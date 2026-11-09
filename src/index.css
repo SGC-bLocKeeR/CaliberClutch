@@ -1,0 +1,58 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    --vortex-bg: #0A0B0E;
+    --vortex-surface: #101217;
+    --vortex-card: #151821;
+    --vortex-hover: #1D212D;
+    --vortex-border: #252B3B;
+    --vortex-primary: #EF4444;
+    --vortex-red: #EF4444;
+    --vortex-red-dark: #DC2626;
+    --vortex-text: #F1F5F9;
+    --vortex-muted: #94A3B8;
+  }
+
+  body {
+    background-color: var(--vortex-bg);
+    color: var(--vortex-text);
+    font-family: 'Inter', system-ui, -apple-system, sans-serif;
+    overflow-x: hidden;
+  }
+}
+
+/* Custom Scrollbars */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+
+::-webkit-scrollbar-track {
+  background: #0A0B0E;
+}
+
+::-webkit-scrollbar-thumb {
+  background: #252B3B;
+  border-radius: 9999px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: #EF4444;
+}
+
+/* Sleek Glowing Red Pulsing Animations */
+@keyframes vortex-pulse-glow {
+  0%, 100% {
+    box-shadow: 0 0 20px rgba(239, 68, 68, 0.4);
+  }
+  50% {
+    box-shadow: 0 0 35px rgba(239, 68, 68, 0.7);
+  }
+}
+
+.animate-vortex-glow {
+  animation: vortex-pulse-glow 2.5s infinite ease-in-out;
+}
