@@ -3344,9 +3344,21 @@ export const VortexDashboard: React.FC<VortexDashboardProps> = ({
                     </div>
 
                     {/* Steam Trade URL */}
-                    <div className="p-3 rounded-xl bg-[#12141C] border border-white/5 flex items-center justify-between">
-                      <span className="text-slate-400">Trade Offer URL:</span>
-                      <div className="flex items-center gap-2 truncate max-w-[240px]">
+                    <div className="p-3 rounded-xl bg-[#12141C] border border-white/5 flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+                      <div className="flex items-center gap-2">
+                        <span className="text-slate-400">Trade Offer URL:</span>
+                        <a
+                          href="https://steamcommunity.com/my/tradeoffers/privacy#trade_offer_access_url"
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="inline-flex items-center gap-1 text-[10px] text-[#A3E635] hover:underline font-bold"
+                          title="Find your Steam Trade URL"
+                        >
+                          <span>Get URL</span>
+                          <ExternalLink className="w-3 h-3" />
+                        </a>
+                      </div>
+                      <div className="flex items-center gap-2 truncate max-w-full sm:max-w-[280px]">
                         <span className="text-slate-300 truncate">{currentTradeUrl}</span>
                         <button
                           onClick={() => {
@@ -4039,29 +4051,58 @@ export const VortexDashboard: React.FC<VortexDashboardProps> = ({
                   Esports Telemetry & Steam Setup
                 </label>
 
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                  {/* Crosshair Code */}
-                  <div>
-                    <label className="block text-xs font-mono text-slate-400 mb-1.5">CS2 Crosshair Code</label>
-                    <input
-                      type="text"
-                      value={draftCrosshairCode}
-                      onChange={(e) => setDraftCrosshairCode(e.target.value)}
-                      placeholder="CSGO-..."
-                      className="w-full px-4 py-2.5 rounded-xl bg-[#0A0D14] border border-white/10 focus:border-[#A3E635] text-white text-xs font-mono outline-none"
-                    />
+                {/* CS2 Crosshair Code */}
+                <div>
+                  <label className="block text-xs font-mono text-slate-400 mb-1.5">CS2 Crosshair Code</label>
+                  <input
+                    type="text"
+                    value={draftCrosshairCode}
+                    onChange={(e) => setDraftCrosshairCode(e.target.value)}
+                    placeholder="CSGO-..."
+                    className="w-full px-4 py-2.5 rounded-xl bg-[#0A0D14] border border-white/10 focus:border-[#A3E635] text-white text-xs font-mono outline-none"
+                  />
+                  <p className="text-[10px] font-mono text-slate-500 mt-1">Share your crosshair settings with teammates and lobby players</p>
+                </div>
+
+                {/* Steam Trade Offer URL (Separated on its own with "Get Trade URL" option) */}
+                <div className="pt-3 border-t border-white/[0.06] space-y-2">
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <label className="block text-xs font-mono text-white font-bold">
+                        Steam Trade Offer URL
+                      </label>
+                      <p className="text-[10px] font-mono text-slate-400">Required for instant skin drops, weapon case rewards & tournament prize payouts</p>
+                    </div>
+
+                    <a
+                      href="https://steamcommunity.com/my/tradeoffers/privacy#trade_offer_access_url"
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-[#18210C] hover:bg-[#84CC16] text-[#A3E635] hover:text-slate-950 border border-[#A3E635]/40 text-xs font-mono font-bold transition shadow-sm cursor-pointer group shrink-0"
+                      title="Open Steam to find your personal Trade Offer URL"
+                    >
+                      <ExternalLink className="w-3.5 h-3.5 group-hover:translate-x-0.5 group-hover:-translate-y-0.5 transition-transform" />
+                      <span>GET TRADE URL</span>
+                    </a>
                   </div>
 
-                  {/* Steam Trade URL */}
-                  <div>
-                    <label className="block text-xs font-mono text-slate-400 mb-1.5">Steam Trade Offer URL</label>
+                  <div className="relative flex items-center">
                     <input
                       type="url"
                       value={draftTradeUrl}
                       onChange={(e) => setDraftTradeUrl(e.target.value)}
-                      placeholder="https://steamcommunity.com/tradeoffer/..."
-                      className="w-full px-4 py-2.5 rounded-xl bg-[#0A0D14] border border-white/10 focus:border-[#A3E635] text-white text-xs font-mono outline-none"
+                      placeholder="https://steamcommunity.com/tradeoffer/new/?partner=..."
+                      className="w-full px-4 py-2.5 pr-28 rounded-xl bg-[#0A0D14] border border-white/10 focus:border-[#A3E635] text-white text-xs font-mono outline-none"
                     />
+                    <a
+                      href="https://steamcommunity.com/my/tradeoffers/privacy#trade_offer_access_url"
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="absolute right-1.5 px-3 py-1.5 rounded-lg bg-white/[0.06] hover:bg-[#A3E635]/20 hover:text-[#A3E635] text-xs font-mono text-slate-300 transition flex items-center gap-1 border border-white/5 hover:border-[#A3E635]/30 cursor-pointer"
+                    >
+                      <span>Find on Steam</span>
+                      <ExternalLink className="w-3 h-3 text-[#A3E635]" />
+                    </a>
                   </div>
                 </div>
               </div>
