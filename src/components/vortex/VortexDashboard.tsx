@@ -512,6 +512,31 @@ export const VortexDashboard: React.FC<VortexDashboardProps> = ({
   const [notificationsOpen, setNotificationsOpen] = useState(false);
   const [showPremiumModal, setShowPremiumModal] = useState(initialOpenPremium);
 
+  // Anti-Cheat Active State (When active, the warning pill is hidden as in FACEIT)
+  const [isAntiCheatActive, setIsAntiCheatActive] = useState<boolean>(() => {
+    const saved = localStorage.getItem('vortex_anticheat_active');
+    return saved !== null ? saved === 'true' : true;
+  });
+
+  const handleLaunchAntiCheat = () => {
+    sound.playJoinScrim();
+    setIsAntiCheatActive(true);
+    localStorage.setItem('vortex_anticheat_active', 'true');
+    setDashboardToast('VORTEX Kernel Anti-Cheat launched & active!');
+    setTimeout(() => setDashboardToast(null), 3500);
+  };
+
+  const handleToggleAntiCheat = () => {
+    sound.playClick();
+    setIsAntiCheatActive(prev => {
+      const next = !prev;
+      localStorage.setItem('vortex_anticheat_active', String(next));
+      setDashboardToast(next ? 'Anti-Cheat is now ACTIVE (Warning hidden)' : 'Anti-Cheat STOPPED (Warning pill visible)');
+      setTimeout(() => setDashboardToast(null), 3500);
+      return next;
+    });
+  };
+
   useEffect(() => {
     if (initialOpenPremium) {
       setShowPremiumModal(true);
@@ -1544,30 +1569,32 @@ export const VortexDashboard: React.FC<VortexDashboardProps> = ({
                     })}
                   </div>
 
-                  {/* FLOATING ANTI-CHEAT WARNING PILL (EXACT FACEIT REPLICA) */}
-                  <div className="flex justify-center -mt-4 relative z-10">
-                    <div className="inline-flex items-center gap-3.5 px-5 py-2.5 rounded-xl bg-[#0B0D12] border border-[#FF5500] shadow-2xl shadow-orange-500/20 text-xs font-mono">
-                      <div className="flex items-center gap-2 text-slate-200">
-                        <ShieldAlert className="w-4 h-4 text-[#FF5500]" />
-                        <span className="font-semibold text-slate-200">Please run Anti-Cheat</span>
+                  {/* FLOATING ANTI-CHEAT WARNING PILL (SHOWN ONLY IF ANTI-CHEAT IS NOT ACTIVE) */}
+                  {!isAntiCheatActive && (
+                    <div className="flex justify-center -mt-4 relative z-10 animate-in fade-in duration-200">
+                      <div className="inline-flex items-center gap-3.5 px-5 py-2.5 rounded-xl bg-[#0B0D12] border border-[#FF5500] shadow-2xl shadow-orange-500/20 text-xs font-mono">
+                        <div className="flex items-center gap-2 text-slate-200">
+                          <ShieldAlert className="w-4 h-4 text-[#FF5500]" />
+                          <span className="font-semibold text-slate-200">Please run Anti-Cheat</span>
+                        </div>
+                        <a
+                          href="https://www.faceit.com/en/anti-cheat"
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="text-[#FF5500] hover:text-[#FFAA00] font-bold text-xs uppercase tracking-wider transition"
+                        >
+                          DOWNLOAD
+                        </a>
+                        <button
+                          onClick={handleLaunchAntiCheat}
+                          className="px-3.5 py-1 rounded bg-[#2A1D15] hover:bg-[#FF5500] text-[#FF5500] hover:text-white border border-[#FF5500] font-bold text-xs uppercase tracking-wider transition cursor-pointer"
+                          title="Click to launch Anti-Cheat"
+                        >
+                          LAUNCH
+                        </button>
                       </div>
-                      <a
-                        href="https://www.faceit.com/en/anti-cheat"
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="text-[#FF5500] hover:text-[#FFAA00] font-bold text-xs uppercase tracking-wider transition"
-                      >
-                        DOWNLOAD
-                      </a>
-                      <a
-                        href="faceitac://"
-                        onClick={() => sound.playClick()}
-                        className="px-3.5 py-1 rounded bg-[#2A1D15] hover:bg-[#FF5500] text-[#FF5500] hover:text-white border border-[#FF5500] font-bold text-xs uppercase tracking-wider transition cursor-pointer"
-                      >
-                        LAUNCH
-                      </a>
                     </div>
-                  </div>
+                  )}
                 </div>
 
                 {/* FIND MATCH BUTTON (CENTERED AS IN SCREENSHOT) */}
@@ -1611,6 +1638,12 @@ export const VortexDashboard: React.FC<VortexDashboardProps> = ({
                   ) : (
                     <button
                       onClick={() => {
+                        if (!isAntiCheatActive) {
+                          sound.playClick();
+                          setDashboardToast('⚠️ Anti-Cheat must be running to find a match! Click LAUNCH.');
+                          setTimeout(() => setDashboardToast(null), 3500);
+                          return;
+                        }
                         sound.playJoinScrim();
                         setIsQueuing(true);
                         setQueueSeconds(0);
@@ -2007,8 +2040,25 @@ export const VortexDashboard: React.FC<VortexDashboardProps> = ({
                     <span>Players queueing: <strong className="text-[#A3E635]">3,164</strong></span>
                   </div>
                   <div className="flex items-center gap-2 text-slate-400">
-                    <ShieldCheck className="w-3.5 h-3.5 text-emerald-400 inline" />
-                    <span>Ring-0 Kernel Anti-Cheat Active • Matchmaking Region: Global</span>
+                    <button
+                      onClick={handleToggleAntiCheat}
+                      className="inline-flex items-center gap-1.5 transition cursor-pointer hover:underline"
+                      title={isAntiCheatActive ? "Anti-Cheat is ACTIVE (Click to toggle & test warning pill)" : "Anti-Cheat is STOPPED (Click to launch)"}
+                    >
+                      {isAntiCheatActive ? (
+                        <>
+                          <ShieldCheck className="w-3.5 h-3.5 text-emerald-400 inline" />
+                          <span className="text-emerald-400 font-bold">Ring-0 Kernel Anti-Cheat Active</span>
+                        </>
+                      ) : (
+                        <>
+                          <ShieldAlert className="w-3.5 h-3.5 text-[#FF5500] inline" />
+                          <span className="text-[#FF5500] font-bold">Anti-Cheat Not Running (Click to launch)</span>
+                        </>
+                      )}
+                    </button>
+                    <span>•</span>
+                    <span>Region: Global</span>
                   </div>
                 </div>
 
@@ -3078,12 +3128,34 @@ export const VortexDashboard: React.FC<VortexDashboardProps> = ({
               </div>
 
               <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-                <div className="p-6 rounded-3xl bg-[#12141C] border border-[#23293B]">
-                  <div className="w-12 h-12 rounded-2xl bg-emerald-500/15 border border-emerald-500/30 flex items-center justify-center text-emerald-400 mb-4">
-                    <ShieldCheck className="w-6 h-6" />
+                <div className="p-6 rounded-3xl bg-[#12141C] border border-[#23293B] flex flex-col justify-between">
+                  <div>
+                    <div className={`w-12 h-12 rounded-2xl flex items-center justify-center mb-4 ${
+                      isAntiCheatActive 
+                        ? 'bg-emerald-500/15 border border-emerald-500/30 text-emerald-400' 
+                        : 'bg-[#FF5500]/15 border border-[#FF5500]/30 text-[#FF5500]'
+                    }`}>
+                      {isAntiCheatActive ? <ShieldCheck className="w-6 h-6" /> : <ShieldAlert className="w-6 h-6" />}
+                    </div>
+                    <h3 className="text-lg font-bold text-white">
+                      {isAntiCheatActive ? 'Kernel Driver Active' : 'Anti-Cheat Stopped'}
+                    </h3>
+                    <p className="text-xs text-[#94A3B8] mt-1">
+                      {isAntiCheatActive 
+                        ? 'vortex_kernel_ac.sys verified and running at Ring-0.' 
+                        : 'The driver is currently stopped. Launch Anti-Cheat to queue for matches.'}
+                    </p>
                   </div>
-                  <h3 className="text-lg font-bold text-white">Kernel Driver Active</h3>
-                  <p className="text-xs text-[#94A3B8] mt-1">vortex_kernel_ac.sys verified and running without anomalies.</p>
+                  <button
+                    onClick={handleToggleAntiCheat}
+                    className={`mt-4 w-full py-2.5 rounded-xl font-mono font-bold text-xs transition cursor-pointer flex items-center justify-center gap-2 ${
+                      isAntiCheatActive
+                        ? 'bg-red-500/15 hover:bg-red-500/25 border border-red-500/30 text-red-400'
+                        : 'bg-[#84CC16] hover:bg-[#A3E635] text-slate-950 shadow-md'
+                    }`}
+                  >
+                    {isAntiCheatActive ? 'Stop Driver (Test Inactive)' : 'Launch Anti-Cheat Now'}
+                  </button>
                 </div>
 
                 <div className="p-6 rounded-3xl bg-[#12141C] border border-[#23293B]">
@@ -3425,29 +3497,31 @@ export const VortexDashboard: React.FC<VortexDashboardProps> = ({
                   Searching for balanced 128-tick CS2 lobbies based on your verified Level 7 ELO (1,407).
                 </p>
 
-                <div className="pt-2 flex justify-center">
-                  <div className="inline-flex items-center gap-3.5 px-4 py-2 rounded-xl bg-[#0D0F14] border border-orange-500/40 shadow-lg shadow-orange-500/10 text-xs font-mono">
-                    <div className="flex items-center gap-2 text-slate-200">
-                      <ShieldAlert className="w-4 h-4 text-[#ff5500]" />
-                      <span className="font-semibold text-slate-300">Please run Anti-Cheat</span>
+                {!isAntiCheatActive && (
+                  <div className="pt-2 flex justify-center animate-in fade-in duration-200">
+                    <div className="inline-flex items-center gap-3.5 px-4 py-2 rounded-xl bg-[#0D0F14] border border-orange-500/40 shadow-lg shadow-orange-500/10 text-xs font-mono">
+                      <div className="flex items-center gap-2 text-slate-200">
+                        <ShieldAlert className="w-4 h-4 text-[#ff5500]" />
+                        <span className="font-semibold text-slate-300">Please run Anti-Cheat</span>
+                      </div>
+                      <a
+                        href="https://www.faceit.com/en/anti-cheat"
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="text-[#ff5500] hover:text-[#ff7733] font-bold text-xs uppercase tracking-wider transition"
+                      >
+                        DOWNLOAD
+                      </a>
+                      <button
+                        onClick={handleLaunchAntiCheat}
+                        className="px-3 py-1 rounded-lg bg-[#2A1D15] hover:bg-[#ff5500] text-[#ff5500] hover:text-white border border-orange-500/50 font-bold text-xs uppercase tracking-wider transition cursor-pointer"
+                        title="Click to launch Anti-Cheat"
+                      >
+                        LAUNCH
+                      </button>
                     </div>
-                    <a
-                      href="https://www.faceit.com/en/anti-cheat"
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="text-[#ff5500] hover:text-[#ff7733] font-bold text-xs uppercase tracking-wider transition"
-                    >
-                      DOWNLOAD
-                    </a>
-                    <a
-                      href="faceitac://"
-                      onClick={() => sound.playClick()}
-                      className="px-3 py-1 rounded-lg bg-[#2A1D15] hover:bg-[#ff5500] text-[#ff5500] hover:text-white border border-orange-500/50 font-bold text-xs uppercase tracking-wider transition cursor-pointer"
-                    >
-                      LAUNCH
-                    </a>
                   </div>
-                </div>
+                )}
 
                 <div className="pt-4">
                   <button
