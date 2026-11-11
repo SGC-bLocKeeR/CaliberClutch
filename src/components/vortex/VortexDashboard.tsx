@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { 
   BarChart2, 
   Server, 
@@ -8,12 +8,14 @@ import {
   Compass, 
   Award, 
   ShieldCheck, 
+  ShieldAlert, 
   User, 
   Crown, 
   ArrowRight,
   Menu,
   Bell,
   ChevronDown,
+  ChevronRight,
   LogOut,
   X,
   CheckCircle2,
@@ -22,9 +24,36 @@ import {
   Flame,
   Star,
   Users,
-  Gift
+  Gift,
+  Play,
+  Clock,
+  Info,
+  Lock,
+  Copy,
+  Check,
+  TrendingUp,
+  SlidersHorizontal,
+  Plus,
+  Trash2,
+  Radio,
+  Sparkles,
+  Download,
+  Film,
+  Target,
+  Newspaper,
+  Activity,
+  Brain,
+  Share2,
+  Wifi,
+  Gauge,
+  Camera,
+  Edit3,
+  Upload,
+  Image as ImageIcon
 } from 'lucide-react';
+import confetti from 'canvas-confetti';
 import { sound } from '../../utils/soundEffects';
+import { VortexBrandLogo } from './VortexLandingPage';
 
 interface VortexDashboardProps {
   userGamerTag?: string;
@@ -32,10 +61,12 @@ interface VortexDashboardProps {
   onNavigateTab?: (tabName: string) => void;
   onOpenGoPremium?: () => void;
   onLogout?: () => void;
+  initialOpenPremium?: boolean;
 }
 
 export type VortexTab = 
-  | 'dashboard' 
+  | 'dashboard'
+  | 'play'
   | 'servers' 
   | 'tournaments' 
   | 'scrims' 
@@ -45,17 +76,467 @@ export type VortexTab =
   | 'anticheat' 
   | 'profile';
 
+interface PartySlotMember {
+  id: string;
+  name: string;
+  tag?: string;
+  avatar: string;
+  level: number;
+  elo: number;
+  isLeader?: boolean;
+}
+
+const SUGGESTED_TEAMMATES: PartySlotMember[] = [
+  {
+    id: 'juanflatroo',
+    name: 'juanflatroo',
+    tag: 'GUILD',
+    avatar: 'https://images.unsplash.com/photo-1566492031773-4f4e44671857?auto=format&fit=crop&w=200&q=80',
+    level: 10,
+    elo: 2840
+  },
+  {
+    id: 'sener1',
+    name: 'sener1',
+    tag: 'BNE',
+    avatar: 'https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?auto=format&fit=crop&w=200&q=80',
+    level: 10,
+    elo: 2750
+  },
+  {
+    id: 'gxx-',
+    name: 'gxx-',
+    tag: 'BNE',
+    avatar: 'https://images.unsplash.com/photo-1570295999919-56ceb5ecca61?auto=format&fit=crop&w=200&q=80',
+    level: 10,
+    elo: 2690
+  },
+  {
+    id: 'karrigan_fan',
+    name: 'karrigan_fan',
+    tag: 'FAZE',
+    avatar: 'https://images.unsplash.com/photo-1527980965255-d3b416303d12?auto=format&fit=crop&w=200&q=80',
+    level: 8,
+    elo: 1610
+  }
+];
+
+const AVAILABLE_MAP_POOL = [
+  { id: 'mirage', name: 'Mirage', code: 'de_mirage', image: '/images/maps/de_mirage.jpg' },
+  { id: 'inferno', name: 'Inferno', code: 'de_inferno', image: '/images/maps/de_inferno.jpg' },
+  { id: 'nuke', name: 'Nuke', code: 'de_nuke', image: '/images/maps/de_nuke.jpg' },
+  { id: 'dust2', name: 'Dust II', code: 'de_dust2', image: 'https://images.unsplash.com/photo-1579783902614-a3fb3927b675?auto=format&fit=crop&w=600&q=80' },
+  { id: 'anubis', name: 'Anubis', code: 'de_anubis', image: 'https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?auto=format&fit=crop&w=600&q=80' },
+  { id: 'ancient', name: 'Ancient', code: 'de_ancient', image: 'https://images.unsplash.com/photo-1518709268805-4e9042af9f23?auto=format&fit=crop&w=600&q=80' },
+  { id: 'vertigo', name: 'Vertigo', code: 'de_vertigo', image: 'https://images.unsplash.com/photo-1486406146926-c627a92ad1ab?auto=format&fit=crop&w=600&q=80' }
+];
+
+// Exact FACEIT Server Country Locations as in reference screenshot
+const SERVER_COUNTRY_LOCATIONS = [
+  {
+    id: 'netherlands',
+    name: 'Netherlands',
+    ping: '16 ms',
+    flagSvg: (
+      <svg viewBox="0 0 640 480" className="w-full h-full object-cover">
+        <path fill="#21468b" d="M0 0h640v480H0z"/>
+        <path fill="#fff" d="M0 0h640v320H0z"/>
+        <path fill="#ae1c28" d="M0 0h640v160H0z"/>
+      </svg>
+    )
+  },
+  {
+    id: 'uk',
+    name: 'UK',
+    ping: '19 ms',
+    flagSvg: (
+      <svg viewBox="0 0 60 30" className="w-full h-full object-cover">
+        <clipPath id="uk-flag-clip"><path d="M0 0v30h60V0z"/></clipPath>
+        <g clipPath="url(#uk-flag-clip)">
+          <path d="M0 0v30h60V0z" fill="#012169"/>
+          <path d="M0 0l60 30m0-30L0 30" stroke="#fff" strokeWidth="6"/>
+          <path d="M0 0l60 30m0-30L0 30" stroke="#C8102E" strokeWidth="4"/>
+          <path d="M30 0v30M0 15h60" stroke="#fff" strokeWidth="10"/>
+          <path d="M30 0v30M0 15h60" stroke="#C8102E" strokeWidth="6"/>
+        </g>
+      </svg>
+    )
+  },
+  {
+    id: 'germany',
+    name: 'Germany',
+    ping: '14 ms',
+    flagSvg: (
+      <svg viewBox="0 0 5 3" className="w-full h-full object-cover">
+        <rect width="5" height="3" fill="#000"/>
+        <rect width="5" height="2" y="1" fill="#DD0000"/>
+        <rect width="5" height="1" y="2" fill="#FFCE00"/>
+      </svg>
+    )
+  },
+  {
+    id: 'sweden',
+    name: 'Sweden',
+    ping: '28 ms',
+    flagSvg: (
+      <svg viewBox="0 0 16 10" className="w-full h-full object-cover">
+        <rect width="16" height="10" fill="#006AA7"/>
+        <rect width="2.5" height="10" x="5" fill="#FECC00"/>
+        <rect width="16" height="2.5" y="3.75" fill="#FECC00"/>
+      </svg>
+    )
+  },
+  {
+    id: 'france',
+    name: 'France',
+    ping: '21 ms',
+    flagSvg: (
+      <svg viewBox="0 0 3 2" className="w-full h-full object-cover">
+        <rect width="1" height="2" x="0" fill="#002395"/>
+        <rect width="1" height="2" x="1" fill="#FFFFFF"/>
+        <rect width="1" height="2" x="2" fill="#ED2939"/>
+      </svg>
+    )
+  },
+  {
+    id: 'finland',
+    name: 'Finland',
+    ping: '31 ms',
+    flagSvg: (
+      <svg viewBox="0 0 18 11" className="w-full h-full object-cover">
+        <rect width="18" height="11" fill="#FFFFFF"/>
+        <rect width="3.5" height="11" x="5" fill="#003580"/>
+        <rect width="18" height="3.5" y="3.75" fill="#003580"/>
+      </svg>
+    )
+  }
+];
+
+// Exact Hamburger Collapse Icon with Tilted Neon Diamond as in reference screenshot
+export const SidebarMenuIcon: React.FC<{ collapsed?: boolean; className?: string }> = ({ collapsed, className = "w-5 h-5" }) => (
+  <div className={`relative flex items-center justify-center ${className}`}>
+    <div className="flex flex-col justify-between w-4 h-3.5">
+      <span className={`h-[2px] bg-slate-200 rounded-full transition-all duration-300 ${collapsed ? 'w-3' : 'w-full'}`} />
+      <span className="w-full h-[2px] bg-slate-200 rounded-full transition-all duration-300" />
+      <span className={`h-[2px] bg-slate-200 rounded-full transition-all duration-300 ${collapsed ? 'w-2.5' : 'w-full'}`} />
+    </div>
+    {/* Tilted neon diamond dot on the top-right corner */}
+    <span className="absolute -top-1 -right-1 w-2 h-2 rotate-45 bg-[#A3E635] shadow-[0_0_8px_rgba(163,230,53,0.95)] rounded-[1px]" />
+  </div>
+);
+
+const PRESET_AVATARS = [
+  { id: 'blockeerz', name: 'bLocKeeRz Official', url: '/images/blockeerz_avatar.png' },
+  { id: 'cyber', name: 'Cyber Operator', url: 'https://images.unsplash.com/photo-1566492031773-4f4e44671857?auto=format&fit=crop&w=250&q=80' },
+  { id: 'stealth', name: 'Stealth Specialist', url: 'https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?auto=format&fit=crop&w=250&q=80' },
+  { id: 'entry', name: 'Pro Entry Fragger', url: 'https://images.unsplash.com/photo-1570295999919-56ceb5ecca61?auto=format&fit=crop&w=250&q=80' },
+  { id: 'sniper', name: 'Tactical Sniper', url: 'https://images.unsplash.com/photo-1527980965255-d3b416303d12?auto=format&fit=crop&w=250&q=80' },
+  { id: 'neon', name: 'Neon Striker', url: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=250&q=80' },
+  { id: 'sentinel', name: 'Vortex Sentinel', url: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?auto=format&fit=crop&w=250&q=80' },
+  { id: 'shadow', name: 'Shadow Infiltrator', url: 'https://images.unsplash.com/photo-1500648767791-00dcc994a43e?auto=format&fit=crop&w=250&q=80' }
+];
+
+const PRESET_COUNTRIES = [
+  { code: 'XK', name: 'Kosovo', flag: '🇽🇰' },
+  { code: 'AL', name: 'Albania', flag: '🇦🇱' },
+  { code: 'DE', name: 'Germany', flag: '🇩🇪' },
+  { code: 'SE', name: 'Sweden', flag: '🇸🇪' },
+  { code: 'GB', name: 'United Kingdom', flag: '🇬🇧' },
+  { code: 'FR', name: 'France', flag: '🇫🇷' },
+  { code: 'FI', name: 'Finland', flag: '🇫🇮' },
+  { code: 'NL', name: 'Netherlands', flag: '🇳🇱' },
+  { code: 'US', name: 'United States', flag: '🇺🇸' },
+  { code: 'WW', name: 'Global / International', flag: '🌐' }
+];
+
+const CS2_ROLES = [
+  'AWPer / Entry',
+  'AWPer',
+  'Entry Fragger',
+  'Rifler / Lurker',
+  'In-Game Leader (IGL)',
+  'Support / Utility',
+  'Anchor / Site Defender'
+];
+
 export const VortexDashboard: React.FC<VortexDashboardProps> = ({
   userGamerTag = 'bLocKeeRz',
-  avatarUrl = 'https://distribution.faceit-cdn.net/images/ac453a50-dbca-4d42-a740-dac12bdc74c0.jpeg',
+  avatarUrl = '/images/blockeerz_avatar.png',
   onNavigateTab,
-  onLogout
+  onLogout,
+  initialOpenPremium = false
 }) => {
+  // Profile Customization State with localStorage persistence
+  const [currentGamerTag, setCurrentGamerTag] = useState<string>(() => {
+    return localStorage.getItem('vortex_user_gamertag') || userGamerTag;
+  });
+  const [currentAvatarUrl, setCurrentAvatarUrl] = useState<string>(() => {
+    return localStorage.getItem('vortex_user_avatar') || avatarUrl;
+  });
+  const [currentClanTag, setCurrentClanTag] = useState<string>(() => {
+    return localStorage.getItem('vortex_user_clantag') || 'VTX';
+  });
+  const [currentCountry, setCurrentCountry] = useState<{ code: string; name: string; flag: string }>(() => {
+    const saved = localStorage.getItem('vortex_user_country');
+    if (saved) {
+      try {
+        return JSON.parse(saved);
+      } catch (e) {}
+    }
+    return { code: 'XK', name: 'Kosovo', flag: '🇽🇰' };
+  });
+  const [currentRole, setCurrentRole] = useState<string>(() => {
+    return localStorage.getItem('vortex_user_role') || 'AWPer / Entry';
+  });
+  const [currentBio, setCurrentBio] = useState<string>(() => {
+    return localStorage.getItem('vortex_user_bio') || 'Pushing ELO to Level 10. Smoke lineups on point.';
+  });
+  const [currentTradeUrl, setCurrentTradeUrl] = useState<string>(() => {
+    return localStorage.getItem('vortex_user_tradeurl') || 'https://steamcommunity.com/tradeoffer/new/?partner=43918293';
+  });
+  const [currentCrosshairCode, setCurrentCrosshairCode] = useState<string>(() => {
+    return localStorage.getItem('vortex_user_crosshair') || 'CSGO-4w29A-6yvKP-6k7kF-3xK2v-d9HkQ';
+  });
+
+  // Edit Profile Modal Open State & Draft Form Fields
+  const [editProfileOpen, setEditProfileOpen] = useState(false);
+  const [avatarUploadMode, setAvatarUploadMode] = useState<'presets' | 'upload' | 'url'>('presets');
+  const [draftGamerTag, setDraftGamerTag] = useState(currentGamerTag);
+  const [draftAvatarUrl, setDraftAvatarUrl] = useState(currentAvatarUrl);
+  const [draftClanTag, setDraftClanTag] = useState(currentClanTag);
+  const [draftCountry, setDraftCountry] = useState(currentCountry);
+  const [draftRole, setDraftRole] = useState(currentRole);
+  const [draftBio, setDraftBio] = useState(currentBio);
+  const [draftTradeUrl, setDraftTradeUrl] = useState(currentTradeUrl);
+  const [draftCrosshairCode, setDraftCrosshairCode] = useState(currentCrosshairCode);
+
+  const handleOpenEditProfile = () => {
+    sound.playClick();
+    setDraftGamerTag(currentGamerTag);
+    setDraftAvatarUrl(currentAvatarUrl);
+    setDraftClanTag(currentClanTag);
+    setDraftCountry(currentCountry);
+    setDraftRole(currentRole);
+    setDraftBio(currentBio);
+    setDraftTradeUrl(currentTradeUrl);
+    setDraftCrosshairCode(currentCrosshairCode);
+    setProfileDropdownOpen(false);
+    setEditProfileOpen(true);
+  };
+
+  const handleAvatarFileUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      if (file.size > 5 * 1024 * 1024) {
+        alert('Image file size must be under 5MB.');
+        return;
+      }
+      const reader = new FileReader();
+      reader.onload = () => {
+        if (typeof reader.result === 'string') {
+          setDraftAvatarUrl(reader.result);
+          sound.playSelect();
+        }
+      };
+      reader.readAsDataURL(file);
+    }
+  };
+
+  const handleSaveProfile = () => {
+    sound.playQuestClaim();
+    setCurrentGamerTag(draftGamerTag);
+    setCurrentAvatarUrl(draftAvatarUrl);
+    setCurrentClanTag(draftClanTag);
+    setCurrentCountry(draftCountry);
+    setCurrentRole(draftRole);
+    setCurrentBio(draftBio);
+    setCurrentTradeUrl(draftTradeUrl);
+    setCurrentCrosshairCode(draftCrosshairCode);
+
+    localStorage.setItem('vortex_user_gamertag', draftGamerTag);
+    localStorage.setItem('vortex_user_avatar', draftAvatarUrl);
+    localStorage.setItem('vortex_user_clantag', draftClanTag);
+    localStorage.setItem('vortex_user_country', JSON.stringify(draftCountry));
+    localStorage.setItem('vortex_user_role', draftRole);
+    localStorage.setItem('vortex_user_bio', draftBio);
+    localStorage.setItem('vortex_user_tradeurl', draftTradeUrl);
+    localStorage.setItem('vortex_user_crosshair', draftCrosshairCode);
+
+    setEditProfileOpen(false);
+    setDashboardToast('Profile updated & synchronized successfully!');
+    setTimeout(() => setDashboardToast(null), 3500);
+  };
+
+  // Collapsible Left Navigation Rail
+  const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
+  // User Membership Status ('free' | 'premium' | 'vip')
+  const [userMembershipTier, setUserMembershipTier] = useState<'free' | 'premium' | 'vip'>('free');
+  // Matchmaking Sub-tab ('match_type' | 'maps' | 'servers') & Membership Tier ('free' | 'premium' | 'vip')
+  const [playSubTab, setPlaySubTab] = useState<'match_type' | 'maps' | 'servers'>('match_type');
+  const [selectedMatchTier, setSelectedMatchTier] = useState<'free' | 'premium' | 'vip'>('free');
+  // Selected server country locations (default 4 matching screenshot: Netherlands, Germany, Sweden, Finland)
+  const [selectedServers, setSelectedServers] = useState<string[]>(['netherlands', 'germany', 'sweden', 'finland']);
+  // Dashboard is #1 and Play is #2 in order
   const [activeTab, setActiveTab] = useState<VortexTab>('dashboard');
   const [profileDropdownOpen, setProfileDropdownOpen] = useState(false);
   const [notificationsOpen, setNotificationsOpen] = useState(false);
-  const [showPremiumModal, setShowPremiumModal] = useState(false);
+  const [showPremiumModal, setShowPremiumModal] = useState(initialOpenPremium);
+
+  useEffect(() => {
+    if (initialOpenPremium) {
+      setShowPremiumModal(true);
+    }
+  }, [initialOpenPremium]);
   const [connectToast, setConnectToast] = useState<{ name: string; ip: string } | null>(null);
+
+  // Matchmaking Party Lobby State (5 Party Slots, Center is user)
+  const [partySlots, setPartySlots] = useState<(PartySlotMember | null)[]>([
+    null,
+    null,
+    {
+      id: 'current-user',
+      name: currentGamerTag,
+      tag: currentClanTag,
+      avatar: currentAvatarUrl,
+      level: 7,
+      elo: 1407,
+      isLeader: true
+    },
+    null,
+    null
+  ]);
+
+  // Map Pool Selection (Mirage, Inferno, Nuke, Dust II, Anubis)
+  const [selectedMaps, setSelectedMaps] = useState<string[]>(['mirage', 'inferno', 'nuke', 'dust2', 'anubis']);
+
+  // Matchmaking Queue State
+  const [isQueuing, setIsQueuing] = useState(false);
+  const [queueSeconds, setQueueSeconds] = useState(0);
+  const [matchFoundModal, setMatchFoundModal] = useState(false);
+  const [acceptedPlayers, setAcceptedPlayers] = useState(3);
+  const [userHasAccepted, setUserHasAccepted] = useState(false);
+  const [matchReadyCountdown, setMatchReadyCountdown] = useState(10);
+  const [activeServerIp, setActiveServerIp] = useState('194.163.159.231:27015');
+  const [activePickedMap, setActivePickedMap] = useState('Mirage');
+  const [copiedIp, setCopiedIp] = useState(false);
+  const [downloadDemoToast, setDownloadDemoToast] = useState<string | null>(null);
+  const [dashboardToast, setDashboardToast] = useState<string | null>(null);
+  const [bountyClaimed, setBountyClaimed] = useState(false);
+  const [serverWarning, setServerWarning] = useState<string | null>(null);
+
+  const handleToggleServer = (serverId: string) => {
+    sound.playClick();
+    if (selectedServers.includes(serverId)) {
+      if (selectedServers.length <= 4) {
+        setServerWarning('Select a minimum of 4 servers that you would like to play on.');
+        setTimeout(() => setServerWarning(null), 3500);
+        return;
+      }
+      setServerWarning(null);
+      setSelectedServers(prev => prev.filter(id => id !== serverId));
+    } else {
+      setServerWarning(null);
+      setSelectedServers(prev => [...prev, serverId]);
+    }
+  };
+
+  const handleClaimBounty = () => {
+    if (bountyClaimed) return;
+    sound.playQuestClaim();
+    confetti({
+      particleCount: 60,
+      spread: 70,
+      origin: { y: 0.6 }
+    });
+    setBountyClaimed(true);
+    setDashboardToast('Claimed Bounty: +50 VTX Credits & 100 XP!');
+    setTimeout(() => setDashboardToast(null), 3500);
+  };
+
+  // Synchronize leader tag and avatar if state changes
+  useEffect(() => {
+    setPartySlots(prev => {
+      const next = [...prev];
+      next[2] = {
+        id: 'current-user',
+        name: currentGamerTag,
+        tag: currentClanTag,
+        avatar: currentAvatarUrl,
+        level: 7,
+        elo: 1407,
+        isLeader: true
+      };
+      return next;
+    });
+  }, [currentGamerTag, currentClanTag, currentAvatarUrl]);
+
+  // Queue Interval Timer
+  useEffect(() => {
+    let interval: ReturnType<typeof setInterval>;
+    if (isQueuing) {
+      interval = setInterval(() => {
+        setQueueSeconds(prev => {
+          const next = prev + 1;
+          if (next >= 4) {
+            triggerMatchFound();
+            return 0;
+          }
+          return next;
+        });
+      }, 1000);
+    }
+    return () => clearInterval(interval);
+  }, [isQueuing]);
+
+  // Match Ready Countdown Timer
+  useEffect(() => {
+    let timer: ReturnType<typeof setInterval>;
+    if (matchFoundModal) {
+      timer = setInterval(() => {
+        setMatchReadyCountdown(prev => {
+          if (prev <= 1) {
+            return 0;
+          }
+          return prev - 1;
+        });
+      }, 1000);
+    }
+    return () => clearInterval(timer);
+  }, [matchFoundModal]);
+
+  const triggerMatchFound = () => {
+    setIsQueuing(false);
+    setMatchFoundModal(true);
+    setAcceptedPlayers(4);
+    setUserHasAccepted(false);
+    setMatchReadyCountdown(10);
+    setActivePickedMap(selectedMaps.length > 0 ? selectedMaps[0].toUpperCase() : 'MIRAGE');
+    sound.playNotification();
+
+    // Increment accepted players progressively
+    let accepted = 4;
+    const acceptInterval = setInterval(() => {
+      accepted += 2;
+      if (accepted >= 9) {
+        setAcceptedPlayers(9);
+        clearInterval(acceptInterval);
+      } else {
+        setAcceptedPlayers(accepted);
+      }
+    }, 450);
+  };
+
+  const handleUserAcceptMatch = () => {
+    sound.playClick();
+    setUserHasAccepted(true);
+    setAcceptedPlayers(10);
+    sound.playTournamentVictory();
+    confetti({
+      particleCount: 100,
+      spread: 70,
+      origin: { y: 0.6 }
+    });
+  };
 
   const handleConnectServer = (ip: string, serverName: string) => {
     sound.playTournamentVictory();
@@ -70,547 +551,3018 @@ export const VortexDashboard: React.FC<VortexDashboardProps> = ({
     window.location.href = `steam://connect/${ip}`;
   };
 
-  const navItems = [
-    { id: 'dashboard' as VortexTab, label: 'Dashboard', icon: BarChart2 },
-    { id: 'servers' as VortexTab, label: 'Server Browser', icon: Server },
-    { id: 'tournaments' as VortexTab, label: 'Tournaments', icon: Trophy },
-    { id: 'scrims' as VortexTab, label: 'Scrims', icon: Swords },
-    { id: 'aim' as VortexTab, label: '1v1 Aim', icon: Crosshair },
-    { id: 'lineups' as VortexTab, label: 'Lineups', icon: Compass },
-    { id: 'rankings' as VortexTab, label: 'Rankings', icon: Award },
-    { id: 'anticheat' as VortexTab, label: 'Anti-Cheat', icon: ShieldCheck },
-    { id: 'profile' as VortexTab, label: 'Profile', icon: User },
+  const handleCopyIp = (ip: string) => {
+    sound.playClick();
+    if (navigator?.clipboard?.writeText) {
+      navigator.clipboard.writeText(`connect ${ip}`).catch(() => {});
+    }
+    setCopiedIp(true);
+    setTimeout(() => setCopiedIp(false), 2000);
+  };
+
+  const handleAddTeammate = (slotIndex: number) => {
+    sound.playClick();
+    const available = SUGGESTED_TEAMMATES.filter(
+      st => !partySlots.some(ps => ps && ps.id === st.id)
+    );
+    if (available.length > 0) {
+      const chosen = available[0];
+      setPartySlots(prev => {
+        const next = [...prev];
+        next[slotIndex] = chosen;
+        return next;
+      });
+      sound.playJoinScrim();
+    }
+  };
+
+  const handleInviteAndJumpToPlay = (teammate: PartySlotMember) => {
+    sound.playJoinScrim();
+    setPartySlots(prev => {
+      const next = [...prev];
+      const emptyIdx = next.findIndex((slot, i) => i !== 2 && slot === null);
+      if (emptyIdx !== -1) {
+        next[emptyIdx] = teammate;
+      }
+      return next;
+    });
+    setDashboardToast(`Invited ${teammate.name} to 5v5 Lobby!`);
+    setTimeout(() => setDashboardToast(null), 3000);
+    setActiveTab('play');
+  };
+
+  const handleRemoveTeammate = (slotIndex: number, e: React.MouseEvent) => {
+    e.stopPropagation();
+    sound.playClick();
+    setPartySlots(prev => {
+      const next = [...prev];
+      next[slotIndex] = null;
+      return next;
+    });
+  };
+
+  const handleToggleMap = (mapId: string) => {
+    sound.playClick();
+    setSelectedMaps(prev => {
+      if (prev.includes(mapId)) {
+        if (prev.length === 1) return prev; // Keep at least one map selected
+        return prev.filter(m => m !== mapId);
+      } else {
+        return [...prev, mapId];
+      }
+    });
+  };
+
+  const handleDownloadDemo = (matchName: string) => {
+    sound.playClick();
+    setDownloadDemoToast(`GOTV Demo: ${matchName}.dem`);
+    setTimeout(() => setDownloadDemoToast(null), 3000);
+  };
+
+  const underDevInfo: Record<string, { title: string; subtitle: string; desc: string; progress: number; icon: React.ComponentType<{ className?: string }> }> = {
+    servers: {
+      title: 'Server Browser (128-Tick)',
+      subtitle: 'Dedicated CS2 Competitive Grid',
+      desc: 'Our infrastructure engineers are configuring dedicated 128-tick CS2 community and practice servers across Frankfurt, Vienna, and Stockholm with direct fiber routing and 0% packet loss.',
+      progress: 88,
+      icon: Server
+    },
+    tournaments: {
+      title: 'VORTEX CS2 Tournaments',
+      subtitle: 'Official Tournament Circuit & Cash Prizes',
+      desc: 'Automated bracket progression, live GOTV spectator relays, and instant prize pool distribution are undergoing final security verification.',
+      progress: 82,
+      icon: Trophy
+    },
+    scrims: {
+      title: 'Scrims Hub (5v5 Practice)',
+      subtitle: 'Team Scrimmage & Matchmaking Arena',
+      desc: 'Instant 5v5 team practice matchmaking with automated server reservations, captain vetoes, and tactical demo recording is being optimized.',
+      progress: 90,
+      icon: Swords
+    },
+    aim: {
+      title: '1v1 Aim Arena',
+      subtitle: 'Duels & Primary Weapon Ladders',
+      desc: 'High-tickrate 1v1 duel arenas featuring AK-47, AWP, and Desert Eagle ladders with real-time reaction telemetry and Aim Rating.',
+      progress: 85,
+      icon: Crosshair
+    },
+    lineups: {
+      title: 'CS2 Grenade Lineups 2D Radar',
+      subtitle: 'Interactive Utility & Trajectory Playbook',
+      desc: 'Comprehensive 2D interactive radar with verified pro lineups for smokes, flashbangs, and molotovs across all official competitive maps.',
+      progress: 78,
+      icon: Compass
+    },
+    rankings: {
+      title: 'Global Rankings & Hall of Fame',
+      subtitle: 'Worldwide ELO Competitive Ladder',
+      desc: 'Global ELO leaderboard tracking competitive rankings across Europe, Americas, and Asia-Pacific with verified pro tiers and division brackets.',
+      progress: 92,
+      icon: Award
+    },
+    anticheat: {
+      title: 'VORTEX Kernel Anti-Cheat',
+      subtitle: 'Ring-0 Hardware Driver Protection',
+      desc: 'Kernel-level anti-cheat driver with Secure Boot and TPM 2.0 integrity verification ensuring 100% fair matchmaking for all competitive modes.',
+      progress: 95,
+      icon: ShieldCheck
+    },
+    profile: {
+      title: 'Player Profile & Digital Passport',
+      subtitle: 'Career Analytics & Achievements',
+      desc: 'Enhanced player career passport featuring match history, weapon mastery analytics, badges, and team management is getting final touches.',
+      progress: 86,
+      icon: User
+    }
+  };
+
+  const primaryNavItems = [
+    {
+      id: 'dashboard' as VortexTab,
+      label: 'Dashboard',
+      desc: 'Player career & telemetry',
+      icon: BarChart2,
+      badge: 'HOME',
+      badgeColor: 'bg-[#A3E635]/15 text-[#A3E635] border border-[#A3E635]/30'
+    },
+    {
+      id: 'play' as VortexTab,
+      label: 'Play (5v5 Queue)',
+      desc: 'Ranked 128-tick matchmaking',
+      icon: Play,
+      badge: isQueuing ? 'QUEUING' : 'ACTIVE',
+      badgeColor: isQueuing
+        ? 'bg-red-500/20 text-red-400 border border-red-500/40 animate-pulse'
+        : 'bg-[#A3E635]/15 text-[#A3E635] border border-[#A3E635]/30'
+    }
+  ];
+
+  const secondaryNavItems = [
+    {
+      id: 'servers' as VortexTab,
+      label: 'Server Browser',
+      desc: 'Under Development • Opening Soon',
+      icon: Server,
+      badge: 'COMING SOON',
+      badgeColor: 'bg-amber-500/15 text-amber-400 border border-amber-500/30 font-bold'
+    },
+    {
+      id: 'tournaments' as VortexTab,
+      label: 'Tournaments',
+      desc: 'Under Development • Opening Soon',
+      icon: Trophy,
+      badge: 'COMING SOON',
+      badgeColor: 'bg-amber-500/15 text-amber-400 border border-amber-500/30 font-bold'
+    },
+    {
+      id: 'scrims' as VortexTab,
+      label: 'Scrims Hub',
+      desc: 'Under Development • Opening Soon',
+      icon: Swords,
+      badge: 'COMING SOON',
+      badgeColor: 'bg-amber-500/15 text-amber-400 border border-amber-500/30 font-bold'
+    },
+    {
+      id: 'aim' as VortexTab,
+      label: '1v1 Aim Arena',
+      desc: 'Under Development • Opening Soon',
+      icon: Crosshair,
+      badge: 'COMING SOON',
+      badgeColor: 'bg-amber-500/15 text-amber-400 border border-amber-500/30 font-bold'
+    },
+    {
+      id: 'lineups' as VortexTab,
+      label: 'CS2 Lineups',
+      desc: 'Under Development • Opening Soon',
+      icon: Compass,
+      badge: 'COMING SOON',
+      badgeColor: 'bg-amber-500/15 text-amber-400 border border-amber-500/30 font-bold'
+    },
+    {
+      id: 'rankings' as VortexTab,
+      label: 'Rankings',
+      desc: 'Under Development • Opening Soon',
+      icon: Award,
+      badge: 'COMING SOON',
+      badgeColor: 'bg-amber-500/15 text-amber-400 border border-amber-500/30 font-bold'
+    },
+    {
+      id: 'anticheat' as VortexTab,
+      label: 'Anti-Cheat',
+      desc: 'Under Development • Opening Soon',
+      icon: ShieldCheck,
+      badge: 'COMING SOON',
+      badgeColor: 'bg-amber-500/15 text-amber-400 border border-amber-500/30 font-bold'
+    },
+    {
+      id: 'profile' as VortexTab,
+      label: 'Player Profile',
+      desc: 'Digital Passport & Settings',
+      icon: User,
+      badge: 'VERIFIED',
+      badgeColor: 'bg-[#A3E635]/15 text-[#A3E635] border border-[#A3E635]/30 font-bold'
+    },
   ];
 
   return (
-    <div className="w-full min-h-screen bg-[#07080B] text-[#F1F5F9] font-sans flex flex-col justify-start items-center selection:bg-red-500/30 selection:text-white">
+    <div className="w-full min-h-screen bg-[#07080B] text-[#F1F5F9] font-sans flex flex-col justify-start items-center selection:bg-lime-500/30 selection:text-white">
       
       {/* ======================================================== */}
-      {/* 1. MAIN PIXEL-PERFECT DASHBOARD VIEW (WHEN TAB = DASHBOARD) */}
+      {/* UNIFIED PERSISTENT LAYOUT (SIDEBAR + MAIN CONTENT AREA)  */}
       {/* ======================================================== */}
-      {activeTab === 'dashboard' ? (
-        <div className="w-full max-w-[1920px] mx-auto relative select-none">
-          <div className="relative w-full aspect-[1672/443] overflow-hidden shadow-2xl">
-            <img 
-              src="/images/vortex_dashboard_reference.jpg" 
-              alt="VORTEX Gaming Dashboard" 
-              className="w-full h-full object-cover pointer-events-none"
-            />
-
-            {/* ==================================================== */}
-            {/* INTERACTIVE HOTSPOTS FOR DASHBOARD                   */}
-            {/* ==================================================== */}
-
-            {/* Logo (Top Left) */}
-            <button
-              onClick={() => { sound.playClick(); setActiveTab('dashboard'); }}
-              className="absolute z-20 cursor-pointer rounded-lg hover:ring-2 hover:ring-[#EF4444]/40 transition"
-              style={{ left: '0.90%', top: '2.0%', width: '10.47%', height: '8.0%' }}
-              title="VORTEX Home"
-            />
-
-            {/* Sidebar: Dashboard */}
-            <button
-              onClick={() => { sound.playSelect(); setActiveTab('dashboard'); }}
-              className="absolute z-20 cursor-pointer rounded-xl hover:bg-white/5 transition"
-              style={{ left: '0.90%', top: '15.35%', width: '10.47%', height: '8.13%' }}
-              title="Dashboard"
-            />
-
-            {/* Sidebar: Server Browser */}
-            <button
-              onClick={() => { sound.playSelect(); setActiveTab('servers'); }}
-              className="absolute z-20 cursor-pointer rounded-xl hover:ring-1 hover:ring-[#EF4444] hover:bg-[#EF4444]/10 transition"
-              style={{ left: '0.90%', top: '24.83%', width: '10.47%', height: '7.22%' }}
-              title="Dedicated Server Browser"
-            />
-
-            {/* Sidebar: Tournaments */}
-            <button
-              onClick={() => { sound.playSelect(); setActiveTab('tournaments'); }}
-              className="absolute z-20 cursor-pointer rounded-xl hover:ring-1 hover:ring-[#EF4444] hover:bg-[#EF4444]/10 transition"
-              style={{ left: '0.90%', top: '33.41%', width: '10.47%', height: '7.22%' }}
-              title="Tournaments & Brackets"
-            />
-
-            {/* Sidebar: Scrims */}
-            <button
-              onClick={() => { sound.playSelect(); setActiveTab('scrims'); }}
-              className="absolute z-20 cursor-pointer rounded-xl hover:ring-1 hover:ring-[#EF4444] hover:bg-[#EF4444]/10 transition"
-              style={{ left: '0.90%', top: '41.99%', width: '10.47%', height: '7.22%' }}
-              title="5v5 Team Scrims"
-            />
-
-            {/* Sidebar: 1v1 Aim */}
-            <button
-              onClick={() => { sound.playSelect(); setActiveTab('aim'); }}
-              className="absolute z-20 cursor-pointer rounded-xl hover:ring-1 hover:ring-[#EF4444] hover:bg-[#EF4444]/10 transition"
-              style={{ left: '0.90%', top: '50.56%', width: '10.47%', height: '7.22%' }}
-              title="1v1 Aim Ladder"
-            />
-
-            {/* Sidebar: Lineups */}
-            <button
-              onClick={() => { sound.playSelect(); setActiveTab('lineups'); }}
-              className="absolute z-20 cursor-pointer rounded-xl hover:ring-1 hover:ring-[#EF4444] hover:bg-[#EF4444]/10 transition"
-              style={{ left: '0.90%', top: '59.14%', width: '10.47%', height: '7.22%' }}
-              title="Grenade Lineups"
-            />
-
-            {/* Sidebar: Rankings */}
-            <button
-              onClick={() => { sound.playSelect(); setActiveTab('rankings'); }}
-              className="absolute z-20 cursor-pointer rounded-xl hover:ring-1 hover:ring-[#EF4444] hover:bg-[#EF4444]/10 transition"
-              style={{ left: '0.90%', top: '67.72%', width: '10.47%', height: '7.22%' }}
-              title="FACEIT & Global Rankings"
-            />
-
-            {/* Sidebar: Anti-Cheat */}
-            <button
-              onClick={() => { sound.playSelect(); setActiveTab('anticheat'); }}
-              className="absolute z-20 cursor-pointer rounded-xl hover:ring-1 hover:ring-[#EF4444] hover:bg-[#EF4444]/10 transition"
-              style={{ left: '0.90%', top: '76.30%', width: '10.47%', height: '7.22%' }}
-              title="Kernel Anti-Cheat Status"
-            />
-
-            {/* Sidebar: Profile */}
-            <button
-              onClick={() => { sound.playSelect(); setActiveTab('profile'); }}
-              className="absolute z-20 cursor-pointer rounded-xl hover:ring-1 hover:ring-[#EF4444] hover:bg-[#EF4444]/10 transition"
-              style={{ left: '0.90%', top: '84.88%', width: '10.47%', height: '7.22%' }}
-              title="Gamer Profile Passport"
-            />
-
-            {/* Sidebar: Go Premium */}
-            <button
-              onClick={() => { sound.playTournamentVictory(); setShowPremiumModal(true); }}
-              className="absolute z-20 cursor-pointer rounded-2xl hover:ring-2 hover:ring-amber-400 hover:scale-[1.02] transition"
-              style={{ left: '0.90%', top: '92.10%', width: '10.47%', height: '7.22%' }}
-              title="Unlock VORTEX Premium"
-            />
-
-            {/* Top Bar: Bell Notifications */}
-            <button
-              onClick={() => { sound.playClick(); setNotificationsOpen(!notificationsOpen); }}
-              className="absolute z-20 cursor-pointer rounded-full hover:bg-white/10 transition"
-              style={{ left: '88.5%', top: '2.0%', width: '2.5%', height: '6.5%' }}
-              title="Notifications"
-            />
-
-            {/* Top Bar: Profile Pill / Dropdown */}
-            <button
-              onClick={() => { sound.playClick(); setProfileDropdownOpen(!profileDropdownOpen); }}
-              className="absolute z-20 cursor-pointer rounded-full hover:ring-1 hover:ring-[#EF4444] transition"
-              style={{ left: '91.5%', top: '1.5%', width: '7.5%', height: '7.5%' }}
-              title="User Account"
-            />
-
-            {/* Connect Server 1: FACEIT Premium Server (Mirage) */}
-            <button
-              onClick={() => handleConnectServer('194.163.159.231:27015', 'FACEIT Premium Server (Mirage)')}
-              className="absolute z-20 cursor-pointer rounded-full hover:ring-2 hover:ring-white hover:scale-105 hover:shadow-[0_0_15px_#EF4444] transition duration-150"
-              style={{ left: '44.74%', top: '51.47%', width: '4.19%', height: '6.32%' }}
-              title="Connect to FACEIT Premium Server [de_mirage]"
-            />
-
-            {/* Connect Server 2: Vortex 128-Tick Competitive (Inferno) */}
-            <button
-              onClick={() => handleConnectServer('194.163.159.231:27016', 'Vortex 128-Tick | Competitive (Inferno)')}
-              className="absolute z-20 cursor-pointer rounded-full hover:ring-2 hover:ring-white hover:scale-105 hover:shadow-[0_0_15px_#EF4444] transition duration-150"
-              style={{ left: '44.74%', top: '63.21%', width: '4.19%', height: '6.32%' }}
-              title="Connect to Vortex 128-Tick [de_inferno]"
-            />
-
-            {/* Connect Server 3: Vortex Practice Server (Dust2) */}
-            <button
-              onClick={() => handleConnectServer('194.163.159.231:27017', 'Vortex Practice Server (Dust2)')}
-              className="absolute z-20 cursor-pointer rounded-full hover:ring-2 hover:ring-white hover:scale-105 hover:shadow-[0_0_15px_#EF4444] transition duration-150"
-              style={{ left: '44.74%', top: '74.94%', width: '4.19%', height: '6.32%' }}
-              title="Connect to Vortex Practice [de_dust2]"
-            />
-
-            {/* Popular Servers "View All ->" */}
-            <button
-              onClick={() => { sound.playSelect(); setActiveTab('servers'); }}
-              className="absolute z-20 cursor-pointer rounded hover:ring-1 hover:ring-[#EF4444] transition"
-              style={{ left: '45.75%', top: '43.34%', width: '3.59%', height: '4.51%' }}
-              title="View All Servers"
-            />
-
-            {/* Upcoming Tournaments "View All ->" */}
-            <button
-              onClick={() => { sound.playSelect(); setActiveTab('tournaments'); }}
-              className="absolute z-20 cursor-pointer rounded hover:ring-1 hover:ring-[#EF4444] transition"
-              style={{ left: '77.15%', top: '43.34%', width: '3.59%', height: '4.51%' }}
-              title="View All Tournaments"
-            />
-
-            {/* Upcoming Tournament Card (VORTEX CS2 TOURNAMENT) */}
-            <button
-              onClick={() => { sound.playSelect(); setActiveTab('tournaments'); }}
-              className="absolute z-20 cursor-pointer rounded-2xl hover:ring-2 hover:ring-[#EF4444]/60 transition"
-              style={{ left: '51.73%', top: '49.21%', width: '29.01%', height: '33.86%' }}
-              title="VORTEX CS2 TOURNAMENT - Starts in 2d 14h 32m"
-            />
-
-            {/* Bottom Right: "Go Premium ->" Button */}
-            <button
-              onClick={() => { sound.playTournamentVictory(); setShowPremiumModal(true); }}
-              className="absolute z-20 cursor-pointer rounded-full hover:ring-2 hover:ring-white hover:scale-105 transition duration-150"
-              style={{ left: '88.82%', top: '84.65%', width: '5.68%', height: '6.32%' }}
-              title="Go Premium Now"
-            />
-
-          </div>
-        </div>
-      ) : (
-        /* ======================================================== */
-        /* 2. SUB-PAGES (SERVERS, TOURNAMENTS, RANKINGS, PROFILE, ETC) */
-        /* ======================================================== */
-        <div className="w-full max-w-[1720px] mx-auto flex flex-col md:flex-row gap-6 p-6 min-h-[90vh]">
-          
-          {/* Subpage Left Sidebar */}
-          <aside className="w-full md:w-64 bg-[#0E1017] border border-[#202536] rounded-3xl p-5 flex flex-col justify-between shrink-0 shadow-xl">
-            <div>
-              <div 
-                onClick={() => { sound.playClick(); setActiveTab('dashboard'); }}
-                className="flex items-center gap-3 cursor-pointer group mb-8 px-2"
-              >
-                <img 
-                  src="/images/vortex_logo_clean.png" 
-                  alt="VORTEX" 
-                  className="h-8 object-contain"
-                />
-              </div>
-
-              <nav className="space-y-1.5">
-                {navItems.map((item) => {
-                  const Icon = item.icon;
-                  const isActive = activeTab === item.id;
-                  return (
-                    <button
-                      key={item.id}
-                      onClick={() => {
-                        sound.playSelect();
-                        setActiveTab(item.id);
-                      }}
-                      className={`w-full flex items-center gap-3 px-4 py-3 rounded-2xl text-xs font-bold font-sans transition cursor-pointer text-left ${
-                        isActive
-                          ? 'bg-[#241217] text-white border-r-2 border-[#EF4444]'
-                          : 'text-[#94A3B8] hover:text-white hover:bg-[#151924]'
-                      }`}
-                    >
-                      <Icon className={`w-4 h-4 ${isActive ? 'text-[#EF4444]' : 'text-[#64748B]'}`} />
-                      <span>{item.label}</span>
-                    </button>
-                  );
-                })}
-              </nav>
+      <div className="w-full max-w-[1780px] mx-auto flex flex-col lg:flex-row gap-6 p-4 sm:p-6 min-h-[92vh]">
+        
+        {/* ==================== LEFT SIDEBAR ==================== */}
+        <aside className={`bg-[#0E1017] border border-[#202536] rounded-3xl flex flex-col justify-between shrink-0 shadow-xl transition-all duration-300 ease-in-out ${
+          sidebarCollapsed ? 'w-full lg:w-[84px] p-3' : 'w-full lg:w-72 p-4 sm:p-5'
+        }`}>
+          <div>
+            {/* Brand Logo (Full when expanded, compact VTX when collapsed) */}
+            <div className={`flex items-center mb-6 transition-all ${
+              sidebarCollapsed ? 'justify-center py-1' : 'px-2'
+            }`}>
+              {!sidebarCollapsed ? (
+                <div 
+                  onClick={() => { sound.playClick(); setActiveTab('dashboard'); }}
+                  className="flex items-center gap-3 cursor-pointer group transition hover:scale-105"
+                >
+                  <VortexBrandLogo />
+                </div>
+              ) : (
+                <div 
+                  onClick={() => { sound.playClick(); setActiveTab('dashboard'); }}
+                  className="cursor-pointer transition hover:scale-110"
+                  title="VORTEX Dashboard"
+                >
+                  <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-[#18210C] to-[#12141C] border border-[#A3E635]/50 flex items-center justify-center text-[#A3E635] font-black font-display text-xs shadow-[0_0_15px_rgba(163,230,53,0.25)]">
+                    VTX
+                  </div>
+                </div>
+              )}
             </div>
 
+            {/* Primary Navigation Modes (1. Dashboard & 2. Play) */}
+            <div className="space-y-1.5">
+              {primaryNavItems.map((item) => {
+                const Icon = item.icon;
+                const isActive = activeTab === item.id;
+                const isPlayTab = item.id === 'play';
+
+                return (
+                  <button
+                    key={item.id}
+                    onClick={() => {
+                      sound.playSelect();
+                      setActiveTab(item.id);
+                    }}
+                    className={`w-full group relative flex items-center ${
+                      sidebarCollapsed ? 'justify-center p-2.5' : 'justify-between px-3.5 py-2.5'
+                    } rounded-xl text-left transition-all cursor-pointer ${
+                      isActive
+                        ? 'bg-gradient-to-r from-[#A3E635]/20 via-[#18210C] to-transparent border border-[#A3E635]/60 text-white shadow-[0_0_20px_rgba(163,230,53,0.18)]'
+                        : 'hover:bg-[#151924] border border-transparent text-slate-300 hover:text-white'
+                    }`}
+                  >
+                    <div className={`flex items-center ${sidebarCollapsed ? 'justify-center' : 'gap-3'}`}>
+                      <div className={`p-2 rounded-lg transition-colors ${
+                        isActive 
+                          ? 'bg-[#A3E635] text-slate-950 shadow-md' 
+                          : 'bg-[#151924] group-hover:bg-[#1E2332] text-slate-400 group-hover:text-white'
+                      }`}>
+                        <Icon className={`w-4 h-4 ${isPlayTab ? 'fill-current' : ''}`} />
+                      </div>
+                      {!sidebarCollapsed && (
+                        <div>
+                          <div className="text-xs font-bold tracking-wide text-white">{item.label}</div>
+                          <div className="text-[10px] text-slate-400">{item.desc}</div>
+                        </div>
+                      )}
+                    </div>
+
+                    {!sidebarCollapsed && item.badge && (
+                      <span className={`text-[9px] font-mono font-bold px-2 py-0.5 rounded-full ${item.badgeColor}`}>
+                        {item.badge}
+                      </span>
+                    )}
+
+                    {isActive && (
+                      <div className="absolute left-0 top-1/2 -translate-y-1/2 w-1.5 h-6 rounded-r-full bg-[#A3E635] shadow-[0_0_12px_rgba(163,230,53,0.85)]" />
+                    )}
+
+                    {/* Floating Tooltip when collapsed */}
+                    {sidebarCollapsed && (
+                      <div className="absolute left-full ml-3 px-3 py-1.5 rounded-xl bg-[#141722] border border-[#252C3D] text-white text-xs font-bold whitespace-nowrap opacity-0 group-hover:opacity-100 pointer-events-none transition-all duration-150 z-50 shadow-2xl flex items-center gap-2">
+                        <span>{item.label}</span>
+                        {item.badge && (
+                          <span className={`text-[9px] font-mono px-1.5 py-0.2 rounded-full ${item.badgeColor}`}>
+                            {item.badge}
+                          </span>
+                        )}
+                      </div>
+                    )}
+                  </button>
+                );
+              })}
+            </div>
+
+            {/* Category Header or Divider */}
+            {!sidebarCollapsed ? (
+              <div className="px-3 pt-4 pb-2 text-[10px] font-mono uppercase tracking-wider text-slate-500 border-t border-white/[0.06] mt-3">
+                Competitive Command Center
+              </div>
+            ) : (
+              <div className="w-8 h-px bg-white/10 mx-auto my-3" />
+            )}
+
+            {/* Secondary Navigation Modes */}
+            <nav className="space-y-1">
+              {secondaryNavItems.map((item) => {
+                const Icon = item.icon;
+                const isActive = activeTab === item.id;
+
+                return (
+                  <button
+                    key={item.id}
+                    onClick={() => {
+                      sound.playSelect();
+                      setActiveTab(item.id);
+                    }}
+                    className={`w-full group relative flex items-center ${
+                      sidebarCollapsed ? 'justify-center p-2.5' : 'justify-between px-3.5 py-2'
+                    } rounded-xl text-left transition-all cursor-pointer ${
+                      isActive
+                        ? 'bg-gradient-to-r from-[#A3E635]/20 via-[#18210C] to-transparent border border-[#A3E635]/60 text-white shadow-[0_0_20px_rgba(163,230,53,0.18)]'
+                        : 'hover:bg-[#151924] border border-transparent text-slate-300 hover:text-white'
+                    }`}
+                  >
+                    <div className={`flex items-center ${sidebarCollapsed ? 'justify-center' : 'gap-3'}`}>
+                      <div className={`p-2 rounded-lg transition-colors ${
+                        isActive 
+                          ? 'bg-[#A3E635] text-slate-950 shadow-md' 
+                          : 'bg-[#151924] group-hover:bg-[#1E2332] text-slate-400 group-hover:text-white'
+                      }`}>
+                        <Icon className="w-4 h-4" />
+                      </div>
+                      {!sidebarCollapsed && (
+                        <div>
+                          <div className="text-xs font-bold tracking-wide">{item.label}</div>
+                          <div className="text-[10px] text-slate-400">{item.desc}</div>
+                        </div>
+                      )}
+                    </div>
+
+                    {!sidebarCollapsed && item.badge && (
+                      <span className={`text-[9px] font-mono font-bold px-2 py-0.5 rounded-full ${item.badgeColor}`}>
+                        {item.badge}
+                      </span>
+                    )}
+
+                    {isActive && (
+                      <div className="absolute left-0 top-1/2 -translate-y-1/2 w-1.5 h-6 rounded-r-full bg-[#A3E635] shadow-[0_0_12px_rgba(163,230,53,0.85)]" />
+                    )}
+
+                    {/* Floating Tooltip when collapsed */}
+                    {sidebarCollapsed && (
+                      <div className="absolute left-full ml-3 px-3 py-1.5 rounded-xl bg-[#141722] border border-[#252C3D] text-white text-xs font-bold whitespace-nowrap opacity-0 group-hover:opacity-100 pointer-events-none transition-all duration-150 z-50 shadow-2xl flex items-center gap-2">
+                        <span>{item.label}</span>
+                        {item.badge && (
+                          <span className={`text-[9px] font-mono px-1.5 py-0.2 rounded-full ${item.badgeColor}`}>
+                            {item.badge}
+                          </span>
+                        )}
+                      </div>
+                    )}
+                  </button>
+                );
+              })}
+            </nav>
+          </div>
+
+          {/* Go Premium Card */}
+          {!sidebarCollapsed ? (
             <button
               onClick={() => { sound.playTournamentVictory(); setShowPremiumModal(true); }}
-              className="mt-6 p-4 rounded-2xl bg-gradient-to-r from-[#241217] to-[#12141C] border border-amber-500/40 hover:border-amber-400 text-left transition cursor-pointer group shadow-lg"
+              className="mt-6 p-4 rounded-2xl bg-gradient-to-r from-[#1C160B] to-[#12141C] border border-amber-500/40 hover:border-amber-400 text-left transition cursor-pointer group shadow-lg"
             >
               <div className="flex items-center gap-2 text-amber-400 text-xs font-display font-black mb-1">
                 <Crown className="w-4 h-4" />
-                <span>Go Premium</span>
+                <span>{userMembershipTier === 'vip' ? 'VIP Elite Active' : userMembershipTier === 'premium' ? 'Upgrade to VIP' : 'Go Premium'}</span>
               </div>
-              <p className="text-[10px] text-[#94A3B8]">Unlock priority matchmaking & stats</p>
+              <p className="text-[10px] text-[#94A3B8]">
+                {userMembershipTier === 'vip' ? 'All Pro 128-tick queues unlocked' : userMembershipTier === 'premium' ? 'Unlock €25k Pro Tournaments' : 'Unlock Super Match 5v5 & VODs'}
+              </p>
             </button>
-          </aside>
-
-          {/* Subpage Content Area */}
-          <main className="flex-1 bg-[#0E1017] border border-[#202536] rounded-3xl p-6 md:p-8 shadow-xl">
-            
-            {/* SERVER BROWSER */}
-            {activeTab === 'servers' && (
-              <div className="space-y-6">
-                <div className="flex items-center justify-between pb-4 border-b border-[#1E2333]">
-                  <div>
-                    <h2 className="text-2xl font-black font-display text-white">VORTEX 128-Tick Dedicated Server Grid</h2>
-                    <p className="text-xs text-[#94A3B8]">Direct low-latency CS2 nodes verified across Frankfurt, Vienna, and Stockholm</p>
-                  </div>
-                  <button
-                    onClick={() => setActiveTab('dashboard')}
-                    className="px-4 py-2 rounded-xl bg-[#141722] border border-[#252C3D] text-xs font-mono hover:text-white cursor-pointer"
-                  >
-                    ← Back to Dashboard
-                  </button>
-                </div>
-
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                  {[
-                    { name: 'FACEIT Premium Server', map: 'de_mirage', ip: '194.163.159.231:27015', players: '16/20', ping: '12ms', loc: 'Frankfurt, DE' },
-                    { name: 'Vortex 128-Tick | Competitive', map: 'de_inferno', ip: '194.163.159.231:27016', players: '14/20', ping: '18ms', loc: 'Vienna, AT' },
-                    { name: 'Vortex Practice Server', map: 'de_dust2', ip: '194.163.159.231:27017', players: '12/20', ping: '20ms', loc: 'Frankfurt, DE' },
-                    { name: 'Vortex Retake Arena #1', map: 'de_nuke', ip: '194.163.159.231:27018', players: '9/10', ping: '14ms', loc: 'Stockholm, SE' },
-                    { name: 'Vortex 1v1 Aim Ladder', map: 'aim_redline', ip: '194.163.159.231:27019', players: '14/16', ping: '15ms', loc: 'Frankfurt, DE' },
-                    { name: 'Vortex High-ELO 5v5 Scrim', map: 'de_anubis', ip: '194.163.159.231:27020', players: '10/10', ping: '11ms', loc: 'Frankfurt, DE' },
-                  ].map((s, idx) => (
-                    <div key={idx} className="p-5 rounded-2xl bg-[#12141C] border border-[#23293B] hover:border-[#EF4444] transition flex flex-col justify-between gap-4">
-                      <div>
-                        <div className="flex items-center justify-between mb-2">
-                          <span className="text-[10px] font-mono text-[#EF4444] font-bold uppercase">{s.loc}</span>
-                          <span className="text-xs font-mono text-emerald-400 font-bold">{s.ping}</span>
-                        </div>
-                        <h4 className="text-base font-bold font-display text-white">{s.name}</h4>
-                        <p className="text-xs font-mono text-[#94A3B8] mt-1">Map: {s.map}</p>
-                      </div>
-
-                      <div className="flex items-center justify-between pt-3 border-t border-[#1C2233]">
-                        <span className="text-xs font-mono text-slate-300">{s.players}</span>
-                        <button
-                          onClick={() => handleConnectServer(s.ip, s.name)}
-                          className="px-4 py-2 rounded-full bg-[#DC2626] hover:bg-[#EF4444] text-white font-black font-display text-xs transition cursor-pointer shadow-sm"
-                        >
-                          Connect
-                        </button>
-                      </div>
-                    </div>
-                  ))}
-                </div>
+          ) : (
+            <button
+              onClick={() => { sound.playTournamentVictory(); setShowPremiumModal(true); }}
+              className="mt-6 w-full h-11 rounded-xl bg-gradient-to-br from-[#1C160B] to-[#12141C] border border-amber-500/40 hover:border-amber-400 flex items-center justify-center transition cursor-pointer group relative shadow-lg"
+              title={userMembershipTier === 'vip' ? 'VIP Elite Active' : userMembershipTier === 'premium' ? 'Upgrade to VIP' : 'Go Premium'}
+            >
+              <Crown className="w-5 h-5 text-amber-400 group-hover:scale-110 transition" />
+              <div className="absolute left-full ml-3 px-3 py-1.5 rounded-xl bg-[#141722] border border-amber-500/40 text-amber-400 text-xs font-bold whitespace-nowrap opacity-0 group-hover:opacity-100 pointer-events-none transition-all duration-150 z-50 shadow-2xl">
+                {userMembershipTier === 'vip' ? 'VIP Elite Active' : userMembershipTier === 'premium' ? 'Upgrade to VIP' : 'Go Premium'}
               </div>
-            )}
+            </button>
+          )}
+        </aside>
 
-            {/* TOURNAMENTS */}
-            {activeTab === 'tournaments' && (
-              <div className="space-y-6">
-                <div className="flex items-center justify-between pb-4 border-b border-[#1E2333]">
-                  <div>
-                    <h2 className="text-2xl font-black font-display text-white">VORTEX CS2 TOURNAMENT CIRCUIT</h2>
-                    <p className="text-xs text-[#94A3B8]">Automated bracket matchmaking and instant prize distributions</p>
-                  </div>
-                  <button
-                    onClick={() => setActiveTab('dashboard')}
-                    className="px-4 py-2 rounded-xl bg-[#141722] border border-[#252C3D] text-xs font-mono hover:text-white cursor-pointer"
-                  >
-                    ← Back to Dashboard
-                  </button>
-                </div>
+        {/* ==================== MAIN CONTENT AREA ==================== */}
+        <main className="flex-1 flex flex-col gap-6">
 
-                <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-                  {[
-                    { title: 'VORTEX Major Championship 2026', prize: '€10,000', teams: '32 / 32', date: 'LIVE NOW', status: 'IN PROGRESS', badge: 'bg-emerald-500/15 text-emerald-400 border-emerald-500/30' },
-                    { title: 'VORTEX CS2 Balkan Open Cup', prize: '€5,000', teams: '16 / 16', date: 'Starts in: 2d 14h', status: 'OPEN', badge: 'bg-red-500/15 text-red-400 border-red-500/30' },
-                    { title: 'IEM Katowice 2026 Community Qualifier', prize: '€7,500', teams: '48 / 64', date: 'Starts in: 5d 08h', status: 'REGISTRATION', badge: 'bg-amber-500/15 text-amber-400 border-amber-500/30' },
-                    { title: 'VORTEX Weekly 128-Tick Scrimfest', prize: '€2,500', teams: '12 / 16', date: 'Starts Saturday', status: 'REGISTER', badge: 'bg-sky-500/15 text-sky-400 border-sky-500/30' },
-                  ].map((t, idx) => (
-                    <div key={idx} className="p-6 rounded-3xl bg-[#12141C] border border-[#23293B] hover:border-[#EF4444] transition flex flex-col justify-between gap-6">
-                      <div className="flex items-start justify-between">
-                        <div>
-                          <span className={`px-2.5 py-1 rounded text-[10px] font-mono font-bold border ${t.badge}`}>{t.status}</span>
-                          <h3 className="text-xl font-black font-display text-white mt-3">{t.title}</h3>
-                          <p className="text-xs font-mono text-[#94A3B8] mt-1">{t.date}</p>
-                        </div>
-                        <div className="text-right">
-                          <div className="text-2xl font-black font-mono text-[#EF4444]">{t.prize}</div>
-                          <div className="text-[10px] text-[#94A3B8] uppercase">Prize Pool</div>
-                        </div>
-                      </div>
+          {/* TOP HEADER CONTROLS (SEAMLESS DIRECT ON BACKGROUND AS PHOTO 2 - NO BOX WINDOW) */}
+          <header className="w-full flex items-center justify-between px-1 py-1 bg-transparent border-0 shadow-none">
+            <div className="flex items-center gap-3">
+              <button
+                onClick={() => {
+                  sound.playClick();
+                  setSidebarCollapsed(!sidebarCollapsed);
+                }}
+                title={sidebarCollapsed ? "Expand Sidebar (Full View)" : "Minimize Sidebar (Icon View)"}
+                className="p-2.5 rounded-xl bg-[#12141C] hover:bg-[#1A1F2E] border border-white/10 hover:border-[#A3E635]/50 text-slate-300 hover:text-white transition cursor-pointer group shrink-0 shadow-md"
+              >
+                <SidebarMenuIcon collapsed={sidebarCollapsed} />
+              </button>
 
-                      <div className="flex items-center justify-between pt-4 border-t border-[#1C2233]">
-                        <span className="text-xs font-mono text-slate-300">Slots: {t.teams}</span>
-                        <button
-                          onClick={() => sound.playTournamentVictory()}
-                          className="px-5 py-2.5 rounded-full bg-[#DC2626] hover:bg-[#EF4444] text-white font-display font-black text-xs uppercase transition shadow-md cursor-pointer"
-                        >
-                          Register Team
-                        </button>
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              </div>
-            )}
+              {/* Show Queue Status ONLY when actively in matchmaking queue */}
+              {isQueuing && (
+                <button
+                  onClick={() => setActiveTab('play')}
+                  className="px-3.5 py-1.5 rounded-full bg-red-500/15 border border-red-500/40 text-red-400 font-mono text-xs font-bold flex items-center gap-2 animate-pulse cursor-pointer shadow-lg shadow-red-500/15"
+                >
+                  <span className="w-2 h-2 rounded-full bg-red-500" />
+                  <span>IN QUEUE (00:0{queueSeconds})</span>
+                </button>
+              )}
+            </div>
 
-            {/* RANKINGS */}
-            {activeTab === 'rankings' && (
-              <div className="space-y-6">
-                <div className="flex items-center justify-between pb-4 border-b border-[#1E2333]">
-                  <div>
-                    <h2 className="text-2xl font-black font-display text-white">Global & Regional Rankings</h2>
-                    <p className="text-xs text-[#94A3B8]">Verified FACEIT ELO and official player passports</p>
-                  </div>
-                  <button
-                    onClick={() => setActiveTab('dashboard')}
-                    className="px-4 py-2 rounded-xl bg-[#141722] border border-[#252C3D] text-xs font-mono hover:text-white cursor-pointer"
-                  >
-                    ← Back to Dashboard
-                  </button>
-                </div>
+            <div className="flex items-center gap-5 sm:gap-6">
+              {/* Notification Bell (Clean glowing icon as in Photo 2, no box window) */}
+              <button
+                onClick={() => { sound.playClick(); setNotificationsOpen(!notificationsOpen); }}
+                className="p-1.5 text-lime-400 hover:text-lime-300 transition cursor-pointer relative"
+                aria-label="Notifications"
+              >
+                <Bell className="w-5 h-5 text-[#A3E635] hover:brightness-125 transition drop-shadow-[0_0_8px_rgba(163,230,53,0.5)]" />
+                <span className="absolute top-0.5 right-0.5 w-2 h-2 rounded-full bg-[#A3E635] shadow-[0_0_6px_rgba(163,230,53,0.95)]" />
+              </button>
 
-                <div className="rounded-3xl bg-[#12141C] border border-[#23293B] overflow-hidden shadow-xl">
-                  <table className="w-full text-left font-sans">
-                    <thead>
-                      <tr className="border-b border-[#1E2333] text-[11px] font-mono font-bold text-[#94A3B8] uppercase bg-[#0D0F15]">
-                        <th className="py-3 px-6">Rank</th>
-                        <th className="py-3 px-6">Player</th>
-                        <th className="py-3 px-6">Country</th>
-                        <th className="py-3 px-6">FACEIT Level</th>
-                        <th className="py-3 px-6">ELO Rating</th>
-                        <th className="py-3 px-6">Win Rate</th>
-                      </tr>
-                    </thead>
-                    <tbody className="divide-y divide-[#181D2C] text-sm">
-                      {[
-                        { rank: '#1', tag: 'bLocKeeRz', country: 'Kosovo', flag: '🇽🇰', level: 'Level 7', elo: 1394, winrate: '58.9%' },
-                        { rank: '#2', tag: 's1mple', country: 'Ukraine', flag: '🇺🇦', level: 'Level 10', elo: 3840, winrate: '68.2%' },
-                        { rank: '#3', tag: 'm0NESY', country: 'Russia', flag: '🏳️', level: 'Level 10', elo: 3620, winrate: '66.4%' },
-                        { rank: '#4', tag: 'ZywOo', country: 'France', flag: '🇫🇷', level: 'Level 10', elo: 3580, winrate: '65.1%' },
-                        { rank: '#5', tag: 'NiKo', country: 'Bosnia', flag: '🇧🇦', level: 'Level 10', elo: 3410, winrate: '63.8%' },
-                      ].map((p, idx) => (
-                        <tr key={idx} className="hover:bg-[#161A26] transition">
-                          <td className="py-4 px-6 font-mono font-black text-[#EF4444]">{p.rank}</td>
-                          <td className="py-4 px-6 font-bold text-white flex items-center gap-2">
-                            <span className="w-2 h-2 rounded-full bg-emerald-400" />
-                            <span>{p.tag}</span>
-                          </td>
-                          <td className="py-4 px-6 font-mono text-slate-300">{p.flag} {p.country}</td>
-                          <td className="py-4 px-6 font-bold text-amber-400">{p.level}</td>
-                          <td className="py-4 px-6 font-mono font-bold text-white">{p.elo}</td>
-                          <td className="py-4 px-6 font-mono text-emerald-400">{p.winrate}</td>
-                        </tr>
-                      ))}
-                    </tbody>
-                  </table>
-                </div>
-              </div>
-            )}
-
-            {/* ANTI-CHEAT */}
-            {activeTab === 'anticheat' && (
-              <div className="space-y-6">
-                <div className="flex items-center justify-between pb-4 border-b border-[#1E2333]">
-                  <div>
-                    <h2 className="text-2xl font-black font-display text-white">VORTEX Kernel Anti-Cheat Protection</h2>
-                    <p className="text-xs text-[#94A3B8]">Ring-0 hardware enforcement and driver integrity monitor</p>
-                  </div>
-                  <button
-                    onClick={() => setActiveTab('dashboard')}
-                    className="px-4 py-2 rounded-xl bg-[#141722] border border-[#252C3D] text-xs font-mono hover:text-white cursor-pointer"
-                  >
-                    ← Back to Dashboard
-                  </button>
-                </div>
-
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-                  <div className="p-6 rounded-3xl bg-[#12141C] border border-[#23293B]">
-                    <div className="w-12 h-12 rounded-2xl bg-emerald-500/15 border border-emerald-500/30 flex items-center justify-center text-emerald-400 mb-4">
-                      <ShieldCheck className="w-6 h-6" />
-                    </div>
-                    <h3 className="text-lg font-bold text-white">Kernel Driver Active</h3>
-                    <p className="text-xs text-[#94A3B8] mt-1">vortex_kernel_ac.sys verified and running without anomalies.</p>
-                  </div>
-
-                  <div className="p-6 rounded-3xl bg-[#12141C] border border-[#23293B]">
-                    <div className="w-12 h-12 rounded-2xl bg-red-500/15 border border-red-500/30 flex items-center justify-center text-[#EF4444] mb-4">
-                      <Zap className="w-6 h-6" />
-                    </div>
-                    <h3 className="text-lg font-bold text-white">Hardware ID Enforcement</h3>
-                    <p className="text-xs text-[#94A3B8] mt-1">Motherboard UUID and TPM 2.0 cryptographic handshake locked.</p>
-                  </div>
-
-                  <div className="p-6 rounded-3xl bg-[#12141C] border border-[#23293B]">
-                    <div className="w-12 h-12 rounded-2xl bg-amber-500/15 border border-amber-500/30 flex items-center justify-center text-amber-400 mb-4">
-                      <CheckCircle2 className="w-6 h-6" />
-                    </div>
-                    <h3 className="text-lg font-bold text-white">FACEIT Trust Synchronized</h3>
-                    <p className="text-xs text-[#94A3B8] mt-1">Player clean history confirmed across international leagues.</p>
-                  </div>
-                </div>
-              </div>
-            )}
-
-            {/* PROFILE */}
-            {activeTab === 'profile' && (
-              <div className="space-y-6">
-                <div className="flex items-center justify-between pb-4 border-b border-[#1E2333]">
-                  <div>
-                    <h2 className="text-2xl font-black font-display text-white">Gamer Passport // {userGamerTag}</h2>
-                    <p className="text-xs text-[#94A3B8]">Verified Steam & FACEIT credentials</p>
-                  </div>
-                  <button
-                    onClick={() => setActiveTab('dashboard')}
-                    className="px-4 py-2 rounded-xl bg-[#141722] border border-[#252C3D] text-xs font-mono hover:text-white cursor-pointer"
-                  >
-                    ← Back to Dashboard
-                  </button>
-                </div>
-
-                <div className="p-8 rounded-3xl bg-[#12141C] border border-[#23293B] flex flex-col md:flex-row items-center gap-6">
-                  <img 
-                    src={avatarUrl} 
-                    alt={userGamerTag} 
-                    className="w-24 h-24 rounded-2xl object-cover border-2 border-[#EF4444] shadow-lg shadow-[#EF4444]/25"
+              {/* User Profile (Avatar + GamerTag + Chevron as in Photo 2) */}
+              <div className="relative">
+                <button
+                  onClick={() => { sound.playClick(); setProfileDropdownOpen(!profileDropdownOpen); }}
+                  className="flex items-center gap-2.5 py-1 px-1.5 rounded-xl hover:bg-white/[0.05] transition cursor-pointer group"
+                >
+                  <img
+                    src={currentAvatarUrl}
+                    alt={currentGamerTag}
+                    className="w-8 h-8 rounded-full object-cover border border-[#A3E635]/60 group-hover:border-[#A3E635] transition shadow-sm"
+                    onError={(e) => {
+                      (e.target as HTMLImageElement).src = '/images/blockeerz_avatar.png';
+                    }}
                   />
-                  <div className="flex-1">
-                    <div className="flex items-center gap-3">
-                      <h3 className="text-2xl font-black font-display text-white">{userGamerTag}</h3>
-                      <span className="px-2.5 py-0.5 rounded text-[10px] font-mono font-bold bg-[#EF4444]/15 text-[#EF4444] border border-[#EF4444]/30">VORTEX VERIFIED</span>
+                  <span className="font-display font-bold text-sm text-white group-hover:text-[#A3E635] transition">
+                    {currentGamerTag}
+                  </span>
+                  <ChevronDown className={`w-4 h-4 text-slate-400 group-hover:text-white transition-transform duration-200 ${profileDropdownOpen ? 'rotate-180 text-[#A3E635]' : ''}`} />
+                </button>
+
+                {/* AUTHENTIC PRO ESPORTS PROFILE CARD POPOVER */}
+                {profileDropdownOpen && (
+                  <>
+                    <div
+                      className="fixed inset-0 z-40 bg-black/40 backdrop-blur-[1px]"
+                      onClick={() => setProfileDropdownOpen(false)}
+                    />
+                    <div className="absolute right-0 top-full mt-3 w-80 sm:w-84 max-w-[calc(100vw-2rem)] rounded-3xl bg-[#12141C] border border-[#252B3B] shadow-[0_20px_50px_rgba(0,0,0,0.85)] p-5 z-50 animate-in fade-in zoom-in-95 space-y-4 text-center">
+                      
+                      {/* Close Icon Button */}
+                      <button
+                        onClick={() => setProfileDropdownOpen(false)}
+                        className="absolute top-3.5 right-3.5 p-1.5 rounded-lg text-slate-400 hover:text-white hover:bg-white/[0.08] transition cursor-pointer"
+                        title="Close"
+                      >
+                        <X className="w-4 h-4" />
+                      </button>
+
+                      {/* Large Avatar with Glowing Ring, Level 7 Badge, and Camera Edit Trigger */}
+                      <div className="relative inline-block mx-auto mt-1 group">
+                        <div 
+                          onClick={handleOpenEditProfile}
+                          title="Click to edit avatar & profile"
+                          className="relative cursor-pointer"
+                        >
+                          <img
+                            src={currentAvatarUrl}
+                            alt={currentGamerTag}
+                            className="w-16 h-16 rounded-full object-cover border-2 border-[#A3E635] shadow-[0_0_20px_rgba(163,230,53,0.35)] group-hover:brightness-75 transition"
+                            onError={(e) => {
+                              (e.target as HTMLImageElement).src = '/images/blockeerz_avatar.png';
+                            }}
+                          />
+                          <div className="absolute inset-0 rounded-full flex items-center justify-center opacity-0 group-hover:opacity-100 bg-black/60 transition">
+                            <Camera className="w-5 h-5 text-[#A3E635]" />
+                          </div>
+                          <span className="absolute bottom-0 right-0 w-4 h-4 rounded-full bg-emerald-400 border-2 border-[#12141C]" />
+                        </div>
+                        <div className="absolute -bottom-1 -left-1 w-6 h-6 rounded-full bg-gradient-to-br from-amber-400 via-amber-500 to-yellow-600 text-black font-black text-xs flex items-center justify-center border-2 border-[#12141C] shadow-md">
+                          7
+                        </div>
+                      </div>
+
+                      {/* GamerTag & Verified Status */}
+                      <div>
+                        <div className="flex items-center justify-center gap-1.5 font-display font-black text-white text-base">
+                          <span className="text-[#A3E635] text-xs font-mono font-bold">[{currentClanTag}]</span>
+                          <span>{currentGamerTag}</span>
+                          <span className="text-xs" title={currentCountry.name}>{currentCountry.flag}</span>
+                          <span className="w-4 h-4 rounded-full bg-[#A3E635]/20 text-[#A3E635] text-[10px] font-bold flex items-center justify-center">✓</span>
+                          <span className="px-1.5 py-0.2 rounded text-[9px] font-mono font-bold bg-[#A3E635]/15 text-[#A3E635] border border-[#A3E635]/30">PRO</span>
+                        </div>
+                        <div className="flex items-center justify-center gap-2 mt-1 text-xs font-mono text-slate-400">
+                          <span className="text-white font-bold">1,407 ELO</span>
+                          <span>•</span>
+                          <span className="text-sky-400 font-bold">{currentRole}</span>
+                          <span>•</span>
+                          <span className="text-emerald-400 font-bold flex items-center gap-1">
+                            <ShieldCheck className="w-3.5 h-3.5" />
+                            AC Verified
+                          </span>
+                        </div>
+                      </div>
+
+                      {/* ELO Progression Bar to Level 8 */}
+                      <div className="w-full space-y-1 pt-1 border-t border-white/[0.06]">
+                        <div className="w-full h-1.5 rounded-full bg-[#1A1D27] overflow-hidden">
+                          <div className="h-full bg-gradient-to-r from-[#FF5500] to-amber-500 rounded-full" style={{ width: '31%' }} />
+                        </div>
+                        <div className="flex justify-between text-[10px] font-mono text-slate-500">
+                          <span>1,351 (Lv 7)</span>
+                          <span className="text-amber-400 font-bold">+124 ELO to Level 8</span>
+                          <span>1,530 (Lv 8)</span>
+                        </div>
+                      </div>
+
+                      {/* Quick Career Telemetry (Matches, Win Rate, Recent Results) */}
+                      <div className="grid grid-cols-3 gap-1 py-2.5 border-y border-white/[0.06] font-mono text-center">
+                        <div>
+                          <div className="text-[9px] text-slate-400 uppercase font-bold">MATCHES</div>
+                          <div className="text-sm font-black text-white mt-0.5">2,480</div>
+                        </div>
+                        <div className="border-x border-white/[0.06]">
+                          <div className="text-[9px] text-slate-400 uppercase font-bold">WIN RATE</div>
+                          <div className="text-sm font-black text-[#A3E635] mt-0.5">58.9%</div>
+                        </div>
+                        <div>
+                          <div className="text-[9px] text-slate-400 uppercase font-bold">RECENT FORM</div>
+                          <div className="text-xs font-black mt-1 flex items-center justify-center gap-1">
+                            <span className="w-4 h-4 rounded bg-emerald-500/20 text-emerald-400 text-[10px] flex items-center justify-center font-bold">W</span>
+                            <span className="w-4 h-4 rounded bg-emerald-500/20 text-emerald-400 text-[10px] flex items-center justify-center font-bold">W</span>
+                            <span className="w-4 h-4 rounded bg-emerald-500/20 text-emerald-400 text-[10px] flex items-center justify-center font-bold">W</span>
+                            <span className="w-4 h-4 rounded bg-red-500/20 text-red-400 text-[10px] flex items-center justify-center font-bold">L</span>
+                            <span className="w-4 h-4 rounded bg-emerald-500/20 text-emerald-400 text-[10px] flex items-center justify-center font-bold">W</span>
+                          </div>
+                        </div>
+                      </div>
+
+                      {/* Membership Tier & Upgrade CTA */}
+                      <div className="p-3 rounded-2xl bg-gradient-to-r from-amber-500/10 via-[#181D2A] to-purple-500/10 border border-amber-500/30 flex items-center justify-between text-left">
+                        <div className="flex items-center gap-2.5">
+                          <div className={`w-8 h-8 rounded-xl flex items-center justify-center ${
+                            userMembershipTier === 'vip'
+                              ? 'bg-purple-500/20 border border-purple-500/40 text-purple-400'
+                              : userMembershipTier === 'premium'
+                              ? 'bg-amber-500/20 border border-amber-500/40 text-amber-400'
+                              : 'bg-white/10 border border-white/20 text-slate-300'
+                          }`}>
+                            <Crown className="w-4 h-4" />
+                          </div>
+                          <div>
+                            <div className="text-xs font-display font-black text-white">
+                              {userMembershipTier === 'vip' ? 'VIP ELITE MEMBER' : userMembershipTier === 'premium' ? 'PREMIUM MEMBER' : 'FREE MEMBER'}
+                            </div>
+                            <div className="text-[10px] font-mono text-slate-400">
+                              {userMembershipTier === 'vip' ? 'All Pro Queues Unlocked' : userMembershipTier === 'premium' ? 'Super Match Unlocked' : 'Unlock Priority & VIP Ladders'}
+                            </div>
+                          </div>
+                        </div>
+                        {userMembershipTier !== 'vip' && (
+                          <button
+                            onClick={() => {
+                              sound.playTournamentVictory();
+                              setProfileDropdownOpen(false);
+                              setShowPremiumModal(true);
+                            }}
+                            className="px-3 py-1.5 rounded-xl bg-gradient-to-r from-amber-500 to-yellow-500 hover:brightness-110 text-slate-950 font-display font-black text-[10px] uppercase tracking-wider transition cursor-pointer shadow-md"
+                          >
+                            {userMembershipTier === 'premium' ? 'GO VIP' : 'UPGRADE'}
+                          </button>
+                        )}
+                      </div>
+
+                      {/* Quick Profile Actions */}
+                      <div className="space-y-1.5 text-left pt-1">
+                        {/* EDIT PROFILE & AVATAR ACTION BUTTON */}
+                        <button
+                          onClick={handleOpenEditProfile}
+                          className="w-full flex items-center justify-between px-3.5 py-2.5 text-xs font-mono font-bold text-white bg-gradient-to-r from-[#A3E635]/15 via-[#1E2C10] to-[#12141C] hover:from-[#A3E635]/25 hover:via-[#263714] border border-[#A3E635]/40 rounded-xl transition cursor-pointer shadow-sm group"
+                        >
+                          <div className="flex items-center gap-2 text-[#A3E635]">
+                            <Edit3 className="w-4 h-4 group-hover:rotate-12 transition-transform" />
+                            <span>Edit Profile & Avatar</span>
+                          </div>
+                          <span className="text-[10px] font-mono text-[#A3E635] uppercase font-bold tracking-wider">EDIT →</span>
+                        </button>
+
+                        <button
+                          onClick={() => {
+                            sound.playSelect();
+                            setProfileDropdownOpen(false);
+                            setActiveTab('profile');
+                          }}
+                          className="w-full flex items-center justify-between px-3.5 py-2 text-xs font-mono text-slate-300 hover:text-white hover:bg-white/[0.05] rounded-xl transition cursor-pointer"
+                        >
+                          <div className="flex items-center gap-2">
+                            <User className="w-4 h-4 text-sky-400" />
+                            <span>Digital Player Passport</span>
+                          </div>
+                          <ChevronRight className="w-3.5 h-3.5 text-slate-500" />
+                        </button>
+
+                        <button
+                          onClick={() => {
+                            sound.playSelect();
+                            setProfileDropdownOpen(false);
+                            setActiveTab('dashboard');
+                          }}
+                          className="w-full flex items-center justify-between px-3.5 py-2 text-xs font-mono text-slate-300 hover:text-white hover:bg-white/[0.05] rounded-xl transition cursor-pointer"
+                        >
+                          <div className="flex items-center gap-2">
+                            <BarChart2 className="w-4 h-4 text-[#A3E635]" />
+                            <span>Player Telemetry Matrix</span>
+                          </div>
+                          <ChevronRight className="w-3.5 h-3.5 text-slate-500" />
+                        </button>
+
+                        <button
+                          onClick={() => {
+                            sound.playClick();
+                            navigator.clipboard.writeText('STEAM_0:1:43918293');
+                            setDashboardToast('SteamID copied: STEAM_0:1:43918293');
+                            setTimeout(() => setDashboardToast(null), 3000);
+                          }}
+                          className="w-full flex items-center justify-between px-3.5 py-2 text-xs font-mono text-slate-300 hover:text-white hover:bg-white/[0.05] rounded-xl transition cursor-pointer"
+                        >
+                          <div className="flex items-center gap-2">
+                            <Copy className="w-4 h-4 text-slate-400" />
+                            <span>Copy SteamID</span>
+                          </div>
+                          <span className="text-[10px] text-slate-500">STEAM_0:1:4391...</span>
+                        </button>
+
+                        {onLogout && (
+                          <button
+                            onClick={() => {
+                              sound.playClick();
+                              setProfileDropdownOpen(false);
+                              onLogout();
+                            }}
+                            className="w-full flex items-center justify-between px-3.5 py-2 text-xs font-mono text-rose-400 hover:text-rose-300 hover:bg-rose-500/10 rounded-xl transition cursor-pointer border-t border-white/[0.04] mt-2 pt-2"
+                          >
+                            <div className="flex items-center gap-2">
+                              <LogOut className="w-4 h-4 text-rose-400" />
+                              <span>Log Out</span>
+                            </div>
+                            <span className="text-[10px] text-rose-400/70">Disconnect session</span>
+                          </button>
+                        )}
+                      </div>
+
                     </div>
-                    <p className="text-xs font-mono text-[#94A3B8] mt-1">Country: Kosovo 🇽🇰 | Primary Game: Counter-Strike 2</p>
+                  </>
+                )}
+              </div>
+            </div>
+          </header>
+
+          {/* ========================================================================= */}
+          {/* TAB: "PLAY" -> THE COMPLETE MATCHMAKING HUB AS SHOWN IN THE PHOTO!       */}
+          {/* ========================================================================= */}
+          {activeTab === 'play' && (
+            <div className="space-y-6 animate-in fade-in duration-200">
+
+              {/* HERO MODULE: 5v5 CS2 MATCHMAKING LOBBY (1:1 FACEIT REPLICA) */}
+              <div className="w-full bg-[#0B0D12] border border-[#202535] rounded-3xl p-6 sm:p-8 relative overflow-hidden shadow-2xl">
+                {/* Subtle Glow Accents */}
+                <div className="absolute top-0 right-1/4 w-96 h-96 bg-orange-600/5 rounded-full blur-3xl pointer-events-none" />
+                <div className="absolute bottom-0 left-1/4 w-96 h-96 bg-lime-500/5 rounded-full blur-3xl pointer-events-none" />
+
+                {/* Top Centered Queue Pill */}
+                <div className="flex justify-center mb-6">
+                  <span className="px-5 py-1.5 rounded-full text-xs font-mono font-bold uppercase tracking-wider text-[#FF5500] bg-[#1C120D] border border-[#FF5500]/60 shadow-md flex items-center gap-2">
+                    <span className="w-2 h-2 rounded-full bg-[#FF5500] animate-pulse" />
+                    EUROPE 5v5 QUEUE
+                  </span>
+                </div>
+
+                {/* Top Row: User Level / ELO Progression + S9 Monthly Mission */}
+                <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-center pb-6 border-b border-white/[0.06]">
+                  
+                  {/* Left: User Level 7 Badge & ELO Bar */}
+                  <div className="lg:col-span-7 flex flex-col sm:flex-row sm:items-center gap-5">
+                    {/* Yellow Faceit Level 7 Circular Badge */}
+                    <div className="w-16 h-16 sm:w-20 sm:h-20 rounded-full bg-gradient-to-br from-amber-400 via-amber-500 to-yellow-600 p-[3.5px] shadow-lg shadow-amber-500/25 shrink-0">
+                      <div className="w-full h-full rounded-full bg-[#12141C] flex items-center justify-center border border-amber-300/40">
+                        <span className="text-2xl sm:text-3xl font-black font-display text-white tracking-tighter">7</span>
+                      </div>
+                    </div>
+
+                    {/* ELO Details & Progression Line */}
+                    <div className="flex-1 space-y-2">
+                      <div className="flex items-center gap-3">
+                        <span className="px-2.5 py-0.5 rounded-full bg-[#1A1D27] text-slate-300 text-xs font-mono border border-white/5">
+                          Season 9
+                        </span>
+                        <span className="text-xl sm:text-2xl font-black font-display text-white tracking-tight flex items-center gap-2">
+                          1,407
+                          <TrendingUp className="w-4 h-4 text-slate-400 inline" />
+                          <ChevronDown className="w-4 h-4 text-red-500 inline" />
+                        </span>
+                        <div className="ml-auto flex items-center gap-1.5 px-2.5 py-0.5 rounded-lg bg-white/[0.04] border border-white/10 text-xs font-mono font-bold text-slate-300">
+                          <span>#91</span>
+                          <span>🇽🇰</span>
+                          <ChevronRight className="w-3.5 h-3.5 text-emerald-400" />
+                        </div>
+                      </div>
+
+                      {/* ELO Progress Bar: 1,351 to 1,530 */}
+                      <div className="space-y-1">
+                        <div className="w-full h-2 rounded-full bg-[#1A1D27] overflow-hidden p-[1px]">
+                          <div 
+                            className="h-full bg-gradient-to-r from-[#FF5500] to-amber-500 rounded-full" 
+                            style={{ width: '31%' }} 
+                          />
+                        </div>
+                        <div className="flex items-center justify-between text-[11px] font-mono text-slate-400">
+                          <span>1,351</span>
+                          <span className="text-slate-300 font-bold">+124 to Level 8</span>
+                          <span>1,530</span>
+                        </div>
+                      </div>
+
+                      {/* Party Action Buttons */}
+                      <div className="flex items-center gap-2.5 pt-1">
+                        <button
+                          onClick={() => sound.playClick()}
+                          className="px-3 py-1 rounded-full bg-white/[0.05] hover:bg-white/[0.10] border border-white/10 text-slate-300 hover:text-white font-mono text-xs flex items-center gap-1.5 transition cursor-pointer"
+                        >
+                          <Users className="w-3.5 h-3.5 text-[#FF5500]" />
+                          <span>Find party</span>
+                          <span className="px-1.5 py-0.2 rounded-full bg-black/40 text-[10px] text-slate-400">14</span>
+                        </button>
+                        <button
+                          onClick={() => sound.playClick()}
+                          className="px-3 py-1 rounded-full bg-white/[0.05] hover:bg-white/[0.10] border border-white/10 text-slate-300 hover:text-white font-mono text-xs transition cursor-pointer"
+                        >
+                          Post party
+                        </button>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Right: S9 Monthly Mission: Silent Salute */}
+                  <div className="lg:col-span-5 p-4 rounded-2xl bg-[#12141C] border border-[#232838] space-y-2 relative overflow-hidden">
+                    <div className="flex items-center justify-between text-[11px] font-mono text-slate-400">
+                      <span className="uppercase tracking-wider font-bold text-slate-300">S9 MONTHLY MISSION: SILENT SALUTE</span>
+                      <span className="text-white font-bold">2/5</span>
+                    </div>
+
+                    <div className="flex items-center justify-between">
+                      <span className="text-sm font-bold text-white font-display">Play 5 matches</span>
+                      <div className="flex items-center gap-2 text-xs font-mono font-bold text-amber-400">
+                        <div className="w-6 h-6 rounded-full bg-gradient-to-br from-amber-500 to-orange-600 flex items-center justify-center text-white shadow-sm">
+                          <Star className="w-3.5 h-3.5 fill-white" />
+                        </div>
+                        <div className="flex items-center gap-1 px-2 py-0.5 rounded bg-black/40 border border-white/10 text-white">
+                          <span>F 100</span>
+                          <Lock className="w-3 h-3 text-emerald-400" />
+                        </div>
+                      </div>
+                    </div>
+
+                    {/* Mission Progress Bar */}
+                    <div className="w-full h-1.5 rounded-full bg-[#1E2332] overflow-hidden">
+                      <div className="h-full bg-gradient-to-r from-[#FF5500] to-amber-500 rounded-full" style={{ width: '40%' }} />
+                    </div>
+
+                    <div className="flex items-center justify-between text-[10px] font-mono text-slate-500 pt-0.5">
+                      <span>Ends in 19D 21H 09M</span>
+                      <span className="text-emerald-400 font-bold">Active Stage</span>
+                    </div>
+                  </div>
+                </div>
+
+                {/* 5 PARTY SLOTS (CENTER IS bLocKeeRz) */}
+                <div className="mt-8 relative">
+                  <div className="grid grid-cols-2 sm:grid-cols-5 gap-3.5">
+                    {partySlots.map((member, idx) => {
+                      const isCenterLeader = idx === 2;
+
+                      if (member) {
+                        return (
+                          <div
+                            key={member.id}
+                            className={`h-56 rounded-2xl border flex flex-col items-center justify-between p-4 transition-all relative group ${
+                              isCenterLeader
+                                ? 'bg-gradient-to-b from-[#181D2A] to-[#11141D] border-[#FF5500]/60 shadow-lg shadow-[#FF5500]/15'
+                                : 'bg-[#12141C] border-[#252B3B] hover:border-[#A3E635]/40'
+                            }`}
+                          >
+                            {/* Member Top Row */}
+                            <div className="w-full flex items-center justify-between text-[10px] font-mono">
+                              {isCenterLeader ? (
+                                <span className="px-2 py-0.5 rounded bg-[#FF5500]/15 text-[#FF5500] font-bold border border-[#FF5500]/30 flex items-center gap-1">
+                                  <Crown className="w-3 h-3 fill-[#FF5500]" />
+                                  LEADER
+                                </span>
+                              ) : (
+                                <span className="px-2 py-0.5 rounded bg-white/[0.05] text-slate-400 font-bold">
+                                  MEMBER
+                                </span>
+                              )}
+
+                              {!isCenterLeader && (
+                                <button
+                                  onClick={(e) => handleRemoveTeammate(idx, e)}
+                                  className="opacity-0 group-hover:opacity-100 p-1 rounded hover:bg-red-500/20 text-slate-400 hover:text-red-400 transition cursor-pointer"
+                                  title="Remove from lobby"
+                                >
+                                  <X className="w-3.5 h-3.5" />
+                                </button>
+                              )}
+                            </div>
+
+                            {/* Member Avatar & Details */}
+                            <div className="flex flex-col items-center text-center space-y-2">
+                              <div className="relative">
+                                <img
+                                  src={member.avatar}
+                                  alt={member.name}
+                                  className={`w-16 h-16 rounded-full object-cover border-2 shadow-md ${
+                                    isCenterLeader 
+                                      ? 'border-[#FF5500] shadow-[#FF5500]/25' 
+                                      : 'border-[#A3E635]/60'
+                                  }`}
+                                  onError={(e) => {
+                                    (e.target as HTMLElement).style.display = 'none';
+                                  }}
+                                />
+                                <span className="absolute bottom-0 right-0 w-3.5 h-3.5 rounded-full bg-emerald-400 border-2 border-[#12141C]" />
+                              </div>
+
+                              <div>
+                                <div className="text-sm font-bold text-white flex items-center justify-center gap-1.5 font-display">
+                                  <span>{member.name}</span>
+                                  <CheckCircle2 className="w-3.5 h-3.5 text-white fill-white/20 inline" />
+                                  <span className="text-xs">🇽🇰</span>
+                                </div>
+                                <div className="flex items-center justify-center gap-1.5 text-xs font-mono text-slate-300 mt-0.5">
+                                  <span className="w-4 h-4 rounded-full bg-amber-500 text-black text-[10px] font-black flex items-center justify-center">
+                                    {member.level}
+                                  </span>
+                                  <span className="font-bold">{member.elo.toLocaleString()}</span>
+                                </div>
+                              </div>
+                            </div>
+
+                            {/* Status Bottom */}
+                            <div className="w-full text-center">
+                              <span className="px-2.5 py-0.5 rounded text-[10px] font-mono font-bold bg-emerald-500/15 text-emerald-400 border border-emerald-500/30">
+                                READY
+                              </span>
+                            </div>
+                          </div>
+                        );
+                      }
+
+                      // Empty Slot (Invite Friend)
+                      return (
+                        <div
+                          key={`empty-${idx}`}
+                          onClick={() => handleAddTeammate(idx)}
+                          className="h-56 rounded-2xl bg-[#10121A] border border-[#202535] hover:border-[#A3E635]/50 flex flex-col items-center justify-center gap-2 p-4 transition group cursor-pointer"
+                        >
+                          <div className="w-12 h-12 rounded-full bg-white/[0.03] group-hover:bg-[#A3E635]/15 border border-white/10 group-hover:border-[#A3E635]/50 flex items-center justify-center text-slate-500 group-hover:text-[#A3E635] transition">
+                            <Plus className="w-6 h-6 group-hover:scale-125 transition-transform" />
+                          </div>
+                          <span className="text-xs font-mono text-slate-500 group-hover:text-slate-300 transition">
+                            + Invite Teammate
+                          </span>
+                        </div>
+                      );
+                    })}
+                  </div>
+
+                  {/* FLOATING ANTI-CHEAT WARNING PILL (EXACT FACEIT REPLICA) */}
+                  <div className="flex justify-center -mt-4 relative z-10">
+                    <div className="inline-flex items-center gap-3.5 px-5 py-2.5 rounded-xl bg-[#0B0D12] border border-[#FF5500] shadow-2xl shadow-orange-500/20 text-xs font-mono">
+                      <div className="flex items-center gap-2 text-slate-200">
+                        <ShieldAlert className="w-4 h-4 text-[#FF5500]" />
+                        <span className="font-semibold text-slate-200">Please run Anti-Cheat</span>
+                      </div>
+                      <a
+                        href="https://www.faceit.com/en/anti-cheat"
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="text-[#FF5500] hover:text-[#FFAA00] font-bold text-xs uppercase tracking-wider transition"
+                      >
+                        DOWNLOAD
+                      </a>
+                      <a
+                        href="faceitac://"
+                        onClick={() => sound.playClick()}
+                        className="px-3.5 py-1 rounded bg-[#2A1D15] hover:bg-[#FF5500] text-[#FF5500] hover:text-white border border-[#FF5500] font-bold text-xs uppercase tracking-wider transition cursor-pointer"
+                      >
+                        LAUNCH
+                      </a>
+                    </div>
+                  </div>
+                </div>
+
+                {/* FIND MATCH BUTTON (CENTERED AS IN SCREENSHOT) */}
+                <div className="flex justify-center mt-6">
+                  {isQueuing ? (
+                    <div className="flex flex-wrap items-center justify-center gap-4">
+                      <div className="flex items-center gap-3 px-6 py-3.5 rounded-2xl bg-[#1A130D] border border-[#FF5500]/60 text-xs font-mono shadow-lg shadow-orange-500/10">
+                        <span className="w-2.5 h-2.5 rounded-full bg-[#FF5500] animate-ping" />
+                        <span className="text-white font-bold tracking-wider">SEARCHING FOR OPPONENTS...</span>
+                        <span className="text-amber-400 font-bold font-mono">00:0{queueSeconds}</span>
+                      </div>
+                      <button
+                        onClick={() => { sound.playClick(); setIsQueuing(false); }}
+                        className="px-5 py-3.5 rounded-2xl bg-red-500/15 hover:bg-red-500/25 border border-red-500/40 text-red-400 text-xs font-mono font-bold cursor-pointer transition shadow-md"
+                      >
+                        CANCEL
+                      </button>
+                    </div>
+                  ) : selectedMatchTier === 'premium' && userMembershipTier === 'free' ? (
+                    <button
+                      onClick={() => {
+                        sound.playTournamentVictory();
+                        setShowPremiumModal(true);
+                      }}
+                      className="w-full sm:w-auto min-w-[340px] px-10 py-4 rounded-2xl bg-gradient-to-r from-amber-500 via-orange-500 to-amber-500 hover:brightness-110 text-slate-950 font-display font-black text-sm uppercase tracking-wider transition shadow-[0_0_30px_rgba(245,158,11,0.4)] hover:scale-[1.02] cursor-pointer flex items-center justify-center gap-3"
+                    >
+                      <Lock className="w-4 h-4 fill-slate-950" />
+                      <span>UPGRADE TO PREMIUM TO QUEUE SUPER MATCH</span>
+                    </button>
+                  ) : selectedMatchTier === 'vip' && userMembershipTier !== 'vip' ? (
+                    <button
+                      onClick={() => {
+                        sound.playTournamentVictory();
+                        setShowPremiumModal(true);
+                      }}
+                      className="w-full sm:w-auto min-w-[340px] px-10 py-4 rounded-2xl bg-gradient-to-r from-purple-500 via-fuchsia-500 to-amber-400 hover:brightness-110 text-slate-950 font-display font-black text-sm uppercase tracking-wider transition shadow-[0_0_30px_rgba(168,85,247,0.4)] hover:scale-[1.02] cursor-pointer flex items-center justify-center gap-3"
+                    >
+                      <Crown className="w-4 h-4 fill-slate-950" />
+                      <span>UPGRADE TO VIP TO QUEUE VIP ELITE</span>
+                    </button>
+                  ) : (
+                    <button
+                      onClick={() => {
+                        sound.playJoinScrim();
+                        setIsQueuing(true);
+                        setQueueSeconds(0);
+                      }}
+                      className="w-full sm:w-auto min-w-[320px] px-12 py-4 rounded-2xl bg-gradient-to-r from-[#84CC16] via-[#A3E635] to-[#84CC16] hover:brightness-110 text-slate-950 font-display font-black text-sm uppercase tracking-wider transition shadow-[0_0_30px_rgba(163,230,53,0.35)] hover:scale-[1.02] cursor-pointer flex items-center justify-center gap-3"
+                    >
+                      <Play className="w-4 h-4 fill-slate-950" />
+                      <span>FIND MATCH ({selectedMatchTier === 'free' ? 'STANDARD' : selectedMatchTier === 'premium' ? 'SUPER MATCH' : 'VIP ELITE'})</span>
+                    </button>
+                  )}
+                </div>
+
+                {/* MATCHMAKING SUB-NAVIGATION (MATCH TYPE • MAPS • SERVERS) */}
+                <div className="mt-8 pt-4 border-t border-white/[0.08] flex flex-wrap items-center justify-between gap-4 text-xs font-mono">
+                  <div className="flex items-center gap-6">
+                    <button
+                      onClick={() => { sound.playClick(); setPlaySubTab('match_type'); }}
+                      className={`relative pb-3 font-bold transition flex items-center gap-2 cursor-pointer ${
+                        playSubTab === 'match_type'
+                          ? 'text-white border-b-2 border-[#FF5500]'
+                          : 'text-slate-400 hover:text-white'
+                      }`}
+                    >
+                      <Crosshair className="w-3.5 h-3.5 text-[#FF5500]" />
+                      <span>MATCH TYPE</span>
+                    </button>
+
+                    <button
+                      onClick={() => { sound.playClick(); setPlaySubTab('maps'); }}
+                      className={`relative pb-3 font-bold transition flex items-center gap-2 cursor-pointer ${
+                        playSubTab === 'maps'
+                          ? 'text-white border-b-2 border-[#A3E635]'
+                          : 'text-slate-400 hover:text-white'
+                      }`}
+                    >
+                      <Compass className="w-3.5 h-3.5 text-[#A3E635]" />
+                      <span>MAPS ({selectedMaps.length}/7)</span>
+                      <span className="px-1.5 py-0.2 rounded text-[9px] bg-[#FF5500] text-black font-black uppercase">
+                        ACTIVE DUTY
+                      </span>
+                    </button>
+                  </div>
+
+                  <button
+                    onClick={() => { sound.playClick(); setPlaySubTab('servers'); }}
+                    className={`relative pb-3 font-bold transition flex items-center gap-2 cursor-pointer ${
+                      playSubTab === 'servers'
+                        ? 'text-white border-b-2 border-[#FF5500]'
+                        : 'text-slate-400 hover:text-white'
+                    }`}
+                  >
+                    <Server className="w-3.5 h-3.5 text-slate-300" />
+                    <span>SERVERS {selectedServers.length}/6</span>
+                  </button>
+                </div>
+
+                {/* SUBTAB 1: 3 MATCHMAKING TIERS (FREE • PREMIUM • VIP) */}
+                {playSubTab === 'match_type' && (
+                  <div className="mt-4 grid grid-cols-1 lg:grid-cols-3 gap-4 animate-in fade-in duration-200">
                     
-                    <div className="mt-4 flex items-center gap-6 font-mono text-xs">
-                      <div>
-                        <span className="text-[#94A3B8]">FACEIT ELO: </span>
-                        <span className="text-white font-bold">1,394</span>
+                    {/* CARD 1: FREE STANDARD MATCH */}
+                    <div
+                      onClick={() => {
+                        sound.playSelect();
+                        setSelectedMatchTier('free');
+                      }}
+                      className={`rounded-2xl p-5 border transition-all cursor-pointer relative group flex flex-col justify-between space-y-4 ${
+                        selectedMatchTier === 'free'
+                          ? 'bg-gradient-to-b from-[#18210C] via-[#11141C] to-[#0E1017] border-[#A3E635]/70 shadow-[0_0_25px_rgba(163,230,53,0.18)] ring-1 ring-[#A3E635]/30'
+                          : 'bg-[#12141C] border-[#222736] hover:border-[#A3E635]/40 text-slate-300'
+                      }`}
+                    >
+                      <div className="space-y-3">
+                        <div className="flex items-center justify-between">
+                          <div className="flex items-center gap-2.5">
+                            <div className="w-8 h-8 rounded-lg bg-white/[0.05] border border-white/10 flex items-center justify-center text-slate-300">
+                              <Swords className="w-4 h-4" />
+                            </div>
+                            <div>
+                              <h4 className="text-base font-black font-display text-white">Standard Match • 5v5</h4>
+                              <div className="text-[10px] font-mono text-slate-400">Open competitive queue</div>
+                            </div>
+                          </div>
+                          <span className="px-2.5 py-0.5 rounded-full text-[10px] font-mono font-bold bg-white/10 text-slate-300 border border-white/10">
+                            FREE
+                          </span>
+                        </div>
+
+                        {/* Perk Pills Grid */}
+                        <div className="grid grid-cols-2 gap-2 text-xs font-mono pt-1">
+                          <div className="p-2 rounded-xl bg-black/40 border border-white/5 flex items-center gap-2 text-slate-300">
+                            <Users className="w-3.5 h-3.5 text-slate-400 shrink-0" />
+                            <span className="truncate">All party sizes</span>
+                          </div>
+                          <div className="p-2 rounded-xl bg-black/40 border border-white/5 flex items-center gap-2 text-slate-300">
+                            <Star className="w-3.5 h-3.5 text-[#A3E635] fill-[#A3E635] shrink-0" />
+                            <span className="truncate">Verified Matching</span>
+                          </div>
+                          <div className="p-2 rounded-xl bg-black/40 border border-white/5 flex items-center gap-2 text-slate-300">
+                            <TrendingUp className="w-3.5 h-3.5 text-slate-400 shrink-0" />
+                            <span className="truncate">No Elo restrictions</span>
+                          </div>
+                          <div className="p-2 rounded-xl bg-black/40 border border-white/5 flex items-center gap-2 text-slate-300">
+                            <Star className="w-3.5 h-3.5 text-[#A3E635] fill-[#A3E635] shrink-0" />
+                            <span className="truncate">Veteran Matching</span>
+                          </div>
+                          <div className="p-2 rounded-xl bg-black/40 border border-white/5 flex items-center gap-2 text-slate-300">
+                            <Wifi className="w-3.5 h-3.5 text-slate-400 shrink-0" />
+                            <span className="truncate">128-Tick Standard</span>
+                          </div>
+                          <div className="p-2 rounded-xl bg-black/40 border border-white/5 flex items-center gap-2 text-slate-300">
+                            <ShieldAlert className="w-3.5 h-3.5 text-emerald-400 shrink-0" />
+                            <span className="truncate">Anti-Cheat Active</span>
+                          </div>
+                        </div>
                       </div>
-                      <div>
-                        <span className="text-[#94A3B8]">Matches: </span>
-                        <span className="text-white font-bold">2,480</span>
+
+                      <div className="pt-2 flex items-center justify-between text-[11px] font-mono border-t border-white/[0.04]">
+                        <span className="text-slate-500">Wait time: ~35s</span>
+                        <span className={`font-bold ${selectedMatchTier === 'free' ? 'text-[#A3E635]' : 'text-slate-400'}`}>
+                          {selectedMatchTier === 'free' ? '✓ SELECTED' : 'Click to Select'}
+                        </span>
                       </div>
+                    </div>
+
+                    {/* CARD 2: PREMIUM SUPER MATCH */}
+                    <div
+                      onClick={() => {
+                        sound.playSelect();
+                        setSelectedMatchTier('premium');
+                      }}
+                      className={`rounded-2xl p-5 border transition-all cursor-pointer relative group flex flex-col justify-between space-y-4 ${
+                        selectedMatchTier === 'premium'
+                          ? 'bg-gradient-to-b from-amber-500/15 via-[#16131C] to-[#0E1017] border-amber-500/70 shadow-[0_0_25px_rgba(245,158,11,0.22)] ring-1 ring-amber-500/40'
+                          : 'bg-[#12141C] border-[#222736] hover:border-amber-500/40 text-slate-300'
+                      }`}
+                    >
+                      <div className="space-y-3">
+                        <div className="flex items-center justify-between">
+                          <div className="flex items-center gap-2.5">
+                            <div className="w-8 h-8 rounded-lg bg-amber-500/15 border border-amber-500/30 flex items-center justify-center text-amber-400 shadow-sm">
+                              <Zap className="w-4 h-4 fill-amber-400" />
+                            </div>
+                            <div>
+                              <h4 className="text-base font-black font-display text-white">Super Match • 5v5</h4>
+                              <div className="text-[10px] font-mono text-amber-400 font-bold">Strict ELO & Captain Vetoes</div>
+                            </div>
+                          </div>
+                          {userMembershipTier === 'free' ? (
+                            <span className="px-2.5 py-0.5 rounded-full text-[10px] font-mono font-bold bg-amber-500/20 text-amber-400 border border-amber-500/40 flex items-center gap-1 shadow-sm">
+                              <Lock className="w-3 h-3 text-amber-400" />
+                              PREMIUM ONLY
+                            </span>
+                          ) : (
+                            <span className="px-2.5 py-0.5 rounded-full text-[10px] font-mono font-bold bg-amber-500/20 text-amber-400 border border-amber-500/40 flex items-center gap-1 shadow-sm">
+                              <Zap className="w-3 h-3 fill-amber-400" />
+                              PREMIUM
+                            </span>
+                          )}
+                        </div>
+
+                        {/* Perk Pills Grid */}
+                        <div className="grid grid-cols-2 gap-2 text-xs font-mono pt-1">
+                          <div className="p-2 rounded-xl bg-black/40 border border-white/5 flex items-center gap-2 text-slate-300">
+                            <Users className="w-3.5 h-3.5 text-amber-400 shrink-0" />
+                            <span className="truncate">Solo, duo, trio</span>
+                          </div>
+                          <div className="p-2 rounded-xl bg-black/40 border border-white/5 flex items-center gap-2 text-slate-300">
+                            <Star className="w-3.5 h-3.5 text-amber-400 fill-amber-400 shrink-0" />
+                            <span className="truncate">Verified Matching</span>
+                          </div>
+                          <div className="p-2 rounded-xl bg-black/40 border border-white/5 flex items-center gap-2 text-slate-300">
+                            <TrendingUp className="w-3.5 h-3.5 text-amber-400 shrink-0" />
+                            <span className="truncate">±250 Elo range</span>
+                          </div>
+                          <div className="p-2 rounded-xl bg-black/40 border border-white/5 flex items-center gap-2 text-slate-300">
+                            <Star className="w-3.5 h-3.5 text-amber-400 fill-amber-400 shrink-0" />
+                            <span className="truncate">Veteran Matching</span>
+                          </div>
+                          <div className="p-2 rounded-xl bg-black/40 border border-white/5 flex items-center gap-2 text-slate-300">
+                            <Crown className="w-3.5 h-3.5 text-amber-400 shrink-0" />
+                            <span className="truncate">Captain Map Pick</span>
+                          </div>
+                          <div className="p-2 rounded-xl bg-black/40 border border-white/5 flex items-center gap-2 text-slate-300">
+                            <Zap className="w-3.5 h-3.5 text-amber-400 shrink-0" />
+                            <span className="truncate">Zero Smurfs Match</span>
+                          </div>
+                        </div>
+                      </div>
+
+                      <div className="pt-2 flex items-center justify-between text-[11px] font-mono border-t border-white/[0.04]">
+                        <span className="text-slate-500">Wait time: ~18s</span>
+                        {userMembershipTier === 'free' ? (
+                          <span className="font-bold text-amber-400 flex items-center gap-1">
+                            <Lock className="w-3 h-3 inline" />
+                            {selectedMatchTier === 'premium' ? 'PREMIUM REQUIRED' : 'Click to Preview'}
+                          </span>
+                        ) : (
+                          <span className={`font-bold ${selectedMatchTier === 'premium' ? 'text-amber-400' : 'text-slate-400'}`}>
+                            {selectedMatchTier === 'premium' ? '✓ SELECTED' : 'Click to Select'}
+                          </span>
+                        )}
+                      </div>
+                    </div>
+
+                    {/* CARD 3: VIP ELITE MATCH */}
+                    <div
+                      onClick={() => {
+                        sound.playSelect();
+                        setSelectedMatchTier('vip');
+                      }}
+                      className={`rounded-2xl p-5 border transition-all cursor-pointer relative group flex flex-col justify-between space-y-4 ${
+                        selectedMatchTier === 'vip'
+                          ? 'bg-gradient-to-b from-purple-500/15 via-[#171322] to-[#0E1017] border-purple-500/70 shadow-[0_0_25px_rgba(168,85,247,0.25)] ring-1 ring-purple-500/40'
+                          : 'bg-[#12141C] border-[#222736] hover:border-purple-500/40 text-slate-300'
+                      }`}
+                    >
+                      <div className="space-y-3">
+                        <div className="flex items-center justify-between">
+                          <div className="flex items-center gap-2.5">
+                            <div className="w-8 h-8 rounded-lg bg-purple-500/15 border border-purple-500/30 flex items-center justify-center text-purple-400 shadow-sm">
+                              <Crown className="w-4 h-4 fill-purple-400" />
+                            </div>
+                            <div>
+                              <h4 className="text-base font-black font-display text-white">VIP Elite Match • 5v5</h4>
+                              <div className="text-[10px] font-mono text-purple-400 font-bold">High Stakes & Pro GOTV</div>
+                            </div>
+                          </div>
+                          {userMembershipTier !== 'vip' ? (
+                            <span className="px-2.5 py-0.5 rounded-full text-[10px] font-mono font-bold bg-purple-500/20 text-purple-300 border border-purple-400/40 flex items-center gap-1 shadow-sm">
+                              <Lock className="w-3 h-3 text-purple-400" />
+                              VIP ONLY
+                            </span>
+                          ) : (
+                            <span className="px-2.5 py-0.5 rounded-full text-[10px] font-mono font-bold bg-gradient-to-r from-amber-500/20 to-purple-500/20 text-amber-300 border border-amber-400/40 flex items-center gap-1 shadow-[0_0_10px_rgba(251,191,36,0.2)]">
+                              <Crown className="w-3 h-3 fill-amber-300" />
+                              VIP ELITE
+                            </span>
+                          )}
+                        </div>
+
+                        {/* Perk Pills Grid */}
+                        <div className="grid grid-cols-2 gap-2 text-xs font-mono pt-1">
+                          <div className="p-2 rounded-xl bg-black/40 border border-white/5 flex items-center gap-2 text-slate-300">
+                            <Crosshair className="w-3.5 h-3.5 text-purple-400 shrink-0" />
+                            <span className="truncate">Solo or duo only</span>
+                          </div>
+                          <div className="p-2 rounded-xl bg-black/40 border border-white/5 flex items-center gap-2 text-slate-300">
+                            <ShieldCheck className="w-3.5 h-3.5 text-purple-400 shrink-0" />
+                            <span className="truncate">Verified required ⭐</span>
+                          </div>
+                          <div className="p-2 rounded-xl bg-black/40 border border-white/5 flex items-center gap-2 text-slate-300">
+                            <TrendingUp className="w-3.5 h-3.5 text-purple-400 shrink-0" />
+                            <span className="truncate">Strict ±150 Elo</span>
+                          </div>
+                          <div className="p-2 rounded-xl bg-black/40 border border-white/5 flex items-center gap-2 text-slate-300">
+                            <Film className="w-3.5 h-3.5 text-purple-400 shrink-0" />
+                            <span className="truncate">Automated GOTV VODs</span>
+                          </div>
+                          <div className="p-2 rounded-xl bg-black/40 border border-white/5 flex items-center gap-2 text-slate-300">
+                            <Sparkles className="w-3.5 h-3.5 text-amber-300 shrink-0" />
+                            <span className="truncate">2x Vortex Points</span>
+                          </div>
+                          <div className="p-2 rounded-xl bg-black/40 border border-white/5 flex items-center gap-2 text-slate-300">
+                            <Flame className="w-3.5 h-3.5 text-amber-400 shrink-0" />
+                            <span className="truncate">High stakes cash</span>
+                          </div>
+                        </div>
+                      </div>
+
+                      <div className="pt-2 flex items-center justify-between text-[11px] font-mono border-t border-white/[0.04]">
+                        <span className="text-slate-500">Wait time: ~12s</span>
+                        {userMembershipTier !== 'vip' ? (
+                          <span className="font-bold text-purple-400 flex items-center gap-1">
+                            <Crown className="w-3 h-3 inline" />
+                            {selectedMatchTier === 'vip' ? 'VIP REQUIRED' : 'Click to Preview'}
+                          </span>
+                        ) : (
+                          <span className={`font-bold ${selectedMatchTier === 'vip' ? 'text-purple-400' : 'text-slate-400'}`}>
+                            {selectedMatchTier === 'vip' ? '✓ SELECTED' : 'Click to Select'}
+                          </span>
+                        )}
+                      </div>
+                    </div>
+
+                  </div>
+                )}
+
+                {/* SUBTAB 2: MAP POOL SELECTOR */}
+                {playSubTab === 'maps' && (
+                  <div className="mt-4 p-5 rounded-2xl bg-[#12141C] border border-[#232838] space-y-3 animate-in fade-in duration-200">
+                    <div className="flex flex-wrap items-center justify-between text-xs font-mono gap-2">
+                      <span className="text-slate-300 font-bold">ACTIVE DUTY MAP POOL ({selectedMaps.length}/7):</span>
+                      <span className="text-slate-500 text-[11px]">Click maps to toggle them in your queue preference</span>
+                    </div>
+                    <div className="grid grid-cols-2 sm:grid-cols-4 lg:grid-cols-7 gap-2.5">
+                      {AVAILABLE_MAP_POOL.map((map) => {
+                        const isSelected = selectedMaps.includes(map.id);
+                        return (
+                          <button
+                            key={map.id}
+                            onClick={() => handleToggleMap(map.id)}
+                            className={`p-3 rounded-xl border flex flex-col items-center gap-1.5 transition cursor-pointer text-xs font-mono font-bold ${
+                              isSelected
+                                ? 'bg-[#18210C] text-[#A3E635] border-[#A3E635]/60 shadow-md'
+                                : 'bg-[#151924] text-slate-500 border-white/5 hover:border-white/20'
+                            }`}
+                          >
+                            <span className="text-sm">{isSelected ? '✓' : '+'}</span>
+                            <span>{map.name}</span>
+                            <span className="text-[10px] text-slate-400 font-normal">{map.code}</span>
+                          </button>
+                        );
+                      })}
+                    </div>
+                  </div>
+                )}
+
+                {/* SUBTAB 3: SERVER COUNTRY PICKER (MATCHING REFERENCE EXACTLY) */}
+                {playSubTab === 'servers' && (
+                  <div className="mt-4 p-6 rounded-2xl bg-[#0B0D13] border border-[#232838] space-y-5 animate-in fade-in duration-200">
+                    {/* Top Recommendation Banner */}
+                    <div className="text-center text-xs sm:text-sm font-sans text-slate-300">
+                      <span>For a better server experience, we recommend switching to </span>
+                      <button
+                        onClick={() => {
+                          sound.playClick();
+                          setSelectedServers(['netherlands', 'germany', 'sweden', 'finland']);
+                          setServerWarning('Optimized server location profile applied (lowest average ping).');
+                          setTimeout(() => setServerWarning(null), 3000);
+                        }}
+                        className="text-[#FF5500] hover:text-[#FFAA00] font-bold cursor-pointer transition underline decoration-[#FF5500]/50"
+                      >
+                        Optimized server location.
+                      </button>
+                    </div>
+
+                    {/* 6 Country Flag Cards Row */}
+                    <div className="flex items-center justify-center gap-3 sm:gap-4 overflow-x-auto py-2">
+                      {SERVER_COUNTRY_LOCATIONS.map((srv) => {
+                        const isSelected = selectedServers.includes(srv.id);
+                        return (
+                          <button
+                            key={srv.id}
+                            onClick={() => handleToggleServer(srv.id)}
+                            className={`relative w-24 sm:w-28 p-2.5 rounded-xl transition-all duration-200 cursor-pointer flex flex-col items-center justify-between gap-2.5 shrink-0 ${
+                              isSelected
+                                ? 'bg-[#141722] border-2 border-white shadow-[0_0_15px_rgba(255,255,255,0.12)]'
+                                : 'bg-[#0E1017] border border-white/10 hover:border-white/30 opacity-50 hover:opacity-85'
+                            }`}
+                          >
+                            <div className="w-full h-11 sm:h-12 rounded-md overflow-hidden flex items-center justify-center bg-black/40 shadow-inner">
+                              {srv.flagSvg}
+                            </div>
+                            <div className="w-full text-center">
+                              <div className="text-xs font-bold text-white tracking-tight truncate">
+                                {srv.name}
+                              </div>
+                              <div className="text-[10px] font-mono text-emerald-400 font-semibold mt-0.5">
+                                {srv.ping}
+                              </div>
+                            </div>
+                          </button>
+                        );
+                      })}
+                    </div>
+
+                    {/* Bottom Helper Text */}
+                    <div className="text-center text-xs font-sans text-slate-400">
+                      <span>Select a minimum of 4 servers that you would like to play on. </span>
+                      <a
+                        href="https://support.faceit.com"
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="underline text-slate-300 hover:text-white transition"
+                      >
+                        Learn more
+                      </a>
+                    </div>
+
+                    {serverWarning && (
+                      <div className="text-center text-xs font-mono text-amber-400 animate-in fade-in">
+                        ⚠️ {serverWarning}
+                      </div>
+                    )}
+                  </div>
+                )}
+
+                {/* LIVE QUEUE FOOTER METRICS (AS SHOWN IN PHOTO) */}
+                <div className="mt-6 pt-3 flex flex-wrap items-center justify-between text-[11px] font-mono text-slate-500 gap-3">
+                  <div className="flex items-center gap-4">
+                    <span>Live matches: <strong className="text-slate-300">10,697</strong></span>
+                    <span>•</span>
+                    <span>Players queueing: <strong className="text-[#A3E635]">3,164</strong></span>
+                  </div>
+                  <div className="flex items-center gap-2 text-slate-400">
+                    <ShieldCheck className="w-3.5 h-3.5 text-emerald-400 inline" />
+                    <span>Ring-0 Kernel Anti-Cheat Active • Matchmaking Region: Global</span>
+                  </div>
+                </div>
+
+              </div>
+
+              {/* SECTION UNDER MATCHMAKING: LIVE 128-TICK SERVERS & FEATURED TOURNAMENT */}
+              <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
+                
+                {/* Left (7 cols): Popular 128-Tick Dedicated Servers */}
+                <div className="lg:col-span-7 bg-[#0E1017] border border-[#202536] rounded-3xl p-6 shadow-xl space-y-4">
+                  <div className="flex items-center justify-between pb-3 border-b border-white/[0.06]">
+                    <div>
+                      <h3 className="text-lg font-black font-display text-white">Popular 128-Tick Servers</h3>
+                      <p className="text-xs text-[#94A3B8]">Direct low-latency nodes in Frankfurt and Vienna</p>
+                    </div>
+                    <button
+                      onClick={() => { sound.playSelect(); setActiveTab('servers'); }}
+                      className="text-xs font-mono text-[#A3E635] hover:underline flex items-center gap-1 cursor-pointer"
+                    >
+                      <span>View All (6)</span>
+                      <ArrowRight className="w-3.5 h-3.5" />
+                    </button>
+                  </div>
+
+                  <div className="space-y-3">
+                    {[
+                      { name: 'FACEIT Premium Server', map: 'de_mirage', ip: '194.163.159.231:27015', players: '16/20', ping: '12ms', loc: 'Frankfurt, DE' },
+                      { name: 'Vortex 128-Tick Competitive', map: 'de_inferno', ip: '194.163.159.231:27016', players: '14/20', ping: '18ms', loc: 'Vienna, AT' },
+                      { name: 'Vortex Practice Server', map: 'de_dust2', ip: '194.163.159.231:27017', players: '12/20', ping: '20ms', loc: 'Frankfurt, DE' },
+                    ].map((s, idx) => (
+                      <div 
+                        key={idx}
+                        className="p-4 rounded-2xl bg-[#12141C] border border-[#23293B] hover:border-[#A3E635] transition flex items-center justify-between gap-4"
+                      >
+                        <div>
+                          <div className="flex items-center gap-2 mb-1">
+                            <span className="text-[10px] font-mono text-[#A3E635] font-bold uppercase">{s.loc}</span>
+                            <span className="text-[10px] text-slate-500">•</span>
+                            <span className="text-xs font-mono text-emerald-400 font-bold">{s.ping}</span>
+                          </div>
+                          <h4 className="text-sm font-bold font-display text-white">{s.name}</h4>
+                          <p className="text-xs font-mono text-slate-400">Map: {s.map} • Players: {s.players}</p>
+                        </div>
+
+                        <div className="flex items-center gap-2 shrink-0">
+                          <button
+                            onClick={() => handleCopyIp(s.ip)}
+                            className="p-2.5 rounded-xl bg-white/[0.04] hover:bg-white/[0.08] border border-white/10 text-slate-300 hover:text-white transition cursor-pointer"
+                            title="Copy Steam Connect Command"
+                          >
+                            <Copy className="w-3.5 h-3.5" />
+                          </button>
+                          <button
+                            onClick={() => handleConnectServer(s.ip, s.name)}
+                            className="px-5 py-2 rounded-xl bg-[#84CC16] hover:bg-[#A3E635] text-white font-black font-display text-xs transition cursor-pointer shadow-sm"
+                          >
+                            Connect
+                          </button>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+
+                {/* Right (5 cols): Featured CS2 Tournament */}
+                <div className="lg:col-span-5 bg-[#0E1017] border border-[#202536] rounded-3xl p-6 shadow-xl flex flex-col justify-between gap-4">
+                  <div>
+                    <div className="flex items-center justify-between pb-3 border-b border-white/[0.06] mb-4">
                       <div>
-                        <span className="text-[#94A3B8]">Win Rate: </span>
-                        <span className="text-emerald-400 font-bold">68.0%</span>
+                        <h3 className="text-lg font-black font-display text-white">Upcoming Tournament</h3>
+                        <p className="text-xs text-[#94A3B8]">Automated FACEIT bracket system</p>
+                      </div>
+                      <button
+                        onClick={() => { sound.playSelect(); setActiveTab('tournaments'); }}
+                        className="text-xs font-mono text-[#A3E635] hover:underline flex items-center gap-1 cursor-pointer"
+                      >
+                        <span>View All</span>
+                        <ArrowRight className="w-3.5 h-3.5" />
+                      </button>
+                    </div>
+
+                    <div className="p-5 rounded-2xl bg-[#12141C] border border-[#23293B] space-y-3">
+                      <div className="flex items-start justify-between">
+                        <span className="px-2.5 py-1 rounded text-[10px] font-mono font-bold bg-lime-500/15 text-[#A3E635] border border-lime-500/30">
+                          REGISTRATION OPEN
+                        </span>
+                        <div className="text-right">
+                          <div className="text-xl font-black font-mono text-[#A3E635]">$25,000</div>
+                          <div className="text-[10px] text-slate-500 uppercase">Prize Pool</div>
+                        </div>
+                      </div>
+
+                      <h4 className="text-base font-black font-display text-white">VORTEX CS2 Global Open Championship</h4>
+                      <p className="text-xs font-mono text-slate-400">Starts in: 2d 14h • Format: 5v5 Single Elimination</p>
+
+                      <div className="pt-2 flex items-center justify-between text-xs font-mono text-slate-300">
+                        <span>Slots: 14 / 16 Teams</span>
+                        <span className="text-emerald-400 font-bold">2 Slots Remaining</span>
+                      </div>
+                    </div>
+                  </div>
+
+                  <button
+                    onClick={() => {
+                      sound.playTournamentVictory();
+                      setActiveTab('tournaments');
+                    }}
+                    className="w-full py-3 rounded-2xl bg-[#84CC16] hover:bg-[#A3E635] text-white font-display font-black text-xs uppercase tracking-wider transition shadow-md cursor-pointer text-center"
+                  >
+                    Register Team for Tournament
+                  </button>
+                </div>
+
+              </div>
+
+              {/* RECENT MATCHES TELEMETRY SECTION */}
+              <div className="bg-[#0E1017] border border-[#202536] rounded-3xl p-6 shadow-xl space-y-4">
+                <div className="flex items-center justify-between pb-3 border-b border-white/[0.06]">
+                  <div>
+                    <h3 className="text-lg font-black font-display text-white">Recent Match Telemetry</h3>
+                    <p className="text-xs text-[#94A3B8]">Verified CS2 matches played on official 128-tick nodes</p>
+                  </div>
+                  <div className="flex items-center gap-4 text-xs font-mono">
+                    <span className="text-emerald-400 font-bold">Win Rate: 58.9%</span>
+                    <span className="text-slate-600">•</span>
+                    <span className="text-white font-bold">K/D: 1.34</span>
+                    <span className="text-slate-600">•</span>
+                    <span className="text-amber-400 font-bold">HS: 64.2%</span>
+                  </div>
+                </div>
+
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+                  {[
+                    { map: 'de_mirage', score: '13 - 9', res: 'VICTORY', elo: '+14', kd: '24 / 11', rating: '1.48', win: true },
+                    { map: 'de_inferno', score: '13 - 11', res: 'VICTORY', elo: '+12', kd: '19 / 14', rating: '1.15', win: true },
+                    { map: 'de_anubis', score: '8 - 13', res: 'DEFEAT', elo: '-15', kd: '16 / 15', rating: '0.98', win: false },
+                    { map: 'de_nuke', score: '13 - 7', res: 'VICTORY', elo: '+16', kd: '26 / 9', rating: '1.62', win: true },
+                  ].map((m, idx) => (
+                    <div
+                      key={idx}
+                      className="p-4 rounded-2xl bg-[#12141C] border border-[#23293B] hover:border-white/20 transition space-y-3"
+                    >
+                      <div className="flex items-center justify-between">
+                        <span className={`px-2 py-0.5 rounded text-[10px] font-mono font-bold ${
+                          m.win 
+                            ? 'bg-emerald-500/15 text-emerald-400 border border-emerald-500/30' 
+                            : 'bg-rose-500/15 text-rose-400 border border-rose-500/30'
+                        }`}>
+                          {m.res}
+                        </span>
+                        <span className={`text-xs font-mono font-bold ${m.win ? 'text-emerald-400' : 'text-rose-400'}`}>
+                          {m.elo} ELO
+                        </span>
+                      </div>
+
+                      <div>
+                        <div className="text-lg font-black font-mono text-white">{m.score}</div>
+                        <div className="text-xs font-mono text-slate-400">{m.map}</div>
+                      </div>
+
+                      <div className="pt-2 border-t border-white/5 flex items-center justify-between text-xs font-mono text-slate-400">
+                        <span>K/D: <strong className="text-white">{m.kd}</strong></span>
+                        <span>Rating: <strong className="text-[#A3E635]">{m.rating}</strong></span>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+
+            </div>
+          )}
+
+          {/* ========================================================================= */}
+          {/* TAB: "DASHBOARD" -> DEDICATED TO OTHER THINGS: CAREER, DEMOS, NEWS, ETC. */}
+          {/* ========================================================================= */}
+          {activeTab === 'dashboard' && (
+            <div className="space-y-6 animate-in fade-in duration-200">
+
+              {/* ===================================================================== */}
+              {/* 0. AUTHENTIC CODED WELCOME HERO BANNER (1:1 EXACT AS REFERENCE)       */}
+              {/* ===================================================================== */}
+              <div className="relative w-full rounded-2xl bg-[#0A0D14] border border-[#1E2433] overflow-hidden shadow-2xl px-5 sm:px-6 py-4 flex flex-col md:flex-row md:items-center justify-between gap-5 min-h-[96px] group">
+                
+                {/* Center Tactical Soldier Backdrop (Positioned cleanly in the middle gap) */}
+                <div className="absolute inset-y-0 left-[34%] right-[30%] hidden md:flex items-center justify-center overflow-hidden pointer-events-none z-0">
+                  <img
+                    src="/images/ref_soldier_exact.png"
+                    alt=""
+                    className="h-full object-contain filter contrast-125 opacity-85"
+                    onError={(e) => {
+                      (e.target as HTMLImageElement).src = '/images/welcome_soldier_vortex.png';
+                    }}
+                  />
+                  {/* Subtle edge feathering so it melts seamlessly into the background */}
+                  <div className="absolute inset-0 bg-gradient-to-r from-[#0A0D14] via-transparent to-[#0A0D14]" />
+                  <div className="absolute inset-0 bg-gradient-to-t from-[#0A0D14]/60 via-transparent to-[#0A0D14]/60" />
+                </div>
+
+                {/* Left Side: Glowing Ring Avatar & Welcome Greeting */}
+                <div className="relative z-10 flex items-center gap-4">
+                  {/* Circular Emblem with Glowing Neon Progress Ring */}
+                  <div className="relative w-14 h-14 sm:w-16 sm:h-16 shrink-0 flex items-center justify-center">
+                    {/* SVG Radial Neon Accent Ring */}
+                    <svg className="absolute inset-0 w-full h-full -rotate-90">
+                      <circle
+                        cx="50%"
+                        cy="50%"
+                        r="42%"
+                        className="stroke-[#1C2315] fill-none stroke-[2.5]"
+                      />
+                      <circle
+                        cx="50%"
+                        cy="50%"
+                        r="42%"
+                        strokeDasharray="210"
+                        strokeDashoffset="55"
+                        className="stroke-[#A3E635] fill-none stroke-[2.5] stroke-linecap-round filter drop-shadow-[0_0_8px_rgba(163,230,53,0.85)]"
+                      />
+                    </svg>
+
+                    {/* Brand Chevron Icon inside Ring */}
+                    <div className="w-10 h-10 sm:w-11 sm:h-11 rounded-full bg-[#11170D] border border-[#A3E635]/50 flex items-center justify-center shadow-[inset_0_0_12px_rgba(163,230,53,0.3)]">
+                      <svg className="w-5 h-5 drop-shadow-[0_0_8px_rgba(163,230,53,0.7)]" viewBox="0 0 32 32" fill="none">
+                        <path d="M5 6L16 26L27 6H21L16 17L11 6H5Z" fill="#A3E635" />
+                        <path d="M16 8L19 14L16 20L13 14L16 8Z" fill="#FFFFFF" opacity="0.9" />
+                      </svg>
+                    </div>
+                  </div>
+
+                  {/* Greeting Text */}
+                  <div className="space-y-0.5">
+                    <h2 className="text-lg sm:text-xl font-bold font-display text-white tracking-tight">
+                      Welcome back, {currentGamerTag}!
+                    </h2>
+                    <p className="text-xs font-sans text-slate-400 font-medium">
+                      Good to see you on Vortex. Keep grinding!
+                    </p>
+                  </div>
+                </div>
+
+                {/* Right Side: 3 Clean Metric Stats (Clean icons without boxes, exact as photo) */}
+                <div className="relative z-10 flex items-center gap-6 sm:gap-10 pt-3 md:pt-0 border-t md:border-t-0 border-white/[0.06] shrink-0">
+                  {/* Stat 1: Matches */}
+                  <div className="flex items-center gap-3">
+                    <BarChart2 className="w-5 h-5 text-[#A3E635] shrink-0" />
+                    <div>
+                      <div className="text-base sm:text-lg font-bold font-mono text-white leading-tight">2,480</div>
+                      <div className="text-[10px] font-mono uppercase tracking-wider text-slate-400">Matches</div>
+                    </div>
+                  </div>
+
+                  {/* Stat 2: Win Rate */}
+                  <div className="flex items-center gap-3">
+                    <Trophy className="w-5 h-5 text-amber-400 shrink-0" />
+                    <div>
+                      <div className="text-base sm:text-lg font-bold font-mono text-white leading-tight">68%</div>
+                      <div className="text-[10px] font-mono uppercase tracking-wider text-slate-400">Win Rate</div>
+                    </div>
+                  </div>
+
+                  {/* Stat 3: Level */}
+                  <div className="flex items-center gap-3">
+                    <Star className="w-5 h-5 text-[#A3E635] fill-current shrink-0" />
+                    <div>
+                      <div className="text-base sm:text-lg font-bold font-mono text-white leading-tight">Level 7</div>
+                      <div className="text-[10px] font-mono uppercase tracking-wider text-[#A3E635]">VORTEX / CS2</div>
+                    </div>
+                  </div>
+                </div>
+
+              </div>
+
+              {/* 1. HERO COMMAND PASSPORT & CAREER OVERVIEW */}
+              <div className="w-full bg-[#0E1017] border border-[#202536] rounded-3xl p-6 sm:p-8 shadow-2xl relative overflow-hidden">
+                <div className="absolute top-0 right-0 w-96 h-96 bg-lime-500/5 rounded-full blur-3xl pointer-events-none" />
+
+                <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-6">
+                  {/* Player Passport & Status */}
+                  <div className="flex items-center gap-5">
+                    <div 
+                      onClick={handleOpenEditProfile}
+                      title="Click to change avatar & edit profile"
+                      className="relative cursor-pointer group"
+                    >
+                      <img 
+                        src={currentAvatarUrl} 
+                        alt={currentGamerTag} 
+                        className="w-20 h-20 sm:w-24 sm:h-24 rounded-2xl object-cover border-2 border-[#A3E635] shadow-lg shadow-[#A3E635]/20 group-hover:brightness-75 transition"
+                        onError={(e) => {
+                          (e.target as HTMLImageElement).src = '/images/blockeerz_avatar.png';
+                        }}
+                      />
+                      <div className="absolute inset-0 rounded-2xl flex items-center justify-center opacity-0 group-hover:opacity-100 bg-black/60 transition">
+                        <div className="flex flex-col items-center gap-1 text-[10px] font-mono font-bold text-white">
+                          <Camera className="w-5 h-5 text-[#A3E635]" />
+                          <span>CHANGE</span>
+                        </div>
+                      </div>
+                    </div>
+
+                    <div className="space-y-2">
+                      <div className="flex flex-wrap items-center gap-2.5">
+                        <span className="px-2 py-0.5 rounded text-[10px] font-mono font-bold bg-[#182012] text-[#A3E635] border border-[#A3E635]/40">
+                          [{currentClanTag}]
+                        </span>
+                        <h2 className="text-2xl sm:text-3xl font-black font-display text-white">{currentGamerTag}</h2>
+                        <span className="px-2 py-0.5 rounded text-[10px] font-mono font-bold bg-[#A3E635]/15 text-[#A3E635] border border-[#A3E635]/30">
+                          VERIFIED PRO
+                        </span>
+                        <span className="text-base" title={currentCountry.name}>{currentCountry.flag}</span>
+                        <button
+                          onClick={handleOpenEditProfile}
+                          className="ml-2 px-3 py-1 rounded-xl bg-white/[0.06] hover:bg-[#A3E635]/20 border border-white/10 hover:border-[#A3E635]/50 text-slate-300 hover:text-white text-xs font-mono transition flex items-center gap-1.5 cursor-pointer"
+                        >
+                          <Edit3 className="w-3.5 h-3.5 text-[#A3E635]" />
+                          <span>Edit Profile</span>
+                        </button>
+                      </div>
+
+                      <div className="flex flex-wrap items-center gap-3 text-xs font-mono text-slate-400">
+                        <span className="flex items-center gap-1.5 text-amber-400 font-bold">
+                          <span className="w-5 h-5 rounded-full bg-amber-500 text-black font-black flex items-center justify-center text-[10px]">7</span>
+                          <span>Level 7</span>
+                        </span>
+                        <span>•</span>
+                        <span className="text-white font-bold">1,407 ELO</span>
+                        <span>•</span>
+                        <span className="text-slate-300">#91 Global</span>
+                        <span>•</span>
+                        <span className="text-emerald-400 font-bold flex items-center gap-1">
+                          <ShieldCheck className="w-3.5 h-3.5" />
+                          Kernel AC Verified
+                        </span>
+                        <span>•</span>
+                        <span className="text-sky-400 font-bold">{currentRole}</span>
+                      </div>
+
+                      {/* ELO Progress Bar */}
+                      <div className="w-64 sm:w-80 space-y-1">
+                        <div className="w-full h-1.5 rounded-full bg-[#1A1D27] overflow-hidden">
+                          <div className="h-full bg-gradient-to-r from-[#FF5500] to-amber-500 rounded-full" style={{ width: '31%' }} />
+                        </div>
+                        <div className="flex justify-between text-[10px] font-mono text-slate-500">
+                          <span>1,351</span>
+                          <span className="text-slate-400 font-bold">+124 to Level 8</span>
+                          <span>1,530</span>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Specialized Combat Index & Form Card (Replaces Game Start Section) */}
+                  <div className="flex flex-col sm:flex-row lg:flex-col gap-3 shrink-0 p-5 rounded-2xl bg-[#12141C] border border-[#232938] min-w-[300px]">
+                    <div className="flex items-center justify-between gap-4">
+                      <div>
+                        <div className="text-[10px] font-mono text-slate-400 uppercase tracking-wider flex items-center gap-1.5">
+                          <Activity className="w-3.5 h-3.5 text-[#A3E635]" />
+                          <span>VORTEX COMBAT INDEX</span>
+                        </div>
+                        <div className="flex items-baseline gap-2 mt-0.5">
+                          <span className="text-3xl font-black font-display text-white">89.4</span>
+                          <span className="text-xs font-mono text-slate-500">/ 100</span>
+                          <span className="px-2 py-0.5 rounded text-[9px] font-mono font-bold bg-[#A3E635]/15 text-[#A3E635] border border-[#A3E635]/30">
+                            TOP 3% TACTICIAN
+                          </span>
+                        </div>
+                      </div>
+
+                      <button
+                        onClick={() => {
+                          sound.playClick();
+                          navigator.clipboard?.writeText?.(window.location.origin + '/p/' + userGamerTag);
+                          setDashboardToast('Pro Player Passport Link Copied to Clipboard!');
+                          setTimeout(() => setDashboardToast(null), 3000);
+                        }}
+                        title="Share Pro Passport"
+                        className="p-2.5 rounded-xl bg-white/[0.04] hover:bg-[#84CC16]/20 border border-white/10 hover:border-[#A3E635]/50 text-slate-300 hover:text-[#A3E635] transition cursor-pointer"
+                      >
+                        <Share2 className="w-4 h-4" />
+                      </button>
+                    </div>
+
+                    {/* Recent 5 Matches Form (W-W-W-L-W) */}
+                    <div className="space-y-1.5 pt-3 border-t border-white/[0.06]">
+                      <div className="flex items-center justify-between text-[10px] font-mono">
+                        <span className="text-slate-400">LAST 5 MATCHES FORM</span>
+                        <span className="text-emerald-400 font-bold">+68 ELO (Streak 3)</span>
+                      </div>
+                      <div className="flex items-center gap-1.5">
+                        {[
+                          { r: 'W', map: 'Mirage 13-9', win: true },
+                          { r: 'W', map: 'Inferno 13-11', win: true },
+                          { r: 'W', map: 'Nuke 13-7', win: true },
+                          { r: 'L', map: 'Dust II 10-13', win: false },
+                          { r: 'W', map: 'Anubis 13-8', win: true },
+                        ].map((m, idx) => (
+                          <div 
+                            key={idx}
+                            title={`${m.map} - ${m.win ? 'Victory (+24 ELO)' : 'Defeat (-18 ELO)'}`}
+                            className={`flex-1 py-1 text-center rounded text-xs font-mono font-black transition cursor-help ${
+                              m.win 
+                                ? 'bg-emerald-500/20 text-emerald-400 border border-emerald-500/40 hover:bg-emerald-500/30' 
+                                : 'bg-red-500/20 text-red-400 border border-red-500/40 hover:bg-red-500/30'
+                            }`}
+                          >
+                            {m.r}
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+
+                    {/* Telemetry Heartbeat Status */}
+                    <div className="flex items-center justify-between pt-2 border-t border-white/[0.06] text-[10px] font-mono text-slate-400">
+                      <span className="flex items-center gap-1 text-emerald-400">
+                        <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />
+                        AC v3.1 Ring-0
+                      </span>
+                      <span>128-Tick Sync</span>
+                      <span className="text-slate-500">Jitter 0.4ms</span>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Quick Performance Numbers Bar (6 Columns) */}
+                <div className="mt-6 pt-5 border-t border-white/[0.06] grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-4">
+                  <div className="p-3 rounded-xl bg-[#12141C] border border-[#232938]">
+                    <div className="text-[10px] font-mono text-slate-400 uppercase">Win Rate</div>
+                    <div className="text-lg font-black font-mono text-emerald-400">58.9%</div>
+                  </div>
+                  <div className="p-3 rounded-xl bg-[#12141C] border border-[#232938]">
+                    <div className="text-[10px] font-mono text-slate-400 uppercase">K/D Ratio</div>
+                    <div className="text-lg font-black font-mono text-white">1.34</div>
+                  </div>
+                  <div className="p-3 rounded-xl bg-[#12141C] border border-[#232938]">
+                    <div className="text-[10px] font-mono text-slate-400 uppercase">Headshot %</div>
+                    <div className="text-lg font-black font-mono text-amber-400">64.2%</div>
+                  </div>
+                  <div className="p-3 rounded-xl bg-[#12141C] border border-[#232938]">
+                    <div className="text-[10px] font-mono text-slate-400 uppercase">Avg Damage (ADR)</div>
+                    <div className="text-lg font-black font-mono text-[#A3E635]">88.4</div>
+                  </div>
+                  <div className="p-3 rounded-xl bg-[#12141C] border border-[#232938]">
+                    <div className="text-[10px] font-mono text-slate-400 uppercase">Impact 2.0</div>
+                    <div className="text-lg font-black font-mono text-sky-400">1.38</div>
+                  </div>
+                  <div className="p-3 rounded-xl bg-[#12141C] border border-[#232938]">
+                    <div className="text-[10px] font-mono text-slate-400 uppercase">Total Matches</div>
+                    <div className="text-lg font-black font-mono text-slate-200">2,480</div>
+                  </div>
+                </div>
+              </div>
+
+              {/* 2. DEEP TACTICAL & COMBAT METRICS (LEETIFY / HLTV PRO TELEMETRY) */}
+              <div className="bg-[#0E1017] border border-[#202536] rounded-3xl p-6 shadow-xl space-y-4">
+                <div className="flex flex-col sm:flex-row sm:items-center justify-between pb-3 border-b border-white/[0.06] gap-2">
+                  <div>
+                    <div className="flex items-center gap-2">
+                      <h3 className="text-lg font-black font-display text-white">Tactical Telemetry & Combat Matrix</h3>
+                      <span className="px-2 py-0.5 rounded text-[10px] font-mono font-bold bg-[#A3E635]/15 text-[#A3E635] border border-[#A3E635]/30">
+                        LEETIFY-GRADE TELEMETRY
+                      </span>
+                    </div>
+                    <p className="text-xs text-[#94A3B8]">Deep sub-tick competitive analytics computed from official 128-tick GOTV logs</p>
+                  </div>
+                  <div className="flex items-center gap-2 text-xs font-mono text-slate-400">
+                    <Gauge className="w-4 h-4 text-[#A3E635]" />
+                    <span>Crosshair & Utility Calibrated</span>
+                  </div>
+                </div>
+
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+                  {/* Aim Matrix */}
+                  <div className="p-4 rounded-2xl bg-[#12141C] border border-[#232938] space-y-3">
+                    <div className="flex items-center justify-between">
+                      <span className="text-[10px] font-mono uppercase text-slate-400 font-bold">Aim & Accuracy</span>
+                      <span className="text-xs font-mono font-black text-amber-400">88.2 / 100</span>
+                    </div>
+                    <div className="w-full h-1.5 rounded-full bg-[#1A1D27] overflow-hidden">
+                      <div className="h-full bg-amber-400 rounded-full" style={{ width: '88.2%' }} />
+                    </div>
+                    <div className="space-y-1.5 text-xs font-mono">
+                      <div className="flex justify-between">
+                        <span className="text-slate-400">Crosshair Placement:</span>
+                        <span className="text-white font-bold">84.6% (Top 4%)</span>
+                      </div>
+                      <div className="flex justify-between">
+                        <span className="text-slate-400">Time to Damage:</span>
+                        <span className="text-emerald-400 font-bold">412 ms</span>
+                      </div>
+                      <div className="flex justify-between">
+                        <span className="text-slate-400">1st Bullet Accuracy:</span>
+                        <span className="text-amber-400 font-bold">79.4%</span>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Utility Efficiency */}
+                  <div className="p-4 rounded-2xl bg-[#12141C] border border-[#232938] space-y-3">
+                    <div className="flex items-center justify-between">
+                      <span className="text-[10px] font-mono uppercase text-slate-400 font-bold">Utility Mastery</span>
+                      <span className="text-xs font-mono font-black text-[#A3E635]">91.5 / 100</span>
+                    </div>
+                    <div className="w-full h-1.5 rounded-full bg-[#1A1D27] overflow-hidden">
+                      <div className="h-full bg-[#A3E635] rounded-full" style={{ width: '91.5%' }} />
+                    </div>
+                    <div className="space-y-1.5 text-xs font-mono">
+                      <div className="flex justify-between">
+                        <span className="text-slate-400">Flash Blind Duration:</span>
+                        <span className="text-[#A3E635] font-bold">2.84s / enemy</span>
+                      </div>
+                      <div className="flex justify-between">
+                        <span className="text-slate-400">Lineup Execution:</span>
+                        <span className="text-white font-bold">96.0%</span>
+                      </div>
+                      <div className="flex justify-between">
+                        <span className="text-slate-400">Avg Nade Damage:</span>
+                        <span className="text-emerald-400 font-bold">215 HP / match</span>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Clutch & Situational */}
+                  <div className="p-4 rounded-2xl bg-[#12141C] border border-[#232938] space-y-3">
+                    <div className="flex items-center justify-between">
+                      <span className="text-[10px] font-mono uppercase text-slate-400 font-bold">Clutch Performance</span>
+                      <span className="text-xs font-mono font-black text-sky-400">85.0 / 100</span>
+                    </div>
+                    <div className="w-full h-1.5 rounded-full bg-[#1A1D27] overflow-hidden">
+                      <div className="h-full bg-sky-400 rounded-full" style={{ width: '85%' }} />
+                    </div>
+                    <div className="space-y-1.5 text-xs font-mono">
+                      <div className="flex justify-between">
+                        <span className="text-slate-400">1v1 Win Rate:</span>
+                        <span className="text-emerald-400 font-bold">76.2% (16 / 21)</span>
+                      </div>
+                      <div className="flex justify-between">
+                        <span className="text-slate-400">1v2 Win Rate:</span>
+                        <span className="text-sky-400 font-bold">42.9% (6 / 14)</span>
+                      </div>
+                      <div className="flex justify-between">
+                        <span className="text-slate-400">Trade Frag Rate:</span>
+                        <span className="text-white font-bold">74.1%</span>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Opening Duels & Entry */}
+                  <div className="p-4 rounded-2xl bg-[#12141C] border border-[#232938] space-y-3">
+                    <div className="flex items-center justify-between">
+                      <span className="text-[10px] font-mono uppercase text-slate-400 font-bold">Opening Duels</span>
+                      <span className="text-xs font-mono font-black text-purple-400">82.4 / 100</span>
+                    </div>
+                    <div className="w-full h-1.5 rounded-full bg-[#1A1D27] overflow-hidden">
+                      <div className="h-full bg-purple-400 rounded-full" style={{ width: '82.4%' }} />
+                    </div>
+                    <div className="space-y-1.5 text-xs font-mono">
+                      <div className="flex justify-between">
+                        <span className="text-slate-400">Opening Duel Win Rate:</span>
+                        <span className="text-emerald-400 font-bold">63.8%</span>
+                      </div>
+                      <div className="flex justify-between">
+                        <span className="text-slate-400">Opening Frag Attempt:</span>
+                        <span className="text-purple-400 font-bold">21.4%</span>
+                      </div>
+                      <div className="flex justify-between">
+                        <span className="text-slate-400">Impact 2.0 Rating:</span>
+                        <span className="text-white font-bold">1.38</span>
                       </div>
                     </div>
                   </div>
                 </div>
               </div>
-            )}
 
-            {/* SCRIMS / AIM / LINEUPS FALLBACK */}
-            {(activeTab === 'scrims' || activeTab === 'aim' || activeTab === 'lineups') && (
-              <div className="space-y-6">
-                <div className="flex items-center justify-between pb-4 border-b border-[#1E2333]">
+              {/* 3. VORTEX AI TACTICAL INTELLIGENCE (INTELLIGENT COACH) */}
+              <div className="bg-[#0E1017] border border-[#202536] rounded-3xl p-6 shadow-xl relative overflow-hidden space-y-4">
+                <div className="absolute top-0 right-0 w-80 h-80 bg-emerald-500/5 rounded-full blur-3xl pointer-events-none" />
+
+                <div className="flex items-center justify-between pb-3 border-b border-white/[0.06]">
+                  <div className="flex items-center gap-3">
+                    <div className="w-10 h-10 rounded-2xl bg-gradient-to-br from-lime-500/20 to-emerald-500/20 border border-[#A3E635]/40 flex items-center justify-center text-[#A3E635]">
+                      <Brain className="w-5 h-5 animate-pulse" />
+                    </div>
+                    <div>
+                      <div className="flex items-center gap-2">
+                        <h3 className="text-lg font-black font-display text-white">VORTEX AI Tactical Intelligence</h3>
+                        <span className="px-2 py-0.5 rounded text-[10px] font-mono font-bold bg-emerald-500/15 text-emerald-400 border border-emerald-500/30 flex items-center gap-1">
+                          <Sparkles className="w-3 h-3" />
+                          NEURAL COACH V4.2
+                        </span>
+                      </div>
+                      <p className="text-xs text-[#94A3B8]">Automated post-match pattern recognition based on your last 20 competitive matches</p>
+                    </div>
+                  </div>
+                  <span className="hidden sm:inline-block text-xs font-mono text-slate-400">Analyzed 420 Rounds</span>
+                </div>
+
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                  {/* Pro Strength */}
+                  <div className="p-4 rounded-2xl bg-[#12141C] border border-emerald-500/30 space-y-2">
+                    <div className="flex items-center gap-2 text-emerald-400 text-xs font-mono font-bold">
+                      <CheckCircle2 className="w-4 h-4 shrink-0" />
+                      <span>SIGNIFICANT PRO ADVANTAGE</span>
+                    </div>
+                    <h4 className="text-sm font-bold font-display text-white">Elite Flashbang Setups on Mirage A-Site</h4>
+                    <p className="text-xs text-slate-300 leading-relaxed">
+                      Your team flashbang utility behind Palace & Tetris blinds enemies for an average of <span className="text-[#A3E635] font-bold">2.84s per encounter</span>. This places your utility effectiveness in the <span className="text-emerald-400 font-bold">TOP 5% of regional players</span>.
+                    </p>
+                  </div>
+
+                  {/* Tactical Correction */}
+                  <div className="p-4 rounded-2xl bg-[#12141C] border border-amber-500/30 space-y-2">
+                    <div className="flex items-center gap-2 text-amber-400 text-xs font-mono font-bold">
+                      <Target className="w-4 h-4 shrink-0" />
+                      <span>TACTICAL FOCUS AREA</span>
+                    </div>
+                    <h4 className="text-sm font-bold font-display text-white">CT Anti-Eco Crosshair Angles (Inferno)</h4>
+                    <p className="text-xs text-slate-300 leading-relaxed">
+                      Caught with utility in hand twice in rounds 2 & 3 on Banana. <span className="text-amber-400 font-bold">Recommendation:</span> Hold passive rifle angles at Car/Sandbags against pistol eco pushes before committing utility.
+                    </p>
+                  </div>
+
+                  {/* ELO Trajectory */}
+                  <div className="p-4 rounded-2xl bg-[#12141C] border border-sky-500/30 space-y-2">
+                    <div className="flex items-center gap-2 text-sky-400 text-xs font-mono font-bold">
+                      <TrendingUp className="w-4 h-4 shrink-0" />
+                      <span>ELO ADVANCEMENT PROJECTION</span>
+                    </div>
+                    <h4 className="text-sm font-bold font-display text-white">+124 ELO to Level 8 Promotion</h4>
+                    <p className="text-xs text-slate-300 leading-relaxed">
+                      With your current <span className="text-sky-400 font-bold">58.9% win rate</span> and +24 net gain per win, expected progression to Level 8 will take approximately <span className="text-white font-bold">5 to 6 competitive wins</span>.
+                    </p>
+                  </div>
+                </div>
+              </div>
+
+              {/* 4. DEDICATED 128-TICK INFRASTRUCTURE & LATENCY NODES */}
+              <div className="bg-[#0E1017] border border-[#202536] rounded-3xl p-6 shadow-xl space-y-4">
+                <div className="flex flex-col sm:flex-row sm:items-center justify-between pb-3 border-b border-white/[0.06] gap-2">
                   <div>
-                    <h2 className="text-2xl font-black font-display text-white capitalize">{activeTab} Arena</h2>
-                    <p className="text-xs text-[#94A3B8]">Automated 128-tick matchmaking lobby</p>
+                    <h3 className="text-lg font-black font-display text-white">Live Node Telemetry & Server Clusters</h3>
+                    <p className="text-xs text-[#94A3B8]">Dedicated 128-tick sub-tick servers monitored with 0% packet loss guarantees</p>
                   </div>
                   <button
-                    onClick={() => setActiveTab('dashboard')}
-                    className="px-4 py-2 rounded-xl bg-[#141722] border border-[#252C3D] text-xs font-mono hover:text-white cursor-pointer"
+                    onClick={() => {
+                      sound.playClick();
+                      setDashboardToast('Network Nodes pinged: All 4 clusters healthy (0% loss)');
+                      setTimeout(() => setDashboardToast(null), 3000);
+                    }}
+                    className="px-3.5 py-1.5 rounded-xl bg-[#141722] hover:bg-[#84CC16]/20 border border-[#A3E635]/40 text-[#A3E635] text-xs font-mono font-bold transition cursor-pointer flex items-center gap-1.5 self-start sm:self-auto"
                   >
-                    ← Back to Dashboard
+                    <Wifi className="w-3.5 h-3.5" />
+                    <span>Ping Clusters</span>
                   </button>
                 </div>
-                <div className="p-8 rounded-3xl bg-[#12141C] border border-[#23293B] text-center space-y-4">
-                  <div className="w-16 h-16 rounded-full bg-red-500/10 border border-[#EF4444]/30 flex items-center justify-center mx-auto text-[#EF4444]">
-                    <Swords className="w-8 h-8" />
+
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+                  {[
+                    { name: 'Frankfurt Central (EU)', ping: '22 ms', tick: '128-Tick', loss: '0.0%', status: 'OPERATIONAL', role: 'Primary 5v5 Node' },
+                    { name: 'London Edge (UK)', ping: '19 ms', tick: '128-Tick', loss: '0.0%', status: 'OPERATIONAL', role: 'Western Europe Relay' },
+                    { name: 'Stockholm Pro (SE)', ping: '28 ms', tick: '128-Tick', loss: '0.0%', status: 'OPERATIONAL', role: 'Nordic High-ELO Cluster' },
+                    { name: 'Global GOTV Relays', ping: '24 Nodes', tick: '128-Tick', loss: '0.0%', status: 'SYNCED', role: 'Worldwide Broadcast' },
+                  ].map((node, idx) => (
+                    <div key={idx} className="p-4 rounded-2xl bg-[#12141C] border border-[#232938] space-y-2">
+                      <div className="flex items-center justify-between">
+                        <span className="text-[10px] font-mono text-slate-400 uppercase font-bold">{node.role}</span>
+                        <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse" />
+                      </div>
+                      <div className="text-sm font-bold font-display text-white">{node.name}</div>
+                      <div className="flex items-center justify-between text-xs font-mono pt-1 border-t border-white/[0.04]">
+                        <span className="text-[#A3E635] font-bold">{node.ping}</span>
+                        <span className="text-slate-400">{node.tick}</span>
+                        <span className="text-emerald-400 font-bold">{node.loss} loss</span>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+
+              {/* 5. WEEKLY PRO BOUNTIES & MISSIONS */}
+              <div className="bg-[#0E1017] border border-[#202536] rounded-3xl p-6 shadow-xl space-y-4">
+                <div className="flex items-center justify-between pb-3 border-b border-white/[0.06]">
+                  <div>
+                    <h3 className="text-lg font-black font-display text-white">Weekly Competitive Bounties</h3>
+                    <p className="text-xs text-[#94A3B8]">Complete in-game objectives across 128-tick ranked matches to earn rewards</p>
                   </div>
-                  <h3 className="text-xl font-bold text-white">Live Matchmaking Queue Open</h3>
-                  <p className="text-xs text-[#94A3B8] max-w-md mx-auto">
-                    Searching for balanced 128-tick CS2 lobbies based on your verified FACEIT Level 5 rating.
-                  </p>
+                  <span className="text-xs font-mono text-amber-400 font-bold">Resets in 3d 18h</span>
+                </div>
+
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                  {/* Bounty 1 */}
+                  <div className="p-4 rounded-2xl bg-[#12141C] border border-[#232938] space-y-3">
+                    <div className="flex items-center justify-between">
+                      <span className="px-2 py-0.5 rounded text-[10px] font-mono font-bold bg-amber-500/15 text-amber-400">
+                        WEAPON CHALLENGE
+                      </span>
+                      <span className="text-xs font-mono text-slate-300 font-bold">+150 XP</span>
+                    </div>
+                    <div>
+                      <h4 className="text-sm font-bold font-display text-white">Headshot Precision</h4>
+                      <p className="text-xs text-slate-400">Eliminate 50 opponents with headshots in 5v5 ranked.</p>
+                    </div>
+                    <div className="space-y-1">
+                      <div className="flex justify-between text-xs font-mono text-slate-400">
+                        <span>Progress: 38 / 50</span>
+                        <span className="text-amber-400 font-bold">76%</span>
+                      </div>
+                      <div className="w-full h-1.5 rounded-full bg-[#1A1D27] overflow-hidden">
+                        <div className="h-full bg-amber-400 rounded-full" style={{ width: '76%' }} />
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Bounty 2 - Completed! */}
+                  <div className="p-4 rounded-2xl bg-[#12141C] border border-emerald-500/40 space-y-3 relative overflow-hidden">
+                    <div className="flex items-center justify-between">
+                      <span className="px-2 py-0.5 rounded text-[10px] font-mono font-bold bg-emerald-500/15 text-emerald-400">
+                        STREAK REWARD
+                      </span>
+                      <span className="text-xs font-mono text-[#A3E635] font-bold">+50 VTX CREDITS</span>
+                    </div>
+                    <div>
+                      <h4 className="text-sm font-bold font-display text-white">Tri-Victory Streak</h4>
+                      <p className="text-xs text-slate-400">Win 3 consecutive competitive 5v5 matches.</p>
+                    </div>
+                    <div className="space-y-2">
+                      <div className="flex justify-between text-xs font-mono">
+                        <span className="text-emerald-400 font-bold">3 / 3 COMPLETED!</span>
+                        <span className="text-emerald-400 font-bold">100%</span>
+                      </div>
+                      <button
+                        onClick={handleClaimBounty}
+                        disabled={bountyClaimed}
+                        className={`w-full py-2 rounded-xl font-mono text-xs font-bold transition flex items-center justify-center gap-1.5 ${
+                          bountyClaimed
+                            ? 'bg-white/[0.05] text-slate-500 cursor-not-allowed border border-white/5'
+                            : 'bg-[#84CC16] hover:bg-[#A3E635] text-slate-950 shadow-[0_0_15px_rgba(163,230,53,0.35)] cursor-pointer'
+                        }`}
+                      >
+                        <CheckCircle2 className="w-3.5 h-3.5" />
+                        <span>{bountyClaimed ? 'CLAIMED ✓' : 'CLAIM BOUNTY REWARD'}</span>
+                      </button>
+                    </div>
+                  </div>
+
+                  {/* Bounty 3 */}
+                  <div className="p-4 rounded-2xl bg-[#12141C] border border-[#232938] space-y-3">
+                    <div className="flex items-center justify-between">
+                      <span className="px-2 py-0.5 rounded text-[10px] font-mono font-bold bg-sky-500/15 text-sky-400">
+                        UTILITY CHALLENGE
+                      </span>
+                      <span className="text-xs font-mono text-slate-300 font-bold">+100 XP</span>
+                    </div>
+                    <div>
+                      <h4 className="text-sm font-bold font-display text-white">Tactical Demolition</h4>
+                      <p className="text-xs text-slate-400">Deal 1,500 total utility grenade damage.</p>
+                    </div>
+                    <div className="space-y-1">
+                      <div className="flex justify-between text-xs font-mono text-slate-400">
+                        <span>Progress: 1,240 / 1,500</span>
+                        <span className="text-sky-400 font-bold">82%</span>
+                      </div>
+                      <div className="w-full h-1.5 rounded-full bg-[#1A1D27] overflow-hidden">
+                        <div className="h-full bg-sky-400 rounded-full" style={{ width: '82%' }} />
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              {/* 6. WEAPON MASTERY & PERFORMANCE ACCURACY */}
+              <div className="bg-[#0E1017] border border-[#202536] rounded-3xl p-6 shadow-xl space-y-4">
+                <div className="flex items-center justify-between pb-3 border-b border-white/[0.06]">
+                  <div>
+                    <h3 className="text-lg font-black font-display text-white">Weapon Mastery & Accuracy</h3>
+                    <p className="text-xs text-[#94A3B8]">Telemetry synchronized with CS2 competitive servers</p>
+                  </div>
+                  <span className="text-xs font-mono text-emerald-400 font-bold">Season 9 Data</span>
+                </div>
+
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+                  {[
+                    { gun: 'AK-47', kills: 1420, hs: '68.4%', rating: '1.42', badge: 'RIFLE', color: 'text-amber-400' },
+                    { gun: 'M4A1-S', kills: 890, hs: '61.2%', rating: '1.35', badge: 'RIFLE', color: 'text-sky-400' },
+                    { gun: 'AWP', kills: 540, hs: '14.5%', rating: '1.60', badge: 'SNIPER', color: 'text-emerald-400' },
+                    { gun: 'Desert Eagle', kills: 310, hs: '78.2%', rating: '1.25', badge: 'PISTOL', color: 'text-[#A3E635]' },
+                  ].map((w, idx) => (
+                    <div key={idx} className="p-4 rounded-2xl bg-[#12141C] border border-[#232938] space-y-3">
+                      <div className="flex items-center justify-between">
+                        <span className="px-2 py-0.5 rounded text-[10px] font-mono font-bold bg-white/[0.05] text-slate-300">
+                          {w.badge}
+                        </span>
+                        <span className={`text-xs font-mono font-bold ${w.color}`}>{w.gun}</span>
+                      </div>
+                      <div className="space-y-1">
+                        <div className="flex justify-between text-xs font-mono">
+                          <span className="text-slate-400">Total Kills:</span>
+                          <span className="text-white font-bold">{w.kills.toLocaleString()}</span>
+                        </div>
+                        <div className="flex justify-between text-xs font-mono">
+                          <span className="text-slate-400">Headshot %:</span>
+                          <span className="text-amber-400 font-bold">{w.hs}</span>
+                        </div>
+                        <div className="flex justify-between text-xs font-mono">
+                          <span className="text-slate-400">Impact Rating:</span>
+                          <span className="text-emerald-400 font-bold">{w.rating}</span>
+                        </div>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+
+              {/* 3. RECENT GOTV MATCH DEMOS & REPLAYS */}
+              <div className="bg-[#0E1017] border border-[#202536] rounded-3xl p-6 shadow-xl space-y-4">
+                <div className="flex items-center justify-between pb-3 border-b border-white/[0.06]">
+                  <div>
+                    <h3 className="text-lg font-black font-display text-white">GOTV 128-Tick Match Replays (.dem)</h3>
+                    <p className="text-xs text-[#94A3B8]">Download broadcast demos with full team comms & tick-rate accuracy</p>
+                  </div>
+                  <span className="text-xs font-mono text-[#A3E635]">Auto-Recorded on Frankfurt Node</span>
+                </div>
+
+                <div className="space-y-3">
+                  {[
+                    { match: 'Mirage 5v5 Competitive', map: 'de_mirage', score: '13 - 9', res: 'VICTORY', size: '128 MB', date: 'Today at 13:20' },
+                    { match: 'Inferno 5v5 Scrimfest', map: 'de_inferno', score: '13 - 11', res: 'VICTORY', size: '142 MB', date: 'Yesterday at 21:45' },
+                    { match: 'Nuke High-ELO Practice', map: 'de_nuke', score: '13 - 7', res: 'VICTORY', size: '118 MB', date: '2 days ago' },
+                  ].map((dm, idx) => (
+                    <div key={idx} className="p-4 rounded-2xl bg-[#12141C] border border-[#232938] hover:border-[#A3E635]/40 transition flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+                      <div className="flex items-center gap-4">
+                        <div className="w-10 h-10 rounded-xl bg-lime-500/10 border border-[#A3E635]/30 flex items-center justify-center text-[#A3E635] shrink-0">
+                          <Film className="w-5 h-5" />
+                        </div>
+                        <div>
+                          <div className="flex items-center gap-2">
+                            <h4 className="text-sm font-bold font-display text-white">{dm.match}</h4>
+                            <span className="px-2 py-0.5 rounded text-[10px] font-mono font-bold bg-emerald-500/15 text-emerald-400">
+                              {dm.res}
+                            </span>
+                          </div>
+                          <p className="text-xs font-mono text-slate-400 mt-0.5">
+                            Map: {dm.map} • Score: {dm.score} • Recorded: {dm.date}
+                          </p>
+                        </div>
+                      </div>
+
+                      <div className="flex items-center gap-3">
+                        <span className="text-xs font-mono text-slate-400">{dm.size}</span>
+                        <button
+                          onClick={() => handleDownloadDemo(dm.map)}
+                          className="px-4 py-2 rounded-xl bg-[#141722] hover:bg-[#84CC16] text-[#A3E635] hover:text-slate-950 border border-[#A3E635]/40 font-mono text-xs font-bold transition cursor-pointer flex items-center gap-1.5"
+                        >
+                          <Download className="w-3.5 h-3.5" />
+                          <span>Download Demo</span>
+                        </button>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+
+              {/* 4. GLOBAL LEADERBOARD & ONLINE TEAMMATES */}
+              <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
+                
+                {/* Left (6 cols): Global Leaderboard Top 5 */}
+                <div className="lg:col-span-6 bg-[#0E1017] border border-[#202536] rounded-3xl p-6 shadow-xl space-y-4">
+                  <div className="flex items-center justify-between pb-3 border-b border-white/[0.06]">
+                    <div>
+                      <h3 className="text-lg font-black font-display text-white">Global Pro Standings</h3>
+                      <p className="text-xs text-[#94A3B8]">Verified international CS2 rankings</p>
+                    </div>
+                    <button
+                      onClick={() => { sound.playSelect(); setActiveTab('rankings'); }}
+                      className="text-xs font-mono text-[#A3E635] hover:underline flex items-center gap-1 cursor-pointer"
+                    >
+                      <span>Full Rankings</span>
+                      <ArrowRight className="w-3.5 h-3.5" />
+                    </button>
+                  </div>
+
+                  <div className="space-y-2">
+                    {[
+                      { rank: '#1', tag: 'm0NESY', level: 'Level 10', elo: 3840, flag: '🇪🇺', isUser: false },
+                      { rank: '#2', tag: 'ZywOo', level: 'Level 10', elo: 3795, flag: '🇫🇷', isUser: false },
+                      { rank: '#3', tag: 'donk', level: 'Level 10', elo: 3720, flag: '🇪🇺', isUser: false },
+                      { rank: '#4', tag: 'bLocKeeRz', level: 'Level 7', elo: 1407, flag: '🌐', isUser: true },
+                      { rank: '#5', tag: 'NiKo', level: 'Level 10', elo: 3650, flag: '🇧🇦', isUser: false },
+                    ].map((p, idx) => (
+                      <div
+                        key={idx}
+                        className={`p-3 rounded-2xl flex items-center justify-between text-xs font-mono transition ${
+                          p.isUser 
+                            ? 'bg-[#18210C] border border-[#A3E635]/40 text-white font-bold' 
+                            : 'bg-[#12141C] border border-[#232938] text-slate-300'
+                        }`}
+                      >
+                        <div className="flex items-center gap-3">
+                          <span className={p.isUser ? 'text-[#A3E635] font-black' : 'text-slate-500'}>{p.rank}</span>
+                          <span className="text-sm">{p.flag}</span>
+                          <span className="font-display font-bold text-white">{p.tag}</span>
+                          {p.isUser && (
+                            <span className="px-1.5 py-0.2 rounded text-[9px] bg-[#A3E635] text-slate-950 font-black">YOU</span>
+                          )}
+                        </div>
+                        <div className="flex items-center gap-4">
+                          <span className="text-amber-400">{p.level}</span>
+                          <span className="text-white font-bold">{p.elo.toLocaleString()} ELO</span>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+
+                {/* Right (6 cols): Teammates Ready for Party */}
+                <div className="lg:col-span-6 bg-[#0E1017] border border-[#202536] rounded-3xl p-6 shadow-xl space-y-4">
+                  <div className="flex items-center justify-between pb-3 border-b border-white/[0.06]">
+                    <div>
+                      <h3 className="text-lg font-black font-display text-white">Teammates Online</h3>
+                      <p className="text-xs text-[#94A3B8]">Invite directly into your 5v5 lobby</p>
+                    </div>
+                    <span className="px-2.5 py-0.5 rounded-full text-[10px] font-mono font-bold bg-emerald-500/15 text-emerald-400 border border-emerald-500/30 flex items-center gap-1.5">
+                      <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-ping" />
+                      4 Online
+                    </span>
+                  </div>
+
+                  <div className="space-y-2.5">
+                    {SUGGESTED_TEAMMATES.map((tm) => (
+                      <div
+                        key={tm.id}
+                        className="p-3 rounded-2xl bg-[#12141C] border border-[#232938] hover:border-[#A3E635]/40 transition flex items-center justify-between gap-3"
+                      >
+                        <div className="flex items-center gap-3">
+                          <div className="relative">
+                            <img
+                              src={tm.avatar}
+                              alt={tm.name}
+                              className="w-10 h-10 rounded-full object-cover border border-white/10"
+                            />
+                            <span className="absolute bottom-0 right-0 w-2.5 h-2.5 rounded-full bg-emerald-400 border border-[#12141C]" />
+                          </div>
+                          <div>
+                            <div className="text-sm font-bold font-display text-white flex items-center gap-1.5">
+                              <span>{tm.name}</span>
+                              <span className="text-[10px] font-mono px-1.5 py-0.2 rounded bg-black/40 text-slate-400">[{tm.tag}]</span>
+                            </div>
+                            <div className="text-xs font-mono text-slate-400">
+                              Level {tm.level} • {tm.elo} ELO
+                            </div>
+                          </div>
+                        </div>
+
+                        <button
+                          onClick={() => handleInviteAndJumpToPlay(tm)}
+                          className="px-4 py-1.5 rounded-xl bg-[#18210C] hover:bg-[#84CC16] text-[#A3E635] hover:text-slate-950 border border-[#A3E635]/40 font-mono font-bold text-xs transition cursor-pointer flex items-center gap-1.5"
+                        >
+                          <Plus className="w-3.5 h-3.5" />
+                          <span>Invite & Play</span>
+                        </button>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+
+              </div>
+
+              {/* 5. COMMUNITY ANNOUNCEMENTS & GLOBAL ESPORTS NEWS */}
+              <div className="bg-[#0E1017] border border-[#202536] rounded-3xl p-6 shadow-xl space-y-4">
+                <div className="flex items-center justify-between pb-3 border-b border-white/[0.06]">
+                  <div>
+                    <h3 className="text-lg font-black font-display text-white">Community & Global Esports News</h3>
+                    <p className="text-xs text-[#94A3B8]">Official updates from the VORTEX Competitive Circuit</p>
+                  </div>
+                  <Newspaper className="w-4 h-4 text-[#A3E635]" />
+                </div>
+
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                  <div className="p-4 rounded-2xl bg-[#12141C] border border-[#232938] space-y-2">
+                    <span className="text-[10px] font-mono text-[#A3E635] font-bold">GLOBAL ANNOUNCEMENT</span>
+                    <h4 className="text-sm font-bold text-white font-display">VORTEX CS2 Global Open Championship</h4>
+                    <p className="text-xs text-slate-400">$25,000 international cash prize pool tournament open to verified teams worldwide.</p>
+                  </div>
+                  <div className="p-4 rounded-2xl bg-[#12141C] border border-[#232938] space-y-2">
+                    <span className="text-[10px] font-mono text-amber-400 font-bold">ANTI-CHEAT UPDATE</span>
+                    <h4 className="text-sm font-bold text-white font-display">Kernel Anti-Cheat v2.9 Global Rollout</h4>
+                    <p className="text-xs text-slate-400">Mandatory ring-0 handshake update ensures 100% fair matchmaking across all global servers.</p>
+                  </div>
+                  <div className="p-4 rounded-2xl bg-[#12141C] border border-[#232938] space-y-2">
+                    <span className="text-[10px] font-mono text-emerald-400 font-bold">NETWORK UPGRADE</span>
+                    <h4 className="text-sm font-bold text-white font-display">Global Sub-Tick Edge Network Live</h4>
+                    <p className="text-xs text-slate-400">Direct low-latency fiber routing deployed across Frankfurt, Stockholm, London, and New York.</p>
+                  </div>
+                </div>
+              </div>
+
+            </div>
+          )}
+
+          {/* ======================================================== */}
+          {/* TAB: SERVER BROWSER                                      */}
+          {/* ======================================================== */}
+          {activeTab === 'servers' && (
+            <div className="bg-[#0E1017] border border-[#202536] rounded-3xl p-6 md:p-8 shadow-xl space-y-6">
+              <div className="flex items-center justify-between pb-4 border-b border-[#1E2333]">
+                <div>
+                  <h2 className="text-2xl font-black font-display text-white">VORTEX 128-Tick Dedicated Server Grid</h2>
+                  <p className="text-xs text-[#94A3B8]">Direct low-latency CS2 nodes verified across Frankfurt, Vienna, and Stockholm</p>
+                </div>
+                <button
+                  onClick={() => setActiveTab('play')}
+                  className="px-4 py-2 rounded-xl bg-[#141722] border border-[#252C3D] text-xs font-mono hover:text-white cursor-pointer"
+                >
+                  ← Back to Play
+                </button>
+              </div>
+
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                {[
+                  { name: 'FACEIT Premium Server', map: 'de_mirage', ip: '194.163.159.231:27015', players: '16/20', ping: '12ms', loc: 'Frankfurt, DE' },
+                  { name: 'Vortex 128-Tick | Competitive', map: 'de_inferno', ip: '194.163.159.231:27016', players: '14/20', ping: '18ms', loc: 'Vienna, AT' },
+                  { name: 'Vortex Practice Server', map: 'de_dust2', ip: '194.163.159.231:27017', players: '12/20', ping: '20ms', loc: 'Frankfurt, DE' },
+                  { name: 'Vortex Retake Arena #1', map: 'de_nuke', ip: '194.163.159.231:27018', players: '9/10', ping: '14ms', loc: 'Stockholm, SE' },
+                  { name: 'Vortex 1v1 Aim Ladder', map: 'aim_redline', ip: '194.163.159.231:27019', players: '14/16', ping: '15ms', loc: 'Frankfurt, DE' },
+                  { name: 'Vortex High-ELO 5v5 Scrim', map: 'de_anubis', ip: '194.163.159.231:27020', players: '10/10', ping: '11ms', loc: 'Frankfurt, DE' },
+                ].map((s, idx) => (
+                  <div key={idx} className="p-5 rounded-2xl bg-[#12141C] border border-[#23293B] hover:border-[#A3E635] transition flex flex-col justify-between gap-4">
+                    <div>
+                      <div className="flex items-center justify-between mb-2">
+                        <span className="text-[10px] font-mono text-[#A3E635] font-bold uppercase">{s.loc}</span>
+                        <span className="text-xs font-mono text-emerald-400 font-bold">{s.ping}</span>
+                      </div>
+                      <h4 className="text-base font-bold font-display text-white">{s.name}</h4>
+                      <p className="text-xs font-mono text-[#94A3B8] mt-1">Map: {s.map}</p>
+                    </div>
+
+                    <div className="flex items-center justify-between pt-3 border-t border-[#1C2233]">
+                      <span className="text-xs font-mono text-slate-300">{s.players}</span>
+                      <button
+                        onClick={() => handleConnectServer(s.ip, s.name)}
+                        className="px-4 py-2 rounded-full bg-[#84CC16] hover:bg-[#A3E635] text-white font-black font-display text-xs transition cursor-pointer shadow-sm"
+                      >
+                        Connect
+                      </button>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
+
+          {/* ======================================================== */}
+          {/* TAB: TOURNAMENTS                                         */}
+          {/* ======================================================== */}
+          {activeTab === 'tournaments' && (
+            <div className="bg-[#0E1017] border border-[#202536] rounded-3xl p-6 md:p-8 shadow-xl space-y-6">
+              <div className="flex items-center justify-between pb-4 border-b border-[#1E2333]">
+                <div>
+                  <h2 className="text-2xl font-black font-display text-white">VORTEX CS2 TOURNAMENT CIRCUIT</h2>
+                  <p className="text-xs text-[#94A3B8]">Automated bracket matchmaking and instant prize distributions</p>
+                </div>
+                <button
+                  onClick={() => setActiveTab('play')}
+                  className="px-4 py-2 rounded-xl bg-[#141722] border border-[#252C3D] text-xs font-mono hover:text-white cursor-pointer"
+                >
+                  ← Back to Play
+                </button>
+              </div>
+
+              <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                {[
+                  { title: 'VORTEX Major Championship 2026', prize: '€10,000', teams: '32 / 32', date: 'LIVE NOW', status: 'IN PROGRESS', badge: 'bg-emerald-500/15 text-emerald-400 border-emerald-500/30' },
+                  { title: 'VORTEX CS2 Balkan Open Cup', prize: '€5,000', teams: '16 / 16', date: 'Starts in: 2d 14h', status: 'OPEN', badge: 'bg-lime-500/15 text-lime-400 border-lime-500/30' },
+                  { title: 'IEM Katowice 2026 Community Qualifier', prize: '€7,500', teams: '48 / 64', date: 'Starts in: 5d 08h', status: 'REGISTRATION', badge: 'bg-amber-500/15 text-amber-400 border-amber-500/30' },
+                  { title: 'VORTEX Weekly 128-Tick Scrimfest', prize: '€2,500', teams: '12 / 16', date: 'Starts Saturday', status: 'REGISTER', badge: 'bg-sky-500/15 text-sky-400 border-sky-500/30' },
+                ].map((t, idx) => (
+                  <div key={idx} className="p-6 rounded-3xl bg-[#12141C] border border-[#23293B] hover:border-[#A3E635] transition flex flex-col justify-between gap-6">
+                    <div className="flex items-start justify-between">
+                      <div>
+                        <span className={`px-2.5 py-1 rounded text-[10px] font-mono font-bold border ${t.badge}`}>{t.status}</span>
+                        <h3 className="text-xl font-black font-display text-white mt-3">{t.title}</h3>
+                        <p className="text-xs font-mono text-[#94A3B8] mt-1">{t.date}</p>
+                      </div>
+                      <div className="text-right">
+                        <div className="text-2xl font-black font-mono text-[#A3E635]">{t.prize}</div>
+                        <div className="text-[10px] text-[#94A3B8] uppercase">Prize Pool</div>
+                      </div>
+                    </div>
+
+                    <div className="flex items-center justify-between pt-4 border-t border-[#1C2233]">
+                      <span className="text-xs font-mono text-slate-300">Slots: {t.teams}</span>
+                      <button
+                        onClick={() => sound.playTournamentVictory()}
+                        className="px-5 py-2.5 rounded-full bg-[#84CC16] hover:bg-[#A3E635] text-white font-display font-black text-xs uppercase transition shadow-md cursor-pointer"
+                      >
+                        Register Team
+                      </button>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
+
+          {/* ======================================================== */}
+          {/* TAB: RANKINGS                                            */}
+          {/* ======================================================== */}
+          {activeTab === 'rankings' && (
+            <div className="bg-[#0E1017] border border-[#202536] rounded-3xl p-6 md:p-8 shadow-xl space-y-6">
+              <div className="flex items-center justify-between pb-4 border-b border-[#1E2333]">
+                <div>
+                  <h2 className="text-2xl font-black font-display text-white">Global & Regional Rankings</h2>
+                  <p className="text-xs text-[#94A3B8]">Verified FACEIT ELO and official player passports</p>
+                </div>
+                <button
+                  onClick={() => setActiveTab('play')}
+                  className="px-4 py-2 rounded-xl bg-[#141722] border border-[#252C3D] text-xs font-mono hover:text-white cursor-pointer"
+                >
+                  ← Back to Play
+                </button>
+              </div>
+
+              <div className="rounded-3xl bg-[#12141C] border border-[#23293B] overflow-hidden shadow-xl">
+                <table className="w-full text-left font-sans">
+                  <thead>
+                    <tr className="border-b border-[#1E2333] text-[11px] font-mono font-bold text-[#94A3B8] uppercase bg-[#0D0F15]">
+                      <th className="py-3 px-6">Rank</th>
+                      <th className="py-3 px-6">Player</th>
+                      <th className="py-3 px-6">Country</th>
+                      <th className="py-3 px-6">FACEIT Level</th>
+                      <th className="py-3 px-6">ELO Rating</th>
+                      <th className="py-3 px-6">Win Rate</th>
+                    </tr>
+                  </thead>
+                  <tbody className="divide-y divide-[#181D2C] text-sm">
+                    {[
+                      { rank: '#1', tag: 'bLocKeeRz', country: 'Kosovo', flag: '🇽🇰', level: 'Level 7', elo: 1407, winrate: '58.9%' },
+                      { rank: '#2', tag: 's1mple', country: 'Ukraine', flag: '🇺🇦', level: 'Level 10', elo: 3840, winrate: '68.2%' },
+                      { rank: '#3', tag: 'm0NESY', country: 'Russia', flag: '🏳️', level: 'Level 10', elo: 3620, winrate: '66.4%' },
+                      { rank: '#4', tag: 'ZywOo', country: 'France', flag: '🇫🇷', level: 'Level 10', elo: 3580, winrate: '65.1%' },
+                      { rank: '#5', tag: 'NiKo', country: 'Bosnia', flag: '🇧🇦', level: 'Level 10', elo: 3410, winrate: '63.8%' },
+                    ].map((p, idx) => (
+                      <tr key={idx} className="hover:bg-[#161A26] transition">
+                        <td className="py-4 px-6 font-mono font-black text-[#A3E635]">{p.rank}</td>
+                        <td className="py-4 px-6 font-bold text-white flex items-center gap-2">
+                          <span className="w-2 h-2 rounded-full bg-emerald-400" />
+                          <span>{p.tag}</span>
+                        </td>
+                        <td className="py-4 px-6 font-mono text-slate-300">{p.flag} {p.country}</td>
+                        <td className="py-4 px-6 font-bold text-amber-400">{p.level}</td>
+                        <td className="py-4 px-6 font-mono font-bold text-white">{p.elo}</td>
+                        <td className="py-4 px-6 font-mono text-emerald-400">{p.winrate}</td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          )}
+
+          {/* ======================================================== */}
+          {/* TAB: ANTI-CHEAT                                          */}
+          {/* ======================================================== */}
+          {activeTab === 'anticheat' && (
+            <div className="bg-[#0E1017] border border-[#202536] rounded-3xl p-6 md:p-8 shadow-xl space-y-6">
+              <div className="flex items-center justify-between pb-4 border-b border-[#1E2333]">
+                <div>
+                  <h2 className="text-2xl font-black font-display text-white">VORTEX Kernel Anti-Cheat Protection</h2>
+                  <p className="text-xs text-[#94A3B8]">Ring-0 hardware enforcement and driver integrity monitor</p>
+                </div>
+                <button
+                  onClick={() => setActiveTab('play')}
+                  className="px-4 py-2 rounded-xl bg-[#141722] border border-[#252C3D] text-xs font-mono hover:text-white cursor-pointer"
+                >
+                  ← Back to Play
+                </button>
+              </div>
+
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                <div className="p-6 rounded-3xl bg-[#12141C] border border-[#23293B]">
+                  <div className="w-12 h-12 rounded-2xl bg-emerald-500/15 border border-emerald-500/30 flex items-center justify-center text-emerald-400 mb-4">
+                    <ShieldCheck className="w-6 h-6" />
+                  </div>
+                  <h3 className="text-lg font-bold text-white">Kernel Driver Active</h3>
+                  <p className="text-xs text-[#94A3B8] mt-1">vortex_kernel_ac.sys verified and running without anomalies.</p>
+                </div>
+
+                <div className="p-6 rounded-3xl bg-[#12141C] border border-[#23293B]">
+                  <div className="w-12 h-12 rounded-2xl bg-lime-500/15 border border-lime-500/30 flex items-center justify-center text-[#A3E635] mb-4">
+                    <Zap className="w-6 h-6" />
+                  </div>
+                  <h3 className="text-lg font-bold text-white">Hardware ID Enforcement</h3>
+                  <p className="text-xs text-[#94A3B8] mt-1">Motherboard UUID and TPM 2.0 cryptographic handshake locked.</p>
+                </div>
+
+                <div className="p-6 rounded-3xl bg-[#12141C] border border-[#23293B]">
+                  <div className="w-12 h-12 rounded-2xl bg-amber-500/15 border border-amber-500/30 flex items-center justify-center text-amber-400 mb-4">
+                    <CheckCircle2 className="w-6 h-6" />
+                  </div>
+                  <h3 className="text-lg font-bold text-white">FACEIT Trust Synchronized</h3>
+                  <p className="text-xs text-[#94A3B8] mt-1">Player clean history confirmed across international leagues.</p>
+                </div>
+              </div>
+            </div>
+          )}
+
+          {/* ========================================================================= */}
+          {/* TAB: "PROFILE" -> COMPLETE DIGITAL PLAYER PASSPORT & CAREER COMMAND HUB    */}
+          {/* ========================================================================= */}
+          {activeTab === 'profile' && (
+            <div className="space-y-6 animate-in fade-in duration-200">
+              
+              {/* HERO PASSPORT & IDENTITY CARD */}
+              <div className="w-full bg-[#0E1017] border border-[#202536] rounded-3xl p-6 sm:p-8 shadow-2xl relative overflow-hidden">
+                <div className="absolute top-0 right-0 w-96 h-96 bg-lime-500/5 rounded-full blur-3xl pointer-events-none" />
+                <div className="absolute bottom-0 left-0 w-80 h-80 bg-amber-500/5 rounded-full blur-3xl pointer-events-none" />
+
+                <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-6 relative z-10">
+                  {/* Avatar + Primary Identification */}
+                  <div className="flex flex-col sm:flex-row sm:items-center gap-6">
+                    <div 
+                      onClick={handleOpenEditProfile}
+                      title="Click to change avatar & edit profile"
+                      className="relative cursor-pointer group shrink-0"
+                    >
+                      <img 
+                        src={currentAvatarUrl} 
+                        alt={currentGamerTag} 
+                        className="w-24 h-24 sm:w-28 sm:h-28 rounded-3xl object-cover border-2 border-[#A3E635] shadow-[0_0_25px_rgba(163,230,53,0.35)] group-hover:brightness-75 transition"
+                        onError={(e) => {
+                          (e.target as HTMLImageElement).src = '/images/blockeerz_avatar.png';
+                        }}
+                      />
+                      <div className="absolute inset-0 rounded-3xl flex items-center justify-center opacity-0 group-hover:opacity-100 bg-black/60 transition">
+                        <div className="flex flex-col items-center gap-1 text-[11px] font-mono font-bold text-white">
+                          <Camera className="w-6 h-6 text-[#A3E635]" />
+                          <span>CHANGE</span>
+                        </div>
+                      </div>
+                      {/* Level 7 badge */}
+                      <div className="absolute -bottom-2 -right-2 w-8 h-8 rounded-full bg-gradient-to-br from-amber-400 via-amber-500 to-yellow-600 text-black font-black text-xs flex items-center justify-center border-2 border-[#0E1017] shadow-lg">
+                        7
+                      </div>
+                    </div>
+
+                    <div className="space-y-2">
+                      <div className="flex flex-wrap items-center gap-2.5">
+                        <span className="px-2.5 py-0.5 rounded text-xs font-mono font-bold bg-[#182012] text-[#A3E635] border border-[#A3E635]/40">
+                          [{currentClanTag}]
+                        </span>
+                        <h1 className="text-2xl sm:text-4xl font-black font-display text-white tracking-tight">
+                          {currentGamerTag}
+                        </h1>
+                        <span className="px-2.5 py-0.5 rounded text-[10px] font-mono font-bold bg-[#A3E635]/15 text-[#A3E635] border border-[#A3E635]/30">
+                          VERIFIED PRO
+                        </span>
+                        <span className="text-lg" title={currentCountry.name}>{currentCountry.flag}</span>
+                      </div>
+
+                      <p className="text-xs sm:text-sm font-sans text-slate-300 italic max-w-xl">
+                        "{currentBio}"
+                      </p>
+
+                      <div className="flex flex-wrap items-center gap-3 text-xs font-mono text-slate-400 pt-1">
+                        <span className="text-white font-bold">1,407 ELO</span>
+                        <span>•</span>
+                        <span className="text-[#A3E635] font-bold">#91 Global Rank</span>
+                        <span>•</span>
+                        <span className="text-sky-400 font-bold">{currentRole}</span>
+                        <span>•</span>
+                        <span className="text-emerald-400 font-bold flex items-center gap-1">
+                          <ShieldCheck className="w-3.5 h-3.5" />
+                          Kernel AC Verified
+                        </span>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Actions: Edit Profile Button & Share */}
+                  <div className="flex sm:flex-row lg:flex-col gap-3 shrink-0">
+                    <button
+                      onClick={handleOpenEditProfile}
+                      className="px-5 py-3 rounded-2xl bg-[#84CC16] hover:bg-[#A3E635] text-slate-950 font-display font-black text-xs uppercase tracking-wider transition cursor-pointer shadow-[0_0_20px_rgba(163,230,53,0.35)] flex items-center justify-center gap-2"
+                    >
+                      <Edit3 className="w-4 h-4 stroke-[2.5]" />
+                      <span>Edit Profile & Avatar</span>
+                    </button>
+
+                    <button
+                      onClick={() => {
+                        sound.playClick();
+                        navigator.clipboard.writeText(window.location.href);
+                        setDashboardToast('Profile URL copied to clipboard!');
+                        setTimeout(() => setDashboardToast(null), 3000);
+                      }}
+                      className="px-5 py-2.5 rounded-2xl bg-[#141722] hover:bg-[#1A1F2E] border border-white/10 hover:border-white/20 text-slate-300 hover:text-white font-mono text-xs transition cursor-pointer flex items-center justify-center gap-2"
+                    >
+                      <Share2 className="w-4 h-4 text-[#A3E635]" />
+                      <span>Share Passport</span>
+                    </button>
+                  </div>
+                </div>
+
+                {/* ELO Progress Meter to Level 8 */}
+                <div className="mt-6 pt-5 border-t border-white/[0.06] space-y-2">
+                  <div className="flex justify-between items-center text-xs font-mono">
+                    <div className="flex items-center gap-2">
+                      <span className="w-2 h-2 rounded-full bg-[#A3E635] animate-ping" />
+                      <span className="text-slate-400">Current Standing: <strong className="text-white">1,407 ELO</strong> (Level 7)</span>
+                    </div>
+                    <span className="text-amber-400 font-bold">+123 ELO to Level 8 (1,530)</span>
+                  </div>
+                  <div className="w-full h-2 rounded-full bg-[#1A1D27] overflow-hidden">
+                    <div className="h-full bg-gradient-to-r from-[#FF5500] via-amber-500 to-[#A3E635] rounded-full" style={{ width: '31%' }} />
+                  </div>
+                </div>
+              </div>
+
+              {/* 4 VITALS METRICS CARDS */}
+              <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
+                <div className="p-5 rounded-2xl bg-[#0E1017] border border-[#202536] space-y-2">
+                  <div className="text-[10px] font-mono uppercase tracking-wider text-slate-400 flex items-center gap-1.5">
+                    <Trophy className="w-3.5 h-3.5 text-amber-400" />
+                    <span>Win Rate</span>
+                  </div>
+                  <div className="text-2xl font-black font-mono text-white">58.9%</div>
+                  <div className="text-[10px] font-mono text-emerald-400 font-bold">+2.4% this season</div>
+                </div>
+
+                <div className="p-5 rounded-2xl bg-[#0E1017] border border-[#202536] space-y-2">
+                  <div className="text-[10px] font-mono uppercase tracking-wider text-slate-400 flex items-center gap-1.5">
+                    <Crosshair className="w-3.5 h-3.5 text-[#A3E635]" />
+                    <span>K/D Ratio</span>
+                  </div>
+                  <div className="text-2xl font-black font-mono text-[#A3E635]">1.38</div>
+                  <div className="text-[10px] font-mono text-slate-400">1.42 Impact Rating</div>
+                </div>
+
+                <div className="p-5 rounded-2xl bg-[#0E1017] border border-[#202536] space-y-2">
+                  <div className="text-[10px] font-mono uppercase tracking-wider text-slate-400 flex items-center gap-1.5">
+                    <Target className="w-3.5 h-3.5 text-amber-400" />
+                    <span>Headshot %</span>
+                  </div>
+                  <div className="text-2xl font-black font-mono text-amber-400">64.2%</div>
+                  <div className="text-[10px] font-mono text-slate-400">1,420 AK-47 kills</div>
+                </div>
+
+                <div className="p-5 rounded-2xl bg-[#0E1017] border border-[#202536] space-y-2">
+                  <div className="text-[10px] font-mono uppercase tracking-wider text-slate-400 flex items-center gap-1.5">
+                    <Activity className="w-3.5 h-3.5 text-sky-400" />
+                    <span>Matches Total</span>
+                  </div>
+                  <div className="text-2xl font-black font-mono text-white">2,480</div>
+                  <div className="text-[10px] font-mono text-[#A3E635] font-bold">4 Streak Wins</div>
+                </div>
+              </div>
+
+              {/* TWO COLUMN GRID: ESPORTS GEAR & STEAM CONFIG + CS2 MAP POOL MASTERY */}
+              <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
+                
+                {/* Left (6 cols): Esports Gear & Steam Config */}
+                <div className="lg:col-span-6 bg-[#0E1017] border border-[#202536] rounded-3xl p-6 shadow-xl space-y-4">
+                  <div className="flex items-center justify-between pb-3 border-b border-white/[0.06]">
+                    <div>
+                      <h3 className="text-lg font-black font-display text-white">Competitive Setup & Gear</h3>
+                      <p className="text-xs text-slate-400">Synchronized CS2 launch options & Steam trade parameters</p>
+                    </div>
+                    <button
+                      onClick={handleOpenEditProfile}
+                      className="text-xs font-mono text-[#A3E635] hover:underline flex items-center gap-1 cursor-pointer"
+                    >
+                      <Edit3 className="w-3 h-3" />
+                      <span>Edit</span>
+                    </button>
+                  </div>
+
+                  <div className="space-y-3 font-mono text-xs">
+                    {/* Steam ID */}
+                    <div className="p-3 rounded-xl bg-[#12141C] border border-white/5 flex items-center justify-between">
+                      <span className="text-slate-400">Steam ID:</span>
+                      <div className="flex items-center gap-2">
+                        <span className="text-white font-bold">STEAM_0:1:43918293</span>
+                        <button
+                          onClick={() => {
+                            navigator.clipboard.writeText('STEAM_0:1:43918293');
+                            setDashboardToast('SteamID copied!');
+                            setTimeout(() => setDashboardToast(null), 2500);
+                          }}
+                          className="p-1 rounded hover:bg-white/10 text-slate-400 hover:text-white"
+                          title="Copy"
+                        >
+                          <Copy className="w-3.5 h-3.5" />
+                        </button>
+                      </div>
+                    </div>
+
+                    {/* CS2 Crosshair Code */}
+                    <div className="p-3 rounded-xl bg-[#12141C] border border-white/5 flex items-center justify-between">
+                      <span className="text-slate-400">CS2 Crosshair Code:</span>
+                      <div className="flex items-center gap-2">
+                        <span className="text-[#A3E635] font-bold">{currentCrosshairCode}</span>
+                        <button
+                          onClick={() => {
+                            navigator.clipboard.writeText(currentCrosshairCode);
+                            setDashboardToast('Crosshair code copied!');
+                            setTimeout(() => setDashboardToast(null), 2500);
+                          }}
+                          className="p-1 rounded hover:bg-white/10 text-slate-400 hover:text-white"
+                          title="Copy"
+                        >
+                          <Copy className="w-3.5 h-3.5" />
+                        </button>
+                      </div>
+                    </div>
+
+                    {/* Steam Trade URL */}
+                    <div className="p-3 rounded-xl bg-[#12141C] border border-white/5 flex items-center justify-between">
+                      <span className="text-slate-400">Trade Offer URL:</span>
+                      <div className="flex items-center gap-2 truncate max-w-[240px]">
+                        <span className="text-slate-300 truncate">{currentTradeUrl}</span>
+                        <button
+                          onClick={() => {
+                            navigator.clipboard.writeText(currentTradeUrl);
+                            setDashboardToast('Trade URL copied!');
+                            setTimeout(() => setDashboardToast(null), 2500);
+                          }}
+                          className="p-1 rounded hover:bg-white/10 text-slate-400 hover:text-white shrink-0"
+                          title="Copy"
+                        >
+                          <Copy className="w-3.5 h-3.5" />
+                        </button>
+                      </div>
+                    </div>
+
+                    {/* Hardware & Sens */}
+                    <div className="p-3 rounded-xl bg-[#12141C] border border-white/5 flex items-center justify-between">
+                      <span className="text-slate-400">Sensitivity & Res:</span>
+                      <span className="text-amber-400 font-bold">800 DPI • 1.15 Sens • 1280x960 4:3 Stretched</span>
+                    </div>
+
+                    {/* Anti-Cheat State */}
+                    <div className="p-3 rounded-xl bg-emerald-500/10 border border-emerald-500/30 flex items-center justify-between">
+                      <span className="text-emerald-400 font-bold flex items-center gap-1.5">
+                        <ShieldCheck className="w-4 h-4" />
+                        Warden Kernel Ring-0 Anti-Cheat
+                      </span>
+                      <span className="text-emerald-400 font-bold uppercase tracking-wider text-[10px]">ACTIVE & CLEAN</span>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Right (6 cols): Competitive Map Win Rates */}
+                <div className="lg:col-span-6 bg-[#0E1017] border border-[#202536] rounded-3xl p-6 shadow-xl space-y-4">
+                  <div className="flex items-center justify-between pb-3 border-b border-white/[0.06]">
+                    <div>
+                      <h3 className="text-lg font-black font-display text-white">Competitive Map Performance</h3>
+                      <p className="text-xs text-slate-400">Telemetry across official 128-tick ranked pool</p>
+                    </div>
+                    <span className="text-xs font-mono text-[#A3E635]">Season 9</span>
+                  </div>
+
+                  <div className="space-y-3 font-mono">
+                    {[
+                      { map: 'Mirage (de_mirage)', winRate: 64, matches: 320, color: 'bg-[#A3E635]' },
+                      { map: 'Inferno (de_inferno)', winRate: 58, matches: 285, color: 'bg-amber-400' },
+                      { map: 'Nuke (de_nuke)', winRate: 61, matches: 190, color: 'bg-emerald-400' },
+                      { map: 'Dust II (de_dust2)', winRate: 52, matches: 145, color: 'bg-sky-400' },
+                      { map: 'Ancient (de_ancient)', winRate: 59, matches: 110, color: 'bg-purple-400' },
+                    ].map((m, idx) => (
+                      <div key={idx} className="space-y-1">
+                        <div className="flex justify-between text-xs">
+                          <span className="text-white font-bold">{m.map}</span>
+                          <span className="text-slate-400">
+                            <strong className="text-white">{m.winRate}%</strong> ({m.matches} matches)
+                          </span>
+                        </div>
+                        <div className="w-full h-1.5 rounded-full bg-[#1A1D27] overflow-hidden">
+                          <div className={`h-full ${m.color} rounded-full`} style={{ width: `${m.winRate}%` }} />
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+
+              </div>
+
+            </div>
+          )}
+
+          {/* ======================================================== */}
+          {/* TAB: SCRIMS / AIM / LINEUPS ARENA                        */}
+          {/* ======================================================== */}
+          {(activeTab === 'scrims' || activeTab === 'aim' || activeTab === 'lineups') && (
+            <div className="bg-[#0E1017] border border-[#202536] rounded-3xl p-6 md:p-8 shadow-xl space-y-6">
+              <div className="flex items-center justify-between pb-4 border-b border-[#1E2333]">
+                <div>
+                  <h2 className="text-2xl font-black font-display text-white capitalize">{activeTab} Arena</h2>
+                  <p className="text-xs text-[#94A3B8]">Automated 128-tick matchmaking lobby</p>
+                </div>
+                <button
+                  onClick={() => setActiveTab('play')}
+                  className="px-4 py-2 rounded-xl bg-[#141722] border border-[#252C3D] text-xs font-mono hover:text-white cursor-pointer"
+                >
+                  ← Back to Play
+                </button>
+              </div>
+
+              <div className="p-8 rounded-3xl bg-[#12141C] border border-[#23293B] text-center space-y-4">
+                <div className="w-16 h-16 rounded-full bg-lime-500/10 border border-[#A3E635]/30 flex items-center justify-center mx-auto text-[#A3E635]">
+                  <Swords className="w-8 h-8" />
+                </div>
+                <h3 className="text-xl font-bold text-white">Live Matchmaking Queue Open</h3>
+                <p className="text-xs text-[#94A3B8] max-w-md mx-auto">
+                  Searching for balanced 128-tick CS2 lobbies based on your verified Level 7 ELO (1,407).
+                </p>
+
+                <div className="pt-2 flex justify-center">
+                  <div className="inline-flex items-center gap-3.5 px-4 py-2 rounded-xl bg-[#0D0F14] border border-orange-500/40 shadow-lg shadow-orange-500/10 text-xs font-mono">
+                    <div className="flex items-center gap-2 text-slate-200">
+                      <ShieldAlert className="w-4 h-4 text-[#ff5500]" />
+                      <span className="font-semibold text-slate-300">Please run Anti-Cheat</span>
+                    </div>
+                    <a
+                      href="https://www.faceit.com/en/anti-cheat"
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="text-[#ff5500] hover:text-[#ff7733] font-bold text-xs uppercase tracking-wider transition"
+                    >
+                      DOWNLOAD
+                    </a>
+                    <a
+                      href="faceitac://"
+                      onClick={() => sound.playClick()}
+                      className="px-3 py-1 rounded-lg bg-[#2A1D15] hover:bg-[#ff5500] text-[#ff5500] hover:text-white border border-orange-500/50 font-bold text-xs uppercase tracking-wider transition cursor-pointer"
+                    >
+                      LAUNCH
+                    </a>
+                  </div>
+                </div>
+
+                <div className="pt-4">
                   <button
                     onClick={() => handleConnectServer('194.163.159.231:27015', 'Quick Scrim Arena')}
-                    className="px-6 py-2.5 rounded-full bg-[#DC2626] hover:bg-[#EF4444] text-white font-black font-display text-xs uppercase tracking-wider transition shadow-lg cursor-pointer"
+                    className="px-8 py-3 rounded-full bg-[#A3E635] hover:bg-[#BEF264] text-black font-black font-display text-xs uppercase tracking-wider transition shadow-[0_0_20px_rgba(163,230,53,0.4)] cursor-pointer"
                   >
-                    Find Match Now
+                    Connect to Server Now
                   </button>
                 </div>
               </div>
-            )}
+            </div>
+          )}
 
-          </main>
+        </main>
+      </div>
+
+      {/* ======================================================== */}
+      {/* MATCH READY FOUND POPUP MODAL                            */}
+      {/* ======================================================== */}
+      {matchFoundModal && (
+        <div className="fixed inset-0 z-50 bg-black/85 backdrop-blur-md flex items-center justify-center p-4">
+          <div className="relative w-full max-w-lg bg-[#0F121A] border-2 border-[#A3E635] rounded-3xl p-6 sm:p-8 shadow-2xl space-y-6 animate-in zoom-in-95">
+            <div className="text-center space-y-2">
+              <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-[#18210C] border border-[#A3E635]/50 text-[#A3E635] text-xs font-mono font-bold uppercase">
+                <span className="w-2 h-2 rounded-full bg-[#A3E635] animate-ping" />
+                MATCH READY
+              </div>
+              <h3 className="text-2xl font-black font-display text-white">5v5 COMPETITIVE MATCH</h3>
+              <p className="text-xs font-mono text-slate-400">
+                Map: <span className="text-white font-bold">{activePickedMap}</span> • Server: <span className="text-white font-bold">Frankfurt 128-tick</span>
+              </p>
+            </div>
+
+            {/* Players Acceptance Counter */}
+            <div className="p-4 rounded-2xl bg-[#141722] border border-[#232938] text-center space-y-2">
+              <div className="flex items-center justify-between text-xs font-mono">
+                <span className="text-slate-400">Players Accepted:</span>
+                <span className="text-[#A3E635] font-bold text-sm">{acceptedPlayers} / 10</span>
+              </div>
+              <div className="w-full h-2 rounded-full bg-black/50 overflow-hidden">
+                <div 
+                  className="h-full bg-gradient-to-r from-[#84CC16] to-[#A3E635] transition-all duration-300 rounded-full"
+                  style={{ width: `${(acceptedPlayers / 10) * 100}%` }}
+                />
+              </div>
+            </div>
+
+            {/* Actions: Accept or Direct Connect */}
+            <div className="space-y-3">
+              {!userHasAccepted ? (
+                <button
+                  onClick={handleUserAcceptMatch}
+                  className="w-full py-4 rounded-2xl bg-gradient-to-r from-[#84CC16] to-[#A3E635] hover:brightness-110 text-slate-950 font-display font-black text-sm uppercase tracking-wider transition shadow-[0_0_25px_rgba(163,230,53,0.5)] cursor-pointer"
+                >
+                  ACCEPT MATCH
+                </button>
+              ) : (
+                <div className="space-y-3">
+                  <div className="p-3 rounded-xl bg-emerald-500/15 border border-emerald-500/30 text-emerald-400 text-center font-mono text-xs font-bold">
+                    ✓ MATCH ACCEPTED! ALL 10 PLAYERS READY
+                  </div>
+                  
+                  <div className="flex flex-col sm:flex-row gap-3">
+                    <button
+                      onClick={() => handleCopyIp(activeServerIp)}
+                      className="flex-1 py-3 rounded-xl bg-[#141722] hover:bg-[#1A1F2E] border border-white/10 text-white font-mono text-xs font-bold transition flex items-center justify-center gap-2 cursor-pointer"
+                    >
+                      <Copy className="w-3.5 h-3.5" />
+                      <span>{copiedIp ? 'COPIED TO CLIPBOARD!' : 'COPY CONNECT IP'}</span>
+                    </button>
+                    <button
+                      onClick={() => handleConnectServer(activeServerIp, `5v5 Match [${activePickedMap}]`)}
+                      className="flex-1 py-3 rounded-xl bg-[#84CC16] hover:bg-[#A3E635] text-white font-display font-black text-xs uppercase tracking-wider transition shadow-md cursor-pointer flex items-center justify-center gap-2"
+                    >
+                      <Play className="w-3.5 h-3.5 fill-white" />
+                      <span>CONNECT VIA STEAM</span>
+                    </button>
+                  </div>
+                </div>
+              )}
+
+              <button
+                onClick={() => setMatchFoundModal(false)}
+                className="w-full py-2.5 rounded-xl bg-white/[0.04] hover:bg-white/[0.08] text-slate-400 hover:text-white font-mono text-xs transition cursor-pointer"
+              >
+                Close Window
+              </button>
+            </div>
+          </div>
         </div>
       )}
 
       {/* Connect Server Toast Notification */}
       {connectToast && (
-        <div className="fixed top-20 right-8 z-50 animate-in fade-in slide-in-from-top-4 flex items-center gap-3 bg-[#131620] border border-[#EF4444] px-5 py-3 rounded-2xl shadow-2xl shadow-red-500/30">
-          <div className="w-3 h-3 rounded-full bg-[#EF4444] animate-ping" />
+        <div className="fixed top-20 right-8 z-50 animate-in fade-in slide-in-from-top-4 flex items-center gap-3 bg-[#131620] border border-[#A3E635] px-5 py-3 rounded-2xl shadow-2xl shadow-lime-500/30">
+          <div className="w-3 h-3 rounded-full bg-[#A3E635] animate-ping" />
           <div className="text-xs font-mono">
             <div className="text-white font-bold">CONNECTING TO CS2 SERVER...</div>
             <div className="text-emerald-400 text-[11px]">connect {connectToast.ip} (Copied to clipboard)</div>
@@ -618,39 +3570,29 @@ export const VortexDashboard: React.FC<VortexDashboardProps> = ({
         </div>
       )}
 
-      {/* Profile Dropdown */}
-      {profileDropdownOpen && (
-        <div className="fixed right-8 top-16 w-52 rounded-2xl bg-[#141722] border border-[#283042] shadow-2xl p-2 z-50 animate-in fade-in zoom-in-95">
-          <div className="px-3 py-2 text-xs text-white font-bold border-b border-[#283042] mb-1 flex items-center justify-between">
-            <span>{userGamerTag}</span>
-            <span className="text-[10px] text-amber-400 font-mono">Level 5</span>
+      {/* Download Demo Toast Notification */}
+      {downloadDemoToast && (
+        <div className="fixed top-20 right-8 z-50 animate-in fade-in slide-in-from-top-4 flex items-center gap-3 bg-[#131620] border border-emerald-400 px-5 py-3 rounded-2xl shadow-2xl shadow-emerald-500/30">
+          <Download className="w-4 h-4 text-emerald-400 animate-bounce" />
+          <div className="text-xs font-mono">
+            <div className="text-white font-bold">DOWNLOADING GOTV BROADCAST DEMO...</div>
+            <div className="text-slate-300 text-[11px]">{downloadDemoToast}</div>
           </div>
-          <button
-            onClick={() => {
-              sound.playSelect();
-              setProfileDropdownOpen(false);
-              setActiveTab('profile');
-            }}
-            className="w-full flex items-center gap-2 px-3 py-2 text-xs font-mono text-slate-300 hover:text-white hover:bg-white/5 rounded-lg transition cursor-pointer"
-          >
-            <User className="w-3.5 h-3.5" />
-            <span>View Passport</span>
-          </button>
-          {onLogout && (
-            <button
-              onClick={() => {
-                sound.playClick();
-                setProfileDropdownOpen(false);
-                onLogout();
-              }}
-              className="w-full flex items-center gap-2 px-3 py-2 text-xs font-mono text-rose-400 hover:bg-rose-500/10 rounded-lg transition cursor-pointer"
-            >
-              <LogOut className="w-3.5 h-3.5" />
-              <span>Log Out</span>
-            </button>
-          )}
         </div>
       )}
+
+      {/* Dashboard General Action Toast Notification */}
+      {dashboardToast && (
+        <div className="fixed top-20 right-8 z-50 animate-in fade-in slide-in-from-top-4 flex items-center gap-3 bg-[#131620] border border-[#A3E635] px-5 py-3 rounded-2xl shadow-2xl shadow-lime-500/30">
+          <Sparkles className="w-4 h-4 text-[#A3E635] animate-pulse" />
+          <div className="text-xs font-mono">
+            <div className="text-white font-bold">VORTEX COMMAND TELEMETRY</div>
+            <div className="text-[#A3E635] text-[11px]">{dashboardToast}</div>
+          </div>
+        </div>
+      )}
+
+
 
       {/* Notifications Drawer */}
       {notificationsOpen && (
@@ -666,57 +3608,485 @@ export const VortexDashboard: React.FC<VortexDashboardProps> = ({
             <div className="text-[#94A3B8] text-[11px]">Ranked match on de_mirage begins in 5 minutes.</div>
           </div>
           <div className="p-3 rounded-xl bg-[#0D0F15] border border-[#1E2333] text-xs">
-            <div className="text-[#EF4444] font-bold mb-1">Tournament Registration Open</div>
+            <div className="text-[#A3E635] font-bold mb-1">Tournament Registration Open</div>
             <div className="text-[#94A3B8] text-[11px]">VORTEX CS2 TOURNAMENT starts in 2d 14h.</div>
           </div>
         </div>
       )}
 
-      {/* VORTEX Premium Modal */}
+      {/* VORTEX Membership Upgrade Modal */}
       {showPremiumModal && (
         <div className="fixed inset-0 z-50 bg-black/90 backdrop-blur-md flex items-center justify-center p-4">
-          <div className="relative w-full max-w-md bg-[#0E1017] border border-amber-500/50 rounded-3xl p-6 shadow-2xl space-y-6">
+          <div className="relative w-full max-w-2xl bg-[#0E1017] border border-amber-500/50 rounded-3xl p-6 sm:p-8 shadow-2xl space-y-6">
             <div className="flex items-center justify-between">
-              <div className="flex items-center gap-2 text-amber-400 font-display font-black text-lg">
-                <Crown className="w-5 h-5" />
-                <span>VORTEX PREMIUM</span>
+              <div className="flex items-center gap-3">
+                <div className="w-10 h-10 rounded-xl bg-amber-500/20 border border-amber-500/40 flex items-center justify-center text-amber-400">
+                  <Crown className="w-5 h-5 fill-amber-400" />
+                </div>
+                <div>
+                  <h3 className="text-lg font-black font-display text-white">CHOOSE YOUR VORTEX TIER</h3>
+                  <p className="text-xs font-mono text-slate-400">Unlock strict ELO matchmaking, captain vetoes & pro cash cups</p>
+                </div>
               </div>
               <button 
                 onClick={() => { sound.playClick(); setShowPremiumModal(false); }}
-                className="p-1 rounded-full hover:bg-white/10 text-[#94A3B8] hover:text-white"
+                className="p-2 rounded-xl bg-white/[0.05] hover:bg-white/10 text-[#94A3B8] hover:text-white transition cursor-pointer"
               >
                 <X className="w-5 h-5" />
               </button>
             </div>
 
-            <div className="space-y-3 text-xs text-[#94A3B8]">
-              <div className="flex items-center gap-2.5 text-white">
-                <CheckCircle2 className="w-4 h-4 text-amber-400" />
-                <span>Priority 128-tick matchmaking server queue</span>
+            {/* 2 Plans Side by Side */}
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              
+              {/* PLAN 1: PREMIUM */}
+              <div className={`p-5 rounded-2xl border transition-all flex flex-col justify-between space-y-4 ${
+                userMembershipTier === 'premium'
+                  ? 'bg-amber-500/10 border-amber-500 shadow-[0_0_20px_rgba(245,158,11,0.25)]'
+                  : 'bg-[#121520] border-[#222736] hover:border-amber-500/40'
+              }`}>
+                <div className="space-y-3">
+                  <div className="flex items-center justify-between">
+                    <span className="text-xs font-display font-black text-amber-400 uppercase tracking-wider">VORTEX PREMIUM</span>
+                    <span className="text-lg font-black text-white font-mono">€5.99<span className="text-xs text-slate-400">/mo</span></span>
+                  </div>
+                  <p className="text-[11px] text-slate-400 font-mono">Strict competitive 5v5 queue with zero smurfs guarantee.</p>
+
+                  <div className="space-y-2 text-xs text-slate-300 pt-1">
+                    <div className="flex items-center gap-2">
+                      <CheckCircle2 className="w-3.5 h-3.5 text-amber-400 shrink-0" />
+                      <span>Unlock Super Match 5v5 queue</span>
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <CheckCircle2 className="w-3.5 h-3.5 text-amber-400 shrink-0" />
+                      <span>Strict ±250 ELO range balance</span>
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <CheckCircle2 className="w-3.5 h-3.5 text-amber-400 shrink-0" />
+                      <span>Captain map veto priority</span>
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <CheckCircle2 className="w-3.5 h-3.5 text-amber-400 shrink-0" />
+                      <span>Verified & Veteran only matchmaking</span>
+                    </div>
+                  </div>
+                </div>
+
+                <button
+                  onClick={() => {
+                    sound.playTournamentVictory();
+                    setUserMembershipTier('premium');
+                    confetti({ particleCount: 70, spread: 80, origin: { y: 0.6 } });
+                    setDashboardToast('Upgraded to VORTEX PREMIUM! Super Match queue unlocked.');
+                    setTimeout(() => setDashboardToast(null), 4000);
+                    setShowPremiumModal(false);
+                  }}
+                  className={`w-full py-3 rounded-xl font-display font-black text-xs uppercase tracking-wider transition cursor-pointer shadow-md ${
+                    userMembershipTier === 'premium'
+                      ? 'bg-amber-500/20 text-amber-400 border border-amber-500/40 cursor-default'
+                      : 'bg-gradient-to-r from-amber-500 to-amber-600 hover:brightness-110 text-slate-950 shadow-amber-500/20'
+                  }`}
+                >
+                  {userMembershipTier === 'premium' ? 'CURRENT PLAN' : 'UPGRADE TO PREMIUM'}
+                </button>
               </div>
-              <div className="flex items-center gap-2.5 text-white">
-                <CheckCircle2 className="w-4 h-4 text-amber-400" />
-                <span>Exclusive participation in €25,000+ Major Cups</span>
+
+              {/* PLAN 2: VIP ELITE */}
+              <div className={`p-5 rounded-2xl border transition-all flex flex-col justify-between space-y-4 ${
+                userMembershipTier === 'vip'
+                  ? 'bg-purple-500/10 border-purple-500 shadow-[0_0_20px_rgba(168,85,247,0.25)]'
+                  : 'bg-[#121520] border-[#222736] hover:border-purple-500/40'
+              }`}>
+                <div className="space-y-3">
+                  <div className="flex items-center justify-between">
+                    <span className="text-xs font-display font-black text-purple-400 uppercase tracking-wider flex items-center gap-1">
+                      <Crown className="w-3.5 h-3.5 fill-purple-400" /> VIP ELITE
+                    </span>
+                    <span className="text-lg font-black text-white font-mono">€12.99<span className="text-xs text-slate-400">/mo</span></span>
+                  </div>
+                  <p className="text-[11px] text-slate-400 font-mono">The ultimate esports tier for pro players and high-stakes cash.</p>
+
+                  <div className="space-y-2 text-xs text-slate-300 pt-1">
+                    <div className="flex items-center gap-2">
+                      <CheckCircle2 className="w-3.5 h-3.5 text-purple-400 shrink-0" />
+                      <span>Unlock VIP Elite Match 5v5 queue</span>
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <CheckCircle2 className="w-3.5 h-3.5 text-purple-400 shrink-0" />
+                      <span>Ultra-strict ±150 ELO range</span>
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <CheckCircle2 className="w-3.5 h-3.5 text-purple-400 shrink-0" />
+                      <span>Automated GOTV broadcast recordings</span>
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <CheckCircle2 className="w-3.5 h-3.5 text-purple-400 shrink-0" />
+                      <span>2x Vortex Points & €25,000 Major Cups</span>
+                    </div>
+                  </div>
+                </div>
+
+                <button
+                  onClick={() => {
+                    sound.playTournamentVictory();
+                    setUserMembershipTier('vip');
+                    confetti({ particleCount: 90, spread: 90, origin: { y: 0.6 } });
+                    setDashboardToast('Upgraded to VIP ELITE! All pro queues & GOTV active.');
+                    setTimeout(() => setDashboardToast(null), 4000);
+                    setShowPremiumModal(false);
+                  }}
+                  className={`w-full py-3 rounded-xl font-display font-black text-xs uppercase tracking-wider transition cursor-pointer shadow-md ${
+                    userMembershipTier === 'vip'
+                      ? 'bg-purple-500/20 text-purple-400 border border-purple-500/40 cursor-default'
+                      : 'bg-gradient-to-r from-purple-500 via-fuchsia-500 to-amber-400 hover:brightness-110 text-slate-950 shadow-purple-500/20'
+                  }`}
+                >
+                  {userMembershipTier === 'vip' ? 'CURRENT PLAN' : 'UPGRADE TO VIP ELITE'}
+                </button>
               </div>
-              <div className="flex items-center gap-2.5 text-white">
-                <CheckCircle2 className="w-4 h-4 text-amber-400" />
-                <span>Advanced FACEIT ELO analytics and heatmaps</span>
-              </div>
-              <div className="flex items-center gap-2.5 text-white">
-                <CheckCircle2 className="w-4 h-4 text-amber-400" />
-                <span>Golden Crown badge on your Gamer Passport</span>
+
+            </div>
+
+            {/* Quick Testing Simulator Bar */}
+            <div className="pt-2 border-t border-white/[0.08] flex items-center justify-between text-xs font-mono">
+              <span className="text-slate-500">Simulate Account Tier:</span>
+              <div className="flex items-center gap-2">
+                <button
+                  onClick={() => {
+                    sound.playClick();
+                    setUserMembershipTier('free');
+                    setDashboardToast('Account switched to Free tier.');
+                    setTimeout(() => setDashboardToast(null), 2500);
+                  }}
+                  className={`px-3 py-1 rounded-lg transition cursor-pointer ${
+                    userMembershipTier === 'free'
+                      ? 'bg-white/20 text-white font-bold'
+                      : 'bg-white/5 text-slate-400 hover:text-white'
+                  }`}
+                >
+                  Free
+                </button>
+                <button
+                  onClick={() => {
+                    sound.playClick();
+                    setUserMembershipTier('premium');
+                    setDashboardToast('Account switched to Premium tier.');
+                    setTimeout(() => setDashboardToast(null), 2500);
+                  }}
+                  className={`px-3 py-1 rounded-lg transition cursor-pointer ${
+                    userMembershipTier === 'premium'
+                      ? 'bg-amber-500 text-slate-950 font-bold'
+                      : 'bg-white/5 text-slate-400 hover:text-white'
+                  }`}
+                >
+                  Premium
+                </button>
+                <button
+                  onClick={() => {
+                    sound.playClick();
+                    setUserMembershipTier('vip');
+                    setDashboardToast('Account switched to VIP Elite tier.');
+                    setTimeout(() => setDashboardToast(null), 2500);
+                  }}
+                  className={`px-3 py-1 rounded-lg transition cursor-pointer ${
+                    userMembershipTier === 'vip'
+                      ? 'bg-purple-500 text-white font-bold'
+                      : 'bg-white/5 text-slate-400 hover:text-white'
+                  }`}
+                >
+                  VIP Elite
+                </button>
               </div>
             </div>
 
-            <button
-              onClick={() => {
-                sound.playTournamentVictory();
-                setShowPremiumModal(false);
-              }}
-              className="w-full py-3 rounded-full bg-gradient-to-r from-amber-500 to-amber-600 hover:brightness-110 text-slate-950 font-display font-black text-xs uppercase tracking-wider transition shadow-lg shadow-amber-500/20 cursor-pointer"
-            >
-              Upgrade to Premium (€5.99 / mo)
-            </button>
+          </div>
+        </div>
+      )}
+
+      {/* ======================================================== */}
+      {/* EDIT PROFILE & AVATAR MODAL                              */}
+      {/* ======================================================== */}
+      {editProfileOpen && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-md animate-in fade-in duration-200">
+          <div className="relative w-full max-w-2xl bg-[#0F121A] border border-[#252C3E] rounded-3xl shadow-[0_25px_60px_rgba(0,0,0,0.95)] overflow-hidden max-h-[92vh] flex flex-col">
+            
+            {/* Modal Header */}
+            <div className="flex items-center justify-between px-6 py-5 border-b border-white/[0.08] bg-[#141824]">
+              <div className="flex items-center gap-3">
+                <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-[#A3E635]/20 to-[#12141C] border border-[#A3E635]/40 flex items-center justify-center text-[#A3E635]">
+                  <Edit3 className="w-5 h-5" />
+                </div>
+                <div>
+                  <h3 className="text-lg font-black font-display text-white">Edit Player Profile & Identity</h3>
+                  <p className="text-xs font-mono text-slate-400">Customize avatar, gamer tag, role, and CS2 competitive details</p>
+                </div>
+              </div>
+              <button
+                onClick={() => setEditProfileOpen(false)}
+                className="p-2 rounded-xl text-slate-400 hover:text-white hover:bg-white/[0.08] transition cursor-pointer"
+              >
+                <X className="w-5 h-5" />
+              </button>
+            </div>
+
+            {/* Scrollable Content */}
+            <div className="p-6 space-y-6 overflow-y-auto">
+              
+              {/* SECTION 1: AVATAR CUSTOMIZATION */}
+              <div className="p-5 rounded-2xl bg-[#12151E] border border-white/[0.06] space-y-4">
+                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+                  <div>
+                    <label className="text-xs font-mono font-bold uppercase tracking-wider text-[#A3E635]">
+                      Player Avatar
+                    </label>
+                    <p className="text-xs text-slate-400">Choose a preset pro icon, upload from your PC, or paste an image link</p>
+                  </div>
+                  {/* Avatar Upload Mode Switcher */}
+                  <div className="flex rounded-xl bg-[#0A0D14] p-1 border border-white/[0.06] text-xs font-mono shrink-0">
+                    <button
+                      type="button"
+                      onClick={() => setAvatarUploadMode('presets')}
+                      className={`px-3 py-1 rounded-lg transition cursor-pointer ${
+                        avatarUploadMode === 'presets' ? 'bg-[#A3E635] text-slate-950 font-bold' : 'text-slate-400 hover:text-white'
+                      }`}
+                    >
+                      Presets
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => setAvatarUploadMode('upload')}
+                      className={`px-3 py-1 rounded-lg transition cursor-pointer ${
+                        avatarUploadMode === 'upload' ? 'bg-[#A3E635] text-slate-950 font-bold' : 'text-slate-400 hover:text-white'
+                      }`}
+                    >
+                      Upload File
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => setAvatarUploadMode('url')}
+                      className={`px-3 py-1 rounded-lg transition cursor-pointer ${
+                        avatarUploadMode === 'url' ? 'bg-[#A3E635] text-slate-950 font-bold' : 'text-slate-400 hover:text-white'
+                      }`}
+                    >
+                      Image URL
+                    </button>
+                  </div>
+                </div>
+
+                {/* Avatar Preview & Options Row */}
+                <div className="flex flex-col sm:flex-row items-center gap-5 pt-2">
+                  {/* Current Draft Avatar Preview with Level Badge */}
+                  <div className="relative shrink-0">
+                    <img
+                      src={draftAvatarUrl}
+                      alt="Avatar Preview"
+                      className="w-20 h-20 rounded-2xl object-cover border-2 border-[#A3E635] shadow-[0_0_20px_rgba(163,230,53,0.3)] bg-slate-900"
+                      onError={(e) => {
+                        (e.target as HTMLImageElement).src = '/images/blockeerz_avatar.png';
+                      }}
+                    />
+                    <div className="absolute -bottom-1 -right-1 w-6 h-6 rounded-full bg-amber-500 text-black font-black text-xs flex items-center justify-center border-2 border-[#12141C] shadow-md">
+                      7
+                    </div>
+                  </div>
+
+                  {/* Mode 1: Presets Grid */}
+                  {avatarUploadMode === 'presets' && (
+                    <div className="grid grid-cols-4 sm:grid-cols-8 gap-2.5 flex-1">
+                      {PRESET_AVATARS.map((av) => (
+                        <button
+                          key={av.id}
+                          type="button"
+                          onClick={() => {
+                            sound.playClick();
+                            setDraftAvatarUrl(av.url);
+                          }}
+                          className={`relative rounded-xl overflow-hidden aspect-square border-2 transition cursor-pointer group ${
+                            draftAvatarUrl === av.url ? 'border-[#A3E635] ring-2 ring-[#A3E635]/40 scale-105' : 'border-white/10 hover:border-white/30'
+                          }`}
+                          title={av.name}
+                        >
+                          <img src={av.url} alt={av.name} className="w-full h-full object-cover group-hover:scale-110 transition duration-200" />
+                          {draftAvatarUrl === av.url && (
+                            <div className="absolute inset-0 bg-[#A3E635]/25 flex items-center justify-center">
+                              <Check className="w-4 h-4 text-[#A3E635] stroke-[3]" />
+                            </div>
+                          )}
+                        </button>
+                      ))}
+                    </div>
+                  )}
+
+                  {/* Mode 2: File Upload Dropzone */}
+                  {avatarUploadMode === 'upload' && (
+                    <div className="flex-1 w-full">
+                      <label className="flex flex-col items-center justify-center w-full h-24 border-2 border-dashed border-[#A3E635]/40 hover:border-[#A3E635] rounded-xl cursor-pointer bg-[#0A0D14]/60 hover:bg-[#A3E635]/5 transition p-3 text-center">
+                        <Upload className="w-6 h-6 text-[#A3E635] mb-1" />
+                        <span className="text-xs font-mono font-bold text-white">Click to browse photo from computer</span>
+                        <span className="text-[10px] text-slate-400">Supports PNG, JPG, GIF up to 5MB</span>
+                        <input
+                          type="file"
+                          accept="image/*"
+                          onChange={handleAvatarFileUpload}
+                          className="hidden"
+                        />
+                      </label>
+                    </div>
+                  )}
+
+                  {/* Mode 3: Direct URL */}
+                  {avatarUploadMode === 'url' && (
+                    <div className="flex-1 w-full space-y-1.5">
+                      <input
+                        type="url"
+                        placeholder="https://example.com/avatar.jpg"
+                        value={draftAvatarUrl}
+                        onChange={(e) => setDraftAvatarUrl(e.target.value)}
+                        className="w-full px-4 py-2.5 rounded-xl bg-[#0A0D14] border border-white/10 focus:border-[#A3E635] text-white text-xs font-mono outline-none"
+                      />
+                      <p className="text-[10px] font-mono text-slate-400">Paste any public direct image URL</p>
+                    </div>
+                  )}
+                </div>
+              </div>
+
+              {/* SECTION 2: IDENTITY (GAMER TAG, CLAN TAG, NATIONALITY, ROLE) */}
+              <div className="p-5 rounded-2xl bg-[#12151E] border border-white/[0.06] space-y-4">
+                <label className="text-xs font-mono font-bold uppercase tracking-wider text-[#A3E635]">
+                  Player Credentials & Role
+                </label>
+                
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                  {/* GamerTag Input */}
+                  <div>
+                    <label className="block text-xs font-mono text-slate-400 mb-1.5">GamerTag / Nickname</label>
+                    <input
+                      type="text"
+                      value={draftGamerTag}
+                      onChange={(e) => setDraftGamerTag(e.target.value)}
+                      placeholder="e.g. bLocKeeRz"
+                      maxLength={18}
+                      className="w-full px-4 py-2.5 rounded-xl bg-[#0A0D14] border border-white/10 focus:border-[#A3E635] text-white text-sm font-display font-bold outline-none"
+                    />
+                  </div>
+
+                  {/* Clan Tag Input */}
+                  <div>
+                    <label className="block text-xs font-mono text-slate-400 mb-1.5">Team / Clan Tag</label>
+                    <input
+                      type="text"
+                      value={draftClanTag}
+                      onChange={(e) => setDraftClanTag(e.target.value.toUpperCase())}
+                      placeholder="e.g. VTX"
+                      maxLength={6}
+                      className="w-full px-4 py-2.5 rounded-xl bg-[#0A0D14] border border-white/10 focus:border-[#A3E635] text-white text-sm font-mono font-bold uppercase outline-none"
+                    />
+                  </div>
+
+                  {/* Country Flag Select */}
+                  <div>
+                    <label className="block text-xs font-mono text-slate-400 mb-1.5">Country / Flag</label>
+                    <select
+                      value={draftCountry.code}
+                      onChange={(e) => {
+                        const sel = PRESET_COUNTRIES.find(c => c.code === e.target.value);
+                        if (sel) setDraftCountry(sel);
+                      }}
+                      className="w-full px-4 py-2.5 rounded-xl bg-[#0A0D14] border border-white/10 focus:border-[#A3E635] text-white text-xs font-mono outline-none"
+                    >
+                      {PRESET_COUNTRIES.map(c => (
+                        <option key={c.code} value={c.code}>
+                          {c.flag} {c.name} ({c.code})
+                        </option>
+                      ))}
+                    </select>
+                  </div>
+
+                  {/* CS2 Role Select */}
+                  <div>
+                    <label className="block text-xs font-mono text-slate-400 mb-1.5">Primary CS2 Role</label>
+                    <select
+                      value={draftRole}
+                      onChange={(e) => setDraftRole(e.target.value)}
+                      className="w-full px-4 py-2.5 rounded-xl bg-[#0A0D14] border border-white/10 focus:border-[#A3E635] text-white text-xs font-mono outline-none"
+                    >
+                      {CS2_ROLES.map(r => (
+                        <option key={r} value={r}>
+                          {r}
+                        </option>
+                      ))}
+                    </select>
+                  </div>
+                </div>
+
+                {/* Player Bio */}
+                <div>
+                  <label className="block text-xs font-mono text-slate-400 mb-1.5">Player Bio / Signature</label>
+                  <textarea
+                    rows={2}
+                    value={draftBio}
+                    onChange={(e) => setDraftBio(e.target.value)}
+                    placeholder="Brief bio or tactical playstyle..."
+                    maxLength={160}
+                    className="w-full px-4 py-2 rounded-xl bg-[#0A0D14] border border-white/10 focus:border-[#A3E635] text-white text-xs font-mono outline-none resize-none"
+                  />
+                </div>
+              </div>
+
+              {/* SECTION 3: HARDWARE & STEAM INTEGRATION */}
+              <div className="p-5 rounded-2xl bg-[#12151E] border border-white/[0.06] space-y-4">
+                <label className="text-xs font-mono font-bold uppercase tracking-wider text-[#A3E635]">
+                  Esports Telemetry & Steam Setup
+                </label>
+
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                  {/* Crosshair Code */}
+                  <div>
+                    <label className="block text-xs font-mono text-slate-400 mb-1.5">CS2 Crosshair Code</label>
+                    <input
+                      type="text"
+                      value={draftCrosshairCode}
+                      onChange={(e) => setDraftCrosshairCode(e.target.value)}
+                      placeholder="CSGO-..."
+                      className="w-full px-4 py-2.5 rounded-xl bg-[#0A0D14] border border-white/10 focus:border-[#A3E635] text-white text-xs font-mono outline-none"
+                    />
+                  </div>
+
+                  {/* Steam Trade URL */}
+                  <div>
+                    <label className="block text-xs font-mono text-slate-400 mb-1.5">Steam Trade Offer URL</label>
+                    <input
+                      type="url"
+                      value={draftTradeUrl}
+                      onChange={(e) => setDraftTradeUrl(e.target.value)}
+                      placeholder="https://steamcommunity.com/tradeoffer/..."
+                      className="w-full px-4 py-2.5 rounded-xl bg-[#0A0D14] border border-white/10 focus:border-[#A3E635] text-white text-xs font-mono outline-none"
+                    />
+                  </div>
+                </div>
+              </div>
+
+            </div>
+
+            {/* Modal Footer Actions */}
+            <div className="px-6 py-4 border-t border-white/[0.08] bg-[#141824] flex items-center justify-between">
+              <button
+                type="button"
+                onClick={() => setEditProfileOpen(false)}
+                className="px-5 py-2.5 rounded-xl border border-white/10 hover:border-white/30 text-slate-300 hover:text-white font-mono text-xs transition cursor-pointer"
+              >
+                Cancel
+              </button>
+              <button
+                type="button"
+                onClick={handleSaveProfile}
+                className="px-6 py-2.5 rounded-xl bg-[#84CC16] hover:bg-[#A3E635] text-slate-950 font-display font-black text-xs uppercase tracking-wider transition cursor-pointer shadow-[0_0_20px_rgba(163,230,53,0.35)] flex items-center gap-2"
+              >
+                <Check className="w-4 h-4 stroke-[3]" />
+                <span>Save Profile Changes</span>
+              </button>
+            </div>
+
           </div>
         </div>
       )}

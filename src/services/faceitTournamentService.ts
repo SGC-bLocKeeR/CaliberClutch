@@ -50,7 +50,7 @@ export const NEXUS_FACEIT_ORGANIZER_URL = 'https://www.faceit.com/en/organizers/
 const DEFAULT_ORGANIZER_CONFIG: FaceitOrganizerConfig = {
   apiKey: '',
   organizerId: NEXUS_FACEIT_ORGANIZER_ID,
-  hubId: 'nexus-balkan-cs2-hub',
+  hubId: 'vortex-global-cs2-hub',
   autoProgressBracket: true,
   enforceFaceitAC: true,
 };

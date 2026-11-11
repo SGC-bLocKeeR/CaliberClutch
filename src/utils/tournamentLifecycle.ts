@@ -59,8 +59,8 @@ export const SCHEDULED_TOURNAMENTS: ScheduledCircuitEvent[] = [
     liveMatchDescription: 'Group A Opening: Team Spirit vs FURIA (BO3 Series)'
   },
   {
-    id: 'nexus-balkan',
-    name: 'Nexus Balkan Circuit Season 4',
+    id: 'vortex-global',
+    name: 'Vortex Global Circuit Season 4',
     startDate: '2026-11-14T16:00:00Z',
     endDate: '2026-11-18T22:00:00Z',
     logoType: 'nexus',

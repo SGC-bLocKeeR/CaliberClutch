@@ -216,23 +216,23 @@ export const INITIAL_TOURNAMENTS: Tournament[] = [
   },
   {
     id: 'tourney-cs2-faceit-cup',
-    title: 'Faceit Level 10 Balkan Championship',
+    title: 'Faceit Level 10 Global Masters Championship',
     gameId: 'cs2',
     gameName: 'Counter-Strike 2',
-    prizePool: 7500,
-    prizeCoins: 18000,
+    prizePool: 15000,
+    prizeCoins: 35000,
     entryFee: 0,
     status: 'registration',
-    maxTeams: 16,
-    registeredTeamsCount: 11,
+    maxTeams: 32,
+    registeredTeamsCount: 24,
     format: '5v5 Single Elimination BO1 + Finals BO3',
-    region: 'EU East (Warsaw/Vienna)',
+    region: 'Global / EU West (Frankfurt/London)',
     startDate: 'Sunday, 17:00 CET',
     banner: 'https://images.unsplash.com/photo-1542751371-adc38448a05e?q=80&w=1200&auto=format&fit=crop',
     organizer: {
-      name: 'Faceit Balkan Hub',
+      name: 'Faceit Global Masters Hub',
       verified: true,
-      avatar: 'https://api.dicebear.com/7.x/bottts/svg?seed=balkan_hub'
+      avatar: 'https://api.dicebear.com/7.x/bottts/svg?seed=global_hub'
     },
     rules: [
       'Minimum Faceit Elo: 2,000+ required',
@@ -660,10 +660,10 @@ export const CURRENT_USER_PASSPORT: GamerPassport = {
     },
     {
       id: 'b3',
-      name: 'Kosovo CS2 Challenger',
-      icon: '🇽🇰',
-      color: '#F59E0B',
-      description: 'Official representative in Balkan & European CS2 Qualifier brackets.'
+      name: 'Global CS2 Challenger',
+      icon: '🌐',
+      color: '#A3E635',
+      description: 'Official representative in Global & European CS2 Qualifier brackets.'
     },
     {
       id: 'b4',

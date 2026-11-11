@@ -13,6 +13,7 @@ export default defineConfig({
   server: {
     port: 5175,
     host: true,
+    allowedHosts: true,
     proxy: {
       '/api/open-faceit': {
         target: 'https://open.faceit.com/data/v4',
