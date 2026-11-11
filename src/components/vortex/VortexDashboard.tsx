@@ -2208,26 +2208,14 @@ export const VortexDashboard: React.FC<VortexDashboardProps> = ({
                 <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-6">
                   {/* Player Passport & Status */}
                   <div className="flex items-center gap-5">
-                    <div 
-                      onClick={handleOpenEditProfile}
-                      title="Click to change avatar & edit profile"
-                      className="relative cursor-pointer group"
-                    >
-                      <img 
-                        src={currentAvatarUrl} 
-                        alt={currentGamerTag} 
-                        className="w-20 h-20 sm:w-24 sm:h-24 rounded-2xl object-cover border-2 border-[#A3E635] shadow-lg shadow-[#A3E635]/20 group-hover:brightness-75 transition"
-                        onError={(e) => {
-                          (e.target as HTMLImageElement).src = '/images/blockeerz_avatar.png';
-                        }}
-                      />
-                      <div className="absolute inset-0 rounded-2xl flex items-center justify-center opacity-0 group-hover:opacity-100 bg-black/60 transition">
-                        <div className="flex flex-col items-center gap-1 text-[10px] font-mono font-bold text-white">
-                          <Camera className="w-5 h-5 text-[#A3E635]" />
-                          <span>CHANGE</span>
-                        </div>
-                      </div>
-                    </div>
+                    <img 
+                      src={currentAvatarUrl} 
+                      alt={currentGamerTag} 
+                      className="w-20 h-20 sm:w-24 sm:h-24 rounded-2xl object-cover border-2 border-[#A3E635] shadow-lg shadow-[#A3E635]/20"
+                      onError={(e) => {
+                        (e.target as HTMLImageElement).src = '/images/blockeerz_avatar.png';
+                      }}
+                    />
 
                     <div className="space-y-2">
                       <div className="flex flex-wrap items-center gap-2.5">
@@ -2239,13 +2227,6 @@ export const VortexDashboard: React.FC<VortexDashboardProps> = ({
                           VERIFIED PRO
                         </span>
                         <span className="text-base" title={currentCountry.name}>{currentCountry.flag}</span>
-                        <button
-                          onClick={handleOpenEditProfile}
-                          className="ml-2 px-3 py-1 rounded-xl bg-white/[0.06] hover:bg-[#A3E635]/20 border border-white/10 hover:border-[#A3E635]/50 text-slate-300 hover:text-white text-xs font-mono transition flex items-center gap-1.5 cursor-pointer"
-                        >
-                          <Edit3 className="w-3.5 h-3.5 text-[#A3E635]" />
-                          <span>Edit Profile</span>
-                        </button>
                       </div>
 
                       <div className="flex flex-wrap items-center gap-3 text-xs font-mono text-slate-400">
