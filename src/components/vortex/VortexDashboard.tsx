@@ -1071,58 +1071,27 @@ export const VortexDashboard: React.FC<VortexDashboardProps> = ({
                         </div>
                       </div>
 
-                      {/* GamerTag & Verified Status */}
-                      <div>
-                        <div className="flex items-center justify-center gap-1.5 font-display font-black text-white text-base">
+                      {/* Clean GamerTag & Level/ELO */}
+                      <div className="space-y-1">
+                        <div className="flex items-center justify-center gap-2 font-display font-black text-white text-base">
                           <span className="text-[#A3E635] text-xs font-mono font-bold">[{currentClanTag}]</span>
                           <span>{currentGamerTag}</span>
-                          <span className="text-xs" title={currentCountry.name}>{currentCountry.flag}</span>
-                          <span className="w-4 h-4 rounded-full bg-[#A3E635]/20 text-[#A3E635] text-[10px] font-bold flex items-center justify-center">✓</span>
-                          <span className="px-1.5 py-0.2 rounded text-[9px] font-mono font-bold bg-[#A3E635]/15 text-[#A3E635] border border-[#A3E635]/30">PRO</span>
+                          <span 
+                            className="w-4 h-4 rounded-full bg-[#A3E635]/20 text-[#A3E635] text-[10px] font-bold flex items-center justify-center" 
+                            title="Verified Player"
+                          >
+                            ✓
+                          </span>
                         </div>
-                        <div className="flex items-center justify-center gap-2 mt-1 text-xs font-mono text-slate-400">
-                          <span className="text-white font-bold">1,407 ELO</span>
+                        <div className="flex items-center justify-center gap-2 text-xs font-mono text-slate-400">
+                          <span className="text-amber-400 font-bold">Level 7</span>
                           <span>•</span>
-                          <span className="text-sky-400 font-bold">{currentRole}</span>
+                          <span className="text-white font-bold">1,407 ELO</span>
                           <span>•</span>
                           <span className="text-emerald-400 font-bold flex items-center gap-1">
                             <ShieldCheck className="w-3.5 h-3.5" />
-                            AC Verified
+                            AC Active
                           </span>
-                        </div>
-                      </div>
-
-                      {/* ELO Progression Bar to Level 8 */}
-                      <div className="w-full space-y-1 pt-1 border-t border-white/[0.06]">
-                        <div className="w-full h-1.5 rounded-full bg-[#1A1D27] overflow-hidden">
-                          <div className="h-full bg-gradient-to-r from-[#FF5500] to-amber-500 rounded-full" style={{ width: '31%' }} />
-                        </div>
-                        <div className="flex justify-between text-[10px] font-mono text-slate-500">
-                          <span>1,351 (Lv 7)</span>
-                          <span className="text-amber-400 font-bold">+124 ELO to Level 8</span>
-                          <span>1,530 (Lv 8)</span>
-                        </div>
-                      </div>
-
-                      {/* Quick Career Telemetry (Matches, Win Rate, Recent Results) */}
-                      <div className="grid grid-cols-3 gap-1 py-2.5 border-y border-white/[0.06] font-mono text-center">
-                        <div>
-                          <div className="text-[9px] text-slate-400 uppercase font-bold">MATCHES</div>
-                          <div className="text-sm font-black text-white mt-0.5">2,480</div>
-                        </div>
-                        <div className="border-x border-white/[0.06]">
-                          <div className="text-[9px] text-slate-400 uppercase font-bold">WIN RATE</div>
-                          <div className="text-sm font-black text-[#A3E635] mt-0.5">58.9%</div>
-                        </div>
-                        <div>
-                          <div className="text-[9px] text-slate-400 uppercase font-bold">RECENT FORM</div>
-                          <div className="text-xs font-black mt-1 flex items-center justify-center gap-1">
-                            <span className="w-4 h-4 rounded bg-emerald-500/20 text-emerald-400 text-[10px] flex items-center justify-center font-bold">W</span>
-                            <span className="w-4 h-4 rounded bg-emerald-500/20 text-emerald-400 text-[10px] flex items-center justify-center font-bold">W</span>
-                            <span className="w-4 h-4 rounded bg-emerald-500/20 text-emerald-400 text-[10px] flex items-center justify-center font-bold">W</span>
-                            <span className="w-4 h-4 rounded bg-red-500/20 text-red-400 text-[10px] flex items-center justify-center font-bold">L</span>
-                            <span className="w-4 h-4 rounded bg-emerald-500/20 text-emerald-400 text-[10px] flex items-center justify-center font-bold">W</span>
-                          </div>
                         </div>
                       </div>
 
@@ -1181,26 +1150,11 @@ export const VortexDashboard: React.FC<VortexDashboardProps> = ({
                             setProfileDropdownOpen(false);
                             setActiveTab('profile');
                           }}
-                          className="w-full flex items-center justify-between px-3.5 py-2 text-xs font-mono text-slate-300 hover:text-white hover:bg-white/[0.05] rounded-xl transition cursor-pointer"
+                          className="w-full flex items-center justify-between px-3.5 py-2.5 text-xs font-mono text-slate-300 hover:text-white hover:bg-white/[0.05] rounded-xl transition cursor-pointer"
                         >
                           <div className="flex items-center gap-2">
                             <User className="w-4 h-4 text-sky-400" />
                             <span>Digital Player Passport</span>
-                          </div>
-                          <ChevronRight className="w-3.5 h-3.5 text-slate-500" />
-                        </button>
-
-                        <button
-                          onClick={() => {
-                            sound.playSelect();
-                            setProfileDropdownOpen(false);
-                            setActiveTab('dashboard');
-                          }}
-                          className="w-full flex items-center justify-between px-3.5 py-2 text-xs font-mono text-slate-300 hover:text-white hover:bg-white/[0.05] rounded-xl transition cursor-pointer"
-                        >
-                          <div className="flex items-center gap-2">
-                            <BarChart2 className="w-4 h-4 text-[#A3E635]" />
-                            <span>Player Telemetry Matrix</span>
                           </div>
                           <ChevronRight className="w-3.5 h-3.5 text-slate-500" />
                         </button>
@@ -1212,7 +1166,7 @@ export const VortexDashboard: React.FC<VortexDashboardProps> = ({
                             setDashboardToast('SteamID copied: STEAM_0:1:43918293');
                             setTimeout(() => setDashboardToast(null), 3000);
                           }}
-                          className="w-full flex items-center justify-between px-3.5 py-2 text-xs font-mono text-slate-300 hover:text-white hover:bg-white/[0.05] rounded-xl transition cursor-pointer"
+                          className="w-full flex items-center justify-between px-3.5 py-2.5 text-xs font-mono text-slate-300 hover:text-white hover:bg-white/[0.05] rounded-xl transition cursor-pointer"
                         >
                           <div className="flex items-center gap-2">
                             <Copy className="w-4 h-4 text-slate-400" />
