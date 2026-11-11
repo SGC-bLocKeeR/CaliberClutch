@@ -76,6 +76,8 @@ export type VortexTab =
   | 'anticheat' 
   | 'profile';
 
+type VerificationType = 'vip' | 'verified' | 'none';
+
 interface PartySlotMember {
   id: string;
   name: string;
@@ -84,7 +86,109 @@ interface PartySlotMember {
   level: number;
   elo: number;
   isLeader?: boolean;
+  verification?: VerificationType;
 }
+
+interface FaceitVerificationBadgeProps {
+  type?: VerificationType;
+  size?: 'sm' | 'md' | 'lg';
+  className?: string;
+}
+
+const FaceitVerificationBadge: React.FC<FaceitVerificationBadgeProps> = ({
+  type = 'none',
+  size = 'md',
+  className = ''
+}) => {
+  if (!type || type === 'none') return null;
+
+  const sizeClasses = {
+    sm: 'w-3.5 h-3.5',
+    md: 'w-4 h-4',
+    lg: 'w-5 h-5'
+  }[size];
+
+  const isVip = type === 'vip';
+
+  return (
+    <span className={`relative inline-flex items-center group/vbadge align-middle ${className}`}>
+      {isVip ? (
+        <svg 
+          viewBox="0 0 24 24" 
+          className={`${sizeClasses} shrink-0 cursor-pointer transition-transform duration-150 group-hover/vbadge:scale-110 drop-shadow-[0_1px_4px_rgba(235,160,30,0.5)]`}
+          fill="none"
+          xmlns="http://www.w3.org/2000/svg"
+        >
+          {/* Authentic FACEIT 8-Pointed Star Seal */}
+          <path 
+            d="M12 1.5 L15.06 4.61 L19.42 4.58 L19.39 8.94 L22.5 12 L19.39 15.06 L19.42 19.42 L15.06 19.39 L12 22.5 L8.94 19.39 L4.58 19.42 L4.61 15.06 L1.5 12 L4.61 8.94 L4.58 4.58 L8.94 4.61 Z" 
+            fill="url(#faceitVipGoldGrad)" 
+            stroke="#D97706"
+            strokeWidth="0.6"
+          />
+          {/* Checkmark */}
+          <path 
+            d="M8.2 12.2l2.6 2.6 5.2-5.2" 
+            stroke="#12141C" 
+            strokeWidth="2.4" 
+            strokeLinecap="round" 
+            strokeLinejoin="round" 
+          />
+          <defs>
+            <linearGradient id="faceitVipGoldGrad" x1="2" y1="2" x2="22" y2="22" gradientUnits="userSpaceOnUse">
+              <stop stopColor="#FDE68A" />
+              <stop offset="0.45" stopColor="#F59E0B" />
+              <stop offset="1" stopColor="#B45309" />
+            </linearGradient>
+          </defs>
+        </svg>
+      ) : (
+        <svg 
+          viewBox="0 0 24 24" 
+          className={`${sizeClasses} shrink-0 cursor-pointer transition-transform duration-150 group-hover/vbadge:scale-110 drop-shadow-[0_1px_4px_rgba(255,255,255,0.35)]`}
+          fill="none"
+          xmlns="http://www.w3.org/2000/svg"
+        >
+          <circle cx="12" cy="12" r="10" fill="#FFFFFF" stroke="#CBD5E1" strokeWidth="0.5" />
+          <path 
+            d="M8.2 12.2l2.6 2.6 5.2-5.2" 
+            stroke="#12141C" 
+            strokeWidth="2.4" 
+            strokeLinecap="round" 
+            strokeLinejoin="round" 
+          />
+        </svg>
+      )}
+
+      {/* FACEIT AUTHENTIC TOOLTIP */}
+      <span className="absolute left-1/2 -translate-x-1/2 bottom-full mb-2 hidden group-hover/vbadge:flex flex-col z-[100] pointer-events-none min-w-[210px] p-2.5 rounded-xl bg-[#181B22] border border-white/10 shadow-[0_12px_30px_rgba(0,0,0,0.9)] text-left backdrop-blur-md animate-in fade-in duration-150">
+        <span className="flex items-center gap-2">
+          {isVip ? (
+            <svg viewBox="0 0 24 24" className="w-4 h-4 shrink-0" fill="none">
+              <path d="M12 1.5 L15.06 4.61 L19.42 4.58 L19.39 8.94 L22.5 12 L19.39 15.06 L19.42 19.42 L15.06 19.39 L12 22.5 L8.94 19.39 L4.58 19.42 L4.61 15.06 L1.5 12 L4.61 8.94 L4.58 4.58 L8.94 4.61 Z" fill="#F59E0B" />
+              <path d="M8.2 12.2l2.6 2.6 5.2-5.2" stroke="#12141C" strokeWidth="2.4" strokeLinecap="round" strokeLinejoin="round" />
+            </svg>
+          ) : (
+            <span className="w-4 h-4 rounded-full bg-white flex items-center justify-center shrink-0">
+              <svg viewBox="0 0 24 24" className="w-2.5 h-2.5 text-[#12141C]" fill="none" stroke="currentColor" strokeWidth="3">
+                <path d="M5 13l4 4L19 7" strokeLinecap="round" strokeLinejoin="round" />
+              </svg>
+            </span>
+          )}
+          <span className="text-xs font-bold text-white font-display whitespace-nowrap">
+            {isVip ? 'VIP verified account' : 'Verified account'}
+          </span>
+        </span>
+
+        <span className="my-1.5 border-t border-white/10 w-full block" />
+
+        <span className="text-[10px] font-sans text-slate-300 leading-snug whitespace-nowrap">
+          <span className="text-[#FF5500] font-bold">Learn more</span> about account verification
+        </span>
+      </span>
+    </span>
+  );
+};
 
 const SUGGESTED_TEAMMATES: PartySlotMember[] = [
   {
@@ -93,7 +197,8 @@ const SUGGESTED_TEAMMATES: PartySlotMember[] = [
     tag: 'GUILD',
     avatar: 'https://images.unsplash.com/photo-1566492031773-4f4e44671857?auto=format&fit=crop&w=200&q=80',
     level: 10,
-    elo: 2840
+    elo: 2840,
+    verification: 'vip' // Official CS Pro (Golden Star)
   },
   {
     id: 'sener1',
@@ -101,7 +206,8 @@ const SUGGESTED_TEAMMATES: PartySlotMember[] = [
     tag: 'BNE',
     avatar: 'https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?auto=format&fit=crop&w=200&q=80',
     level: 10,
-    elo: 2750
+    elo: 2750,
+    verification: 'vip' // Official CS Pro (Golden Star)
   },
   {
     id: 'gxx-',
@@ -109,7 +215,8 @@ const SUGGESTED_TEAMMATES: PartySlotMember[] = [
     tag: 'BNE',
     avatar: 'https://images.unsplash.com/photo-1570295999919-56ceb5ecca61?auto=format&fit=crop&w=200&q=80',
     level: 10,
-    elo: 2690
+    elo: 2690,
+    verification: 'verified' // Standard ID Verified
   },
   {
     id: 'karrigan_fan',
@@ -117,7 +224,8 @@ const SUGGESTED_TEAMMATES: PartySlotMember[] = [
     tag: 'FAZE',
     avatar: 'https://images.unsplash.com/photo-1527980965255-d3b416303d12?auto=format&fit=crop&w=200&q=80',
     level: 8,
-    elo: 1610
+    elo: 1610,
+    verification: 'none' // Regular player without badge
   }
 ];
 
@@ -297,6 +405,10 @@ export const VortexDashboard: React.FC<VortexDashboardProps> = ({
   const [currentCrosshairCode, setCurrentCrosshairCode] = useState<string>(() => {
     return localStorage.getItem('vortex_user_crosshair') || 'CSGO-4w29A-6yvKP-6k7kF-3xK2v-d9HkQ';
   });
+  const [currentVerification, setCurrentVerification] = useState<VerificationType>(() => {
+    const saved = localStorage.getItem('vortex_user_verification');
+    return (saved === 'vip' || saved === 'verified' || saved === 'none') ? (saved as VerificationType) : 'vip';
+  });
 
   // Edit Profile Modal Open State & Draft Form Fields
   const [editProfileOpen, setEditProfileOpen] = useState(false);
@@ -309,6 +421,7 @@ export const VortexDashboard: React.FC<VortexDashboardProps> = ({
   const [draftBio, setDraftBio] = useState(currentBio);
   const [draftTradeUrl, setDraftTradeUrl] = useState(currentTradeUrl);
   const [draftCrosshairCode, setDraftCrosshairCode] = useState(currentCrosshairCode);
+  const [draftVerification, setDraftVerification] = useState<VerificationType>(currentVerification);
 
   const handleOpenEditProfile = () => {
     sound.playClick();
@@ -320,6 +433,7 @@ export const VortexDashboard: React.FC<VortexDashboardProps> = ({
     setDraftBio(currentBio);
     setDraftTradeUrl(currentTradeUrl);
     setDraftCrosshairCode(currentCrosshairCode);
+    setDraftVerification(currentVerification);
     setProfileDropdownOpen(false);
     setEditProfileOpen(true);
   };
@@ -352,6 +466,7 @@ export const VortexDashboard: React.FC<VortexDashboardProps> = ({
     setCurrentBio(draftBio);
     setCurrentTradeUrl(draftTradeUrl);
     setCurrentCrosshairCode(draftCrosshairCode);
+    setCurrentVerification(draftVerification);
 
     localStorage.setItem('vortex_user_gamertag', draftGamerTag);
     localStorage.setItem('vortex_user_avatar', draftAvatarUrl);
@@ -361,6 +476,21 @@ export const VortexDashboard: React.FC<VortexDashboardProps> = ({
     localStorage.setItem('vortex_user_bio', draftBio);
     localStorage.setItem('vortex_user_tradeurl', draftTradeUrl);
     localStorage.setItem('vortex_user_crosshair', draftCrosshairCode);
+    localStorage.setItem('vortex_user_verification', draftVerification);
+
+    setPartySlots(prev => {
+      const next = [...prev];
+      if (next[2]) {
+        next[2] = {
+          ...next[2],
+          name: draftGamerTag.trim() || currentGamerTag,
+          avatar: draftAvatarUrl,
+          tag: draftClanTag.trim(),
+          verification: draftVerification
+        };
+      }
+      return next;
+    });
 
     setEditProfileOpen(false);
     setDashboardToast('Profile updated & synchronized successfully!');
@@ -400,7 +530,8 @@ export const VortexDashboard: React.FC<VortexDashboardProps> = ({
       avatar: currentAvatarUrl,
       level: 7,
       elo: 1407,
-      isLeader: true
+      isLeader: true,
+      verification: currentVerification
     },
     null,
     null
@@ -1022,8 +1153,9 @@ export const VortexDashboard: React.FC<VortexDashboardProps> = ({
                       (e.target as HTMLImageElement).src = '/images/blockeerz_avatar.png';
                     }}
                   />
-                  <span className="font-display font-bold text-sm text-white group-hover:text-[#A3E635] transition">
-                    {currentGamerTag}
+                  <span className="font-display font-bold text-sm text-white group-hover:text-[#A3E635] transition flex items-center gap-1.5">
+                    <span>{currentGamerTag}</span>
+                    <FaceitVerificationBadge type={currentVerification} size="sm" />
                   </span>
                   <ChevronDown className={`w-4 h-4 text-slate-400 group-hover:text-white transition-transform duration-200 ${profileDropdownOpen ? 'rotate-180 text-[#A3E635]' : ''}`} />
                 </button>
@@ -1076,12 +1208,7 @@ export const VortexDashboard: React.FC<VortexDashboardProps> = ({
                         <div className="flex items-center justify-center gap-2 font-display font-black text-white text-base">
                           <span className="text-[#A3E635] text-xs font-mono font-bold">[{currentClanTag}]</span>
                           <span>{currentGamerTag}</span>
-                          <span 
-                            className="w-4 h-4 rounded-full bg-[#A3E635]/20 text-[#A3E635] text-[10px] font-bold flex items-center justify-center" 
-                            title="Verified Player"
-                          >
-                            ✓
-                          </span>
+                          <FaceitVerificationBadge type={currentVerification} size="md" />
                         </div>
                         <div className="flex items-center justify-center gap-2 text-xs font-mono text-slate-400">
                           <span className="text-amber-400 font-bold">Level 7</span>
@@ -1378,8 +1505,7 @@ export const VortexDashboard: React.FC<VortexDashboardProps> = ({
                               <div>
                                 <div className="text-sm font-bold text-white flex items-center justify-center gap-1.5 font-display">
                                   <span>{member.name}</span>
-                                  <CheckCircle2 className="w-3.5 h-3.5 text-white fill-white/20 inline" />
-                                  <span className="text-xs">🇽🇰</span>
+                                  <FaceitVerificationBadge type={member.verification || 'none'} size="sm" />
                                 </div>
                                 <div className="flex items-center justify-center gap-1.5 text-xs font-mono text-slate-300 mt-0.5">
                                   <span className="w-4 h-4 rounded-full bg-amber-500 text-black text-[10px] font-black flex items-center justify-center">
@@ -2176,10 +2302,10 @@ export const VortexDashboard: React.FC<VortexDashboardProps> = ({
                         <span className="px-2 py-0.5 rounded text-[10px] font-mono font-bold bg-[#182012] text-[#A3E635] border border-[#A3E635]/40">
                           [{currentClanTag}]
                         </span>
-                        <h2 className="text-2xl sm:text-3xl font-black font-display text-white">{currentGamerTag}</h2>
-                        <span className="px-2 py-0.5 rounded text-[10px] font-mono font-bold bg-[#A3E635]/15 text-[#A3E635] border border-[#A3E635]/30">
-                          VERIFIED PRO
-                        </span>
+                        <h2 className="text-2xl sm:text-3xl font-black font-display text-white flex items-center gap-2">
+                          <span>{currentGamerTag}</span>
+                          <FaceitVerificationBadge type={currentVerification} size="lg" />
+                        </h2>
                         <span className="text-base" title={currentCountry.name}>{currentCountry.flag}</span>
                       </div>
 
@@ -2808,6 +2934,7 @@ export const VortexDashboard: React.FC<VortexDashboardProps> = ({
                           <div>
                             <div className="text-sm font-bold font-display text-white flex items-center gap-1.5">
                               <span>{tm.name}</span>
+                              <FaceitVerificationBadge type={tm.verification || 'none'} size="sm" />
                               <span className="text-[10px] font-mono px-1.5 py-0.2 rounded bg-black/40 text-slate-400">[{tm.tag}]</span>
                             </div>
                             <div className="text-xs font-mono text-slate-400">
@@ -2999,17 +3126,20 @@ export const VortexDashboard: React.FC<VortexDashboardProps> = ({
                   </thead>
                   <tbody className="divide-y divide-[#181D2C] text-sm">
                     {[
-                      { rank: '#1', tag: 'bLocKeeRz', country: 'Kosovo', flag: '🇽🇰', level: 'Level 7', elo: 1407, winrate: '58.9%' },
-                      { rank: '#2', tag: 's1mple', country: 'Ukraine', flag: '🇺🇦', level: 'Level 10', elo: 3840, winrate: '68.2%' },
-                      { rank: '#3', tag: 'm0NESY', country: 'Russia', flag: '🏳️', level: 'Level 10', elo: 3620, winrate: '66.4%' },
-                      { rank: '#4', tag: 'ZywOo', country: 'France', flag: '🇫🇷', level: 'Level 10', elo: 3580, winrate: '65.1%' },
-                      { rank: '#5', tag: 'NiKo', country: 'Bosnia', flag: '🇧🇦', level: 'Level 10', elo: 3410, winrate: '63.8%' },
+                      { rank: '#1', tag: currentGamerTag, country: currentCountry.name, flag: currentCountry.flag, level: 'Level 7', elo: 1407, winrate: '58.9%', verification: currentVerification },
+                      { rank: '#2', tag: 'juanflatroo', country: 'Kosovo', flag: '🇽🇰', level: 'Level 10', elo: 3890, winrate: '69.4%', verification: 'vip' as VerificationType },
+                      { rank: '#3', tag: 's1mple', country: 'Ukraine', flag: '🇺🇦', level: 'Level 10', elo: 3840, winrate: '68.2%', verification: 'vip' as VerificationType },
+                      { rank: '#4', tag: 'm0NESY', country: 'Russia', flag: '🏳️', level: 'Level 10', elo: 3620, winrate: '66.4%', verification: 'vip' as VerificationType },
+                      { rank: '#5', tag: 'ZywOo', country: 'France', flag: '🇫🇷', level: 'Level 10', elo: 3580, winrate: '65.1%', verification: 'vip' as VerificationType },
+                      { rank: '#6', tag: 'NiKo', country: 'Bosnia', flag: '🇧🇦', level: 'Level 10', elo: 3410, winrate: '63.8%', verification: 'vip' as VerificationType },
+                      { rank: '#7', tag: 'karrigan_fan', country: 'Denmark', flag: '🇩🇰', level: 'Level 8', elo: 1610, winrate: '51.4%', verification: 'none' as VerificationType },
                     ].map((p, idx) => (
                       <tr key={idx} className="hover:bg-[#161A26] transition">
                         <td className="py-4 px-6 font-mono font-black text-[#A3E635]">{p.rank}</td>
                         <td className="py-4 px-6 font-bold text-white flex items-center gap-2">
                           <span className="w-2 h-2 rounded-full bg-emerald-400" />
                           <span>{p.tag}</span>
+                          <FaceitVerificationBadge type={p.verification} size="sm" />
                         </td>
                         <td className="py-4 px-6 font-mono text-slate-300">{p.flag} {p.country}</td>
                         <td className="py-4 px-6 font-bold text-amber-400">{p.level}</td>
@@ -3113,12 +3243,10 @@ export const VortexDashboard: React.FC<VortexDashboardProps> = ({
                         <span className="px-2.5 py-0.5 rounded text-xs font-mono font-bold bg-[#182012] text-[#A3E635] border border-[#A3E635]/40">
                           [{currentClanTag}]
                         </span>
-                        <h1 className="text-2xl sm:text-4xl font-black font-display text-white tracking-tight">
-                          {currentGamerTag}
+                        <h1 className="text-2xl sm:text-4xl font-black font-display text-white tracking-tight flex items-center gap-2.5">
+                          <span>{currentGamerTag}</span>
+                          <FaceitVerificationBadge type={currentVerification} size="lg" />
                         </h1>
-                        <span className="px-2.5 py-0.5 rounded text-[10px] font-mono font-bold bg-[#A3E635]/15 text-[#A3E635] border border-[#A3E635]/30">
-                          VERIFIED PRO
-                        </span>
                         <span className="text-lg" title={currentCountry.name}>{currentCountry.flag}</span>
                       </div>
 
@@ -3977,6 +4105,77 @@ export const VortexDashboard: React.FC<VortexDashboardProps> = ({
                     maxLength={160}
                     className="w-full px-4 py-2 rounded-xl bg-[#0A0D14] border border-white/10 focus:border-[#A3E635] text-white text-xs font-mono outline-none resize-none"
                   />
+                </div>
+
+                {/* Account Verification Tier (Authentic FACEIT System) */}
+                <div className="pt-3 border-t border-white/[0.06]">
+                  <div className="flex items-center justify-between mb-2">
+                    <label className="block text-xs font-mono text-white font-bold">
+                      Account Verification Tier
+                    </label>
+                    <span className="text-[10px] font-mono text-slate-400">
+                      Standard FACEIT badge rules
+                    </span>
+                  </div>
+                  
+                  <div className="grid grid-cols-1 sm:grid-cols-3 gap-2.5">
+                    {/* VIP Verified (Pro Star) */}
+                    <button
+                      type="button"
+                      onClick={() => { sound.playSelect(); setDraftVerification('vip'); }}
+                      className={`p-3 rounded-xl border flex items-center gap-2.5 transition cursor-pointer text-left ${
+                        draftVerification === 'vip'
+                          ? 'bg-[#F59E0B]/10 border-[#F59E0B] shadow-md shadow-amber-500/10'
+                          : 'bg-[#0A0D14] border-white/10 hover:border-white/25 text-slate-400'
+                      }`}
+                    >
+                      <FaceitVerificationBadge type="vip" size="md" />
+                      <div>
+                        <div className={`text-xs font-display font-bold ${draftVerification === 'vip' ? 'text-white' : 'text-slate-300'}`}>
+                          VIP Verified
+                        </div>
+                        <div className="text-[10px] font-mono text-amber-400">Official CS2 Pro</div>
+                      </div>
+                    </button>
+
+                    {/* Community Verified (White Checkmark) */}
+                    <button
+                      type="button"
+                      onClick={() => { sound.playSelect(); setDraftVerification('verified'); }}
+                      className={`p-3 rounded-xl border flex items-center gap-2.5 transition cursor-pointer text-left ${
+                        draftVerification === 'verified'
+                          ? 'bg-white/10 border-white shadow-md shadow-white/10'
+                          : 'bg-[#0A0D14] border-white/10 hover:border-white/25 text-slate-400'
+                      }`}
+                    >
+                      <FaceitVerificationBadge type="verified" size="md" />
+                      <div>
+                        <div className={`text-xs font-display font-bold ${draftVerification === 'verified' ? 'text-white' : 'text-slate-300'}`}>
+                          Verified
+                        </div>
+                        <div className="text-[10px] font-mono text-slate-400">ID & Selfie Verified</div>
+                      </div>
+                    </button>
+
+                    {/* Unverified (None) */}
+                    <button
+                      type="button"
+                      onClick={() => { sound.playSelect(); setDraftVerification('none'); }}
+                      className={`p-3 rounded-xl border flex items-center gap-2.5 transition cursor-pointer text-left ${
+                        draftVerification === 'none'
+                          ? 'bg-slate-800/40 border-slate-400 text-white'
+                          : 'bg-[#0A0D14] border-white/10 hover:border-white/25 text-slate-400'
+                      }`}
+                    >
+                      <span className="w-4 h-4 rounded-full border border-dashed border-slate-500 flex items-center justify-center text-[9px] text-slate-500">✕</span>
+                      <div>
+                        <div className={`text-xs font-display font-bold ${draftVerification === 'none' ? 'text-white' : 'text-slate-300'}`}>
+                          Unverified
+                        </div>
+                        <div className="text-[10px] font-mono text-slate-500">No Badge (Standard)</div>
+                      </div>
+                    </button>
+                  </div>
                 </div>
               </div>
 
