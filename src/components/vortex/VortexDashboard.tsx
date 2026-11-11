@@ -4067,23 +4067,14 @@ export const VortexDashboard: React.FC<VortexDashboardProps> = ({
                     </a>
                   </div>
 
-                  <div className="relative flex items-center">
+                  <div>
                     <input
                       type="url"
                       value={draftTradeUrl}
                       onChange={(e) => setDraftTradeUrl(e.target.value)}
                       placeholder="https://steamcommunity.com/tradeoffer/new/?partner=..."
-                      className="w-full px-4 py-2.5 pr-28 rounded-xl bg-[#0A0D14] border border-white/10 focus:border-[#A3E635] text-white text-xs font-mono outline-none"
+                      className="w-full px-4 py-2.5 rounded-xl bg-[#0A0D14] border border-white/10 focus:border-[#A3E635] text-white text-xs font-mono outline-none"
                     />
-                    <a
-                      href="https://steamcommunity.com/my/tradeoffers/privacy#trade_offer_access_url"
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="absolute right-1.5 px-3 py-1.5 rounded-lg bg-white/[0.06] hover:bg-[#A3E635]/20 hover:text-[#A3E635] text-xs font-mono text-slate-300 transition flex items-center gap-1 border border-white/5 hover:border-[#A3E635]/30 cursor-pointer"
-                    >
-                      <span>Find on Steam</span>
-                      <ExternalLink className="w-3 h-3 text-[#A3E635]" />
-                    </a>
                   </div>
                 </div>
               </div>
