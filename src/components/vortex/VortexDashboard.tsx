@@ -512,10 +512,10 @@ export const VortexDashboard: React.FC<VortexDashboardProps> = ({
   const [notificationsOpen, setNotificationsOpen] = useState(false);
   const [showPremiumModal, setShowPremiumModal] = useState(initialOpenPremium);
 
-  // Anti-Cheat Active State (When active, the warning pill is hidden as in FACEIT)
+  // Anti-Cheat Active State (Defaults to false so user sees the warning until launched)
   const [isAntiCheatActive, setIsAntiCheatActive] = useState<boolean>(() => {
     const saved = localStorage.getItem('vortex_anticheat_active');
-    return saved !== null ? saved === 'true' : true;
+    return saved === 'true';
   });
 
   const handleLaunchAntiCheat = () => {
@@ -1153,7 +1153,30 @@ export const VortexDashboard: React.FC<VortexDashboardProps> = ({
               )}
             </div>
 
-            <div className="flex items-center gap-5 sm:gap-6">
+            <div className="flex items-center gap-3 sm:gap-4">
+              {/* Anti-Cheat Header Status Pill (Allows Launching or Toggling from any page) */}
+              <button
+                onClick={handleToggleAntiCheat}
+                className={`px-3 py-1.5 rounded-xl text-xs font-mono font-bold flex items-center gap-1.5 transition cursor-pointer shadow-sm ${
+                  isAntiCheatActive
+                    ? 'bg-emerald-500/10 hover:bg-emerald-500/20 text-emerald-400 border border-emerald-500/30'
+                    : 'bg-[#2A1D15] hover:bg-[#FF5500] text-[#FF5500] hover:text-white border border-[#FF5500] animate-pulse shadow-[0_0_15px_rgba(255,85,0,0.35)]'
+                }`}
+                title={isAntiCheatActive ? "Anti-Cheat is Active (Click to toggle)" : "Anti-Cheat is Stopped (Click to launch)"}
+              >
+                {isAntiCheatActive ? (
+                  <>
+                    <ShieldCheck className="w-3.5 h-3.5 text-emerald-400" />
+                    <span className="hidden sm:inline">AC Active</span>
+                  </>
+                ) : (
+                  <>
+                    <ShieldAlert className="w-3.5 h-3.5 text-[#FF5500]" />
+                    <span>Launch AC</span>
+                  </>
+                )}
+              </button>
+
               {/* Notification Bell (Clean glowing icon as in Photo 2, no box window) */}
               <button
                 onClick={() => { sound.playClick(); setNotificationsOpen(!notificationsOpen); }}
@@ -2275,9 +2298,9 @@ export const VortexDashboard: React.FC<VortexDashboardProps> = ({
                         <span>•</span>
                         <span className="text-slate-300">#91 Global</span>
                         <span>•</span>
-                        <span className="text-emerald-400 font-bold flex items-center gap-1">
-                          <ShieldCheck className="w-3.5 h-3.5" />
-                          Kernel AC Verified
+                        <span className={`font-bold flex items-center gap-1 ${isAntiCheatActive ? 'text-emerald-400' : 'text-[#FF5500]'}`}>
+                          {isAntiCheatActive ? <ShieldCheck className="w-3.5 h-3.5" /> : <ShieldAlert className="w-3.5 h-3.5" />}
+                          {isAntiCheatActive ? 'Kernel AC Verified' : 'AC Not Running'}
                         </span>
                         <span>•</span>
                         <span className="text-sky-400 font-bold">{currentRole}</span>
@@ -2359,9 +2382,9 @@ export const VortexDashboard: React.FC<VortexDashboardProps> = ({
 
                     {/* Telemetry Heartbeat Status */}
                     <div className="flex items-center justify-between pt-2 border-t border-white/[0.06] text-[10px] font-mono text-slate-400">
-                      <span className="flex items-center gap-1 text-emerald-400">
-                        <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />
-                        AC v3.1 Ring-0
+                      <span className={`flex items-center gap-1 ${isAntiCheatActive ? 'text-emerald-400' : 'text-[#FF5500]'}`}>
+                        <span className={`w-1.5 h-1.5 rounded-full ${isAntiCheatActive ? 'bg-emerald-400 animate-pulse' : 'bg-[#FF5500]'}`} />
+                        {isAntiCheatActive ? 'AC v3.1 Ring-0 Active' : 'AC Inactive'}
                       </span>
                       <span>128-Tick Sync</span>
                       <span className="text-slate-500">Jitter 0.4ms</span>
@@ -3239,9 +3262,9 @@ export const VortexDashboard: React.FC<VortexDashboardProps> = ({
                         <span>•</span>
                         <span className="text-sky-400 font-bold">{currentRole}</span>
                         <span>•</span>
-                        <span className="text-emerald-400 font-bold flex items-center gap-1">
-                          <ShieldCheck className="w-3.5 h-3.5" />
-                          Kernel AC Verified
+                        <span className={`font-bold flex items-center gap-1 ${isAntiCheatActive ? 'text-emerald-400' : 'text-[#FF5500]'}`}>
+                          {isAntiCheatActive ? <ShieldCheck className="w-3.5 h-3.5" /> : <ShieldAlert className="w-3.5 h-3.5" />}
+                          {isAntiCheatActive ? 'Kernel AC Verified' : 'AC Not Running'}
                         </span>
                       </div>
                     </div>
