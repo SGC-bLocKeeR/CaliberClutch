@@ -512,15 +512,19 @@ export const VortexDashboard: React.FC<VortexDashboardProps> = ({
   const [notificationsOpen, setNotificationsOpen] = useState(false);
   const [showPremiumModal, setShowPremiumModal] = useState(initialOpenPremium);
 
-  // Anti-Cheat Active State (Defaults to false so user sees the warning until launched)
+  // Anti-Cheat Active State (Stored in localStorage, default false)
   const [isAntiCheatActive, setIsAntiCheatActive] = useState<boolean>(() => {
     const saved = localStorage.getItem('vortex_anticheat_active');
     return saved === 'true';
   });
 
+  // Warning prompt shown only when user attempts to FIND MATCH without Anti-Cheat running
+  const [showAcPrompt, setShowAcPrompt] = useState(false);
+
   const handleLaunchAntiCheat = () => {
     sound.playJoinScrim();
     setIsAntiCheatActive(true);
+    setShowAcPrompt(false);
     localStorage.setItem('vortex_anticheat_active', 'true');
     setDashboardToast('VORTEX Kernel Anti-Cheat launched & active!');
     setTimeout(() => setDashboardToast(null), 3500);
@@ -531,7 +535,10 @@ export const VortexDashboard: React.FC<VortexDashboardProps> = ({
     setIsAntiCheatActive(prev => {
       const next = !prev;
       localStorage.setItem('vortex_anticheat_active', String(next));
-      setDashboardToast(next ? 'Anti-Cheat is now ACTIVE (Warning hidden)' : 'Anti-Cheat STOPPED (Warning pill visible)');
+      if (next) {
+        setShowAcPrompt(false);
+      }
+      setDashboardToast(next ? 'Anti-Cheat is now ACTIVE' : 'Anti-Cheat STOPPED');
       setTimeout(() => setDashboardToast(null), 3500);
       return next;
     });
@@ -1592,28 +1599,35 @@ export const VortexDashboard: React.FC<VortexDashboardProps> = ({
                     })}
                   </div>
 
-                  {/* FLOATING ANTI-CHEAT WARNING PILL (SHOWN ONLY IF ANTI-CHEAT IS NOT ACTIVE) */}
-                  {!isAntiCheatActive && (
-                    <div className="flex justify-center -mt-4 relative z-10 animate-in fade-in duration-200">
-                      <div className="inline-flex items-center gap-3.5 px-5 py-2.5 rounded-xl bg-[#0B0D12] border border-[#FF5500] shadow-2xl shadow-orange-500/20 text-xs font-mono">
+                  {/* FLOATING ANTI-CHEAT WARNING PILL (SHOWN ONLY IF USER CLICKS FIND MATCH WITHOUT AC RUNNING) */}
+                  {!isAntiCheatActive && showAcPrompt && (
+                    <div className="flex justify-center -mt-4 relative z-10 animate-in fade-in zoom-in-95 duration-200">
+                      <div className="inline-flex items-center gap-3 sm:gap-4 px-4 sm:px-5 py-2 sm:py-2.5 rounded-xl bg-[#090B0F] border border-[#FF5500] shadow-[0_0_25px_rgba(255,85,0,0.3)] text-xs font-mono">
                         <div className="flex items-center gap-2 text-slate-200">
-                          <ShieldAlert className="w-4 h-4 text-[#FF5500]" />
-                          <span className="font-semibold text-slate-200">Please run Anti-Cheat</span>
+                          <ShieldAlert className="w-4 h-4 text-[#FF5500] shrink-0" />
+                          <span className="font-semibold text-slate-100 tracking-wide">Please run Anti-Cheat</span>
                         </div>
                         <a
                           href="https://www.faceit.com/en/anti-cheat"
                           target="_blank"
                           rel="noopener noreferrer"
-                          className="text-[#FF5500] hover:text-[#FFAA00] font-bold text-xs uppercase tracking-wider transition"
+                          className="text-[#FF5500] hover:text-[#FFAA00] font-bold text-xs uppercase tracking-wider transition hover:underline"
                         >
                           DOWNLOAD
                         </a>
                         <button
                           onClick={handleLaunchAntiCheat}
-                          className="px-3.5 py-1 rounded bg-[#2A1D15] hover:bg-[#FF5500] text-[#FF5500] hover:text-white border border-[#FF5500] font-bold text-xs uppercase tracking-wider transition cursor-pointer"
+                          className="px-4 py-1.5 rounded-lg bg-[#FF5500] hover:bg-[#FF6611] text-white font-black text-xs uppercase tracking-wider transition cursor-pointer shadow-md shadow-orange-500/30 hover:scale-105 active:scale-95"
                           title="Click to launch Anti-Cheat"
                         >
                           LAUNCH
+                        </button>
+                        <button
+                          onClick={() => setShowAcPrompt(false)}
+                          className="text-slate-500 hover:text-white transition cursor-pointer p-0.5 ml-0.5"
+                          title="Dismiss warning"
+                        >
+                          <X className="w-3.5 h-3.5" />
                         </button>
                       </div>
                     </div>
@@ -1663,6 +1677,7 @@ export const VortexDashboard: React.FC<VortexDashboardProps> = ({
                       onClick={() => {
                         if (!isAntiCheatActive) {
                           sound.playClick();
+                          setShowAcPrompt(true);
                           setDashboardToast('⚠️ Anti-Cheat must be running to find a match! Click LAUNCH.');
                           setTimeout(() => setDashboardToast(null), 3500);
                           return;
@@ -3520,27 +3535,34 @@ export const VortexDashboard: React.FC<VortexDashboardProps> = ({
                   Searching for balanced 128-tick CS2 lobbies based on your verified Level 7 ELO (1,407).
                 </p>
 
-                {!isAntiCheatActive && (
-                  <div className="pt-2 flex justify-center animate-in fade-in duration-200">
-                    <div className="inline-flex items-center gap-3.5 px-4 py-2 rounded-xl bg-[#0D0F14] border border-orange-500/40 shadow-lg shadow-orange-500/10 text-xs font-mono">
+                {!isAntiCheatActive && showAcPrompt && (
+                  <div className="pt-2 flex justify-center animate-in fade-in zoom-in-95 duration-200">
+                    <div className="inline-flex items-center gap-3 sm:gap-4 px-4 sm:px-5 py-2 sm:py-2.5 rounded-xl bg-[#090B0F] border border-[#FF5500] shadow-[0_0_25px_rgba(255,85,0,0.3)] text-xs font-mono">
                       <div className="flex items-center gap-2 text-slate-200">
-                        <ShieldAlert className="w-4 h-4 text-[#ff5500]" />
-                        <span className="font-semibold text-slate-300">Please run Anti-Cheat</span>
+                        <ShieldAlert className="w-4 h-4 text-[#FF5500] shrink-0" />
+                        <span className="font-semibold text-slate-100 tracking-wide">Please run Anti-Cheat</span>
                       </div>
                       <a
                         href="https://www.faceit.com/en/anti-cheat"
                         target="_blank"
                         rel="noopener noreferrer"
-                        className="text-[#ff5500] hover:text-[#ff7733] font-bold text-xs uppercase tracking-wider transition"
+                        className="text-[#FF5500] hover:text-[#FFAA00] font-bold text-xs uppercase tracking-wider transition hover:underline"
                       >
                         DOWNLOAD
                       </a>
                       <button
                         onClick={handleLaunchAntiCheat}
-                        className="px-3 py-1 rounded-lg bg-[#2A1D15] hover:bg-[#ff5500] text-[#ff5500] hover:text-white border border-orange-500/50 font-bold text-xs uppercase tracking-wider transition cursor-pointer"
+                        className="px-4 py-1.5 rounded-lg bg-[#FF5500] hover:bg-[#FF6611] text-white font-black text-xs uppercase tracking-wider transition cursor-pointer shadow-md shadow-orange-500/30 hover:scale-105 active:scale-95"
                         title="Click to launch Anti-Cheat"
                       >
                         LAUNCH
+                      </button>
+                      <button
+                        onClick={() => setShowAcPrompt(false)}
+                        className="text-slate-500 hover:text-white transition cursor-pointer p-0.5 ml-0.5"
+                        title="Dismiss warning"
+                      >
+                        <X className="w-3.5 h-3.5" />
                       </button>
                     </div>
                   </div>
