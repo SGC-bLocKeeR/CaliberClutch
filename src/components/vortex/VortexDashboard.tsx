@@ -48,6 +48,7 @@ import {
   Gauge,
   Camera,
   Edit3,
+  Search,
   Upload,
   Image as ImageIcon
 } from 'lucide-react';
@@ -566,6 +567,8 @@ export const VortexDashboard: React.FC<VortexDashboardProps> = ({
     }
   }, [initialOpenPremium]);
   const [connectToast, setConnectToast] = useState<{ name: string; ip: string } | null>(null);
+  const [rankingSearch, setRankingSearch] = useState('');
+  const [rankingRegion, setRankingRegion] = useState<'all' | 'XK' | 'AL' | 'lvl10'>('all');
 
   // Matchmaking Party Lobby State (5 Party Slots, Center is user)
   const [partySlots, setPartySlots] = useState<(PartySlotMember | null)[]>([
@@ -875,6 +878,14 @@ export const VortexDashboard: React.FC<VortexDashboardProps> = ({
       badgeColor: isQueuing
         ? 'bg-red-500/20 text-red-400 border border-red-500/40 animate-pulse'
         : 'bg-[#A3E635]/15 text-[#A3E635] border border-[#A3E635]/30'
+    },
+    {
+      id: 'rankings' as VortexTab,
+      label: 'Rankings',
+      desc: 'Platform Player Leaderboard',
+      icon: Award,
+      badge: 'TOP PLAYERS',
+      badgeColor: 'bg-[#A3E635]/15 text-[#A3E635] border border-[#A3E635]/30 font-bold'
     }
   ];
 
@@ -916,14 +927,6 @@ export const VortexDashboard: React.FC<VortexDashboardProps> = ({
       label: 'CS2 Lineups',
       desc: 'Under Development • Opening Soon',
       icon: Compass,
-      badge: 'COMING SOON',
-      badgeColor: 'bg-amber-500/15 text-amber-400 border border-amber-500/30 font-bold'
-    },
-    {
-      id: 'rankings' as VortexTab,
-      label: 'Rankings',
-      desc: 'Under Development • Opening Soon',
-      icon: Award,
       badge: 'COMING SOON',
       badgeColor: 'bg-amber-500/15 text-amber-400 border border-amber-500/30 font-bold'
     },
@@ -2848,8 +2851,8 @@ export const VortexDashboard: React.FC<VortexDashboardProps> = ({
                 <div className="lg:col-span-6 bg-[#0E1017] border border-[#202536] rounded-3xl p-6 shadow-xl space-y-4">
                   <div className="flex items-center justify-between pb-3 border-b border-white/[0.06]">
                     <div>
-                      <h3 className="text-lg font-black font-display text-white">Global Pro Standings</h3>
-                      <p className="text-xs text-[#94A3B8]">Verified international CS2 rankings</p>
+                      <h3 className="text-lg font-black font-display text-white">Platform Player Standings</h3>
+                      <p className="text-xs text-[#94A3B8]">Verified VORTEX community rankings</p>
                     </div>
                     <button
                       onClick={() => { sound.playSelect(); setActiveTab('rankings'); }}
@@ -2862,11 +2865,11 @@ export const VortexDashboard: React.FC<VortexDashboardProps> = ({
 
                   <div className="space-y-2">
                     {[
-                      { rank: '#1', tag: 'm0NESY', level: 'Level 10', elo: 3840, flag: '🇪🇺', isUser: false },
-                      { rank: '#2', tag: 'ZywOo', level: 'Level 10', elo: 3795, flag: '🇫🇷', isUser: false },
-                      { rank: '#3', tag: 'donk', level: 'Level 10', elo: 3720, flag: '🇪🇺', isUser: false },
-                      { rank: '#4', tag: 'bLocKeeRz', level: 'Level 7', elo: 1407, flag: '🌐', isUser: true },
-                      { rank: '#5', tag: 'NiKo', level: 'Level 10', elo: 3650, flag: '🇧🇦', isUser: false },
+                      { rank: '#1', tag: 'juanflatroo', level: 'Level 10', elo: 3890, flag: '🇽🇰', isUser: false },
+                      { rank: '#2', tag: 'gxx-', level: 'Level 10', elo: 3420, flag: '🇽🇰', isUser: false },
+                      { rank: '#3', tag: currentGamerTag, level: 'Level 7', elo: 1407, flag: currentCountry.flag, isUser: true },
+                      { rank: '#4', tag: 'SENER1', level: 'Level 9', elo: 1980, flag: '🇽🇰', isUser: false },
+                      { rank: '#5', tag: 'shroud_al', level: 'Level 8', elo: 1750, flag: '🇦🇱', isUser: false },
                     ].map((p, idx) => (
                       <div
                         key={idx}
@@ -3085,63 +3088,420 @@ export const VortexDashboard: React.FC<VortexDashboardProps> = ({
           )}
 
           {/* ======================================================== */}
-          {/* TAB: RANKINGS                                            */}
+          {/* TAB: RANKINGS (PLATFORM PLAYER LEADERBOARD - RANK #3)    */}
           {/* ======================================================== */}
-          {activeTab === 'rankings' && (
-            <div className="bg-[#0E1017] border border-[#202536] rounded-3xl p-6 md:p-8 shadow-xl space-y-6">
-              <div className="flex items-center justify-between pb-4 border-b border-[#1E2333]">
-                <div>
-                  <h2 className="text-2xl font-black font-display text-white">Global & Regional Rankings</h2>
-                  <p className="text-xs text-[#94A3B8]">Verified FACEIT ELO and official player passports</p>
-                </div>
-                <button
-                  onClick={() => setActiveTab('play')}
-                  className="px-4 py-2 rounded-xl bg-[#141722] border border-[#252C3D] text-xs font-mono hover:text-white cursor-pointer"
-                >
-                  ← Back to Play
-                </button>
-              </div>
+          {activeTab === 'rankings' && (() => {
+            const platformRankingPlayers = [
+              {
+                rank: '#1',
+                rankNum: 1,
+                tag: 'juanflatroo',
+                avatar: 'https://images.unsplash.com/photo-1566492031773-4f4e44671857?auto=format&fit=crop&w=120&q=80',
+                country: 'Kosovo',
+                flag: '🇽🇰',
+                code: 'XK',
+                level: 'Level 10',
+                levelNum: 10,
+                elo: 3890,
+                matches: 428,
+                winrate: '69.4%',
+                kd: '1.48',
+                verification: 'vip' as VerificationType,
+                isUser: false
+              },
+              {
+                rank: '#2',
+                rankNum: 2,
+                tag: 'gxx-',
+                avatar: 'https://images.unsplash.com/photo-1570295999919-56ceb5ecca61?auto=format&fit=crop&w=120&q=80',
+                country: 'Kosovo',
+                flag: '🇽🇰',
+                code: 'XK',
+                level: 'Level 10',
+                levelNum: 10,
+                elo: 3420,
+                matches: 382,
+                winrate: '64.2%',
+                kd: '1.35',
+                verification: 'verified' as VerificationType,
+                isUser: false
+              },
+              {
+                rank: '#3',
+                rankNum: 3,
+                tag: currentGamerTag,
+                avatar: currentAvatarUrl,
+                country: currentCountry.name,
+                flag: currentCountry.flag,
+                code: currentCountry.code,
+                level: 'Level 7',
+                levelNum: 7,
+                elo: 1407,
+                matches: 214,
+                winrate: '58.9%',
+                kd: '1.28',
+                verification: currentVerification,
+                isUser: true
+              },
+              {
+                rank: '#4',
+                rankNum: 4,
+                tag: 'SENER1',
+                avatar: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?auto=format&fit=crop&w=120&q=80',
+                country: 'Kosovo',
+                flag: '🇽🇰',
+                code: 'XK',
+                level: 'Level 9',
+                levelNum: 9,
+                elo: 1980,
+                matches: 310,
+                winrate: '57.1%',
+                kd: '1.22',
+                verification: 'verified' as VerificationType,
+                isUser: false
+              },
+              {
+                rank: '#5',
+                rankNum: 5,
+                tag: 'shroud_al',
+                avatar: 'https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?auto=format&fit=crop&w=120&q=80',
+                country: 'Albania',
+                flag: '🇦🇱',
+                code: 'AL',
+                level: 'Level 8',
+                levelNum: 8,
+                elo: 1750,
+                matches: 195,
+                winrate: '55.4%',
+                kd: '1.18',
+                verification: 'none' as VerificationType,
+                isUser: false
+              },
+              {
+                rank: '#6',
+                rankNum: 6,
+                tag: 'redline_cs',
+                avatar: 'https://images.unsplash.com/photo-1527980965255-d3b416303d12?auto=format&fit=crop&w=120&q=80',
+                country: 'Kosovo',
+                flag: '🇽🇰',
+                code: 'XK',
+                level: 'Level 8',
+                levelNum: 8,
+                elo: 1690,
+                matches: 182,
+                winrate: '54.0%',
+                kd: '1.15',
+                verification: 'none' as VerificationType,
+                isUser: false
+              },
+              {
+                rank: '#7',
+                rankNum: 7,
+                tag: 'eagle_xk',
+                avatar: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=120&q=80',
+                country: 'Kosovo',
+                flag: '🇽🇰',
+                code: 'XK',
+                level: 'Level 7',
+                levelNum: 7,
+                elo: 1430,
+                matches: 160,
+                winrate: '52.8%',
+                kd: '1.11',
+                verification: 'none' as VerificationType,
+                isUser: false
+              },
+              {
+                rank: '#8',
+                rankNum: 8,
+                tag: 'tirana_beast',
+                avatar: 'https://images.unsplash.com/photo-1500648767791-00dcc994a43e?auto=format&fit=crop&w=120&q=80',
+                country: 'Albania',
+                flag: '🇦🇱',
+                code: 'AL',
+                level: 'Level 6',
+                levelNum: 6,
+                elo: 1290,
+                matches: 142,
+                winrate: '50.5%',
+                kd: '1.05',
+                verification: 'none' as VerificationType,
+                isUser: false
+              },
+              {
+                rank: '#9',
+                rankNum: 9,
+                tag: 'vortex_striker',
+                avatar: 'https://images.unsplash.com/photo-1566492031773-4f4e44671857?auto=format&fit=crop&w=120&q=80',
+                country: 'Germany',
+                flag: '🇩🇪',
+                code: 'DE',
+                level: 'Level 6',
+                levelNum: 6,
+                elo: 1210,
+                matches: 128,
+                winrate: '49.8%',
+                kd: '1.02',
+                verification: 'none' as VerificationType,
+                isUser: false
+              },
+              {
+                rank: '#10',
+                rankNum: 10,
+                tag: 'bl1tz_kd',
+                avatar: 'https://images.unsplash.com/photo-1570295999919-56ceb5ecca61?auto=format&fit=crop&w=120&q=80',
+                country: 'Kosovo',
+                flag: '🇽🇰',
+                code: 'XK',
+                level: 'Level 5',
+                levelNum: 5,
+                elo: 1150,
+                matches: 98,
+                winrate: '48.5%',
+                kd: '0.98',
+                verification: 'none' as VerificationType,
+                isUser: false
+              }
+            ];
 
-              <div className="rounded-3xl bg-[#12141C] border border-[#23293B] overflow-hidden shadow-xl">
-                <table className="w-full text-left font-sans">
-                  <thead>
-                    <tr className="border-b border-[#1E2333] text-[11px] font-mono font-bold text-[#94A3B8] uppercase bg-[#0D0F15]">
-                      <th className="py-3 px-6">Rank</th>
-                      <th className="py-3 px-6">Player</th>
-                      <th className="py-3 px-6">Country</th>
-                      <th className="py-3 px-6">FACEIT Level</th>
-                      <th className="py-3 px-6">ELO Rating</th>
-                      <th className="py-3 px-6">Win Rate</th>
-                    </tr>
-                  </thead>
-                  <tbody className="divide-y divide-[#181D2C] text-sm">
-                    {[
-                      { rank: '#1', tag: currentGamerTag, country: currentCountry.name, flag: currentCountry.flag, level: 'Level 7', elo: 1407, winrate: '58.9%', verification: currentVerification },
-                      { rank: '#2', tag: 'juanflatroo', country: 'Kosovo', flag: '🇽🇰', level: 'Level 10', elo: 3890, winrate: '69.4%', verification: 'vip' as VerificationType },
-                      { rank: '#3', tag: 's1mple', country: 'Ukraine', flag: '🇺🇦', level: 'Level 10', elo: 3840, winrate: '68.2%', verification: 'vip' as VerificationType },
-                      { rank: '#4', tag: 'm0NESY', country: 'Russia', flag: '🏳️', level: 'Level 10', elo: 3620, winrate: '66.4%', verification: 'vip' as VerificationType },
-                      { rank: '#5', tag: 'ZywOo', country: 'France', flag: '🇫🇷', level: 'Level 10', elo: 3580, winrate: '65.1%', verification: 'vip' as VerificationType },
-                      { rank: '#6', tag: 'NiKo', country: 'Bosnia', flag: '🇧🇦', level: 'Level 10', elo: 3410, winrate: '63.8%', verification: 'vip' as VerificationType },
-                      { rank: '#7', tag: 'karrigan_fan', country: 'Denmark', flag: '🇩🇰', level: 'Level 8', elo: 1610, winrate: '51.4%', verification: 'none' as VerificationType },
-                    ].map((p, idx) => (
-                      <tr key={idx} className="hover:bg-[#161A26] transition">
-                        <td className="py-4 px-6 font-mono font-black text-[#A3E635]">{p.rank}</td>
-                        <td className="py-4 px-6 font-bold text-white flex items-center gap-2">
-                          <span className="w-2 h-2 rounded-full bg-emerald-400" />
-                          <span>{p.tag}</span>
-                          <FaceitVerificationBadge type={p.verification} size="sm" />
-                        </td>
-                        <td className="py-4 px-6 font-mono text-slate-300">{p.flag} {p.country}</td>
-                        <td className="py-4 px-6 font-bold text-amber-400">{p.level}</td>
-                        <td className="py-4 px-6 font-mono font-bold text-white">{p.elo}</td>
-                        <td className="py-4 px-6 font-mono text-emerald-400">{p.winrate}</td>
+            const filteredPlayers = platformRankingPlayers.filter(p => {
+              if (rankingRegion === 'XK' && p.code !== 'XK') return false;
+              if (rankingRegion === 'AL' && p.code !== 'AL') return false;
+              if (rankingRegion === 'lvl10' && p.levelNum !== 10) return false;
+              if (rankingSearch.trim()) {
+                const q = rankingSearch.toLowerCase();
+                return p.tag.toLowerCase().includes(q) || p.country.toLowerCase().includes(q);
+              }
+              return true;
+            });
+
+            return (
+              <div className="bg-[#0E1017] border border-[#202536] rounded-3xl p-6 md:p-8 shadow-xl space-y-6">
+                <div className="flex flex-wrap items-center justify-between gap-4 pb-4 border-b border-[#1E2333]">
+                  <div>
+                    <div className="flex items-center gap-2.5">
+                      <h2 className="text-2xl font-black font-display text-white">Platform Player Rankings</h2>
+                      <span className="px-2.5 py-0.5 rounded-full text-[10px] font-mono font-bold bg-[#A3E635]/15 text-[#A3E635] border border-[#A3E635]/30">
+                        SEASON 1 LIVE
+                      </span>
+                    </div>
+                    <p className="text-xs text-[#94A3B8] mt-1">
+                      Official competitive leaderboard of registered players on our platform • Rank #3: <strong className="text-white">{currentGamerTag}</strong>
+                    </p>
+                  </div>
+                  <button
+                    onClick={() => { sound.playClick(); setActiveTab('play'); }}
+                    className="px-4 py-2 rounded-xl bg-[#141722] hover:bg-[#1C2130] border border-[#252C3D] hover:border-[#A3E635]/40 text-xs font-mono text-slate-300 hover:text-white transition cursor-pointer flex items-center gap-2"
+                  >
+                    <span>← Back to Play</span>
+                  </button>
+                </div>
+
+                {/* TOP 3 PODIUM CARDS */}
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                  {/* #1 Card - Gold */}
+                  <div className="p-5 rounded-2xl bg-gradient-to-b from-[#1C1708] to-[#12141C] border border-amber-500/40 shadow-lg relative overflow-hidden">
+                    <div className="absolute top-2 right-2 text-2xl">🥇</div>
+                    <div className="text-[10px] font-mono font-bold uppercase tracking-wider text-amber-400">RANK #1 • PLATFORM LEADER</div>
+                    <div className="mt-3 flex items-center gap-3">
+                      <img
+                        src="https://images.unsplash.com/photo-1566492031773-4f4e44671857?auto=format&fit=crop&w=120&q=80"
+                        alt="juanflatroo"
+                        className="w-12 h-12 rounded-xl object-cover border border-amber-500/40"
+                      />
+                      <div>
+                        <div className="flex items-center gap-1.5">
+                          <span className="font-display font-black text-white text-base">juanflatroo</span>
+                          <FaceitVerificationBadge type="vip" size="sm" />
+                        </div>
+                        <span className="text-xs text-slate-400 font-mono">🇽🇰 Kosovo</span>
+                      </div>
+                    </div>
+                    <div className="mt-4 pt-3 border-t border-white/[0.06] flex items-center justify-between text-xs font-mono">
+                      <span className="text-amber-400 font-bold">Level 10</span>
+                      <span className="text-white font-bold">3,890 ELO</span>
+                      <span className="text-emerald-400 font-bold">69.4% Win</span>
+                    </div>
+                  </div>
+
+                  {/* #2 Card - Silver */}
+                  <div className="p-5 rounded-2xl bg-gradient-to-b from-[#171922] to-[#12141C] border border-slate-400/30 shadow-lg relative overflow-hidden">
+                    <div className="absolute top-2 right-2 text-2xl">🥈</div>
+                    <div className="text-[10px] font-mono font-bold uppercase tracking-wider text-slate-300">RANK #2 • PLATFORM ELITE</div>
+                    <div className="mt-3 flex items-center gap-3">
+                      <img
+                        src="https://images.unsplash.com/photo-1570295999919-56ceb5ecca61?auto=format&fit=crop&w=120&q=80"
+                        alt="gxx-"
+                        className="w-12 h-12 rounded-xl object-cover border border-slate-400/30"
+                      />
+                      <div>
+                        <div className="flex items-center gap-1.5">
+                          <span className="font-display font-black text-white text-base">gxx-</span>
+                          <FaceitVerificationBadge type="verified" size="sm" />
+                        </div>
+                        <span className="text-xs text-slate-400 font-mono">🇽🇰 Kosovo</span>
+                      </div>
+                    </div>
+                    <div className="mt-4 pt-3 border-t border-white/[0.06] flex items-center justify-between text-xs font-mono">
+                      <span className="text-amber-400 font-bold">Level 10</span>
+                      <span className="text-white font-bold">3,420 ELO</span>
+                      <span className="text-emerald-400 font-bold">64.2% Win</span>
+                    </div>
+                  </div>
+
+                  {/* #3 Card - Bronze / Current User (bLocKeeRz) */}
+                  <div className="p-5 rounded-2xl bg-gradient-to-b from-[#18210C] via-[#141B0E] to-[#12141C] border-2 border-[#A3E635] shadow-[0_0_25px_rgba(163,230,53,0.25)] relative overflow-hidden">
+                    <div className="absolute top-2 right-2 text-2xl">🥉</div>
+                    <div className="flex items-center gap-2">
+                      <span className="text-[10px] font-mono font-bold uppercase tracking-wider text-[#A3E635]">RANK #3 • YOUR STANDING</span>
+                      <span className="px-1.5 py-0.2 rounded text-[9px] bg-[#A3E635] text-slate-950 font-black">YOU</span>
+                    </div>
+                    <div className="mt-3 flex items-center gap-3">
+                      <img
+                        src={currentAvatarUrl}
+                        alt={currentGamerTag}
+                        className="w-12 h-12 rounded-xl object-cover border-2 border-[#A3E635]"
+                      />
+                      <div>
+                        <div className="flex items-center gap-1.5">
+                          <span className="font-display font-black text-white text-base">{currentGamerTag}</span>
+                          <FaceitVerificationBadge type={currentVerification} size="sm" />
+                        </div>
+                        <span className="text-xs text-slate-400 font-mono">{currentCountry.flag} {currentCountry.name}</span>
+                      </div>
+                    </div>
+                    <div className="mt-4 pt-3 border-t border-white/[0.06] flex items-center justify-between text-xs font-mono">
+                      <span className="text-lime-400 font-bold">Level 7</span>
+                      <span className="text-[#A3E635] font-black">1,407 ELO</span>
+                      <span className="text-emerald-400 font-bold">58.9% Win</span>
+                    </div>
+                  </div>
+                </div>
+
+                {/* SEARCH & REGION FILTERS */}
+                <div className="flex flex-wrap items-center justify-between gap-4 pt-2">
+                  <div className="flex items-center gap-2">
+                    <button
+                      onClick={() => setRankingRegion('all')}
+                      className={`px-3 py-1.5 rounded-xl text-xs font-mono font-bold transition cursor-pointer ${
+                        rankingRegion === 'all'
+                          ? 'bg-[#A3E635] text-slate-950 shadow-md'
+                          : 'bg-[#141722] text-slate-400 hover:text-white border border-[#232938]'
+                      }`}
+                    >
+                      All Platform Players
+                    </button>
+                    <button
+                      onClick={() => setRankingRegion('XK')}
+                      className={`px-3 py-1.5 rounded-xl text-xs font-mono font-bold transition cursor-pointer ${
+                        rankingRegion === 'XK'
+                          ? 'bg-[#A3E635] text-slate-950 shadow-md'
+                          : 'bg-[#141722] text-slate-400 hover:text-white border border-[#232938]'
+                      }`}
+                    >
+                      🇽🇰 Kosovo
+                    </button>
+                    <button
+                      onClick={() => setRankingRegion('AL')}
+                      className={`px-3 py-1.5 rounded-xl text-xs font-mono font-bold transition cursor-pointer ${
+                        rankingRegion === 'AL'
+                          ? 'bg-[#A3E635] text-slate-950 shadow-md'
+                          : 'bg-[#141722] text-slate-400 hover:text-white border border-[#232938]'
+                      }`}
+                    >
+                      🇦🇱 Albania
+                    </button>
+                    <button
+                      onClick={() => setRankingRegion('lvl10')}
+                      className={`px-3 py-1.5 rounded-xl text-xs font-mono font-bold transition cursor-pointer ${
+                        rankingRegion === 'lvl10'
+                          ? 'bg-[#A3E635] text-slate-950 shadow-md'
+                          : 'bg-[#141722] text-slate-400 hover:text-white border border-[#232938]'
+                      }`}
+                    >
+                      Level 10 Masters
+                    </button>
+                  </div>
+
+                  <div className="relative">
+                    <Search className="w-3.5 h-3.5 text-slate-400 absolute left-3 top-1/2 -translate-y-1/2" />
+                    <input
+                      type="text"
+                      value={rankingSearch}
+                      onChange={(e) => setRankingSearch(e.target.value)}
+                      placeholder="Search platform player..."
+                      className="pl-8 pr-3 py-1.5 rounded-xl bg-[#12141C] border border-[#232938] text-xs font-mono text-white placeholder-slate-500 focus:outline-none focus:border-[#A3E635]"
+                    />
+                  </div>
+                </div>
+
+                {/* LEADERBOARD TABLE */}
+                <div className="rounded-3xl bg-[#12141C] border border-[#23293B] overflow-hidden shadow-xl">
+                  <table className="w-full text-left font-sans">
+                    <thead>
+                      <tr className="border-b border-[#1E2333] text-[11px] font-mono font-bold text-[#94A3B8] uppercase bg-[#0D0F15]">
+                        <th className="py-3 px-6">Rank</th>
+                        <th className="py-3 px-6">Player</th>
+                        <th className="py-3 px-6">Country</th>
+                        <th className="py-3 px-6">Skill Level</th>
+                        <th className="py-3 px-6">Platform ELO</th>
+                        <th className="py-3 px-6">Matches</th>
+                        <th className="py-3 px-6">Win Rate</th>
+                        <th className="py-3 px-6">K/D</th>
                       </tr>
-                    ))}
-                  </tbody>
-                </table>
+                    </thead>
+                    <tbody className="divide-y divide-[#181D2C] text-sm">
+                      {filteredPlayers.map((p, idx) => (
+                        <tr 
+                          key={idx} 
+                          className={`transition ${
+                            p.isUser 
+                              ? 'bg-[#18210C]/80 hover:bg-[#18210C] font-semibold text-white' 
+                              : 'hover:bg-[#161A26]'
+                          }`}
+                        >
+                          <td className="py-4 px-6 font-mono font-black">
+                            <span className={
+                              p.rankNum === 1 ? 'text-amber-400' :
+                              p.rankNum === 2 ? 'text-slate-300' :
+                              p.rankNum === 3 ? 'text-[#A3E635]' : 'text-slate-400'
+                            }>
+                              {p.rank}
+                            </span>
+                          </td>
+                          <td className="py-4 px-6 text-white">
+                            <div className="flex items-center gap-2.5">
+                              <span className="w-2 h-2 rounded-full bg-emerald-400" />
+                              <img src={p.avatar} alt={p.tag} className="w-6 h-6 rounded-md object-cover border border-white/10" />
+                              <span className="font-bold">{p.tag}</span>
+                              {p.isUser && (
+                                <span className="px-1.5 py-0.2 rounded text-[9px] bg-[#A3E635] text-slate-950 font-black">YOU</span>
+                              )}
+                              <FaceitVerificationBadge type={p.verification} size="sm" />
+                            </div>
+                          </td>
+                          <td className="py-4 px-6 font-mono text-slate-300">{p.flag} {p.country}</td>
+                          <td className="py-4 px-6">
+                            <span className={`px-2 py-0.5 rounded text-xs font-mono font-bold ${
+                              p.levelNum === 10 ? 'bg-orange-500/20 text-[#FF5500] border border-[#FF5500]/40' :
+                              p.levelNum >= 7 ? 'bg-lime-500/20 text-[#A3E635] border border-[#A3E635]/40' :
+                              'bg-slate-700/40 text-slate-300'
+                            }`}>
+                              {p.level}
+                            </span>
+                          </td>
+                          <td className="py-4 px-6 font-mono font-bold text-white">{p.elo}</td>
+                          <td className="py-4 px-6 font-mono text-slate-400">{p.matches}</td>
+                          <td className="py-4 px-6 font-mono text-emerald-400 font-bold">{p.winrate}</td>
+                          <td className="py-4 px-6 font-mono text-slate-300">{p.kd}</td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
               </div>
-            </div>
-          )}
+            );
+          })()}
 
           {/* ======================================================== */}
           {/* TAB: ANTI-CHEAT                                          */}
