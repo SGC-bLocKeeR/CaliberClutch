@@ -88,6 +88,8 @@ interface PartySlotMember {
   elo: number;
   isLeader?: boolean;
   verification?: VerificationType;
+  flag?: string;
+  countryName?: string;
 }
 
 interface FaceitVerificationBadgeProps {
@@ -199,7 +201,9 @@ const SUGGESTED_TEAMMATES: PartySlotMember[] = [
     avatar: 'https://images.unsplash.com/photo-1566492031773-4f4e44671857?auto=format&fit=crop&w=200&q=80',
     level: 10,
     elo: 2840,
-    verification: 'vip' // Official CS Pro (Golden Star)
+    verification: 'vip', // Official CS Pro (Golden Star)
+    flag: '🇽🇰',
+    countryName: 'Kosovo'
   },
   {
     id: 'sener1',
@@ -208,7 +212,9 @@ const SUGGESTED_TEAMMATES: PartySlotMember[] = [
     avatar: 'https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?auto=format&fit=crop&w=200&q=80',
     level: 10,
     elo: 2750,
-    verification: 'vip' // Official CS Pro (Golden Star)
+    verification: 'vip', // Official CS Pro (Golden Star)
+    flag: '🇽🇰',
+    countryName: 'Kosovo'
   },
   {
     id: 'gxx-',
@@ -217,7 +223,9 @@ const SUGGESTED_TEAMMATES: PartySlotMember[] = [
     avatar: 'https://images.unsplash.com/photo-1570295999919-56ceb5ecca61?auto=format&fit=crop&w=200&q=80',
     level: 10,
     elo: 2690,
-    verification: 'verified' // Standard ID Verified
+    verification: 'verified', // Standard ID Verified
+    flag: '🇽🇰',
+    countryName: 'Kosovo'
   },
   {
     id: 'karrigan_fan',
@@ -226,7 +234,9 @@ const SUGGESTED_TEAMMATES: PartySlotMember[] = [
     avatar: 'https://images.unsplash.com/photo-1527980965255-d3b416303d12?auto=format&fit=crop&w=200&q=80',
     level: 8,
     elo: 1610,
-    verification: 'none' // Regular player without badge
+    verification: 'none', // Regular player without badge
+    flag: '🇩🇰',
+    countryName: 'Denmark'
   }
 ];
 
@@ -499,7 +509,9 @@ export const VortexDashboard: React.FC<VortexDashboardProps> = ({
           name: draftGamerTag.trim() || currentGamerTag,
           avatar: draftAvatarUrl,
           tag: draftClanTag.trim(),
-          verification: draftVerification
+          verification: draftVerification,
+          flag: draftCountry.flag,
+          countryName: draftCountry.name
         };
       }
       return next;
@@ -585,7 +597,6 @@ export const VortexDashboard: React.FC<VortexDashboardProps> = ({
   const [rankingRegion, setRankingRegion] = useState<'all' | 'XK' | 'AL' | 'lvl10'>('all');
   const [sidebarSearchQuery, setSidebarSearchQuery] = useState('');
   const [sidebarSearchOpen, setSidebarSearchOpen] = useState(false);
-  const [gameSelectorOpen, setGameSelectorOpen] = useState(false);
 
   // Matchmaking Party Lobby State (5 Party Slots, Center is user)
   const [partySlots, setPartySlots] = useState<(PartySlotMember | null)[]>([
@@ -599,7 +610,9 @@ export const VortexDashboard: React.FC<VortexDashboardProps> = ({
       level: 7,
       elo: 1407,
       isLeader: true,
-      verification: currentVerification
+      verification: currentVerification,
+      flag: currentCountry.flag,
+      countryName: currentCountry.name
     },
     null,
     null
@@ -652,7 +665,7 @@ export const VortexDashboard: React.FC<VortexDashboardProps> = ({
     setTimeout(() => setDashboardToast(null), 3500);
   };
 
-  // Synchronize leader tag and avatar if state changes
+  // Synchronize leader tag, avatar, verification, and country if state changes
   useEffect(() => {
     setPartySlots(prev => {
       const next = [...prev];
@@ -663,11 +676,14 @@ export const VortexDashboard: React.FC<VortexDashboardProps> = ({
         avatar: currentAvatarUrl,
         level: 7,
         elo: 1407,
-        isLeader: true
+        isLeader: true,
+        verification: currentVerification,
+        flag: currentCountry.flag,
+        countryName: currentCountry.name
       };
       return next;
     });
-  }, [currentGamerTag, currentClanTag, currentAvatarUrl]);
+  }, [currentGamerTag, currentClanTag, currentAvatarUrl, currentVerification, currentCountry]);
 
   // Queue Interval Timer
   useEffect(() => {
@@ -1061,46 +1077,22 @@ export const VortexDashboard: React.FC<VortexDashboardProps> = ({
             {/* INTEGRATED COUNTER-STRIKE 2 GAME SELECTOR (AS IN FACEIT SCREENSHOT) */}
             {!sidebarCollapsed ? (
               <div className="relative mb-2 px-1">
-                <button
-                  onClick={() => { sound.playClick(); setGameSelectorOpen(!gameSelectorOpen); }}
-                  className="w-full flex items-center justify-between px-3 py-2 rounded-xl bg-[#14161F] hover:bg-[#191D2A] border border-white/[0.06] hover:border-white/15 transition cursor-pointer text-left group"
-                >
+                <div className="w-full flex items-center justify-between px-3 py-2 rounded-xl bg-[#14161F] border border-white/[0.06] text-left">
                   <div className="flex items-center gap-2.5">
                     <CS2GameIcon className="w-6 h-6" />
-                    <span className="font-sans font-bold text-xs text-white tracking-wide">CS2</span>
+                    <span className="font-sans font-bold text-xs text-white tracking-wide">Counter Strike 2</span>
                   </div>
-                  <div className="flex items-center gap-1.5 text-slate-400 group-hover:text-white transition">
-                    <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />
-                    <ChevronDown className={`w-3.5 h-3.5 transition-transform duration-200 ${gameSelectorOpen ? 'rotate-180' : ''}`} />
-                  </div>
-                </button>
-
-                {/* Dropdown Menu when clicked */}
-                {gameSelectorOpen && (
-                  <div className="absolute left-1 right-1 top-full mt-1.5 p-2 rounded-2xl bg-[#0D0F16] border border-white/10 shadow-2xl z-50 animate-in fade-in zoom-in-95 duration-150">
-                    <div className="text-[10px] font-mono text-slate-400 px-2 py-1 uppercase tracking-wider">Active Title</div>
-                    <div className="p-2 rounded-xl bg-[#1A2644]/40 border border-[#2F4275]/50 flex items-center justify-between">
-                      <div className="flex items-center gap-2.5">
-                        <CS2GameIcon className="w-6 h-6" />
-                        <div>
-                          <div className="text-xs font-bold text-white">Counter-Strike 2</div>
-                          <div className="text-[10px] text-emerald-400 font-mono">128-Tick Competitive Active</div>
-                        </div>
-                      </div>
-                      <Check className="w-4 h-4 text-emerald-400" />
-                    </div>
-                  </div>
-                )}
+                  <span className="w-1.5 h-1.5 rounded-full bg-emerald-400" title="Counter Strike 2 Active" />
+                </div>
               </div>
             ) : (
               <div className="flex justify-center mb-2">
-                <button
-                  onClick={() => { sound.playClick(); setSidebarCollapsed(false); }}
-                  title="Counter-Strike 2 (Active Title)"
-                  className="p-1 rounded-xl bg-[#14161F] hover:bg-[#191D2A] border border-white/[0.06] transition cursor-pointer"
+                <div
+                  title="Counter Strike 2"
+                  className="p-1 rounded-xl bg-[#14161F] border border-white/[0.06]"
                 >
                   <CS2GameIcon className="w-7 h-7" />
-                </button>
+                </div>
               </div>
             )}
 
@@ -1450,11 +1442,11 @@ export const VortexDashboard: React.FC<VortexDashboardProps> = ({
                   </span>
                 </div>
 
-                {/* Top Row: User Level / ELO Progression + S9 Monthly Mission */}
-                <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-center pb-6 border-b border-white/[0.06]">
+                {/* Top Row: User Level / ELO Progression */}
+                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-6 pb-6 border-b border-white/[0.06]">
                   
-                  {/* Left: User Level 7 Badge & ELO Bar */}
-                  <div className="lg:col-span-7 flex flex-col sm:flex-row sm:items-center gap-5">
+                  {/* User Level 7 Badge & ELO Bar */}
+                  <div className="flex flex-col sm:flex-row sm:items-center gap-5 w-full">
                     {/* Yellow Faceit Level 7 Circular Badge */}
                     <div className="w-16 h-16 sm:w-20 sm:h-20 rounded-full bg-gradient-to-br from-amber-400 via-amber-500 to-yellow-600 p-[3.5px] shadow-lg shadow-amber-500/25 shrink-0">
                       <div className="w-full h-full rounded-full bg-[#12141C] flex items-center justify-center border border-amber-300/40">
@@ -1475,7 +1467,7 @@ export const VortexDashboard: React.FC<VortexDashboardProps> = ({
                         </span>
                         <div className="ml-auto flex items-center gap-1.5 px-2.5 py-0.5 rounded-lg bg-white/[0.04] border border-white/10 text-xs font-mono font-bold text-slate-300">
                           <span>#91</span>
-                          <span>🇽🇰</span>
+                          <span>{currentCountry.flag}</span>
                           <ChevronRight className="w-3.5 h-3.5 text-emerald-400" />
                         </div>
                       </div>
@@ -1512,37 +1504,6 @@ export const VortexDashboard: React.FC<VortexDashboardProps> = ({
                           Post party
                         </button>
                       </div>
-                    </div>
-                  </div>
-
-                  {/* Right: S9 Monthly Mission: Silent Salute */}
-                  <div className="lg:col-span-5 p-4 rounded-2xl bg-[#12141C] border border-[#232838] space-y-2 relative overflow-hidden">
-                    <div className="flex items-center justify-between text-[11px] font-mono text-slate-400">
-                      <span className="uppercase tracking-wider font-bold text-slate-300">S9 MONTHLY MISSION: SILENT SALUTE</span>
-                      <span className="text-white font-bold">2/5</span>
-                    </div>
-
-                    <div className="flex items-center justify-between">
-                      <span className="text-sm font-bold text-white font-display">Play 5 matches</span>
-                      <div className="flex items-center gap-2 text-xs font-mono font-bold text-amber-400">
-                        <div className="w-6 h-6 rounded-full bg-gradient-to-br from-amber-500 to-orange-600 flex items-center justify-center text-white shadow-sm">
-                          <Star className="w-3.5 h-3.5 fill-white" />
-                        </div>
-                        <div className="flex items-center gap-1 px-2 py-0.5 rounded bg-black/40 border border-white/10 text-white">
-                          <span>F 100</span>
-                          <Lock className="w-3 h-3 text-emerald-400" />
-                        </div>
-                      </div>
-                    </div>
-
-                    {/* Mission Progress Bar */}
-                    <div className="w-full h-1.5 rounded-full bg-[#1E2332] overflow-hidden">
-                      <div className="h-full bg-gradient-to-r from-[#FF5500] to-amber-500 rounded-full" style={{ width: '40%' }} />
-                    </div>
-
-                    <div className="flex items-center justify-between text-[10px] font-mono text-slate-500 pt-0.5">
-                      <span>Ends in 19D 21H 09M</span>
-                      <span className="text-emerald-400 font-bold">Active Stage</span>
                     </div>
                   </div>
                 </div>
@@ -1608,13 +1569,36 @@ export const VortexDashboard: React.FC<VortexDashboardProps> = ({
                               <div>
                                 <div className="text-sm font-bold text-white flex items-center justify-center gap-1.5 font-display">
                                   <span>{member.name}</span>
-                                  <FaceitVerificationBadge type={member.verification || 'none'} size="sm" />
+                                  <FaceitVerificationBadge 
+                                    type={member.verification || (isCenterLeader ? currentVerification : 'none')} 
+                                    size="sm" 
+                                  />
+                                  {(member.flag || (isCenterLeader ? currentCountry.flag : null)) && (
+                                    <span 
+                                      className="text-sm leading-none shrink-0" 
+                                      title={member.countryName || (isCenterLeader ? currentCountry.name : '')}
+                                    >
+                                      {member.flag || (isCenterLeader ? currentCountry.flag : '')}
+                                    </span>
+                                  )}
                                 </div>
-                                <div className="flex items-center justify-center gap-1.5 text-xs font-mono text-slate-300 mt-0.5">
-                                  <span className="w-4 h-4 rounded-full bg-amber-500 text-black text-[10px] font-black flex items-center justify-center">
-                                    {member.level}
-                                  </span>
-                                  <span className="font-bold">{member.elo.toLocaleString()}</span>
+                                <div className="inline-flex items-center gap-2 px-2.5 py-0.5 rounded-full bg-[#151922] border border-white/10 shadow-inner mt-1">
+                                  <div className="w-4 h-4 rounded-full relative flex items-center justify-center">
+                                    <svg className="w-4 h-4 -rotate-90" viewBox="0 0 36 36">
+                                      <path className="text-white/10" strokeWidth="4" stroke="currentColor" fill="none" d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" />
+                                      <path 
+                                        className={member.level >= 10 ? 'text-[#FF5500]' : member.level >= 7 ? 'text-amber-500' : 'text-[#A3E635]'} 
+                                        strokeDasharray="68, 100" 
+                                        strokeWidth="4" 
+                                        strokeLinecap="round" 
+                                        stroke="currentColor" 
+                                        fill="none" 
+                                        d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" 
+                                      />
+                                    </svg>
+                                    <span className="absolute text-[9px] font-black text-white">{member.level}</span>
+                                  </div>
+                                  <span className="text-xs font-mono font-bold text-white tracking-tight">{member.elo.toLocaleString()}</span>
                                 </div>
                               </div>
                             </div>
