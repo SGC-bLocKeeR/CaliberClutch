@@ -15,7 +15,7 @@ export const CountryFlag: React.FC<CountryFlagProps> = ({
 }) => {
   const [hasError, setHasError] = useState(false);
   const cleanCode = (code || 'XK').toUpperCase().trim();
-  const lowerCode = cleanCode === 'WW' ? 'un' : cleanCode.toLowerCase();
+  const lowerCode = cleanCode.toLowerCase();
 
   const sizeClasses = {
     xs: 'w-4 h-2.5 rounded-[2px]',
@@ -61,13 +61,13 @@ export const CountryFlag: React.FC<CountryFlagProps> = ({
     );
   }
 
-  if (hasError || cleanCode === 'WW') {
+  if (hasError) {
     return (
       <span 
         className={`inline-flex items-center justify-center bg-slate-800 border border-white/10 text-[10px] font-mono text-slate-300 font-bold ${sizeClasses} ${className}`}
         title={name || cleanCode}
       >
-        🌐
+        🏳️
       </span>
     );
   }

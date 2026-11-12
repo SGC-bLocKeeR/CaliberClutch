@@ -189,12 +189,11 @@ export const ALL_COUNTRIES: Country[] = [
   { code: 'VE', name: 'Venezuela', flag: '🇻🇪' },
   { code: 'YE', name: 'Yemen', flag: '🇾🇪' },
   { code: 'ZM', name: 'Zambia', flag: '🇿🇲' },
-  { code: 'ZW', name: 'Zimbabwe', flag: '🇿🇼' },
-  { code: 'WW', name: 'Global / Worldwide', flag: '🌐' }
+  { code: 'ZW', name: 'Zimbabwe', flag: '🇿🇼' }
 ];
 
 export const getCountryByCode = (code?: string): Country => {
   if (!code) return ALL_COUNTRIES[0];
   const found = ALL_COUNTRIES.find(c => c.code.toUpperCase() === code.toUpperCase());
-  return found || { code: code.toUpperCase(), name: code.toUpperCase(), flag: '🌐' };
+  return found || ALL_COUNTRIES[0];
 };
