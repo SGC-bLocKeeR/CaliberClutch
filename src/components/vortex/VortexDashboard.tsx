@@ -3589,13 +3589,46 @@ export const VortexDashboard: React.FC<VortexDashboardProps> = ({
 
                         <div className="flex items-center gap-3">
                           <span className="text-xs font-mono text-slate-400">{dm.size}</span>
-                          <button
-                            onClick={() => handleDownloadDemo(dm.map)}
-                            className="px-4 py-2 rounded-xl bg-[#141722] hover:bg-[#84CC16] text-[#A3E635] hover:text-slate-950 border border-[#A3E635]/40 font-mono text-xs font-bold transition cursor-pointer flex items-center gap-1.5"
-                          >
-                            <Download className="w-3.5 h-3.5" />
-                            <span>Download Demo</span>
-                          </button>
+
+                          <div className="flex items-center gap-2">
+                            {/* Download Demo Button with Authentic FACEIT Tooltip */}
+                            <div className="relative group/demotip">
+                              <button
+                                onClick={() => handleDownloadDemo(dm.map)}
+                                className="w-10 h-10 rounded-xl bg-[#1C202B] hover:bg-[#262C3B] border border-white/10 hover:border-white/25 text-slate-200 hover:text-white flex items-center justify-center transition cursor-pointer shadow-sm hover:scale-105 active:scale-95"
+                                aria-label="Download demo"
+                              >
+                                <Download className="w-4 h-4 stroke-[2.2]" />
+                              </button>
+
+                              {/* Pure White FACEIT Speech Bubble Tooltip */}
+                              <div className="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 px-2.5 py-1 rounded-md bg-white text-slate-950 text-xs font-sans font-bold shadow-2xl whitespace-nowrap opacity-0 group-hover/demotip:opacity-100 transition-all duration-150 pointer-events-none z-30">
+                                Download demo
+                                <div className="absolute top-full left-1/2 -translate-x-1/2 border-4 border-transparent border-t-white" />
+                              </div>
+                            </div>
+
+                            {/* View Match Room External Link Button with Tooltip */}
+                            <div className="relative group/roomtip">
+                              <button
+                                onClick={() => {
+                                  sound.playClick();
+                                  setDashboardToast(`Opening match room for ${dm.match}...`);
+                                  setTimeout(() => setDashboardToast(null), 2500);
+                                }}
+                                className="w-10 h-10 rounded-xl bg-[#141722] hover:bg-[#1E2333] border border-white/10 hover:border-white/20 text-slate-400 hover:text-white flex items-center justify-center transition cursor-pointer shadow-sm hover:scale-105 active:scale-95"
+                                aria-label="View match"
+                              >
+                                <ExternalLink className="w-4 h-4 stroke-[2.2]" />
+                              </button>
+
+                              {/* Pure White FACEIT Speech Bubble Tooltip */}
+                              <div className="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 px-2.5 py-1 rounded-md bg-white text-slate-950 text-xs font-sans font-bold shadow-2xl whitespace-nowrap opacity-0 group-hover/roomtip:opacity-100 transition-all duration-150 pointer-events-none z-30">
+                                View match
+                                <div className="absolute top-full left-1/2 -translate-x-1/2 border-4 border-transparent border-t-white" />
+                              </div>
+                            </div>
+                          </div>
                         </div>
                       </div>
                     ))}
