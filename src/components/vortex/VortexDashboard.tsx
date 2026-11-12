@@ -960,22 +960,16 @@ export const VortexDashboard: React.FC<VortexDashboardProps> = ({
               {!sidebarCollapsed ? (
                 <div 
                   onClick={() => { sound.playClick(); setActiveTab('dashboard'); }}
-                  className={`flex items-center gap-3 cursor-pointer group transition p-1.5 -ml-1 rounded-2xl ${
-                    activeTab === 'dashboard' 
-                      ? 'bg-white/[0.04] ring-1 ring-[#A3E635]/30 shadow-[0_0_20px_rgba(163,230,53,0.15)]' 
-                      : 'hover:bg-white/[0.03]'
-                  }`}
-                  title="VORTEX Gaming (Click to return to Dashboard Home)"
+                  className="flex items-center gap-3 cursor-pointer group transition hover:scale-105"
+                  title="VORTEX Dashboard"
                 >
                   <VortexBrandLogo />
                 </div>
               ) : (
                 <div 
                   onClick={() => { sound.playClick(); setActiveTab('dashboard'); }}
-                  className={`cursor-pointer transition hover:scale-110 rounded-xl p-0.5 ${
-                    activeTab === 'dashboard' ? 'ring-2 ring-[#A3E635] shadow-[0_0_15px_rgba(163,230,53,0.3)]' : ''
-                  }`}
-                  title="VORTEX Gaming (Click to return to Dashboard Home)"
+                  className="cursor-pointer transition hover:scale-110"
+                  title="VORTEX Dashboard"
                 >
                   <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-[#18210C] to-[#12141C] border border-[#A3E635]/50 flex items-center justify-center text-[#A3E635] font-black font-display text-xs shadow-[0_0_15px_rgba(163,230,53,0.25)]">
                     VTX
