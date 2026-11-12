@@ -320,7 +320,7 @@ const SERVER_COUNTRY_LOCATIONS = [
   }
 ];
 
-// Exact Hamburger Collapse Icon with Tilted Neon Diamond as in reference screenshot
+// Clean Hamburger Collapse Icon for Sidebar
 export const SidebarMenuIcon: React.FC<{ collapsed?: boolean; className?: string }> = ({ collapsed, className = "w-5 h-5" }) => (
   <div className={`relative flex items-center justify-center ${className}`}>
     <div className="flex flex-col justify-between w-4 h-3.5">
@@ -328,8 +328,6 @@ export const SidebarMenuIcon: React.FC<{ collapsed?: boolean; className?: string
       <span className="w-full h-[2px] bg-slate-200 rounded-full transition-all duration-300" />
       <span className={`h-[2px] bg-slate-200 rounded-full transition-all duration-300 ${collapsed ? 'w-2.5' : 'w-full'}`} />
     </div>
-    {/* Tilted neon diamond dot on the top-right corner */}
-    <span className="absolute -top-1 -right-1 w-2 h-2 rotate-45 bg-[#A3E635] shadow-[0_0_8px_rgba(163,230,53,0.95)] rounded-[1px]" />
   </div>
 );
 
