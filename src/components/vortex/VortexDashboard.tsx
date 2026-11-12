@@ -4401,9 +4401,9 @@ export const VortexDashboard: React.FC<VortexDashboardProps> = ({
                   {/* Country Flag Select */}
                   <div>
                     <label className="block text-xs font-mono text-slate-400 mb-1.5">Country</label>
-                    <div className="flex items-center gap-2.5">
-                      <div className="p-2 rounded-xl bg-[#0A0D14] border border-white/10 flex items-center justify-center shrink-0 shadow-inner" title={draftCountry.name}>
-                        <CountryFlag code={draftCountry.code} name={draftCountry.name} size="lg" />
+                    <div className="relative">
+                      <div className="absolute left-3.5 top-1/2 -translate-y-1/2 pointer-events-none flex items-center">
+                        <CountryFlag code={draftCountry.code} name={draftCountry.name} size="md" />
                       </div>
                       <select
                         value={draftCountry.code}
@@ -4411,31 +4411,35 @@ export const VortexDashboard: React.FC<VortexDashboardProps> = ({
                           const sel = ALL_COUNTRIES.find(c => c.code === e.target.value);
                           if (sel) setDraftCountry(sel);
                         }}
-                        className="flex-1 px-4 py-2.5 rounded-xl bg-[#0A0D14] border border-white/10 focus:border-[#A3E635] text-white text-xs font-mono outline-none cursor-pointer"
+                        className="w-full pl-11 pr-9 py-2.5 rounded-xl bg-[#0A0D14] border border-white/10 focus:border-[#A3E635] text-white text-xs font-mono outline-none cursor-pointer appearance-none transition"
                       >
                         {ALL_COUNTRIES.map(c => (
                           <option key={c.code} value={c.code} className="bg-[#12141C] text-white py-1">
-                            {c.name} ({c.code})
+                            {c.name}
                           </option>
                         ))}
                       </select>
+                      <ChevronDown className="w-4 h-4 text-slate-400 absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none" />
                     </div>
                   </div>
 
                   {/* CS2 Role Select */}
                   <div>
                     <label className="block text-xs font-mono text-slate-400 mb-1.5">Primary CS2 Role</label>
-                    <select
-                      value={draftRole}
-                      onChange={(e) => setDraftRole(e.target.value)}
-                      className="w-full px-4 py-2.5 rounded-xl bg-[#0A0D14] border border-white/10 focus:border-[#A3E635] text-white text-xs font-mono outline-none"
-                    >
-                      {CS2_ROLES.map(r => (
-                        <option key={r} value={r}>
-                          {r}
-                        </option>
-                      ))}
-                    </select>
+                    <div className="relative">
+                      <select
+                        value={draftRole}
+                        onChange={(e) => setDraftRole(e.target.value)}
+                        className="w-full px-4 pr-9 py-2.5 rounded-xl bg-[#0A0D14] border border-white/10 focus:border-[#A3E635] text-white text-xs font-mono outline-none cursor-pointer appearance-none transition"
+                      >
+                        {CS2_ROLES.map(r => (
+                          <option key={r} value={r} className="bg-[#12141C] text-white py-1">
+                            {r}
+                          </option>
+                        ))}
+                      </select>
+                      <ChevronDown className="w-4 h-4 text-slate-400 absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none" />
+                    </div>
                   </div>
                 </div>
 
