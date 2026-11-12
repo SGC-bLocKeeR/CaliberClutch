@@ -523,10 +523,28 @@ export const VortexDashboard: React.FC<VortexDashboardProps> = ({
 
   const handleLaunchAntiCheat = () => {
     sound.playJoinScrim();
+
+    // Trigger local desktop Anti-Cheat protocol handler (faceitac:// / faceit://)
+    try {
+      const iframe = document.createElement('iframe');
+      iframe.style.display = 'none';
+      iframe.src = 'faceitac://launch';
+      document.body.appendChild(iframe);
+      setTimeout(() => {
+        try {
+          document.body.removeChild(iframe);
+        } catch {}
+      }, 1500);
+
+      window.location.href = 'faceitac://';
+    } catch (e) {
+      console.warn('Protocol launch attempt:', e);
+    }
+
     setIsAntiCheatActive(true);
     setShowAcPrompt(false);
     localStorage.setItem('vortex_anticheat_active', 'true');
-    setDashboardToast('VORTEX Kernel Anti-Cheat launched & active!');
+    setDashboardToast('Launching Anti-Cheat client & activating Ring-0 driver...');
     setTimeout(() => setDashboardToast(null), 3500);
   };
 
@@ -1161,29 +1179,6 @@ export const VortexDashboard: React.FC<VortexDashboardProps> = ({
             </div>
 
             <div className="flex items-center gap-3 sm:gap-4">
-              {/* Anti-Cheat Header Status Pill (Allows Launching or Toggling from any page) */}
-              <button
-                onClick={handleToggleAntiCheat}
-                className={`px-3 py-1.5 rounded-xl text-xs font-mono font-bold flex items-center gap-1.5 transition cursor-pointer shadow-sm ${
-                  isAntiCheatActive
-                    ? 'bg-emerald-500/10 hover:bg-emerald-500/20 text-emerald-400 border border-emerald-500/30'
-                    : 'bg-[#2A1D15] hover:bg-[#FF5500] text-[#FF5500] hover:text-white border border-[#FF5500] animate-pulse shadow-[0_0_15px_rgba(255,85,0,0.35)]'
-                }`}
-                title={isAntiCheatActive ? "Anti-Cheat is Active (Click to toggle)" : "Anti-Cheat is Stopped (Click to launch)"}
-              >
-                {isAntiCheatActive ? (
-                  <>
-                    <ShieldCheck className="w-3.5 h-3.5 text-emerald-400" />
-                    <span className="hidden sm:inline">AC Active</span>
-                  </>
-                ) : (
-                  <>
-                    <ShieldAlert className="w-3.5 h-3.5 text-[#FF5500]" />
-                    <span>Launch AC</span>
-                  </>
-                )}
-              </button>
-
               {/* Notification Bell (Clean glowing icon as in Photo 2, no box window) */}
               <button
                 onClick={() => { sound.playClick(); setNotificationsOpen(!notificationsOpen); }}
@@ -1615,13 +1610,16 @@ export const VortexDashboard: React.FC<VortexDashboardProps> = ({
                         >
                           DOWNLOAD
                         </a>
-                        <button
-                          onClick={handleLaunchAntiCheat}
-                          className="px-4 py-1.5 rounded-lg bg-[#FF5500] hover:bg-[#FF6611] text-white font-black text-xs uppercase tracking-wider transition cursor-pointer shadow-md shadow-orange-500/30 hover:scale-105 active:scale-95"
+                        <a
+                          href="faceitac://"
+                          onClick={() => {
+                            handleLaunchAntiCheat();
+                          }}
+                          className="px-4 py-1.5 rounded-lg bg-[#FF5500] hover:bg-[#FF6611] text-white font-black text-xs uppercase tracking-wider transition cursor-pointer shadow-md shadow-orange-500/30 hover:scale-105 active:scale-95 inline-flex items-center"
                           title="Click to launch Anti-Cheat"
                         >
                           LAUNCH
-                        </button>
+                        </a>
                         <button
                           onClick={() => setShowAcPrompt(false)}
                           className="text-slate-500 hover:text-white transition cursor-pointer p-0.5 ml-0.5"
@@ -3550,13 +3548,16 @@ export const VortexDashboard: React.FC<VortexDashboardProps> = ({
                       >
                         DOWNLOAD
                       </a>
-                      <button
-                        onClick={handleLaunchAntiCheat}
-                        className="px-4 py-1.5 rounded-lg bg-[#FF5500] hover:bg-[#FF6611] text-white font-black text-xs uppercase tracking-wider transition cursor-pointer shadow-md shadow-orange-500/30 hover:scale-105 active:scale-95"
+                      <a
+                        href="faceitac://"
+                        onClick={() => {
+                          handleLaunchAntiCheat();
+                        }}
+                        className="px-4 py-1.5 rounded-lg bg-[#FF5500] hover:bg-[#FF6611] text-white font-black text-xs uppercase tracking-wider transition cursor-pointer shadow-md shadow-orange-500/30 hover:scale-105 active:scale-95 inline-flex items-center"
                         title="Click to launch Anti-Cheat"
                       >
                         LAUNCH
-                      </button>
+                      </a>
                       <button
                         onClick={() => setShowAcPrompt(false)}
                         className="text-slate-500 hover:text-white transition cursor-pointer p-0.5 ml-0.5"
