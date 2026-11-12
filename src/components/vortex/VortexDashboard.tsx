@@ -1258,38 +1258,48 @@ export const VortexDashboard: React.FC<VortexDashboardProps> = ({
                         <X className="w-4 h-4" />
                       </button>
 
-                      {/* Large Avatar with Glowing Ring, Level 7 Badge, and Camera Edit Trigger */}
+                      {/* Large Avatar with Glowing Ring, Level 7 Badge (Click to View Profile) */}
                       <div className="relative inline-block mx-auto mt-1 group">
-                        <div 
-                          onClick={handleOpenEditProfile}
-                          title="Click to edit avatar & profile"
-                          className="relative cursor-pointer"
+                        <button 
+                          onClick={() => {
+                            sound.playSelect();
+                            setProfileDropdownOpen(false);
+                            setActiveTab('profile');
+                          }}
+                          title="Click to view player profile"
+                          className="relative cursor-pointer block rounded-full"
                         >
                           <img
                             src={currentAvatarUrl}
                             alt={currentGamerTag}
-                            className="w-16 h-16 rounded-full object-cover border-2 border-[#A3E635] shadow-[0_0_20px_rgba(163,230,53,0.35)] group-hover:brightness-75 transition"
+                            className="w-16 h-16 rounded-full object-cover border-2 border-[#A3E635] shadow-[0_0_20px_rgba(163,230,53,0.35)] group-hover:scale-105 group-hover:border-[#FF5500] transition duration-200"
                             onError={(e) => {
                               (e.target as HTMLImageElement).src = '/images/blockeerz_avatar.png';
                             }}
                           />
-                          <div className="absolute inset-0 rounded-full flex items-center justify-center opacity-0 group-hover:opacity-100 bg-black/60 transition">
-                            <Camera className="w-5 h-5 text-[#A3E635]" />
-                          </div>
                           <span className="absolute bottom-0 right-0 w-4 h-4 rounded-full bg-emerald-400 border-2 border-[#12141C]" />
-                        </div>
-                        <div className="absolute -bottom-1 -left-1 w-6 h-6 rounded-full bg-gradient-to-br from-amber-400 via-amber-500 to-yellow-600 text-black font-black text-xs flex items-center justify-center border-2 border-[#12141C] shadow-md">
+                        </button>
+                        <div className="absolute -bottom-1 -left-1 w-6 h-6 rounded-full bg-gradient-to-br from-amber-400 via-amber-500 to-yellow-600 text-black font-black text-xs flex items-center justify-center border-2 border-[#12141C] shadow-md pointer-events-none">
                           7
                         </div>
                       </div>
 
-                      {/* Clean GamerTag */}
+                      {/* Clean GamerTag - Clickable to View Profile */}
                       <div>
-                        <div className="flex items-center justify-center gap-2 font-display font-black text-white text-base">
-                          <span className="text-[#A3E635] text-xs font-mono font-bold">[{currentClanTag}]</span>
-                          <span>{currentGamerTag}</span>
+                        <button
+                          onClick={() => {
+                            sound.playSelect();
+                            setProfileDropdownOpen(false);
+                            setActiveTab('profile');
+                          }}
+                          className="group/name inline-flex items-center justify-center gap-2 font-display font-black text-white text-base hover:text-[#A3E635] transition cursor-pointer"
+                          title="Click to view player profile"
+                        >
+                          <span className="text-[#A3E635] text-xs font-mono font-bold group-hover/name:brightness-125">[{currentClanTag}]</span>
+                          <span className="group-hover/name:underline underline-offset-4 decoration-[#A3E635]">{currentGamerTag}</span>
                           <FaceitVerificationBadge type={currentVerification} size="md" />
-                        </div>
+                          <ChevronRight className="w-4 h-4 text-slate-500 group-hover/name:text-[#A3E635] group-hover/name:translate-x-0.5 transition-all" />
+                        </button>
                       </div>
 
                       {/* Membership Tier & Upgrade CTA */}
@@ -1351,7 +1361,7 @@ export const VortexDashboard: React.FC<VortexDashboardProps> = ({
                         >
                           <div className="flex items-center gap-2">
                             <User className="w-4 h-4 text-sky-400" />
-                            <span>Digital Player Passport</span>
+                            <span>View Full Profile</span>
                           </div>
                           <ChevronRight className="w-3.5 h-3.5 text-slate-500" />
                         </button>
