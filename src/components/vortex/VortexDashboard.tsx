@@ -2427,57 +2427,283 @@ export const VortexDashboard: React.FC<VortexDashboardProps> = ({
 
               </div>
 
-              {/* RECENT MATCHES TELEMETRY SECTION */}
+              {/* AUTHENTIC FACEIT-STYLE RECENT MATCHES TABLE (IN PLAY TAB) */}
               <div className="bg-[#0E1017] border border-[#202536] rounded-3xl p-6 shadow-xl space-y-4">
                 <div className="flex items-center justify-between pb-3 border-b border-white/[0.06]">
                   <div>
-                    <h3 className="text-lg font-black font-display text-white">Recent Match Telemetry</h3>
-                    <p className="text-xs text-[#94A3B8]">Verified CS2 matches played on official 128-tick nodes</p>
+                    <h3 className="text-xl font-bold font-sans text-white tracking-tight">Recent matches</h3>
+                    <p className="text-xs text-[#94A3B8]">Verified 128-tick ranked competitive match history</p>
                   </div>
-                  <div className="flex items-center gap-4 text-xs font-mono">
-                    <span className="text-emerald-400 font-bold">Win Rate: 58.9%</span>
-                    <span className="text-slate-600">•</span>
-                    <span className="text-white font-bold">K/D: 1.34</span>
-                    <span className="text-slate-600">•</span>
-                    <span className="text-amber-400 font-bold">HS: 64.2%</span>
-                  </div>
+                  <button
+                    onClick={() => {
+                      sound.playClick();
+                      setActiveTab('profile');
+                    }}
+                    className="text-xs font-sans text-slate-400 hover:text-white transition flex items-center gap-1 cursor-pointer group font-medium"
+                  >
+                    <span>Full match history</span>
+                    <ChevronRight className="w-3.5 h-3.5 group-hover:translate-x-0.5 transition-transform" />
+                  </button>
                 </div>
 
-                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-                  {[
-                    { map: 'de_mirage', score: '13 - 9', res: 'VICTORY', elo: '+14', kd: '24 / 11', rating: '1.48', win: true },
-                    { map: 'de_inferno', score: '13 - 11', res: 'VICTORY', elo: '+12', kd: '19 / 14', rating: '1.15', win: true },
-                    { map: 'de_anubis', score: '8 - 13', res: 'DEFEAT', elo: '-15', kd: '16 / 15', rating: '0.98', win: false },
-                    { map: 'de_nuke', score: '13 - 7', res: 'VICTORY', elo: '+16', kd: '26 / 9', rating: '1.62', win: true },
-                  ].map((m, idx) => (
-                    <div
-                      key={idx}
-                      className="p-4 rounded-2xl bg-[#12141C] border border-[#23293B] hover:border-white/20 transition space-y-3"
-                    >
-                      <div className="flex items-center justify-between">
-                        <span className={`px-2 py-0.5 rounded text-[10px] font-mono font-bold ${
-                          m.win 
-                            ? 'bg-emerald-500/15 text-emerald-400 border border-emerald-500/30' 
-                            : 'bg-rose-500/15 text-rose-400 border border-rose-500/30'
-                        }`}>
-                          {m.res}
-                        </span>
-                        <span className={`text-xs font-mono font-bold ${m.win ? 'text-emerald-400' : 'text-rose-400'}`}>
-                          {m.elo} ELO
-                        </span>
+                <div className="overflow-x-auto -mx-6 px-6">
+                  <div className="min-w-[860px] space-y-2">
+                    {/* Table Header matching FACEIT photo */}
+                    <div className="flex items-center gap-4 px-4 py-2 text-xs font-sans font-bold text-[#8E97A8] border-b border-white/[0.04]">
+                      <div className="w-[130px] shrink-0 pl-3">Date</div>
+                      <div className="w-[110px] shrink-0">Score</div>
+                      <div className="w-[170px] shrink-0"></div>
+                      <div className="w-[100px] shrink-0 flex items-center gap-1.5">
+                        <div className="w-3.5 h-3.5 rounded-full bg-[#FF5500] flex items-center justify-center shrink-0">
+                          <svg className="w-2 h-2 text-white fill-current" viewBox="0 0 24 24">
+                            <path d="M4 12l10-8v6h6l-10 8v-6H4z" />
+                          </svg>
+                        </div>
+                        <span>Rating</span>
                       </div>
-
-                      <div>
-                        <div className="text-lg font-black font-mono text-white">{m.score}</div>
-                        <div className="text-xs font-mono text-slate-400">{m.map}</div>
-                      </div>
-
-                      <div className="pt-2 border-t border-white/5 flex items-center justify-between text-xs font-mono text-slate-400">
-                        <span>K/D: <strong className="text-white">{m.kd}</strong></span>
-                        <span>Rating: <strong className="text-[#A3E635]">{m.rating}</strong></span>
-                      </div>
+                      <div className="w-[110px] shrink-0">K/D/A</div>
+                      <div className="flex-1 min-w-[120px]">Map</div>
+                      <div className="w-[84px] shrink-0"></div>
                     </div>
-                  ))}
+
+                    {/* Table Rows matching photo 100% */}
+                    {[
+                      {
+                        id: 'play-m1',
+                        date: 'Wed 11 Nov',
+                        time: '20:52',
+                        isWin: true,
+                        score: '13 : 11',
+                        level: 7,
+                        elo: 1401,
+                        eloDelta: 21,
+                        rating: '0.73',
+                        ratingType: 'red',
+                        kda: '12 / 18 / 4',
+                        map: 'Cache'
+                      },
+                      {
+                        id: 'play-m2',
+                        date: 'Wed 11 Nov',
+                        time: '20:07',
+                        isWin: false,
+                        score: '10 : 13',
+                        level: 7,
+                        elo: 1380,
+                        eloDelta: -25,
+                        rating: '1.22',
+                        ratingType: 'neutral',
+                        kda: '14 / 16 / 5',
+                        map: 'Mirage'
+                      },
+                      {
+                        id: 'play-m3',
+                        date: 'Wed 11 Nov',
+                        time: '19:21',
+                        isWin: true,
+                        score: '13 : 11',
+                        level: 7,
+                        elo: 1405,
+                        eloDelta: 28,
+                        rating: '1.55',
+                        ratingType: 'green',
+                        kda: '23 / 17 / 5',
+                        map: 'Nuke'
+                      },
+                      {
+                        id: 'play-m4',
+                        date: 'Tue 10 Nov',
+                        time: '21:44',
+                        isWin: false,
+                        score: '4 : 13',
+                        level: 7,
+                        elo: 1377,
+                        eloDelta: -20,
+                        rating: '1.18',
+                        ratingType: 'neutral',
+                        kda: '16 / 13 / 3',
+                        map: 'Nuke'
+                      },
+                      {
+                        id: 'play-m5',
+                        date: 'Tue 10 Nov',
+                        time: '21:03',
+                        isWin: true,
+                        score: '13 : 10',
+                        level: 7,
+                        elo: 1397,
+                        eloDelta: 27,
+                        rating: '1.14',
+                        ratingType: 'neutral',
+                        kda: '18 / 16 / 7',
+                        map: 'Cache'
+                      }
+                    ].map((m, idx) => (
+                      <div
+                        key={m.id}
+                        className="relative flex items-center gap-4 px-4 py-3 rounded-xl bg-[#0B0D13] border border-[#1C202E] hover:border-white/15 transition overflow-hidden group/row"
+                      >
+                        {/* Vertical Left Line: Pure Green or Pure Red matching row height */}
+                        <div 
+                          className={`absolute left-0 top-0 bottom-0 w-1 ${
+                            m.isWin ? 'bg-[#22C55E]' : 'bg-[#EF4444]'
+                          }`} 
+                        />
+
+                        {/* Column 1: Date & Time */}
+                        <div className="w-[130px] shrink-0 pl-3 font-sans text-xs">
+                          <div className="font-semibold text-white tracking-tight">{m.date}</div>
+                          <div className="text-[11px] text-[#717B8C] font-mono mt-0.5">{m.time}</div>
+                        </div>
+
+                        {/* Column 2: Score & Result Box */}
+                        <div className="w-[110px] shrink-0 flex items-center gap-2 font-sans text-xs">
+                          <span 
+                            className={`w-5 h-5 rounded flex items-center justify-center font-black text-[11px] shrink-0 text-white ${
+                              m.isWin ? 'bg-[#22C55E]' : 'bg-[#EF4444]'
+                            }`}
+                          >
+                            {m.isWin ? 'W' : 'L'}
+                          </span>
+                          <span className={`font-bold tracking-wide font-mono ${m.isWin ? 'text-[#22C55E]' : 'text-[#EF4444]'}`}>
+                            {m.score}
+                          </span>
+                        </div>
+
+                        {/* Column 3: Skill Level, ELO & Party icon */}
+                        <div className="w-[170px] shrink-0 flex items-center gap-2.5 font-sans text-xs">
+                          {/* Party icon (5 dots in X pattern like FACEIT) */}
+                          <svg className="w-3.5 h-3.5 text-[#7E8B9E] shrink-0" viewBox="0 0 16 16" fill="currentColor">
+                            <circle cx="8" cy="8" r="1.5" />
+                            <circle cx="3.5" cy="3.5" r="1.5" />
+                            <circle cx="12.5" cy="3.5" r="1.5" />
+                            <circle cx="3.5" cy="12.5" r="1.5" />
+                            <circle cx="12.5" cy="12.5" r="1.5" />
+                          </svg>
+
+                          {/* FACEIT Level 7 Circle with yellow arc */}
+                          <div className="relative w-5 h-5 rounded-full bg-[#141720] border border-slate-700/80 flex items-center justify-center shrink-0">
+                            <svg className="absolute inset-0 w-full h-full -rotate-90" viewBox="0 0 24 24">
+                              <circle cx="12" cy="12" r="9" fill="none" stroke="#EAB308" strokeWidth="2.5" strokeDasharray="36 60" />
+                            </svg>
+                            <span className="text-[10px] font-black text-white font-mono relative z-10 leading-none">{m.level}</span>
+                          </div>
+
+                          {/* ELO & Delta */}
+                          <div className="flex items-center gap-1.5 font-mono text-xs">
+                            <span className="text-white font-bold">{m.elo.toLocaleString()}</span>
+                            <span className={`font-bold flex items-center ${m.isWin ? 'text-[#22C55E]' : 'text-[#EF4444]'}`}>
+                              {m.isWin ? `↑ ${m.eloDelta}` : `↓ ${Math.abs(m.eloDelta)}`}
+                            </span>
+                          </div>
+                        </div>
+
+                        {/* Column 4: Rating Capsule exactly like in screenshot */}
+                        <div className="w-[100px] shrink-0 flex items-center">
+                          <div 
+                            className={`px-2.5 py-0.5 rounded font-mono text-xs font-bold shrink-0 border-b-2 tracking-tight ${
+                              m.ratingType === 'red'
+                                ? 'bg-[#2E1215] text-[#EF4444] border-[#EF4444]'
+                                : m.ratingType === 'green'
+                                ? 'bg-[#102A19] text-[#22C55E] border-[#22C55E]'
+                                : 'bg-[#1B1E28] text-white border-white'
+                            }`}
+                            title="Match Rating"
+                          >
+                            {m.rating}
+                          </div>
+                        </div>
+
+                        {/* Column 5: K / D / A */}
+                        <div className="w-[110px] shrink-0 font-mono text-xs text-white font-medium">
+                          {m.kda}
+                        </div>
+
+                        {/* Column 6: Map badge and name */}
+                        <div className="flex-1 min-w-[120px] flex items-center gap-2 font-sans text-xs font-semibold text-white">
+                          {m.map === 'Cache' && (
+                            <div className="w-5 h-5 rounded bg-[#18231C] border border-[#2E5E3D] flex items-center justify-center shrink-0 text-[#8CE8A0] text-[10px]">
+                              ⭐
+                            </div>
+                          )}
+                          {m.map === 'Mirage' && (
+                            <div className="w-5 h-5 rounded bg-[#2D1F16] border border-[#6B4627] flex items-center justify-center shrink-0 text-[#FDBA74] text-[10px]">
+                              🏛️
+                            </div>
+                          )}
+                          {m.map === 'Nuke' && (
+                            <div className="w-5 h-5 rounded bg-[#13222B] border border-[#234A5E] flex items-center justify-center shrink-0 text-[#7DD3FC] text-[10px]">
+                              ☢️
+                            </div>
+                          )}
+                          <span>{m.map}</span>
+                        </div>
+
+                        {/* Column 7: Actions (Download Demo + View Match) */}
+                        <div className="w-[84px] shrink-0 flex items-center justify-end gap-1.5">
+                          {/* Download Demo Button with FACEIT Tooltip */}
+                          <div 
+                            className="relative group"
+                            onMouseEnter={() => setHoveredTooltip(`play-demo-${idx}`)}
+                            onMouseLeave={() => setHoveredTooltip(null)}
+                          >
+                            <button
+                              onClick={() => handleDownloadDemo(m.map.toLowerCase())}
+                              className="w-8 h-8 rounded-lg bg-[#141720] hover:bg-[#202534] border border-white/10 hover:border-white/25 text-slate-300 hover:text-white flex items-center justify-center transition cursor-pointer shadow-sm hover:scale-105 active:scale-95"
+                              aria-label="Download demo"
+                              title="Download demo"
+                            >
+                              <Download className="w-3.5 h-3.5 stroke-[2.2]" />
+                            </button>
+
+                            {/* Pure White FACEIT Speech Bubble Tooltip */}
+                            <div 
+                              className={`absolute bottom-full right-0 sm:left-1/2 sm:-translate-x-1/2 mb-2 px-2.5 py-1 rounded-md bg-white text-slate-950 text-xs font-sans font-bold shadow-2xl whitespace-nowrap z-50 pointer-events-none transition-all duration-150 ${
+                                hoveredTooltip === `play-demo-${idx}`
+                                  ? 'opacity-100 visible scale-100 translate-y-0'
+                                  : 'opacity-0 invisible scale-95 translate-y-1 group-hover:opacity-100 group-hover:visible group-hover:scale-100 group-hover:translate-y-0'
+                              }`}
+                            >
+                              <span>Download demo</span>
+                              <span className="absolute -bottom-1 right-3 sm:left-1/2 sm:-translate-x-1/2 w-2 h-2 bg-white rotate-45 pointer-events-none" />
+                            </div>
+                          </div>
+
+                          {/* View Match Room Button with Tooltip */}
+                          <div 
+                            className="relative group"
+                            onMouseEnter={() => setHoveredTooltip(`play-room-${idx}`)}
+                            onMouseLeave={() => setHoveredTooltip(null)}
+                          >
+                            <button
+                              onClick={() => {
+                                sound.playClick();
+                                setDashboardToast(`Opening match room for ${m.map} 5v5...`);
+                                setTimeout(() => setDashboardToast(null), 2500);
+                              }}
+                              className="w-8 h-8 rounded-lg bg-[#141720] hover:bg-[#202534] border border-white/10 hover:border-white/25 text-slate-400 hover:text-white flex items-center justify-center transition cursor-pointer shadow-sm hover:scale-105 active:scale-95"
+                              aria-label="View match"
+                              title="View match"
+                            >
+                              <ExternalLink className="w-3.5 h-3.5 stroke-[2.2]" />
+                            </button>
+
+                            {/* Pure White FACEIT Speech Bubble Tooltip */}
+                            <div 
+                              className={`absolute bottom-full right-0 sm:left-1/2 sm:-translate-x-1/2 mb-2 px-2.5 py-1 rounded-md bg-white text-slate-950 text-xs font-sans font-bold shadow-2xl whitespace-nowrap z-50 pointer-events-none transition-all duration-150 ${
+                                hoveredTooltip === `play-room-${idx}`
+                                  ? 'opacity-100 visible scale-100 translate-y-0'
+                                  : 'opacity-0 invisible scale-95 translate-y-1 group-hover:opacity-100 group-hover:visible group-hover:scale-100 group-hover:translate-y-0'
+                              }`}
+                            >
+                              <span>View match</span>
+                              <span className="absolute -bottom-1 right-3 sm:left-1/2 sm:-translate-x-1/2 w-2 h-2 bg-white rotate-45 pointer-events-none" />
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
                 </div>
               </div>
 
