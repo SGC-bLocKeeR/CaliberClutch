@@ -835,13 +835,6 @@ export const VortexDashboard: React.FC<VortexDashboardProps> = ({
   };
 
   const underDevInfo: Record<string, { title: string; subtitle: string; desc: string; progress: number; icon: React.ComponentType<{ className?: string }> }> = {
-    servers: {
-      title: 'Server Browser (128-Tick)',
-      subtitle: 'Dedicated CS2 Competitive Grid',
-      desc: 'Our infrastructure engineers are configuring dedicated 128-tick CS2 community and practice servers across Frankfurt, Vienna, and Stockholm with direct fiber routing and 0% packet loss.',
-      progress: 88,
-      icon: Server
-    },
     tournaments: {
       title: 'VORTEX CS2 Tournaments',
       subtitle: 'Official Tournament Circuit & Cash Prizes',
@@ -911,14 +904,6 @@ export const VortexDashboard: React.FC<VortexDashboardProps> = ({
       icon: BarChart2,
       badge: 'TOP PLAYERS',
       badgeColor: 'bg-[#A3E635]/15 text-[#A3E635] border border-[#A3E635]/30 font-bold'
-    },
-    {
-      id: 'servers' as VortexTab,
-      label: 'Server Browser',
-      desc: 'Under Development • Opening Soon',
-      icon: Server,
-      badge: 'COMING SOON',
-      badgeColor: 'bg-amber-500/15 text-amber-400 border border-amber-500/30 font-bold'
     },
     {
       id: 'tournaments' as VortexTab,
@@ -2137,116 +2122,6 @@ export const VortexDashboard: React.FC<VortexDashboardProps> = ({
 
               </div>
 
-              {/* SECTION UNDER MATCHMAKING: LIVE 128-TICK SERVERS & FEATURED TOURNAMENT */}
-              <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
-                
-                {/* Left (7 cols): Popular 128-Tick Dedicated Servers */}
-                <div className="lg:col-span-7 bg-[#0E1017] border border-[#202536] rounded-3xl p-6 shadow-xl space-y-4">
-                  <div className="flex items-center justify-between pb-3 border-b border-white/[0.06]">
-                    <div>
-                      <h3 className="text-lg font-black font-display text-white">Popular 128-Tick Servers</h3>
-                      <p className="text-xs text-[#94A3B8]">Direct low-latency nodes in Frankfurt and Vienna</p>
-                    </div>
-                    <button
-                      onClick={() => { sound.playSelect(); setActiveTab('servers'); }}
-                      className="text-xs font-mono text-[#A3E635] hover:underline flex items-center gap-1 cursor-pointer"
-                    >
-                      <span>View All (6)</span>
-                      <ArrowRight className="w-3.5 h-3.5" />
-                    </button>
-                  </div>
-
-                  <div className="space-y-3">
-                    {[
-                      { name: 'FACEIT Premium Server', map: 'de_mirage', ip: '194.163.159.231:27015', players: '16/20', ping: '12ms', loc: 'Frankfurt, DE' },
-                      { name: 'Vortex 128-Tick Competitive', map: 'de_inferno', ip: '194.163.159.231:27016', players: '14/20', ping: '18ms', loc: 'Vienna, AT' },
-                      { name: 'Vortex Practice Server', map: 'de_dust2', ip: '194.163.159.231:27017', players: '12/20', ping: '20ms', loc: 'Frankfurt, DE' },
-                    ].map((s, idx) => (
-                      <div 
-                        key={idx}
-                        className="p-4 rounded-2xl bg-[#12141C] border border-[#23293B] hover:border-[#A3E635] transition flex items-center justify-between gap-4"
-                      >
-                        <div>
-                          <div className="flex items-center gap-2 mb-1">
-                            <span className="text-[10px] font-mono text-[#A3E635] font-bold uppercase">{s.loc}</span>
-                            <span className="text-[10px] text-slate-500">•</span>
-                            <span className="text-xs font-mono text-emerald-400 font-bold">{s.ping}</span>
-                          </div>
-                          <h4 className="text-sm font-bold font-display text-white">{s.name}</h4>
-                          <p className="text-xs font-mono text-slate-400">Map: {s.map} • Players: {s.players}</p>
-                        </div>
-
-                        <div className="flex items-center gap-2 shrink-0">
-                          <button
-                            onClick={() => handleCopyIp(s.ip)}
-                            className="p-2.5 rounded-xl bg-white/[0.04] hover:bg-white/[0.08] border border-white/10 text-slate-300 hover:text-white transition cursor-pointer"
-                            title="Copy Steam Connect Command"
-                          >
-                            <Copy className="w-3.5 h-3.5" />
-                          </button>
-                          <button
-                            onClick={() => handleConnectServer(s.ip, s.name)}
-                            className="px-5 py-2 rounded-xl bg-[#84CC16] hover:bg-[#A3E635] text-white font-black font-display text-xs transition cursor-pointer shadow-sm"
-                          >
-                            Connect
-                          </button>
-                        </div>
-                      </div>
-                    ))}
-                  </div>
-                </div>
-
-                {/* Right (5 cols): Featured CS2 Tournament */}
-                <div className="lg:col-span-5 bg-[#0E1017] border border-[#202536] rounded-3xl p-6 shadow-xl flex flex-col justify-between gap-4">
-                  <div>
-                    <div className="flex items-center justify-between pb-3 border-b border-white/[0.06] mb-4">
-                      <div>
-                        <h3 className="text-lg font-black font-display text-white">Upcoming Tournament</h3>
-                        <p className="text-xs text-[#94A3B8]">Automated FACEIT bracket system</p>
-                      </div>
-                      <button
-                        onClick={() => { sound.playSelect(); setActiveTab('tournaments'); }}
-                        className="text-xs font-mono text-[#A3E635] hover:underline flex items-center gap-1 cursor-pointer"
-                      >
-                        <span>View All</span>
-                        <ArrowRight className="w-3.5 h-3.5" />
-                      </button>
-                    </div>
-
-                    <div className="p-5 rounded-2xl bg-[#12141C] border border-[#23293B] space-y-3">
-                      <div className="flex items-start justify-between">
-                        <span className="px-2.5 py-1 rounded text-[10px] font-mono font-bold bg-lime-500/15 text-[#A3E635] border border-lime-500/30">
-                          REGISTRATION OPEN
-                        </span>
-                        <div className="text-right">
-                          <div className="text-xl font-black font-mono text-[#A3E635]">$25,000</div>
-                          <div className="text-[10px] text-slate-500 uppercase">Prize Pool</div>
-                        </div>
-                      </div>
-
-                      <h4 className="text-base font-black font-display text-white">VORTEX CS2 Global Open Championship</h4>
-                      <p className="text-xs font-mono text-slate-400">Starts in: 2d 14h • Format: 5v5 Single Elimination</p>
-
-                      <div className="pt-2 flex items-center justify-between text-xs font-mono text-slate-300">
-                        <span>Slots: 14 / 16 Teams</span>
-                        <span className="text-emerald-400 font-bold">2 Slots Remaining</span>
-                      </div>
-                    </div>
-                  </div>
-
-                  <button
-                    onClick={() => {
-                      sound.playTournamentVictory();
-                      setActiveTab('tournaments');
-                    }}
-                    className="w-full py-3 rounded-2xl bg-[#84CC16] hover:bg-[#A3E635] text-white font-display font-black text-xs uppercase tracking-wider transition shadow-md cursor-pointer text-center"
-                  >
-                    Register Team for Tournament
-                  </button>
-                </div>
-
-              </div>
-
               {/* RECENT MATCHES TELEMETRY SECTION */}
               <div className="bg-[#0E1017] border border-[#202536] rounded-3xl p-6 shadow-xl space-y-4">
                 <div className="flex items-center justify-between pb-3 border-b border-white/[0.06]">
@@ -3000,58 +2875,6 @@ export const VortexDashboard: React.FC<VortexDashboardProps> = ({
                 </div>
               </div>
 
-            </div>
-          )}
-
-          {/* ======================================================== */}
-          {/* TAB: SERVER BROWSER                                      */}
-          {/* ======================================================== */}
-          {activeTab === 'servers' && (
-            <div className="bg-[#0E1017] border border-[#202536] rounded-3xl p-6 md:p-8 shadow-xl space-y-6">
-              <div className="flex items-center justify-between pb-4 border-b border-[#1E2333]">
-                <div>
-                  <h2 className="text-2xl font-black font-display text-white">VORTEX 128-Tick Dedicated Server Grid</h2>
-                  <p className="text-xs text-[#94A3B8]">Direct low-latency CS2 nodes verified across Frankfurt, Vienna, and Stockholm</p>
-                </div>
-                <button
-                  onClick={() => setActiveTab('play')}
-                  className="px-4 py-2 rounded-xl bg-[#141722] border border-[#252C3D] text-xs font-mono hover:text-white cursor-pointer"
-                >
-                  ← Back to Play
-                </button>
-              </div>
-
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                {[
-                  { name: 'FACEIT Premium Server', map: 'de_mirage', ip: '194.163.159.231:27015', players: '16/20', ping: '12ms', loc: 'Frankfurt, DE' },
-                  { name: 'Vortex 128-Tick | Competitive', map: 'de_inferno', ip: '194.163.159.231:27016', players: '14/20', ping: '18ms', loc: 'Vienna, AT' },
-                  { name: 'Vortex Practice Server', map: 'de_dust2', ip: '194.163.159.231:27017', players: '12/20', ping: '20ms', loc: 'Frankfurt, DE' },
-                  { name: 'Vortex Retake Arena #1', map: 'de_nuke', ip: '194.163.159.231:27018', players: '9/10', ping: '14ms', loc: 'Stockholm, SE' },
-                  { name: 'Vortex 1v1 Aim Ladder', map: 'aim_redline', ip: '194.163.159.231:27019', players: '14/16', ping: '15ms', loc: 'Frankfurt, DE' },
-                  { name: 'Vortex High-ELO 5v5 Scrim', map: 'de_anubis', ip: '194.163.159.231:27020', players: '10/10', ping: '11ms', loc: 'Frankfurt, DE' },
-                ].map((s, idx) => (
-                  <div key={idx} className="p-5 rounded-2xl bg-[#12141C] border border-[#23293B] hover:border-[#A3E635] transition flex flex-col justify-between gap-4">
-                    <div>
-                      <div className="flex items-center justify-between mb-2">
-                        <span className="text-[10px] font-mono text-[#A3E635] font-bold uppercase">{s.loc}</span>
-                        <span className="text-xs font-mono text-emerald-400 font-bold">{s.ping}</span>
-                      </div>
-                      <h4 className="text-base font-bold font-display text-white">{s.name}</h4>
-                      <p className="text-xs font-mono text-[#94A3B8] mt-1">Map: {s.map}</p>
-                    </div>
-
-                    <div className="flex items-center justify-between pt-3 border-t border-[#1C2233]">
-                      <span className="text-xs font-mono text-slate-300">{s.players}</span>
-                      <button
-                        onClick={() => handleConnectServer(s.ip, s.name)}
-                        className="px-4 py-2 rounded-full bg-[#84CC16] hover:bg-[#A3E635] text-white font-black font-display text-xs transition cursor-pointer shadow-sm"
-                      >
-                        Connect
-                      </button>
-                    </div>
-                  </div>
-                ))}
-              </div>
             </div>
           )}
 
