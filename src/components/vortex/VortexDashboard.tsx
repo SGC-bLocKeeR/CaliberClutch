@@ -58,6 +58,8 @@ import {
 import confetti from 'canvas-confetti';
 import { sound } from '../../utils/soundEffects';
 import { VortexBrandLogo } from './VortexLandingPage';
+import { CountryFlag } from './CountryFlag';
+import { ALL_COUNTRIES, getCountryByCode, Country } from '../../data/countries';
 
 interface VortexDashboardProps {
   userGamerTag?: string;
@@ -92,6 +94,7 @@ interface PartySlotMember {
   isLeader?: boolean;
   verification?: VerificationType;
   flag?: string;
+  code?: string;
   countryName?: string;
 }
 
@@ -233,6 +236,7 @@ const SUGGESTED_TEAMMATES: PartySlotMember[] = [
     elo: 2840,
     verification: 'vip', // Official CS Pro (Golden Star)
     flag: '🇽🇰',
+    code: 'XK',
     countryName: 'Kosovo'
   },
   {
@@ -244,6 +248,7 @@ const SUGGESTED_TEAMMATES: PartySlotMember[] = [
     elo: 2750,
     verification: 'vip', // Official CS Pro (Golden Star)
     flag: '🇽🇰',
+    code: 'XK',
     countryName: 'Kosovo'
   },
   {
@@ -255,6 +260,7 @@ const SUGGESTED_TEAMMATES: PartySlotMember[] = [
     elo: 2690,
     verification: 'verified', // Standard ID Verified
     flag: '🇽🇰',
+    code: 'XK',
     countryName: 'Kosovo'
   },
   {
@@ -266,6 +272,7 @@ const SUGGESTED_TEAMMATES: PartySlotMember[] = [
     elo: 1610,
     verification: 'none', // Regular player without badge
     flag: '🇩🇰',
+    code: 'DK',
     countryName: 'Denmark'
   }
 ];
@@ -397,18 +404,7 @@ const PRESET_AVATARS = [
   { id: 'shadow', name: 'Shadow Infiltrator', url: 'https://images.unsplash.com/photo-1500648767791-00dcc994a43e?auto=format&fit=crop&w=250&q=80' }
 ];
 
-const PRESET_COUNTRIES = [
-  { code: 'XK', name: 'Kosovo', flag: '🇽🇰' },
-  { code: 'AL', name: 'Albania', flag: '🇦🇱' },
-  { code: 'DE', name: 'Germany', flag: '🇩🇪' },
-  { code: 'SE', name: 'Sweden', flag: '🇸🇪' },
-  { code: 'GB', name: 'United Kingdom', flag: '🇬🇧' },
-  { code: 'FR', name: 'France', flag: '🇫🇷' },
-  { code: 'FI', name: 'Finland', flag: '🇫🇮' },
-  { code: 'NL', name: 'Netherlands', flag: '🇳🇱' },
-  { code: 'US', name: 'United States', flag: '🇺🇸' },
-  { code: 'WW', name: 'Global / International', flag: '🌐' }
-];
+const PRESET_COUNTRIES = ALL_COUNTRIES;
 
 const CS2_ROLES = [
   'AWPer / Entry',
@@ -917,6 +913,7 @@ export const VortexDashboard: React.FC<VortexDashboardProps> = ({
       isLeader: true,
       verification: currentVerification,
       flag: currentCountry.flag,
+      code: currentCountry.code,
       countryName: currentCountry.name
     },
     null,
@@ -984,6 +981,7 @@ export const VortexDashboard: React.FC<VortexDashboardProps> = ({
         isLeader: true,
         verification: currentVerification,
         flag: currentCountry.flag,
+        code: currentCountry.code,
         countryName: currentCountry.name
       };
       return next;
@@ -1329,11 +1327,11 @@ export const VortexDashboard: React.FC<VortexDashboardProps> = ({
                   <div className="absolute left-1 right-1 top-full mt-1.5 p-2 rounded-2xl bg-[#0D0F16] border border-white/10 shadow-2xl z-50 max-h-60 overflow-y-auto animate-in fade-in zoom-in-95 duration-150">
                     <div className="text-[10px] font-mono text-slate-400 px-2 py-1 uppercase tracking-wider">Quick Results</div>
                     {[
-                      { tag: 'bLocKeeRz', level: 'Level 7', elo: '1,407 ELO', flag: '🇽🇰', action: () => { setActiveTab('profile'); setSidebarSearchOpen(false); } },
-                      { tag: 'juanflatroo', level: 'Level 10', elo: '3,890 ELO', flag: '🇽🇰', action: () => { setActiveTab('rankings'); setSidebarSearchOpen(false); } },
-                      { tag: 'gxx-', level: 'Level 10', elo: '3,420 ELO', flag: '🇽🇰', action: () => { setActiveTab('rankings'); setSidebarSearchOpen(false); } },
-                      { tag: 'Play 5v5 Queue', level: '128-Tick', elo: 'Matchmaking', flag: '🎮', action: () => { setActiveTab('play'); setSidebarSearchOpen(false); } },
-                      { tag: 'Platform Rankings', level: 'Ladder', elo: 'Leaderboard', flag: '🏆', action: () => { setActiveTab('rankings'); setSidebarSearchOpen(false); } },
+                      { tag: 'bLocKeeRz', level: 'Level 7', elo: '1,407 ELO', code: 'XK', action: () => { setActiveTab('profile'); setSidebarSearchOpen(false); } },
+                      { tag: 'juanflatroo', level: 'Level 10', elo: '3,890 ELO', code: 'XK', action: () => { setActiveTab('rankings'); setSidebarSearchOpen(false); } },
+                      { tag: 'gxx-', level: 'Level 10', elo: '3,420 ELO', code: 'XK', action: () => { setActiveTab('rankings'); setSidebarSearchOpen(false); } },
+                      { tag: 'Play 5v5 Queue', level: '128-Tick', elo: 'Matchmaking', icon: '🎮', action: () => { setActiveTab('play'); setSidebarSearchOpen(false); } },
+                      { tag: 'Platform Rankings', level: 'Ladder', elo: 'Leaderboard', icon: '🏆', action: () => { setActiveTab('rankings'); setSidebarSearchOpen(false); } },
                     ]
                       .filter(item => item.tag.toLowerCase().includes(sidebarSearchQuery.toLowerCase()))
                       .map((res, i) => (
@@ -1343,7 +1341,7 @@ export const VortexDashboard: React.FC<VortexDashboardProps> = ({
                           className="px-2.5 py-1.5 rounded-xl hover:bg-[#1A1F2E] flex items-center justify-between text-xs font-mono text-white cursor-pointer transition"
                         >
                           <div className="flex items-center gap-2">
-                            <span>{res.flag}</span>
+                            {res.code ? <CountryFlag code={res.code} size="xs" /> : <span>{res.icon}</span>}
                             <span className="font-bold">{res.tag}</span>
                           </div>
                           <span className="text-[10px] text-slate-400">{res.elo}</span>
@@ -1541,6 +1539,7 @@ export const VortexDashboard: React.FC<VortexDashboardProps> = ({
                   <span className="font-display font-bold text-sm text-white group-hover:text-[#A3E635] transition flex items-center gap-1.5">
                     <span>{currentGamerTag}</span>
                     <FaceitVerificationBadge type={currentVerification} size="sm" />
+                    <CountryFlag code={currentCountry.code} name={currentCountry.name} size="xs" />
                   </span>
                   <ChevronDown className={`w-4 h-4 text-slate-400 group-hover:text-white transition-transform duration-200 ${profileDropdownOpen ? 'rotate-180 text-[#A3E635]' : ''}`} />
                 </button>
@@ -1603,6 +1602,7 @@ export const VortexDashboard: React.FC<VortexDashboardProps> = ({
                           <span className="text-[#A3E635] text-xs font-mono font-bold group-hover/name:brightness-125">[{currentClanTag}]</span>
                           <span className="group-hover/name:underline underline-offset-4 decoration-[#A3E635]">{currentGamerTag}</span>
                           <FaceitVerificationBadge type={currentVerification} size="md" />
+                          <CountryFlag code={currentCountry.code} name={currentCountry.name} size="sm" />
                           <ChevronRight className="w-4 h-4 text-slate-500 group-hover/name:text-[#A3E635] group-hover/name:translate-x-0.5 transition-all" />
                         </button>
                       </div>
@@ -1757,7 +1757,7 @@ export const VortexDashboard: React.FC<VortexDashboardProps> = ({
                         </span>
                         <div className="ml-auto flex items-center gap-1.5 px-2.5 py-0.5 rounded-lg bg-white/[0.04] border border-white/10 text-xs font-mono font-bold text-slate-300">
                           <span>#91</span>
-                          <span>{currentCountry.flag}</span>
+                          <CountryFlag code={currentCountry.code} name={currentCountry.name} size="xs" />
                           <ChevronRight className="w-3.5 h-3.5 text-emerald-400" />
                         </div>
                       </div>
@@ -1863,14 +1863,11 @@ export const VortexDashboard: React.FC<VortexDashboardProps> = ({
                                     type={member.verification || (isCenterLeader ? currentVerification : 'none')} 
                                     size="sm" 
                                   />
-                                  {(member.flag || (isCenterLeader ? currentCountry.flag : null)) && (
-                                    <span 
-                                      className="text-sm leading-none shrink-0" 
-                                      title={member.countryName || (isCenterLeader ? currentCountry.name : '')}
-                                    >
-                                      {member.flag || (isCenterLeader ? currentCountry.flag : '')}
-                                    </span>
-                                  )}
+                                  <CountryFlag 
+                                    code={member.code || (isCenterLeader ? currentCountry.code : 'XK')} 
+                                    name={member.countryName || (isCenterLeader ? currentCountry.name : 'Kosovo')} 
+                                    size="xs" 
+                                  />
                                 </div>
                                 <div className="inline-flex items-center gap-2 px-2.5 py-0.5 rounded-full bg-[#151922] border border-white/10 shadow-inner mt-1">
                                   <div className="w-4 h-4 rounded-full relative flex items-center justify-center">
@@ -2779,8 +2776,12 @@ export const VortexDashboard: React.FC<VortexDashboardProps> = ({
                         <div className="flex items-center gap-1.5">
                           <span className="font-display font-black text-white text-base group-hover:text-amber-400 group-hover:underline transition">juanflatroo</span>
                           <FaceitVerificationBadge type="vip" size="sm" />
+                          <CountryFlag code="XK" name="Kosovo" size="xs" />
                         </div>
-                        <span className="text-xs text-slate-400 font-mono">🇽🇰 Kosovo</span>
+                        <span className="text-xs text-slate-400 font-mono flex items-center gap-1.5">
+                          <CountryFlag code="XK" name="Kosovo" size="xs" />
+                          <span>Kosovo</span>
+                        </span>
                       </div>
                     </div>
                     <div className="mt-4 pt-3 border-t border-white/[0.06] flex items-center justify-between text-xs font-mono">
@@ -2810,8 +2811,12 @@ export const VortexDashboard: React.FC<VortexDashboardProps> = ({
                         <div className="flex items-center gap-1.5">
                           <span className="font-display font-black text-white text-base group-hover:text-slate-200 group-hover:underline transition">gxx-</span>
                           <FaceitVerificationBadge type="verified" size="sm" />
+                          <CountryFlag code="XK" name="Kosovo" size="xs" />
                         </div>
-                        <span className="text-xs text-slate-400 font-mono">🇽🇰 Kosovo</span>
+                        <span className="text-xs text-slate-400 font-mono flex items-center gap-1.5">
+                          <CountryFlag code="XK" name="Kosovo" size="xs" />
+                          <span>Kosovo</span>
+                        </span>
                       </div>
                     </div>
                     <div className="mt-4 pt-3 border-t border-white/[0.06] flex items-center justify-between text-xs font-mono">
@@ -2844,8 +2849,12 @@ export const VortexDashboard: React.FC<VortexDashboardProps> = ({
                         <div className="flex items-center gap-1.5">
                           <span className="font-display font-black text-white text-base group-hover:text-[#A3E635] group-hover:underline transition">{currentGamerTag}</span>
                           <FaceitVerificationBadge type={currentVerification} size="sm" />
+                          <CountryFlag code={currentCountry.code} name={currentCountry.name} size="xs" />
                         </div>
-                        <span className="text-xs text-slate-400 font-mono">{currentCountry.flag} {currentCountry.name}</span>
+                        <span className="text-xs text-slate-400 font-mono flex items-center gap-1.5">
+                          <CountryFlag code={currentCountry.code} name={currentCountry.name} size="xs" />
+                          <span>{currentCountry.name}</span>
+                        </span>
                       </div>
                     </div>
                     <div className="mt-4 pt-3 border-t border-white/[0.06] flex items-center justify-between text-xs font-mono">
@@ -2873,23 +2882,25 @@ export const VortexDashboard: React.FC<VortexDashboardProps> = ({
                     </button>
                     <button
                       onClick={() => setRankingRegion('XK')}
-                      className={`px-3 py-1.5 rounded-xl text-xs font-mono font-bold transition cursor-pointer ${
+                      className={`px-3 py-1.5 rounded-xl text-xs font-mono font-bold transition cursor-pointer flex items-center gap-1.5 ${
                         rankingRegion === 'XK'
                           ? 'bg-[#A3E635] text-slate-950 shadow-md'
                           : 'bg-[#141722] text-slate-400 hover:text-white border border-[#232938]'
                       }`}
                     >
-                      🇽🇰 Kosovo
+                      <CountryFlag code="XK" name="Kosovo" size="xs" />
+                      <span>Kosovo</span>
                     </button>
                     <button
                       onClick={() => setRankingRegion('AL')}
-                      className={`px-3 py-1.5 rounded-xl text-xs font-mono font-bold transition cursor-pointer ${
+                      className={`px-3 py-1.5 rounded-xl text-xs font-mono font-bold transition cursor-pointer flex items-center gap-1.5 ${
                         rankingRegion === 'AL'
                           ? 'bg-[#A3E635] text-slate-950 shadow-md'
                           : 'bg-[#141722] text-slate-400 hover:text-white border border-[#232938]'
                       }`}
                     >
-                      🇦🇱 Albania
+                      <CountryFlag code="AL" name="Albania" size="xs" />
+                      <span>Albania</span>
                     </button>
                     <button
                       onClick={() => setRankingRegion('lvl10')}
@@ -2963,9 +2974,15 @@ export const VortexDashboard: React.FC<VortexDashboardProps> = ({
                                 <span className="px-1.5 py-0.2 rounded text-[9px] bg-[#A3E635] text-slate-950 font-black">YOU</span>
                               )}
                               <FaceitVerificationBadge type={p.verification} size="sm" />
+                              <CountryFlag code={p.code} name={p.country} size="xs" />
                             </div>
                           </td>
-                          <td className="py-4 px-6 font-mono text-slate-300">{p.flag} {p.country}</td>
+                          <td className="py-4 px-6 font-mono text-slate-300">
+                            <div className="flex items-center gap-2">
+                              <CountryFlag code={p.code} name={p.country} size="sm" />
+                              <span>{p.country}</span>
+                            </div>
+                          </td>
                           <td className="py-4 px-6">
                             <span className={`px-2 py-0.5 rounded text-xs font-mono font-bold ${
                               p.levelNum === 10 ? 'bg-orange-500/20 text-[#FF5500] border border-[#FF5500]/40' :
@@ -3079,6 +3096,7 @@ export const VortexDashboard: React.FC<VortexDashboardProps> = ({
             const displayVerification = viewedPlayer ? viewedPlayer.verification : currentVerification;
             const displayCountryFlag = viewedPlayer ? viewedPlayer.flag : currentCountry.flag;
             const displayCountryName = viewedPlayer ? viewedPlayer.country : currentCountry.name;
+            const displayCountryCode = viewedPlayer ? (viewedPlayer.code || 'XK') : currentCountry.code;
             const displayBio = viewedPlayer ? (viewedPlayer.bio || 'Competitive CS2 player on VORTEX gaming platform.') : currentBio;
             const displayRole = viewedPlayer ? (viewedPlayer.role || 'CS2 Competitor') : currentRole;
             const displayElo = viewedPlayer ? viewedPlayer.elo : 1407;
@@ -3111,10 +3129,10 @@ export const VortexDashboard: React.FC<VortexDashboardProps> = ({
                       <div className="flex items-center gap-2 text-xs font-mono">
                         <span className="w-2 h-2 rounded-full bg-[#A3E635] animate-pulse" />
                         <span className="text-slate-400">Viewing Public Profile:</span>
-                        <strong className="text-white flex items-center gap-1">
+                        <strong className="text-white flex items-center gap-1.5">
                           <span>{displayTag}</span>
                           <FaceitVerificationBadge type={displayVerification} size="sm" />
-                          <span>{displayCountryFlag}</span>
+                          <CountryFlag code={displayCountryCode} name={displayCountryName} size="xs" />
                         </strong>
                       </div>
                     </div>
@@ -3180,7 +3198,7 @@ export const VortexDashboard: React.FC<VortexDashboardProps> = ({
                             <span>{displayTag}</span>
                             <FaceitVerificationBadge type={displayVerification} size="lg" />
                           </h1>
-                          <span className="text-lg" title={displayCountryName}>{displayCountryFlag}</span>
+                          <CountryFlag code={displayCountryCode} name={displayCountryName} size="lg" />
                         </div>
 
                         <p className="text-xs sm:text-sm font-sans text-slate-300 italic max-w-xl">
@@ -3188,6 +3206,11 @@ export const VortexDashboard: React.FC<VortexDashboardProps> = ({
                         </p>
 
                         <div className="flex flex-wrap items-center gap-3 text-xs font-mono text-slate-400 pt-1">
+                          <span className="flex items-center gap-1.5 text-slate-300">
+                            <CountryFlag code={displayCountryCode} name={displayCountryName} size="xs" />
+                            <span>{displayCountryName}</span>
+                          </span>
+                          <span>•</span>
                           <span className="text-white font-bold">{displayElo.toLocaleString()} ELO</span>
                           <span>•</span>
                           <span className="text-[#A3E635] font-bold">{displayRank}</span>
@@ -4377,21 +4400,26 @@ export const VortexDashboard: React.FC<VortexDashboardProps> = ({
 
                   {/* Country Flag Select */}
                   <div>
-                    <label className="block text-xs font-mono text-slate-400 mb-1.5">Country / Flag</label>
-                    <select
-                      value={draftCountry.code}
-                      onChange={(e) => {
-                        const sel = PRESET_COUNTRIES.find(c => c.code === e.target.value);
-                        if (sel) setDraftCountry(sel);
-                      }}
-                      className="w-full px-4 py-2.5 rounded-xl bg-[#0A0D14] border border-white/10 focus:border-[#A3E635] text-white text-xs font-mono outline-none"
-                    >
-                      {PRESET_COUNTRIES.map(c => (
-                        <option key={c.code} value={c.code}>
-                          {c.flag} {c.name} ({c.code})
-                        </option>
-                      ))}
-                    </select>
+                    <label className="block text-xs font-mono text-slate-400 mb-1.5">Country / Nationality (All World Countries)</label>
+                    <div className="flex items-center gap-2.5">
+                      <div className="p-2 rounded-xl bg-[#0A0D14] border border-white/10 flex items-center justify-center shrink-0 shadow-inner" title={draftCountry.name}>
+                        <CountryFlag code={draftCountry.code} name={draftCountry.name} size="lg" />
+                      </div>
+                      <select
+                        value={draftCountry.code}
+                        onChange={(e) => {
+                          const sel = ALL_COUNTRIES.find(c => c.code === e.target.value);
+                          if (sel) setDraftCountry(sel);
+                        }}
+                        className="flex-1 px-4 py-2.5 rounded-xl bg-[#0A0D14] border border-white/10 focus:border-[#A3E635] text-white text-xs font-mono outline-none cursor-pointer"
+                      >
+                        {ALL_COUNTRIES.map(c => (
+                          <option key={c.code} value={c.code} className="bg-[#12141C] text-white py-1">
+                            {c.name} ({c.code})
+                          </option>
+                        ))}
+                      </select>
+                    </div>
                   </div>
 
                   {/* CS2 Role Select */}
