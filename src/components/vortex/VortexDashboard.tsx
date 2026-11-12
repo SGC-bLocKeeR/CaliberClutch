@@ -332,6 +332,20 @@ export const SidebarMenuIcon: React.FC<{ collapsed?: boolean; className?: string
   </div>
 );
 
+// Authentic Counter-Strike 2 Circular Badge for Game Selector
+export const CS2GameIcon: React.FC<{ className?: string }> = ({ className = "w-6 h-6" }) => (
+  <div className={`rounded-full bg-[#1A2644] border border-[#2F4275] flex items-center justify-center shrink-0 shadow-sm relative overflow-hidden select-none ${className}`}>
+    <div className="flex items-center justify-center leading-none">
+      <span className="font-display font-black text-[9px] italic text-[#E2E8F0] tracking-tighter drop-shadow-[0_1px_2px_rgba(0,0,0,0.8)]">
+        CS
+      </span>
+      <span className="font-display font-black text-[10px] text-[#F59E0B] not-italic ml-0.5 drop-shadow-[0_1px_2px_rgba(0,0,0,0.8)]">
+        2
+      </span>
+    </div>
+  </div>
+);
+
 const PRESET_AVATARS = [
   { id: 'blockeerz', name: 'bLocKeeRz Official', url: '/images/blockeerz_avatar.png' },
   { id: 'cyber', name: 'Cyber Operator', url: 'https://images.unsplash.com/photo-1566492031773-4f4e44671857?auto=format&fit=crop&w=250&q=80' },
@@ -569,6 +583,9 @@ export const VortexDashboard: React.FC<VortexDashboardProps> = ({
   const [connectToast, setConnectToast] = useState<{ name: string; ip: string } | null>(null);
   const [rankingSearch, setRankingSearch] = useState('');
   const [rankingRegion, setRankingRegion] = useState<'all' | 'XK' | 'AL' | 'lvl10'>('all');
+  const [sidebarSearchQuery, setSidebarSearchQuery] = useState('');
+  const [sidebarSearchOpen, setSidebarSearchOpen] = useState(false);
+  const [gameSelectorOpen, setGameSelectorOpen] = useState(false);
 
   // Matchmaking Party Lobby State (5 Party Slots, Center is user)
   const [partySlots, setPartySlots] = useState<(PartySlotMember | null)[]>([
@@ -863,7 +880,7 @@ export const VortexDashboard: React.FC<VortexDashboardProps> = ({
   const navItems = [
     {
       id: 'play' as VortexTab,
-      label: 'Play (5v5 Queue)',
+      label: 'Play',
       desc: 'Ranked 128-tick matchmaking',
       icon: Play,
       badge: isQueuing ? 'QUEUING' : 'ACTIVE',
@@ -873,9 +890,9 @@ export const VortexDashboard: React.FC<VortexDashboardProps> = ({
     },
     {
       id: 'rankings' as VortexTab,
-      label: 'Rankings',
+      label: 'Rank',
       desc: 'Platform Player Leaderboard',
-      icon: Award,
+      icon: BarChart2,
       badge: 'TOP PLAYERS',
       badgeColor: 'bg-[#A3E635]/15 text-[#A3E635] border border-[#A3E635]/30 font-bold'
     },
@@ -975,7 +992,124 @@ export const VortexDashboard: React.FC<VortexDashboardProps> = ({
               )}
             </div>
 
-            {/* Unified Navigation List (Single Clean List Below Logo, No Dividing Line) */}
+            {/* FACEIT-STYLE SEARCH BAR */}
+            {!sidebarCollapsed ? (
+              <div className="relative mb-2 px-1">
+                <div className="flex items-center gap-2.5 px-3 py-2 rounded-xl bg-[#14161F] hover:bg-[#191D2A] border border-white/[0.06] hover:border-white/15 focus-within:border-[#A3E635]/60 transition text-xs font-sans group">
+                  <Search className="w-4 h-4 text-slate-400 group-focus-within:text-[#A3E635] transition shrink-0" />
+                  <input
+                    type="text"
+                    value={sidebarSearchQuery}
+                    onChange={(e) => {
+                      setSidebarSearchQuery(e.target.value);
+                      setSidebarSearchOpen(true);
+                    }}
+                    onFocus={() => setSidebarSearchOpen(true)}
+                    placeholder="Search"
+                    className="bg-transparent border-0 text-white placeholder-slate-400 focus:outline-none w-full text-xs font-sans tracking-wide"
+                  />
+                  {sidebarSearchQuery && (
+                    <button 
+                      onClick={() => { setSidebarSearchQuery(''); setSidebarSearchOpen(false); }}
+                      className="text-slate-400 hover:text-white transition p-0.5"
+                    >
+                      <X className="w-3.5 h-3.5" />
+                    </button>
+                  )}
+                </div>
+
+                {/* Instant Search Popup Dropdown */}
+                {sidebarSearchOpen && sidebarSearchQuery.trim() && (
+                  <div className="absolute left-1 right-1 top-full mt-1.5 p-2 rounded-2xl bg-[#0D0F16] border border-white/10 shadow-2xl z-50 max-h-60 overflow-y-auto animate-in fade-in zoom-in-95 duration-150">
+                    <div className="text-[10px] font-mono text-slate-400 px-2 py-1 uppercase tracking-wider">Quick Results</div>
+                    {[
+                      { tag: 'bLocKeeRz', level: 'Level 7', elo: '1,407 ELO', flag: '🇽🇰', action: () => { setActiveTab('profile'); setSidebarSearchOpen(false); } },
+                      { tag: 'juanflatroo', level: 'Level 10', elo: '3,890 ELO', flag: '🇽🇰', action: () => { setActiveTab('rankings'); setSidebarSearchOpen(false); } },
+                      { tag: 'gxx-', level: 'Level 10', elo: '3,420 ELO', flag: '🇽🇰', action: () => { setActiveTab('rankings'); setSidebarSearchOpen(false); } },
+                      { tag: 'Play 5v5 Queue', level: '128-Tick', elo: 'Matchmaking', flag: '🎮', action: () => { setActiveTab('play'); setSidebarSearchOpen(false); } },
+                      { tag: 'Platform Rankings', level: 'Ladder', elo: 'Leaderboard', flag: '🏆', action: () => { setActiveTab('rankings'); setSidebarSearchOpen(false); } },
+                    ]
+                      .filter(item => item.tag.toLowerCase().includes(sidebarSearchQuery.toLowerCase()))
+                      .map((res, i) => (
+                        <div
+                          key={i}
+                          onClick={() => { sound.playClick(); res.action(); }}
+                          className="px-2.5 py-1.5 rounded-xl hover:bg-[#1A1F2E] flex items-center justify-between text-xs font-mono text-white cursor-pointer transition"
+                        >
+                          <div className="flex items-center gap-2">
+                            <span>{res.flag}</span>
+                            <span className="font-bold">{res.tag}</span>
+                          </div>
+                          <span className="text-[10px] text-slate-400">{res.elo}</span>
+                        </div>
+                      ))}
+                  </div>
+                )}
+              </div>
+            ) : (
+              <div className="flex justify-center mb-2">
+                <button
+                  onClick={() => { sound.playClick(); setSidebarCollapsed(false); }}
+                  title="Search"
+                  className="p-2.5 rounded-xl bg-[#14161F] hover:bg-[#191D2A] border border-white/[0.06] text-slate-400 hover:text-white transition cursor-pointer"
+                >
+                  <Search className="w-4 h-4" />
+                </button>
+              </div>
+            )}
+
+            {/* INTEGRATED COUNTER-STRIKE 2 GAME SELECTOR (AS IN FACEIT SCREENSHOT) */}
+            {!sidebarCollapsed ? (
+              <div className="relative mb-2 px-1">
+                <button
+                  onClick={() => { sound.playClick(); setGameSelectorOpen(!gameSelectorOpen); }}
+                  className="w-full flex items-center justify-between px-3 py-2 rounded-xl bg-[#14161F] hover:bg-[#191D2A] border border-white/[0.06] hover:border-white/15 transition cursor-pointer text-left group"
+                >
+                  <div className="flex items-center gap-2.5">
+                    <CS2GameIcon className="w-6 h-6" />
+                    <span className="font-sans font-bold text-xs text-white tracking-wide">CS2</span>
+                  </div>
+                  <div className="flex items-center gap-1.5 text-slate-400 group-hover:text-white transition">
+                    <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />
+                    <ChevronDown className={`w-3.5 h-3.5 transition-transform duration-200 ${gameSelectorOpen ? 'rotate-180' : ''}`} />
+                  </div>
+                </button>
+
+                {/* Dropdown Menu when clicked */}
+                {gameSelectorOpen && (
+                  <div className="absolute left-1 right-1 top-full mt-1.5 p-2 rounded-2xl bg-[#0D0F16] border border-white/10 shadow-2xl z-50 animate-in fade-in zoom-in-95 duration-150">
+                    <div className="text-[10px] font-mono text-slate-400 px-2 py-1 uppercase tracking-wider">Active Title</div>
+                    <div className="p-2 rounded-xl bg-[#1A2644]/40 border border-[#2F4275]/50 flex items-center justify-between">
+                      <div className="flex items-center gap-2.5">
+                        <CS2GameIcon className="w-6 h-6" />
+                        <div>
+                          <div className="text-xs font-bold text-white">Counter-Strike 2</div>
+                          <div className="text-[10px] text-emerald-400 font-mono">128-Tick Competitive Active</div>
+                        </div>
+                      </div>
+                      <Check className="w-4 h-4 text-emerald-400" />
+                    </div>
+                  </div>
+                )}
+              </div>
+            ) : (
+              <div className="flex justify-center mb-2">
+                <button
+                  onClick={() => { sound.playClick(); setSidebarCollapsed(false); }}
+                  title="Counter-Strike 2 (Active Title)"
+                  className="p-1 rounded-xl bg-[#14161F] hover:bg-[#191D2A] border border-white/[0.06] transition cursor-pointer"
+                >
+                  <CS2GameIcon className="w-7 h-7" />
+                </button>
+              </div>
+            )}
+
+            {/* DIVIDER LINE ABOVE PLAY 5vs5 ("vija te jet mbi Play 5vs5") */}
+            <div className={`w-full my-3 ${sidebarCollapsed ? 'px-2' : 'px-1'}`}>
+              <div className="h-px bg-white/[0.08] w-full" />
+            </div>
+
+            {/* Unified Navigation List (Single Clean List Below Logo & Divider) */}
             <nav className="space-y-1">
               {navItems.map((item) => {
                 const Icon = item.icon;
@@ -2230,11 +2364,6 @@ export const VortexDashboard: React.FC<VortexDashboardProps> = ({
                         <span>•</span>
                         <span className="text-slate-300">#91 Global</span>
                         <span>•</span>
-                        <span className={`font-bold flex items-center gap-1 ${isAntiCheatActive ? 'text-emerald-400' : 'text-[#FF5500]'}`}>
-                          {isAntiCheatActive ? <ShieldCheck className="w-3.5 h-3.5" /> : <ShieldAlert className="w-3.5 h-3.5" />}
-                          {isAntiCheatActive ? 'Kernel AC Verified' : 'AC Not Running'}
-                        </span>
-                        <span>•</span>
                         <span className="text-sky-400 font-bold">{currentRole}</span>
                       </div>
 
@@ -2310,16 +2439,6 @@ export const VortexDashboard: React.FC<VortexDashboardProps> = ({
                           </div>
                         ))}
                       </div>
-                    </div>
-
-                    {/* Telemetry Heartbeat Status */}
-                    <div className="flex items-center justify-between pt-2 border-t border-white/[0.06] text-[10px] font-mono text-slate-400">
-                      <span className={`flex items-center gap-1 ${isAntiCheatActive ? 'text-emerald-400' : 'text-[#FF5500]'}`}>
-                        <span className={`w-1.5 h-1.5 rounded-full ${isAntiCheatActive ? 'bg-emerald-400 animate-pulse' : 'bg-[#FF5500]'}`} />
-                        {isAntiCheatActive ? 'AC v3.1 Ring-0 Active' : 'AC Inactive'}
-                      </span>
-                      <span>128-Tick Sync</span>
-                      <span className="text-slate-500">Jitter 0.4ms</span>
                     </div>
                   </div>
                 </div>
@@ -3550,11 +3669,6 @@ export const VortexDashboard: React.FC<VortexDashboardProps> = ({
                         <span className="text-[#A3E635] font-bold">#91 Global Rank</span>
                         <span>•</span>
                         <span className="text-sky-400 font-bold">{currentRole}</span>
-                        <span>•</span>
-                        <span className={`font-bold flex items-center gap-1 ${isAntiCheatActive ? 'text-emerald-400' : 'text-[#FF5500]'}`}>
-                          {isAntiCheatActive ? <ShieldCheck className="w-3.5 h-3.5" /> : <ShieldAlert className="w-3.5 h-3.5" />}
-                          {isAntiCheatActive ? 'Kernel AC Verified' : 'AC Not Running'}
-                        </span>
                       </div>
                     </div>
                   </div>
