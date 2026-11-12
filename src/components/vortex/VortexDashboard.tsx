@@ -4400,7 +4400,7 @@ export const VortexDashboard: React.FC<VortexDashboardProps> = ({
 
                   {/* Country Flag Select */}
                   <div>
-                    <label className="block text-xs font-mono text-slate-400 mb-1.5">Country / Nationality (All World Countries)</label>
+                    <label className="block text-xs font-mono text-slate-400 mb-1.5">Country</label>
                     <div className="flex items-center gap-2.5">
                       <div className="p-2 rounded-xl bg-[#0A0D14] border border-white/10 flex items-center justify-center shrink-0 shadow-inner" title={draftCountry.name}>
                         <CountryFlag code={draftCountry.code} name={draftCountry.name} size="lg" />
