@@ -860,7 +860,7 @@ export const VortexDashboard: React.FC<VortexDashboardProps> = ({
     }
   };
 
-  const primaryNavItems = [
+  const navItems = [
     {
       id: 'play' as VortexTab,
       label: 'Play (5v5 Queue)',
@@ -878,10 +878,7 @@ export const VortexDashboard: React.FC<VortexDashboardProps> = ({
       icon: Award,
       badge: 'TOP PLAYERS',
       badgeColor: 'bg-[#A3E635]/15 text-[#A3E635] border border-[#A3E635]/30 font-bold'
-    }
-  ];
-
-  const secondaryNavItems = [
+    },
     {
       id: 'servers' as VortexTab,
       label: 'Server Browser',
@@ -978,9 +975,9 @@ export const VortexDashboard: React.FC<VortexDashboardProps> = ({
               )}
             </div>
 
-            {/* Primary Navigation Modes (1. Dashboard & 2. Play) */}
-            <div className="space-y-1.5">
-              {primaryNavItems.map((item) => {
+            {/* Unified Navigation List (Single Clean List Below Logo, No Dividing Line) */}
+            <nav className="space-y-1">
+              {navItems.map((item) => {
                 const Icon = item.icon;
                 const isActive = activeTab === item.id;
                 const isPlayTab = item.id === 'play';
@@ -1011,78 +1008,6 @@ export const VortexDashboard: React.FC<VortexDashboardProps> = ({
                       {!sidebarCollapsed && (
                         <div>
                           <div className="text-xs font-bold tracking-wide text-white">{item.label}</div>
-                          <div className="text-[10px] text-slate-400">{item.desc}</div>
-                        </div>
-                      )}
-                    </div>
-
-                    {!sidebarCollapsed && item.badge && (
-                      <span className={`text-[9px] font-mono font-bold px-2 py-0.5 rounded-full ${item.badgeColor}`}>
-                        {item.badge}
-                      </span>
-                    )}
-
-                    {isActive && (
-                      <div className="absolute left-0 top-1/2 -translate-y-1/2 w-1.5 h-6 rounded-r-full bg-[#A3E635] shadow-[0_0_12px_rgba(163,230,53,0.85)]" />
-                    )}
-
-                    {/* Floating Tooltip when collapsed */}
-                    {sidebarCollapsed && (
-                      <div className="absolute left-full ml-3 px-3 py-1.5 rounded-xl bg-[#141722] border border-[#252C3D] text-white text-xs font-bold whitespace-nowrap opacity-0 group-hover:opacity-100 pointer-events-none transition-all duration-150 z-50 shadow-2xl flex items-center gap-2">
-                        <span>{item.label}</span>
-                        {item.badge && (
-                          <span className={`text-[9px] font-mono px-1.5 py-0.2 rounded-full ${item.badgeColor}`}>
-                            {item.badge}
-                          </span>
-                        )}
-                      </div>
-                    )}
-                  </button>
-                );
-              })}
-            </div>
-
-            {/* Category Header or Divider */}
-            {!sidebarCollapsed ? (
-              <div className="px-3 pt-4 pb-2 text-[10px] font-mono uppercase tracking-wider text-slate-500 border-t border-white/[0.06] mt-3">
-                Competitive Command Center
-              </div>
-            ) : (
-              <div className="w-8 h-px bg-white/10 mx-auto my-3" />
-            )}
-
-            {/* Secondary Navigation Modes */}
-            <nav className="space-y-1">
-              {secondaryNavItems.map((item) => {
-                const Icon = item.icon;
-                const isActive = activeTab === item.id;
-
-                return (
-                  <button
-                    key={item.id}
-                    onClick={() => {
-                      sound.playSelect();
-                      setActiveTab(item.id);
-                    }}
-                    className={`w-full group relative flex items-center ${
-                      sidebarCollapsed ? 'justify-center p-2.5' : 'justify-between px-3.5 py-2'
-                    } rounded-xl text-left transition-all cursor-pointer ${
-                      isActive
-                        ? 'bg-gradient-to-r from-[#A3E635]/20 via-[#18210C] to-transparent border border-[#A3E635]/60 text-white shadow-[0_0_20px_rgba(163,230,53,0.18)]'
-                        : 'hover:bg-[#151924] border border-transparent text-slate-300 hover:text-white'
-                    }`}
-                  >
-                    <div className={`flex items-center ${sidebarCollapsed ? 'justify-center' : 'gap-3'}`}>
-                      <div className={`p-2 rounded-lg transition-colors ${
-                        isActive 
-                          ? 'bg-[#A3E635] text-slate-950 shadow-md' 
-                          : 'bg-[#151924] group-hover:bg-[#1E2332] text-slate-400 group-hover:text-white'
-                      }`}>
-                        <Icon className="w-4 h-4" />
-                      </div>
-                      {!sidebarCollapsed && (
-                        <div>
-                          <div className="text-xs font-bold tracking-wide">{item.label}</div>
                           <div className="text-[10px] text-slate-400">{item.desc}</div>
                         </div>
                       )}
