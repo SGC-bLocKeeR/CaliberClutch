@@ -626,6 +626,7 @@ export const VortexDashboard: React.FC<VortexDashboardProps> = ({
   const [rankingSearch, setRankingSearch] = useState('');
   const [rankingRegion, setRankingRegion] = useState<'all' | 'XK' | 'AL' | 'lvl10'>('all');
   const [viewedPlayer, setViewedPlayer] = useState<PlatformRankingPlayer | null>(null);
+  const [hoveredTooltip, setHoveredTooltip] = useState<string | null>(null);
 
   const platformRankingPlayers: PlatformRankingPlayer[] = [
     {
@@ -3553,85 +3554,280 @@ export const VortexDashboard: React.FC<VortexDashboardProps> = ({
                   </div>
                 </div>
 
-                {/* GOTV 128-TICK MATCH REPLAYS (.DEM) */}
+                {/* RECENT MATCHES (AUTHENTIC ESPORTS MATCH HISTORY & GOTV DEMOS) */}
                 <div className="bg-[#0E1017] border border-[#202536] rounded-3xl p-6 shadow-xl space-y-4">
                   <div className="flex items-center justify-between pb-3 border-b border-white/[0.06]">
                     <div>
-                      <h3 className="text-lg font-black font-display text-white">Recent GOTV 128-Tick Match Replays (.dem)</h3>
-                      <p className="text-xs text-[#94A3B8]">Recorded broadcast demos with full player POV & tick-rate accuracy</p>
+                      <h3 className="text-lg font-black font-display text-white">Recent matches</h3>
+                      <p className="text-xs text-[#94A3B8]">Verified 128-tick ranked matchmaking history & GOTV replays</p>
                     </div>
-                    <span className="text-xs font-mono text-[#A3E635]">Auto-Recorded on European Node</span>
+                    <button
+                      onClick={() => {
+                        sound.playClick();
+                        setDashboardToast('Full 5v5 competitive match history archive synced (420 matches)');
+                        setTimeout(() => setDashboardToast(null), 3000);
+                      }}
+                      className="text-xs font-mono text-slate-400 hover:text-white transition flex items-center gap-1 cursor-pointer group"
+                    >
+                      <span>Full match history</span>
+                      <ChevronRight className="w-3.5 h-3.5 group-hover:translate-x-0.5 transition-transform" />
+                    </button>
                   </div>
 
-                  <div className="space-y-3">
-                    {[
-                      { match: 'Mirage 5v5 Competitive', map: 'de_mirage', score: '13 - 9', res: 'VICTORY', size: '128 MB', date: 'Today at 13:20' },
-                      { match: 'Inferno 5v5 Scrimfest', map: 'de_inferno', score: '13 - 11', res: 'VICTORY', size: '142 MB', date: 'Yesterday at 21:45' },
-                      { match: 'Nuke High-ELO Practice', map: 'de_nuke', score: '13 - 7', res: 'VICTORY', size: '118 MB', date: '2 days ago' },
-                    ].map((dm, idx) => (
-                      <div key={idx} className="p-4 rounded-2xl bg-[#12141C] border border-[#232938] hover:border-[#A3E635]/40 transition flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-                        <div className="flex items-center gap-4">
-                          <div className="w-10 h-10 rounded-xl bg-lime-500/10 border border-[#A3E635]/30 flex items-center justify-center text-[#A3E635] shrink-0">
-                            <Film className="w-5 h-5" />
+                  <div className="overflow-x-auto -mx-6 px-6">
+                    <div className="min-w-[760px] space-y-2">
+                      {/* Table Header */}
+                      <div className="grid grid-cols-12 gap-3 px-4 py-2 text-[11px] font-mono font-bold uppercase tracking-wider text-slate-400 border-b border-white/[0.04]">
+                        <div className="col-span-2">Date</div>
+                        <div className="col-span-2">Score</div>
+                        <div className="col-span-3">Rating & ELO</div>
+                        <div className="col-span-2">K / D / A</div>
+                        <div className="col-span-2">Map</div>
+                        <div className="col-span-1 text-right">Actions</div>
+                      </div>
+
+                      {/* Match Rows */}
+                      {[
+                        {
+                          id: 1,
+                          date: 'Wed 11 Nov',
+                          time: '20:52',
+                          isWin: true,
+                          score: '13 : 11',
+                          userScore: 13,
+                          oppScore: 11,
+                          level: displayLevelNum,
+                          elo: displayElo,
+                          eloDelta: '+21',
+                          rating: isViewingOther ? '1.48' : '1.38',
+                          kda: isViewingOther ? '24 / 14 / 6' : '19 / 14 / 5',
+                          map: 'Mirage',
+                          mapCode: 'de_mirage',
+                          mapIcon: '🏛️',
+                          size: '128 MB'
+                        },
+                        {
+                          id: 2,
+                          date: 'Wed 11 Nov',
+                          time: '20:07',
+                          isWin: false,
+                          score: '10 : 13',
+                          userScore: 10,
+                          oppScore: 13,
+                          level: displayLevelNum,
+                          elo: displayElo - 25,
+                          eloDelta: '-25',
+                          rating: isViewingOther ? '1.18' : '1.05',
+                          kda: isViewingOther ? '18 / 17 / 4' : '14 / 16 / 5',
+                          map: 'Inferno',
+                          mapCode: 'de_inferno',
+                          mapIcon: '🏰',
+                          size: '142 MB'
+                        },
+                        {
+                          id: 3,
+                          date: 'Wed 11 Nov',
+                          time: '19:21',
+                          isWin: true,
+                          score: '13 : 11',
+                          userScore: 13,
+                          oppScore: 11,
+                          level: displayLevelNum,
+                          elo: displayElo - 3,
+                          eloDelta: '+28',
+                          rating: isViewingOther ? '1.65' : '1.55',
+                          kda: isViewingOther ? '28 / 12 / 8' : '23 / 17 / 5',
+                          map: 'Nuke',
+                          mapCode: 'de_nuke',
+                          mapIcon: '☢️',
+                          size: '118 MB'
+                        },
+                        {
+                          id: 4,
+                          date: 'Tue 10 Nov',
+                          time: '21:44',
+                          isWin: false,
+                          score: '4 : 13',
+                          userScore: 4,
+                          oppScore: 13,
+                          level: displayLevelNum,
+                          elo: displayElo - 31,
+                          eloDelta: '-20',
+                          rating: isViewingOther ? '0.95' : '0.88',
+                          kda: isViewingOther ? '15 / 15 / 2' : '11 / 15 / 3',
+                          map: 'Ancient',
+                          mapCode: 'de_ancient',
+                          mapIcon: '🗿',
+                          size: '98 MB'
+                        },
+                        {
+                          id: 5,
+                          date: 'Tue 10 Nov',
+                          time: '21:03',
+                          isWin: true,
+                          score: '13 : 10',
+                          userScore: 13,
+                          oppScore: 10,
+                          level: displayLevelNum,
+                          elo: displayElo - 11,
+                          eloDelta: '+27',
+                          rating: isViewingOther ? '1.35' : '1.24',
+                          kda: isViewingOther ? '22 / 13 / 6' : '18 / 12 / 7',
+                          map: 'Dust II',
+                          mapCode: 'de_dust2',
+                          mapIcon: '🏜️',
+                          size: '134 MB'
+                        }
+                      ].map((m, idx) => (
+                        <div
+                          key={m.id}
+                          className="grid grid-cols-12 gap-3 items-center p-3 sm:p-3.5 rounded-2xl bg-[#12141C] border border-[#232938] hover:border-[#A3E635]/40 transition relative overflow-hidden group/row"
+                        >
+                          {/* Vertical Left Win/Loss Indicator Bar */}
+                          <div 
+                            className={`absolute left-0 top-0 bottom-0 w-1 ${
+                              m.isWin ? 'bg-[#A3E635]' : 'bg-rose-500'
+                            }`} 
+                          />
+
+                          {/* Column 1: Date & Time */}
+                          <div className="col-span-2 pl-3 font-mono text-xs">
+                            <div className="font-bold text-white">{m.date}</div>
+                            <div className="text-[10px] text-slate-400">{m.time}</div>
                           </div>
-                          <div>
-                            <div className="flex items-center gap-2">
-                              <h4 className="text-sm font-bold font-display text-white">{dm.match}</h4>
-                              <span className="px-2 py-0.5 rounded text-[10px] font-mono font-bold bg-emerald-500/15 text-emerald-400">
-                                {dm.res}
+
+                          {/* Column 2: Score & Result */}
+                          <div className="col-span-2 flex items-center gap-2 font-mono text-xs">
+                            <span 
+                              className={`w-5 h-5 rounded flex items-center justify-center font-black text-[10px] shrink-0 ${
+                                m.isWin 
+                                  ? 'bg-[#A3E635] text-slate-950 shadow-[0_0_8px_rgba(163,230,53,0.35)]' 
+                                  : 'bg-rose-500 text-white'
+                              }`}
+                            >
+                              {m.isWin ? 'W' : 'L'}
+                            </span>
+                            <span className="font-bold">
+                              <span className={m.isWin ? 'text-[#A3E635]' : 'text-rose-400'}>{m.userScore}</span>
+                              <span className="text-slate-500 mx-1">:</span>
+                              <span className="text-slate-400">{m.oppScore}</span>
+                            </span>
+                          </div>
+
+                          {/* Column 3: Rating & ELO Progression */}
+                          <div className="col-span-3 flex items-center gap-2.5 font-mono text-xs">
+                            {/* Rating Badge */}
+                            <span 
+                              className={`px-2 py-0.5 rounded text-xs font-bold border ${
+                                parseFloat(m.rating) >= 1.30
+                                  ? 'bg-emerald-500/15 text-emerald-400 border-emerald-500/30'
+                                  : parseFloat(m.rating) >= 1.00
+                                  ? 'bg-white/[0.06] text-white border-white/10'
+                                  : 'bg-rose-500/15 text-rose-400 border-rose-500/30'
+                              }`}
+                              title="HLTV 2.0 Impact Rating"
+                            >
+                              {m.rating}
+                            </span>
+
+                            {/* Level Capsule + ELO delta */}
+                            <div className="flex items-center gap-1.5 text-xs">
+                              <span 
+                                className={`w-4 h-4 rounded-full text-[9px] font-black flex items-center justify-center ${
+                                  m.level === 10
+                                    ? 'bg-gradient-to-br from-[#FF5500] to-amber-600 text-white'
+                                    : 'bg-gradient-to-br from-amber-400 to-yellow-600 text-black'
+                                }`}
+                              >
+                                {m.level}
+                              </span>
+                              <span className="text-white font-bold">{m.elo.toLocaleString()}</span>
+                              <span 
+                                className={`text-[10px] font-bold ${
+                                  m.isWin ? 'text-[#A3E635]' : 'text-rose-400'
+                                }`}
+                              >
+                                {m.isWin ? `↑ ${m.eloDelta}` : `↓ ${m.eloDelta}`}
                               </span>
                             </div>
-                            <p className="text-xs font-mono text-slate-400 mt-0.5">
-                              Map: {dm.map} • Score: {dm.score} • Recorded: {dm.date}
-                            </p>
                           </div>
-                        </div>
 
-                        <div className="flex items-center gap-3">
-                          <span className="text-xs font-mono text-slate-400">{dm.size}</span>
+                          {/* Column 4: K / D / A */}
+                          <div className="col-span-2 font-mono text-xs text-slate-300">
+                            {m.kda}
+                          </div>
 
-                          <div className="flex items-center gap-2">
-                            {/* Download Demo Button with Authentic FACEIT Tooltip */}
-                            <div className="relative group/demotip">
+                          {/* Column 5: Map */}
+                          <div className="col-span-2 flex items-center gap-2 font-display text-xs font-bold text-white">
+                            <span className="text-base shrink-0">{m.mapIcon}</span>
+                            <span className="truncate">{m.map}</span>
+                          </div>
+
+                          {/* Column 6: Actions (Download Demo + View Match) */}
+                          <div className="col-span-1 flex items-center justify-end gap-1.5 pr-1">
+                            {/* Download Demo Button with White FACEIT Speech Bubble Tooltip */}
+                            <div 
+                              className="relative group"
+                              onMouseEnter={() => setHoveredTooltip(`demo-${idx}`)}
+                              onMouseLeave={() => setHoveredTooltip(null)}
+                            >
                               <button
-                                onClick={() => handleDownloadDemo(dm.map)}
-                                className="w-10 h-10 rounded-xl bg-[#1C202B] hover:bg-[#262C3B] border border-white/10 hover:border-white/25 text-slate-200 hover:text-white flex items-center justify-center transition cursor-pointer shadow-sm hover:scale-105 active:scale-95"
+                                onClick={() => handleDownloadDemo(m.mapCode)}
+                                className="w-8 h-8 rounded-lg bg-[#181C26] hover:bg-[#252C3B] border border-white/10 hover:border-white/25 text-slate-300 hover:text-white flex items-center justify-center transition cursor-pointer shadow-sm hover:scale-105 active:scale-95"
                                 aria-label="Download demo"
+                                title="Download demo"
                               >
-                                <Download className="w-4 h-4 stroke-[2.2]" />
+                                <Download className="w-3.5 h-3.5 stroke-[2.2]" />
                               </button>
 
                               {/* Pure White FACEIT Speech Bubble Tooltip */}
-                              <div className="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 px-2.5 py-1 rounded-md bg-white text-slate-950 text-xs font-sans font-bold shadow-2xl whitespace-nowrap opacity-0 group-hover/demotip:opacity-100 transition-all duration-150 pointer-events-none z-30">
-                                Download demo
-                                <div className="absolute top-full left-1/2 -translate-x-1/2 border-4 border-transparent border-t-white" />
+                              <div 
+                                className={`absolute bottom-full right-0 sm:left-1/2 sm:-translate-x-1/2 mb-2 px-2.5 py-1 rounded-md bg-white text-slate-950 text-xs font-sans font-bold shadow-2xl whitespace-nowrap z-50 pointer-events-none transition-all duration-150 ${
+                                  hoveredTooltip === `demo-${idx}`
+                                    ? 'opacity-100 visible scale-100 translate-y-0'
+                                    : 'opacity-0 invisible scale-95 translate-y-1 group-hover:opacity-100 group-hover:visible group-hover:scale-100 group-hover:translate-y-0'
+                                }`}
+                              >
+                                <span>Download demo</span>
+                                <span className="absolute -bottom-1 right-3 sm:left-1/2 sm:-translate-x-1/2 w-2 h-2 bg-white rotate-45 pointer-events-none" />
                               </div>
                             </div>
 
-                            {/* View Match Room External Link Button with Tooltip */}
-                            <div className="relative group/roomtip">
+                            {/* View Match Room Button with Tooltip */}
+                            <div 
+                              className="relative group"
+                              onMouseEnter={() => setHoveredTooltip(`room-${idx}`)}
+                              onMouseLeave={() => setHoveredTooltip(null)}
+                            >
                               <button
                                 onClick={() => {
                                   sound.playClick();
-                                  setDashboardToast(`Opening match room for ${dm.match}...`);
+                                  setDashboardToast(`Opening match room for ${m.map} 5v5...`);
                                   setTimeout(() => setDashboardToast(null), 2500);
                                 }}
-                                className="w-10 h-10 rounded-xl bg-[#141722] hover:bg-[#1E2333] border border-white/10 hover:border-white/20 text-slate-400 hover:text-white flex items-center justify-center transition cursor-pointer shadow-sm hover:scale-105 active:scale-95"
+                                className="w-8 h-8 rounded-lg bg-[#141722] hover:bg-[#1E2333] border border-white/10 hover:border-white/20 text-slate-400 hover:text-white flex items-center justify-center transition cursor-pointer shadow-sm hover:scale-105 active:scale-95"
                                 aria-label="View match"
+                                title="View match"
                               >
-                                <ExternalLink className="w-4 h-4 stroke-[2.2]" />
+                                <ExternalLink className="w-3.5 h-3.5 stroke-[2.2]" />
                               </button>
 
                               {/* Pure White FACEIT Speech Bubble Tooltip */}
-                              <div className="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 px-2.5 py-1 rounded-md bg-white text-slate-950 text-xs font-sans font-bold shadow-2xl whitespace-nowrap opacity-0 group-hover/roomtip:opacity-100 transition-all duration-150 pointer-events-none z-30">
-                                View match
-                                <div className="absolute top-full left-1/2 -translate-x-1/2 border-4 border-transparent border-t-white" />
+                              <div 
+                                className={`absolute bottom-full right-0 sm:left-1/2 sm:-translate-x-1/2 mb-2 px-2.5 py-1 rounded-md bg-white text-slate-950 text-xs font-sans font-bold shadow-2xl whitespace-nowrap z-50 pointer-events-none transition-all duration-150 ${
+                                  hoveredTooltip === `room-${idx}`
+                                    ? 'opacity-100 visible scale-100 translate-y-0'
+                                    : 'opacity-0 invisible scale-95 translate-y-1 group-hover:opacity-100 group-hover:visible group-hover:scale-100 group-hover:translate-y-0'
+                                }`}
+                              >
+                                <span>View match</span>
+                                <span className="absolute -bottom-1 right-3 sm:left-1/2 sm:-translate-x-1/2 w-2 h-2 bg-white rotate-45 pointer-events-none" />
                               </div>
                             </div>
                           </div>
                         </div>
-                      </div>
-                    ))}
+                      ))}
+                    </div>
                   </div>
                 </div>
 
