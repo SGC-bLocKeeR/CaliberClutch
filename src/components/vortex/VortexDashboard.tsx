@@ -1283,22 +1283,12 @@ export const VortexDashboard: React.FC<VortexDashboardProps> = ({
                         </div>
                       </div>
 
-                      {/* Clean GamerTag & Level/ELO */}
-                      <div className="space-y-1">
+                      {/* Clean GamerTag */}
+                      <div>
                         <div className="flex items-center justify-center gap-2 font-display font-black text-white text-base">
                           <span className="text-[#A3E635] text-xs font-mono font-bold">[{currentClanTag}]</span>
                           <span>{currentGamerTag}</span>
                           <FaceitVerificationBadge type={currentVerification} size="md" />
-                        </div>
-                        <div className="flex items-center justify-center gap-2 text-xs font-mono text-slate-400">
-                          <span className="text-amber-400 font-bold">Level 7</span>
-                          <span>•</span>
-                          <span className="text-white font-bold">1,407 ELO</span>
-                          <span>•</span>
-                          <span className="text-emerald-400 font-bold flex items-center gap-1">
-                            <ShieldCheck className="w-3.5 h-3.5" />
-                            AC Active
-                          </span>
                         </div>
                       </div>
 
@@ -2738,112 +2728,6 @@ export const VortexDashboard: React.FC<VortexDashboardProps> = ({
                     </div>
                   ))}
                 </div>
-              </div>
-
-              {/* 4. GLOBAL LEADERBOARD & ONLINE TEAMMATES */}
-              <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
-                
-                {/* Left (6 cols): Global Leaderboard Top 5 */}
-                <div className="lg:col-span-6 bg-[#0E1017] border border-[#202536] rounded-3xl p-6 shadow-xl space-y-4">
-                  <div className="flex items-center justify-between pb-3 border-b border-white/[0.06]">
-                    <div>
-                      <h3 className="text-lg font-black font-display text-white">Platform Player Standings</h3>
-                      <p className="text-xs text-[#94A3B8]">Verified VORTEX community rankings</p>
-                    </div>
-                    <button
-                      onClick={() => { sound.playSelect(); setActiveTab('rankings'); }}
-                      className="text-xs font-mono text-[#A3E635] hover:underline flex items-center gap-1 cursor-pointer"
-                    >
-                      <span>Full Rankings</span>
-                      <ArrowRight className="w-3.5 h-3.5" />
-                    </button>
-                  </div>
-
-                  <div className="space-y-2">
-                    {[
-                      { rank: '#1', tag: 'juanflatroo', level: 'Level 10', elo: 3890, flag: '🇽🇰', isUser: false },
-                      { rank: '#2', tag: 'gxx-', level: 'Level 10', elo: 3420, flag: '🇽🇰', isUser: false },
-                      { rank: '#3', tag: currentGamerTag, level: 'Level 7', elo: 1407, flag: currentCountry.flag, isUser: true },
-                      { rank: '#4', tag: 'SENER1', level: 'Level 9', elo: 1980, flag: '🇽🇰', isUser: false },
-                      { rank: '#5', tag: 'shroud_al', level: 'Level 8', elo: 1750, flag: '🇦🇱', isUser: false },
-                    ].map((p, idx) => (
-                      <div
-                        key={idx}
-                        className={`p-3 rounded-2xl flex items-center justify-between text-xs font-mono transition ${
-                          p.isUser 
-                            ? 'bg-[#18210C] border border-[#A3E635]/40 text-white font-bold' 
-                            : 'bg-[#12141C] border border-[#232938] text-slate-300'
-                        }`}
-                      >
-                        <div className="flex items-center gap-3">
-                          <span className={p.isUser ? 'text-[#A3E635] font-black' : 'text-slate-500'}>{p.rank}</span>
-                          <span className="text-sm">{p.flag}</span>
-                          <span className="font-display font-bold text-white">{p.tag}</span>
-                          {p.isUser && (
-                            <span className="px-1.5 py-0.2 rounded text-[9px] bg-[#A3E635] text-slate-950 font-black">YOU</span>
-                          )}
-                        </div>
-                        <div className="flex items-center gap-4">
-                          <span className="text-amber-400">{p.level}</span>
-                          <span className="text-white font-bold">{p.elo.toLocaleString()} ELO</span>
-                        </div>
-                      </div>
-                    ))}
-                  </div>
-                </div>
-
-                {/* Right (6 cols): Teammates Ready for Party */}
-                <div className="lg:col-span-6 bg-[#0E1017] border border-[#202536] rounded-3xl p-6 shadow-xl space-y-4">
-                  <div className="flex items-center justify-between pb-3 border-b border-white/[0.06]">
-                    <div>
-                      <h3 className="text-lg font-black font-display text-white">Teammates Online</h3>
-                      <p className="text-xs text-[#94A3B8]">Invite directly into your 5v5 lobby</p>
-                    </div>
-                    <span className="px-2.5 py-0.5 rounded-full text-[10px] font-mono font-bold bg-emerald-500/15 text-emerald-400 border border-emerald-500/30 flex items-center gap-1.5">
-                      <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-ping" />
-                      4 Online
-                    </span>
-                  </div>
-
-                  <div className="space-y-2.5">
-                    {SUGGESTED_TEAMMATES.map((tm) => (
-                      <div
-                        key={tm.id}
-                        className="p-3 rounded-2xl bg-[#12141C] border border-[#232938] hover:border-[#A3E635]/40 transition flex items-center justify-between gap-3"
-                      >
-                        <div className="flex items-center gap-3">
-                          <div className="relative">
-                            <img
-                              src={tm.avatar}
-                              alt={tm.name}
-                              className="w-10 h-10 rounded-full object-cover border border-white/10"
-                            />
-                            <span className="absolute bottom-0 right-0 w-2.5 h-2.5 rounded-full bg-emerald-400 border border-[#12141C]" />
-                          </div>
-                          <div>
-                            <div className="text-sm font-bold font-display text-white flex items-center gap-1.5">
-                              <span>{tm.name}</span>
-                              <FaceitVerificationBadge type={tm.verification || 'none'} size="sm" />
-                              <span className="text-[10px] font-mono px-1.5 py-0.2 rounded bg-black/40 text-slate-400">[{tm.tag}]</span>
-                            </div>
-                            <div className="text-xs font-mono text-slate-400">
-                              Level {tm.level} • {tm.elo} ELO
-                            </div>
-                          </div>
-                        </div>
-
-                        <button
-                          onClick={() => handleInviteAndJumpToPlay(tm)}
-                          className="px-4 py-1.5 rounded-xl bg-[#18210C] hover:bg-[#84CC16] text-[#A3E635] hover:text-slate-950 border border-[#A3E635]/40 font-mono font-bold text-xs transition cursor-pointer flex items-center gap-1.5"
-                        >
-                          <Plus className="w-3.5 h-3.5" />
-                          <span>Invite & Play</span>
-                        </button>
-                      </div>
-                    ))}
-                  </div>
-                </div>
-
               </div>
 
               {/* 5. COMMUNITY ANNOUNCEMENTS & GLOBAL ESPORTS NEWS */}
