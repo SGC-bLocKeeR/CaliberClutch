@@ -274,6 +274,42 @@ const SUGGESTED_TEAMMATES: PartySlotMember[] = [
     flag: '🇩🇰',
     code: 'DK',
     countryName: 'Denmark'
+  },
+  {
+    id: 'sinnopsyy',
+    name: 'sinnopsyy',
+    tag: 'BNE',
+    avatar: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?auto=format&fit=crop&w=200&q=80',
+    level: 10,
+    elo: 2810,
+    verification: 'vip',
+    flag: '🇽🇰',
+    code: 'XK',
+    countryName: 'Kosovo'
+  },
+  {
+    id: 'albi_aim',
+    name: 'Albi_Aim',
+    tag: 'ALB',
+    avatar: 'https://images.unsplash.com/photo-1500648767791-00dcc994a43e?auto=format&fit=crop&w=200&q=80',
+    level: 9,
+    elo: 1940,
+    verification: 'verified',
+    flag: '🇦🇱',
+    code: 'AL',
+    countryName: 'Albania'
+  },
+  {
+    id: 'm0nesy',
+    name: 'm0NESY',
+    tag: 'G2',
+    avatar: 'https://images.unsplash.com/photo-1519085360753-af0119f7cbe7?auto=format&fit=crop&w=200&q=80',
+    level: 10,
+    elo: 3340,
+    verification: 'vip',
+    flag: '🇩🇪',
+    code: 'DE',
+    countryName: 'Germany'
   }
 ];
 
@@ -714,11 +750,104 @@ export const VortexDashboard: React.FC<VortexDashboardProps> = ({
   };
 
   // =========================================================================
+  // FACEIT-STYLE "INVITE PLAYERS TO PARTY" MODAL & PENDING SLOTS STATE
+  // =========================================================================
+  const [inviteModalOpen, setInviteModalOpen] = useState(false);
+  const [selectedInviteSlot, setSelectedInviteSlot] = useState<number>(0);
+  const [inviteSearchQuery, setInviteSearchQuery] = useState('');
+  const [inviteModalTab, setInviteModalTab] = useState<'all' | 'kosovo' | 'international'>('all');
+
+  // Pending outgoing invitations by slot index: slotIndex -> PartySlotMember
+  const [pendingSlotInvites, setPendingSlotInvites] = useState<Record<number, PartySlotMember>>({
+    0: {
+      id: 'juanflatroo',
+      name: 'juanflatroo',
+      tag: 'GUILD',
+      avatar: 'https://images.unsplash.com/photo-1566492031773-4f4e44671857?auto=format&fit=crop&w=200&q=80',
+      level: 10,
+      elo: 2840,
+      verification: 'vip',
+      flag: '🇽🇰',
+      code: 'XK',
+      countryName: 'Kosovo'
+    }
+  });
+
+  const filteredInvitablePlayers = SUGGESTED_TEAMMATES.filter((p) => {
+    const matchesSearch =
+      p.name.toLowerCase().includes(inviteSearchQuery.toLowerCase()) ||
+      (p.tag && p.tag.toLowerCase().includes(inviteSearchQuery.toLowerCase())) ||
+      String(p.level).includes(inviteSearchQuery);
+    if (!matchesSearch) return false;
+
+    if (inviteModalTab === 'kosovo') {
+      return p.code === 'XK' || p.code === 'AL';
+    }
+    if (inviteModalTab === 'international') {
+      return p.code !== 'XK' && p.code !== 'AL';
+    }
+    return true;
+  });
+
+  const handleOpenInviteModal = (slotIndex: number) => {
+    sound.playClick();
+    setSelectedInviteSlot(slotIndex);
+    setInviteModalOpen(true);
+  };
+
+  const handleSendInviteToPlayer = (player: PartySlotMember) => {
+    sound.playClick();
+    const slotIdx = selectedInviteSlot;
+
+    // Save as pending invite in this slot
+    setPendingSlotInvites(prev => ({ ...prev, [slotIdx]: player }));
+
+    // Close the friends list modal
+    setInviteModalOpen(false);
+
+    setDashboardToast(`✓ Party invitation sent to ${player.name}! Player now sees the ACCEPT / REJECT card.`);
+
+    // Show the interactive foreground card in front of the screen with ACCEPT & REJECT
+    setActivePartyInvite({
+      id: `invite-${Date.now()}`,
+      direction: 'outgoing',
+      sender: player.name,
+      targetSlot: slotIdx,
+      tag: player.tag,
+      avatar: player.avatar,
+      level: player.level,
+      elo: player.elo,
+      flag: player.flag || '🇽🇰',
+      code: player.code || 'XK',
+      countryName: player.countryName || 'Kosovo',
+      lobbyInfo: `Lobby of ${currentGamerTag} • 5v5 European Queue (Slot #${slotIdx + 1})`,
+      expiresIn: 45,
+      status: 'pending',
+    });
+  };
+
+  const handleCancelPendingInvite = (slotIndex: number, e: React.MouseEvent) => {
+    e.stopPropagation();
+    sound.playClick();
+    setPendingSlotInvites(prev => {
+      const copy = { ...prev };
+      delete copy[slotIndex];
+      return copy;
+    });
+    if (activePartyInvite && activePartyInvite.targetSlot === slotIndex) {
+      setActivePartyInvite(null);
+    }
+    setDashboardToast('Invitation cancelled');
+  };
+
+  // =========================================================================
   // FACEIT-STYLE FOREGROUND ACTIVE PARTY INVITATION (Shows in front of screen)
   // =========================================================================
   const [activePartyInvite, setActivePartyInvite] = useState<{
     id: string;
+    direction: 'incoming' | 'outgoing';
     sender: string;
+    targetSlot?: number;
     tag?: string;
     avatar: string;
     level: number;
@@ -731,7 +860,9 @@ export const VortexDashboard: React.FC<VortexDashboardProps> = ({
     status: 'pending' | 'accepted' | 'declined';
   } | null>({
     id: 'invite-juanflatroo',
+    direction: 'outgoing',
     sender: 'juanflatroo',
+    targetSlot: 0,
     tag: 'FLATROO',
     avatar: 'https://images.unsplash.com/photo-1566492031773-4f4e44671857?w=150&auto=format&fit=crop&q=80',
     level: 10,
@@ -739,7 +870,7 @@ export const VortexDashboard: React.FC<VortexDashboardProps> = ({
     flag: '🇽🇰',
     code: 'XK',
     countryName: 'Kosovo',
-    lobbyInfo: 'European Challenger 5v5 Lobby (4/5 in Party)',
+    lobbyInfo: 'European Challenger 5v5 Lobby (Slot #1)',
     expiresIn: 45,
     status: 'pending',
   });
@@ -764,34 +895,42 @@ export const VortexDashboard: React.FC<VortexDashboardProps> = ({
     sound.playJoinScrim();
     try {
       confetti({
-        particleCount: 75,
+        particleCount: 80,
         spread: 80,
         origin: { y: 0.25 }
       });
     } catch {}
 
     if (activePartyInvite) {
+      const targetSlot = activePartyInvite.targetSlot !== undefined ? activePartyInvite.targetSlot : 0;
       setActivePartyInvite(prev => prev ? { ...prev, status: 'accepted' } : null);
+
+      const acceptedMember: PartySlotMember = {
+        id: activePartyInvite.sender.toLowerCase(),
+        name: activePartyInvite.sender,
+        tag: activePartyInvite.tag || 'PRO',
+        avatar: activePartyInvite.avatar,
+        level: activePartyInvite.level,
+        elo: activePartyInvite.elo,
+        verification: 'vip',
+        flag: activePartyInvite.flag,
+        code: activePartyInvite.code,
+        countryName: activePartyInvite.countryName,
+      };
 
       setPartySlots(prev => {
         const next = [...prev];
-        next[0] = {
-          id: 'juanflatroo',
-          name: 'juanflatroo',
-          tag: 'FLATROO',
-          avatar: activePartyInvite.avatar,
-          level: 10,
-          elo: 2840,
-          isLeader: true,
-          verification: 'vip',
-          flag: '🇽🇰',
-          code: 'XK',
-          countryName: 'Kosovo',
-        };
+        next[targetSlot] = acceptedMember;
         return next;
       });
 
-      setDashboardToast('✓ Joined juanflatroo\'s 5v5 party lobby!');
+      setPendingSlotInvites(prev => {
+        const copy = { ...prev };
+        delete copy[targetSlot];
+        return copy;
+      });
+
+      setDashboardToast(`✓ ${activePartyInvite.sender} accepted the party invitation and joined the lobby!`);
 
       setTimeout(() => {
         setActivePartyInvite(null);
@@ -803,8 +942,16 @@ export const VortexDashboard: React.FC<VortexDashboardProps> = ({
   const handleRejectPartyInvite = () => {
     sound.playClick();
     if (activePartyInvite) {
+      const targetSlot = activePartyInvite.targetSlot !== undefined ? activePartyInvite.targetSlot : 0;
       setActivePartyInvite(prev => prev ? { ...prev, status: 'declined' } : null);
-      setDashboardToast('Party invitation rejected');
+
+      setPendingSlotInvites(prev => {
+        const copy = { ...prev };
+        delete copy[targetSlot];
+        return copy;
+      });
+
+      setDashboardToast(`${activePartyInvite.sender} declined the invitation.`);
       setTimeout(() => {
         setActivePartyInvite(null);
       }, 600);
@@ -815,6 +962,7 @@ export const VortexDashboard: React.FC<VortexDashboardProps> = ({
     sound.playJoinScrim();
     setActivePartyInvite({
       id: `invite-${Date.now()}`,
+      direction: 'incoming',
       sender: customName || 'juanflatroo',
       tag: 'PRO',
       avatar: 'https://images.unsplash.com/photo-1566492031773-4f4e44671857?w=150&auto=format&fit=crop&q=80',
@@ -2178,19 +2326,81 @@ export const VortexDashboard: React.FC<VortexDashboardProps> = ({
                         );
                       }
 
-                      // Empty Slot (Invite Friend)
+                      // Pending Outgoing Invite Slot
+                      const pendingPlayer = pendingSlotInvites[idx];
+                      if (pendingPlayer) {
+                        return (
+                          <div
+                            key={`pending-${idx}`}
+                            className="h-56 rounded-2xl bg-[#0E1017] border-2 border-dashed border-amber-500/70 p-4 flex flex-col justify-between items-center relative group shadow-[0_0_20px_rgba(245,158,11,0.15)] animate-in zoom-in-95"
+                          >
+                            {/* Top Pending Tag */}
+                            <div className="w-full flex items-center justify-between">
+                              <span className="text-[10px] font-mono font-bold text-amber-300 bg-amber-500/20 border border-amber-500/40 px-2 py-0.5 rounded flex items-center gap-1.5 animate-pulse">
+                                <span className="w-1.5 h-1.5 rounded-full bg-amber-400" />
+                                WAITING...
+                              </span>
+                              <button
+                                onClick={(e) => handleCancelPendingInvite(idx, e)}
+                                className="text-slate-500 hover:text-red-400 p-1 transition cursor-pointer"
+                                title="Cancel Invitation"
+                              >
+                                <X className="w-3.5 h-3.5" />
+                              </button>
+                            </div>
+
+                            {/* Player Avatar */}
+                            <div className="relative my-1">
+                              <img
+                                src={pendingPlayer.avatar}
+                                alt={pendingPlayer.name}
+                                className="w-14 h-14 rounded-2xl object-cover grayscale opacity-80 border-2 border-amber-500/60 shadow-md"
+                              />
+                              <div className="absolute -bottom-1 -right-1 px-1.5 py-0.2 rounded bg-[#FF5500] text-white font-black text-[9px] font-mono border border-black shadow">
+                                LVL {pendingPlayer.level}
+                              </div>
+                            </div>
+
+                            {/* Player Name & ELO */}
+                            <div className="text-center w-full">
+                              <div className="flex items-center justify-center gap-1.5 text-xs font-bold text-white font-mono">
+                                <span>{pendingPlayer.name}</span>
+                                <CountryFlag code={pendingPlayer.code || 'XK'} name={pendingPlayer.countryName || 'Kosovo'} size="xs" />
+                              </div>
+                              <span className="text-[10px] text-amber-400/80 font-mono">Invite sent • {pendingPlayer.elo} ELO</span>
+                            </div>
+
+                            {/* Bottom Cancel Button */}
+                            <div className="w-full pt-1">
+                              <button
+                                onClick={(e) => handleCancelPendingInvite(idx, e)}
+                                className="w-full py-1 rounded-lg bg-white/5 hover:bg-red-500/20 text-slate-400 hover:text-red-300 border border-white/10 hover:border-red-500/30 text-[10px] font-mono font-bold transition cursor-pointer"
+                              >
+                                Cancel Invite
+                              </button>
+                            </div>
+                          </div>
+                        );
+                      }
+
+                      // Empty Slot (Opens FACEIT Invite Modal)
                       return (
                         <div
                           key={`empty-${idx}`}
-                          onClick={() => handleAddTeammate(idx)}
-                          className="h-56 rounded-2xl bg-[#10121A] border border-[#202535] hover:border-[#A3E635]/50 flex flex-col items-center justify-center gap-2 p-4 transition group cursor-pointer"
+                          onClick={() => handleOpenInviteModal(idx)}
+                          className="h-56 rounded-2xl bg-[#10121A] border border-[#202535] hover:border-[#A3E635]/60 hover:bg-[#131722] flex flex-col items-center justify-center gap-2.5 p-4 transition-all duration-150 group cursor-pointer shadow-sm hover:shadow-[0_0_20px_rgba(163,230,53,0.15)] hover:scale-[1.01]"
                         >
-                          <div className="w-12 h-12 rounded-full bg-white/[0.03] group-hover:bg-[#A3E635]/15 border border-white/10 group-hover:border-[#A3E635]/50 flex items-center justify-center text-slate-500 group-hover:text-[#A3E635] transition">
+                          <div className="w-12 h-12 rounded-2xl bg-white/[0.03] group-hover:bg-[#A3E635]/15 border border-white/10 group-hover:border-[#A3E635]/50 flex items-center justify-center text-slate-500 group-hover:text-[#A3E635] transition shadow-inner">
                             <Plus className="w-6 h-6 group-hover:scale-125 transition-transform" />
                           </div>
-                          <span className="text-xs font-mono text-slate-500 group-hover:text-slate-300 transition">
-                            + Invite Teammate
-                          </span>
+                          <div className="text-center">
+                            <span className="block text-xs font-mono font-bold text-slate-400 group-hover:text-white transition">
+                              + Invite Teammate
+                            </span>
+                            <span className="block text-[10px] font-mono text-slate-600 group-hover:text-[#A3E635] transition mt-0.5">
+                              Open Friends List
+                            </span>
+                          </div>
                         </div>
                       );
                     })}
@@ -5199,11 +5409,184 @@ export const VortexDashboard: React.FC<VortexDashboardProps> = ({
       )}
 
       {/* ======================================================== */}
+      {/* FACEIT-STYLE "INVITE FRIENDS TO PARTY" MODAL            */}
+      {/* Opens when user clicks [+ Invite Teammate] on any slot   */}
+      {/* ======================================================== */}
+      {inviteModalOpen && (
+        <div className="fixed inset-0 z-[120] bg-black/85 backdrop-blur-md flex items-center justify-center p-4">
+          <div className="relative w-full max-w-xl bg-[#0D0F17] border border-[#A3E635]/40 rounded-3xl p-6 shadow-[0_20px_60px_rgba(0,0,0,0.9)] space-y-5 animate-in fade-in zoom-in-95 duration-150">
+            {/* Modal Header */}
+            <div className="flex items-center justify-between pb-3 border-b border-[#1E2538]">
+              <div className="flex items-center gap-3">
+                <div className="w-10 h-10 rounded-2xl bg-[#1B2213] border border-[#A3E635]/40 flex items-center justify-center text-[#A3E635]">
+                  <UserPlus className="w-5 h-5" />
+                </div>
+                <div>
+                  <h3 className="font-display font-black text-lg text-white tracking-wide">
+                    INVITE PLAYERS TO PARTY
+                  </h3>
+                  <p className="text-xs font-mono text-slate-400">
+                    CS2 5v5 European Queue • Inviting for Slot #{selectedInviteSlot + 1}
+                  </p>
+                </div>
+              </div>
+              <button
+                onClick={() => setInviteModalOpen(false)}
+                className="text-slate-400 hover:text-white p-1.5 rounded-lg bg-white/5 hover:bg-white/10 transition cursor-pointer"
+              >
+                <X className="w-5 h-5" />
+              </button>
+            </div>
+
+            {/* Search Input */}
+            <div className="relative">
+              <Search className="w-4 h-4 text-slate-400 absolute left-3.5 top-1/2 -translate-y-1/2" />
+              <input
+                type="text"
+                value={inviteSearchQuery}
+                onChange={(e) => setInviteSearchQuery(e.target.value)}
+                placeholder="Search friends by GamerTag, clan tag, or Faceit Level..."
+                className="w-full pl-10 pr-4 py-2.5 rounded-xl bg-[#141824] border border-[#252D40] focus:border-[#A3E635] text-white text-xs font-mono outline-none transition"
+              />
+            </div>
+
+            {/* Filter Category Tabs */}
+            <div className="flex items-center gap-2 border-b border-[#1E2538] pb-2 text-xs font-mono">
+              <button
+                onClick={() => { sound.playClick(); setInviteModalTab('all'); }}
+                className={`px-3 py-1 rounded-lg transition cursor-pointer ${
+                  inviteModalTab === 'all'
+                    ? 'bg-[#A3E635] text-slate-950 font-black'
+                    : 'text-slate-400 hover:text-white hover:bg-white/5'
+                }`}
+              >
+                All Friends ({SUGGESTED_TEAMMATES.length})
+              </button>
+              <button
+                onClick={() => { sound.playClick(); setInviteModalTab('kosovo'); }}
+                className={`px-3 py-1 rounded-lg transition cursor-pointer ${
+                  inviteModalTab === 'kosovo'
+                    ? 'bg-[#A3E635] text-slate-950 font-black'
+                    : 'text-slate-400 hover:text-white hover:bg-white/5'
+                }`}
+              >
+                Kosovo CS2 Pros (BNE)
+              </button>
+              <button
+                onClick={() => { sound.playClick(); setInviteModalTab('international'); }}
+                className={`px-3 py-1 rounded-lg transition cursor-pointer ${
+                  inviteModalTab === 'international'
+                    ? 'bg-[#A3E635] text-slate-950 font-black'
+                    : 'text-slate-400 hover:text-white hover:bg-white/5'
+                }`}
+              >
+                International
+              </button>
+            </div>
+
+            {/* Players List */}
+            <div className="max-h-[340px] overflow-y-auto space-y-2 pr-1">
+              {filteredInvitablePlayers.length === 0 ? (
+                <div className="text-center py-8 text-slate-500 font-mono text-xs">
+                  No players found matching "{inviteSearchQuery}"
+                </div>
+              ) : (
+                filteredInvitablePlayers.map((player) => {
+                  const isInParty = partySlots.some(slot => slot && slot.id === player.id);
+                  const isPending = Object.values(pendingSlotInvites).some(p => p.id === player.id);
+
+                  return (
+                    <div
+                      key={player.id}
+                      className="p-3 rounded-2xl bg-[#121622] border border-[#202638] hover:border-slate-700 flex items-center justify-between gap-3 transition"
+                    >
+                      {/* Player info */}
+                      <div className="flex items-center gap-3 min-w-0">
+                        <div className="relative shrink-0">
+                          <img
+                            src={player.avatar}
+                            alt={player.name}
+                            className="w-10 h-10 rounded-xl object-cover border border-[#A3E635]/40"
+                          />
+                          <div className="absolute -bottom-1 -right-1 px-1 py-0.2 rounded bg-[#FF5500] text-white font-black text-[9px] font-mono leading-none border border-black shadow">
+                            {player.level}
+                          </div>
+                        </div>
+
+                        <div className="min-w-0 text-left">
+                          <div className="flex items-center gap-2">
+                            <span className="font-display font-bold text-sm text-white truncate">
+                              {player.name}
+                            </span>
+                            {player.tag && (
+                              <span className="px-1.5 py-0.2 rounded bg-white/5 text-slate-400 font-mono text-[10px]">
+                                [{player.tag}]
+                              </span>
+                            )}
+                            <CountryFlag code={player.code || 'XK'} name={player.countryName || 'Kosovo'} size="xs" />
+                            {player.verification === 'vip' && (
+                              <span className="px-1.5 py-0.2 rounded bg-amber-500/20 text-amber-300 border border-amber-500/30 font-black text-[9px] font-mono">
+                                PRO
+                              </span>
+                            )}
+                          </div>
+                          <div className="flex items-center gap-2 mt-0.5 text-[11px] font-mono text-slate-400">
+                            <span className="text-[#A3E635] font-bold">{player.elo} ELO</span>
+                            <span>•</span>
+                            <span className="text-emerald-400 flex items-center gap-1">
+                              <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />
+                              Online in Menu
+                            </span>
+                          </div>
+                        </div>
+                      </div>
+
+                      {/* Action Button */}
+                      <div>
+                        {isInParty ? (
+                          <span className="px-3 py-1.5 rounded-xl bg-emerald-500/15 border border-emerald-500/30 text-emerald-400 font-mono font-bold text-xs">
+                            IN LOBBY
+                          </span>
+                        ) : isPending ? (
+                          <span className="px-3 py-1.5 rounded-xl bg-amber-500/20 border border-amber-500/40 text-amber-300 font-mono font-bold text-xs animate-pulse">
+                            INVITED • WAITING...
+                          </span>
+                        ) : (
+                          <button
+                            onClick={() => handleSendInviteToPlayer(player)}
+                            className="px-4 py-2 rounded-xl bg-[#84CC16] hover:bg-[#A3E635] text-slate-950 font-black text-xs font-mono uppercase tracking-wider transition hover:scale-105 active:scale-95 shadow-[0_0_15px_rgba(163,230,53,0.35)] flex items-center gap-1.5 cursor-pointer"
+                          >
+                            <UserPlus className="w-3.5 h-3.5 stroke-[2.5]" />
+                            <span>INVITE</span>
+                          </button>
+                        )}
+                      </div>
+                    </div>
+                  );
+                })
+              )}
+            </div>
+
+            {/* Modal Footer */}
+            <div className="pt-2 border-t border-[#1E2538] flex items-center justify-between text-xs font-mono text-slate-400">
+              <span>Steam & FACEIT Friends Synced (24 Online)</span>
+              <button
+                onClick={() => setInviteModalOpen(false)}
+                className="px-4 py-1.5 rounded-xl bg-white/5 hover:bg-white/10 text-slate-300 hover:text-white transition cursor-pointer"
+              >
+                Close
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* ======================================================== */}
       {/* FACEIT-STYLE FOREGROUND PARTY INVITATION POPUP          */}
       {/* Appears prominently in front of screen with ACCEPT & REJECT */}
       {/* ======================================================== */}
       {activePartyInvite && (
-        <div className="fixed top-6 left-1/2 -translate-x-1/2 z-[150] w-[94vw] sm:w-[500px] rounded-3xl bg-[#0C0E17]/98 border-2 border-[#A3E635] shadow-[0_25px_80px_rgba(0,0,0,0.95),0_0_40px_rgba(163,230,53,0.35)] backdrop-blur-2xl p-5 animate-in slide-in-from-top-6 fade-in duration-200">
+        <div className="fixed top-6 left-1/2 -translate-x-1/2 z-[150] w-[94vw] sm:w-[520px] rounded-3xl bg-[#0C0E17]/98 border-2 border-[#A3E635] shadow-[0_25px_80px_rgba(0,0,0,0.95),0_0_40px_rgba(163,230,53,0.35)] backdrop-blur-2xl p-5 animate-in slide-in-from-top-6 fade-in duration-200">
           {/* Top header badge & countdown */}
           <div className="flex items-center justify-between pb-3 border-b border-[#1E2538]">
             <div className="flex items-center gap-2.5">
@@ -5212,7 +5595,9 @@ export const VortexDashboard: React.FC<VortexDashboardProps> = ({
                 <span className="relative inline-flex rounded-full h-2.5 w-2.5 bg-[#A3E635]"></span>
               </span>
               <span className="text-xs font-black tracking-widest text-[#A3E635] uppercase font-mono">
-                CS2 PARTY INVITATION
+                {activePartyInvite.direction === 'outgoing'
+                  ? 'CS2 PARTY INVITATION (SENT TO PLAYER)'
+                  : 'CS2 PARTY INVITATION (RECEIVED)'}
               </span>
             </div>
 
@@ -5230,7 +5615,7 @@ export const VortexDashboard: React.FC<VortexDashboardProps> = ({
             </div>
           </div>
 
-          {/* Inviter Info Row */}
+          {/* Inviter / Target Info Row */}
           <div className="py-4 flex items-center gap-4">
             {/* Avatar with Faceit Level Badge */}
             <div className="relative shrink-0">
@@ -5256,7 +5641,9 @@ export const VortexDashboard: React.FC<VortexDashboardProps> = ({
                 </span>
               </div>
               <p className="text-xs text-slate-300 mt-0.5 font-sans">
-                has invited you to join their CS2 5v5 competitive lobby
+                {activePartyInvite.direction === 'outgoing'
+                  ? `You invited ${activePartyInvite.sender} to join your CS2 5v5 party lobby.`
+                  : 'has invited you to join their CS2 5v5 competitive lobby.'}
               </p>
               <div className="flex items-center gap-2 mt-1.5 text-[11px] font-mono text-[#A3E635]">
                 <Users className="w-3.5 h-3.5" />
@@ -5267,26 +5654,37 @@ export const VortexDashboard: React.FC<VortexDashboardProps> = ({
 
           {/* Action Buttons: ACCEPT & REJECT */}
           {activePartyInvite.status === 'pending' ? (
-            <div className="pt-2 flex items-center gap-3">
-              <button
-                onClick={handleAcceptPartyInvite}
-                className="flex-1 py-3 px-4 rounded-2xl bg-gradient-to-r from-[#A3E635] to-[#84cc16] hover:from-[#b4f545] hover:to-[#95dc22] text-slate-950 font-black text-sm uppercase font-mono tracking-wider transition-all duration-150 shadow-[0_0_25px_rgba(163,230,53,0.55)] hover:scale-[1.02] active:scale-98 flex items-center justify-center gap-2 cursor-pointer"
-              >
-                <Check className="w-4 h-4 stroke-[3]" />
-                <span>ACCEPT</span>
-              </button>
-              <button
-                onClick={handleRejectPartyInvite}
-                className="flex-1 py-3 px-4 rounded-2xl bg-[#151924] hover:bg-red-500/20 text-slate-300 hover:text-red-400 border border-[#252D40] hover:border-red-500/40 font-black text-sm uppercase font-mono tracking-wider transition-all duration-150 active:scale-98 flex items-center justify-center gap-2 cursor-pointer"
-              >
-                <X className="w-4 h-4 stroke-[2.5]" />
-                <span>REJECT</span>
-              </button>
+            <div className="space-y-2 pt-2">
+              <div className="flex items-center gap-3">
+                <button
+                  onClick={handleAcceptPartyInvite}
+                  className="flex-1 py-3 px-4 rounded-2xl bg-gradient-to-r from-[#A3E635] to-[#84cc16] hover:from-[#b4f545] hover:to-[#95dc22] text-slate-950 font-black text-sm uppercase font-mono tracking-wider transition-all duration-150 shadow-[0_0_25px_rgba(163,230,53,0.55)] hover:scale-[1.02] active:scale-98 flex items-center justify-center gap-2 cursor-pointer"
+                >
+                  <Check className="w-4 h-4 stroke-[3]" />
+                  <span>
+                    {activePartyInvite.direction === 'outgoing'
+                      ? `ACCEPT (SIMULATE ${activePartyInvite.sender.toUpperCase()} JOIN)`
+                      : 'ACCEPT'}
+                  </span>
+                </button>
+                <button
+                  onClick={handleRejectPartyInvite}
+                  className="py-3 px-4 rounded-2xl bg-[#151924] hover:bg-red-500/20 text-slate-300 hover:text-red-400 border border-[#252D40] hover:border-red-500/40 font-black text-sm uppercase font-mono tracking-wider transition-all duration-150 active:scale-98 flex items-center justify-center gap-2 cursor-pointer"
+                >
+                  <X className="w-4 h-4 stroke-[2.5]" />
+                  <span>REJECT</span>
+                </button>
+              </div>
+              {activePartyInvite.direction === 'outgoing' && (
+                <p className="text-[10px] font-mono text-center text-slate-400">
+                  👆 This card displays live how {activePartyInvite.sender} sees your invite. Click ACCEPT to see them join your party, or REJECT to decline!
+                </p>
+              )}
             </div>
           ) : activePartyInvite.status === 'accepted' ? (
             <div className="p-3 rounded-2xl bg-emerald-500/15 border border-emerald-500/40 text-emerald-400 text-xs font-mono font-bold flex items-center justify-center gap-2 animate-in zoom-in-95">
               <CheckCircle2 className="w-4 h-4" />
-              <span>PARTY JOINED • REDIRECTING TO 5v5 LOBBY...</span>
+              <span>INVITATION ACCEPTED • PLAYER ENTERED 5v5 LOBBY!</span>
             </div>
           ) : (
             <div className="p-3 rounded-2xl bg-red-500/10 border border-red-500/30 text-red-400 text-xs font-mono font-bold flex items-center justify-center gap-2">
