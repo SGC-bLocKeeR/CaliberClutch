@@ -228,6 +228,18 @@ const FaceitVerificationBadge: React.FC<FaceitVerificationBadgeProps> = ({
 
 const SUGGESTED_TEAMMATES: PartySlotMember[] = [
   {
+    id: 'm18',
+    name: 'M18',
+    tag: 'FACEIT',
+    avatar: 'https://images.unsplash.com/photo-1542751371-adc38448a05e?auto=format&fit=crop&w=200&q=80',
+    level: 10,
+    elo: 3120,
+    verification: 'vip',
+    flag: '🇽🇰',
+    code: 'XK',
+    countryName: 'Kosovo'
+  },
+  {
     id: 'juanflatroo',
     name: 'juanflatroo',
     tag: 'GUILD',
@@ -789,37 +801,37 @@ export const VortexDashboard: React.FC<VortexDashboardProps> = ({
     // Save as pending invite in this slot
     setPendingSlotInvites(prev => ({ ...prev, [slotIdx]: player }));
 
-    // Close modal
+    // Close friends selection modal
     setInviteModalOpen(false);
 
-    setDashboardToast(`✓ Party invite sent to ${player.name}`);
+    // IMMEDIATELY trigger the authentic 1:1 FACEIT invitation test dialog!
+    setPartyInviteCountdown(88);
+    setActivePartyInvite({
+      id: `invite-${Date.now()}`,
+      sender: player.name,
+      avatar: player.avatar,
+      level: player.level,
+      code: player.code || 'XK',
+      countryName: player.countryName || 'Kosovo',
+      targetSlotIdx: slotIdx,
+      playerObj: player,
+    });
 
-    // Simulated acceptance after 2.5 seconds (teammate accepts and enters lobby)
-    setTimeout(() => {
-      setPartySlots(prev => {
-        const next = [...prev];
-        next[slotIdx] = player;
-        return next;
-      });
-      setPendingSlotInvites(prev => {
-        const copy = { ...prev };
-        delete copy[slotIdx];
-        return copy;
-      });
-      sound.playJoinScrim();
-      setDashboardToast(`✓ ${player.name} joined your party!`);
-    }, 2500);
+    setDashboardToast(`✓ Ftesa iu dërgua ${player.name} — Dritarja e testimit FACEIT aktive`);
   };
 
-  const handleCancelPendingInvite = (slotIndex: number, e: React.MouseEvent) => {
-    e.stopPropagation();
+  const handleCancelPendingInvite = (slotIndex: number, e?: React.MouseEvent) => {
+    if (e) e.stopPropagation();
     sound.playClick();
     setPendingSlotInvites(prev => {
       const copy = { ...prev };
       delete copy[slotIndex];
       return copy;
     });
-    setDashboardToast('Invitation cancelled');
+    if (activePartyInvite && activePartyInvite.targetSlotIdx === slotIndex) {
+      setActivePartyInvite(null);
+    }
+    setDashboardToast('Ftesa u anulua');
   };
 
   // =========================================================================
@@ -832,6 +844,8 @@ export const VortexDashboard: React.FC<VortexDashboardProps> = ({
     level?: number;
     code?: string;
     countryName?: string;
+    targetSlotIdx?: number;
+    playerObj?: PartySlotMember;
   } | null>({
     id: 'invite-m18',
     sender: 'M18',
@@ -839,6 +853,7 @@ export const VortexDashboard: React.FC<VortexDashboardProps> = ({
     level: 10,
     code: 'XK',
     countryName: 'Kosovo',
+    targetSlotIdx: 0,
   });
 
   const [partyInviteCountdown, setPartyInviteCountdown] = useState<number>(88);
@@ -873,23 +888,42 @@ export const VortexDashboard: React.FC<VortexDashboardProps> = ({
 
     if (activePartyInvite) {
       const sender = activePartyInvite.sender;
+      // Target slot: use targetSlotIdx, or find first empty slot, or slot 0
+      let targetSlot = activePartyInvite.targetSlotIdx;
+      if (targetSlot === undefined || targetSlot < 0) {
+        const emptyIdx = partySlots.findIndex((s, idx) => idx !== 2 && !s);
+        targetSlot = emptyIdx !== -1 ? emptyIdx : 0;
+      }
+
+      const playerToAdd: PartySlotMember = activePartyInvite.playerObj || {
+        id: sender.toLowerCase(),
+        name: sender,
+        tag: sender === 'M18' ? 'FACEIT' : 'PRO',
+        avatar: activePartyInvite.avatar || '',
+        level: activePartyInvite.level || 10,
+        elo: 3120,
+        verification: 'vip',
+        flag: '🇽🇰',
+        code: activePartyInvite.code || 'XK',
+        countryName: activePartyInvite.countryName || 'Kosovo',
+      };
+
       setPartySlots(prev => {
         const next = [...prev];
-        next[0] = {
-          id: sender.toLowerCase(),
-          name: sender,
-          tag: 'PRO',
-          avatar: activePartyInvite.avatar || 'https://images.unsplash.com/photo-1566492031773-4f4e44671857?w=150&auto=format&fit=crop&q=80',
-          level: activePartyInvite.level || 10,
-          elo: 2980,
-          verification: 'vip',
-          flag: '🇽🇰',
-          code: activePartyInvite.code || 'XK',
-          countryName: activePartyInvite.countryName || 'Kosovo',
-        };
+        next[targetSlot!] = playerToAdd;
         return next;
       });
-      setDashboardToast(`✓ Joined ${sender}'s party lobby!`);
+
+      // Clear pending state for this slot
+      if (targetSlot !== undefined) {
+        setPendingSlotInvites(prev => {
+          const copy = { ...prev };
+          delete copy[targetSlot!];
+          return copy;
+        });
+      }
+
+      setDashboardToast(`✓ ${sender} pranoi ftesën dhe u fut në party!`);
       setActivePartyInvite(null);
       setActiveTab('play');
     }
@@ -898,21 +932,34 @@ export const VortexDashboard: React.FC<VortexDashboardProps> = ({
   const handleRejectPartyInvite = () => {
     sound.playClick();
     if (activePartyInvite) {
-      setDashboardToast(`Party invitation from ${activePartyInvite.sender} declined`);
+      const targetSlot = activePartyInvite.targetSlotIdx;
+      if (targetSlot !== undefined) {
+        setPendingSlotInvites(prev => {
+          const copy = { ...prev };
+          delete copy[targetSlot];
+          return copy;
+        });
+      }
+      setDashboardToast(`Ftesa për ${activePartyInvite.sender} u refuzua`);
       setActivePartyInvite(null);
     }
   };
 
-  const handleTriggerPartyInvite = (customName?: string) => {
+  const handleTriggerPartyInvite = (customName?: string, slotIdx?: number) => {
     sound.playClick();
     setPartyInviteCountdown(88);
+    const chosenName = customName || 'M18';
+    const foundInSuggested = SUGGESTED_TEAMMATES.find(s => s.name.toLowerCase() === chosenName.toLowerCase());
+
     setActivePartyInvite({
       id: `invite-${Date.now()}`,
-      sender: customName || 'M18',
-      avatar: customName === 'M18' || !customName ? '' : 'https://images.unsplash.com/photo-1566492031773-4f4e44671857?w=150&auto=format&fit=crop&q=80',
-      level: 10,
-      code: 'XK',
-      countryName: 'Kosovo',
+      sender: chosenName,
+      avatar: foundInSuggested?.avatar || (chosenName === 'M18' ? '' : 'https://images.unsplash.com/photo-1566492031773-4f4e44671857?w=150&auto=format&fit=crop&q=80'),
+      level: foundInSuggested?.level || 10,
+      code: foundInSuggested?.code || 'XK',
+      countryName: foundInSuggested?.countryName || 'Kosovo',
+      targetSlotIdx: slotIdx !== undefined ? slotIdx : 0,
+      playerObj: foundInSuggested,
     });
   };
 
@@ -2205,18 +2252,27 @@ export const VortexDashboard: React.FC<VortexDashboardProps> = ({
                             {/* Member Avatar & Details */}
                             <div className="flex flex-col items-center text-center space-y-2">
                               <div className="relative">
-                                <img
-                                  src={member.avatar}
-                                  alt={member.name}
-                                  className={`w-16 h-16 rounded-full object-cover border-2 shadow-md ${
-                                    isCenterLeader 
-                                      ? 'border-[#FF5500] shadow-[#FF5500]/25' 
-                                      : 'border-[#A3E635]/60'
-                                  }`}
-                                  onError={(e) => {
-                                    (e.target as HTMLElement).style.display = 'none';
-                                  }}
-                                />
+                                {member.name === 'M18' || !member.avatar ? (
+                                  <div className="w-16 h-16 rounded-full bg-black border-2 border-[#FF5500] flex flex-col items-center justify-center p-1 shadow-md">
+                                    <svg className="w-10 h-5 text-white" viewBox="0 0 100 40" fill="currentColor">
+                                      <path d="M 6 22 L 20 22 L 22 17 L 36 17 L 38 20 L 52 20 L 57 18 L 82 18 L 84 20 L 92 20 L 92 23 L 83 23 L 83 26 L 76 26 L 75 23 L 52 23 L 50 30 L 44 30 L 47 23 L 38 23 L 34 32 L 28 32 L 26 24 L 6 26 Z" />
+                                    </svg>
+                                    <span className="text-[10px] font-black text-white">M18</span>
+                                  </div>
+                                ) : (
+                                  <img
+                                    src={member.avatar}
+                                    alt={member.name}
+                                    className={`w-16 h-16 rounded-full object-cover border-2 shadow-md ${
+                                      isCenterLeader 
+                                        ? 'border-[#FF5500] shadow-[#FF5500]/25' 
+                                        : 'border-[#A3E635]/60'
+                                    }`}
+                                    onError={(e) => {
+                                      (e.target as HTMLElement).style.display = 'none';
+                                    }}
+                                  />
+                                )}
                                 <span className="absolute bottom-0 right-0 w-3.5 h-3.5 rounded-full bg-emerald-400 border-2 border-[#12141C]" />
                               </div>
 
@@ -2270,7 +2326,22 @@ export const VortexDashboard: React.FC<VortexDashboardProps> = ({
                         return (
                           <div
                             key={`pending-${idx}`}
-                            className="h-56 rounded-2xl bg-[#0E1017] border-2 border-dashed border-amber-500/70 p-4 flex flex-col justify-between items-center relative group shadow-[0_0_20px_rgba(245,158,11,0.15)] animate-in zoom-in-95"
+                            onClick={() => {
+                              sound.playClick();
+                              setPartyInviteCountdown(88);
+                              setActivePartyInvite({
+                                id: `invite-${Date.now()}`,
+                                sender: pendingPlayer.name,
+                                avatar: pendingPlayer.avatar,
+                                level: pendingPlayer.level,
+                                code: pendingPlayer.code || 'XK',
+                                countryName: pendingPlayer.countryName || 'Kosovo',
+                                targetSlotIdx: idx,
+                                playerObj: pendingPlayer,
+                              });
+                            }}
+                            className="h-56 rounded-2xl bg-[#0E1017] border-2 border-dashed border-amber-500/70 p-4 flex flex-col justify-between items-center relative group shadow-[0_0_20px_rgba(245,158,11,0.15)] animate-in zoom-in-95 cursor-pointer hover:border-[#FF5500] transition-all hover:scale-[1.01]"
+                            title="Kliko për të hapur dritaren e testimit të ftesës FACEIT"
                           >
                             {/* Top Pending Tag */}
                             <div className="w-full flex items-center justify-between">
@@ -2289,11 +2360,20 @@ export const VortexDashboard: React.FC<VortexDashboardProps> = ({
 
                             {/* Player Avatar */}
                             <div className="relative my-1">
-                              <img
-                                src={pendingPlayer.avatar}
-                                alt={pendingPlayer.name}
-                                className="w-14 h-14 rounded-2xl object-cover grayscale opacity-80 border-2 border-amber-500/60 shadow-md"
-                              />
+                              {pendingPlayer.name === 'M18' || !pendingPlayer.avatar ? (
+                                <div className="w-14 h-14 rounded-2xl bg-black border border-white/10 flex flex-col items-center justify-center p-1">
+                                  <svg className="w-9 h-4 text-white" viewBox="0 0 100 40" fill="currentColor">
+                                    <path d="M 6 22 L 20 22 L 22 17 L 36 17 L 38 20 L 52 20 L 57 18 L 82 18 L 84 20 L 92 20 L 92 23 L 83 23 L 83 26 L 76 26 L 75 23 L 52 23 L 50 30 L 44 30 L 47 23 L 38 23 L 34 32 L 28 32 L 26 24 L 6 26 Z" />
+                                  </svg>
+                                  <span className="text-[10px] font-black text-white">M18</span>
+                                </div>
+                              ) : (
+                                <img
+                                  src={pendingPlayer.avatar}
+                                  alt={pendingPlayer.name}
+                                  className="w-14 h-14 rounded-2xl object-cover grayscale opacity-80 border-2 border-amber-500/60 shadow-md"
+                                />
+                              )}
                               <div className="absolute -bottom-1 -right-1 px-1.5 py-0.2 rounded bg-[#FF5500] text-white font-black text-[9px] font-mono border border-black shadow">
                                 LVL {pendingPlayer.level}
                               </div>
@@ -2308,13 +2388,34 @@ export const VortexDashboard: React.FC<VortexDashboardProps> = ({
                               <span className="text-[10px] text-amber-400/80 font-mono">Invite sent • {pendingPlayer.elo} ELO</span>
                             </div>
 
-                            {/* Bottom Cancel Button */}
-                            <div className="w-full pt-1">
+                            {/* Action Row */}
+                            <div className="w-full flex items-center gap-1.5 pt-1">
+                              <button
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  sound.playClick();
+                                  setPartyInviteCountdown(88);
+                                  setActivePartyInvite({
+                                    id: `invite-${Date.now()}`,
+                                    sender: pendingPlayer.name,
+                                    avatar: pendingPlayer.avatar,
+                                    level: pendingPlayer.level,
+                                    code: pendingPlayer.code || 'XK',
+                                    countryName: pendingPlayer.countryName || 'Kosovo',
+                                    targetSlotIdx: idx,
+                                    playerObj: pendingPlayer,
+                                  });
+                                }}
+                                className="flex-1 py-1 rounded-lg bg-[#FF5500] hover:bg-[#FF6611] text-white text-[10px] font-mono font-bold transition cursor-pointer shadow-sm text-center"
+                              >
+                                TEST MODAL
+                              </button>
                               <button
                                 onClick={(e) => handleCancelPendingInvite(idx, e)}
-                                className="w-full py-1 rounded-lg bg-white/5 hover:bg-red-500/20 text-slate-400 hover:text-red-300 border border-white/10 hover:border-red-500/30 text-[10px] font-mono font-bold transition cursor-pointer"
+                                className="px-2 py-1 rounded-lg bg-white/5 hover:bg-red-500/20 text-slate-400 hover:text-red-300 border border-white/10 text-[10px] font-mono font-bold transition cursor-pointer"
+                                title="Anulo ftesën"
                               >
-                                Cancel Invite
+                                <X className="w-3 h-3" />
                               </button>
                             </div>
                           </div>
@@ -5448,11 +5549,17 @@ export const VortexDashboard: React.FC<VortexDashboardProps> = ({
                       {/* Player info */}
                       <div className="flex items-center gap-3 min-w-0">
                         <div className="relative shrink-0">
-                          <img
-                            src={player.avatar}
-                            alt={player.name}
-                            className="w-10 h-10 rounded-xl object-cover border border-[#A3E635]/40"
-                          />
+                          {player.name === 'M18' || !player.avatar ? (
+                            <div className="w-10 h-10 rounded-xl bg-black border border-white/10 flex flex-col items-center justify-center">
+                              <span className="font-mono font-black text-white text-[10px]">M18</span>
+                            </div>
+                          ) : (
+                            <img
+                              src={player.avatar}
+                              alt={player.name}
+                              className="w-10 h-10 rounded-xl object-cover border border-[#A3E635]/40"
+                            />
+                          )}
                           <div className="absolute -bottom-1 -right-1 px-1 py-0.2 rounded bg-[#FF5500] text-white font-black text-[9px] font-mono leading-none border border-black shadow">
                             {player.level}
                           </div>
