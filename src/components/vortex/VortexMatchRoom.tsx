@@ -764,10 +764,9 @@ export const VortexMatchRoom: React.FC<VortexMatchRoomProps> = ({
             {/* Server Card */}
             <div className="p-3.5 rounded-xl bg-[#14151D] border border-[#212330] space-y-1">
               <div className="text-[10px] font-mono uppercase text-slate-400 font-bold">Server</div>
-              <div className="flex items-center gap-2">
-                <span className="text-lg">🇩🇪</span>
+              <div className="flex items-center gap-2.5">
+                <CountryFlag code="DE" name="Germany" size="md" />
                 <span className="font-display font-bold text-white text-sm">Germany</span>
-                <span className="text-[11px] font-mono text-slate-500">(Frankfurt 128-tick)</span>
               </div>
             </div>
 
