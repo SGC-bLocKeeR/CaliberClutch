@@ -5638,45 +5638,40 @@ export const VortexDashboard: React.FC<VortexDashboardProps> = ({
       {/* ======================================================== */}
       {activePartyInvite && (
         <div className="fixed inset-0 z-[150] bg-black/75 backdrop-blur-[2px] flex items-center justify-center p-4 animate-in fade-in duration-150">
-          <div className="relative w-full max-w-[480px] bg-[#121214] border border-[#232328] rounded-xl shadow-[0_25px_60px_rgba(0,0,0,0.95)] overflow-hidden animate-in zoom-in-95 duration-150">
-            {/* Header: Centered "Invite to party" with close button */}
+          <div className="relative w-full max-w-[530px] bg-[#121214] border border-[#222225] rounded-xl shadow-[0_30px_70px_rgba(0,0,0,0.95)] overflow-hidden animate-in zoom-in-95 duration-150">
+            {/* Header: Centered "Invite to party" with styled close button */}
             <div className="relative pt-6 pb-2 px-6 flex items-center justify-center">
-              <h2 className="text-xl font-bold tracking-tight text-white select-none">
+              <h2 className="text-xl font-black tracking-tight text-white select-none">
                 Invite to <span className="text-[#FF5500]">party</span>
               </h2>
               <button
                 onClick={() => setActivePartyInvite(null)}
-                className="absolute right-5 top-5 text-[#888B94] hover:text-white transition cursor-pointer p-1"
+                className="absolute right-4 top-4 w-7 h-7 rounded-md bg-[#1C1C1E] hover:bg-[#28282C] flex items-center justify-center text-[#7E8088] hover:text-white transition cursor-pointer"
                 aria-label="Close"
               >
-                <X className="w-5 h-5" />
+                <X className="w-4 h-4 stroke-[2.5]" />
               </button>
             </div>
 
             {/* Content: Avatar & Invite Details */}
-            <div className="px-8 pt-4 pb-6 flex items-center gap-5">
+            <div className="px-8 pt-4 pb-7 flex items-center justify-center gap-6">
               {/* Avatar circle */}
-              <div className="relative shrink-0">
+              <div className="relative shrink-0 select-none">
                 {activePartyInvite.sender === 'M18' || !activePartyInvite.avatar ? (
-                  <div className="w-[76px] h-[76px] rounded-full bg-black border border-[#2c2d33] flex flex-col items-center justify-center shadow-inner overflow-hidden select-none">
-                    {/* AK-47 Silhouette */}
-                    <svg className="w-12 h-6 text-white" viewBox="0 0 100 40" fill="currentColor">
-                      <path d="M 6 22 L 20 22 L 22 17 L 36 17 L 38 20 L 52 20 L 57 18 L 82 18 L 84 20 L 92 20 L 92 23 L 83 23 L 83 26 L 76 26 L 75 23 L 52 23 L 50 30 L 44 30 L 47 23 L 38 23 L 34 32 L 28 32 L 26 24 L 6 26 Z" />
-                      <path d="M 46 23 Q 48 34 42 38 L 38 37 Q 43 32 43 23 Z" />
-                    </svg>
-                    {/* M18 outlined rounded badge */}
-                    <div className="mt-0.5 px-2 py-0.2 border-[1.5px] border-white rounded-[3px] leading-tight">
-                      <span className="font-sans font-black text-white text-[13px] tracking-wider block">
-                        M18
-                      </span>
-                    </div>
-                  </div>
+                  <img
+                    src="/images/faceit_m18_badge.png"
+                    alt="M18"
+                    className="w-[82px] h-[82px] rounded-full object-cover shadow-md shrink-0 select-none"
+                    onError={(e) => {
+                      (e.target as HTMLElement).style.display = 'none';
+                    }}
+                  />
                 ) : (
                   <div className="relative">
                     <img
                       src={activePartyInvite.avatar}
                       alt={activePartyInvite.sender}
-                      className="w-[76px] h-[76px] rounded-full object-cover border border-[#2c2d33]"
+                      className="w-[82px] h-[82px] rounded-full object-cover border border-[#2c2d33] shadow-md"
                     />
                     {activePartyInvite.level && (
                       <div className="absolute -bottom-1 -right-1 px-1.5 py-0.5 rounded bg-[#FF5500] text-white font-black text-[10px] font-mono leading-none border border-black shadow">
@@ -5692,20 +5687,20 @@ export const VortexDashboard: React.FC<VortexDashboardProps> = ({
                 <p className="font-bold text-white text-[15px] leading-tight tracking-tight">
                   {activePartyInvite.sender} invited you to join their party
                 </p>
-                <p className="text-[13px] text-[#9194A0] mt-1.5 font-normal leading-snug">
+                <p className="text-[13px] text-[#A0A2AD] mt-1.5 font-normal leading-snug">
                   Click accept to join the party
                 </p>
-                <p className="text-[13px] text-[#9194A0] mt-1 font-normal leading-snug">
+                <p className="text-[13px] text-[#A0A2AD] mt-1 font-normal leading-snug">
                   Time remaining {partyInviteCountdown}
                 </p>
               </div>
             </div>
 
             {/* Thin Horizontal Divider */}
-            <div className="w-full h-px bg-[#232328]" />
+            <div className="w-full h-px bg-[#202024]" />
 
             {/* Actions: DECLINE and ACCEPT */}
-            <div className="px-6 py-4 flex items-center justify-center gap-6">
+            <div className="px-6 py-4 flex items-center justify-center gap-7">
               <button
                 onClick={handleRejectPartyInvite}
                 className="font-bold text-sm tracking-wider text-[#FF5500] hover:text-[#FF6611] px-5 py-2 transition cursor-pointer uppercase select-none"
@@ -5714,7 +5709,7 @@ export const VortexDashboard: React.FC<VortexDashboardProps> = ({
               </button>
               <button
                 onClick={handleAcceptPartyInvite}
-                className="font-bold text-sm tracking-wider text-white bg-[#FF5500] hover:bg-[#FF6611] px-8 py-2.5 rounded-lg shadow-md transition cursor-pointer uppercase select-none hover:shadow-orange-500/20 active:scale-98"
+                className="font-bold text-sm tracking-wider text-white bg-[#FF5500] hover:bg-[#FF6611] px-8 py-2.5 rounded-md shadow-md transition cursor-pointer uppercase select-none hover:shadow-orange-500/20 active:scale-98"
               >
                 ACCEPT
               </button>
