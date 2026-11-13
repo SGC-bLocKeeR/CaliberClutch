@@ -5634,52 +5634,31 @@ export const VortexDashboard: React.FC<VortexDashboardProps> = ({
       )}
 
       {/* ======================================================== */}
-      {/* VORTEX SIGNATURE CS2 "INVITE TO PARTY" MODAL DIALOG       */}
+      {/* VORTEX MINIMAL CLEAN "INVITE TO PARTY" MODAL DIALOG       */}
       {/* ======================================================== */}
       {activePartyInvite && (
-        <div className="fixed inset-0 z-[150] bg-black/85 backdrop-blur-md flex items-center justify-center p-4 animate-in fade-in duration-200">
-          <div className="relative w-full max-w-[500px] bg-[#0E121B] border border-[#A3E635]/40 rounded-3xl shadow-[0_25px_60px_rgba(0,0,0,0.95),0_0_35px_rgba(163,230,53,0.18)] overflow-hidden animate-in zoom-in-95 duration-150">
-            {/* Top Slim Glowing Neon Lime Countdown Bar */}
-            <div className="w-full bg-[#182030] h-1">
-              <div
-                style={{ width: `${Math.max(0, Math.min(100, (partyInviteCountdown / 88) * 100))}%` }}
-                className="h-full bg-gradient-to-r from-[#84CC16] to-[#A3E635] shadow-[0_0_12px_rgba(163,230,53,0.9)] transition-all duration-1000 ease-linear"
-              />
-            </div>
-
-            {/* Header: VORTEX Party Invite with Icon Badge */}
-            <div className="p-5 pb-4 flex items-center justify-between border-b border-white/[0.08] bg-[#121622]/70">
-              <div className="flex items-center gap-3">
-                <div className="w-10 h-10 rounded-2xl bg-[#1B2213] border border-[#A3E635]/40 flex items-center justify-center text-[#A3E635] shadow-[0_0_15px_rgba(163,230,53,0.25)]">
-                  <Users className="w-5 h-5" />
-                </div>
-                <div>
-                  <div className="flex items-center gap-2">
-                    <h3 className="font-display font-black text-sm sm:text-base text-white uppercase tracking-wider">
-                      VORTEX <span className="text-[#A3E635] drop-shadow-[0_0_10px_rgba(163,230,53,0.6)]">Party Invite</span>
-                    </h3>
-                    <span className="px-2 py-0.5 rounded-full bg-[#A3E635]/15 border border-[#A3E635]/30 text-[#A3E635] font-mono font-black text-[9px] uppercase tracking-wider">
-                      CS2 5v5
-                    </span>
-                  </div>
-                  <p className="text-xs font-mono text-slate-400">Competitive Ranked Matchmaking</p>
-                </div>
-              </div>
+        <div className="fixed inset-0 z-[150] bg-black/80 backdrop-blur-[3px] flex items-center justify-center p-4 animate-in fade-in duration-150">
+          <div className="relative w-full max-w-[480px] bg-[#0E121B] border border-[#A3E635]/30 rounded-2xl shadow-[0_25px_60px_rgba(0,0,0,0.95),0_0_30px_rgba(163,230,53,0.12)] overflow-hidden animate-in zoom-in-95 duration-150">
+            {/* Header: Centered "Invite to party" with close button */}
+            <div className="relative pt-6 pb-2 px-6 flex items-center justify-center">
+              <h2 className="text-xl font-bold tracking-tight text-white select-none">
+                Invite to <span className="text-[#A3E635]">party</span>
+              </h2>
               <button
                 onClick={() => setActivePartyInvite(null)}
-                className="p-1.5 rounded-xl bg-white/5 hover:bg-white/10 text-slate-400 hover:text-white transition cursor-pointer"
+                className="absolute right-4 top-4 text-slate-500 hover:text-white transition cursor-pointer p-1.5"
                 aria-label="Close"
               >
                 <X className="w-5 h-5" />
               </button>
             </div>
 
-            {/* Content: Avatar & Invite Details */}
-            <div className="p-6 flex items-center gap-5">
-              {/* Avatar with VORTEX Glowing Border */}
+            {/* Content: Avatar & 3 Clean Lines of Text */}
+            <div className="px-8 pt-4 pb-6 flex items-center gap-5">
+              {/* Avatar circle */}
               <div className="relative shrink-0 select-none">
                 {activePartyInvite.sender === 'M18' || !activePartyInvite.avatar ? (
-                  <div className="w-16 h-16 rounded-2xl bg-[#090C12] border-2 border-[#A3E635] p-2 flex flex-col items-center justify-center shadow-[0_0_20px_rgba(163,230,53,0.35)] relative overflow-hidden">
+                  <div className="w-[74px] h-[74px] rounded-full bg-black border border-[#A3E635]/40 flex items-center justify-center p-1 shadow-md overflow-hidden">
                     <img
                       src="/images/faceit_m18_badge.png"
                       alt="M18"
@@ -5691,65 +5670,48 @@ export const VortexDashboard: React.FC<VortexDashboardProps> = ({
                     <img
                       src={activePartyInvite.avatar}
                       alt={activePartyInvite.sender}
-                      className="w-16 h-16 rounded-2xl object-cover border-2 border-[#A3E635] shadow-[0_0_20px_rgba(163,230,53,0.35)]"
+                      className="w-[74px] h-[74px] rounded-full object-cover border border-[#A3E635]/40 shadow-md"
                     />
                     {activePartyInvite.level && (
                       <div className="absolute -bottom-1 -right-1 px-1.5 py-0.2 rounded bg-[#A3E635] text-slate-950 font-black text-[9px] font-mono leading-none border border-black shadow">
-                        LVL {activePartyInvite.level}
+                        {activePartyInvite.level}
                       </div>
                     )}
                   </div>
                 )}
-                <span className="absolute -top-1 -right-1 w-3 h-3 rounded-full bg-emerald-400 border-2 border-[#0E121B] animate-pulse" />
               </div>
 
-              {/* Text Info */}
-              <div className="min-w-0 text-left select-none space-y-1">
-                <div className="flex items-center gap-2">
-                  <span className="font-display font-black text-white text-base truncate">
-                    {activePartyInvite.sender}
-                  </span>
-                  <CountryFlag code={activePartyInvite.code || 'XK'} name={activePartyInvite.countryName || 'Kosovo'} size="xs" />
-                  <span className="px-1.5 py-0.2 rounded bg-amber-500/20 text-amber-300 border border-amber-500/30 font-black text-[9px] font-mono">
-                    PRO
-                  </span>
-                </div>
-                <p className="text-xs font-mono text-slate-300">
-                  Invited you to join their CS2 5v5 Party Lobby
+              {/* Text Info: Clean and uncluttered */}
+              <div className="min-w-0 text-left select-none">
+                <p className="font-bold text-white text-[15px] leading-snug">
+                  {activePartyInvite.sender} invited you to join their party
                 </p>
-                <div className="flex items-center gap-3 pt-1 text-[11px] font-mono text-slate-400 flex-wrap">
-                  <span className="flex items-center gap-1.5 text-emerald-400 font-bold">
-                    <CheckCircle2 className="w-3.5 h-3.5" /> 128-Tick EU Server
-                  </span>
-                  <span>•</span>
-                  <span className="flex items-center gap-1 text-slate-300">
-                    <Clock className="w-3 h-3 text-[#A3E635]" />
-                    Expires in <strong className="text-[#A3E635] font-bold">{partyInviteCountdown}s</strong>
-                  </span>
-                </div>
+                <p className="text-sm text-slate-400 mt-1 font-normal leading-snug">
+                  Click accept to join the party
+                </p>
+                <p className="text-sm text-slate-400 mt-1 font-normal leading-snug">
+                  Time remaining {partyInviteCountdown}
+                </p>
               </div>
             </div>
 
-            {/* Actions: VORTEX Styled Decline and Accept */}
-            <div className="p-4 px-6 border-t border-white/[0.08] bg-[#0A0D14]/80 flex items-center justify-between gap-3">
-              <span className="text-[11px] font-mono text-slate-400 hidden sm:inline-block">
-                Click Accept to enter squad lobby
-              </span>
-              <div className="flex items-center gap-2.5 w-full sm:w-auto justify-end">
-                <button
-                  onClick={handleRejectPartyInvite}
-                  className="flex-1 sm:flex-initial px-4 py-2 rounded-xl bg-white/5 hover:bg-red-500/15 border border-white/10 hover:border-red-500/40 text-slate-300 hover:text-red-300 font-mono font-bold text-xs uppercase tracking-wider transition cursor-pointer"
-                >
-                  Decline
-                </button>
-                <button
-                  onClick={handleAcceptPartyInvite}
-                  className="flex-1 sm:flex-initial px-6 py-2.5 rounded-xl bg-gradient-to-r from-[#84CC16] to-[#A3E635] hover:brightness-110 text-slate-950 font-display font-black text-xs uppercase tracking-wider shadow-[0_0_20px_rgba(163,230,53,0.4)] hover:scale-[1.02] active:scale-95 transition flex items-center justify-center gap-2 cursor-pointer"
-                >
-                  <Check className="w-4 h-4 stroke-[3]" />
-                  <span>Accept & Join</span>
-                </button>
-              </div>
+            {/* Thin Horizontal Divider */}
+            <div className="w-full h-px bg-white/[0.08]" />
+
+            {/* Actions: Clean Centered DECLINE and ACCEPT */}
+            <div className="px-6 py-4 flex items-center justify-center gap-7">
+              <button
+                onClick={handleRejectPartyInvite}
+                className="font-bold text-sm tracking-wider text-[#A3E635] hover:text-[#84CC16] px-5 py-2 transition cursor-pointer uppercase select-none"
+              >
+                DECLINE
+              </button>
+              <button
+                onClick={handleAcceptPartyInvite}
+                className="font-bold text-sm tracking-wider text-slate-950 bg-[#A3E635] hover:bg-[#84CC16] px-8 py-2.5 rounded-lg shadow-md hover:shadow-lime-500/25 transition cursor-pointer uppercase select-none active:scale-95"
+              >
+                ACCEPT
+              </button>
             </div>
           </div>
         </div>
