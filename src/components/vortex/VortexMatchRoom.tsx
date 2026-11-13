@@ -798,8 +798,3 @@ export const VortexMatchRoom: React.FC<VortexMatchRoomProps> = ({
     </div>
   );
 };
-
-      </div>
-    </div>
-  );
-};
