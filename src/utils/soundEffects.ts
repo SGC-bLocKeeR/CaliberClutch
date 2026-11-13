@@ -310,6 +310,135 @@ class SoundSynthesizer {
     osc.start();
     osc.stop(ctx.currentTime + 0.06);
   }
+
+  // FACEIT-style Match Found Horn / Cyber Bass Fanfare
+  public playMatchFound() {
+    const ctx = this.getContext();
+    if (!ctx) return;
+    
+    // Heavy sub bass impact
+    const bass = ctx.createOscillator();
+    const bassGain = ctx.createGain();
+    bass.type = 'sawtooth';
+    bass.frequency.setValueAtTime(110, ctx.currentTime);
+    bass.frequency.exponentialRampToValueAtTime(45, ctx.currentTime + 0.5);
+    bassGain.gain.setValueAtTime(0.25, ctx.currentTime);
+    bassGain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.55);
+    bass.connect(bassGain);
+    bassGain.connect(ctx.destination);
+    bass.start();
+    bass.stop(ctx.currentTime + 0.55);
+
+    // High triumphant alert chords
+    const notes = [440, 554.37, 659.25, 880];
+    notes.forEach((freq, idx) => {
+      const osc = ctx.createOscillator();
+      const gain = ctx.createGain();
+      const start = ctx.currentTime + 0.08 + idx * 0.05;
+      osc.type = 'sine';
+      osc.frequency.setValueAtTime(freq, start);
+      gain.gain.setValueAtTime(0.12, start);
+      gain.gain.exponentialRampToValueAtTime(0.001, start + 0.35);
+      osc.connect(gain);
+      gain.connect(ctx.destination);
+      osc.start(start);
+      osc.stop(start + 0.35);
+    });
+  }
+
+  // FACEIT-style Party Invite dual chime
+  public playPartyInvite() {
+    const ctx = this.getContext();
+    if (!ctx) return;
+    const notes = [659.25, 880]; // E5, A5
+    notes.forEach((freq, idx) => {
+      const osc = ctx.createOscillator();
+      const gain = ctx.createGain();
+      const start = ctx.currentTime + idx * 0.12;
+      osc.type = 'sine';
+      osc.frequency.setValueAtTime(freq, start);
+      gain.gain.setValueAtTime(0.15, start);
+      gain.gain.exponentialRampToValueAtTime(0.001, start + 0.35);
+      osc.connect(gain);
+      gain.connect(ctx.destination);
+      osc.start(start);
+      osc.stop(start + 0.35);
+    });
+  }
+
+  // Heavy Map Ban Slam
+  public playMapBan() {
+    const ctx = this.getContext();
+    if (!ctx) return;
+    const osc = ctx.createOscillator();
+    const gain = ctx.createGain();
+    osc.type = 'square';
+    osc.frequency.setValueAtTime(180, ctx.currentTime);
+    osc.frequency.exponentialRampToValueAtTime(40, ctx.currentTime + 0.18);
+    gain.gain.setValueAtTime(0.2, ctx.currentTime);
+    gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.2);
+    osc.connect(gain);
+    gain.connect(ctx.destination);
+    osc.start();
+    osc.stop(ctx.currentTime + 0.2);
+  }
+
+  // Decisive Map Pick Chime
+  public playMapPick() {
+    const ctx = this.getContext();
+    if (!ctx) return;
+    const notes = [523.25, 659.25, 783.99, 1046.5];
+    notes.forEach((freq, idx) => {
+      const osc = ctx.createOscillator();
+      const gain = ctx.createGain();
+      const start = ctx.currentTime + idx * 0.08;
+      osc.type = 'triangle';
+      osc.frequency.setValueAtTime(freq, start);
+      gain.gain.setValueAtTime(0.14, start);
+      gain.gain.exponentialRampToValueAtTime(0.001, start + 0.3);
+      osc.connect(gain);
+      gain.connect(ctx.destination);
+      osc.start(start);
+      osc.stop(start + 0.3);
+    });
+  }
+
+  // Chat message pop
+  public playChatMessage() {
+    const ctx = this.getContext();
+    if (!ctx) return;
+    const osc = ctx.createOscillator();
+    const gain = ctx.createGain();
+    osc.type = 'sine';
+    osc.frequency.setValueAtTime(750, ctx.currentTime);
+    osc.frequency.exponentialRampToValueAtTime(950, ctx.currentTime + 0.04);
+    gain.gain.setValueAtTime(0.08, ctx.currentTime);
+    gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.05);
+    osc.connect(gain);
+    gain.connect(ctx.destination);
+    osc.start();
+    osc.stop(ctx.currentTime + 0.05);
+  }
+
+  // Crown / Leader Promotion Fanfare
+  public playCrownPromote() {
+    const ctx = this.getContext();
+    if (!ctx) return;
+    const notes = [392, 523.25, 659.25]; // G4, C5, E5
+    notes.forEach((freq, idx) => {
+      const osc = ctx.createOscillator();
+      const gain = ctx.createGain();
+      const start = ctx.currentTime + idx * 0.09;
+      osc.type = 'triangle';
+      osc.frequency.setValueAtTime(freq, start);
+      gain.gain.setValueAtTime(0.12, start);
+      gain.gain.exponentialRampToValueAtTime(0.001, start + 0.25);
+      osc.connect(gain);
+      gain.connect(ctx.destination);
+      osc.start(start);
+      osc.stop(start + 0.25);
+    });
+  }
 }
 
 export const sound = new SoundSynthesizer();

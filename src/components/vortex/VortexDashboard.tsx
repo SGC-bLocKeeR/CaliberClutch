@@ -60,6 +60,8 @@ import { sound } from '../../utils/soundEffects';
 import { VortexBrandLogo } from './VortexLandingPage';
 import { CountryFlag } from './CountryFlag';
 import { ALL_COUNTRIES, getCountryByCode, Country } from '../../data/countries';
+import { VortexPartyChat } from './VortexPartyChat';
+import { VortexMatchRoom } from './VortexMatchRoom';
 
 interface VortexDashboardProps {
   userGamerTag?: string;
@@ -837,6 +839,47 @@ export const VortexDashboard: React.FC<VortexDashboardProps> = ({
       setActivePartyInvite(null);
     }
     setDashboardToast('Ftesa u anulua');
+  };
+
+  // Party Leader Index (Default to center slot 2: bLocKeeRz) & Match Room modal
+  const [partyLeaderIndex, setPartyLeaderIndex] = useState<number>(2);
+  const [isMatchRoomOpen, setIsMatchRoomOpen] = useState<boolean>(false);
+
+  const handlePromoteToLeader = (slotIndex: number, e?: React.MouseEvent) => {
+    if (e) e.stopPropagation();
+    sound.playCrownPromote();
+    setPartyLeaderIndex(slotIndex);
+    const member = partySlots[slotIndex];
+    if (member) {
+      setDashboardToast(`👑 ${member.name} u emërua Lider i Party-t!`);
+    }
+  };
+
+  const handleKickMember = (slotIndex: number, e?: React.MouseEvent) => {
+    if (e) e.stopPropagation();
+    sound.playClick();
+    const member = partySlots[slotIndex];
+    setPartySlots(prev => {
+      const copy = [...prev];
+      copy[slotIndex] = null;
+      return copy;
+    });
+    if (partyLeaderIndex === slotIndex) {
+      setPartyLeaderIndex(2); // Fallback to current user
+    }
+    if (member) {
+      setDashboardToast(`✕ ${member.name} u largua nga party`);
+    }
+  };
+
+  const handleLeaveParty = () => {
+    sound.playClick();
+    setPartySlots(prev => {
+      const copy = [null, null, prev[2], null, null];
+      return copy;
+    });
+    setPartyLeaderIndex(2);
+    setDashboardToast('Ju dolët nga party');
   };
 
   // =========================================================================
@@ -2228,25 +2271,64 @@ export const VortexDashboard: React.FC<VortexDashboardProps> = ({
                   </div>
                 </div>
 
-                {/* 5 PARTY SLOTS (CENTER IS bLocKeeRz) */}
-                <div className="mt-8 relative">
+                {/* PARTY CONTROLS & MATCH ROOM ENTRY */}
+                <div className="mt-8 mb-3 flex flex-wrap items-center justify-between gap-3 text-xs font-mono">
+                  <div className="flex items-center gap-3">
+                    <div className="flex items-center gap-2 px-3 py-1.5 rounded-xl bg-white/[0.04] border border-white/10">
+                      <Users className="w-3.5 h-3.5 text-[#A3E635]" />
+                      <span className="text-white font-bold">
+                        PARTY: {partySlots.filter(Boolean).length}/5
+                      </span>
+                    </div>
+                    {partySlots.filter(Boolean).length > 1 && (
+                      <button
+                        onClick={handleLeaveParty}
+                        className="px-3 py-1.5 rounded-xl bg-red-500/10 hover:bg-red-500/20 border border-red-500/30 text-red-300 transition flex items-center gap-1.5 cursor-pointer"
+                        title="Leave current party"
+                      >
+                        <LogOut className="w-3 h-3" />
+                        <span>Leave Party</span>
+                      </button>
+                    )}
+                  </div>
+
+                  <div className="flex items-center gap-2">
+                    <button
+                      onClick={() => {
+                        sound.playSelect();
+                        setIsMatchRoomOpen(true);
+                      }}
+                      className="px-4 py-1.5 rounded-xl bg-[#A3E635]/15 hover:bg-[#A3E635]/25 border border-[#A3E635]/40 text-[#A3E635] hover:text-white font-bold transition flex items-center gap-2 shadow-sm hover:shadow-[0_0_15px_rgba(163,230,53,0.3)] cursor-pointer"
+                      title="Enter CS2 Match Room with Active Duty Map Veto"
+                    >
+                      <Radio className="w-3.5 h-3.5 animate-pulse text-[#A3E635]" />
+                      <span>CS2 MATCH ROOM & MAP VETO</span>
+                      <ChevronRight className="w-3.5 h-3.5" />
+                    </button>
+                  </div>
+                </div>
+
+                {/* 5 PARTY SLOTS */}
+                <div className="relative">
                   <div className="grid grid-cols-2 sm:grid-cols-5 gap-3.5">
                     {partySlots.map((member, idx) => {
+                      const isLeader = partyLeaderIndex === idx;
                       const isCenterLeader = idx === 2;
+                      const isCurrentUser = member?.id === 'current-user' || member?.name === currentGamerTag;
 
                       if (member) {
                         return (
                           <div
                             key={member.id}
                             className={`h-56 rounded-2xl border flex flex-col items-center justify-between p-4 transition-all relative group ${
-                              isCenterLeader
+                              isLeader
                                 ? 'bg-gradient-to-b from-[#181D2A] to-[#11141D] border-[#FF5500]/60 shadow-lg shadow-[#FF5500]/15'
                                 : 'bg-[#12141C] border-[#252B3B] hover:border-[#A3E635]/40'
                             }`}
                           >
                             {/* Member Top Row */}
                             <div className="w-full flex items-center justify-between text-[10px] font-mono">
-                              {isCenterLeader ? (
+                              {isLeader ? (
                                 <span className="px-2 py-0.5 rounded bg-[#FF5500]/15 text-[#FF5500] font-bold border border-[#FF5500]/30 flex items-center gap-1">
                                   <Crown className="w-3 h-3 fill-[#FF5500]" />
                                   LEADER
@@ -2257,15 +2339,36 @@ export const VortexDashboard: React.FC<VortexDashboardProps> = ({
                                 </span>
                               )}
 
-                              {!isCenterLeader && (
-                                <button
-                                  onClick={(e) => handleRemoveTeammate(idx, e)}
-                                  className="opacity-0 group-hover:opacity-100 p-1 rounded hover:bg-red-500/20 text-slate-400 hover:text-red-400 transition cursor-pointer"
-                                  title="Remove from lobby"
-                                >
-                                  <X className="w-3.5 h-3.5" />
-                                </button>
-                              )}
+                              <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+                                {!isLeader && (
+                                  <button
+                                    onClick={(e) => handlePromoteToLeader(idx, e)}
+                                    className="p-1 rounded hover:bg-amber-500/20 text-slate-400 hover:text-amber-400 transition cursor-pointer"
+                                    title="Bëje Lider (Promote to Leader)"
+                                  >
+                                    <Crown className="w-3.5 h-3.5" />
+                                  </button>
+                                )}
+                                {!isCurrentUser ? (
+                                  <button
+                                    onClick={(e) => handleKickMember(idx, e)}
+                                    className="p-1 rounded hover:bg-red-500/20 text-slate-400 hover:text-red-400 transition cursor-pointer"
+                                    title="Largo nga grupi (Kick)"
+                                  >
+                                    <X className="w-3.5 h-3.5" />
+                                  </button>
+                                ) : (
+                                  partySlots.filter(Boolean).length > 1 && (
+                                    <button
+                                      onClick={handleLeaveParty}
+                                      className="p-1 rounded hover:bg-red-500/20 text-slate-400 hover:text-red-400 transition cursor-pointer"
+                                      title="Dil nga grupi (Leave Party)"
+                                    >
+                                      <LogOut className="w-3.5 h-3.5" />
+                                    </button>
+                                  )
+                                )}
+                              </div>
                             </div>
 
                             {/* Member Avatar & Details */}
@@ -4509,6 +4612,17 @@ export const VortexDashboard: React.FC<VortexDashboardProps> = ({
                       <span>CONNECT VIA STEAM</span>
                     </button>
                   </div>
+
+                  <button
+                    onClick={() => {
+                      setMatchFoundModal(false);
+                      setIsMatchRoomOpen(true);
+                    }}
+                    className="w-full py-3.5 rounded-xl bg-gradient-to-r from-[#84CC16] to-[#A3E635] hover:brightness-110 text-slate-950 font-display font-black text-xs uppercase tracking-wider transition shadow-lg shadow-lime-500/25 flex items-center justify-center gap-2 cursor-pointer"
+                  >
+                    <Radio className="w-4 h-4 animate-pulse" />
+                    <span>ENTER CS2 MATCH ROOM & MAP VETO</span>
+                  </button>
                 </div>
               )}
 
@@ -5759,6 +5873,38 @@ export const VortexDashboard: React.FC<VortexDashboardProps> = ({
             </div>
           </div>
         </div>
+      )}
+
+      {/* ======================================================== */}
+      {/* VORTEX PARTY CHAT DOCKED WIDGET                          */}
+      {/* ======================================================== */}
+      <VortexPartyChat
+        currentGamerTag={currentGamerTag}
+        currentAvatarUrl={currentAvatarUrl}
+        partyMembers={partySlots
+          .map((m, idx) => m ? {
+            id: m.id,
+            name: m.name,
+            avatar: m.avatar,
+            verification: m.verification,
+            isLeader: partyLeaderIndex === idx
+          } : null)
+          .filter((m): m is { id: string; name: string; avatar?: string; verification?: 'vip' | 'verified' | 'none'; isLeader: boolean } => m !== null)
+        }
+        onOpenMatchRoom={() => setIsMatchRoomOpen(true)}
+      />
+
+      {/* ======================================================== */}
+      {/* VORTEX CS2 MATCH ROOM & MAP VETO MODAL                   */}
+      {/* ======================================================== */}
+      {isMatchRoomOpen && (
+        <VortexMatchRoom
+          matchId="VTX-89421"
+          currentGamerTag={currentGamerTag}
+          currentAvatarUrl={currentAvatarUrl}
+          partyMembers={partySlots.filter((m): m is PartySlotMember => m !== null)}
+          onClose={() => setIsMatchRoomOpen(false)}
+        />
       )}
 
     </div>
