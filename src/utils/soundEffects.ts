@@ -25,16 +25,20 @@ class SoundSynthesizer {
 
   private getContext(): AudioContext | null {
     if (!this.soundEnabled) return null;
-    if (!this.ctx && typeof window !== 'undefined') {
-      const AudioCtx = window.AudioContext || (window as unknown as { webkitAudioContext: typeof AudioContext }).webkitAudioContext;
-      if (AudioCtx) {
-        this.ctx = new AudioCtx();
+    try {
+      if (!this.ctx && typeof window !== 'undefined') {
+        const AudioCtx = window.AudioContext || (window as unknown as { webkitAudioContext: typeof AudioContext }).webkitAudioContext;
+        if (AudioCtx) {
+          this.ctx = new AudioCtx();
+        }
       }
+      if (this.ctx && this.ctx.state === 'suspended') {
+        this.ctx.resume().catch?.(() => {});
+      }
+      return this.ctx;
+    } catch {
+      return null;
     }
-    if (this.ctx && this.ctx.state === 'suspended') {
-      this.ctx.resume();
-    }
-    return this.ctx;
   }
 
   // Crisp cyber click

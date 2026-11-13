@@ -563,6 +563,156 @@ export const VortexDashboard: React.FC<VortexDashboardProps> = ({
   const [notificationsOpen, setNotificationsOpen] = useState(false);
   const [showPremiumModal, setShowPremiumModal] = useState(initialOpenPremium);
 
+  // =========================================================================
+  // NOTIFICATIONS SYSTEM STATE (Interactive esports alerts & actions)
+  // =========================================================================
+  const [notifications, setNotifications] = useState<Array<{
+    id: string;
+    type: 'match' | 'party' | 'tournament' | 'anticheat' | 'achievement';
+    title: string;
+    subtitle: string;
+    time: string;
+    read: boolean;
+    actionStatus?: 'pending' | 'accepted' | 'declined';
+    data?: {
+      map?: string;
+      server?: string;
+      sender?: string;
+      elo?: number;
+      tournamentId?: string;
+    };
+  }>>([
+    {
+      id: 'notif-1',
+      type: 'match',
+      title: '5v5 Match Ready Check',
+      subtitle: 'Ranked 5v5 on de_mirage (128-tick EU Frankfurt). 9/10 players confirmed.',
+      time: 'Just now',
+      read: false,
+      actionStatus: 'pending',
+      data: { map: 'de_mirage', server: '185.122.54.12:27015' },
+    },
+    {
+      id: 'notif-2',
+      type: 'party',
+      title: 'Party Invite from juanflatroo',
+      subtitle: 'Invited you to European Challenger 5v5 Lobby (4/5 slots filled).',
+      time: '4m ago',
+      read: false,
+      actionStatus: 'pending',
+      data: { sender: 'juanflatroo' },
+    },
+    {
+      id: 'notif-3',
+      type: 'tournament',
+      title: 'VORTEX CS2 Global Open ($25,000)',
+      subtitle: 'Bracket check-in opens in 1h 45m. Make sure all 5 players have Anti-Cheat active.',
+      time: '42m ago',
+      read: false,
+      data: { tournamentId: 'vortex-global-open' },
+    },
+    {
+      id: 'notif-4',
+      type: 'anticheat',
+      title: 'Fair Play Compensation: +25 ELO',
+      subtitle: 'A player from your recent competitive match was banned by Kernel Anti-Cheat. +25 ELO refunded.',
+      time: '3h ago',
+      read: true,
+      data: { elo: 25 },
+    },
+    {
+      id: 'notif-5',
+      type: 'achievement',
+      title: 'Season Milestone: Level 9 Reached',
+      subtitle: 'Congratulations bLocKeeRz! You crossed the 1,850 ELO threshold on the European ladder.',
+      time: 'Yesterday',
+      read: true,
+    },
+  ]);
+
+  const [notificationFilter, setNotificationFilter] = useState<'all' | 'match' | 'party' | 'tournament' | 'system'>('all');
+
+  const unreadCount = notifications.filter(n => !n.read).length;
+  const matchCount = notifications.filter(n => n.type === 'match').length;
+  const partyCount = notifications.filter(n => n.type === 'party').length;
+  const tournamentCount = notifications.filter(n => n.type === 'tournament').length;
+  const systemCount = notifications.filter(n => n.type === 'anticheat' || n.type === 'achievement').length;
+
+  const filteredNotifications = notifications.filter(n => {
+    if (notificationFilter === 'all') return true;
+    if (notificationFilter === 'match') return n.type === 'match';
+    if (notificationFilter === 'party') return n.type === 'party';
+    if (notificationFilter === 'tournament') return n.type === 'tournament';
+    if (notificationFilter === 'system') return n.type === 'anticheat' || n.type === 'achievement';
+    return true;
+  });
+
+  const handleAcceptMatch = (id: string) => {
+    sound.playJoinScrim();
+    try {
+      confetti({
+        particleCount: 50,
+        spread: 60,
+        origin: { y: 0.2, x: 0.85 }
+      });
+    } catch {}
+    setNotifications(prev => prev.map(n => n.id === id ? { ...n, read: true, actionStatus: 'accepted' } : n));
+    setDashboardToast('✓ Match Confirmed! IP copied: connect 185.122.54.12:27015');
+    if (navigator.clipboard) {
+      navigator.clipboard.writeText('connect 185.122.54.12:27015; password vortex').catch(() => {});
+    }
+  };
+
+  const handleDeclineMatch = (id: string) => {
+    sound.playClick();
+    setNotifications(prev => prev.map(n => n.id === id ? { ...n, read: true, actionStatus: 'declined' } : n));
+    setDashboardToast('Match was declined. Removed from queue.');
+  };
+
+  const handleJoinParty = (id: string, sender?: string) => {
+    sound.playJoinScrim();
+    setNotifications(prev => prev.map(n => n.id === id ? { ...n, read: true, actionStatus: 'accepted' } : n));
+    setDashboardToast(`✓ Joined ${sender || 'squad'}'s 5v5 lobby!`);
+  };
+
+  const handleDeclineParty = (id: string) => {
+    sound.playClick();
+    setNotifications(prev => prev.map(n => n.id === id ? { ...n, read: true, actionStatus: 'declined' } : n));
+  };
+
+  const handleMarkAllAsRead = () => {
+    sound.playSelect();
+    setNotifications(prev => prev.map(n => ({ ...n, read: true })));
+    setDashboardToast('All notifications marked as read');
+  };
+
+  const handleClearAllNotifications = () => {
+    sound.playClick();
+    setNotifications([]);
+    setDashboardToast('All notifications cleared');
+  };
+
+  const handleDeleteNotification = (id: string) => {
+    sound.playClick();
+    setNotifications(prev => prev.filter(n => n.id !== id));
+  };
+
+  const handleTriggerTestNotif = () => {
+    sound.playJoinScrim();
+    const newNotif = {
+      id: `notif-${Date.now()}`,
+      type: 'match' as const,
+      title: '5v5 Match Ready Check (New)',
+      subtitle: 'Ranked 5v5 on de_inferno (128-tick EU Vienna). Accept within 20s.',
+      time: 'Just now',
+      read: false,
+      actionStatus: 'pending' as const,
+      data: { map: 'de_inferno', server: '194.156.98.5:27015' }
+    };
+    setNotifications(prev => [newNotif, ...prev]);
+    setDashboardToast('⚡ Incoming Match Ready alert!');
+  };
+
   // Anti-Cheat Active State (Stored in localStorage, default false)
   const [isAntiCheatActive, setIsAntiCheatActive] = useState<boolean>(() => {
     const saved = localStorage.getItem('vortex_anticheat_active');
@@ -1512,14 +1662,25 @@ export const VortexDashboard: React.FC<VortexDashboardProps> = ({
             </div>
 
             <div className="flex items-center gap-3 sm:gap-4">
-              {/* Notification Bell (Clean glowing icon as in Photo 2, no box window) */}
+              {/* Notification Bell with Dynamic Unread Counter */}
               <button
-                onClick={() => { sound.playClick(); setNotificationsOpen(!notificationsOpen); }}
+                id="vortex-notifications-bell-btn"
+                onClick={() => {
+                  try { sound.playClick(); } catch {}
+                  setNotificationsOpen(prev => !prev);
+                }}
                 className="p-1.5 text-lime-400 hover:text-lime-300 transition cursor-pointer relative"
                 aria-label="Notifications"
+                title="Notifications"
               >
-                <Bell className="w-5 h-5 text-[#A3E635] hover:brightness-125 transition drop-shadow-[0_0_8px_rgba(163,230,53,0.5)]" />
-                <span className="absolute top-0.5 right-0.5 w-2 h-2 rounded-full bg-[#A3E635] shadow-[0_0_6px_rgba(163,230,53,0.95)]" />
+                <Bell className="w-5 h-5 text-[#A3E635] hover:brightness-125 transition drop-shadow-[0_0_8px_rgba(163,230,53,0.5)] pointer-events-none" />
+                {unreadCount > 0 ? (
+                  <span className="absolute -top-1 -right-1 min-w-[18px] h-[18px] px-1 rounded-full bg-[#A3E635] text-slate-950 font-black text-[10px] flex items-center justify-center shadow-[0_0_10px_rgba(163,230,53,0.95)] font-mono leading-none pointer-events-none">
+                    {unreadCount}
+                  </span>
+                ) : (
+                  <span className="absolute top-0.5 right-0.5 w-2 h-2 rounded-full bg-slate-600 pointer-events-none" />
+                )}
               </button>
 
               {/* User Profile (Avatar + GamerTag + Chevron as in Photo 2) */}
@@ -4009,24 +4170,328 @@ export const VortexDashboard: React.FC<VortexDashboardProps> = ({
 
 
 
-      {/* Notifications Drawer */}
+      {/* ======================================================== */}
+      {/* AUTHENTIC PRO ESPORTS NOTIFICATIONS DRAWER               */}
+      {/* ======================================================== */}
       {notificationsOpen && (
-        <div className="fixed right-8 top-16 w-80 rounded-2xl bg-[#141722] border border-[#283042] shadow-2xl p-4 z-50 animate-in fade-in zoom-in-95 space-y-3">
-          <div className="flex items-center justify-between pb-2 border-b border-[#283042]">
-            <span className="text-xs font-bold text-white uppercase font-mono">Notifications (2)</span>
-            <button onClick={() => setNotificationsOpen(false)} className="text-[#94A3B8] hover:text-white">
-              <X className="w-4 h-4" />
-            </button>
+        <>
+          {/* Backdrop for outside click */}
+          <div
+            className="fixed inset-0 z-40 bg-black/40 backdrop-blur-[2px]"
+            onClick={() => setNotificationsOpen(false)}
+          />
+
+          <div className="fixed right-3 sm:right-8 top-16 w-[calc(100vw-1.5rem)] sm:w-[440px] max-h-[85vh] flex flex-col rounded-3xl bg-[#0D0F17]/98 border border-[#202536] shadow-[0_20px_60px_rgba(0,0,0,0.85)] z-50 animate-in fade-in zoom-in-95 duration-150 backdrop-blur-xl overflow-hidden">
+            {/* Top Bar */}
+            <div className="p-4 border-b border-[#1E2333] flex items-center justify-between bg-[#121622]/60">
+              <div className="flex items-center gap-2.5">
+                <div className="w-8 h-8 rounded-xl bg-[#1B2213] border border-[#A3E635]/30 flex items-center justify-center text-[#A3E635]">
+                  <Bell className="w-4 h-4" />
+                </div>
+                <div>
+                  <div className="flex items-center gap-2">
+                    <span className="text-sm font-black text-white uppercase font-mono tracking-wider">Notifications</span>
+                    {unreadCount > 0 && (
+                      <span className="px-2 py-0.5 rounded-full bg-[#A3E635]/20 border border-[#A3E635]/40 text-[#A3E635] text-[10px] font-black font-mono">
+                        {unreadCount} NEW
+                      </span>
+                    )}
+                  </div>
+                  <span className="text-[11px] text-slate-400 font-mono">Matchmaking, Party & Competitive Updates</span>
+                </div>
+              </div>
+
+              <div className="flex items-center gap-1.5">
+                {unreadCount > 0 && (
+                  <button
+                    onClick={handleMarkAllAsRead}
+                    className="px-2 py-1 rounded-lg bg-white/5 hover:bg-[#A3E635]/15 text-slate-300 hover:text-[#A3E635] text-[11px] font-mono transition flex items-center gap-1 border border-white/5 hover:border-[#A3E635]/30 cursor-pointer"
+                    title="Mark all as read"
+                  >
+                    <Check className="w-3 h-3" />
+                    <span className="hidden sm:inline">Read All</span>
+                  </button>
+                )}
+                {notifications.length > 0 && (
+                  <button
+                    onClick={handleClearAllNotifications}
+                    className="p-1.5 rounded-lg bg-white/5 hover:bg-red-500/15 text-slate-400 hover:text-red-400 text-xs transition border border-white/5 hover:border-red-500/30 cursor-pointer"
+                    title="Clear all notifications"
+                  >
+                    <Trash2 className="w-3.5 h-3.5" />
+                  </button>
+                )}
+                <button
+                  onClick={() => setNotificationsOpen(false)}
+                  className="p-1.5 rounded-lg bg-white/5 hover:bg-white/10 text-slate-400 hover:text-white text-xs transition cursor-pointer"
+                >
+                  <X className="w-4 h-4" />
+                </button>
+              </div>
+            </div>
+
+            {/* Filter Category Tabs */}
+            <div className="px-3 py-2 border-b border-[#1A2030] bg-[#0A0C13]/90 flex items-center gap-1.5 overflow-x-auto scrollbar-none text-[11px] font-mono">
+              <button
+                onClick={() => { sound.playClick(); setNotificationFilter('all'); }}
+                className={`px-2.5 py-1 rounded-lg transition whitespace-nowrap cursor-pointer ${
+                  notificationFilter === 'all'
+                    ? 'bg-[#A3E635] text-slate-950 font-black shadow-[0_0_10px_rgba(163,230,53,0.3)]'
+                    : 'text-slate-400 hover:text-white hover:bg-white/5'
+                }`}
+              >
+                All ({notifications.length})
+              </button>
+              <button
+                onClick={() => { sound.playClick(); setNotificationFilter('match'); }}
+                className={`px-2.5 py-1 rounded-lg transition whitespace-nowrap cursor-pointer flex items-center gap-1 ${
+                  notificationFilter === 'match'
+                    ? 'bg-red-500 text-white font-black shadow-[0_0_10px_rgba(239,68,68,0.3)]'
+                    : 'text-slate-400 hover:text-white hover:bg-white/5'
+                }`}
+              >
+                <Crosshair className="w-3 h-3" /> Matches ({matchCount})
+              </button>
+              <button
+                onClick={() => { sound.playClick(); setNotificationFilter('party'); }}
+                className={`px-2.5 py-1 rounded-lg transition whitespace-nowrap cursor-pointer flex items-center gap-1 ${
+                  notificationFilter === 'party'
+                    ? 'bg-sky-500 text-slate-950 font-black shadow-[0_0_10px_rgba(14,165,233,0.3)]'
+                    : 'text-slate-400 hover:text-white hover:bg-white/5'
+                }`}
+              >
+                <Users className="w-3 h-3" /> Invites ({partyCount})
+              </button>
+              <button
+                onClick={() => { sound.playClick(); setNotificationFilter('tournament'); }}
+                className={`px-2.5 py-1 rounded-lg transition whitespace-nowrap cursor-pointer flex items-center gap-1 ${
+                  notificationFilter === 'tournament'
+                    ? 'bg-amber-500 text-slate-950 font-black shadow-[0_0_10px_rgba(245,158,11,0.3)]'
+                    : 'text-slate-400 hover:text-white hover:bg-white/5'
+                }`}
+              >
+                <Trophy className="w-3 h-3" /> Tournaments ({tournamentCount})
+              </button>
+              <button
+                onClick={() => { sound.playClick(); setNotificationFilter('system'); }}
+                className={`px-2.5 py-1 rounded-lg transition whitespace-nowrap cursor-pointer flex items-center gap-1 ${
+                  notificationFilter === 'system'
+                    ? 'bg-emerald-500 text-slate-950 font-black shadow-[0_0_10px_rgba(16,185,129,0.3)]'
+                    : 'text-slate-400 hover:text-white hover:bg-white/5'
+                }`}
+              >
+                <ShieldCheck className="w-3 h-3" /> System ({systemCount})
+              </button>
+            </div>
+
+            {/* Notification List Body */}
+            <div className="flex-1 overflow-y-auto p-3 space-y-2.5 max-h-[58vh]">
+              {filteredNotifications.length === 0 ? (
+                <div className="py-12 flex flex-col items-center justify-center text-center space-y-3">
+                  <div className="w-12 h-12 rounded-2xl bg-white/5 border border-white/10 flex items-center justify-center text-slate-500">
+                    <CheckCircle2 className="w-6 h-6 text-slate-600" />
+                  </div>
+                  <div>
+                    <h4 className="text-xs font-bold text-slate-300 font-mono uppercase">All Caught Up!</h4>
+                    <p className="text-[11px] text-slate-500 max-w-xs mt-1">No pending notifications in this category. You are ready to compete.</p>
+                  </div>
+                  <button
+                    onClick={handleTriggerTestNotif}
+                    className="mt-2 px-3 py-1.5 rounded-xl bg-[#1B2213] border border-[#A3E635]/40 text-[#A3E635] text-xs font-mono font-bold hover:bg-[#283519] transition cursor-pointer flex items-center gap-1.5"
+                  >
+                    <Plus className="w-3.5 h-3.5" /> Simulate 5v5 Ready Notification
+                  </button>
+                </div>
+              ) : (
+                filteredNotifications.map((n) => (
+                  <div
+                    key={n.id}
+                    className={`relative p-3 rounded-2xl border transition-all duration-200 ${
+                      !n.read
+                        ? 'bg-[#121622]/95 border-[#A3E635]/40 shadow-[0_0_15px_rgba(163,230,53,0.06)]'
+                        : 'bg-[#0B0D15]/85 border-[#1D2335] opacity-90 hover:opacity-100 hover:border-slate-700'
+                    }`}
+                  >
+                    {/* Header line of notification */}
+                    <div className="flex items-center justify-between gap-2 mb-1.5">
+                      <div className="flex items-center gap-2">
+                        {n.type === 'match' && (
+                          <span className="px-2 py-0.5 rounded-md bg-red-500/15 border border-red-500/30 text-red-400 text-[10px] font-black font-mono flex items-center gap-1 animate-pulse">
+                            <Crosshair className="w-3 h-3" /> READY CHECK
+                          </span>
+                        )}
+                        {n.type === 'party' && (
+                          <span className="px-2 py-0.5 rounded-md bg-sky-500/15 border border-sky-500/30 text-sky-400 text-[10px] font-bold font-mono flex items-center gap-1">
+                            <Users className="w-3 h-3" /> LOBBY INVITE
+                          </span>
+                        )}
+                        {n.type === 'tournament' && (
+                          <span className="px-2 py-0.5 rounded-md bg-amber-500/15 border border-amber-500/30 text-amber-400 text-[10px] font-bold font-mono flex items-center gap-1">
+                            <Trophy className="w-3 h-3" /> TOURNAMENT
+                          </span>
+                        )}
+                        {n.type === 'anticheat' && (
+                          <span className="px-2 py-0.5 rounded-md bg-emerald-500/15 border border-emerald-500/30 text-emerald-400 text-[10px] font-bold font-mono flex items-center gap-1">
+                            <ShieldCheck className="w-3 h-3" /> FAIR PLAY
+                          </span>
+                        )}
+                        {n.type === 'achievement' && (
+                          <span className="px-2 py-0.5 rounded-md bg-purple-500/15 border border-purple-500/30 text-purple-400 text-[10px] font-bold font-mono flex items-center gap-1">
+                            <Flame className="w-3 h-3" /> MILESTONE
+                          </span>
+                        )}
+
+                        {!n.read && (
+                          <span className="w-1.5 h-1.5 rounded-full bg-[#A3E635] shadow-[0_0_6px_rgba(163,230,53,0.9)]" />
+                        )}
+                      </div>
+
+                      <div className="flex items-center gap-2">
+                        <span className="text-[10px] text-slate-500 font-mono">{n.time}</span>
+                        <button
+                          onClick={() => handleDeleteNotification(n.id)}
+                          className="text-slate-600 hover:text-slate-300 p-0.5 transition cursor-pointer"
+                          title="Dismiss"
+                        >
+                          <X className="w-3 h-3" />
+                        </button>
+                      </div>
+                    </div>
+
+                    {/* Content */}
+                    <div className="text-left">
+                      <h4 className="text-xs font-bold text-white font-mono">{n.title}</h4>
+                      <p className="text-[11px] text-slate-400 leading-relaxed mt-0.5">{n.subtitle}</p>
+                    </div>
+
+                    {/* Interactive Action Controls */}
+                    <div className="mt-2.5 pt-2 border-t border-white/[0.06] flex items-center gap-2 flex-wrap">
+                      {n.type === 'match' && (
+                        <>
+                          {n.actionStatus === 'pending' && (
+                            <>
+                              <button
+                                onClick={() => handleAcceptMatch(n.id)}
+                                className="px-3 py-1.5 rounded-xl bg-gradient-to-r from-lime-500 to-emerald-500 hover:from-lime-400 hover:to-emerald-400 text-slate-950 font-black text-xs font-mono flex items-center gap-1.5 shadow-[0_0_15px_rgba(163,230,53,0.4)] transition hover:scale-[1.02] active:scale-95 cursor-pointer"
+                              >
+                                <Check className="w-3.5 h-3.5 stroke-[3]" />
+                                <span>ACCEPT MATCH (0:15)</span>
+                              </button>
+                              <button
+                                onClick={() => handleDeclineMatch(n.id)}
+                                className="px-2.5 py-1.5 rounded-xl bg-white/5 hover:bg-red-500/20 text-slate-400 hover:text-red-400 border border-white/10 hover:border-red-500/30 text-xs font-mono transition cursor-pointer"
+                              >
+                                DECLINE
+                              </button>
+                            </>
+                          )}
+                          {n.actionStatus === 'accepted' && (
+                            <div className="w-full flex items-center justify-between p-2 rounded-xl bg-emerald-500/10 border border-emerald-500/30 text-[11px]">
+                              <span className="text-emerald-400 font-bold font-mono flex items-center gap-1.5">
+                                <CheckCircle2 className="w-3.5 h-3.5" /> READY (10/10) • DE_MIRAGE
+                              </span>
+                              <button
+                                onClick={() => {
+                                  sound.playClick();
+                                  if (navigator.clipboard) {
+                                    navigator.clipboard.writeText('connect 185.122.54.12:27015; password vortex');
+                                  }
+                                  setDashboardToast('Console command copied: connect 185.122.54.12:27015');
+                                }}
+                                className="px-2.5 py-1 rounded-lg bg-emerald-500 hover:bg-emerald-400 text-slate-950 font-black text-[10px] font-mono transition cursor-pointer flex items-center gap-1 shadow-sm"
+                              >
+                                <Copy className="w-3 h-3" />
+                                <span>COPY IP</span>
+                              </button>
+                            </div>
+                          )}
+                          {n.actionStatus === 'declined' && (
+                            <span className="text-red-400/80 text-[11px] font-mono italic">✕ You declined this match.</span>
+                          )}
+                        </>
+                      )}
+
+                      {n.type === 'party' && (
+                        <>
+                          {n.actionStatus === 'pending' && (
+                            <>
+                              <button
+                                onClick={() => handleJoinParty(n.id, n.data?.sender)}
+                                className="px-3 py-1.5 rounded-xl bg-sky-500 hover:bg-sky-400 text-slate-950 font-black text-xs font-mono flex items-center gap-1.5 shadow-[0_0_12px_rgba(14,165,233,0.35)] transition hover:scale-[1.02] cursor-pointer"
+                              >
+                                <Users className="w-3.5 h-3.5" />
+                                <span>JOIN LOBBY</span>
+                              </button>
+                              <button
+                                onClick={() => handleDeclineParty(n.id)}
+                                className="px-2.5 py-1.5 rounded-xl bg-white/5 hover:bg-red-500/20 text-slate-400 hover:text-red-400 border border-white/10 text-xs font-mono transition cursor-pointer"
+                              >
+                                DECLINE
+                              </button>
+                            </>
+                          )}
+                          {n.actionStatus === 'accepted' && (
+                            <span className="text-sky-400 text-[11px] font-bold font-mono flex items-center gap-1">
+                              <Check className="w-3.5 h-3.5" /> Joined {n.data?.sender || 'Squad'}'s 5v5 Lobby
+                            </span>
+                          )}
+                          {n.actionStatus === 'declined' && (
+                            <span className="text-slate-500 text-[11px] font-mono italic">✕ Invitation declined</span>
+                          )}
+                        </>
+                      )}
+
+                      {n.type === 'tournament' && (
+                        <button
+                          onClick={() => {
+                            sound.playSelect();
+                            setActiveTab('tournaments');
+                            setNotificationsOpen(false);
+                          }}
+                          className="px-3 py-1.5 rounded-xl bg-[#1B2213] hover:bg-[#283519] border border-[#A3E635]/40 text-[#A3E635] text-xs font-bold font-mono transition flex items-center gap-1.5 cursor-pointer"
+                        >
+                          <Trophy className="w-3.5 h-3.5" />
+                          <span>VIEW TOURNAMENT BRACKET</span>
+                          <ArrowRight className="w-3 h-3" />
+                        </button>
+                      )}
+
+                      {n.type === 'anticheat' && (
+                        <span className="px-2.5 py-1 rounded-lg bg-emerald-500/10 border border-emerald-500/30 text-emerald-400 text-[10px] font-mono font-bold flex items-center gap-1">
+                          <ShieldCheck className="w-3 h-3" /> ACCOUNT STATUS: 100% CLEAN
+                        </span>
+                      )}
+
+                      {n.type === 'achievement' && (
+                        <span className="px-2.5 py-1 rounded-lg bg-purple-500/10 border border-purple-500/30 text-purple-400 text-[10px] font-mono font-bold flex items-center gap-1">
+                          <Star className="w-3 h-3 fill-purple-400" /> BADGE DISPLAYED ON PASSPORT
+                        </span>
+                      )}
+                    </div>
+                  </div>
+                ))
+              )}
+            </div>
+
+            {/* Bottom Controls Footer */}
+            <div className="p-3 border-t border-[#1E2333] bg-[#0A0C13] flex items-center justify-between text-[11px] font-mono">
+              <button
+                onClick={handleTriggerTestNotif}
+                className="text-slate-400 hover:text-[#A3E635] transition flex items-center gap-1.5 cursor-pointer"
+                title="Send a mock incoming 5v5 ready check"
+              >
+                <Plus className="w-3 h-3 text-[#A3E635]" />
+                <span>Simulate Incoming Alert</span>
+              </button>
+              <button
+                onClick={() => setNotificationsOpen(false)}
+                className="px-3 py-1 rounded-lg bg-white/5 hover:bg-white/10 text-slate-300 hover:text-white transition cursor-pointer"
+              >
+                Close (ESC)
+              </button>
+            </div>
           </div>
-          <div className="p-3 rounded-xl bg-[#0D0F15] border border-[#1E2333] text-xs">
-            <div className="text-emerald-400 font-bold mb-1">FACEIT Match Confirmed</div>
-            <div className="text-[#94A3B8] text-[11px]">Ranked match on de_mirage begins in 5 minutes.</div>
-          </div>
-          <div className="p-3 rounded-xl bg-[#0D0F15] border border-[#1E2333] text-xs">
-            <div className="text-[#A3E635] font-bold mb-1">Tournament Registration Open</div>
-            <div className="text-[#94A3B8] text-[11px]">VORTEX CS2 TOURNAMENT starts in 2d 14h.</div>
-          </div>
-        </div>
+        </>
       )}
 
       {/* VORTEX Membership Upgrade Modal */}
