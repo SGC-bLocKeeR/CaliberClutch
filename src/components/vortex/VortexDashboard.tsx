@@ -823,31 +823,51 @@ export const VortexDashboard: React.FC<VortexDashboardProps> = ({
   };
 
   // =========================================================================
-  // AUTHENTIC FACEIT PARTY INVITATION (Clean & Minimal)
+  // AUTHENTIC 1:1 FACEIT PARTY INVITATION (Exact Replica of FACEIT Modal)
   // =========================================================================
   const [activePartyInvite, setActivePartyInvite] = useState<{
     id: string;
     sender: string;
-    avatar: string;
-    level: number;
-    code: string;
-    countryName: string;
+    avatar?: string;
+    level?: number;
+    code?: string;
+    countryName?: string;
   } | null>({
-    id: 'invite-juanflatroo',
-    sender: 'juanflatroo',
-    avatar: 'https://images.unsplash.com/photo-1566492031773-4f4e44671857?w=150&auto=format&fit=crop&q=80',
+    id: 'invite-m18',
+    sender: 'M18',
+    avatar: '',
     level: 10,
     code: 'XK',
     countryName: 'Kosovo',
   });
 
+  const [partyInviteCountdown, setPartyInviteCountdown] = useState<number>(88);
+
+  useEffect(() => {
+    if (!activePartyInvite) {
+      setPartyInviteCountdown(88);
+      return;
+    }
+    const timer = setInterval(() => {
+      setPartyInviteCountdown(prev => {
+        if (prev <= 1) {
+          clearInterval(timer);
+          setActivePartyInvite(null);
+          return 0;
+        }
+        return prev - 1;
+      });
+    }, 1000);
+    return () => clearInterval(timer);
+  }, [activePartyInvite]);
+
   const handleAcceptPartyInvite = () => {
     sound.playJoinScrim();
     try {
       confetti({
-        particleCount: 60,
-        spread: 60,
-        origin: { y: 0.2 }
+        particleCount: 70,
+        spread: 70,
+        origin: { y: 0.3 }
       });
     } catch {}
 
@@ -859,13 +879,13 @@ export const VortexDashboard: React.FC<VortexDashboardProps> = ({
           id: sender.toLowerCase(),
           name: sender,
           tag: 'PRO',
-          avatar: activePartyInvite.avatar,
-          level: activePartyInvite.level,
-          elo: 2840,
+          avatar: activePartyInvite.avatar || 'https://images.unsplash.com/photo-1566492031773-4f4e44671857?w=150&auto=format&fit=crop&q=80',
+          level: activePartyInvite.level || 10,
+          elo: 2980,
           verification: 'vip',
           flag: '🇽🇰',
-          code: activePartyInvite.code,
-          countryName: activePartyInvite.countryName,
+          code: activePartyInvite.code || 'XK',
+          countryName: activePartyInvite.countryName || 'Kosovo',
         };
         return next;
       });
@@ -885,10 +905,11 @@ export const VortexDashboard: React.FC<VortexDashboardProps> = ({
 
   const handleTriggerPartyInvite = (customName?: string) => {
     sound.playClick();
+    setPartyInviteCountdown(88);
     setActivePartyInvite({
       id: `invite-${Date.now()}`,
-      sender: customName || 'juanflatroo',
-      avatar: 'https://images.unsplash.com/photo-1566492031773-4f4e44671857?w=150&auto=format&fit=crop&q=80',
+      sender: customName || 'M18',
+      avatar: customName === 'M18' || !customName ? '' : 'https://images.unsplash.com/photo-1566492031773-4f4e44671857?w=150&auto=format&fit=crop&q=80',
       level: 10,
       code: 'XK',
       countryName: 'Kosovo',
@@ -4660,11 +4681,15 @@ export const VortexDashboard: React.FC<VortexDashboardProps> = ({
                           {n.actionStatus === 'pending' && (
                             <>
                               <button
-                                onClick={() => handleJoinParty(n.id, n.data?.sender)}
-                                className="px-3 py-1.5 rounded-xl bg-sky-500 hover:bg-sky-400 text-slate-950 font-black text-xs font-mono flex items-center gap-1.5 shadow-[0_0_12px_rgba(14,165,233,0.35)] transition hover:scale-[1.02] cursor-pointer"
+                                onClick={() => {
+                                  sound.playClick();
+                                  handleTriggerPartyInvite(n.data?.sender || 'M18');
+                                  setNotificationsOpen(false);
+                                }}
+                                className="px-3 py-1.5 rounded-xl bg-[#FF5500] hover:bg-[#FF6611] text-white font-black text-xs font-mono flex items-center gap-1.5 shadow-[0_0_12px_rgba(255,85,0,0.35)] transition hover:scale-[1.02] cursor-pointer"
                               >
                                 <Users className="w-3.5 h-3.5" />
-                                <span>JOIN LOBBY</span>
+                                <span>VIEW INVITE</span>
                               </button>
                               <button
                                 onClick={() => handleDeclineParty(n.id)}
@@ -4721,12 +4746,15 @@ export const VortexDashboard: React.FC<VortexDashboardProps> = ({
             <div className="p-3 border-t border-[#1E2333] bg-[#0A0C13] flex items-center justify-between gap-2 text-[11px] font-mono flex-wrap">
               <div className="flex items-center gap-2">
                 <button
-                  onClick={() => handleTriggerPartyInvite('juanflatroo')}
-                  className="px-2.5 py-1 rounded-lg bg-[#A3E635]/15 hover:bg-[#A3E635]/25 border border-[#A3E635]/40 text-[#A3E635] font-bold transition flex items-center gap-1.5 cursor-pointer shadow-sm"
-                  title="Show the FACEIT-style Party Invite card with Accept and Reject in front"
+                  onClick={() => {
+                    handleTriggerPartyInvite('M18');
+                    setNotificationsOpen(false);
+                  }}
+                  className="px-2.5 py-1 rounded-lg bg-[#FF5500]/15 hover:bg-[#FF5500]/25 border border-[#FF5500]/40 text-[#FF5500] font-bold transition flex items-center gap-1.5 cursor-pointer shadow-sm"
+                  title="Show the authentic 1:1 FACEIT Party Invite modal with M18, Accept and Decline"
                 >
-                  <Users className="w-3 h-3 text-[#A3E635]" />
-                  <span>Show FACEIT Invite (Accept/Reject)</span>
+                  <Users className="w-3 h-3 text-[#FF5500]" />
+                  <span>Show FACEIT Invite (M18)</span>
                 </button>
                 <button
                   onClick={handleTriggerTestNotif}
@@ -5499,56 +5527,91 @@ export const VortexDashboard: React.FC<VortexDashboardProps> = ({
       )}
 
       {/* ======================================================== */}
-      {/* AUTHENTIC FACEIT PARTY INVITATION (MINIMAL & FAST)       */}
+      {/* AUTHENTIC 1:1 FACEIT "INVITE TO PARTY" MODAL DIALOG       */}
       {/* ======================================================== */}
       {activePartyInvite && (
-        <div className="fixed top-5 right-5 sm:right-8 z-[150] w-[calc(100vw-2.5rem)] sm:w-[380px] rounded-2xl bg-[#0E1119]/98 border border-[#242C3E] shadow-[0_20px_50px_rgba(0,0,0,0.85)] p-3.5 flex items-center justify-between gap-3 animate-in slide-in-from-top-4 fade-in duration-150 backdrop-blur-xl">
-          {/* Avatar with Faceit Level Badge */}
-          <div className="flex items-center gap-2.5 min-w-0">
-            <div className="relative shrink-0">
-              <img
-                src={activePartyInvite.avatar}
-                alt={activePartyInvite.sender}
-                className="w-10 h-10 rounded-xl object-cover border border-white/10"
-              />
-              <div className="absolute -bottom-1 -right-1 px-1 py-0.2 rounded bg-[#FF5500] text-white font-black text-[9px] font-mono leading-none border border-black shadow">
-                {activePartyInvite.level}
+        <div className="fixed inset-0 z-[150] bg-black/75 backdrop-blur-[2px] flex items-center justify-center p-4 animate-in fade-in duration-150">
+          <div className="relative w-full max-w-[480px] bg-[#121214] border border-[#232328] rounded-xl shadow-[0_25px_60px_rgba(0,0,0,0.95)] overflow-hidden animate-in zoom-in-95 duration-150">
+            {/* Header: Centered "Invite to party" with close button */}
+            <div className="relative pt-6 pb-2 px-6 flex items-center justify-center">
+              <h2 className="text-xl font-bold tracking-tight text-white select-none">
+                Invite to <span className="text-[#FF5500]">party</span>
+              </h2>
+              <button
+                onClick={() => setActivePartyInvite(null)}
+                className="absolute right-5 top-5 text-[#888B94] hover:text-white transition cursor-pointer p-1"
+                aria-label="Close"
+              >
+                <X className="w-5 h-5" />
+              </button>
+            </div>
+
+            {/* Content: Avatar & Invite Details */}
+            <div className="px-8 pt-4 pb-6 flex items-center gap-5">
+              {/* Avatar circle */}
+              <div className="relative shrink-0">
+                {activePartyInvite.sender === 'M18' || !activePartyInvite.avatar ? (
+                  <div className="w-[76px] h-[76px] rounded-full bg-black border border-[#2c2d33] flex flex-col items-center justify-center shadow-inner overflow-hidden select-none">
+                    {/* AK-47 Silhouette */}
+                    <svg className="w-12 h-6 text-white" viewBox="0 0 100 40" fill="currentColor">
+                      <path d="M 6 22 L 20 22 L 22 17 L 36 17 L 38 20 L 52 20 L 57 18 L 82 18 L 84 20 L 92 20 L 92 23 L 83 23 L 83 26 L 76 26 L 75 23 L 52 23 L 50 30 L 44 30 L 47 23 L 38 23 L 34 32 L 28 32 L 26 24 L 6 26 Z" />
+                      <path d="M 46 23 Q 48 34 42 38 L 38 37 Q 43 32 43 23 Z" />
+                    </svg>
+                    {/* M18 outlined rounded badge */}
+                    <div className="mt-0.5 px-2 py-0.2 border-[1.5px] border-white rounded-[3px] leading-tight">
+                      <span className="font-sans font-black text-white text-[13px] tracking-wider block">
+                        M18
+                      </span>
+                    </div>
+                  </div>
+                ) : (
+                  <div className="relative">
+                    <img
+                      src={activePartyInvite.avatar}
+                      alt={activePartyInvite.sender}
+                      className="w-[76px] h-[76px] rounded-full object-cover border border-[#2c2d33]"
+                    />
+                    {activePartyInvite.level && (
+                      <div className="absolute -bottom-1 -right-1 px-1.5 py-0.5 rounded bg-[#FF5500] text-white font-black text-[10px] font-mono leading-none border border-black shadow">
+                        {activePartyInvite.level}
+                      </div>
+                    )}
+                  </div>
+                )}
+              </div>
+
+              {/* Text Info */}
+              <div className="min-w-0 text-left select-none">
+                <p className="font-bold text-white text-[15px] leading-tight tracking-tight">
+                  {activePartyInvite.sender} invited you to join their party
+                </p>
+                <p className="text-[13px] text-[#9194A0] mt-1.5 font-normal leading-snug">
+                  Click accept to join the party
+                </p>
+                <p className="text-[13px] text-[#9194A0] mt-1 font-normal leading-snug">
+                  Time remaining {partyInviteCountdown}
+                </p>
               </div>
             </div>
 
-            <div className="min-w-0 text-left">
-              <div className="flex items-center gap-1.5">
-                <span className="font-display font-bold text-xs text-white truncate">
-                  {activePartyInvite.sender}
-                </span>
-                <CountryFlag code={activePartyInvite.code} name={activePartyInvite.countryName} size="xs" />
-              </div>
-              <p className="text-[11px] font-mono text-slate-400 mt-0.5 truncate">
-                Invited you to CS2 5v5 party
-              </p>
-            </div>
-          </div>
+            {/* Thin Horizontal Divider */}
+            <div className="w-full h-px bg-[#232328]" />
 
-          {/* Action buttons: Decline & Accept */}
-          <div className="flex items-center gap-1.5 shrink-0">
-            <button
-              onClick={handleRejectPartyInvite}
-              className="px-2.5 py-1.5 rounded-lg bg-white/5 hover:bg-white/10 text-slate-300 hover:text-white font-mono font-bold text-xs transition cursor-pointer"
-            >
-              Decline
-            </button>
-            <button
-              onClick={handleAcceptPartyInvite}
-              className="px-3.5 py-1.5 rounded-lg bg-[#FF5500] hover:bg-[#FF6611] text-white font-mono font-black text-xs uppercase tracking-wider transition hover:scale-105 active:scale-95 shadow-md shadow-orange-500/25 cursor-pointer"
-            >
-              Accept
-            </button>
-            <button
-              onClick={() => setActivePartyInvite(null)}
-              className="text-slate-500 hover:text-slate-300 p-1 transition cursor-pointer ml-0.5"
-            >
-              <X className="w-3.5 h-3.5" />
-            </button>
+            {/* Actions: DECLINE and ACCEPT */}
+            <div className="px-6 py-4 flex items-center justify-center gap-6">
+              <button
+                onClick={handleRejectPartyInvite}
+                className="font-bold text-sm tracking-wider text-[#FF5500] hover:text-[#FF6611] px-5 py-2 transition cursor-pointer uppercase select-none"
+              >
+                DECLINE
+              </button>
+              <button
+                onClick={handleAcceptPartyInvite}
+                className="font-bold text-sm tracking-wider text-white bg-[#FF5500] hover:bg-[#FF6611] px-8 py-2.5 rounded-lg shadow-md transition cursor-pointer uppercase select-none hover:shadow-orange-500/20 active:scale-98"
+              >
+                ACCEPT
+              </button>
+            </div>
           </div>
         </div>
       )}
