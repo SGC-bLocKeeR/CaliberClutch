@@ -5683,19 +5683,10 @@ export const VortexDashboard: React.FC<VortexDashboardProps> = ({
               </button>
             </div>
 
-            {/* Content: Left side has Name + Badge + Flag ABOVE photo; Right side has exact FACEIT text */}
+            {/* Content: Left side has Photo with Name + Badge + Flag UNDER photo; Right side has exact FACEIT text */}
             <div className="px-8 pt-4 pb-6 flex items-center gap-6">
-              {/* Left Column: Name, Verification, and Country ABOVE the Photo */}
+              {/* Left Column: Photo with Name Badge UNDER the Photo */}
               <div className="flex flex-col items-center gap-2.5 shrink-0 select-none">
-                {/* The Name Badge directly above the photo (bLocKeeRz ⭐ 🇽🇰) */}
-                <div className="flex items-center gap-1.5 px-3 py-1 rounded-full bg-white/[0.05] border border-white/10 shadow-sm">
-                  <span className="font-display font-black text-white text-xs tracking-tight">
-                    {activePartyInvite.sender}
-                  </span>
-                  <FaceitVerificationBadge type={activePartyInvite.verification || 'vip'} size="sm" />
-                  <CountryFlag code={activePartyInvite.code || 'XK'} name={activePartyInvite.countryName || 'Kosovo'} size="xs" />
-                </div>
-
                 {/* Photo / Avatar with VORTEX Glowing Border and Status Dot */}
                 <div className="relative">
                   {(!activePartyInvite.avatar && activePartyInvite.sender === 'M18') ? (
@@ -5721,6 +5712,15 @@ export const VortexDashboard: React.FC<VortexDashboardProps> = ({
                     </div>
                   )}
                   <span className="absolute -top-1 -right-1 w-3 h-3 rounded-full bg-emerald-400 border-2 border-[#0E121B] animate-pulse" />
+                </div>
+
+                {/* The Name Badge directly UNDER the photo (bLocKeeRz ⭐ 🇽🇰) */}
+                <div className="flex items-center gap-1.5 px-3 py-1 rounded-full bg-white/[0.05] border border-white/10 shadow-sm">
+                  <span className="font-display font-black text-white text-xs tracking-tight">
+                    {activePartyInvite.sender}
+                  </span>
+                  <FaceitVerificationBadge type={activePartyInvite.verification || 'vip'} size="sm" />
+                  <CountryFlag code={activePartyInvite.code || 'XK'} name={activePartyInvite.countryName || 'Kosovo'} size="xs" />
                 </div>
               </div>
 
