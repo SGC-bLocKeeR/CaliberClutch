@@ -5882,14 +5882,15 @@ export const VortexDashboard: React.FC<VortexDashboardProps> = ({
         currentGamerTag={currentGamerTag}
         currentAvatarUrl={currentAvatarUrl}
         partyMembers={partySlots
-          .map((m, idx) => m ? {
+          .map((m, idx) => ({ m, idx }))
+          .filter((item): item is { m: PartySlotMember; idx: number } => item.m !== null)
+          .map(({ m, idx }) => ({
             id: m.id,
             name: m.name,
             avatar: m.avatar,
             verification: m.verification,
             isLeader: partyLeaderIndex === idx
-          } : null)
-          .filter((m): m is { id: string; name: string; avatar?: string; verification?: 'vip' | 'verified' | 'none'; isLeader: boolean } => m !== null)
+          }))
         }
         onOpenMatchRoom={() => setIsMatchRoomOpen(true)}
       />
