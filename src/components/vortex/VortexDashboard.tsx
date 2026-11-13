@@ -897,17 +897,7 @@ export const VortexDashboard: React.FC<VortexDashboardProps> = ({
     playerObj?: PartySlotMember;
     isOutgoingSimulation?: boolean;
     invitedPlayerName?: string;
-  } | null>({
-    id: 'invite-m18',
-    sender: 'M18',
-    avatar: '',
-    level: 10,
-    code: 'XK',
-    countryName: 'Kosovo',
-    verification: 'vip',
-    targetSlotIdx: 0,
-    isOutgoingSimulation: false,
-  });
+  } | null>(null);
 
   const [partyInviteCountdown, setPartyInviteCountdown] = useState<number>(88);
 
