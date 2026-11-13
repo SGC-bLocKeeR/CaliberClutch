@@ -127,7 +127,7 @@ export interface PlatformRankingPlayer {
 
 interface FaceitVerificationBadgeProps {
   type?: VerificationType;
-  size?: 'sm' | 'md' | 'lg';
+  size?: 'xs' | 'sm' | 'md' | 'lg';
   className?: string;
 }
 
@@ -139,10 +139,11 @@ const FaceitVerificationBadge: React.FC<FaceitVerificationBadgeProps> = ({
   if (!type || type === 'none') return null;
 
   const sizeClasses = {
-    sm: 'w-3.5 h-3.5',
+    xs: 'w-3.5 h-3.5',
+    sm: 'w-4 h-4',
     md: 'w-4 h-4',
     lg: 'w-5 h-5'
-  }[size];
+  }[size] || 'w-4 h-4';
 
   const isVip = type === 'vip';
 
@@ -5659,7 +5660,7 @@ export const VortexDashboard: React.FC<VortexDashboardProps> = ({
       {/* ======================================================== */}
       {activePartyInvite && (
         <div className="fixed inset-0 z-[150] bg-black/85 backdrop-blur-[3px] flex items-center justify-center p-4 animate-in fade-in duration-150">
-          <div className="relative w-full max-w-[490px] bg-[#0E121B] border border-[#A3E635]/40 rounded-3xl shadow-[0_25px_60px_rgba(0,0,0,0.95),0_0_35px_rgba(163,230,53,0.18)] overflow-hidden animate-in zoom-in-95 duration-150">
+          <div className="relative w-full max-w-[530px] bg-[#0E121B] border border-[#A3E635]/40 rounded-3xl shadow-[0_25px_60px_rgba(0,0,0,0.95),0_0_35px_rgba(163,230,53,0.18)] overflow-hidden animate-in zoom-in-95 duration-150">
             {/* Top Slim Glowing Neon Lime Animated Countdown Bar */}
             <div className="w-full bg-[#182030] h-1">
               <div
@@ -5682,50 +5683,57 @@ export const VortexDashboard: React.FC<VortexDashboardProps> = ({
               </button>
             </div>
 
-            {/* Content: Avatar, Name + Verification + Country, and Clean Countdown */}
-            <div className="px-8 pt-4 pb-6 flex items-center gap-5">
-              {/* Avatar with VORTEX Glowing Border and Status Dot */}
-              <div className="relative shrink-0 select-none">
-                {(!activePartyInvite.avatar && activePartyInvite.sender === 'M18') ? (
-                  <div className="w-16 h-16 rounded-2xl bg-[#090C12] border-2 border-[#A3E635] p-2 flex flex-col items-center justify-center shadow-[0_0_20px_rgba(163,230,53,0.35)] relative overflow-hidden">
-                    <img
-                      src="/images/faceit_m18_badge.png"
-                      alt="M18"
-                      className="w-full h-full object-contain"
-                    />
-                  </div>
-                ) : (
-                  <div className="relative">
-                    <img
-                      src={activePartyInvite.avatar || currentAvatarUrl}
-                      alt={activePartyInvite.sender}
-                      className="w-16 h-16 rounded-2xl object-cover border-2 border-[#A3E635] shadow-[0_0_20px_rgba(163,230,53,0.35)]"
-                    />
-                    {activePartyInvite.level && (
-                      <div className="absolute -bottom-1 -right-1 px-1.5 py-0.2 rounded bg-[#A3E635] text-slate-950 font-black text-[9px] font-mono leading-none border border-black shadow">
-                        LVL {activePartyInvite.level}
-                      </div>
-                    )}
-                  </div>
-                )}
-                <span className="absolute -top-1 -right-1 w-3 h-3 rounded-full bg-emerald-400 border-2 border-[#0E121B] animate-pulse" />
-              </div>
-
-              {/* Text Info: Name + Verification + Country, and 2 clean lines */}
-              <div className="min-w-0 text-left select-none space-y-1">
-                <div className="flex items-center gap-2">
-                  <span className="font-display font-black text-white text-base truncate">
+            {/* Content: Left side has Name + Badge + Flag ABOVE photo; Right side has exact FACEIT text */}
+            <div className="px-8 pt-4 pb-6 flex items-center gap-6">
+              {/* Left Column: Name, Verification, and Country ABOVE the Photo */}
+              <div className="flex flex-col items-center gap-2.5 shrink-0 select-none">
+                {/* The Name Badge directly above the photo (bLocKeeRz ⭐ 🇽🇰) */}
+                <div className="flex items-center gap-1.5 px-3 py-1 rounded-full bg-white/[0.05] border border-white/10 shadow-sm">
+                  <span className="font-display font-black text-white text-xs tracking-tight">
                     {activePartyInvite.sender}
                   </span>
                   <FaceitVerificationBadge type={activePartyInvite.verification || 'vip'} size="sm" />
                   <CountryFlag code={activePartyInvite.code || 'XK'} name={activePartyInvite.countryName || 'Kosovo'} size="xs" />
                 </div>
-                <p className="text-xs font-mono text-slate-300 font-normal leading-snug">
-                  Invited you to join their party
+
+                {/* Photo / Avatar with VORTEX Glowing Border and Status Dot */}
+                <div className="relative">
+                  {(!activePartyInvite.avatar && activePartyInvite.sender === 'M18') ? (
+                    <div className="w-[72px] h-[72px] rounded-2xl bg-[#090C12] border-2 border-[#A3E635] p-2 flex flex-col items-center justify-center shadow-[0_0_20px_rgba(163,230,53,0.35)] relative overflow-hidden">
+                      <img
+                        src="/images/faceit_m18_badge.png"
+                        alt="M18"
+                        className="w-full h-full object-contain"
+                      />
+                    </div>
+                  ) : (
+                    <div className="relative">
+                      <img
+                        src={activePartyInvite.avatar || currentAvatarUrl}
+                        alt={activePartyInvite.sender}
+                        className="w-[72px] h-[72px] rounded-2xl object-cover border-2 border-[#A3E635] shadow-[0_0_20px_rgba(163,230,53,0.35)]"
+                      />
+                      {activePartyInvite.level && (
+                        <div className="absolute -bottom-1 -right-1 px-1.5 py-0.2 rounded bg-[#A3E635] text-slate-950 font-black text-[9px] font-mono leading-none border border-black shadow">
+                          LVL {activePartyInvite.level}
+                        </div>
+                      )}
+                    </div>
+                  )}
+                  <span className="absolute -top-1 -right-1 w-3 h-3 rounded-full bg-emerald-400 border-2 border-[#0E121B] animate-pulse" />
+                </div>
+              </div>
+
+              {/* Right Side: Exact Clean FACEIT Text lines */}
+              <div className="min-w-0 text-left select-none space-y-1">
+                <p className="font-bold text-white text-[15px] leading-snug whitespace-nowrap">
+                  {activePartyInvite.sender} invited you to join their party
                 </p>
-                <p className="text-xs font-mono text-slate-400 mt-1 font-normal leading-snug flex items-center gap-1.5">
-                  <Clock className="w-3.5 h-3.5 text-[#A3E635]" />
-                  <span>Time remaining: <strong className="text-[#A3E635] font-bold">{partyInviteCountdown}s</strong></span>
+                <p className="text-sm text-[#A0A2AD] mt-1.5 font-normal leading-snug">
+                  Click accept to join the party
+                </p>
+                <p className="text-sm text-[#A0A2AD] mt-1 font-normal leading-snug">
+                  Time remaining {partyInviteCountdown}
                 </p>
               </div>
             </div>
