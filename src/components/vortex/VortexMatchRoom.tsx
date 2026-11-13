@@ -832,17 +832,22 @@ export const VortexMatchRoom: React.FC<VortexMatchRoomProps> = ({
               </div>
             </div>
 
-            {/* Action Buttons: Watch Demo & Back to Matchmaking */}
+            {/* Action Buttons: Watch Demo & Back to Matchmaking (Exact 1:1 FACEIT) */}
             <div className="space-y-2 pt-1">
               <button
                 onClick={() => {
                   sound.playClick();
-                  handleCopyIp();
+                  const demoUrl = `https://demos-europe-west.faceit.com/cs2/${matchId}.dem.gz`;
+                  const link = document.createElement('a');
+                  link.href = demoUrl;
+                  link.setAttribute('download', `vortex-match-${matchId}.dem.gz`);
+                  document.body.appendChild(link);
+                  link.click();
+                  document.body.removeChild(link);
                 }}
-                className="w-full py-2.5 rounded-xl bg-white/[0.04] hover:bg-white/[0.08] border border-white/10 text-white font-mono text-xs font-bold transition flex items-center justify-center gap-2 cursor-pointer"
+                className="w-full py-3 rounded-lg bg-[#18110E] hover:bg-[#201511] border border-[#FF5500]/20 text-[#FF5500] font-display font-bold text-xs uppercase tracking-wider transition flex items-center justify-center cursor-pointer shadow-sm active:scale-95"
               >
-                <Download className="w-3.5 h-3.5 text-slate-400" />
-                <span>{copiedIp ? 'CONNECT IP COPIED!' : 'WATCH DEMO / COPY IP'}</span>
+                <span>WATCH DEMO</span>
               </button>
 
               <button
@@ -850,7 +855,7 @@ export const VortexMatchRoom: React.FC<VortexMatchRoomProps> = ({
                   sound.playClick();
                   onClose();
                 }}
-                className="w-full py-3.5 rounded-xl bg-[#FF5500] hover:bg-[#FF6611] text-black font-display font-black text-xs uppercase tracking-wider transition shadow-lg shadow-orange-500/20 flex items-center justify-center gap-2 cursor-pointer active:scale-95"
+                className="w-full py-3.5 rounded-lg bg-[#FF5500] hover:bg-[#FF6611] text-white font-display font-black text-xs uppercase tracking-wider transition shadow-lg shadow-orange-500/20 flex items-center justify-center cursor-pointer active:scale-95"
               >
                 <span>BACK TO MATCHMAKING</span>
               </button>
