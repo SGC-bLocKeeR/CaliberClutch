@@ -337,7 +337,9 @@ export const VortexMatchRoom: React.FC<VortexMatchRoomProps> = ({
               </span>
             </div>
             <p className="text-[11px] font-mono text-slate-400">
-              Europe (Frankfurt 128-tick) • Server #EU-04 • AC Enforced
+              {matchStatus === 'ready'
+                ? 'Europe (Frankfurt 128-tick) • Server #EU-04 • AC Enforced'
+                : 'Europe Active Duty • 128-Tick Matchmaking • Map Veto Phase'}
             </p>
           </div>
         </div>
@@ -666,40 +668,86 @@ export const VortexMatchRoom: React.FC<VortexMatchRoomProps> = ({
           </div>
         </div>
 
-        {/* SECTION 3: SERVER CONNECT & CONSOLE COMMAND MODAL BOX */}
-        <div className="p-5 rounded-2xl bg-gradient-to-r from-[#0F1420] via-[#0E121B] to-[#0A0D14] border border-white/[0.08] space-y-3">
-          <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
+        {/* SECTION 3: SERVER CONNECT & CONSOLE COMMAND (ONLY SHOWN AFTER MAP VETO IS COMPLETED!) */}
+        {matchStatus === 'configuring' && (
+          <div className="p-6 rounded-2xl bg-[#0E121B] border border-[#A3E635]/40 shadow-xl space-y-3 animate-in fade-in duration-300">
             <div className="flex items-center gap-3">
-              <div className="w-10 h-10 rounded-xl bg-[#A3E635]/15 border border-[#A3E635]/30 flex items-center justify-center text-[#A3E635]">
-                <Server className="w-5 h-5" />
+              <div className="w-10 h-10 rounded-xl bg-[#A3E635]/15 border border-[#A3E635]/40 flex items-center justify-center text-[#A3E635]">
+                <Server className="w-5 h-5 animate-pulse" />
               </div>
-              <div>
-                <h4 className="font-display font-bold text-white text-sm">
-                  Dedicated CS2 Game Server • Frankfurt Germany
-                </h4>
-                <p className="text-[11px] font-mono text-slate-400">
-                  128-tick rate • Sub-tick synchronized • CSTV Live Broadcast: 185.107.96.42:27020
-                </p>
+              <div className="flex-1">
+                <div className="flex items-center justify-between">
+                  <h4 className="font-display font-black text-white text-sm">
+                    DEPLOYING DEDICATED CS2 SERVER FOR {decidedMap?.name.toUpperCase()}...
+                  </h4>
+                  <span className="text-xs font-mono text-[#A3E635] font-bold animate-pulse">
+                    Allocating 128-tick Frankfurt...
+                  </span>
+                </div>
+                <div className="w-full h-1.5 rounded-full bg-black/60 overflow-hidden mt-2">
+                  <div className="h-full bg-gradient-to-r from-[#84CC16] to-[#A3E635] w-2/3 animate-pulse" />
+                </div>
               </div>
             </div>
+          </div>
+        )}
 
-            <div className="flex items-center gap-2 w-full sm:w-auto">
+        {matchStatus === 'ready' && decidedMap && (
+          <div className="p-6 rounded-2xl bg-gradient-to-r from-[#0F1420] via-[#0E121B] to-[#0A0D14] border-2 border-[#A3E635] shadow-[0_0_35px_rgba(163,230,53,0.2)] space-y-4 animate-in slide-in-from-bottom-3 duration-300">
+            <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 border-b border-white/[0.08] pb-4">
+              <div className="flex items-center gap-3.5">
+                <div className="w-12 h-12 rounded-2xl bg-[#A3E635]/15 border border-[#A3E635]/40 flex items-center justify-center text-[#A3E635] shadow-[0_0_20px_rgba(163,230,53,0.3)]">
+                  <Server className="w-6 h-6" />
+                </div>
+                <div>
+                  <div className="flex items-center gap-2">
+                    <span className="px-2 py-0.5 rounded bg-emerald-500/20 text-emerald-400 font-mono text-[10px] font-bold uppercase tracking-wider">
+                      ● LIVE SERVER ONLINE
+                    </span>
+                    <span className="text-xs font-mono text-slate-400">
+                      Map: <strong className="text-white">{decidedMap.name}</strong>
+                    </span>
+                  </div>
+                  <h4 className="font-display font-black text-white text-base mt-0.5">
+                    CS2 Frankfurt Competitive Arena • 128-Tick Tickrate
+                  </h4>
+                  <p className="text-[11px] font-mono text-slate-400 mt-0.5">
+                    Sub-tick synchronized • CSTV Spectator: 185.107.96.42:27020 • Ring-0 AC Active
+                  </p>
+                </div>
+              </div>
+
+              {/* Direct Connect Action */}
+              <a
+                href={`steam://connect/${serverIp}`}
+                className="w-full sm:w-auto px-6 py-3 rounded-xl bg-gradient-to-r from-[#84CC16] to-[#A3E635] hover:brightness-110 text-slate-950 font-display font-black text-xs uppercase tracking-wider transition shadow-lg shadow-lime-500/30 flex items-center justify-center gap-2 cursor-pointer active:scale-95"
+              >
+                <Play className="w-4 h-4 fill-current" />
+                <span>CONNECT VIA STEAM</span>
+              </a>
+            </div>
+
+            {/* Console Command Input Box */}
+            <div className="flex flex-col sm:flex-row items-center gap-3 pt-1">
+              <div className="text-xs font-mono text-slate-400 shrink-0">
+                Console Command:
+              </div>
               <input
                 type="text"
                 readOnly
                 value={consoleCmd}
-                className="flex-1 sm:w-80 px-3 py-2 rounded-xl bg-black/60 border border-white/10 font-mono text-xs text-[#A3E635] outline-none select-all"
+                className="flex-1 w-full px-3.5 py-2.5 rounded-xl bg-black/70 border border-white/10 font-mono text-xs text-[#A3E635] outline-none select-all focus:border-[#A3E635]"
               />
               <button
                 onClick={handleCopyIp}
-                className="px-4 py-2 rounded-xl bg-white/[0.08] hover:bg-white/[0.15] text-white font-mono text-xs font-bold transition flex items-center gap-1.5 cursor-pointer shrink-0"
+                className="w-full sm:w-auto px-5 py-2.5 rounded-xl bg-white/[0.08] hover:bg-white/[0.15] border border-white/10 text-white font-mono text-xs font-bold transition flex items-center justify-center gap-2 cursor-pointer"
               >
                 {copiedIp ? <Check className="w-3.5 h-3.5 text-[#A3E635]" /> : <Copy className="w-3.5 h-3.5" />}
-                <span>{copiedIp ? 'COPIED' : 'COPY'}</span>
+                <span>{copiedIp ? 'COMMAND COPIED!' : 'COPY COMMAND'}</span>
               </button>
             </div>
           </div>
-        </div>
+        )}
 
       </div>
     </div>
