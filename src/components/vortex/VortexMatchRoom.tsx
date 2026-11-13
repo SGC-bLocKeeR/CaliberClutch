@@ -782,14 +782,13 @@ export const VortexMatchRoom: React.FC<VortexMatchRoomProps> = ({
                       sound.playClick();
                       setIsVetoTooltipOpen(!isVetoTooltipOpen);
                     }}
-                    onMouseEnter={() => setIsVetoTooltipOpen(true)}
                     className="flex items-center gap-1 text-xs font-mono text-slate-400 hover:text-white transition cursor-pointer px-2 py-0.5 rounded-md hover:bg-white/[0.06]"
                   >
                     <Info className="w-3.5 h-3.5 text-slate-400" />
                     <span>Veto</span>
                   </button>
 
-                  {/* FLOATING VETO TOOLTIP (EXACT COPY OF SCREENSHOT) */}
+                  {/* FLOATING VETO TOOLTIP (ONLY ON CLICK) */}
                   {isVetoTooltipOpen && (
                     <>
                       <div 
@@ -797,7 +796,6 @@ export const VortexMatchRoom: React.FC<VortexMatchRoomProps> = ({
                         onClick={() => setIsVetoTooltipOpen(false)} 
                       />
                       <div 
-                        onMouseLeave={() => setIsVetoTooltipOpen(false)}
                         className="absolute right-0 top-full mt-2 w-72 p-3.5 rounded-xl bg-[#101117] border border-[#2B2D3C] shadow-2xl z-50 text-xs font-mono space-y-1 animate-in fade-in zoom-in-95 duration-100"
                       >
                         {vetoHistoryList.map(item => (
