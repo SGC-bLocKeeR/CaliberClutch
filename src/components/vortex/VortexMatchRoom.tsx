@@ -1,27 +1,36 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { 
   Play, 
   Copy, 
   Check, 
   X, 
   ShieldCheck, 
-  Server, 
   Clock, 
   Trophy, 
-  Users, 
   Radio, 
-  ChevronRight, 
+  RotateCcw,
+  MoreVertical,
+  Headphones,
+  Send,
+  MessageSquare,
+  ShieldAlert,
+  CheckCircle2,
+  Share2,
+  Info,
+  ChevronDown,
+  ChevronUp,
+  Download,
+  ExternalLink,
   Flame,
-  Award,
-  Crown,
-  Volume2,
-  AlertTriangle,
-  RotateCcw
+  Zap,
+  TrendingUp,
+  TrendingDown,
+  Shield
 } from 'lucide-react';
 import { sound } from '../../utils/soundEffects';
 import { CountryFlag } from './CountryFlag';
 
-export interface MatchRoomPlayer {
+export interface FaceitMatchPlayer {
   id: string;
   name: string;
   avatar: string;
@@ -29,10 +38,18 @@ export interface MatchRoomPlayer {
   elo: number;
   code: string;
   countryName: string;
-  verification?: 'vip' | 'verified' | 'none';
-  kd: string;
-  hsRate: string;
   isCaptain?: boolean;
+  verified?: boolean;
+  matches: number;
+  winRate: string;
+  rating: string;
+  swing: string;
+  isPositiveSwing?: boolean;
+  kda: string;
+  kd: string;
+  kr: string;
+  adr: string;
+  badgeIndex?: number;
 }
 
 interface VortexMatchRoomProps {
@@ -52,268 +69,321 @@ interface VortexMatchRoomProps {
   onClose: () => void;
 }
 
-const MAP_POOL = [
-  { id: 'mirage', name: 'Mirage', code: 'de_mirage', image: '/images/maps/de_mirage.jpg', banner: 'Active Duty' },
-  { id: 'inferno', name: 'Inferno', code: 'de_inferno', image: '/images/maps/de_inferno.jpg', banner: 'Active Duty' },
-  { id: 'nuke', name: 'Nuke', code: 'de_nuke', image: '/images/maps/de_nuke.jpg', banner: 'Active Duty' },
-  { id: 'dust2', name: 'Dust II', code: 'de_dust2', image: 'https://images.unsplash.com/photo-1579783902614-a3fb3927b675?auto=format&fit=crop&w=600&q=80', banner: 'Active Duty' },
-  { id: 'anubis', name: 'Anubis', code: 'de_anubis', image: 'https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?auto=format&fit=crop&w=600&q=80', banner: 'Active Duty' },
-  { id: 'ancient', name: 'Ancient', code: 'de_ancient', image: 'https://images.unsplash.com/photo-1518709268805-4e9042af9f23?auto=format&fit=crop&w=600&q=80', banner: 'Active Duty' },
-  { id: 'vertigo', name: 'Vertigo', code: 'de_vertigo', image: 'https://images.unsplash.com/photo-1486406146926-c627a92ad1ab?auto=format&fit=crop&w=600&q=80', banner: 'Active Duty' }
+export interface MatchChatMessage {
+  id: string;
+  sender: string;
+  avatar?: string;
+  team: 'team1' | 'team2' | 'system' | 'admin';
+  isSystem?: boolean;
+  isAdmin?: boolean;
+  text: string;
+  timestamp: string;
+  code?: string;
+}
+
+const QUICK_TACTICAL_PHRASES = [
+  "GL HF! 👊",
+  "Ban Vertigo please ❌",
+  "I play AWP on Mirage 🎯",
+  "Connect fast to server 🚀",
+  "Nice map pick! 🔥",
+  "Good comms team 🎙️"
 ];
 
 export const VortexMatchRoom: React.FC<VortexMatchRoomProps> = ({
   matchId = 'VTX-89421',
-  currentGamerTag,
+  currentGamerTag = 'bLocKeeRz',
   currentAvatarUrl,
   partyMembers = [],
   onClose
 }) => {
-  // Turn states: 0 to 5 bans, 6 = decided
-  // Turn 0: Team 1 (User) bans
-  // Turn 1: Team 2 (Opponent) bans
-  // Turn 2: Team 1 bans
-  // Turn 3: Team 2 bans
-  // Turn 4: Team 1 bans
-  // Turn 5: Team 2 bans
-  // Remaining = Decided map!
-  const [bannedMapIds, setBannedMapIds] = useState<string[]>([]);
-  const [banHistory, setBanHistory] = useState<Array<{ mapName: string; byTeam: string; time: string }>>([]);
-  const [currentTurnTeam, setCurrentTurnTeam] = useState<'Team 1' | 'Team 2'>('Team 1');
-  const [vetoCountdown, setVetoCountdown] = useState<number>(30);
-  const [decidedMap, setDecidedMap] = useState<typeof MAP_POOL[0] | null>(null);
-  const [matchStatus, setMatchStatus] = useState<'veto' | 'configuring' | 'ready'>('veto');
+  // Navigation Tabs: OVERVIEW vs STATS
+  const [activeTab, setActiveTab] = useState<'overview' | 'stats'>('overview');
+
+  // Veto & Match state
+  const [isVetoTooltipOpen, setIsVetoTooltipOpen] = useState(false);
+  const [matchState, setMatchState] = useState<'completed' | 'live' | 'veto'>('completed');
   const [copiedIp, setCopiedIp] = useState(false);
-  const [activeTab, setActiveTab] = useState<'overview' | 'roster' | 'server'>('overview');
-  const [connectCountdown, setConnectCountdown] = useState<number>(300); // 5 minutes (05:00)
+  const [copiedLink, setCopiedLink] = useState(false);
+  const [connectCountdown, setConnectCountdown] = useState(285);
+
+  // 3-Dots Menu & Live Support Modal
+  const [isMenuOpen, setIsMenuOpen] = useState(false);
+  const [isSupportModalOpen, setIsSupportModalOpen] = useState(false);
+  const [selectedSupportIssue, setSelectedSupportIssue] = useState<string>('server_issue');
+  const [supportCallSubmitted, setSupportCallSubmitted] = useState<boolean>(false);
+
+  // Chat Drawer Toggle
+  const [isChatDrawerOpen, setIsChatDrawerOpen] = useState(false);
+  const [chatTab, setChatTab] = useState<'match' | 'team'>('match');
+  const [chatInput, setChatInput] = useState('');
+  const [chatMessages, setChatMessages] = useState<MatchChatMessage[]>([
+    {
+      id: 'init-2',
+      sender: 'Rosen33',
+      avatar: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=150&q=80',
+      team: 'team1',
+      code: 'SE',
+      text: 'gg wp everyone, good comeback on T side!',
+      timestamp: '00:02'
+    },
+    {
+      id: 'init-3',
+      sender: 'M18',
+      avatar: '/images/faceit_m18_badge.png',
+      team: 'team2',
+      code: 'XK',
+      text: 'gg wp! Rosen played crazy on A site',
+      timestamp: '00:02'
+    },
+    {
+      id: 'init-4',
+      sender: currentGamerTag,
+      avatar: currentAvatarUrl || '/images/blockeerz_avatar.png',
+      team: 'team2',
+      code: 'XK',
+      text: 'gg wp nice game guys',
+      timestamp: '00:03'
+    }
+  ]);
+
+  const chatEndRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
-    if (matchStatus !== 'ready') {
-      setConnectCountdown(300);
-      return;
+    if (isChatDrawerOpen) {
+      chatEndRef.current?.scrollIntoView({ behavior: 'smooth' });
     }
-    const timer = setInterval(() => {
-      setConnectCountdown(prev => (prev <= 1 ? 0 : prev - 1));
-    }, 1000);
-    return () => clearInterval(timer);
-  }, [matchStatus]);
-
-  const formatConnectTime = (secs: number) => {
-    const m = Math.floor(secs / 60);
-    const s = secs % 60;
-    return `${m.toString().padStart(2, '0')}:${s.toString().padStart(2, '0')}`;
-  };
+  }, [chatMessages, isChatDrawerOpen, chatTab]);
 
   const serverIp = '185.107.96.42:27015';
   const consoleCmd = `connect ${serverIp}; password vortex`;
 
-  // Team Rosters
-  const team1Players: MatchRoomPlayer[] = [
+  // Exact 1:1 FACEIT Team 1 Players (Left Column)
+  const team1Players: FaceitMatchPlayer[] = [
     {
       id: 'p1',
-      name: currentGamerTag,
-      avatar: currentAvatarUrl || '/images/blockeerz_avatar.png',
-      level: 7,
-      elo: 1407,
-      code: 'XK',
-      countryName: 'Kosovo',
-      verification: 'vip',
-      kd: '1.42',
-      hsRate: '58%',
-      isCaptain: true
+      name: 'Rosen33',
+      avatar: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=150&q=80',
+      level: 9,
+      elo: 1967,
+      code: 'SE',
+      countryName: 'Sweden',
+      verified: true,
+      isCaptain: true,
+      matches: 429,
+      winRate: '43%',
+      rating: '1.16',
+      swing: '+0.96%',
+      isPositiveSwing: true,
+      kda: '17/16/5',
+      kd: '1.07',
+      kr: '0.81',
+      adr: '88.1',
+      badgeIndex: 1
     },
     {
       id: 'p2',
-      name: partyMembers[0]?.name || 'karrigan_fan',
-      avatar: partyMembers[0]?.avatar || 'https://images.unsplash.com/photo-1566492031773-4f4e44671857?auto=format&fit=crop&w=150&q=80',
+      name: 'stonken',
+      avatar: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?auto=format&fit=crop&w=150&q=80',
       level: 8,
-      elo: 1650,
-      code: 'AL',
-      countryName: 'Albania',
-      verification: 'vip',
-      kd: '1.18',
-      hsRate: '49%'
+      elo: 1589,
+      code: 'SE',
+      countryName: 'Sweden',
+      verified: true,
+      matches: 160,
+      winRate: '46%',
+      rating: '1.00',
+      swing: '-1.82%',
+      isPositiveSwing: false,
+      kda: '14/17/5',
+      kd: '0.80',
+      kr: '0.64',
+      adr: '73.9',
+      badgeIndex: 2
     },
     {
       id: 'p3',
-      name: partyMembers[1]?.name || 'ZywOo_peek',
-      avatar: partyMembers[1]?.avatar || 'https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?auto=format&fit=crop&w=150&q=80',
+      name: 'wast3dtalen1',
+      avatar: 'https://images.unsplash.com/photo-1517841905240-472988babdf9?auto=format&fit=crop&w=150&q=80',
       level: 9,
-      elo: 1890,
-      code: 'XK',
-      countryName: 'Kosovo',
-      verification: 'verified',
-      kd: '1.35',
-      hsRate: '54%'
+      elo: 1810,
+      code: 'RU',
+      countryName: 'Russia',
+      verified: true,
+      matches: 2085,
+      winRate: '40%',
+      rating: '1.08',
+      swing: '-0.41%',
+      isPositiveSwing: false,
+      kda: '18/17/5',
+      kd: '1.05',
+      kr: '0.78',
+      adr: '83.4',
+      badgeIndex: 1
     },
     {
       id: 'p4',
-      name: partyMembers[2]?.name || 'flameZ_aim',
-      avatar: partyMembers[2]?.avatar || 'https://images.unsplash.com/photo-1570295999919-56ceb5ecca61?auto=format&fit=crop&w=150&q=80',
-      level: 7,
-      elo: 1420,
-      code: 'DE',
-      countryName: 'Germany',
-      verification: 'none',
-      kd: '1.05',
-      hsRate: '46%'
+      name: 'mxrty666',
+      avatar: 'https://images.unsplash.com/photo-1539571696357-5a69c17a67c6?auto=format&fit=crop&w=150&q=80',
+      level: 9,
+      elo: 1943,
+      code: 'SE',
+      countryName: 'Sweden',
+      verified: true,
+      matches: 1127,
+      winRate: '46%',
+      rating: '1.20',
+      swing: '+1.58%',
+      isPositiveSwing: true,
+      kda: '18/15/5',
+      kd: '1.16',
+      kr: '0.84',
+      adr: '87.7',
+      badgeIndex: 1
     },
     {
       id: 'p5',
-      name: partyMembers[3]?.name || 'monesy_flick',
-      avatar: partyMembers[3]?.avatar || 'https://images.unsplash.com/photo-1527980965255-d3b416303d12?auto=format&fit=crop&w=150&q=80',
-      level: 10,
-      elo: 2150,
-      code: 'XK',
-      countryName: 'Kosovo',
-      verification: 'vip',
-      kd: '1.61',
-      hsRate: '62%'
+      name: 'zeryx666',
+      avatar: 'https://images.unsplash.com/photo-1501196354995-cbb51c65aaea?auto=format&fit=crop&w=150&q=80',
+      level: 8,
+      elo: 1573,
+      code: 'RU',
+      countryName: 'Russia',
+      verified: true,
+      matches: 989,
+      winRate: '50%',
+      rating: '1.08',
+      swing: '-0.34%',
+      isPositiveSwing: false,
+      kda: '14/15/4',
+      kd: '0.93',
+      kr: '0.67',
+      adr: '69.9',
+      badgeIndex: 1
     }
   ];
 
-  const team2Players: MatchRoomPlayer[] = [
+  // Exact 1:1 FACEIT Team 2 Players (Right Column including M18 and bLocKeeRz)
+  const team2Players: FaceitMatchPlayer[] = [
     {
       id: 'op1',
-      name: 'M18',
-      avatar: '/images/faceit_m18_badge.png',
-      level: 10,
-      elo: 3120,
-      code: 'XK',
-      countryName: 'Kosovo',
-      verification: 'vip',
-      kd: '1.74',
-      hsRate: '64%',
-      isCaptain: true
+      name: 'zimny',
+      avatar: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=150&q=80',
+      level: 9,
+      elo: 1840,
+      code: 'FR',
+      countryName: 'France',
+      verified: true,
+      isCaptain: true,
+      matches: 1119,
+      winRate: '56%',
+      rating: '1.18',
+      swing: '+1.19%',
+      isPositiveSwing: true,
+      kda: '18/17/5',
+      kd: '1.04',
+      kr: '0.79',
+      adr: '87.4',
+      badgeIndex: 1
     },
     {
       id: 'op2',
-      name: 'NiKo_banger',
-      avatar: 'https://images.unsplash.com/photo-1580489944761-15a19d654956?auto=format&fit=crop&w=150&q=80',
-      level: 9,
-      elo: 1980,
-      code: 'BA',
-      countryName: 'Bosnia',
-      verification: 'verified',
-      kd: '1.30',
-      hsRate: '56%'
+      name: 'Nascar777',
+      avatar: 'https://images.unsplash.com/photo-1522075469751-3a6694fb2f61?auto=format&fit=crop&w=150&q=80',
+      level: 10,
+      elo: 2046,
+      code: 'PL',
+      countryName: 'Poland',
+      verified: true,
+      matches: 1261,
+      winRate: '68%',
+      rating: '1.23',
+      swing: '+2.34%',
+      isPositiveSwing: true,
+      kda: '19/15/5',
+      kd: '1.29',
+      kr: '0.86',
+      adr: '90.8',
+      badgeIndex: 1
     },
     {
       id: 'op3',
-      name: 'donk_entry',
-      avatar: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?auto=format&fit=crop&w=150&q=80',
+      name: 'M18',
+      avatar: '/images/faceit_m18_badge.png',
       level: 10,
-      elo: 2280,
+      elo: 2175,
       code: 'XK',
       countryName: 'Kosovo',
-      verification: 'vip',
-      kd: '1.55',
-      hsRate: '61%'
+      verified: true,
+      matches: 900,
+      winRate: '56%',
+      rating: '1.18',
+      swing: '+1.44%',
+      isPositiveSwing: true,
+      kda: '19/16/6',
+      kd: '1.16',
+      kr: '0.82',
+      adr: '90.3',
+      badgeIndex: 69
     },
     {
       id: 'op4',
-      name: 'ropz_lurk',
-      avatar: 'https://images.unsplash.com/photo-1500648767791-00dcc994a43e?auto=format&fit=crop&w=150&q=80',
-      level: 8,
-      elo: 1720,
-      code: 'EE',
-      countryName: 'Estonia',
-      verification: 'none',
-      kd: '1.14',
-      hsRate: '48%'
+      name: currentGamerTag || 'bLocKeeRz',
+      avatar: currentAvatarUrl || '/images/blockeerz_avatar.png',
+      level: 7,
+      elo: 1433,
+      code: 'XK',
+      countryName: 'Kosovo',
+      verified: true,
+      matches: 1644,
+      winRate: '43%',
+      rating: '0.94',
+      swing: '-2.90%',
+      isPositiveSwing: false,
+      kda: '13/17/6',
+      kd: '0.77',
+      kr: '0.58',
+      adr: '70.8',
+      badgeIndex: 1
     },
     {
       id: 'op5',
-      name: 'b1t_headshot',
-      avatar: 'https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?auto=format&fit=crop&w=150&q=80',
-      level: 9,
-      elo: 1910,
+      name: 'Zalevvo',
+      avatar: 'https://images.unsplash.com/photo-1500648767791-00dcc994a43e?auto=format&fit=crop&w=150&q=80',
+      level: 6,
+      elo: 1253,
       code: 'UA',
       countryName: 'Ukraine',
-      verification: 'verified',
-      kd: '1.27',
-      hsRate: '65%'
+      verified: true,
+      matches: 480,
+      winRate: '48%',
+      rating: '0.90',
+      swing: '-1.10%',
+      isPositiveSwing: false,
+      kda: '12/16/4',
+      kd: '0.75',
+      kr: '0.52',
+      adr: '68.4',
+      badgeIndex: 3
     }
   ];
 
-  // Turn timer countdown
-  useEffect(() => {
-    if (matchStatus !== 'veto') return;
-    const interval = setInterval(() => {
-      setVetoCountdown(prev => {
-        if (prev <= 1) {
-          // Auto ban first available map
-          handleAutoBan();
-          return 30;
-        }
-        return prev - 1;
-      });
-    }, 1000);
-    return () => clearInterval(interval);
-  }, [bannedMapIds, currentTurnTeam, matchStatus]);
+  // Map Veto Exact List (as shown in user screenshot)
+  const vetoHistoryList = [
+    { step: 1, text: 'team_Rosen33 banned Cache', isDecided: false },
+    { step: 2, text: 'team_Zalevvo banned Inferno', isDecided: false },
+    { step: 3, text: 'team_Rosen33 banned Nuke', isDecided: false },
+    { step: 4, text: 'team_Zalevvo banned Ancient', isDecided: false },
+    { step: 5, text: 'team_Rosen33 banned Mirage', isDecided: false },
+    { step: 6, text: 'team_Zalevvo banned Dust2', isDecided: false },
+    { step: 7, text: 'Anubis picked by default', isDecided: true }
+  ];
 
-  // Simulated opponent ban
-  useEffect(() => {
-    if (matchStatus === 'veto' && currentTurnTeam === 'Team 2') {
-      const remainingMaps = MAP_POOL.filter(m => !bannedMapIds.includes(m.id));
-      if (remainingMaps.length > 1) {
-        const timer = setTimeout(() => {
-          // Team 2 bans Vertigo or Ancient or random
-          const target = remainingMaps.find(m => m.id === 'vertigo' || m.id === 'ancient') || remainingMaps[0];
-          applyBan(target.id, 'Team 2 (M18)');
-        }, 1600);
-        return () => clearTimeout(timer);
-      }
-    }
-  }, [currentTurnTeam, bannedMapIds, matchStatus]);
-
-  const handleAutoBan = () => {
-    const remaining = MAP_POOL.filter(m => !bannedMapIds.includes(m.id));
-    if (remaining.length > 1) {
-      applyBan(remaining[0].id, currentTurnTeam === 'Team 1' ? `Team 1 (${currentGamerTag})` : 'Team 2 (M18)');
-    }
-  };
-
-  const applyBan = (mapId: string, teamLabel: string) => {
-    const targetMap = MAP_POOL.find(m => m.id === mapId);
-    if (!targetMap) return;
-
-    sound.playMapBan();
-
-    const newBanned = [...bannedMapIds, mapId];
-    setBannedMapIds(newBanned);
-    setBanHistory(prev => [
-      ...prev,
-      {
-        mapName: targetMap.name,
-        byTeam: teamLabel,
-        time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
-      }
-    ]);
-
-    setVetoCountdown(30);
-
-    // Check if only 1 map left
-    const remaining = MAP_POOL.filter(m => !newBanned.includes(m.id));
-    if (remaining.length === 1) {
-      // DECIDED!
-      sound.playMapPick();
-      setDecidedMap(remaining[0]);
-      setMatchStatus('configuring');
-      setTimeout(() => {
-        setMatchStatus('ready');
-      }, 2500);
-    } else {
-      setCurrentTurnTeam(prev => prev === 'Team 1' ? 'Team 2' : 'Team 1');
-    }
-  };
-
-  const handleUserBanMap = (mapId: string) => {
-    if (matchStatus !== 'veto') return;
-    if (currentTurnTeam !== 'Team 1') return;
-    if (bannedMapIds.includes(mapId)) return;
-
-    applyBan(mapId, `Team 1 (${currentGamerTag})`);
+  const handleCopyLink = () => {
+    sound.playClick();
+    navigator.clipboard?.writeText?.(window.location.href);
+    setCopiedLink(true);
+    setTimeout(() => setCopiedLink(false), 2500);
   };
 
   const handleCopyIp = () => {
@@ -323,478 +393,736 @@ export const VortexMatchRoom: React.FC<VortexMatchRoomProps> = ({
     setTimeout(() => setCopiedIp(false), 2500);
   };
 
-  const handleResetVeto = () => {
-    sound.playSelect();
-    setBannedMapIds([]);
-    setBanHistory([]);
-    setCurrentTurnTeam('Team 1');
-    setDecidedMap(null);
-    setMatchStatus('veto');
-    setVetoCountdown(30);
-    setConnectCountdown(300);
+  const handleSendMessage = (e?: React.FormEvent) => {
+    if (e) e.preventDefault();
+    if (!chatInput.trim()) return;
+
+    sound.playChatMessage();
+    const newMsg: MatchChatMessage = {
+      id: `usr-${Date.now()}`,
+      sender: currentGamerTag,
+      avatar: currentAvatarUrl || '/images/blockeerz_avatar.png',
+      team: 'team2',
+      code: 'XK',
+      text: chatInput.trim(),
+      timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
+    };
+
+    setChatMessages(prev => [...prev, newMsg]);
+    setChatInput('');
+
+    setTimeout(() => {
+      const botReplies = [
+        { sender: 'M18', text: 'nice round bLocKeeRz!', team: 'team2' as const },
+        { sender: 'Rosen33', text: 'gg wp! great flash assists', team: 'team1' as const },
+        { sender: 'Nascar777', text: 'queue next match guys?', team: 'team2' as const }
+      ];
+      const reply = botReplies[Math.floor(Math.random() * botReplies.length)];
+      setChatMessages(prev => [
+        ...prev,
+        {
+          id: `bot-${Date.now()}`,
+          sender: reply.sender,
+          avatar: team1Players.concat(team2Players).find(p => p.name === reply.sender)?.avatar,
+          team: reply.team,
+          code: 'XK',
+          text: reply.text,
+          timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
+        }
+      ]);
+    }, 1200);
+  };
+
+  const handleSendPhrase = (phrase: string) => {
+    setChatInput(phrase);
+    setTimeout(() => {
+      handleSendMessage();
+    }, 50);
   };
 
   return (
-    <div className="fixed inset-0 z-[120] bg-[#090C12]/95 backdrop-blur-md overflow-y-auto flex flex-col font-sans select-none animate-in fade-in duration-200">
+    <div className="fixed inset-0 z-[120] bg-[#0E0F12] text-[#E2E8F0] overflow-y-auto flex flex-col font-sans select-none animate-in fade-in duration-150">
       
-      {/* Top Navigation Bar */}
-      <div className="w-full bg-[#0D1018] border-b border-white/[0.08] px-6 py-4 flex items-center justify-between sticky top-0 z-20">
-        <div className="flex items-center gap-4">
-          <div className="flex items-center gap-2 px-3 py-1.5 rounded-xl bg-[#A3E635]/10 border border-[#A3E635]/30">
-            <Radio className="w-4 h-4 text-[#A3E635] animate-pulse" />
-            <span className="font-display font-black text-xs text-[#A3E635] tracking-wider uppercase">
-              Match Room
-            </span>
-          </div>
-          <div>
-            <div className="flex items-center gap-2">
-              <h1 className="font-display font-black text-white text-base tracking-wide">
-                CS2 5v5 Competitive Ranked
-              </h1>
-              <span className="px-2 py-0.5 rounded bg-white/[0.06] text-[10px] font-mono font-bold text-slate-400">
-                #{matchId}
+      {/* ======================================================== */}
+      {/* 1. TOP HEADER: Matchroom • OVERVIEW / STATS • 💬 🔗 ...   */}
+      {/* ======================================================== */}
+      <div className="w-full bg-[#111217] border-b border-[#1E2029] px-6 py-2.5 flex items-center justify-between sticky top-0 z-40">
+        
+        {/* Left: Brand / Title */}
+        <div className="flex items-center gap-6">
+          <span className="font-display font-black text-white text-base tracking-wide">
+            Matchroom
+          </span>
+
+          {/* Center Tabs: OVERVIEW & STATS */}
+          <div className="flex items-center gap-4 text-xs font-mono font-bold uppercase tracking-wider">
+            <button
+              onClick={() => { sound.playClick(); setActiveTab('overview'); }}
+              className={`pb-1 border-b-2 transition cursor-pointer ${
+                activeTab === 'overview'
+                  ? 'border-[#FF5500] text-white'
+                  : 'border-transparent text-slate-400 hover:text-white'
+              }`}
+            >
+              OVERVIEW
+            </button>
+            <button
+              onClick={() => { sound.playClick(); setActiveTab('stats'); }}
+              className={`pb-1 border-b-2 transition flex items-center gap-1.5 cursor-pointer ${
+                activeTab === 'stats'
+                  ? 'border-[#FF5500] text-white'
+                  : 'border-transparent text-slate-400 hover:text-white'
+              }`}
+            >
+              <span>STATS</span>
+              <span className="px-1.5 py-0.2 rounded bg-[#FF5500] text-black text-[9px] font-black uppercase">
+                NEW
               </span>
-            </div>
-            <p className="text-[11px] font-mono text-slate-400">
-              {matchStatus === 'ready'
-                ? 'Europe (Frankfurt 128-tick) • Server #EU-04 • AC Enforced'
-                : 'Europe Active Duty • 128-Tick Matchmaking • Map Veto Phase'}
-            </p>
+            </button>
           </div>
         </div>
 
-        <div className="flex items-center gap-3">
+        {/* Right Action Icons: 💬 Chat, 🔗 Share, ... 3-Dots Menu */}
+        <div className="flex items-center gap-2">
+          
+          {/* Chat Toggle Icon */}
           <button
-            onClick={handleResetVeto}
-            className="px-3 py-1.5 rounded-xl bg-white/[0.04] hover:bg-white/[0.08] border border-white/10 text-slate-300 hover:text-white font-mono text-xs transition flex items-center gap-1.5 cursor-pointer"
-            title="Restart Map Veto simulation"
+            onClick={() => {
+              sound.playClick();
+              setIsChatDrawerOpen(!isChatDrawerOpen);
+            }}
+            className={`p-2 rounded-lg transition cursor-pointer relative ${
+              isChatDrawerOpen 
+                ? 'bg-[#FF5500]/20 text-[#FF5500]' 
+                : 'text-slate-400 hover:text-white hover:bg-white/[0.05]'
+            }`}
+            title="Toggle Match Chat"
           >
-            <RotateCcw className="w-3.5 h-3.5" />
-            <span>Reset Veto</span>
+            <MessageSquare className="w-4 h-4" />
+            <span className="absolute top-1 right-1 w-2 h-2 rounded-full bg-[#FF5500] animate-pulse" />
           </button>
 
+          {/* Share Link Icon */}
           <button
-            onClick={onClose}
-            className="p-2 rounded-xl bg-white/[0.04] hover:bg-red-500/20 border border-white/10 hover:border-red-500/40 text-slate-400 hover:text-red-400 transition cursor-pointer"
-            title="Leave Match Room"
+            onClick={handleCopyLink}
+            className="p-2 rounded-lg text-slate-400 hover:text-white hover:bg-white/[0.05] transition cursor-pointer relative"
+            title="Share Match Link"
           >
-            <X className="w-5 h-5" />
+            {copiedLink ? <Check className="w-4 h-4 text-[#A3E635]" /> : <Share2 className="w-4 h-4" />}
+          </button>
+
+          {/* 3-DOTS MENU (Support & Leave) */}
+          <div className="relative">
+            <button
+              onClick={() => setIsMenuOpen(!isMenuOpen)}
+              className="p-2 rounded-lg text-slate-400 hover:text-white hover:bg-white/[0.05] transition cursor-pointer"
+              title="Options"
+            >
+              <MoreVertical className="w-4 h-4" />
+            </button>
+
+            {isMenuOpen && (
+              <>
+                <div 
+                  className="fixed inset-0 z-40" 
+                  onClick={() => setIsMenuOpen(false)} 
+                />
+                <div className="absolute right-0 top-full mt-1.5 w-52 rounded-xl bg-[#16171F] border border-[#262835] shadow-2xl p-1 z-50 animate-in fade-in zoom-in-95 duration-100">
+                  <button
+                    onClick={() => {
+                      sound.playSelect();
+                      setIsMenuOpen(false);
+                      setIsSupportModalOpen(true);
+                    }}
+                    className="w-full flex items-center gap-2.5 px-3 py-2 rounded-lg hover:bg-white/[0.06] text-slate-200 hover:text-white text-xs font-mono transition text-left cursor-pointer"
+                  >
+                    <Headphones className="w-3.5 h-3.5 text-[#FF5500]" />
+                    <span>Support</span>
+                  </button>
+
+                  <div className="h-px bg-white/[0.06] my-1" />
+
+                  <button
+                    onClick={() => {
+                      sound.playClick();
+                      setIsMenuOpen(false);
+                      onClose();
+                    }}
+                    className="w-full flex items-center gap-2.5 px-3 py-2 rounded-lg hover:bg-rose-500/15 text-rose-400 hover:text-rose-300 text-xs font-mono transition text-left cursor-pointer"
+                  >
+                    <X className="w-3.5 h-3.5" />
+                    <span>Leave Match Room</span>
+                  </button>
+                </div>
+              </>
+            )}
+          </div>
+
+          {/* Direct Close X Button */}
+          <button
+            onClick={() => {
+              sound.playClick();
+              onClose();
+            }}
+            className="p-2 rounded-lg text-slate-400 hover:text-rose-400 hover:bg-rose-500/10 transition cursor-pointer ml-1"
+            title="Close"
+          >
+            <X className="w-4 h-4" />
           </button>
         </div>
       </div>
 
-      {/* Main Container */}
-      <div className="flex-1 max-w-7xl w-full mx-auto p-4 sm:p-6 space-y-6">
-        
-        {/* Match Status Banner */}
-        <div className="p-4 sm:p-5 rounded-2xl bg-[#0E121B] border border-white/[0.08] flex flex-col sm:flex-row items-center justify-between gap-4 shadow-xl">
-          <div className="flex items-center gap-4">
-            <div className="w-12 h-12 rounded-2xl bg-black border border-white/10 flex items-center justify-center shrink-0">
-              {matchStatus === 'ready' ? (
-                <ShieldCheck className="w-6 h-6 text-[#A3E635]" />
-              ) : (
-                <Flame className="w-6 h-6 text-amber-400 animate-pulse" />
-              )}
-            </div>
+      {/* ======================================================== */}
+      {/* 2. MATCH SCORE & TEAMS BANNER (Authentic FACEIT Header)   */}
+      {/* ======================================================== */}
+      <div className="max-w-[1400px] w-full mx-auto px-4 sm:px-6 pt-4 pb-2">
+        <div className="relative rounded-2xl overflow-hidden border border-[#232530] shadow-2xl bg-[#13141B]">
+          
+          {/* Panoramic Map Background */}
+          <div className="absolute inset-0 z-0">
+            <img 
+              src="/images/maps/de_mirage.jpg" 
+              alt="Match Map" 
+              className="w-full h-full object-cover opacity-25 filter blur-[1px]" 
+            />
+            <div className="absolute inset-0 bg-gradient-to-r from-[#111218]/95 via-[#111218]/85 to-[#111218]/95" />
+          </div>
 
-            <div>
+          <div className="relative z-10 p-4 sm:p-5">
+            {/* Top Sub-Header: Mode & Match Details */}
+            <div className="flex items-center justify-between text-xs font-mono text-slate-400 pb-3 border-b border-white/[0.06]">
               <div className="flex items-center gap-2">
-                <span className="text-xs font-mono font-bold text-slate-400 uppercase">Phase:</span>
-                <span className={`text-xs font-mono font-black uppercase tracking-wider ${
-                  matchStatus === 'ready' ? 'text-[#A3E635]' : 'text-amber-400'
-                }`}>
-                  {matchStatus === 'veto' && `MAP VETO — ${currentTurnTeam.toUpperCase()} IS BANNING`}
-                  {matchStatus === 'configuring' && 'SERVER DEPLOYMENT IN PROGRESS...'}
-                  {matchStatus === 'ready' && 'MATCH READY — CS2 SERVER DEPLOYED'}
+                <span className="text-slate-300 font-bold">Matchmaking / EU / Standard Match</span>
+                <span className="flex items-center gap-1 px-2 py-0.5 rounded bg-[#FF5500]/15 text-[#FF5500] text-[10px] font-bold border border-[#FF5500]/30">
+                  <ShieldCheck className="w-3 h-3" />
+                  Verified
                 </span>
               </div>
-              <p className="text-sm font-bold text-white mt-0.5">
-                {matchStatus === 'veto' && (
-                  currentTurnTeam === 'Team 1' 
-                    ? `You are Captain of Team 1! Click any active map below to ban it.`
-                    : `Waiting for opponent Captain (${team2Players[0].name}) to pick/ban...`
-                )}
-                {matchStatus === 'configuring' && `Allocating 128-tick Frankfurt server for ${decidedMap?.name}...`}
-                {matchStatus === 'ready' && `Map decided: ${decidedMap?.name}! Join the match below.`}
-              </p>
+              <div className="flex items-center gap-3">
+                <span className="flex items-center gap-1.5 text-slate-300 font-bold">
+                  <span>Anubis</span>
+                </span>
+                <span>•</span>
+                <span>10 Nov</span>
+                <span>🇩🇪</span>
+              </div>
+            </div>
+
+            {/* Scoreboard: Team 1 (Rosen33) 13 vs 7 Team 2 (Zalevvo) */}
+            <div className="grid grid-cols-1 md:grid-cols-12 items-center py-3 gap-4">
+              
+              {/* Left Team (Rosen33 - WINNER) */}
+              <div className="md:col-span-5 flex items-center justify-start md:justify-end gap-3.5 text-left md:text-right">
+                <div className="order-2 md:order-1">
+                  <div className="text-[10px] font-mono font-black text-emerald-400 uppercase tracking-widest">
+                    WINNER
+                  </div>
+                  <h2 className="text-xl font-display font-black text-white tracking-wide">
+                    team_Rosen33
+                  </h2>
+                  <div className="text-[11px] font-mono text-slate-400 flex items-center md:justify-end gap-2 mt-0.5">
+                    <span>1,776</span>
+                    <span>•</span>
+                    <span>4,790 Matches</span>
+                  </div>
+                  {/* Detailed Team Stats Row */}
+                  <div className="hidden lg:flex items-center justify-end gap-2 text-[10px] font-mono text-slate-400 mt-1">
+                    <span>45% <span className="text-slate-500">Wins</span></span>
+                    <span>1.10 <span className="text-slate-500">Rating</span></span>
+                    <span className="text-red-400">-0.01% <span className="text-slate-500">Swing</span></span>
+                    <span>1.00 <span className="text-slate-500">K/D</span></span>
+                    <span>0.75 <span className="text-slate-500">K/R</span></span>
+                    <span>80.6 <span className="text-slate-500">ADR</span></span>
+                  </div>
+                </div>
+
+                <div className="order-1 md:order-2 relative w-14 h-14 rounded-full p-0.5 bg-gradient-to-r from-emerald-500 to-[#A3E635] shadow-[0_0_15px_rgba(52,211,153,0.4)] shrink-0">
+                  <img 
+                    src="https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=150&q=80" 
+                    alt="team_Rosen33" 
+                    className="w-full h-full rounded-full object-cover" 
+                  />
+                </div>
+              </div>
+
+              {/* Center Score */}
+              <div className="md:col-span-2 text-center py-1">
+                <div className="inline-flex items-center justify-center gap-3 px-5 py-2 rounded-2xl bg-black/60 border border-white/10 shadow-inner">
+                  <span className="text-3xl font-display font-black text-emerald-400">13</span>
+                  <span className="text-xs font-mono uppercase text-slate-500 font-bold">vs</span>
+                  <span className="text-3xl font-display font-black text-slate-400">7</span>
+                </div>
+              </div>
+
+              {/* Right Team (Zalevvo / M18 / bLocKeeRz) */}
+              <div className="md:col-span-5 flex items-center justify-start gap-3.5 text-left">
+                <div className="relative w-14 h-14 rounded-full p-0.5 bg-gradient-to-r from-slate-600 to-slate-400 shrink-0">
+                  <img 
+                    src="https://images.unsplash.com/photo-1500648767791-00dcc994a43e?auto=format&fit=crop&w=150&q=80" 
+                    alt="team_Zalevvo" 
+                    className="w-full h-full rounded-full object-cover" 
+                  />
+                </div>
+
+                <div>
+                  <h2 className="text-xl font-display font-black text-white tracking-wide">
+                    team_Zalevvo
+                  </h2>
+                  <div className="text-[11px] font-mono text-slate-400 flex items-center gap-2 mt-0.5">
+                    <span>1,749</span>
+                    <span>•</span>
+                    <span>5,325 Matches</span>
+                  </div>
+                  {/* Detailed Team Stats Row */}
+                  <div className="hidden lg:flex items-center gap-2 text-[10px] font-mono text-slate-400 mt-1">
+                    <span>56% <span className="text-slate-500">Wins</span></span>
+                    <span>1.13 <span className="text-slate-500">Rating</span></span>
+                    <span className="text-emerald-400">+0.36% <span className="text-slate-500">Swing</span></span>
+                    <span>1.03 <span className="text-slate-500">K/D</span></span>
+                    <span>0.75 <span className="text-slate-500">K/R</span></span>
+                    <span>83.8 <span className="text-slate-500">ADR</span></span>
+                  </div>
+                </div>
+              </div>
+
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {/* ======================================================== */}
+      {/* 3. THREE-COLUMN BODY: Players Left • Center Info • Right */}
+      {/* ======================================================== */}
+      <div className="max-w-[1400px] w-full mx-auto px-4 sm:px-6 py-4 flex-1">
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-5 items-start">
+          
+          {/* ======================================================== */}
+          {/* LEFT COLUMN (TEAM 1 PLAYERS - 5 CARDS)                  */}
+          {/* ======================================================== */}
+          <div className="lg:col-span-4 space-y-3">
+            <div className="text-xs font-mono font-bold text-slate-400 px-1">
+              Players
+            </div>
+
+            <div className="space-y-2">
+              {team1Players.map(player => (
+                <div 
+                  key={player.id}
+                  className="p-3 rounded-xl bg-[#14151D] border border-[#212330] hover:border-white/20 transition flex items-center gap-3 shadow-sm"
+                >
+                  {/* Left: Matches Count */}
+                  <div className="w-12 text-center shrink-0 border-r border-white/5 pr-2">
+                    <div className="text-xs font-mono font-bold text-white">{player.matches}</div>
+                    <div className="text-[9px] font-mono text-slate-500 uppercase">Matches</div>
+                  </div>
+
+                  {/* Center: Avatar & Names & Stats */}
+                  <div className="flex-1 min-w-0">
+                    <div className="flex items-center justify-between">
+                      <div className="flex items-center gap-1.5 truncate">
+                        <CountryFlag code={player.code} name={player.countryName} size="xs" />
+                        <span className="font-display font-bold text-white text-xs truncate">
+                          {player.name}
+                        </span>
+                        {player.verified && (
+                          <span className="text-emerald-400 text-[10px]">✓</span>
+                        )}
+                      </div>
+
+                      {/* Level & Elo Badge */}
+                      <div className="flex items-center gap-1.5 shrink-0 text-xs font-mono">
+                        <span className="text-slate-400 text-[11px]">~ {player.elo}</span>
+                        <span className="w-5 h-5 rounded-md bg-[#252836] border border-white/10 text-white font-mono font-bold text-[10px] flex items-center justify-center">
+                          {player.level}
+                        </span>
+                      </div>
+                    </div>
+
+                    {/* Telemetry line (Last 30 matches) */}
+                    <div className="text-[9px] font-mono text-slate-400 flex items-center gap-1.5 mt-1 truncate">
+                      <span>{player.winRate}</span>
+                      <span>{player.rating}</span>
+                      <span className={player.isPositiveSwing ? 'text-emerald-400' : 'text-red-400'}>
+                        {player.swing}
+                      </span>
+                      <span>{player.kda}</span>
+                      <span>{player.kd}</span>
+                      <span>{player.kr}</span>
+                      <span>{player.adr}</span>
+                    </div>
+                  </div>
+                </div>
+              ))}
             </div>
           </div>
 
-          {/* Veto Countdown (Only shown during veto) */}
-          {matchStatus === 'veto' && (
-            <div className="flex items-center gap-3 px-4 py-2.5 rounded-xl bg-white/[0.04] border border-white/10">
-              <Clock className="w-4 h-4 text-[#A3E635] animate-spin" style={{ animationDuration: '6s' }} />
-              <div className="text-right font-mono">
-                <div className="text-[10px] text-slate-400 uppercase">Turn Timer</div>
-                <div className={`text-base font-black ${vetoCountdown <= 5 ? 'text-red-400 animate-pulse' : 'text-white'}`}>
-                  00:{vetoCountdown.toString().padStart(2, '0')}
+          {/* ======================================================== */}
+          {/* CENTER COLUMN: Server • Map with ⓘ Veto Tooltip • CTA    */}
+          {/* ======================================================== */}
+          <div className="lg:col-span-4 space-y-4">
+            
+            {/* Server Card */}
+            <div className="p-3.5 rounded-xl bg-[#14151D] border border-[#212330] space-y-1">
+              <div className="text-[10px] font-mono uppercase text-slate-400 font-bold">Server</div>
+              <div className="flex items-center gap-2">
+                <span className="text-lg">🇩🇪</span>
+                <span className="font-display font-bold text-white text-sm">Germany</span>
+                <span className="text-[11px] font-mono text-slate-500">(Frankfurt 128-tick)</span>
+              </div>
+            </div>
+
+            {/* Map Card with ⓘ Veto Popover */}
+            <div className="p-3.5 rounded-xl bg-[#14151D] border border-[#212330] space-y-2 relative">
+              <div className="flex items-center justify-between">
+                <div className="text-[10px] font-mono uppercase text-slate-400 font-bold">Map</div>
+
+                {/* THE ⓘ VETO BUTTON */}
+                <div className="relative">
+                  <button
+                    onClick={() => {
+                      sound.playClick();
+                      setIsVetoTooltipOpen(!isVetoTooltipOpen);
+                    }}
+                    onMouseEnter={() => setIsVetoTooltipOpen(true)}
+                    className="flex items-center gap-1 text-xs font-mono text-slate-400 hover:text-white transition cursor-pointer px-2 py-0.5 rounded-md hover:bg-white/[0.06]"
+                  >
+                    <Info className="w-3.5 h-3.5 text-slate-400" />
+                    <span>Veto</span>
+                  </button>
+
+                  {/* FLOATING VETO TOOLTIP (EXACT COPY OF SCREENSHOT) */}
+                  {isVetoTooltipOpen && (
+                    <>
+                      <div 
+                        className="fixed inset-0 z-40" 
+                        onClick={() => setIsVetoTooltipOpen(false)} 
+                      />
+                      <div 
+                        onMouseLeave={() => setIsVetoTooltipOpen(false)}
+                        className="absolute right-0 top-full mt-2 w-72 p-3.5 rounded-xl bg-[#101117] border border-[#2B2D3C] shadow-2xl z-50 text-xs font-mono space-y-1 animate-in fade-in zoom-in-95 duration-100"
+                      >
+                        {vetoHistoryList.map(item => (
+                          <div 
+                            key={item.step} 
+                            className={`py-0.5 ${item.isDecided ? 'text-emerald-400 font-bold mt-1 pt-1 border-t border-white/5' : 'text-slate-300'}`}
+                          >
+                            <span>{item.step}. {item.text}</span>
+                          </div>
+                        ))}
+                      </div>
+                    </>
+                  )}
+                </div>
+              </div>
+
+              {/* Map Thumbnail & Name */}
+              <div className="flex items-center gap-3">
+                <div className="w-16 h-10 rounded-lg overflow-hidden border border-white/10 shrink-0">
+                  <img 
+                    src="/images/maps/de_mirage.jpg" 
+                    alt="Anubis" 
+                    className="w-full h-full object-cover" 
+                  />
+                </div>
+                <div>
+                  <div className="font-display font-black text-white text-base leading-tight">
+                    Anubis
+                  </div>
+                  <div className="text-[10px] font-mono text-slate-400">
+                    Active Duty Active Map
+                  </div>
                 </div>
               </div>
             </div>
-          )}
+
+            {/* Action Buttons: Watch Demo & Back to Matchmaking */}
+            <div className="space-y-2 pt-1">
+              <button
+                onClick={() => {
+                  sound.playClick();
+                  handleCopyIp();
+                }}
+                className="w-full py-2.5 rounded-xl bg-white/[0.04] hover:bg-white/[0.08] border border-white/10 text-white font-mono text-xs font-bold transition flex items-center justify-center gap-2 cursor-pointer"
+              >
+                <Download className="w-3.5 h-3.5 text-slate-400" />
+                <span>{copiedIp ? 'CONNECT IP COPIED!' : 'WATCH DEMO / COPY IP'}</span>
+              </button>
+
+              <button
+                onClick={() => {
+                  sound.playClick();
+                  onClose();
+                }}
+                className="w-full py-3.5 rounded-xl bg-[#FF5500] hover:bg-[#FF6611] text-black font-display font-black text-xs uppercase tracking-wider transition shadow-lg shadow-orange-500/20 flex items-center justify-center gap-2 cursor-pointer active:scale-95"
+              >
+                <span>BACK TO MATCHMAKING</span>
+              </button>
+            </div>
+
+            {/* Skin of the Match Sponsored Card (1:1 from screenshot) */}
+            <div className="p-3.5 rounded-xl bg-[#14151D] border border-[#212330] space-y-2">
+              <div className="flex items-center justify-between text-[10px] font-mono text-slate-400">
+                <span className="font-bold uppercase tracking-wider text-slate-300">Skin Of The Match</span>
+                <span className="text-[9px] text-slate-500">Powered by SKINPORT</span>
+              </div>
+              <div className="flex items-center gap-3 p-2 rounded-lg bg-black/40 border border-white/5">
+                <div className="w-12 h-10 flex items-center justify-center shrink-0">
+                  <span className="text-2xl">🔪</span>
+                </div>
+                <div className="min-w-0">
+                  <div className="text-[11px] font-bold text-red-400 truncate">
+                    ★ Bayonet | Slaughter
+                  </div>
+                  <div className="text-[10px] font-mono text-slate-400">
+                    Minimal Wear • €283.69
+                  </div>
+                </div>
+              </div>
+            </div>
+
+          </div>
+
+          {/* ======================================================== */}
+          {/* RIGHT COLUMN (TEAM 2 PLAYERS - INCLUDING M18 & bLocKeeRz) */}
+          {/* ======================================================== */}
+          <div className="lg:col-span-4 space-y-3">
+            <div className="text-xs font-mono font-bold text-slate-400 px-1">
+              Players
+            </div>
+
+            <div className="space-y-2">
+              {team2Players.map(player => (
+                <div 
+                  key={player.id}
+                  className={`p-3 rounded-xl border transition flex items-center gap-3 shadow-sm ${
+                    player.name === currentGamerTag 
+                      ? 'bg-[#181B26] border-[#FF5500]/40 ring-1 ring-[#FF5500]/30' 
+                      : 'bg-[#14151D] border-[#212330] hover:border-white/20'
+                  }`}
+                >
+                  {/* Left: Matches Count */}
+                  <div className="w-12 text-center shrink-0 border-r border-white/5 pr-2">
+                    <div className="text-xs font-mono font-bold text-white">{player.matches}</div>
+                    <div className="text-[9px] font-mono text-slate-500 uppercase">Matches</div>
+                  </div>
+
+                  {/* Center: Avatar & Names & Stats */}
+                  <div className="flex-1 min-w-0">
+                    <div className="flex items-center justify-between">
+                      <div className="flex items-center gap-1.5 truncate">
+                        <CountryFlag code={player.code} name={player.countryName} size="xs" />
+                        <span className={`font-display font-bold text-xs truncate ${
+                          player.name === currentGamerTag ? 'text-[#FF5500]' : 'text-white'
+                        }`}>
+                          {player.name}
+                        </span>
+                        {player.verified && (
+                          <span className="text-emerald-400 text-[10px]">✓</span>
+                        )}
+                      </div>
+
+                      {/* Level & Elo Badge */}
+                      <div className="flex items-center gap-1.5 shrink-0 text-xs font-mono">
+                        <span className="text-slate-400 text-[11px]">~ {player.elo}</span>
+                        <span className={`w-5 h-5 rounded-md border font-mono font-bold text-[10px] flex items-center justify-center ${
+                          player.level === 10 
+                            ? 'bg-red-500/20 border-red-500/40 text-red-400' 
+                            : 'bg-[#252836] border-white/10 text-white'
+                        }`}>
+                          {player.level}
+                        </span>
+                      </div>
+                    </div>
+
+                    {/* Telemetry line (Last 30 matches) */}
+                    <div className="text-[9px] font-mono text-slate-400 flex items-center gap-1.5 mt-1 truncate">
+                      <span>{player.winRate}</span>
+                      <span>{player.rating}</span>
+                      <span className={player.isPositiveSwing ? 'text-emerald-400' : 'text-red-400'}>
+                        {player.swing}
+                      </span>
+                      <span>{player.kda}</span>
+                      <span>{player.kd}</span>
+                      <span>{player.kr}</span>
+                      <span>{player.adr}</span>
+                    </div>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+
         </div>
+      </div>
 
-        {/* ======================================================== */}
-        {/* VIEW 1: ACTIVE DUTY MAP VETO (ONLY SHOWN DURING VETO!)   */}
-        {/* ======================================================== */}
-        {matchStatus === 'veto' && (
-          <div className="space-y-3 animate-in fade-in duration-200">
-            <div className="flex items-center justify-between">
-              <h2 className="text-xs font-mono font-bold uppercase tracking-wider text-[#A3E635] flex items-center gap-2">
-                <span>Active Duty Map Veto</span>
-                <span className="text-slate-400 font-normal">({7 - bannedMapIds.length} Remaining)</span>
-              </h2>
+      {/* ======================================================== */}
+      {/* 4. DOCKED / SLIDE-OVER MATCH CHAT (Toggled via 💬)       */}
+      {/* ======================================================== */}
+      {isChatDrawerOpen && (
+        <div className="fixed bottom-4 right-4 z-[130] w-96 rounded-2xl bg-[#111218] border border-[#262835] shadow-2xl flex flex-col h-[520px] overflow-hidden animate-in slide-in-from-bottom-5 duration-150">
+          
+          {/* Chat Header */}
+          <div className="p-3 bg-[#161722] border-b border-[#262835] flex items-center justify-between">
+            <div className="flex items-center gap-2">
+              <MessageSquare className="w-4 h-4 text-[#FF5500]" />
+              <span className="font-display font-bold text-white text-xs uppercase tracking-wide">
+                Match Chat
+              </span>
+              <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse ml-1" />
+            </div>
 
-              {/* Ban timeline history */}
-              {banHistory.length > 0 && (
-                <div className="hidden sm:flex items-center gap-1.5 text-[11px] font-mono text-slate-400 overflow-x-auto no-scrollbar">
-                  <span className="text-slate-500">History:</span>
-                  {banHistory.map((h, i) => (
-                    <span key={i} className="px-2 py-0.5 rounded bg-red-500/10 border border-red-500/20 text-red-300">
-                      {h.mapName} ✕
-                    </span>
+            <div className="flex items-center gap-1">
+              <button
+                onClick={() => setChatTab(chatTab === 'match' ? 'team' : 'match')}
+                className="px-2 py-0.5 rounded bg-white/[0.06] hover:bg-white/[0.1] text-[10px] font-mono text-slate-300"
+              >
+                {chatTab === 'match' ? 'ALL (10)' : 'TEAM 2'}
+              </button>
+              <button
+                onClick={() => setIsChatDrawerOpen(false)}
+                className="p-1 rounded text-slate-400 hover:text-white"
+              >
+                <X className="w-3.5 h-3.5" />
+              </button>
+            </div>
+          </div>
+
+          {/* Messages List */}
+          <div className="flex-1 p-3 overflow-y-auto space-y-2.5 text-xs font-sans">
+            {chatMessages.map(msg => (
+              <div key={msg.id} className="space-y-0.5">
+                <div className="flex items-center gap-1.5 text-[10px] font-mono text-slate-400">
+                  <span className={`font-bold ${msg.sender === currentGamerTag ? 'text-[#FF5500]' : 'text-slate-200'}`}>
+                    {msg.sender}
+                  </span>
+                  <span>{msg.timestamp}</span>
+                </div>
+                <div className="p-2 rounded-xl bg-white/[0.04] text-slate-200 text-xs">
+                  {msg.text}
+                </div>
+              </div>
+            ))}
+            <div ref={chatEndRef} />
+          </div>
+
+          {/* Quick Phrases */}
+          <div className="px-2.5 py-1.5 bg-black/40 border-t border-white/[0.04] flex items-center gap-1 overflow-x-auto no-scrollbar">
+            {QUICK_TACTICAL_PHRASES.slice(0, 3).map((p, i) => (
+              <button
+                key={i}
+                onClick={() => handleSendPhrase(p)}
+                className="px-2 py-0.5 rounded bg-white/[0.05] hover:bg-[#FF5500]/20 text-[9px] font-mono text-slate-300 whitespace-nowrap"
+              >
+                {p}
+              </button>
+            ))}
+          </div>
+
+          {/* Input Form */}
+          <form onSubmit={handleSendMessage} className="p-2.5 bg-[#161722] border-t border-[#262835] flex items-center gap-2">
+            <input
+              type="text"
+              value={chatInput}
+              onChange={e => setChatInput(e.target.value)}
+              placeholder="Type message..."
+              className="flex-1 px-3 py-1.5 rounded-lg bg-black/60 border border-white/10 text-xs text-white outline-none"
+            />
+            <button
+              type="submit"
+              disabled={!chatInput.trim()}
+              className="p-2 rounded-lg bg-[#FF5500] hover:bg-[#FF6611] disabled:opacity-40 text-black transition cursor-pointer"
+            >
+              <Send className="w-3.5 h-3.5" />
+            </button>
+          </form>
+        </div>
+      )}
+
+      {/* ======================================================== */}
+      {/* 5. LIVE MATCH SUPPORT MODAL (From 3-Dots Menu)           */}
+      {/* ======================================================== */}
+      {isSupportModalOpen && (
+        <div className="fixed inset-0 z-[150] bg-black/80 backdrop-blur-md flex items-center justify-center p-4 animate-in fade-in duration-100">
+          <div className="w-full max-w-md bg-[#13141C] border border-[#2B2D3C] rounded-2xl p-6 shadow-2xl relative space-y-4">
+            
+            <div className="flex items-center justify-between border-b border-white/[0.08] pb-3">
+              <div className="flex items-center gap-2.5">
+                <Headphones className="w-5 h-5 text-[#FF5500]" />
+                <h3 className="font-display font-black text-white text-base uppercase">
+                  Live Match Support
+                </h3>
+              </div>
+              <button
+                onClick={() => setIsSupportModalOpen(false)}
+                className="p-1 rounded text-slate-400 hover:text-white"
+              >
+                <X className="w-4 h-4" />
+              </button>
+            </div>
+
+            {!supportCallSubmitted ? (
+              <div className="space-y-4">
+                <div className="text-xs font-mono text-slate-300">
+                  Select issue to dispatch a live FACEIT match admin:
+                </div>
+                <div className="space-y-2">
+                  {[
+                    'Server Unresponsive / Severe Packet Loss (EU-04)',
+                    'Player Never Connected / AFK',
+                    'VORTEX Anti-Cheat Integrity Issue',
+                    'Report Match Problem'
+                  ].map((issue, idx) => (
+                    <div
+                      key={idx}
+                      onClick={() => {
+                        sound.playSelect();
+                        setSelectedSupportIssue(issue);
+                      }}
+                      className={`p-2.5 rounded-xl border text-xs font-mono transition cursor-pointer ${
+                        selectedSupportIssue === issue 
+                          ? 'bg-[#FF5500]/15 border-[#FF5500] text-white' 
+                          : 'bg-black/30 border-white/5 text-slate-400 hover:text-slate-200'
+                      }`}
+                    >
+                      {issue}
+                    </div>
                   ))}
                 </div>
-              )}
-            </div>
 
-            <div className="grid grid-cols-2 sm:grid-cols-4 lg:grid-cols-7 gap-3">
-              {MAP_POOL.map((m) => {
-                const isBanned = bannedMapIds.includes(m.id);
-                const isMyTurn = currentTurnTeam === 'Team 1' && !isBanned;
-
-                return (
-                  <div
-                    key={m.id}
-                    onClick={() => {
-                      if (isMyTurn) handleUserBanMap(m.id);
-                    }}
-                    className={`group relative h-48 rounded-2xl overflow-hidden border transition-all duration-200 select-none ${
-                      isBanned
-                        ? 'border-white/5 opacity-40 grayscale pointer-events-none'
-                        : isMyTurn
-                        ? 'border-white/20 hover:border-red-500/80 hover:scale-[1.02] cursor-pointer shadow-lg'
-                        : 'border-white/10 opacity-80'
-                    }`}
-                  >
-                    {/* Map Image Backdrop */}
-                    <img
-                      src={m.image}
-                      alt={m.name}
-                      className="absolute inset-0 w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"
-                    />
-                    <div className="absolute inset-0 bg-gradient-to-t from-black/95 via-black/40 to-transparent" />
-
-                    {/* Top Badge */}
-                    <div className="absolute top-2.5 left-2.5 right-2.5 flex items-center justify-between text-[10px] font-mono">
-                      <span className="px-2 py-0.5 rounded bg-black/60 backdrop-blur-sm border border-white/10 text-white font-bold">
-                        {m.code}
-                      </span>
-                    </div>
-
-                    {/* Banned Stamp Overlay */}
-                    {isBanned && (
-                      <div className="absolute inset-0 bg-red-950/70 backdrop-blur-[1px] flex flex-col items-center justify-center p-2">
-                        <div className="w-10 h-10 rounded-full bg-red-500/20 border-2 border-red-500 flex items-center justify-center text-red-400 mb-1">
-                          <X className="w-6 h-6 stroke-[3]" />
-                        </div>
-                        <span className="font-display font-black text-sm text-red-400 tracking-widest uppercase">
-                          BANNED
-                        </span>
-                      </div>
-                    )}
-
-                    {/* Hover Ban Action Button */}
-                    {isMyTurn && !isBanned && (
-                      <div className="absolute inset-0 bg-red-950/50 opacity-0 group-hover:opacity-100 transition-opacity flex flex-col items-center justify-center">
-                        <span className="px-3 py-1.5 rounded-xl bg-red-600 hover:bg-red-500 text-white font-mono font-bold text-xs uppercase tracking-wider shadow-lg flex items-center gap-1.5">
-                          <X className="w-3.5 h-3.5" />
-                          <span>BAN MAP</span>
-                        </span>
-                      </div>
-                    )}
-
-                    {/* Bottom Map Name */}
-                    <div className="absolute bottom-3 left-3 right-3 text-left">
-                      <p className="font-display font-black text-white text-base tracking-wide leading-tight">
-                        {m.name}
-                      </p>
-                      <p className="text-[10px] font-mono text-[#A3E635] mt-0.5">
-                        {isBanned ? 'Eliminated' : 'Active Choice'}
-                      </p>
-                    </div>
-                  </div>
-                );
-              })}
-            </div>
-          </div>
-        )}
-
-        {/* ======================================================== */}
-        {/* VIEW 2: SERVER DEPLOYING (INTERMEDIATE PHASE)            */}
-        {/* ======================================================== */}
-        {matchStatus === 'configuring' && (
-          <div className="p-8 rounded-3xl bg-[#0E121B] border border-[#A3E635]/40 shadow-2xl space-y-4 animate-in fade-in duration-300 text-center">
-            <div className="w-14 h-14 rounded-2xl bg-[#A3E635]/15 border border-[#A3E635]/40 flex items-center justify-center text-[#A3E635] mx-auto shadow-[0_0_20px_rgba(163,230,53,0.3)]">
-              <Server className="w-7 h-7 animate-pulse" />
-            </div>
-            <div>
-              <h3 className="text-xl font-display font-black text-white uppercase tracking-wider">
-                DEPLOYING CS2 DEDICATED SERVER FOR {decidedMap?.name.toUpperCase()}...
-              </h3>
-              <p className="text-xs font-mono text-slate-400 mt-1">
-                Allocating 128-tick Frankfurt server • Synchronizing sub-tick tickrate • Loading match cfg
-              </p>
-            </div>
-            <div className="max-w-md mx-auto w-full h-2 rounded-full bg-black/60 overflow-hidden">
-              <div className="h-full bg-gradient-to-r from-[#84CC16] to-[#A3E635] w-3/4 animate-pulse" />
-            </div>
-          </div>
-        )}
-
-        {/* ======================================================== */}
-        {/* VIEW 3: AUTHENTIC FACEIT SERVER CONNECT HUB (FINAL)      */}
-        {/* ======================================================== */}
-        {matchStatus === 'ready' && decidedMap && (
-          <div className="rounded-3xl overflow-hidden border-2 border-[#A3E635] shadow-[0_0_40px_rgba(163,230,53,0.25)] bg-[#0E121B] animate-in zoom-in-95 duration-300">
-            {/* Top Panoramic Hero Artwork of Decided Map */}
-            <div className="relative h-64 sm:h-72 w-full overflow-hidden">
-              <img
-                src={decidedMap.image}
-                alt={decidedMap.name}
-                className="w-full h-full object-cover scale-105"
-              />
-              <div className="absolute inset-0 bg-gradient-to-t from-[#0E121B] via-[#0E121B]/60 to-black/30" />
-
-              {/* Badges and Map Title over the image */}
-              <div className="absolute top-5 left-6 right-6 flex items-center justify-between">
-                <div className="flex items-center gap-2">
-                  <span className="px-3 py-1 rounded-full bg-black/70 backdrop-blur-md border border-[#A3E635]/60 text-[#A3E635] font-mono text-xs font-black tracking-wider uppercase">
-                    ★ Active Duty Selected
-                  </span>
-                  <span className="px-2.5 py-1 rounded-full bg-black/70 backdrop-blur-md border border-white/10 text-white font-mono text-xs font-bold">
-                    {decidedMap.code}
-                  </span>
-                </div>
-
-                <div className="flex items-center gap-2 px-3 py-1 rounded-full bg-emerald-500/20 border border-emerald-500/40 text-emerald-400 font-mono text-xs font-bold">
-                  <span className="w-2 h-2 rounded-full bg-emerald-400 animate-ping" />
-                  <span>SERVER ONLINE</span>
-                </div>
-              </div>
-
-              {/* Centered Map Name inside Hero */}
-              <div className="absolute bottom-6 left-6 right-6 flex flex-col sm:flex-row items-start sm:items-end justify-between gap-3">
-                <div>
-                  <div className="text-[11px] font-mono uppercase tracking-widest text-[#A3E635] font-bold">
-                    Decided Competitive Arena
-                  </div>
-                  <h2 className="text-4xl sm:text-5xl font-black font-display text-white tracking-wide uppercase drop-shadow-lg">
-                    MAP: {decidedMap.name}
-                  </h2>
-                  <p className="text-xs font-mono text-slate-300 mt-1">
-                    Frankfurt, Germany • 128-Tick CS2 Dedicated Server • AC Enforced
-                  </p>
-                </div>
-
-                {/* Veto Summary History Pill */}
-                {banHistory.length > 0 && (
-                  <div className="px-3 py-1.5 rounded-xl bg-black/70 backdrop-blur-md border border-white/10 text-[10px] font-mono text-slate-400 flex items-center gap-1.5 flex-wrap">
-                    <span className="text-slate-500 font-bold uppercase">Veto:</span>
-                    {banHistory.map((h, i) => (
-                      <span key={i} className="text-red-400">
-                        {h.mapName} ✕{i < banHistory.length - 1 ? ' •' : ''}
-                      </span>
-                    ))}
-                  </div>
-                )}
-              </div>
-            </div>
-
-            {/* Bottom FACEIT-Style Server Action Bar */}
-            <div className="p-5 sm:p-6 bg-[#121622] border-t border-white/[0.08] flex flex-col lg:flex-row items-center justify-between gap-5">
-              
-              {/* Left: Time Remaining to Join (Countdown) */}
-              <div className="flex items-center gap-3.5 w-full lg:w-auto">
-                <div className="w-11 h-11 rounded-2xl bg-amber-500/15 border border-amber-500/40 flex items-center justify-center text-amber-400 shrink-0">
-                  <Clock className="w-5 h-5 animate-spin" style={{ animationDuration: '8s' }} />
-                </div>
-                <div>
-                  <div className="text-[10px] font-mono uppercase text-slate-400">Time to join server</div>
-                  <div className="text-xl font-mono font-black text-white flex items-center gap-2">
-                    <span className={connectCountdown <= 60 ? 'text-red-400 animate-pulse' : 'text-[#A3E635]'}>
-                      {formatConnectTime(connectCountdown)}
-                    </span>
-                    <span className="text-xs font-mono text-slate-400 font-normal">(10/10 reserved)</span>
-                  </div>
-                </div>
-              </div>
-
-              {/* Center: Console Command Copy Box */}
-              <div className="flex-1 w-full lg:max-w-md flex items-center gap-2">
-                <input
-                  type="text"
-                  readOnly
-                  value={consoleCmd}
-                  className="flex-1 px-4 py-3 rounded-xl bg-black/80 border border-white/10 focus:border-[#A3E635] font-mono text-xs text-[#A3E635] outline-none select-all"
-                />
                 <button
-                  onClick={handleCopyIp}
-                  className="px-4 py-3 rounded-xl bg-white/[0.08] hover:bg-white/[0.15] border border-white/10 text-white font-mono text-xs font-bold transition flex items-center gap-1.5 cursor-pointer shrink-0 active:scale-95"
+                  onClick={() => {
+                    sound.playTournamentVictory();
+                    setSupportCallSubmitted(true);
+                  }}
+                  className="w-full py-3 rounded-xl bg-[#FF5500] hover:bg-[#FF6611] text-black font-display font-black text-xs uppercase tracking-wider transition cursor-pointer"
                 >
-                  {copiedIp ? <Check className="w-3.5 h-3.5 text-[#A3E635]" /> : <Copy className="w-3.5 h-3.5" />}
-                  <span>{copiedIp ? 'COPIED' : 'COPY IP'}</span>
+                  Call Live Admin
                 </button>
               </div>
-
-              {/* Right: Big Neon FACEIT CTA Button */}
-              <a
-                href={`steam://connect/${serverIp}`}
-                className="w-full lg:w-auto px-8 py-3.5 rounded-xl bg-gradient-to-r from-[#84CC16] to-[#A3E635] hover:brightness-110 text-slate-950 font-display font-black text-sm uppercase tracking-wider transition shadow-lg shadow-lime-500/30 flex items-center justify-center gap-2.5 cursor-pointer active:scale-95 shrink-0"
-              >
-                <Play className="w-4 h-4 fill-current stroke-[2.5]" />
-                <span>CONNECT TO SERVER</span>
-              </a>
-
-            </div>
-          </div>
-        )}
-
-        {/* SECTION 2: ROSTERS COMPARISON (TEAM 1 VS TEAM 2) */}
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-          
-          {/* TEAM 1 ROSTER */}
-          <div className="p-5 rounded-2xl bg-[#0E121B] border border-white/[0.08] space-y-4">
-            <div className="flex items-center justify-between border-b border-white/[0.06] pb-3">
-              <div className="flex items-center gap-2">
-                <div className="w-3 h-3 rounded-full bg-[#A3E635]" />
-                <h3 className="font-display font-black text-white text-base tracking-wide">
-                  TEAM 1 (Team {team1Players[0].name})
-                </h3>
-              </div>
-              <div className="text-right font-mono text-xs text-slate-400">
-                Avg ELO: <strong className="text-[#A3E635]">1,723</strong> • Level 8
-              </div>
-            </div>
-
-            <div className="space-y-2">
-              {team1Players.map((p, idx) => (
-                <div
-                  key={p.id}
-                  className="flex items-center justify-between p-2.5 rounded-xl bg-[#131722]/60 hover:bg-[#131722] border border-white/[0.04] transition"
+            ) : (
+              <div className="py-4 text-center space-y-3">
+                <CheckCircle2 className="w-10 h-10 text-emerald-400 mx-auto" />
+                <h4 className="text-white font-display font-bold text-sm uppercase">Admin Dispatched!</h4>
+                <p className="text-xs font-mono text-slate-400">
+                  Live match admin is connecting to server console EU-04.
+                </p>
+                <button
+                  onClick={() => {
+                    sound.playClick();
+                    setIsSupportModalOpen(false);
+                    setSupportCallSubmitted(false);
+                  }}
+                  className="px-4 py-2 rounded-lg bg-white/[0.08] text-xs font-mono text-white"
                 >
-                  <div className="flex items-center gap-3">
-                    <span className="text-[10px] font-mono text-slate-500 font-bold w-4">
-                      #{idx + 1}
-                    </span>
-
-                    {/* Avatar */}
-                    <div className="relative w-9 h-9 rounded-xl overflow-hidden border border-white/10 shrink-0">
-                      <img src={p.avatar} alt={p.name} className="w-full h-full object-cover" />
-                      {p.isCaptain && (
-                        <div className="absolute -top-1 -right-1 w-3.5 h-3.5 bg-amber-500 rounded-full flex items-center justify-center shadow">
-                          <Crown className="w-2.5 h-2.5 text-black" />
-                        </div>
-                      )}
-                    </div>
-
-                    <div>
-                      <div className="flex items-center gap-1.5 font-display font-bold text-white text-xs">
-                        <span>{p.name}</span>
-                        {p.isCaptain && (
-                          <span className="px-1.5 py-0.2 rounded bg-amber-500/20 text-amber-300 font-mono text-[9px] font-bold">
-                            CAPTAIN
-                          </span>
-                        )}
-                        <CountryFlag code={p.code} name={p.countryName} size="xs" />
-                      </div>
-                      <div className="flex items-center gap-2 text-[10px] font-mono text-slate-400 mt-0.5">
-                        <span>KD: <strong className="text-slate-200">{p.kd}</strong></span>
-                        <span>•</span>
-                        <span>HS: <strong className="text-slate-200">{p.hsRate}</strong></span>
-                      </div>
-                    </div>
-                  </div>
-
-                  {/* Level & ELO badge */}
-                  <div className="flex items-center gap-2">
-                    <span className="text-xs font-mono font-bold text-white">{p.elo}</span>
-                    <span className="w-6 h-6 rounded-lg bg-[#A3E635]/15 border border-[#A3E635]/40 text-[#A3E635] font-mono font-black text-xs flex items-center justify-center">
-                      {p.level}
-                    </span>
-                  </div>
-                </div>
-              ))}
-            </div>
-          </div>
-
-          {/* TEAM 2 ROSTER */}
-          <div className="p-5 rounded-2xl bg-[#0E121B] border border-white/[0.08] space-y-4">
-            <div className="flex items-center justify-between border-b border-white/[0.06] pb-3">
-              <div className="flex items-center gap-2">
-                <div className="w-3 h-3 rounded-full bg-orange-500" />
-                <h3 className="font-display font-black text-white text-base tracking-wide">
-                  TEAM 2 (Team {team2Players[0].name})
-                </h3>
+                  Close
+                </button>
               </div>
-              <div className="text-right font-mono text-xs text-slate-400">
-                Avg ELO: <strong className="text-orange-400">2,202</strong> • Level 10
-              </div>
-            </div>
+            )}
 
-            <div className="space-y-2">
-              {team2Players.map((p, idx) => (
-                <div
-                  key={p.id}
-                  className="flex items-center justify-between p-2.5 rounded-xl bg-[#131722]/60 hover:bg-[#131722] border border-white/[0.04] transition"
-                >
-                  <div className="flex items-center gap-3">
-                    <span className="text-[10px] font-mono text-slate-500 font-bold w-4">
-                      #{idx + 1}
-                    </span>
-
-                    {/* Avatar */}
-                    <div className="relative w-9 h-9 rounded-xl overflow-hidden border border-white/10 shrink-0">
-                      <img src={p.avatar} alt={p.name} className="w-full h-full object-cover" />
-                      {p.isCaptain && (
-                        <div className="absolute -top-1 -right-1 w-3.5 h-3.5 bg-amber-500 rounded-full flex items-center justify-center shadow">
-                          <Crown className="w-2.5 h-2.5 text-black" />
-                        </div>
-                      )}
-                    </div>
-
-                    <div>
-                      <div className="flex items-center gap-1.5 font-display font-bold text-white text-xs">
-                        <span>{p.name}</span>
-                        {p.isCaptain && (
-                          <span className="px-1.5 py-0.2 rounded bg-amber-500/20 text-amber-300 font-mono text-[9px] font-bold">
-                            CAPTAIN
-                          </span>
-                        )}
-                        <CountryFlag code={p.code} name={p.countryName} size="xs" />
-                      </div>
-                      <div className="flex items-center gap-2 text-[10px] font-mono text-slate-400 mt-0.5">
-                        <span>KD: <strong className="text-slate-200">{p.kd}</strong></span>
-                        <span>•</span>
-                        <span>HS: <strong className="text-slate-200">{p.hsRate}</strong></span>
-                      </div>
-                    </div>
-                  </div>
-
-                  {/* Level & ELO badge */}
-                  <div className="flex items-center gap-2">
-                    <span className="text-xs font-mono font-bold text-white">{p.elo}</span>
-                    <span className="w-6 h-6 rounded-lg bg-orange-500/15 border border-orange-500/40 text-orange-400 font-mono font-black text-xs flex items-center justify-center">
-                      {p.level}
-                    </span>
-                  </div>
-                </div>
-              ))}
-            </div>
           </div>
         </div>
+      )}
 
-      </div>
     </div>
   );
 };

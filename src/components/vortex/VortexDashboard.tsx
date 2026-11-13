@@ -634,16 +634,6 @@ export const VortexDashboard: React.FC<VortexDashboardProps> = ({
     };
   }>>([
     {
-      id: 'notif-1',
-      type: 'match',
-      title: '5v5 Match Ready Check',
-      subtitle: 'Ranked 5v5 on de_mirage (128-tick EU Frankfurt). 9/10 players confirmed.',
-      time: 'Just now',
-      read: false,
-      actionStatus: 'pending',
-      data: { map: 'de_mirage', server: '185.122.54.12:27015' },
-    },
-    {
       id: 'notif-2',
       type: 'party',
       title: 'Party Invite from juanflatroo',
@@ -1381,7 +1371,8 @@ export const VortexDashboard: React.FC<VortexDashboardProps> = ({
   const [matchFoundModal, setMatchFoundModal] = useState(false);
   const [acceptedPlayers, setAcceptedPlayers] = useState(3);
   const [userHasAccepted, setUserHasAccepted] = useState(false);
-  const [matchReadyCountdown, setMatchReadyCountdown] = useState(10);
+  const [matchReadyCountdown, setMatchReadyCountdown] = useState(60);
+  const [acceptedPlayerList, setAcceptedPlayerList] = useState<Array<{ name: string; avatar: string; isUser?: boolean }>>([]);
   const [activeServerIp, setActiveServerIp] = useState('194.163.159.231:27015');
   const [activePickedMap, setActivePickedMap] = useState('Mirage');
   const [copiedIp, setCopiedIp] = useState(false);
@@ -1465,6 +1456,7 @@ export const VortexDashboard: React.FC<VortexDashboardProps> = ({
       timer = setInterval(() => {
         setMatchReadyCountdown(prev => {
           if (prev <= 1) {
+            setMatchFoundModal(false);
             return 0;
           }
           return prev - 1;
@@ -1474,37 +1466,81 @@ export const VortexDashboard: React.FC<VortexDashboardProps> = ({
     return () => clearInterval(timer);
   }, [matchFoundModal]);
 
+  // Progressive bot accept simulation for 10 boxes
+  useEffect(() => {
+    if (!matchFoundModal) return;
+
+    const remainingBots: Array<{ name: string; avatar: string }> = [
+      { name: 'NiKo', avatar: 'https://images.unsplash.com/photo-1580489944761-15a19d654956?auto=format&fit=crop&w=150&q=80' },
+      { name: 'ZywOo', avatar: 'https://images.unsplash.com/photo-1570295999919-56ceb5ecca61?auto=format&fit=crop&w=150&q=80' },
+      { name: 'donk', avatar: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?auto=format&fit=crop&w=150&q=80' },
+      { name: 'm0NESY', avatar: 'https://images.unsplash.com/photo-1527980965255-d3b416303d12?auto=format&fit=crop&w=150&q=80' },
+      { name: 'ropz', avatar: 'https://images.unsplash.com/photo-1500648767791-00dcc994a43e?auto=format&fit=crop&w=150&q=80' },
+      { name: 'b1t', avatar: 'https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?auto=format&fit=crop&w=150&q=80' }
+    ];
+
+    let botIdx = 0;
+    const botInterval = setInterval(() => {
+      setAcceptedPlayerList(prev => {
+        if (prev.length >= 10 || botIdx >= remainingBots.length) {
+          clearInterval(botInterval);
+          return prev;
+        }
+        const candidate = remainingBots[botIdx++];
+        if (prev.some(p => p.name === candidate.name)) return prev;
+        return [...prev, candidate];
+      });
+    }, 750);
+
+    return () => clearInterval(botInterval);
+  }, [matchFoundModal]);
+
+  // Transition to Match Room when all 10 accepted
+  useEffect(() => {
+    if (matchFoundModal && userHasAccepted && acceptedPlayerList.length >= 10) {
+      const enterTimer = setTimeout(() => {
+        setMatchFoundModal(false);
+        setIsMatchRoomOpen(true);
+      }, 1200);
+      return () => clearTimeout(enterTimer);
+    }
+  }, [matchFoundModal, userHasAccepted, acceptedPlayerList.length]);
+
   const triggerMatchFound = () => {
     setIsQueuing(false);
     setMatchFoundModal(true);
-    setAcceptedPlayers(4);
     setUserHasAccepted(false);
-    setMatchReadyCountdown(10);
-    setActivePickedMap(selectedMaps.length > 0 ? selectedMaps[0].toUpperCase() : 'MIRAGE');
+    setMatchReadyCountdown(60);
     sound.playNotification();
 
-    // Increment accepted players progressively
-    let accepted = 4;
-    const acceptInterval = setInterval(() => {
-      accepted += 2;
-      if (accepted >= 9) {
-        setAcceptedPlayers(9);
-        clearInterval(acceptInterval);
-      } else {
-        setAcceptedPlayers(accepted);
-      }
-    }, 450);
+    const initialAccepted = [
+      { name: 'M18', avatar: '/images/faceit_m18_badge.png' },
+      { name: 'juanflatroo', avatar: 'https://images.unsplash.com/photo-1566492031773-4f4e44671857?auto=format&fit=crop&w=150&q=80' },
+      { name: 's1mple', avatar: 'https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?auto=format&fit=crop&w=150&q=80' }
+    ];
+    setAcceptedPlayerList(initialAccepted);
+    setAcceptedPlayers(3);
   };
 
   const handleUserAcceptMatch = () => {
     sound.playClick();
     setUserHasAccepted(true);
-    setAcceptedPlayers(10);
     sound.playTournamentVictory();
     confetti({
       particleCount: 100,
       spread: 70,
       origin: { y: 0.6 }
+    });
+
+    const userProfile = {
+      name: currentGamerTag,
+      avatar: currentAvatarUrl || '/images/blockeerz_avatar.png',
+      isUser: true
+    };
+
+    setAcceptedPlayerList(prev => {
+      if (prev.some(p => p.isUser)) return prev;
+      return [...prev, userProfile];
     });
   };
 
@@ -3180,30 +3216,6 @@ export const VortexDashboard: React.FC<VortexDashboardProps> = ({
                 </div>
               </div>
 
-              {/* SLIM MINIMALIST PLATFORM STATUS STRIP */}
-              <div className="w-full px-5 py-3 rounded-2xl bg-[#0E1017] border border-[#202536] flex flex-wrap items-center justify-between gap-4 text-xs font-mono">
-                <div className="flex flex-wrap items-center gap-4 sm:gap-6">
-                  <span className="flex items-center gap-2 text-slate-300">
-                    <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse" />
-                    <span>EU Competitive: <strong className="text-white">Operational</strong></span>
-                  </span>
-                  <span className="hidden sm:inline-block text-white/10">|</span>
-                  <span className="flex items-center gap-2 text-slate-300">
-                    <ShieldCheck className="w-4 h-4 text-emerald-400" />
-                    <span>Kernel AC: <strong className="text-emerald-400 font-bold">100% Enforced</strong></span>
-                  </span>
-                  <span className="hidden md:inline-block text-white/10">|</span>
-                  <span className="hidden md:flex items-center gap-2 text-slate-300">
-                    <Activity className="w-4 h-4 text-[#A3E635]" />
-                    <span>128-Tick: <strong className="text-[#A3E635]">0.4ms Jitter • 0% Loss</strong></span>
-                  </span>
-                </div>
-                <div className="flex items-center gap-2 text-slate-400">
-                  <Wifi className="w-3.5 h-3.5 text-sky-400" />
-                  <span>Frankfurt & Vienna: <strong className="text-sky-400 font-bold">14ms</strong></span>
-                </div>
-              </div>
-
               {/* FEATURED PLATFORM TOURNAMENTS & COMPETITIVE CIRCUIT */}
               <div className="bg-[#0E1017] border border-[#202536] rounded-3xl p-6 shadow-xl space-y-4">
                 <div className="flex flex-col sm:flex-row sm:items-center justify-between pb-3 border-b border-white/[0.06] gap-2">
@@ -4541,88 +4553,110 @@ export const VortexDashboard: React.FC<VortexDashboardProps> = ({
       </div>
 
       {/* ======================================================== */}
-      {/* MATCH READY FOUND POPUP MODAL                            */}
+      {/* MATCH READY FOUND POPUP MODAL (1:1 AUTHENTIC FACEIT)    */}
       {/* ======================================================== */}
       {matchFoundModal && (
-        <div className="fixed inset-0 z-50 bg-black/85 backdrop-blur-md flex items-center justify-center p-4">
+        <div className="fixed inset-0 z-50 bg-black/85 backdrop-blur-md flex items-center justify-center p-4 animate-in fade-in duration-150">
           <div className="relative w-full max-w-lg bg-[#0F121A] border-2 border-[#A3E635] rounded-3xl p-6 sm:p-8 shadow-2xl space-y-6 animate-in zoom-in-95">
             <div className="text-center space-y-2">
               <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-[#18210C] border border-[#A3E635]/50 text-[#A3E635] text-xs font-mono font-bold uppercase">
                 <span className="w-2 h-2 rounded-full bg-[#A3E635] animate-ping" />
                 MATCH READY
               </div>
-              <h3 className="text-2xl font-black font-display text-white">5v5 COMPETITIVE MATCH</h3>
-              <p className="text-xs font-mono text-slate-400">
-                Map: <span className="text-white font-bold">{activePickedMap}</span> • Server: <span className="text-white font-bold">Frankfurt 128-tick</span>
-              </p>
+              <h3 className="text-2xl font-black font-display text-white tracking-wide">
+                5v5 COMPETITIVE MATCH
+              </h3>
+              
+              {/* Only the countdown/minutes/seconds as requested (no map or server) */}
+              <div className="flex items-center justify-center gap-2 pt-1">
+                <Clock className="w-4 h-4 text-[#A3E635]" />
+                <span className="text-sm font-mono text-slate-300">
+                  Time remaining:{' '}
+                  <strong className={matchReadyCountdown <= 15 ? 'text-red-400 font-bold' : 'text-[#A3E635] font-bold'}>
+                    00:{matchReadyCountdown.toString().padStart(2, '0')}
+                  </strong>
+                </span>
+              </div>
             </div>
 
-            {/* Players Acceptance Counter */}
-            <div className="p-4 rounded-2xl bg-[#141722] border border-[#232938] text-center space-y-2">
+            {/* 10 Player Profile Avatar Boxes (FACEIT Authentic) */}
+            <div className="p-4 sm:p-5 rounded-2xl bg-[#141722] border border-[#232938] text-center space-y-3">
               <div className="flex items-center justify-between text-xs font-mono">
                 <span className="text-slate-400">Players Accepted:</span>
-                <span className="text-[#A3E635] font-bold text-sm">{acceptedPlayers} / 10</span>
+                <span className="text-[#A3E635] font-black text-sm">
+                  {acceptedPlayerList.length} / 10
+                </span>
               </div>
-              <div className="w-full h-2 rounded-full bg-black/50 overflow-hidden">
-                <div 
-                  className="h-full bg-gradient-to-r from-[#84CC16] to-[#A3E635] transition-all duration-300 rounded-full"
-                  style={{ width: `${(acceptedPlayers / 10) * 100}%` }}
-                />
+
+              {/* Grid of 10 avatar boxes */}
+              <div className="grid grid-cols-5 sm:grid-cols-10 gap-2 justify-items-center">
+                {Array.from({ length: 10 }).map((_, idx) => {
+                  const player = acceptedPlayerList[idx];
+                  if (player) {
+                    return (
+                      <div
+                        key={idx}
+                        className={`relative w-11 h-11 sm:w-10 sm:h-10 rounded-xl overflow-hidden border-2 transition-all duration-300 transform scale-100 animate-in zoom-in-75 ${
+                          player.isUser 
+                            ? 'border-[#A3E635] shadow-[0_0_15px_rgba(163,230,53,0.7)] ring-2 ring-[#A3E635]/50' 
+                            : 'border-emerald-400 shadow-[0_0_10px_rgba(52,211,153,0.4)]'
+                        }`}
+                        title={player.name}
+                      >
+                        <img
+                          src={player.avatar}
+                          alt={player.name}
+                          className="w-full h-full object-cover"
+                        />
+                        <div className="absolute -bottom-0.5 -right-0.5 w-3.5 h-3.5 rounded-full bg-emerald-500 border border-slate-950 flex items-center justify-center text-slate-950 shadow">
+                          <Check className="w-2 h-2 stroke-[3]" />
+                        </div>
+                        {player.isUser && (
+                          <div className="absolute top-0 inset-x-0 bg-[#A3E635] text-slate-950 text-[7px] font-black uppercase text-center font-mono leading-none py-0.5">
+                            YOU
+                          </div>
+                        )}
+                      </div>
+                    );
+                  }
+
+                  // Empty Waiting Slot
+                  return (
+                    <div
+                      key={idx}
+                      className="w-11 h-11 sm:w-10 sm:h-10 rounded-xl bg-black/50 border border-dashed border-white/15 flex items-center justify-center text-slate-600 transition"
+                      title={`Player #${idx + 1} waiting to accept...`}
+                    >
+                      <span className="text-[10px] font-mono font-bold text-slate-600">
+                        {idx + 1}
+                      </span>
+                    </div>
+                  );
+                })}
               </div>
             </div>
 
-            {/* Actions: Accept or Direct Connect */}
+            {/* Actions: Big Green Accept or Confirmation (No Close Window) */}
             <div className="space-y-3">
               {!userHasAccepted ? (
                 <button
                   onClick={handleUserAcceptMatch}
-                  className="w-full py-4 rounded-2xl bg-gradient-to-r from-[#84CC16] to-[#A3E635] hover:brightness-110 text-slate-950 font-display font-black text-sm uppercase tracking-wider transition shadow-[0_0_25px_rgba(163,230,53,0.5)] cursor-pointer"
+                  className="w-full py-4 rounded-2xl bg-gradient-to-r from-[#84CC16] via-[#A3E635] to-[#84CC16] hover:brightness-110 text-slate-950 font-display font-black text-sm uppercase tracking-wider transition shadow-[0_0_30px_rgba(163,230,53,0.5)] cursor-pointer active:scale-95"
                 >
                   ACCEPT MATCH
                 </button>
               ) : (
-                <div className="space-y-3">
-                  <div className="p-3 rounded-xl bg-emerald-500/15 border border-emerald-500/30 text-emerald-400 text-center font-mono text-xs font-bold">
-                    ✓ MATCH ACCEPTED! ALL 10 PLAYERS READY
-                  </div>
-                  
-                  <div className="flex flex-col sm:flex-row gap-3">
-                    <button
-                      onClick={() => handleCopyIp(activeServerIp)}
-                      className="flex-1 py-3 rounded-xl bg-[#141722] hover:bg-[#1A1F2E] border border-white/10 text-white font-mono text-xs font-bold transition flex items-center justify-center gap-2 cursor-pointer"
-                    >
-                      <Copy className="w-3.5 h-3.5" />
-                      <span>{copiedIp ? 'COPIED TO CLIPBOARD!' : 'COPY CONNECT IP'}</span>
-                    </button>
-                    <button
-                      onClick={() => handleConnectServer(activeServerIp, `5v5 Match [${activePickedMap}]`)}
-                      className="flex-1 py-3 rounded-xl bg-[#84CC16] hover:bg-[#A3E635] text-white font-display font-black text-xs uppercase tracking-wider transition shadow-md cursor-pointer flex items-center justify-center gap-2"
-                    >
-                      <Play className="w-3.5 h-3.5 fill-white" />
-                      <span>CONNECT VIA STEAM</span>
-                    </button>
-                  </div>
-
-                  <button
-                    onClick={() => {
-                      setMatchFoundModal(false);
-                      setIsMatchRoomOpen(true);
-                    }}
-                    className="w-full py-3.5 rounded-xl bg-gradient-to-r from-[#84CC16] to-[#A3E635] hover:brightness-110 text-slate-950 font-display font-black text-xs uppercase tracking-wider transition shadow-lg shadow-lime-500/25 flex items-center justify-center gap-2 cursor-pointer"
-                  >
-                    <Radio className="w-4 h-4 animate-pulse" />
-                    <span>ENTER CS2 MATCH ROOM & MAP VETO</span>
-                  </button>
+                <div className="p-4 rounded-2xl bg-[#A3E635]/15 border border-[#A3E635]/40 text-[#A3E635] text-center font-display font-black text-sm uppercase tracking-wider flex items-center justify-center gap-2">
+                  <Check className="w-5 h-5" />
+                  <span>
+                    {acceptedPlayerList.length >= 10 
+                      ? 'ALL PLAYERS ACCEPTED • ENTERING MATCH ROOM...' 
+                      : `ACCEPTED • WAITING FOR OTHERS (${acceptedPlayerList.length}/10)...`}
+                  </span>
                 </div>
               )}
-
-              <button
-                onClick={() => setMatchFoundModal(false)}
-                className="w-full py-2.5 rounded-xl bg-white/[0.04] hover:bg-white/[0.08] text-slate-400 hover:text-white font-mono text-xs transition cursor-pointer"
-              >
-                Close Window
-              </button>
             </div>
+
           </div>
         </div>
       )}
