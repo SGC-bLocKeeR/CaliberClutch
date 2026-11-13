@@ -758,20 +758,7 @@ export const VortexDashboard: React.FC<VortexDashboardProps> = ({
   const [inviteModalTab, setInviteModalTab] = useState<'all' | 'kosovo' | 'international'>('all');
 
   // Pending outgoing invitations by slot index: slotIndex -> PartySlotMember
-  const [pendingSlotInvites, setPendingSlotInvites] = useState<Record<number, PartySlotMember>>({
-    0: {
-      id: 'juanflatroo',
-      name: 'juanflatroo',
-      tag: 'GUILD',
-      avatar: 'https://images.unsplash.com/photo-1566492031773-4f4e44671857?auto=format&fit=crop&w=200&q=80',
-      level: 10,
-      elo: 2840,
-      verification: 'vip',
-      flag: '🇽🇰',
-      code: 'XK',
-      countryName: 'Kosovo'
-    }
-  });
+  const [pendingSlotInvites, setPendingSlotInvites] = useState<Record<number, PartySlotMember>>({});
 
   const filteredInvitablePlayers = SUGGESTED_TEAMMATES.filter((p) => {
     const matchesSearch =
@@ -802,28 +789,26 @@ export const VortexDashboard: React.FC<VortexDashboardProps> = ({
     // Save as pending invite in this slot
     setPendingSlotInvites(prev => ({ ...prev, [slotIdx]: player }));
 
-    // Close the friends list modal
+    // Close modal
     setInviteModalOpen(false);
 
-    setDashboardToast(`✓ Party invitation sent to ${player.name}! Player now sees the ACCEPT / REJECT card.`);
+    setDashboardToast(`✓ Party invite sent to ${player.name}`);
 
-    // Show the interactive foreground card in front of the screen with ACCEPT & REJECT
-    setActivePartyInvite({
-      id: `invite-${Date.now()}`,
-      direction: 'outgoing',
-      sender: player.name,
-      targetSlot: slotIdx,
-      tag: player.tag,
-      avatar: player.avatar,
-      level: player.level,
-      elo: player.elo,
-      flag: player.flag || '🇽🇰',
-      code: player.code || 'XK',
-      countryName: player.countryName || 'Kosovo',
-      lobbyInfo: `Lobby of ${currentGamerTag} • 5v5 European Queue (Slot #${slotIdx + 1})`,
-      expiresIn: 45,
-      status: 'pending',
-    });
+    // Simulated acceptance after 2.5 seconds (teammate accepts and enters lobby)
+    setTimeout(() => {
+      setPartySlots(prev => {
+        const next = [...prev];
+        next[slotIdx] = player;
+        return next;
+      });
+      setPendingSlotInvites(prev => {
+        const copy = { ...prev };
+        delete copy[slotIdx];
+        return copy;
+      });
+      sound.playJoinScrim();
+      setDashboardToast(`✓ ${player.name} joined your party!`);
+    }, 2500);
   };
 
   const handleCancelPendingInvite = (slotIndex: number, e: React.MouseEvent) => {
@@ -834,148 +819,80 @@ export const VortexDashboard: React.FC<VortexDashboardProps> = ({
       delete copy[slotIndex];
       return copy;
     });
-    if (activePartyInvite && activePartyInvite.targetSlot === slotIndex) {
-      setActivePartyInvite(null);
-    }
     setDashboardToast('Invitation cancelled');
   };
 
   // =========================================================================
-  // FACEIT-STYLE FOREGROUND ACTIVE PARTY INVITATION (Shows in front of screen)
+  // AUTHENTIC FACEIT PARTY INVITATION (Clean & Minimal)
   // =========================================================================
   const [activePartyInvite, setActivePartyInvite] = useState<{
     id: string;
-    direction: 'incoming' | 'outgoing';
     sender: string;
-    targetSlot?: number;
-    tag?: string;
     avatar: string;
     level: number;
-    elo: number;
-    flag: string;
     code: string;
     countryName: string;
-    lobbyInfo: string;
-    expiresIn: number;
-    status: 'pending' | 'accepted' | 'declined';
   } | null>({
     id: 'invite-juanflatroo',
-    direction: 'outgoing',
     sender: 'juanflatroo',
-    targetSlot: 0,
-    tag: 'FLATROO',
     avatar: 'https://images.unsplash.com/photo-1566492031773-4f4e44671857?w=150&auto=format&fit=crop&q=80',
     level: 10,
-    elo: 2840,
-    flag: '🇽🇰',
     code: 'XK',
     countryName: 'Kosovo',
-    lobbyInfo: 'European Challenger 5v5 Lobby (Slot #1)',
-    expiresIn: 45,
-    status: 'pending',
   });
-
-  // Countdown timer for active foreground party invitation
-  useEffect(() => {
-    if (!activePartyInvite || activePartyInvite.status !== 'pending') return;
-    const interval = setInterval(() => {
-      setActivePartyInvite(prev => {
-        if (!prev) return null;
-        if (prev.expiresIn <= 1) {
-          clearInterval(interval);
-          return null;
-        }
-        return { ...prev, expiresIn: prev.expiresIn - 1 };
-      });
-    }, 1000);
-    return () => clearInterval(interval);
-  }, [activePartyInvite?.status]);
 
   const handleAcceptPartyInvite = () => {
     sound.playJoinScrim();
     try {
       confetti({
-        particleCount: 80,
-        spread: 80,
-        origin: { y: 0.25 }
+        particleCount: 60,
+        spread: 60,
+        origin: { y: 0.2 }
       });
     } catch {}
 
     if (activePartyInvite) {
-      const targetSlot = activePartyInvite.targetSlot !== undefined ? activePartyInvite.targetSlot : 0;
-      setActivePartyInvite(prev => prev ? { ...prev, status: 'accepted' } : null);
-
-      const acceptedMember: PartySlotMember = {
-        id: activePartyInvite.sender.toLowerCase(),
-        name: activePartyInvite.sender,
-        tag: activePartyInvite.tag || 'PRO',
-        avatar: activePartyInvite.avatar,
-        level: activePartyInvite.level,
-        elo: activePartyInvite.elo,
-        verification: 'vip',
-        flag: activePartyInvite.flag,
-        code: activePartyInvite.code,
-        countryName: activePartyInvite.countryName,
-      };
-
+      const sender = activePartyInvite.sender;
       setPartySlots(prev => {
         const next = [...prev];
-        next[targetSlot] = acceptedMember;
+        next[0] = {
+          id: sender.toLowerCase(),
+          name: sender,
+          tag: 'PRO',
+          avatar: activePartyInvite.avatar,
+          level: activePartyInvite.level,
+          elo: 2840,
+          verification: 'vip',
+          flag: '🇽🇰',
+          code: activePartyInvite.code,
+          countryName: activePartyInvite.countryName,
+        };
         return next;
       });
-
-      setPendingSlotInvites(prev => {
-        const copy = { ...prev };
-        delete copy[targetSlot];
-        return copy;
-      });
-
-      setDashboardToast(`✓ ${activePartyInvite.sender} accepted the party invitation and joined the lobby!`);
-
-      setTimeout(() => {
-        setActivePartyInvite(null);
-        setActiveTab('play');
-      }, 1000);
+      setDashboardToast(`✓ Joined ${sender}'s party lobby!`);
+      setActivePartyInvite(null);
+      setActiveTab('play');
     }
   };
 
   const handleRejectPartyInvite = () => {
     sound.playClick();
     if (activePartyInvite) {
-      const targetSlot = activePartyInvite.targetSlot !== undefined ? activePartyInvite.targetSlot : 0;
-      setActivePartyInvite(prev => prev ? { ...prev, status: 'declined' } : null);
-
-      setPendingSlotInvites(prev => {
-        const copy = { ...prev };
-        delete copy[targetSlot];
-        return copy;
-      });
-
-      setDashboardToast(`${activePartyInvite.sender} declined the invitation.`);
-      setTimeout(() => {
-        setActivePartyInvite(null);
-      }, 600);
+      setDashboardToast(`Party invitation from ${activePartyInvite.sender} declined`);
+      setActivePartyInvite(null);
     }
   };
 
   const handleTriggerPartyInvite = (customName?: string) => {
-    sound.playJoinScrim();
+    sound.playClick();
     setActivePartyInvite({
       id: `invite-${Date.now()}`,
-      direction: 'incoming',
       sender: customName || 'juanflatroo',
-      tag: 'PRO',
       avatar: 'https://images.unsplash.com/photo-1566492031773-4f4e44671857?w=150&auto=format&fit=crop&q=80',
       level: 10,
-      elo: 2840,
-      flag: '🇽🇰',
       code: 'XK',
       countryName: 'Kosovo',
-      lobbyInfo: 'European Challenger 5v5 Lobby (4/5 in Party)',
-      expiresIn: 45,
-      status: 'pending',
     });
-    setDashboardToast('⚡ Incoming FACEIT-style Party Invite on screen!');
   };
 
   // Anti-Cheat Active State (Stored in localStorage, default false)
@@ -5582,126 +5499,57 @@ export const VortexDashboard: React.FC<VortexDashboardProps> = ({
       )}
 
       {/* ======================================================== */}
-      {/* FACEIT-STYLE FOREGROUND PARTY INVITATION POPUP          */}
-      {/* Appears prominently in front of screen with ACCEPT & REJECT */}
+      {/* AUTHENTIC FACEIT PARTY INVITATION (MINIMAL & FAST)       */}
       {/* ======================================================== */}
       {activePartyInvite && (
-        <div className="fixed top-6 left-1/2 -translate-x-1/2 z-[150] w-[94vw] sm:w-[520px] rounded-3xl bg-[#0C0E17]/98 border-2 border-[#A3E635] shadow-[0_25px_80px_rgba(0,0,0,0.95),0_0_40px_rgba(163,230,53,0.35)] backdrop-blur-2xl p-5 animate-in slide-in-from-top-6 fade-in duration-200">
-          {/* Top header badge & countdown */}
-          <div className="flex items-center justify-between pb-3 border-b border-[#1E2538]">
-            <div className="flex items-center gap-2.5">
-              <span className="relative flex h-2.5 w-2.5">
-                <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-[#A3E635] opacity-75"></span>
-                <span className="relative inline-flex rounded-full h-2.5 w-2.5 bg-[#A3E635]"></span>
-              </span>
-              <span className="text-xs font-black tracking-widest text-[#A3E635] uppercase font-mono">
-                {activePartyInvite.direction === 'outgoing'
-                  ? 'CS2 PARTY INVITATION (SENT TO PLAYER)'
-                  : 'CS2 PARTY INVITATION (RECEIVED)'}
-              </span>
-            </div>
-
-            <div className="flex items-center gap-2.5">
-              <span className="text-[11px] font-mono font-bold text-slate-300 bg-white/5 px-2.5 py-0.5 rounded-full border border-white/10">
-                Expires in {activePartyInvite.expiresIn}s
-              </span>
-              <button
-                onClick={() => setActivePartyInvite(null)}
-                className="text-slate-400 hover:text-white p-1 transition cursor-pointer"
-                title="Dismiss"
-              >
-                <X className="w-4 h-4" />
-              </button>
-            </div>
-          </div>
-
-          {/* Inviter / Target Info Row */}
-          <div className="py-4 flex items-center gap-4">
-            {/* Avatar with Faceit Level Badge */}
+        <div className="fixed top-5 right-5 sm:right-8 z-[150] w-[calc(100vw-2.5rem)] sm:w-[380px] rounded-2xl bg-[#0E1119]/98 border border-[#242C3E] shadow-[0_20px_50px_rgba(0,0,0,0.85)] p-3.5 flex items-center justify-between gap-3 animate-in slide-in-from-top-4 fade-in duration-150 backdrop-blur-xl">
+          {/* Avatar with Faceit Level Badge */}
+          <div className="flex items-center gap-2.5 min-w-0">
             <div className="relative shrink-0">
               <img
                 src={activePartyInvite.avatar}
                 alt={activePartyInvite.sender}
-                className="w-14 h-14 rounded-2xl object-cover border-2 border-[#A3E635] shadow-[0_0_15px_rgba(163,230,53,0.35)]"
+                className="w-10 h-10 rounded-xl object-cover border border-white/10"
               />
-              <div className="absolute -bottom-1 -right-1 px-1.5 py-0.5 rounded-md bg-[#FF5500] text-white font-black text-[10px] font-mono border border-black shadow">
-                LVL {activePartyInvite.level}
+              <div className="absolute -bottom-1 -right-1 px-1 py-0.2 rounded bg-[#FF5500] text-white font-black text-[9px] font-mono leading-none border border-black shadow">
+                {activePartyInvite.level}
               </div>
             </div>
 
-            {/* Details */}
-            <div className="flex-1 min-w-0 text-left">
-              <div className="flex items-center gap-2">
-                <span className="text-base font-black text-white truncate font-display">
+            <div className="min-w-0 text-left">
+              <div className="flex items-center gap-1.5">
+                <span className="font-display font-bold text-xs text-white truncate">
                   {activePartyInvite.sender}
                 </span>
                 <CountryFlag code={activePartyInvite.code} name={activePartyInvite.countryName} size="xs" />
-                <span className="px-1.5 py-0.2 rounded bg-amber-500/20 text-amber-300 border border-amber-500/30 font-black text-[10px] font-mono">
-                  PRO
-                </span>
               </div>
-              <p className="text-xs text-slate-300 mt-0.5 font-sans">
-                {activePartyInvite.direction === 'outgoing'
-                  ? `You invited ${activePartyInvite.sender} to join your CS2 5v5 party lobby.`
-                  : 'has invited you to join their CS2 5v5 competitive lobby.'}
+              <p className="text-[11px] font-mono text-slate-400 mt-0.5 truncate">
+                Invited you to CS2 5v5 party
               </p>
-              <div className="flex items-center gap-2 mt-1.5 text-[11px] font-mono text-[#A3E635]">
-                <Users className="w-3.5 h-3.5" />
-                <span>{activePartyInvite.lobbyInfo}</span>
-              </div>
             </div>
           </div>
 
-          {/* Action Buttons: ACCEPT & REJECT */}
-          {activePartyInvite.status === 'pending' ? (
-            <div className="space-y-2 pt-2">
-              <div className="flex items-center gap-3">
-                <button
-                  onClick={handleAcceptPartyInvite}
-                  className="flex-1 py-3 px-4 rounded-2xl bg-gradient-to-r from-[#A3E635] to-[#84cc16] hover:from-[#b4f545] hover:to-[#95dc22] text-slate-950 font-black text-sm uppercase font-mono tracking-wider transition-all duration-150 shadow-[0_0_25px_rgba(163,230,53,0.55)] hover:scale-[1.02] active:scale-98 flex items-center justify-center gap-2 cursor-pointer"
-                >
-                  <Check className="w-4 h-4 stroke-[3]" />
-                  <span>
-                    {activePartyInvite.direction === 'outgoing'
-                      ? `ACCEPT (SIMULATE ${activePartyInvite.sender.toUpperCase()} JOIN)`
-                      : 'ACCEPT'}
-                  </span>
-                </button>
-                <button
-                  onClick={handleRejectPartyInvite}
-                  className="py-3 px-4 rounded-2xl bg-[#151924] hover:bg-red-500/20 text-slate-300 hover:text-red-400 border border-[#252D40] hover:border-red-500/40 font-black text-sm uppercase font-mono tracking-wider transition-all duration-150 active:scale-98 flex items-center justify-center gap-2 cursor-pointer"
-                >
-                  <X className="w-4 h-4 stroke-[2.5]" />
-                  <span>REJECT</span>
-                </button>
-              </div>
-              {activePartyInvite.direction === 'outgoing' && (
-                <p className="text-[10px] font-mono text-center text-slate-400">
-                  👆 This card displays live how {activePartyInvite.sender} sees your invite. Click ACCEPT to see them join your party, or REJECT to decline!
-                </p>
-              )}
-            </div>
-          ) : activePartyInvite.status === 'accepted' ? (
-            <div className="p-3 rounded-2xl bg-emerald-500/15 border border-emerald-500/40 text-emerald-400 text-xs font-mono font-bold flex items-center justify-center gap-2 animate-in zoom-in-95">
-              <CheckCircle2 className="w-4 h-4" />
-              <span>INVITATION ACCEPTED • PLAYER ENTERED 5v5 LOBBY!</span>
-            </div>
-          ) : (
-            <div className="p-3 rounded-2xl bg-red-500/10 border border-red-500/30 text-red-400 text-xs font-mono font-bold flex items-center justify-center gap-2">
-              <X className="w-4 h-4" />
-              <span>INVITATION DECLINED</span>
-            </div>
-          )}
-
-          {/* Smooth expiration progress bar at bottom */}
-          {activePartyInvite.status === 'pending' && (
-            <div className="mt-3.5 w-full bg-[#1B2233] h-1 rounded-full overflow-hidden">
-              <div
-                className="h-full bg-gradient-to-r from-lime-500 to-[#A3E635] transition-all duration-1000 ease-linear shadow-[0_0_8px_rgba(163,230,53,0.8)]"
-                style={{ width: `${(activePartyInvite.expiresIn / 45) * 100}%` }}
-              />
-            </div>
-          )}
+          {/* Action buttons: Decline & Accept */}
+          <div className="flex items-center gap-1.5 shrink-0">
+            <button
+              onClick={handleRejectPartyInvite}
+              className="px-2.5 py-1.5 rounded-lg bg-white/5 hover:bg-white/10 text-slate-300 hover:text-white font-mono font-bold text-xs transition cursor-pointer"
+            >
+              Decline
+            </button>
+            <button
+              onClick={handleAcceptPartyInvite}
+              className="px-3.5 py-1.5 rounded-lg bg-[#FF5500] hover:bg-[#FF6611] text-white font-mono font-black text-xs uppercase tracking-wider transition hover:scale-105 active:scale-95 shadow-md shadow-orange-500/25 cursor-pointer"
+            >
+              Accept
+            </button>
+            <button
+              onClick={() => setActivePartyInvite(null)}
+              className="text-slate-500 hover:text-slate-300 p-1 transition cursor-pointer ml-0.5"
+            >
+              <X className="w-3.5 h-3.5" />
+            </button>
+          </div>
         </div>
       )}
 
