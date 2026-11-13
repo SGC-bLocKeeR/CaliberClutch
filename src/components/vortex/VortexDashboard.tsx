@@ -804,20 +804,24 @@ export const VortexDashboard: React.FC<VortexDashboardProps> = ({
     // Close friends selection modal
     setInviteModalOpen(false);
 
-    // IMMEDIATELY trigger the authentic 1:1 FACEIT invitation test dialog!
+    // YOU sent the invite to player! The test dialog simulates what `player` sees!
+    // On player's screen, the sender is YOU (currentGamerTag, currentAvatarUrl, currentVerification, currentCountry.code)!
     setPartyInviteCountdown(88);
     setActivePartyInvite({
       id: `invite-${Date.now()}`,
-      sender: player.name,
-      avatar: player.avatar,
-      level: player.level,
-      code: player.code || 'XK',
-      countryName: player.countryName || 'Kosovo',
+      sender: currentGamerTag,
+      avatar: currentAvatarUrl,
+      level: 7,
+      code: currentCountry.code,
+      countryName: currentCountry.name,
+      verification: currentVerification,
       targetSlotIdx: slotIdx,
       playerObj: player,
+      isOutgoingSimulation: true,
+      invitedPlayerName: player.name,
     });
 
-    setDashboardToast(`✓ Ftesa iu dërgua ${player.name} — Dritarja e testimit FACEIT aktive`);
+    setDashboardToast(`✓ Ftesa iu dërgua ${player.name} — Duke shfaqur pamjen e ${player.name}`);
   };
 
   const handleCancelPendingInvite = (slotIndex: number, e?: React.MouseEvent) => {
@@ -844,8 +848,11 @@ export const VortexDashboard: React.FC<VortexDashboardProps> = ({
     level?: number;
     code?: string;
     countryName?: string;
+    verification?: 'vip' | 'verified' | 'none';
     targetSlotIdx?: number;
     playerObj?: PartySlotMember;
+    isOutgoingSimulation?: boolean;
+    invitedPlayerName?: string;
   } | null>({
     id: 'invite-m18',
     sender: 'M18',
@@ -853,7 +860,9 @@ export const VortexDashboard: React.FC<VortexDashboardProps> = ({
     level: 10,
     code: 'XK',
     countryName: 'Kosovo',
+    verification: 'vip',
     targetSlotIdx: 0,
+    isOutgoingSimulation: false,
   });
 
   const [partyInviteCountdown, setPartyInviteCountdown] = useState<number>(88);
@@ -887,7 +896,6 @@ export const VortexDashboard: React.FC<VortexDashboardProps> = ({
     } catch {}
 
     if (activePartyInvite) {
-      const sender = activePartyInvite.sender;
       // Target slot: use targetSlotIdx, or find first empty slot, or slot 0
       let targetSlot = activePartyInvite.targetSlotIdx;
       if (targetSlot === undefined || targetSlot < 0) {
@@ -895,14 +903,16 @@ export const VortexDashboard: React.FC<VortexDashboardProps> = ({
         targetSlot = emptyIdx !== -1 ? emptyIdx : 0;
       }
 
+      // If it was an outgoing simulation (you invited someone), the player entering the slot is playerObj!
+      // If it was an incoming invite (someone invited you), the player is playerObj or sender!
       const playerToAdd: PartySlotMember = activePartyInvite.playerObj || {
-        id: sender.toLowerCase(),
-        name: sender,
-        tag: sender === 'M18' ? 'FACEIT' : 'PRO',
+        id: activePartyInvite.sender.toLowerCase(),
+        name: activePartyInvite.sender,
+        tag: activePartyInvite.sender === 'M18' ? 'FACEIT' : 'PRO',
         avatar: activePartyInvite.avatar || '',
         level: activePartyInvite.level || 10,
         elo: 3120,
-        verification: 'vip',
+        verification: activePartyInvite.verification || 'vip',
         flag: '🇽🇰',
         code: activePartyInvite.code || 'XK',
         countryName: activePartyInvite.countryName || 'Kosovo',
@@ -923,7 +933,11 @@ export const VortexDashboard: React.FC<VortexDashboardProps> = ({
         });
       }
 
-      setDashboardToast(`✓ ${sender} pranoi ftesën dhe u fut në party!`);
+      const joinedName = activePartyInvite.isOutgoingSimulation
+        ? (activePartyInvite.invitedPlayerName || playerToAdd.name)
+        : activePartyInvite.sender;
+
+      setDashboardToast(`✓ ${joinedName} pranoi ftesën dhe u fut në party!`);
       setActivePartyInvite(null);
       setActiveTab('play');
     }
@@ -940,7 +954,11 @@ export const VortexDashboard: React.FC<VortexDashboardProps> = ({
           return copy;
         });
       }
-      setDashboardToast(`Ftesa për ${activePartyInvite.sender} u refuzua`);
+      const declinedName = activePartyInvite.isOutgoingSimulation
+        ? (activePartyInvite.invitedPlayerName || 'Lojtari')
+        : activePartyInvite.sender;
+
+      setDashboardToast(`Ftesa për ${declinedName} u refuzua`);
       setActivePartyInvite(null);
     }
   };
@@ -2397,13 +2415,16 @@ export const VortexDashboard: React.FC<VortexDashboardProps> = ({
                                   setPartyInviteCountdown(88);
                                   setActivePartyInvite({
                                     id: `invite-${Date.now()}`,
-                                    sender: pendingPlayer.name,
-                                    avatar: pendingPlayer.avatar,
-                                    level: pendingPlayer.level,
-                                    code: pendingPlayer.code || 'XK',
-                                    countryName: pendingPlayer.countryName || 'Kosovo',
+                                    sender: currentGamerTag,
+                                    avatar: currentAvatarUrl,
+                                    level: 7,
+                                    code: currentCountry.code,
+                                    countryName: currentCountry.name,
+                                    verification: currentVerification,
                                     targetSlotIdx: idx,
                                     playerObj: pendingPlayer,
+                                    isOutgoingSimulation: true,
+                                    invitedPlayerName: pendingPlayer.name,
                                   });
                                 }}
                                 className="flex-1 py-1 rounded-lg bg-gradient-to-r from-[#84CC16] to-[#A3E635] hover:brightness-110 text-slate-950 text-[10px] font-mono font-black transition cursor-pointer shadow-[0_0_10px_rgba(163,230,53,0.3)] text-center uppercase"
@@ -5637,28 +5658,36 @@ export const VortexDashboard: React.FC<VortexDashboardProps> = ({
       {/* VORTEX MINIMAL CLEAN "INVITE TO PARTY" MODAL DIALOG       */}
       {/* ======================================================== */}
       {activePartyInvite && (
-        <div className="fixed inset-0 z-[150] bg-black/80 backdrop-blur-[3px] flex items-center justify-center p-4 animate-in fade-in duration-150">
-          <div className="relative w-full max-w-[480px] bg-[#0E121B] border border-[#A3E635]/30 rounded-2xl shadow-[0_25px_60px_rgba(0,0,0,0.95),0_0_30px_rgba(163,230,53,0.12)] overflow-hidden animate-in zoom-in-95 duration-150">
+        <div className="fixed inset-0 z-[150] bg-black/85 backdrop-blur-[3px] flex items-center justify-center p-4 animate-in fade-in duration-150">
+          <div className="relative w-full max-w-[490px] bg-[#0E121B] border border-[#A3E635]/40 rounded-3xl shadow-[0_25px_60px_rgba(0,0,0,0.95),0_0_35px_rgba(163,230,53,0.18)] overflow-hidden animate-in zoom-in-95 duration-150">
+            {/* Top Slim Glowing Neon Lime Animated Countdown Bar */}
+            <div className="w-full bg-[#182030] h-1">
+              <div
+                style={{ width: `${Math.max(0, Math.min(100, (partyInviteCountdown / 88) * 100))}%` }}
+                className="h-full bg-gradient-to-r from-[#84CC16] to-[#A3E635] shadow-[0_0_12px_rgba(163,230,53,0.9)] transition-all duration-1000 ease-linear"
+              />
+            </div>
+
             {/* Header: Centered "Invite to party" with close button */}
             <div className="relative pt-6 pb-2 px-6 flex items-center justify-center">
               <h2 className="text-xl font-bold tracking-tight text-white select-none">
-                Invite to <span className="text-[#A3E635]">party</span>
+                Invite to <span className="text-[#A3E635] drop-shadow-[0_0_8px_rgba(163,230,53,0.6)]">party</span>
               </h2>
               <button
                 onClick={() => setActivePartyInvite(null)}
-                className="absolute right-4 top-4 text-slate-500 hover:text-white transition cursor-pointer p-1.5"
+                className="absolute right-4 top-4 text-slate-500 hover:text-white transition cursor-pointer p-1.5 rounded-lg hover:bg-white/5"
                 aria-label="Close"
               >
                 <X className="w-5 h-5" />
               </button>
             </div>
 
-            {/* Content: Avatar & 3 Clean Lines of Text */}
+            {/* Content: Avatar, Name + Verification + Country, and Clean Countdown */}
             <div className="px-8 pt-4 pb-6 flex items-center gap-5">
-              {/* Avatar circle */}
+              {/* Avatar with VORTEX Glowing Border and Status Dot */}
               <div className="relative shrink-0 select-none">
-                {activePartyInvite.sender === 'M18' || !activePartyInvite.avatar ? (
-                  <div className="w-[74px] h-[74px] rounded-full bg-black border border-[#A3E635]/40 flex items-center justify-center p-1 shadow-md overflow-hidden">
+                {(!activePartyInvite.avatar && activePartyInvite.sender === 'M18') ? (
+                  <div className="w-16 h-16 rounded-2xl bg-[#090C12] border-2 border-[#A3E635] p-2 flex flex-col items-center justify-center shadow-[0_0_20px_rgba(163,230,53,0.35)] relative overflow-hidden">
                     <img
                       src="/images/faceit_m18_badge.png"
                       alt="M18"
@@ -5668,29 +5697,35 @@ export const VortexDashboard: React.FC<VortexDashboardProps> = ({
                 ) : (
                   <div className="relative">
                     <img
-                      src={activePartyInvite.avatar}
+                      src={activePartyInvite.avatar || currentAvatarUrl}
                       alt={activePartyInvite.sender}
-                      className="w-[74px] h-[74px] rounded-full object-cover border border-[#A3E635]/40 shadow-md"
+                      className="w-16 h-16 rounded-2xl object-cover border-2 border-[#A3E635] shadow-[0_0_20px_rgba(163,230,53,0.35)]"
                     />
                     {activePartyInvite.level && (
                       <div className="absolute -bottom-1 -right-1 px-1.5 py-0.2 rounded bg-[#A3E635] text-slate-950 font-black text-[9px] font-mono leading-none border border-black shadow">
-                        {activePartyInvite.level}
+                        LVL {activePartyInvite.level}
                       </div>
                     )}
                   </div>
                 )}
+                <span className="absolute -top-1 -right-1 w-3 h-3 rounded-full bg-emerald-400 border-2 border-[#0E121B] animate-pulse" />
               </div>
 
-              {/* Text Info: Clean and uncluttered */}
-              <div className="min-w-0 text-left select-none">
-                <p className="font-bold text-white text-[15px] leading-snug">
-                  {activePartyInvite.sender} invited you to join their party
+              {/* Text Info: Name + Verification + Country, and 2 clean lines */}
+              <div className="min-w-0 text-left select-none space-y-1">
+                <div className="flex items-center gap-2">
+                  <span className="font-display font-black text-white text-base truncate">
+                    {activePartyInvite.sender}
+                  </span>
+                  <FaceitVerificationBadge type={activePartyInvite.verification || 'vip'} size="sm" />
+                  <CountryFlag code={activePartyInvite.code || 'XK'} name={activePartyInvite.countryName || 'Kosovo'} size="xs" />
+                </div>
+                <p className="text-xs font-mono text-slate-300 font-normal leading-snug">
+                  Invited you to join their party
                 </p>
-                <p className="text-sm text-slate-400 mt-1 font-normal leading-snug">
-                  Click accept to join the party
-                </p>
-                <p className="text-sm text-slate-400 mt-1 font-normal leading-snug">
-                  Time remaining {partyInviteCountdown}
+                <p className="text-xs font-mono text-slate-400 mt-1 font-normal leading-snug flex items-center gap-1.5">
+                  <Clock className="w-3.5 h-3.5 text-[#A3E635]" />
+                  <span>Time remaining: <strong className="text-[#A3E635] font-bold">{partyInviteCountdown}s</strong></span>
                 </p>
               </div>
             </div>
@@ -5708,9 +5743,10 @@ export const VortexDashboard: React.FC<VortexDashboardProps> = ({
               </button>
               <button
                 onClick={handleAcceptPartyInvite}
-                className="font-bold text-sm tracking-wider text-slate-950 bg-[#A3E635] hover:bg-[#84CC16] px-8 py-2.5 rounded-lg shadow-md hover:shadow-lime-500/25 transition cursor-pointer uppercase select-none active:scale-95"
+                className="font-bold text-sm tracking-wider text-slate-950 bg-gradient-to-r from-[#84CC16] to-[#A3E635] hover:brightness-110 px-8 py-2.5 rounded-xl shadow-md shadow-lime-500/25 transition cursor-pointer uppercase select-none active:scale-95 flex items-center gap-2"
               >
-                ACCEPT
+                <Check className="w-4 h-4 stroke-[3]" />
+                <span>ACCEPT</span>
               </button>
             </div>
           </div>
