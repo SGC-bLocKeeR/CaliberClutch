@@ -85,6 +85,24 @@ export const VortexMatchRoom: React.FC<VortexMatchRoomProps> = ({
   const [matchStatus, setMatchStatus] = useState<'veto' | 'configuring' | 'ready'>('veto');
   const [copiedIp, setCopiedIp] = useState(false);
   const [activeTab, setActiveTab] = useState<'overview' | 'roster' | 'server'>('overview');
+  const [connectCountdown, setConnectCountdown] = useState<number>(300); // 5 minutes (05:00)
+
+  useEffect(() => {
+    if (matchStatus !== 'ready') {
+      setConnectCountdown(300);
+      return;
+    }
+    const timer = setInterval(() => {
+      setConnectCountdown(prev => (prev <= 1 ? 0 : prev - 1));
+    }, 1000);
+    return () => clearInterval(timer);
+  }, [matchStatus]);
+
+  const formatConnectTime = (secs: number) => {
+    const m = Math.floor(secs / 60);
+    const s = secs % 60;
+    return `${m.toString().padStart(2, '0')}:${s.toString().padStart(2, '0')}`;
+  };
 
   const serverIp = '185.107.96.42:27015';
   const consoleCmd = `connect ${serverIp}; password vortex`;
@@ -313,6 +331,7 @@ export const VortexMatchRoom: React.FC<VortexMatchRoomProps> = ({
     setDecidedMap(null);
     setMatchStatus('veto');
     setVetoCountdown(30);
+    setConnectCountdown(300);
   };
 
   return (
@@ -396,12 +415,12 @@ export const VortexMatchRoom: React.FC<VortexMatchRoomProps> = ({
                     : `Waiting for opponent Captain (${team2Players[0].name}) to pick/ban...`
                 )}
                 {matchStatus === 'configuring' && `Allocating 128-tick Frankfurt server for ${decidedMap?.name}...`}
-                {matchStatus === 'ready' && `Map decided: ${decidedMap?.name}! Copy command or launch via Steam.`}
+                {matchStatus === 'ready' && `Map decided: ${decidedMap?.name}! Join the match below.`}
               </p>
             </div>
           </div>
 
-          {/* Veto Countdown or Server Connect */}
+          {/* Veto Countdown (Only shown during veto) */}
           {matchStatus === 'veto' && (
             <div className="flex items-center gap-3 px-4 py-2.5 rounded-xl bg-white/[0.04] border border-white/10">
               <Clock className="w-4 h-4 text-[#A3E635] animate-spin" style={{ animationDuration: '6s' }} />
@@ -413,126 +432,233 @@ export const VortexMatchRoom: React.FC<VortexMatchRoomProps> = ({
               </div>
             </div>
           )}
-
-          {matchStatus === 'ready' && (
-            <div className="flex items-center gap-2 w-full sm:w-auto">
-              <button
-                onClick={handleCopyIp}
-                className="flex-1 sm:flex-initial px-4 py-2.5 rounded-xl bg-white/[0.06] hover:bg-white/[0.1] border border-white/15 text-white font-mono text-xs font-bold transition flex items-center justify-center gap-2 cursor-pointer"
-              >
-                {copiedIp ? <Check className="w-4 h-4 text-[#A3E635]" /> : <Copy className="w-4 h-4" />}
-                <span>{copiedIp ? 'COMMAND COPIED!' : 'COPY CONNECT IP'}</span>
-              </button>
-              <a
-                href={`steam://connect/${serverIp}`}
-                className="flex-1 sm:flex-initial px-6 py-2.5 rounded-xl bg-gradient-to-r from-[#84CC16] to-[#A3E635] hover:brightness-110 text-slate-950 font-display font-black text-xs uppercase tracking-wider transition shadow-lg shadow-lime-500/25 flex items-center justify-center gap-2 cursor-pointer"
-              >
-                <Play className="w-4 h-4 fill-current" />
-                <span>CONNECT VIA STEAM</span>
-              </a>
-            </div>
-          )}
         </div>
 
-        {/* SECTION 1: MAP VETO GRID */}
-        <div className="space-y-3">
-          <div className="flex items-center justify-between">
-            <h2 className="text-xs font-mono font-bold uppercase tracking-wider text-[#A3E635] flex items-center gap-2">
-              <span>Active Duty Map Veto</span>
-              <span className="text-slate-400 font-normal">({7 - bannedMapIds.length} Remaining)</span>
-            </h2>
+        {/* ======================================================== */}
+        {/* VIEW 1: ACTIVE DUTY MAP VETO (ONLY SHOWN DURING VETO!)   */}
+        {/* ======================================================== */}
+        {matchStatus === 'veto' && (
+          <div className="space-y-3 animate-in fade-in duration-200">
+            <div className="flex items-center justify-between">
+              <h2 className="text-xs font-mono font-bold uppercase tracking-wider text-[#A3E635] flex items-center gap-2">
+                <span>Active Duty Map Veto</span>
+                <span className="text-slate-400 font-normal">({7 - bannedMapIds.length} Remaining)</span>
+              </h2>
 
-            {/* Ban timeline history */}
-            {banHistory.length > 0 && (
-              <div className="hidden sm:flex items-center gap-1.5 text-[11px] font-mono text-slate-400 overflow-x-auto no-scrollbar">
-                <span className="text-slate-500">History:</span>
-                {banHistory.map((h, i) => (
-                  <span key={i} className="px-2 py-0.5 rounded bg-red-500/10 border border-red-500/20 text-red-300">
-                    {h.mapName} ✕
-                  </span>
-                ))}
-              </div>
-            )}
-          </div>
-
-          <div className="grid grid-cols-2 sm:grid-cols-4 lg:grid-cols-7 gap-3">
-            {MAP_POOL.map((m) => {
-              const isBanned = bannedMapIds.includes(m.id);
-              const isDecided = decidedMap?.id === m.id;
-              const isMyTurn = currentTurnTeam === 'Team 1' && matchStatus === 'veto' && !isBanned;
-
-              return (
-                <div
-                  key={m.id}
-                  onClick={() => {
-                    if (isMyTurn) handleUserBanMap(m.id);
-                  }}
-                  className={`group relative h-48 rounded-2xl overflow-hidden border transition-all duration-200 select-none ${
-                    isDecided
-                      ? 'border-2 border-[#A3E635] shadow-[0_0_30px_rgba(163,230,53,0.4)] scale-105 z-10'
-                      : isBanned
-                      ? 'border-white/5 opacity-40 grayscale pointer-events-none'
-                      : isMyTurn
-                      ? 'border-white/20 hover:border-red-500/80 hover:scale-[1.02] cursor-pointer shadow-lg'
-                      : 'border-white/10 opacity-80'
-                  }`}
-                >
-                  {/* Map Image Backdrop */}
-                  <img
-                    src={m.image}
-                    alt={m.name}
-                    className="absolute inset-0 w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"
-                  />
-                  <div className="absolute inset-0 bg-gradient-to-t from-black/95 via-black/40 to-transparent" />
-
-                  {/* Top Badge */}
-                  <div className="absolute top-2.5 left-2.5 right-2.5 flex items-center justify-between text-[10px] font-mono">
-                    <span className="px-2 py-0.5 rounded bg-black/60 backdrop-blur-sm border border-white/10 text-white font-bold">
-                      {m.code}
+              {/* Ban timeline history */}
+              {banHistory.length > 0 && (
+                <div className="hidden sm:flex items-center gap-1.5 text-[11px] font-mono text-slate-400 overflow-x-auto no-scrollbar">
+                  <span className="text-slate-500">History:</span>
+                  {banHistory.map((h, i) => (
+                    <span key={i} className="px-2 py-0.5 rounded bg-red-500/10 border border-red-500/20 text-red-300">
+                      {h.mapName} ✕
                     </span>
-                    {isDecided && (
-                      <span className="px-2 py-0.5 rounded bg-[#A3E635] text-slate-950 font-black tracking-wider animate-pulse shadow">
-                        PICKED!
-                      </span>
-                    )}
-                  </div>
+                  ))}
+                </div>
+              )}
+            </div>
 
-                  {/* Banned Stamp Overlay */}
-                  {isBanned && (
-                    <div className="absolute inset-0 bg-red-950/70 backdrop-blur-[1px] flex flex-col items-center justify-center p-2">
-                      <div className="w-10 h-10 rounded-full bg-red-500/20 border-2 border-red-500 flex items-center justify-center text-red-400 mb-1">
-                        <X className="w-6 h-6 stroke-[3]" />
+            <div className="grid grid-cols-2 sm:grid-cols-4 lg:grid-cols-7 gap-3">
+              {MAP_POOL.map((m) => {
+                const isBanned = bannedMapIds.includes(m.id);
+                const isMyTurn = currentTurnTeam === 'Team 1' && !isBanned;
+
+                return (
+                  <div
+                    key={m.id}
+                    onClick={() => {
+                      if (isMyTurn) handleUserBanMap(m.id);
+                    }}
+                    className={`group relative h-48 rounded-2xl overflow-hidden border transition-all duration-200 select-none ${
+                      isBanned
+                        ? 'border-white/5 opacity-40 grayscale pointer-events-none'
+                        : isMyTurn
+                        ? 'border-white/20 hover:border-red-500/80 hover:scale-[1.02] cursor-pointer shadow-lg'
+                        : 'border-white/10 opacity-80'
+                    }`}
+                  >
+                    {/* Map Image Backdrop */}
+                    <img
+                      src={m.image}
+                      alt={m.name}
+                      className="absolute inset-0 w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"
+                    />
+                    <div className="absolute inset-0 bg-gradient-to-t from-black/95 via-black/40 to-transparent" />
+
+                    {/* Top Badge */}
+                    <div className="absolute top-2.5 left-2.5 right-2.5 flex items-center justify-between text-[10px] font-mono">
+                      <span className="px-2 py-0.5 rounded bg-black/60 backdrop-blur-sm border border-white/10 text-white font-bold">
+                        {m.code}
+                      </span>
+                    </div>
+
+                    {/* Banned Stamp Overlay */}
+                    {isBanned && (
+                      <div className="absolute inset-0 bg-red-950/70 backdrop-blur-[1px] flex flex-col items-center justify-center p-2">
+                        <div className="w-10 h-10 rounded-full bg-red-500/20 border-2 border-red-500 flex items-center justify-center text-red-400 mb-1">
+                          <X className="w-6 h-6 stroke-[3]" />
+                        </div>
+                        <span className="font-display font-black text-sm text-red-400 tracking-widest uppercase">
+                          BANNED
+                        </span>
                       </div>
-                      <span className="font-display font-black text-sm text-red-400 tracking-widest uppercase">
-                        BANNED
-                      </span>
-                    </div>
-                  )}
+                    )}
 
-                  {/* Hover Ban Action Button */}
-                  {isMyTurn && !isBanned && (
-                    <div className="absolute inset-0 bg-red-950/50 opacity-0 group-hover:opacity-100 transition-opacity flex flex-col items-center justify-center">
-                      <span className="px-3 py-1.5 rounded-xl bg-red-600 hover:bg-red-500 text-white font-mono font-bold text-xs uppercase tracking-wider shadow-lg flex items-center gap-1.5">
-                        <X className="w-3.5 h-3.5" />
-                        <span>BAN MAP</span>
-                      </span>
-                    </div>
-                  )}
+                    {/* Hover Ban Action Button */}
+                    {isMyTurn && !isBanned && (
+                      <div className="absolute inset-0 bg-red-950/50 opacity-0 group-hover:opacity-100 transition-opacity flex flex-col items-center justify-center">
+                        <span className="px-3 py-1.5 rounded-xl bg-red-600 hover:bg-red-500 text-white font-mono font-bold text-xs uppercase tracking-wider shadow-lg flex items-center gap-1.5">
+                          <X className="w-3.5 h-3.5" />
+                          <span>BAN MAP</span>
+                        </span>
+                      </div>
+                    )}
 
-                  {/* Bottom Map Name */}
-                  <div className="absolute bottom-3 left-3 right-3 text-left">
-                    <p className="font-display font-black text-white text-base tracking-wide leading-tight">
-                      {m.name}
-                    </p>
-                    <p className="text-[10px] font-mono text-[#A3E635] mt-0.5">
-                      {isDecided ? '✓ Final Selected Map' : isBanned ? 'Eliminated' : 'Active Choice'}
-                    </p>
+                    {/* Bottom Map Name */}
+                    <div className="absolute bottom-3 left-3 right-3 text-left">
+                      <p className="font-display font-black text-white text-base tracking-wide leading-tight">
+                        {m.name}
+                      </p>
+                      <p className="text-[10px] font-mono text-[#A3E635] mt-0.5">
+                        {isBanned ? 'Eliminated' : 'Active Choice'}
+                      </p>
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+          </div>
+        )}
+
+        {/* ======================================================== */}
+        {/* VIEW 2: SERVER DEPLOYING (INTERMEDIATE PHASE)            */}
+        {/* ======================================================== */}
+        {matchStatus === 'configuring' && (
+          <div className="p-8 rounded-3xl bg-[#0E121B] border border-[#A3E635]/40 shadow-2xl space-y-4 animate-in fade-in duration-300 text-center">
+            <div className="w-14 h-14 rounded-2xl bg-[#A3E635]/15 border border-[#A3E635]/40 flex items-center justify-center text-[#A3E635] mx-auto shadow-[0_0_20px_rgba(163,230,53,0.3)]">
+              <Server className="w-7 h-7 animate-pulse" />
+            </div>
+            <div>
+              <h3 className="text-xl font-display font-black text-white uppercase tracking-wider">
+                DEPLOYING CS2 DEDICATED SERVER FOR {decidedMap?.name.toUpperCase()}...
+              </h3>
+              <p className="text-xs font-mono text-slate-400 mt-1">
+                Allocating 128-tick Frankfurt server • Synchronizing sub-tick tickrate • Loading match cfg
+              </p>
+            </div>
+            <div className="max-w-md mx-auto w-full h-2 rounded-full bg-black/60 overflow-hidden">
+              <div className="h-full bg-gradient-to-r from-[#84CC16] to-[#A3E635] w-3/4 animate-pulse" />
+            </div>
+          </div>
+        )}
+
+        {/* ======================================================== */}
+        {/* VIEW 3: AUTHENTIC FACEIT SERVER CONNECT HUB (FINAL)      */}
+        {/* ======================================================== */}
+        {matchStatus === 'ready' && decidedMap && (
+          <div className="rounded-3xl overflow-hidden border-2 border-[#A3E635] shadow-[0_0_40px_rgba(163,230,53,0.25)] bg-[#0E121B] animate-in zoom-in-95 duration-300">
+            {/* Top Panoramic Hero Artwork of Decided Map */}
+            <div className="relative h-64 sm:h-72 w-full overflow-hidden">
+              <img
+                src={decidedMap.image}
+                alt={decidedMap.name}
+                className="w-full h-full object-cover scale-105"
+              />
+              <div className="absolute inset-0 bg-gradient-to-t from-[#0E121B] via-[#0E121B]/60 to-black/30" />
+
+              {/* Badges and Map Title over the image */}
+              <div className="absolute top-5 left-6 right-6 flex items-center justify-between">
+                <div className="flex items-center gap-2">
+                  <span className="px-3 py-1 rounded-full bg-black/70 backdrop-blur-md border border-[#A3E635]/60 text-[#A3E635] font-mono text-xs font-black tracking-wider uppercase">
+                    ★ Active Duty Selected
+                  </span>
+                  <span className="px-2.5 py-1 rounded-full bg-black/70 backdrop-blur-md border border-white/10 text-white font-mono text-xs font-bold">
+                    {decidedMap.code}
+                  </span>
+                </div>
+
+                <div className="flex items-center gap-2 px-3 py-1 rounded-full bg-emerald-500/20 border border-emerald-500/40 text-emerald-400 font-mono text-xs font-bold">
+                  <span className="w-2 h-2 rounded-full bg-emerald-400 animate-ping" />
+                  <span>SERVER ONLINE</span>
+                </div>
+              </div>
+
+              {/* Centered Map Name inside Hero */}
+              <div className="absolute bottom-6 left-6 right-6 flex flex-col sm:flex-row items-start sm:items-end justify-between gap-3">
+                <div>
+                  <div className="text-[11px] font-mono uppercase tracking-widest text-[#A3E635] font-bold">
+                    Decided Competitive Arena
+                  </div>
+                  <h2 className="text-4xl sm:text-5xl font-black font-display text-white tracking-wide uppercase drop-shadow-lg">
+                    MAP: {decidedMap.name}
+                  </h2>
+                  <p className="text-xs font-mono text-slate-300 mt-1">
+                    Frankfurt, Germany • 128-Tick CS2 Dedicated Server • AC Enforced
+                  </p>
+                </div>
+
+                {/* Veto Summary History Pill */}
+                {banHistory.length > 0 && (
+                  <div className="px-3 py-1.5 rounded-xl bg-black/70 backdrop-blur-md border border-white/10 text-[10px] font-mono text-slate-400 flex items-center gap-1.5 flex-wrap">
+                    <span className="text-slate-500 font-bold uppercase">Veto:</span>
+                    {banHistory.map((h, i) => (
+                      <span key={i} className="text-red-400">
+                        {h.mapName} ✕{i < banHistory.length - 1 ? ' •' : ''}
+                      </span>
+                    ))}
+                  </div>
+                )}
+              </div>
+            </div>
+
+            {/* Bottom FACEIT-Style Server Action Bar */}
+            <div className="p-5 sm:p-6 bg-[#121622] border-t border-white/[0.08] flex flex-col lg:flex-row items-center justify-between gap-5">
+              
+              {/* Left: Time Remaining to Join (Countdown) */}
+              <div className="flex items-center gap-3.5 w-full lg:w-auto">
+                <div className="w-11 h-11 rounded-2xl bg-amber-500/15 border border-amber-500/40 flex items-center justify-center text-amber-400 shrink-0">
+                  <Clock className="w-5 h-5 animate-spin" style={{ animationDuration: '8s' }} />
+                </div>
+                <div>
+                  <div className="text-[10px] font-mono uppercase text-slate-400">Time to join server</div>
+                  <div className="text-xl font-mono font-black text-white flex items-center gap-2">
+                    <span className={connectCountdown <= 60 ? 'text-red-400 animate-pulse' : 'text-[#A3E635]'}>
+                      {formatConnectTime(connectCountdown)}
+                    </span>
+                    <span className="text-xs font-mono text-slate-400 font-normal">(10/10 reserved)</span>
                   </div>
                 </div>
-              );
-            })}
+              </div>
+
+              {/* Center: Console Command Copy Box */}
+              <div className="flex-1 w-full lg:max-w-md flex items-center gap-2">
+                <input
+                  type="text"
+                  readOnly
+                  value={consoleCmd}
+                  className="flex-1 px-4 py-3 rounded-xl bg-black/80 border border-white/10 focus:border-[#A3E635] font-mono text-xs text-[#A3E635] outline-none select-all"
+                />
+                <button
+                  onClick={handleCopyIp}
+                  className="px-4 py-3 rounded-xl bg-white/[0.08] hover:bg-white/[0.15] border border-white/10 text-white font-mono text-xs font-bold transition flex items-center gap-1.5 cursor-pointer shrink-0 active:scale-95"
+                >
+                  {copiedIp ? <Check className="w-3.5 h-3.5 text-[#A3E635]" /> : <Copy className="w-3.5 h-3.5" />}
+                  <span>{copiedIp ? 'COPIED' : 'COPY IP'}</span>
+                </button>
+              </div>
+
+              {/* Right: Big Neon FACEIT CTA Button */}
+              <a
+                href={`steam://connect/${serverIp}`}
+                className="w-full lg:w-auto px-8 py-3.5 rounded-xl bg-gradient-to-r from-[#84CC16] to-[#A3E635] hover:brightness-110 text-slate-950 font-display font-black text-sm uppercase tracking-wider transition shadow-lg shadow-lime-500/30 flex items-center justify-center gap-2.5 cursor-pointer active:scale-95 shrink-0"
+              >
+                <Play className="w-4 h-4 fill-current stroke-[2.5]" />
+                <span>CONNECT TO SERVER</span>
+              </a>
+
+            </div>
           </div>
-        </div>
+        )}
 
         {/* SECTION 2: ROSTERS COMPARISON (TEAM 1 VS TEAM 2) */}
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
@@ -668,86 +794,10 @@ export const VortexMatchRoom: React.FC<VortexMatchRoomProps> = ({
           </div>
         </div>
 
-        {/* SECTION 3: SERVER CONNECT & CONSOLE COMMAND (ONLY SHOWN AFTER MAP VETO IS COMPLETED!) */}
-        {matchStatus === 'configuring' && (
-          <div className="p-6 rounded-2xl bg-[#0E121B] border border-[#A3E635]/40 shadow-xl space-y-3 animate-in fade-in duration-300">
-            <div className="flex items-center gap-3">
-              <div className="w-10 h-10 rounded-xl bg-[#A3E635]/15 border border-[#A3E635]/40 flex items-center justify-center text-[#A3E635]">
-                <Server className="w-5 h-5 animate-pulse" />
-              </div>
-              <div className="flex-1">
-                <div className="flex items-center justify-between">
-                  <h4 className="font-display font-black text-white text-sm">
-                    DEPLOYING DEDICATED CS2 SERVER FOR {decidedMap?.name.toUpperCase()}...
-                  </h4>
-                  <span className="text-xs font-mono text-[#A3E635] font-bold animate-pulse">
-                    Allocating 128-tick Frankfurt...
-                  </span>
-                </div>
-                <div className="w-full h-1.5 rounded-full bg-black/60 overflow-hidden mt-2">
-                  <div className="h-full bg-gradient-to-r from-[#84CC16] to-[#A3E635] w-2/3 animate-pulse" />
-                </div>
-              </div>
-            </div>
-          </div>
-        )}
-
-        {matchStatus === 'ready' && decidedMap && (
-          <div className="p-6 rounded-2xl bg-gradient-to-r from-[#0F1420] via-[#0E121B] to-[#0A0D14] border-2 border-[#A3E635] shadow-[0_0_35px_rgba(163,230,53,0.2)] space-y-4 animate-in slide-in-from-bottom-3 duration-300">
-            <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 border-b border-white/[0.08] pb-4">
-              <div className="flex items-center gap-3.5">
-                <div className="w-12 h-12 rounded-2xl bg-[#A3E635]/15 border border-[#A3E635]/40 flex items-center justify-center text-[#A3E635] shadow-[0_0_20px_rgba(163,230,53,0.3)]">
-                  <Server className="w-6 h-6" />
-                </div>
-                <div>
-                  <div className="flex items-center gap-2">
-                    <span className="px-2 py-0.5 rounded bg-emerald-500/20 text-emerald-400 font-mono text-[10px] font-bold uppercase tracking-wider">
-                      ● LIVE SERVER ONLINE
-                    </span>
-                    <span className="text-xs font-mono text-slate-400">
-                      Map: <strong className="text-white">{decidedMap.name}</strong>
-                    </span>
-                  </div>
-                  <h4 className="font-display font-black text-white text-base mt-0.5">
-                    CS2 Frankfurt Competitive Arena • 128-Tick Tickrate
-                  </h4>
-                  <p className="text-[11px] font-mono text-slate-400 mt-0.5">
-                    Sub-tick synchronized • CSTV Spectator: 185.107.96.42:27020 • Ring-0 AC Active
-                  </p>
-                </div>
-              </div>
-
-              {/* Direct Connect Action */}
-              <a
-                href={`steam://connect/${serverIp}`}
-                className="w-full sm:w-auto px-6 py-3 rounded-xl bg-gradient-to-r from-[#84CC16] to-[#A3E635] hover:brightness-110 text-slate-950 font-display font-black text-xs uppercase tracking-wider transition shadow-lg shadow-lime-500/30 flex items-center justify-center gap-2 cursor-pointer active:scale-95"
-              >
-                <Play className="w-4 h-4 fill-current" />
-                <span>CONNECT VIA STEAM</span>
-              </a>
-            </div>
-
-            {/* Console Command Input Box */}
-            <div className="flex flex-col sm:flex-row items-center gap-3 pt-1">
-              <div className="text-xs font-mono text-slate-400 shrink-0">
-                Console Command:
-              </div>
-              <input
-                type="text"
-                readOnly
-                value={consoleCmd}
-                className="flex-1 w-full px-3.5 py-2.5 rounded-xl bg-black/70 border border-white/10 font-mono text-xs text-[#A3E635] outline-none select-all focus:border-[#A3E635]"
-              />
-              <button
-                onClick={handleCopyIp}
-                className="w-full sm:w-auto px-5 py-2.5 rounded-xl bg-white/[0.08] hover:bg-white/[0.15] border border-white/10 text-white font-mono text-xs font-bold transition flex items-center justify-center gap-2 cursor-pointer"
-              >
-                {copiedIp ? <Check className="w-3.5 h-3.5 text-[#A3E635]" /> : <Copy className="w-3.5 h-3.5" />}
-                <span>{copiedIp ? 'COMMAND COPIED!' : 'COPY COMMAND'}</span>
-              </button>
-            </div>
-          </div>
-        )}
+      </div>
+    </div>
+  );
+};
 
       </div>
     </div>
