@@ -5928,26 +5928,6 @@ export const VortexDashboard: React.FC<VortexDashboardProps> = ({
       )}
 
       {/* ======================================================== */}
-      {/* VORTEX PARTY CHAT DOCKED WIDGET                          */}
-      {/* ======================================================== */}
-      <VortexPartyChat
-        currentGamerTag={currentGamerTag}
-        currentAvatarUrl={currentAvatarUrl}
-        partyMembers={partySlots
-          .map((m, idx) => ({ m, idx }))
-          .filter((item): item is { m: PartySlotMember; idx: number } => item.m !== null)
-          .map(({ m, idx }) => ({
-            id: m.id,
-            name: m.name,
-            avatar: m.avatar,
-            verification: m.verification,
-            isLeader: partyLeaderIndex === idx
-          }))
-        }
-        onOpenMatchRoom={() => setIsMatchRoomOpen(true)}
-      />
-
-      {/* ======================================================== */}
       {/* VORTEX CS2 MATCH ROOM & MAP VETO MODAL                   */}
       {/* ======================================================== */}
       {isMatchRoomOpen && (
