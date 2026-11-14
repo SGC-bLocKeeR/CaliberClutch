@@ -5971,6 +5971,8 @@ export const VortexDashboard: React.FC<VortexDashboardProps> = ({
         userMembershipTier={userMembershipTier}
         partyMembers={partySlots}
         unreadNotificationsCount={unreadCount}
+        isAntiCheatActive={isAntiCheatActive}
+        onToggleAntiCheat={handleToggleAntiCheat}
         onOpenNotifications={() => {
           sound.playClick();
           setNotificationsOpen(prev => !prev);

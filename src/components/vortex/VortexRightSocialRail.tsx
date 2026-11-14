@@ -20,11 +20,19 @@ import {
   UserCheck,
   User,
   Shield,
+  ShieldCheck,
+  ShieldAlert,
   Volume2,
   ArrowLeft,
   ShoppingBag,
-  Trophy
+  Trophy,
+  Target,
+  Gift,
+  Coins,
+  Eye,
+  Sparkles
 } from 'lucide-react';
+import confetti from 'canvas-confetti';
 import { sound } from '../../utils/soundEffects';
 import { CountryFlag } from './CountryFlag';
 import { FaceitVerificationBadge } from './VortexDashboard';
@@ -55,6 +63,8 @@ interface VortexRightSocialRailProps {
     tag?: string;
   } | null>;
   unreadNotificationsCount?: number;
+  isAntiCheatActive?: boolean;
+  onToggleAntiCheat?: () => void;
   onOpenNotifications?: () => void;
   onOpenInviteModal?: () => void;
   onOpenProfileTab?: () => void;
@@ -71,6 +81,8 @@ export const VortexRightSocialRail: React.FC<VortexRightSocialRailProps> = ({
   userMembershipTier = 'vip',
   partyMembers = [],
   unreadNotificationsCount = 1,
+  isAntiCheatActive = true,
+  onToggleAntiCheat,
   onOpenNotifications,
   onOpenInviteModal,
   onOpenProfileTab,
@@ -105,6 +117,39 @@ export const VortexRightSocialRail: React.FC<VortexRightSocialRailProps> = ({
     code?: string;
     countryName?: string;
   } | null>(null);
+
+  // Interactive Case & Spectate State
+  const [showCaseModal, setShowCaseModal] = useState(false);
+  const [isOpeningCase, setIsOpeningCase] = useState(false);
+  const [wonSkin, setWonSkin] = useState<{ name: string; wear: string; rarity: string; color: string; image: string } | null>(null);
+  const [spectateToast, setSpectateToast] = useState<string | null>(null);
+
+  const CS2_CASE_SKINS = [
+    { name: '★ Karambit | Doppler Phase 2', wear: 'Factory New', rarity: 'Covert (Extraordinary)', color: '#FF3881', image: 'https://community.cloudflare.steamstatic.com/economy/image/-9a81dlWLwJ2UUGcVs_nsVtzdOEdtWwKGZZLQHTxDZ7I56KU0Zwwo4NUX4oFJZEHLbXH5ApeO4YmlhxYQknCRvCo04DEVlxkKgpovbssLQJf2OD3fm5b09mJmYm0m_7zO6-fzj9V7cAl2eyVpIrz2FKx_0FtZ2D1cIGRcQRsYQ7Q81W3lOjxxcjr3M4pYjY/360fx360f' },
+    { name: 'AWP | Dragon Lore', wear: 'Minimal Wear', rarity: 'Covert', color: '#EB4B4B', image: 'https://community.cloudflare.steamstatic.com/economy/image/-9a81dlWLwJ2UUGcVs_nsVtzdOEdtWwKGZZLQHTxDZ7I56KU0Zwwo4NUX4oFJZEHLbXH5ApeO4YmlhxYQknCRvCo04DEVlxkKgpot621FABz7PLfYQJS5NO0m5O0m_7zO6-fk29T-sBzpezT_I2tiVXs-RE5YTincY-WdVA4N13R81brx-e51sW9786czydiuSQn4ivcnBfmn1gSOd0N_1mS/360fx360f' },
+    { name: 'AK-47 | Fire Serpent', wear: 'Field-Tested', rarity: 'Classified', color: '#D32CE6', image: 'https://community.cloudflare.steamstatic.com/economy/image/-9a81dlWLwJ2UUGcVs_nsVtzdOEdtWwKGZZLQHTxDZ7I56KU0Zwwo4NUX4oFJZEHLbXH5ApeO4YmlhxYQknCRvCo04DEVlxkKgpot7HxfDhjxszJemkV19m5h5SEheP3N77fqWZU7Mxkh6fF89j23Fay8hY9NTildY-WdlI_Z1zV8le2kL_vg5S-u5mdy3BivSEm-z-DyP23_n8N/360fx360f' },
+    { name: 'M4A1-S | Printstream', wear: 'Factory New', rarity: 'Classified', color: '#D32CE6', image: 'https://community.cloudflare.steamstatic.com/economy/image/-9a81dlWLwJ2UUGcVs_nsVtzdOEdtWwKGZZLQHTxDZ7I56KU0Zwwo4NUX4oFJZEHLbXH5ApeO4YmlhxYQknCRvCo04DEVlxkKgpou-6kejhz2v_Nfz5H_uO1gb-Gw_alIITfn2xV_Pp_jez--YXygED6-kZkYj3wLITDdQc8MlCG_Fftxr3ug8C0u5vNnHJr6SQmsH6MnRDi1gYMMLIqu-Y0gQ/360fx360f' },
+    { name: 'Desert Eagle | Printstream', wear: 'Field-Tested', rarity: 'Classified', color: '#D32CE6', image: 'https://community.cloudflare.steamstatic.com/economy/image/-9a81dlWLwJ2UUGcVs_nsVtzdOEdtWwKGZZLQHTxDZ7I56KU0Zwwo4NUX4oFJZEHLbXH5ApeO4YmlhxYQknCRvCo04DEVlxkKgposr-kLAtl7PDdTjlH_8-imIGZksj4OrzZglRd4cJ5nqeWpIqhjAThqUs4MTv3cNeUIAVvNwrX8gS-w-rsg5W8uMufy3I3vCE8pSGKGk5n_6o/360fx360f' }
+  ];
+
+  const handleOpenCase = () => {
+    if (isOpeningCase) return;
+    setIsOpeningCase(true);
+    setWonSkin(null);
+    sound.playSelect();
+    
+    setTimeout(() => {
+      const randomSkin = CS2_CASE_SKINS[Math.floor(Math.random() * CS2_CASE_SKINS.length)];
+      setWonSkin(randomSkin);
+      setIsOpeningCase(false);
+      sound.playTournamentVictory();
+      confetti({
+        particleCount: 120,
+        spread: 80,
+        origin: { y: 0.6 }
+      });
+    }, 2200);
+  };
 
   const [dmInput, setDmInput] = useState('');
   const dmFileInputRef = useRef<HTMLInputElement>(null);
@@ -668,6 +713,150 @@ export const VortexRightSocialRail: React.FC<VortexRightSocialRailProps> = ({
                 </span>
               </button>
 
+            </div>
+          </div>
+
+          {/* ======================================================== */}
+          {/* 1. ANTI-CHEAT KERNEL GUARD STATUS CAPSULE                */}
+          {/* ======================================================== */}
+          <div className="rounded-2xl bg-[#10121A] border border-[#1E2333] p-3 flex flex-col gap-2 shadow-lg hover:border-white/10 transition">
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-2.5">
+                <div className={`w-7 h-7 rounded-lg flex items-center justify-center ${isAntiCheatActive ? 'bg-[#A3E635]/15 text-[#A3E635]' : 'bg-amber-500/15 text-amber-400'}`}>
+                  {isAntiCheatActive ? <ShieldCheck className="w-4 h-4" /> : <ShieldAlert className="w-4 h-4" />}
+                </div>
+                <div>
+                  <div className="text-xs font-bold text-white flex items-center gap-1.5 font-sans">
+                    <span>Anti-Cheat</span>
+                    <span className={`w-1.5 h-1.5 rounded-full ${isAntiCheatActive ? 'bg-[#A3E635] shadow-[0_0_8px_#A3E635] animate-pulse' : 'bg-amber-400'}`} />
+                  </div>
+                  <div className="text-[10px] text-slate-400 font-mono">
+                    {isAntiCheatActive ? 'Kernel Driver Active' : 'Stopped (Click to Start)'}
+                  </div>
+                </div>
+              </div>
+
+              <button
+                onClick={() => {
+                  sound.playClick();
+                  onToggleAntiCheat?.();
+                }}
+                className={`px-2 py-0.5 rounded-full text-[9px] font-black uppercase font-mono transition cursor-pointer ${
+                  isAntiCheatActive 
+                    ? 'bg-[#A3E635]/20 text-[#A3E635] border border-[#A3E635]/40 hover:bg-[#A3E635]/30' 
+                    : 'bg-amber-500/20 text-amber-400 border border-amber-500/40 hover:bg-amber-500/30'
+                }`}
+                title="Toggle Anti-Cheat"
+              >
+                {isAntiCheatActive ? 'ACTIVE' : 'START'}
+              </button>
+            </div>
+          </div>
+
+          {/* ======================================================== */}
+          {/* 2. DAILY MISSIONS & CS2 CASE OPENING CAPSULE             */}
+          {/* ======================================================== */}
+          <div className="rounded-2xl bg-[#10121A] border border-[#1E2333] p-3 flex flex-col gap-2.5 shadow-lg hover:border-white/10 transition">
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-1.5 text-xs font-bold text-white font-sans">
+                <Target className="w-3.5 h-3.5 text-[#A3E635]" />
+                <span>Daily Mission</span>
+              </div>
+              <span className="text-[10px] font-mono text-[#A3E635] font-bold">
+                1 / 2 Completed
+              </span>
+            </div>
+
+            <div>
+              <div className="flex items-center justify-between text-[11px] text-slate-300 font-sans mb-1.5">
+                <span className="truncate">Win 2 Matches on Mirage</span>
+                <span className="font-mono text-slate-400 shrink-0 ml-1">1/2</span>
+              </div>
+              {/* Progress Bar with Lime Glow */}
+              <div className="w-full h-1.5 rounded-full bg-[#181B26] overflow-hidden">
+                <div className="h-full bg-gradient-to-r from-[#84cc16] to-[#A3E635] rounded-full w-1/2 transition-all duration-500 shadow-[0_0_8px_rgba(163,230,53,0.5)]" />
+              </div>
+            </div>
+
+            {/* Reward & Open Case Button */}
+            <div className="flex items-center justify-between pt-0.5">
+              <div className="flex items-center gap-1 text-[10px] font-mono font-bold text-amber-400 bg-amber-400/10 px-2 py-0.5 rounded-md border border-amber-400/20">
+                <Coins className="w-3 h-3" />
+                <span>+150 VTX</span>
+              </div>
+
+              <button
+                onClick={() => {
+                  sound.playSelect();
+                  setShowCaseModal(true);
+                }}
+                className="flex items-center gap-1 text-[10px] font-mono font-bold text-slate-200 hover:text-white bg-white/[0.06] hover:bg-white/10 px-2.5 py-1 rounded-md border border-white/10 transition cursor-pointer group"
+                title="Open VORTEX Weapon Case"
+              >
+                <Gift className="w-3 h-3 text-[#A3E635] group-hover:scale-110 transition" />
+                <span>Open Case</span>
+              </button>
+            </div>
+          </div>
+
+          {/* ======================================================== */}
+          {/* 3. LIVE MATCH ACTIVITY TICKER                            */}
+          {/* ======================================================== */}
+          <div className="rounded-2xl bg-[#10121A] border border-[#1E2333] p-3 flex flex-col gap-2 shadow-lg hover:border-white/10 transition">
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-1.5 text-xs font-bold text-white font-sans">
+                <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse" />
+                <span>Live Matches</span>
+              </div>
+              <span className="text-[10px] font-mono text-slate-500">
+                1 Active
+              </span>
+            </div>
+
+            <div className="p-2 rounded-xl bg-white/[0.02] border border-white/5 flex items-center justify-between gap-2">
+              <div className="flex items-center gap-2 min-w-0">
+                <img
+                  src="https://images.unsplash.com/photo-1566492031773-4f4e44671857?auto=format&fit=crop&w=150&q=80"
+                  alt="Icykilleer"
+                  className="w-7 h-7 rounded-full object-cover border border-white/10 shrink-0"
+                />
+                <div className="min-w-0">
+                  <div className="text-xs font-bold text-white truncate">Icykilleer</div>
+                  <div className="text-[10px] text-emerald-400 font-mono flex items-center gap-1">
+                    <span>Mirage</span>
+                    <span className="text-slate-500">•</span>
+                    <span className="text-white font-bold">11 - 9</span>
+                  </div>
+                </div>
+              </div>
+
+              <button
+                onClick={() => {
+                  sound.playClick();
+                  setSpectateToast('📡 Connecting to GOTV Relay (128-tick EU Vienna)... Spectating Icykilleer on Mirage [11-9]');
+                  setTimeout(() => setSpectateToast(null), 4000);
+                }}
+                className="p-1.5 rounded-lg bg-white/5 hover:bg-white/10 text-slate-300 hover:text-white transition cursor-pointer"
+                title="Watch GOTV Spectate"
+              >
+                <Eye className="w-3.5 h-3.5" />
+              </button>
+            </div>
+          </div>
+
+          {/* ======================================================== */}
+          {/* 4. SERVER LATENCY STATUS STRIP                           */}
+          {/* ======================================================== */}
+          <div className="px-1 py-1 flex items-center justify-between text-[10px] font-mono text-slate-500">
+            <div className="flex items-center gap-1">
+              <span className="w-1.5 h-1.5 rounded-full bg-emerald-400" />
+              <span className="text-slate-400">Vienna:</span>
+              <span className="text-slate-300 font-bold">14ms</span>
+            </div>
+            <div className="flex items-center gap-1">
+              <span className="w-1.5 h-1.5 rounded-full bg-emerald-400" />
+              <span className="text-slate-400">Frankfurt:</span>
+              <span className="text-slate-300 font-bold">18ms</span>
             </div>
           </div>
 
@@ -1707,6 +1896,134 @@ export const VortexRightSocialRail: React.FC<VortexRightSocialRailProps> = ({
 
           </div>
         </>
+      )}
+
+      {/* ======================================================== */}
+      {/* 5. CS2 CASE OPENING MODAL                                 */}
+      {/* ======================================================== */}
+      {showCaseModal && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
+          <div 
+            className="fixed inset-0 bg-black/80 backdrop-blur-md animate-in fade-in duration-200"
+            onClick={() => !isOpeningCase && setShowCaseModal(false)}
+          />
+
+          <div className="relative w-full max-w-lg rounded-3xl bg-[#0B0D14] border border-[#232738] p-6 shadow-2xl z-10 flex flex-col items-center text-center animate-in zoom-in-95 duration-200">
+            {/* Close Button */}
+            {!isOpeningCase && (
+              <button
+                onClick={() => setShowCaseModal(false)}
+                className="absolute top-4 right-4 p-1.5 rounded-xl text-slate-400 hover:text-white hover:bg-white/[0.08] transition cursor-pointer"
+              >
+                <X className="w-5 h-5" />
+              </button>
+            )}
+
+            {/* Header Badge */}
+            <div className="flex items-center gap-2 px-3 py-1 rounded-full bg-amber-400/10 border border-amber-400/30 text-amber-400 text-xs font-mono font-bold uppercase mb-3">
+              <Gift className="w-3.5 h-3.5" />
+              <span>VORTEX Case Drop</span>
+            </div>
+
+            <h3 className="font-display font-black text-2xl text-white tracking-tight">
+              Challenger Weapon Case
+            </h3>
+            <p className="text-xs text-slate-400 font-sans mt-1 max-w-sm">
+              Contains exclusive Covert Knives and Classified CS2 skins.
+            </p>
+
+            {/* Center Showcase Area */}
+            <div className="relative w-full my-6 p-6 rounded-2xl bg-gradient-to-b from-[#131622] to-[#0A0B10] border border-white/10 flex flex-col items-center justify-center min-h-[220px] overflow-hidden">
+              {isOpeningCase ? (
+                <div className="flex flex-col items-center space-y-4 animate-pulse">
+                  <div className="w-24 h-24 rounded-2xl bg-amber-400/10 border border-amber-400/30 flex items-center justify-center animate-spin">
+                    <Sparkles className="w-10 h-10 text-amber-400" />
+                  </div>
+                  <div className="font-display font-bold text-amber-400 text-sm tracking-widest uppercase">
+                    Unlocking Weapon Crate...
+                  </div>
+                </div>
+              ) : wonSkin ? (
+                <div className="flex flex-col items-center animate-in zoom-in-75 duration-300">
+                  <div className="relative mb-2">
+                    <div className="absolute inset-0 blur-xl opacity-50" style={{ backgroundColor: wonSkin.color }} />
+                    <img src={wonSkin.image} alt={wonSkin.name} className="relative w-36 h-28 object-contain drop-shadow-[0_10px_20px_rgba(0,0,0,0.8)]" />
+                  </div>
+                  <div className="text-[11px] font-mono font-bold tracking-wider uppercase px-2 py-0.5 rounded" style={{ color: wonSkin.color, backgroundColor: `${wonSkin.color}20` }}>
+                    {wonSkin.rarity}
+                  </div>
+                  <h4 className="font-display font-black text-lg text-white mt-1">
+                    {wonSkin.name}
+                  </h4>
+                  <span className="text-xs text-slate-400 font-mono mt-0.5">
+                    Exterior: {wonSkin.wear}
+                  </span>
+                </div>
+              ) : (
+                <div className="flex flex-col items-center">
+                  <div className="w-28 h-28 rounded-2xl bg-gradient-to-tr from-amber-500/20 to-[#A3E635]/20 border border-white/10 flex items-center justify-center mb-2 shadow-inner">
+                    <Gift className="w-14 h-14 text-amber-400 drop-shadow-[0_0_15px_rgba(245,158,11,0.5)]" />
+                  </div>
+                  <span className="text-xs font-mono text-slate-300">
+                    Cost to Open: <strong className="text-amber-400">100 VTX Points</strong>
+                  </span>
+                </div>
+              )}
+            </div>
+
+            {/* Action Buttons */}
+            {wonSkin ? (
+              <div className="flex items-center gap-3 w-full">
+                <button
+                  onClick={() => {
+                    sound.playClick();
+                    setWonSkin(null);
+                  }}
+                  className="flex-1 py-3 rounded-xl bg-white/10 hover:bg-white/15 text-white font-display font-bold text-xs uppercase transition cursor-pointer"
+                >
+                  Open Another
+                </button>
+                <button
+                  onClick={() => {
+                    sound.playClick();
+                    setShowCaseModal(false);
+                    setWonSkin(null);
+                  }}
+                  className="flex-1 py-3 rounded-xl bg-[#A3E635] hover:bg-[#84cc16] text-black font-display font-black text-xs uppercase transition cursor-pointer shadow-[0_0_20px_rgba(163,230,53,0.3)]"
+                >
+                  Claim Skin
+                </button>
+              </div>
+            ) : (
+              <button
+                disabled={isOpeningCase}
+                onClick={handleOpenCase}
+                className={`w-full py-3.5 rounded-xl font-display font-black text-sm uppercase tracking-wider transition shadow-xl cursor-pointer ${
+                  isOpeningCase
+                    ? 'bg-slate-700 text-slate-400 cursor-not-allowed'
+                    : 'bg-gradient-to-r from-amber-400 via-amber-500 to-yellow-500 hover:from-amber-300 hover:to-yellow-400 text-black shadow-[0_0_25px_rgba(245,158,11,0.4)]'
+                }`}
+              >
+                {isOpeningCase ? 'Opening...' : 'Unlock Crate (100 VTX)'}
+              </button>
+            )}
+
+            {/* Odds / Info footnote */}
+            <span className="text-[10px] font-mono text-slate-500 mt-3">
+              Special Item: ★ Karambit | Doppler (Covert) • Provably Fair CS2 Seed
+            </span>
+          </div>
+        </div>
+      )}
+
+      {/* ======================================================== */}
+      {/* 6. SPECTATE GOTV TOAST NOTIFICATION                       */}
+      {/* ======================================================== */}
+      {spectateToast && (
+        <div className="fixed top-6 left-1/2 -translate-x-1/2 z-50 px-4 py-2.5 rounded-2xl bg-[#0D1017] border border-[#202738] shadow-2xl text-xs font-mono text-white flex items-center gap-2.5 animate-in fade-in slide-in-from-top-4 duration-200">
+          <span className="w-2.5 h-2.5 rounded-full bg-emerald-400 animate-ping" />
+          <span>{spectateToast}</span>
+        </div>
       )}
 
     </>
