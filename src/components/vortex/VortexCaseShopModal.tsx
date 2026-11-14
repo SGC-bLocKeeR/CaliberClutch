@@ -78,6 +78,28 @@ export const VortexCaseShopModal: React.FC<VortexCaseShopModalProps> = ({ isOpen
     };
   }, []);
 
+  // When activeCase changes, immediately reset and initialize a fresh, authentic reel from this exact case
+  useEffect(() => {
+    if (activeCase) {
+      setReelOffset(0);
+      setWonSkin(null);
+      setDeliveryResult(null);
+      setDeliveryProgress(null);
+      setDeliveryError(null);
+
+      // Pre-populate with authentic items from this exact case
+      const initialReel: CS2Skin[] = [];
+      for (let i = 0; i < 45; i++) {
+        const item = activeCase.items[i % activeCase.items.length];
+        initialReel.push(item);
+      }
+      setReelItems(initialReel);
+    } else {
+      setReelItems([]);
+      setWonSkin(null);
+    }
+  }, [activeCase]);
+
   if (!isOpen) return null;
 
   // Save Trade URL
@@ -507,6 +529,8 @@ export const VortexCaseShopModal: React.FC<VortexCaseShopModalProps> = ({ isOpen
                               src={item.image} 
                               alt={item.name} 
                               referrerPolicy="no-referrer"
+                              crossOrigin="anonymous"
+                              loading="eager"
                               className="w-24 h-20 object-contain drop-shadow-md my-auto" 
                             />
 
