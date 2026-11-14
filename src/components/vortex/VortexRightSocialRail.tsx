@@ -1,4 +1,4 @@
-import React, { useState, useRef } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import { 
   Bell, 
   Users, 
@@ -7,6 +7,7 @@ import {
   X, 
   ChevronDown, 
   ChevronRight,
+  ChevronLeft,
   Headphones, 
   LogOut, 
   Plus, 
@@ -20,7 +21,9 @@ import {
   User,
   Shield,
   Volume2,
-  ArrowLeft
+  ArrowLeft,
+  ShoppingBag,
+  Trophy
 } from 'lucide-react';
 import { sound } from '../../utils/soundEffects';
 import { CountryFlag } from './CountryFlag';
@@ -34,6 +37,8 @@ export interface SocialFriend {
   gameStatus?: string;
   hasPriority?: boolean;
   code?: string;
+  countryName?: string;
+  verification?: 'vip' | 'verified' | 'none';
 }
 
 interface VortexRightSocialRailProps {
@@ -72,8 +77,8 @@ export const VortexRightSocialRail: React.FC<VortexRightSocialRailProps> = ({
   onOpenEditProfile,
   onLeaveParty
 }) => {
-  // Drawer active state: 'none' | 'social' | 'party' | 'profile'
-  const [activeDrawer, setActiveDrawer] = useState<'none' | 'social' | 'party' | 'profile'>('none');
+  // Drawer active state: 'none' | 'social' | 'party' | 'profile' | 'notifications'
+  const [activeDrawer, setActiveDrawer] = useState<'none' | 'social' | 'party' | 'profile' | 'notifications'>('none');
   const [socialSubTab, setSocialSubTab] = useState<'friends' | 'dms' | 'requests'>('friends');
   const [socialSearch, setSocialSearch] = useState('');
   const [partySubTab, setPartySubTab] = useState<'chat' | 'members' | 'voice'>('chat');
@@ -90,39 +95,52 @@ export const VortexRightSocialRail: React.FC<VortexRightSocialRailProps> = ({
   }>>([]);
   const partyFileInputRef = useRef<HTMLInputElement>(null);
 
-  // Active DM Chat view
+  // Active DM Chat view (1:1 FACEIT Match from uploaded_media_1794675192796.png)
   const [activeDmUser, setActiveDmUser] = useState<{
     id: string;
     name: string;
     avatar: string;
     badge?: string;
+    verification?: 'vip' | 'verified' | 'none';
+    code?: string;
+    countryName?: string;
   } | null>(null);
 
   const [dmInput, setDmInput] = useState('');
   const dmFileInputRef = useRef<HTMLInputElement>(null);
+  const dmEndRef = useRef<HTMLDivElement>(null);
 
   // Exact 1:1 Direct Messages from User Reference Screenshot (uploaded_media_1794674870290.png)
   const dmsList = [
     {
       id: 'dm-edd1',
       name: 'edd1-',
-      avatar: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=150&q=80',
-      lastMessage: 'https://www.faceit.com/en/...',
-      date: '9 Nov'
+      avatar: '/avatars/edd1.png',
+      lastMessage: 'kallxo kur me ta qu',
+      date: '9 Nov',
+      verification: 'verified' as const,
+      code: 'XK',
+      countryName: 'Kosovo'
     },
     {
       id: 'dm-blackbars1',
       name: 'blackbars1',
       avatar: 'https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?auto=format&fit=crop&w=150&q=80',
       lastMessage: 'aje tu lu ti',
-      date: '9 Nov'
+      date: '9 Nov',
+      verification: 'none' as const,
+      code: 'AL',
+      countryName: 'Albania'
     },
     {
       id: 'dm-toxi',
       name: 'toxi---',
       avatar: 'https://images.unsplash.com/photo-1570295999919-56ceb5ecca61?auto=format&fit=crop&w=150&q=80',
       lastMessage: 'a',
-      date: '31 Oct'
+      date: '31 Oct',
+      verification: 'none' as const,
+      code: 'XK',
+      countryName: 'Kosovo'
     },
     {
       id: 'dm-n19',
@@ -130,7 +148,10 @@ export const VortexRightSocialRail: React.FC<VortexRightSocialRailProps> = ({
       avatar: 'https://images.unsplash.com/photo-1566492031773-4f4e44671857?auto=format&fit=crop&w=150&q=80',
       badge: '★',
       lastMessage: ';;',
-      date: '24 Oct'
+      date: '24 Oct',
+      verification: 'vip' as const,
+      code: 'DE',
+      countryName: 'Germany'
     },
     {
       id: 'dm-diva',
@@ -138,43 +159,107 @@ export const VortexRightSocialRail: React.FC<VortexRightSocialRailProps> = ({
       avatar: 'https://images.unsplash.com/photo-1494790108377-be9c29b29330?auto=format&fit=crop&w=150&q=80',
       badge: '★',
       lastMessage: 'hec moj lujm fitojm naj loj',
-      date: '18 Oct'
+      date: '18 Oct',
+      verification: 'vip' as const,
+      code: 'XK',
+      countryName: 'Kosovo'
     },
     {
       id: 'dm-amatuero',
       name: 'amatuero',
       avatar: 'https://images.unsplash.com/photo-1579546929518-9e396f3cc809?auto=format&fit=crop&w=150&q=80',
       lastMessage: 'OKI',
-      date: '12 Apr'
+      date: '12 Apr',
+      verification: 'none' as const,
+      code: 'XK',
+      countryName: 'Kosovo'
     }
   ];
 
+  // Exact 1:1 Conversation Stream from uploaded_media_1794675192796.png
   const [dmHistory, setDmHistory] = useState<Record<string, Array<{
     id: string;
     sender: string;
+    avatar?: string;
     text?: string;
     imageUrl?: string;
     timestamp: string;
   }>>>({
     'edd1-': [
-      { id: '1', sender: 'edd1-', text: 'https://www.faceit.com/en/cs2/room/1-a48291f0', timestamp: '9 Nov, 18:24' }
+      {
+        id: '1',
+        sender: currentGamerTag,
+        avatar: currentAvatarUrl || '/images/blockeerz_avatar.png',
+        text: 'prit lop\nse po ma nis lojen e marr banned',
+        timestamp: '09:27 pm'
+      },
+      {
+        id: '2',
+        sender: 'edd1-',
+        avatar: '/avatars/edd1.png',
+        text: 'hahahahahahhahah jojo se nismi pa than ti',
+        timestamp: '09:27 pm'
+      },
+      {
+        id: '3',
+        sender: currentGamerTag,
+        avatar: currentAvatarUrl || '/images/blockeerz_avatar.png',
+        text: 'okej\nprit',
+        timestamp: '09:28 pm'
+      },
+      {
+        id: '4',
+        sender: 'edd1-',
+        avatar: '/avatars/edd1.png',
+        text: 'okej\nkallxo kur me ta qu',
+        timestamp: '09:28 pm'
+      }
     ],
     'blackbars1': [
-      { id: '1', sender: 'blackbars1', text: 'aje tu lu ti', timestamp: '9 Nov, 21:05' }
+      { id: '1', sender: 'blackbars1', avatar: 'https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?auto=format&fit=crop&w=150&q=80', text: 'aje tu lu ti', timestamp: '09:05 pm' }
     ],
     'toxi---': [
-      { id: '1', sender: 'toxi---', text: 'a', timestamp: '31 Oct, 14:12' }
+      { id: '1', sender: 'toxi---', avatar: 'https://images.unsplash.com/photo-1570295999919-56ceb5ecca61?auto=format&fit=crop&w=150&q=80', text: 'a', timestamp: '02:12 pm' }
     ],
     'N19': [
-      { id: '1', sender: 'N19', text: ';;', timestamp: '24 Oct, 23:40' }
+      { id: '1', sender: 'N19', avatar: 'https://images.unsplash.com/photo-1566492031773-4f4e44671857?auto=format&fit=crop&w=150&q=80', text: ';;', timestamp: '11:40 pm' }
     ],
     'DIVA-': [
-      { id: '1', sender: 'DIVA-', text: 'hec moj lujm fitojm naj loj', timestamp: '18 Oct, 19:15' }
+      { id: '1', sender: 'DIVA-', avatar: 'https://images.unsplash.com/photo-1494790108377-be9c29b29330?auto=format&fit=crop&w=150&q=80', text: 'hec moj lujm fitojm naj loj', timestamp: '07:15 pm' }
     ],
     'amatuero': [
-      { id: '1', sender: 'amatuero', text: 'OKI', timestamp: '12 Apr, 16:02' }
+      { id: '1', sender: 'amatuero', avatar: 'https://images.unsplash.com/photo-1579546929518-9e396f3cc809?auto=format&fit=crop&w=150&q=80', text: 'OKI', timestamp: '04:02 pm' }
     ]
   });
+
+  useEffect(() => {
+    if (activeDmUser) {
+      dmEndRef.current?.scrollIntoView({ behavior: 'smooth' });
+    }
+  }, [activeDmUser, dmHistory]);
+
+  const openChatWithUser = (user: {
+    id: string;
+    name: string;
+    avatar: string;
+    badge?: string;
+    verification?: 'vip' | 'verified' | 'none';
+    code?: string;
+    countryName?: string;
+  }) => {
+    sound.playClick();
+    setActiveDrawer('social');
+    setSocialSubTab('dms');
+    setActiveDmUser({
+      id: user.id,
+      name: user.name,
+      avatar: user.avatar,
+      badge: user.badge,
+      verification: user.verification || currentVerification || 'verified',
+      code: user.code || currentCountry?.code || 'XK',
+      countryName: user.countryName || currentCountry?.name || 'Kosovo'
+    });
+  };
 
   const handleSendDm = (e?: React.FormEvent) => {
     e?.preventDefault();
@@ -183,6 +268,7 @@ export const VortexRightSocialRail: React.FC<VortexRightSocialRailProps> = ({
     const newMsg = {
       id: `dm-msg-${Date.now()}`,
       sender: currentGamerTag,
+      avatar: currentAvatarUrl || '/images/blockeerz_avatar.png',
       text: dmInput.trim(),
       timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', hour12: true }).toLowerCase()
     };
@@ -203,6 +289,7 @@ export const VortexRightSocialRail: React.FC<VortexRightSocialRailProps> = ({
       const newMsg = {
         id: `dm-img-${Date.now()}`,
         sender: currentGamerTag,
+        avatar: currentAvatarUrl || '/images/blockeerz_avatar.png',
         text: dmInput.trim() || undefined,
         imageUrl: dataUrl,
         timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', hour12: true }).toLowerCase()
@@ -226,48 +313,78 @@ export const VortexRightSocialRail: React.FC<VortexRightSocialRailProps> = ({
       name: 'Icykilleer',
       avatar: 'https://images.unsplash.com/photo-1566492031773-4f4e44671857?auto=format&fit=crop&w=150&q=80',
       status: 'playing',
-      gameStatus: 'Playing • CS2 MM (12m 45s)'
+      gameStatus: 'Playing • CS2 MM (12m 45s)',
+      verification: 'verified',
+      code: 'XK',
+      countryName: 'Kosovo'
     },
     // Online (5)
     {
       id: 'f-ama',
       name: 'amatuero',
       avatar: 'https://images.unsplash.com/photo-1579546929518-9e396f3cc809?auto=format&fit=crop&w=150&q=80',
-      status: 'online'
+      status: 'online',
+      verification: 'none',
+      code: 'XK',
+      countryName: 'Kosovo'
     },
     {
       id: 'f-black',
       name: 'blackbars1',
       avatar: 'https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?auto=format&fit=crop&w=150&q=80',
-      status: 'online'
+      status: 'online',
+      verification: 'none',
+      code: 'AL',
+      countryName: 'Albania'
     },
     {
       id: 'f-diva',
       name: 'DIVA-',
       avatar: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=150&q=80',
       status: 'online',
-      hasPriority: true
+      hasPriority: true,
+      verification: 'vip',
+      code: 'XK',
+      countryName: 'Kosovo'
     },
     {
       id: 'f-feim',
       name: 'Feimmih',
       avatar: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?auto=format&fit=crop&w=150&q=80',
       status: 'online',
-      hasPriority: true
+      hasPriority: true,
+      verification: 'vip',
+      code: 'XK',
+      countryName: 'Kosovo'
     },
     {
       id: 'f-ndyw',
       name: 'ndyw',
       avatar: 'https://images.unsplash.com/photo-1500648767791-00dcc994a43e?auto=format&fit=crop&w=150&q=80',
       status: 'online',
-      hasPriority: true
+      hasPriority: true,
+      verification: 'vip',
+      code: 'XK',
+      countryName: 'Kosovo'
     },
     // Offline (49)
+    {
+      id: 'f-edd1',
+      name: 'edd1-',
+      avatar: '/avatars/edd1.png',
+      status: 'offline',
+      verification: 'verified',
+      code: 'XK',
+      countryName: 'Kosovo'
+    },
     {
       id: 'f-rud',
       name: 'RudeusX',
       avatar: 'https://images.unsplash.com/photo-1517841905240-472988babdf9?auto=format&fit=crop&w=150&q=80',
-      status: 'offline'
+      status: 'offline',
+      verification: 'none',
+      code: 'XK',
+      countryName: 'Kosovo'
     },
     {
       id: 'f-dion',
@@ -402,24 +519,33 @@ export const VortexRightSocialRail: React.FC<VortexRightSocialRailProps> = ({
         <div className="flex flex-col gap-3 w-full flex-1 pt-3 overflow-y-auto">
           
           {/* Notifications Button */}
-          <button
-            onClick={() => {
-              sound.playClick();
-              onOpenNotifications?.();
-            }}
-            className="w-full flex items-center justify-between px-3 py-2.5 rounded-xl bg-white/[0.03] hover:bg-white/[0.07] text-slate-300 hover:text-white transition cursor-pointer group"
-            title="Notifications"
-          >
-            <div className="flex items-center gap-2.5">
-              <Bell className="w-4 h-4 text-[#A3E635]" />
-              <span className="text-xs font-bold font-sans">Notifications</span>
-            </div>
-            {unreadNotificationsCount > 0 && (
-              <span className="min-w-[18px] h-[18px] px-1.5 rounded-full bg-[#A3E635] text-slate-950 font-mono font-black text-[10px] flex items-center justify-center shadow-md">
-                {unreadNotificationsCount}
-              </span>
+          <div className="relative w-full">
+            {activeDrawer === 'notifications' && (
+              <span className="absolute -left-3 top-1/2 -translate-y-1/2 w-1 h-6 rounded-r bg-[#A3E635]" />
             )}
-          </button>
+            <button
+              onClick={() => {
+                sound.playClick();
+                setActiveDrawer(prev => prev === 'notifications' ? 'none' : 'notifications');
+              }}
+              className={`w-full flex items-center justify-between px-3 py-2.5 rounded-xl transition cursor-pointer group ${
+                activeDrawer === 'notifications'
+                  ? 'bg-white/[0.1] text-white border border-white/10'
+                  : 'bg-white/[0.03] hover:bg-white/[0.07] text-slate-300 hover:text-white'
+              }`}
+              title="Notifications"
+            >
+              <div className="flex items-center gap-2.5">
+                <Bell className="w-4 h-4 text-[#A3E635]" />
+                <span className="text-xs font-bold font-sans">Notifications</span>
+              </div>
+              {unreadNotificationsCount > 0 && (
+                <span className="min-w-[18px] h-[18px] px-1.5 rounded-full bg-[#A3E635] text-slate-950 font-mono font-black text-[10px] flex items-center justify-center shadow-md">
+                  {unreadNotificationsCount}
+                </span>
+              )}
+            </button>
+          </div>
 
           {/* Social (Friends) Button */}
           <div className="relative w-full">
@@ -573,7 +699,7 @@ export const VortexRightSocialRail: React.FC<VortexRightSocialRailProps> = ({
       </aside>
 
       {/* ======================================================== */}
-      {/* 2. SLIDING DRAWER: SOCIAL (1:1 FACEIT FRIENDS DRAWER)     */}
+      {/* 2. SLIDING DRAWER: SOCIAL & 1:1 FACEIT DM CONVERSATION    */}
       {/* ======================================================== */}
       {activeDrawer === 'social' && (
         <>
@@ -585,360 +711,122 @@ export const VortexRightSocialRail: React.FC<VortexRightSocialRailProps> = ({
 
           <div className="fixed right-64 top-0 bottom-0 w-80 bg-[#0B0D13] border-l border-[#1A1D27] z-50 flex flex-col shadow-2xl animate-in slide-in-from-right duration-200 select-none">
             
-            {/* Header: Social + Search User Button + Close ✕ */}
-            <div className="p-4 border-b border-[#181B26] flex items-center justify-between">
-              <h2 className="font-display font-black text-white text-xl">
-                Social
-              </h2>
+            {activeDmUser ? (
+              /* ==================================================== */
+              /* ACTIVE DM CHAT VIEW (EXACT 1:1 MATCH TO uploaded_media_1794675192796.png) */
+              /* ==================================================== */
+              <div className="flex-1 flex flex-col justify-between overflow-hidden bg-[#0C0D12]">
+                {/* 1. Header with Back <, Centered Avatar + Name + Badges, and Close ✕ */}
+                <div className="pt-3 pb-3 px-3 border-b border-[#181B26] bg-[#0A0B0F] relative shrink-0">
+                  <div className="flex items-center justify-between w-full">
+                    {/* Back to DM list */}
+                    <button
+                      onClick={() => setActiveDmUser(null)}
+                      className="w-7 h-7 rounded-lg bg-white/[0.06] hover:bg-white/10 border border-white/5 flex items-center justify-center text-slate-300 hover:text-white transition cursor-pointer"
+                      title="Back to messages"
+                    >
+                      <ChevronLeft className="w-4 h-4" />
+                    </button>
 
-              <div className="flex items-center gap-1.5">
-                <button 
-                  onClick={() => sound.playClick()}
-                  className="p-1.5 rounded-lg bg-white/[0.04] border border-white/10 hover:bg-white/[0.08] text-slate-300 hover:text-white transition cursor-pointer"
-                  title="Search User"
-                >
-                  <UserCheck className="w-4 h-4" />
-                </button>
-                <button
-                  onClick={() => {
-                    sound.playClick();
-                    setActiveDrawer('none');
-                  }}
-                  className="p-1 rounded-lg text-slate-400 hover:text-white hover:bg-white/[0.06] transition cursor-pointer"
-                  title="Close"
-                >
-                  <X className="w-4 h-4" />
-                </button>
-              </div>
-            </div>
-
-            {/* Sub-Tabs: Friends • Messages • Friend Requests */}
-            <div className="p-3 border-b border-[#181B26]">
-              <div className="grid grid-cols-3 gap-1 p-1 rounded-xl bg-[#12141C] border border-[#202330]">
-                <button
-                  onClick={() => { sound.playClick(); setSocialSubTab('friends'); }}
-                  className={`py-2 rounded-lg flex items-center justify-center transition cursor-pointer relative ${
-                    socialSubTab === 'friends' ? 'text-white' : 'text-slate-400 hover:text-white'
-                  }`}
-                  title="Friends"
-                >
-                  <Users className="w-4 h-4" />
-                  {socialSubTab === 'friends' && (
-                    <span className="absolute bottom-0 w-6 h-0.5 rounded-full bg-[#A3E635]" />
-                  )}
-                </button>
-
-                <button
-                  onClick={() => { sound.playClick(); setSocialSubTab('dms'); }}
-                  className={`py-2 rounded-lg flex items-center justify-center transition cursor-pointer relative ${
-                    socialSubTab === 'dms' ? 'text-white' : 'text-slate-400 hover:text-white'
-                  }`}
-                  title="Direct Messages"
-                >
-                  <MessageSquare className="w-4 h-4" />
-                  {socialSubTab === 'dms' && (
-                    <span className="absolute bottom-0 w-6 h-0.5 rounded-full bg-[#A3E635]" />
-                  )}
-                </button>
-
-                <button
-                  onClick={() => { sound.playClick(); setSocialSubTab('requests'); }}
-                  className={`py-2 rounded-lg flex items-center justify-center transition cursor-pointer relative ${
-                    socialSubTab === 'requests' ? 'text-white' : 'text-slate-400 hover:text-white'
-                  }`}
-                  title="Friend Requests"
-                >
-                  <UserPlus className="w-4 h-4" />
-                  {socialSubTab === 'requests' && (
-                    <span className="absolute bottom-0 w-6 h-0.5 rounded-full bg-[#A3E635]" />
-                  )}
-                </button>
-              </div>
-            </div>
-
-            {/* Search Input Bar */}
-            <div className="p-3 border-b border-[#181B26]">
-              <div className="relative flex items-center">
-                <Search className="absolute left-3 w-4 h-4 text-slate-500" />
-                <input 
-                  type="text"
-                  value={socialSearch}
-                  onChange={(e) => setSocialSearch(e.target.value)}
-                  placeholder="Search"
-                  className="w-full h-9 pl-9 pr-3 rounded-lg bg-[#111218] border border-[#20222B] text-xs text-white placeholder-slate-500 focus:outline-none focus:border-slate-500 transition font-sans"
-                />
-              </div>
-            </div>
-
-            {/* 1. FRIENDS LIST SUB-TAB */}
-            {socialSubTab === 'friends' && (
-              <div className="flex-1 overflow-y-auto p-3 space-y-4">
-                
-                {/* Playing Section */}
-                {playingFriends.length > 0 && (
-                  <div>
-                    <div className="text-[11px] font-mono font-bold text-slate-400 mb-2 px-1 flex items-center justify-between">
-                      <span>Playing • {playingFriends.length}</span>
-                    </div>
-                    <div className="space-y-1">
-                      {playingFriends.map(friend => (
-                        <div 
-                          key={friend.id}
-                          className="p-2 rounded-xl hover:bg-white/[0.04] transition flex items-center justify-between gap-2.5 cursor-pointer group relative"
-                        >
-                          <div className="flex items-center gap-2.5 min-w-0">
-                            <div className="relative w-8 h-8 shrink-0">
-                              <img src={friend.avatar} alt={friend.name} className="w-full h-full rounded-full object-cover border border-white/10" />
-                              <span className="absolute bottom-0 right-0 w-2.5 h-2.5 rounded-full bg-[#A3E635] border-2 border-[#0B0D13]" />
-                            </div>
-                            <div className="min-w-0">
-                              <div className="text-xs font-bold text-white group-hover:text-[#A3E635] transition truncate">{friend.name}</div>
-                              <div className="text-[10px] text-slate-400 font-mono truncate">{friend.gameStatus}</div>
-                            </div>
-                          </div>
-
-                          {/* Hover Action Buttons: Open Chat (with Tooltip) & Invite (Exact match to uploaded_media_1794674924199.png) */}
-                          <div className="opacity-0 group-hover:opacity-100 transition-opacity flex items-center gap-1 shrink-0">
-                            <div className="relative group/chat">
-                              <button
-                                onClick={(e) => {
-                                  e.stopPropagation();
-                                  sound.playClick();
-                                  setSocialSubTab('dms');
-                                  setActiveDmUser({
-                                    id: friend.id,
-                                    name: friend.name,
-                                    avatar: friend.avatar,
-                                    badge: friend.hasPriority ? '★' : undefined
-                                  });
-                                }}
-                                className="p-1.5 rounded-lg bg-white/10 hover:bg-white/20 text-slate-200 hover:text-white transition cursor-pointer"
-                                title="Open chat"
-                              >
-                                <MessageSquare className="w-4 h-4" />
-                              </button>
-                              <div className="absolute right-0 bottom-full mb-1.5 px-2 py-0.5 rounded bg-[#12141C] border border-[#222533] text-white text-[10px] font-mono font-bold shadow-xl pointer-events-none opacity-0 group-hover/chat:opacity-100 transition whitespace-nowrap z-50">
-                                Open chat
-                              </div>
-                            </div>
-
-                            <button
-                              onClick={(e) => {
-                                e.stopPropagation();
-                                sound.playClick();
-                                onOpenInviteModal?.();
-                              }}
-                              className="p-1.5 rounded-lg hover:bg-white/10 text-slate-400 hover:text-white transition cursor-pointer"
-                              title="Invite to party"
-                            >
-                              <Plus className="w-4 h-4" />
-                            </button>
-                          </div>
-                        </div>
-                      ))}
-                    </div>
-                  </div>
-                )}
-
-                {/* Online Section */}
-                <div>
-                  <div className="text-[11px] font-mono font-bold text-slate-400 mb-2 px-1 flex items-center justify-between">
-                    <span>Online • {onlineFriends.length}</span>
-                  </div>
-                  <div className="space-y-1">
-                    {onlineFriends.map(friend => (
-                      <div 
-                        key={friend.id}
-                        className="p-2 rounded-xl hover:bg-white/[0.04] transition flex items-center justify-between gap-2.5 cursor-pointer group relative"
-                      >
-                        <div className="flex items-center gap-2.5 min-w-0">
-                          <div className="relative w-8 h-8 shrink-0">
-                            <img src={friend.avatar} alt={friend.name} className="w-full h-full rounded-full object-cover border border-white/10" />
-                            <span className="absolute bottom-0 right-0 w-2.5 h-2.5 rounded-full bg-emerald-400 border-2 border-[#0B0D13]" />
-                          </div>
-                          <div className="flex items-center gap-1.5 truncate">
-                            <span className="text-xs font-bold text-white group-hover:text-[#A3E635] transition truncate">{friend.name}</span>
-                            {friend.hasPriority && (
-                              <span className="w-3.5 h-3.5 rounded bg-[#A3E635] text-black text-[8px] font-black flex items-center justify-center">★</span>
-                            )}
-                          </div>
-                        </div>
-
-                        {/* Hover Action Buttons: Open Chat & Invite */}
-                        <div className="opacity-0 group-hover:opacity-100 transition-opacity flex items-center gap-1 shrink-0">
-                          <div className="relative group/chat">
-                            <button
-                              onClick={(e) => {
-                                e.stopPropagation();
-                                sound.playClick();
-                                setSocialSubTab('dms');
-                                setActiveDmUser({
-                                  id: friend.id,
-                                  name: friend.name,
-                                  avatar: friend.avatar,
-                                  badge: friend.hasPriority ? '★' : undefined
-                                });
-                              }}
-                              className="p-1.5 rounded-lg bg-white/10 hover:bg-white/20 text-slate-200 hover:text-white transition cursor-pointer"
-                              title="Open chat"
-                            >
-                              <MessageSquare className="w-4 h-4" />
-                            </button>
-                            <div className="absolute right-0 bottom-full mb-1.5 px-2 py-0.5 rounded bg-[#12141C] border border-[#222533] text-white text-[10px] font-mono font-bold shadow-xl pointer-events-none opacity-0 group-hover/chat:opacity-100 transition whitespace-nowrap z-50">
-                              Open chat
-                            </div>
-                          </div>
-
-                          <button
-                            onClick={(e) => {
-                              e.stopPropagation();
-                              sound.playClick();
-                              onOpenInviteModal?.();
-                            }}
-                            className="p-1.5 rounded-lg hover:bg-white/10 text-slate-400 hover:text-white transition cursor-pointer"
-                            title="Invite to party"
-                          >
-                            <Plus className="w-4 h-4" />
-                          </button>
-                        </div>
-                      </div>
-                    ))}
-                  </div>
-                </div>
-
-                {/* Offline Section */}
-                <div>
-                  <div className="text-[11px] font-mono font-bold text-slate-500 mb-2 px-1 flex items-center justify-between">
-                    <span>Offline • {offlineFriends.length}</span>
-                  </div>
-                  <div className="space-y-1">
-                    {offlineFriends.map(friend => (
-                      <div 
-                        key={friend.id}
-                        className="p-2 rounded-xl hover:bg-white/[0.03] transition flex items-center justify-between gap-2.5 cursor-pointer opacity-70 hover:opacity-100 group relative"
-                      >
-                        <div className="flex items-center gap-2.5 min-w-0">
-                          <div className="relative w-8 h-8 shrink-0">
-                            <img src={friend.avatar} alt={friend.name} className="w-full h-full rounded-full object-cover border border-white/10 grayscale" />
-                            <span className="absolute bottom-0 right-0 w-2.5 h-2.5 rounded-full bg-slate-600 border-2 border-[#0B0D13]" />
-                          </div>
-                          <span className="text-xs font-semibold text-slate-400 group-hover:text-white transition truncate">{friend.name}</span>
-                        </div>
-
-                        {/* Hover Action Buttons */}
-                        <div className="opacity-0 group-hover:opacity-100 transition-opacity flex items-center gap-1 shrink-0">
-                          <div className="relative group/chat">
-                            <button
-                              onClick={(e) => {
-                                e.stopPropagation();
-                                sound.playClick();
-                                setSocialSubTab('dms');
-                                setActiveDmUser({
-                                  id: friend.id,
-                                  name: friend.name,
-                                  avatar: friend.avatar,
-                                  badge: undefined
-                                });
-                              }}
-                              className="p-1.5 rounded-lg bg-white/10 hover:bg-white/20 text-slate-200 hover:text-white transition cursor-pointer"
-                              title="Open chat"
-                            >
-                              <MessageSquare className="w-4 h-4" />
-                            </button>
-                            <div className="absolute right-0 bottom-full mb-1.5 px-2 py-0.5 rounded bg-[#12141C] border border-[#222533] text-white text-[10px] font-mono font-bold shadow-xl pointer-events-none opacity-0 group-hover/chat:opacity-100 transition whitespace-nowrap z-50">
-                              Open chat
-                            </div>
-                          </div>
-                        </div>
-                      </div>
-                    ))}
-                  </div>
-                </div>
-
-              </div>
-            )}
-
-            {/* 2. DIRECT MESSAGES SUB-TAB (LIST VIEW - EXACT MATCH TO uploaded_media_1794674870290.png) */}
-            {socialSubTab === 'dms' && !activeDmUser && (
-              <div className="flex-1 overflow-y-auto p-2 space-y-1">
-                {dmsList
-                  .filter(dm => dm.name.toLowerCase().includes(socialSearch.toLowerCase()))
-                  .map(dm => (
-                    <div
-                      key={dm.id}
+                    {/* Close drawer */}
+                    <button
                       onClick={() => {
                         sound.playClick();
-                        setActiveDmUser(dm);
+                        setActiveDrawer('none');
                       }}
-                      className="p-2.5 rounded-xl hover:bg-white/[0.05] transition flex items-center justify-between gap-3 cursor-pointer group"
+                      className="w-7 h-7 rounded-lg bg-white/[0.06] hover:bg-white/10 border border-white/5 flex items-center justify-center text-slate-300 hover:text-white transition cursor-pointer"
+                      title="Close"
                     >
-                      <div className="flex items-center gap-2.5 min-w-0">
-                        <div className="relative w-9 h-9 shrink-0">
-                          <img src={dm.avatar} alt={dm.name} className="w-full h-full rounded-full object-cover border border-white/10" />
-                        </div>
-                        <div className="min-w-0">
-                          <div className="flex items-center gap-1.5">
-                            <span className="text-xs font-bold text-white group-hover:text-[#A3E635] transition truncate">{dm.name}</span>
-                            {dm.badge && (
-                              <span className="w-3.5 h-3.5 rounded bg-[#A3E635] text-black text-[8px] font-black flex items-center justify-center">
-                                {dm.badge}
-                              </span>
-                            )}
-                          </div>
-                          <div className="text-[11px] text-slate-400 font-sans truncate">{dm.lastMessage}</div>
-                        </div>
-                      </div>
-                      <span className="text-[10px] font-mono text-slate-500 shrink-0">{dm.date}</span>
-                    </div>
-                  ))}
-              </div>
-            )}
-
-            {/* 2. DIRECT MESSAGES SUB-TAB (ACTIVE CHAT CONVERSATION VIEW) */}
-            {socialSubTab === 'dms' && activeDmUser && (
-              <div className="flex-1 flex flex-col justify-between overflow-hidden">
-                {/* Conversation Header */}
-                <div className="px-3 py-2.5 border-b border-[#181B26] flex items-center justify-between bg-black/20">
-                  <button
-                    onClick={() => setActiveDmUser(null)}
-                    className="flex items-center gap-1 text-xs font-mono text-slate-400 hover:text-white transition cursor-pointer"
-                  >
-                    <ArrowLeft className="w-3.5 h-3.5" />
-                    <span>Back</span>
-                  </button>
-                  <div className="flex items-center gap-2">
-                    <img src={activeDmUser.avatar} alt={activeDmUser.name} className="w-6 h-6 rounded-full object-cover border border-white/10" />
-                    <span className="text-xs font-bold text-white">{activeDmUser.name}</span>
+                      <X className="w-4 h-4" />
+                    </button>
                   </div>
-                  <button
-                    onClick={() => setActiveDrawer('none')}
-                    className="text-slate-400 hover:text-white p-1"
-                  >
-                    <X className="w-3.5 h-3.5" />
-                  </button>
+
+                  {/* Centered Large Avatar + Status Dot + GamerTag & Badges */}
+                  <div className="flex flex-col items-center -mt-2">
+                    <div className="relative w-14 h-14">
+                      <img
+                        src={activeDmUser.avatar}
+                        alt={activeDmUser.name}
+                        className="w-full h-full rounded-full object-cover border border-white/15 shadow-md"
+                        onError={(e) => {
+                          (e.target as HTMLImageElement).src = '/avatars/edd1.png';
+                        }}
+                      />
+                      <span className="absolute bottom-0 right-0 w-3.5 h-3.5 rounded-full bg-[#1F222B] border-2 border-[#0A0B0F]" />
+                    </div>
+
+                    <div className="flex items-center justify-center gap-1.5 mt-2">
+                      <span className="font-display font-extrabold text-white text-sm tracking-tight">
+                        {activeDmUser.name}
+                      </span>
+                      <FaceitVerificationBadge
+                        type={activeDmUser.verification || currentVerification || 'verified'}
+                        size="xs"
+                      />
+                      <CountryFlag
+                        code={activeDmUser.code || currentCountry?.code || 'XK'}
+                        name={activeDmUser.countryName || currentCountry?.name || 'Kosovo'}
+                        size="xs"
+                      />
+                    </div>
+                  </div>
                 </div>
 
-                {/* Conversation Messages Feed */}
-                <div className="flex-1 overflow-y-auto p-3 space-y-3">
-                  {(dmHistory[activeDmUser.name] || []).map(msg => (
-                    <div key={msg.id} className={`flex items-start gap-2 ${msg.sender === currentGamerTag ? 'justify-end' : 'justify-start'}`}>
-                      {msg.sender !== currentGamerTag && (
-                        <img src={activeDmUser.avatar} alt="" className="w-6 h-6 rounded-full object-cover shrink-0 mt-0.5" />
-                      )}
-                      <div className={`p-2.5 rounded-xl max-w-[80%] text-xs ${
-                        msg.sender === currentGamerTag ? 'bg-[#A3E635] text-slate-950 font-medium' : 'bg-[#181A24] text-white border border-white/10'
-                      }`}>
-                        {msg.text && <p className="break-words font-sans">{msg.text}</p>}
-                        {msg.imageUrl && (
-                          <img src={msg.imageUrl} alt="" className="mt-1 rounded-lg max-h-40 object-cover cursor-pointer" onClick={() => window.open(msg.imageUrl, '_blank')} />
+                {/* 2. Chat Feed: Date Separator + Discord/FACEIT stream */}
+                <div className="flex-1 overflow-y-auto px-3.5 py-2 space-y-4 bg-[#090A0E]">
+                  <div className="text-center my-2">
+                    <span className="text-[10px] font-mono font-bold text-slate-500 uppercase tracking-widest">
+                      9 NOV
+                    </span>
+                  </div>
+
+                  {(dmHistory[activeDmUser.name] || [
+                    {
+                      id: 'init-1',
+                      sender: activeDmUser.name,
+                      avatar: activeDmUser.avatar,
+                      text: 'heyy!',
+                      timestamp: 'Just now'
+                    }
+                  ]).map((msg) => (
+                    <div key={msg.id} className="flex items-start gap-2.5">
+                      <img
+                        src={msg.avatar || (msg.sender === currentGamerTag ? (currentAvatarUrl || '/images/blockeerz_avatar.png') : activeDmUser.avatar)}
+                        alt={msg.sender}
+                        className="w-7 h-7 rounded-full object-cover shrink-0 mt-0.5 border border-white/10"
+                        onError={(e) => {
+                          (e.target as HTMLImageElement).src = '/avatars/edd1.png';
+                        }}
+                      />
+                      <div className="min-w-0 flex-1">
+                        <div className="flex items-baseline gap-2">
+                          <span className="font-display font-bold text-white text-xs leading-none">
+                            {msg.sender}
+                          </span>
+                          <span className="text-[10px] font-mono text-slate-500">
+                            {msg.timestamp}
+                          </span>
+                        </div>
+                        {msg.text && (
+                          <p className="text-xs text-slate-200 mt-1 whitespace-pre-line font-sans leading-relaxed break-words">
+                            {msg.text}
+                          </p>
                         )}
-                        <span className="text-[9px] opacity-60 mt-1 block text-right font-mono">{msg.timestamp}</span>
+                        {msg.imageUrl && (
+                          <img
+                            src={msg.imageUrl}
+                            alt="attachment"
+                            className="mt-1.5 rounded-lg max-h-44 object-cover cursor-pointer border border-white/10"
+                            onClick={() => window.open(msg.imageUrl, '_blank')}
+                          />
+                        )}
                       </div>
                     </div>
                   ))}
+                  <div ref={dmEndRef} />
                 </div>
 
-                {/* Conversation Input Form */}
+                {/* 3. Input bar */}
                 <div className="p-2.5 bg-[#07080B] border-t border-[#14151C] shrink-0">
                   <form onSubmit={handleSendDm} className="relative flex items-center">
                     <input
@@ -960,17 +848,518 @@ export const VortexRightSocialRail: React.FC<VortexRightSocialRailProps> = ({
                   </form>
                 </div>
               </div>
+            ) : (
+              /* ==================================================== */
+              /* NORMAL SOCIAL DRAWER VIEW (Friends, DMs, Requests)  */
+              /* ==================================================== */
+              <>
+                {/* Header: Social + Search User Button + Close ✕ */}
+                <div className="p-4 border-b border-[#181B26] flex items-center justify-between">
+                  <h2 className="font-display font-black text-white text-xl">
+                    Social
+                  </h2>
+
+                  <div className="flex items-center gap-1.5">
+                    <button 
+                      onClick={() => sound.playClick()}
+                      className="p-1.5 rounded-lg bg-white/[0.04] border border-white/10 hover:bg-white/[0.08] text-slate-300 hover:text-white transition cursor-pointer"
+                      title="Search User"
+                    >
+                      <UserCheck className="w-4 h-4" />
+                    </button>
+                    <button
+                      onClick={() => {
+                        sound.playClick();
+                        setActiveDrawer('none');
+                      }}
+                      className="p-1 rounded-lg text-slate-400 hover:text-white hover:bg-white/[0.06] transition cursor-pointer"
+                      title="Close"
+                    >
+                      <X className="w-4 h-4" />
+                    </button>
+                  </div>
+                </div>
+
+                {/* Sub-Tabs: Friends • Messages • Friend Requests */}
+                <div className="p-3 border-b border-[#181B26]">
+                  <div className="grid grid-cols-3 gap-1 p-1 rounded-xl bg-[#12141C] border border-[#202330]">
+                    <button
+                      onClick={() => { sound.playClick(); setSocialSubTab('friends'); }}
+                      className={`py-2 rounded-lg flex items-center justify-center transition cursor-pointer relative ${
+                        socialSubTab === 'friends' ? 'text-white' : 'text-slate-400 hover:text-white'
+                      }`}
+                      title="Friends"
+                    >
+                      <Users className="w-4 h-4" />
+                      {socialSubTab === 'friends' && (
+                        <span className="absolute bottom-0 w-6 h-0.5 rounded-full bg-[#A3E635]" />
+                      )}
+                    </button>
+
+                    <button
+                      onClick={() => { sound.playClick(); setSocialSubTab('dms'); }}
+                      className={`py-2 rounded-lg flex items-center justify-center transition cursor-pointer relative ${
+                        socialSubTab === 'dms' ? 'text-white' : 'text-slate-400 hover:text-white'
+                      }`}
+                      title="Direct Messages"
+                    >
+                      <MessageSquare className="w-4 h-4" />
+                      {socialSubTab === 'dms' && (
+                        <span className="absolute bottom-0 w-6 h-0.5 rounded-full bg-[#A3E635]" />
+                      )}
+                    </button>
+
+                    <button
+                      onClick={() => { sound.playClick(); setSocialSubTab('requests'); }}
+                      className={`py-2 rounded-lg flex items-center justify-center transition cursor-pointer relative ${
+                        socialSubTab === 'requests' ? 'text-white' : 'text-slate-400 hover:text-white'
+                      }`}
+                      title="Friend Requests"
+                    >
+                      <UserPlus className="w-4 h-4" />
+                      {socialSubTab === 'requests' && (
+                        <span className="absolute bottom-0 w-6 h-0.5 rounded-full bg-[#A3E635]" />
+                      )}
+                    </button>
+                  </div>
+                </div>
+
+                {/* Search Input Bar */}
+                <div className="p-3 border-b border-[#181B26]">
+                  <div className="relative flex items-center">
+                    <Search className="absolute left-3 w-4 h-4 text-slate-500" />
+                    <input 
+                      type="text"
+                      value={socialSearch}
+                      onChange={(e) => setSocialSearch(e.target.value)}
+                      placeholder="Search"
+                      className="w-full h-9 pl-9 pr-3 rounded-lg bg-[#111218] border border-[#20222B] text-xs text-white placeholder-slate-500 focus:outline-none focus:border-slate-500 transition font-sans"
+                    />
+                  </div>
+                </div>
+
+                {/* 1. FRIENDS LIST SUB-TAB */}
+                {socialSubTab === 'friends' && (
+                  <div className="flex-1 overflow-y-auto p-3 space-y-4">
+                    
+                    {/* Playing Section */}
+                    {playingFriends.length > 0 && (
+                      <div>
+                        <div className="text-[11px] font-mono font-bold text-slate-400 mb-2 px-1 flex items-center justify-between">
+                          <span>Playing • {playingFriends.length}</span>
+                        </div>
+                        <div className="space-y-1">
+                          {playingFriends.map(friend => (
+                            <div 
+                              key={friend.id}
+                              onClick={() => openChatWithUser(friend)}
+                              className="p-2 rounded-xl hover:bg-white/[0.04] transition flex items-center justify-between gap-2.5 cursor-pointer group relative"
+                            >
+                              <div className="flex items-center gap-2.5 min-w-0">
+                                <div className="relative w-8 h-8 shrink-0">
+                                  <img src={friend.avatar} alt={friend.name} className="w-full h-full rounded-full object-cover border border-white/10" />
+                                  <span className="absolute bottom-0 right-0 w-2.5 h-2.5 rounded-full bg-[#A3E635] border-2 border-[#0B0D13]" />
+                                </div>
+                                <div className="min-w-0">
+                                  <div className="text-xs font-bold text-white group-hover:text-[#A3E635] transition truncate">{friend.name}</div>
+                                  <div className="text-[10px] text-slate-400 font-mono truncate">{friend.gameStatus}</div>
+                                </div>
+                              </div>
+
+                              {/* Hover Action Buttons: Open Chat & Invite */}
+                              <div className="opacity-0 group-hover:opacity-100 transition-opacity flex items-center gap-1 shrink-0">
+                                <div className="relative group/chat">
+                                  <button
+                                    onClick={(e) => {
+                                      e.stopPropagation();
+                                      openChatWithUser(friend);
+                                    }}
+                                    className="p-1.5 rounded-lg bg-white/10 hover:bg-white/20 text-slate-200 hover:text-white transition cursor-pointer"
+                                    title="Open chat"
+                                  >
+                                    <MessageSquare className="w-4 h-4" />
+                                  </button>
+                                  <div className="absolute right-0 bottom-full mb-1.5 px-2 py-0.5 rounded bg-[#12141C] border border-[#222533] text-white text-[10px] font-mono font-bold shadow-xl pointer-events-none opacity-0 group-hover/chat:opacity-100 transition whitespace-nowrap z-50">
+                                    Open chat
+                                  </div>
+                                </div>
+
+                                <button
+                                  onClick={(e) => {
+                                    e.stopPropagation();
+                                    sound.playClick();
+                                    onOpenInviteModal?.();
+                                  }}
+                                  className="p-1.5 rounded-lg hover:bg-white/10 text-slate-400 hover:text-white transition cursor-pointer"
+                                  title="Invite to party"
+                                >
+                                  <Plus className="w-4 h-4" />
+                                </button>
+                              </div>
+                            </div>
+                          ))}
+                        </div>
+                      </div>
+                    )}
+
+                    {/* Online Section */}
+                    <div>
+                      <div className="text-[11px] font-mono font-bold text-slate-400 mb-2 px-1 flex items-center justify-between">
+                        <span>Online • {onlineFriends.length}</span>
+                      </div>
+                      <div className="space-y-1">
+                        {onlineFriends.map(friend => (
+                          <div 
+                            key={friend.id}
+                            onClick={() => openChatWithUser(friend)}
+                            className="p-2 rounded-xl hover:bg-white/[0.04] transition flex items-center justify-between gap-2.5 cursor-pointer group relative"
+                          >
+                            <div className="flex items-center gap-2.5 min-w-0">
+                              <div className="relative w-8 h-8 shrink-0">
+                                <img src={friend.avatar} alt={friend.name} className="w-full h-full rounded-full object-cover border border-white/10" />
+                                <span className="absolute bottom-0 right-0 w-2.5 h-2.5 rounded-full bg-emerald-400 border-2 border-[#0B0D13]" />
+                              </div>
+                              <div className="flex items-center gap-1.5 truncate">
+                                <span className="text-xs font-bold text-white group-hover:text-[#A3E635] transition truncate">{friend.name}</span>
+                                {friend.hasPriority && (
+                                  <span className="w-3.5 h-3.5 rounded bg-[#A3E635] text-black text-[8px] font-black flex items-center justify-center">★</span>
+                                )}
+                              </div>
+                            </div>
+
+                            {/* Hover Action Buttons: Open Chat & Invite */}
+                            <div className="opacity-0 group-hover:opacity-100 transition-opacity flex items-center gap-1 shrink-0">
+                              <div className="relative group/chat">
+                                <button
+                                  onClick={(e) => {
+                                    e.stopPropagation();
+                                    openChatWithUser(friend);
+                                  }}
+                                  className="p-1.5 rounded-lg bg-white/10 hover:bg-white/20 text-slate-200 hover:text-white transition cursor-pointer"
+                                  title="Open chat"
+                                >
+                                  <MessageSquare className="w-4 h-4" />
+                                </button>
+                                <div className="absolute right-0 bottom-full mb-1.5 px-2 py-0.5 rounded bg-[#12141C] border border-[#222533] text-white text-[10px] font-mono font-bold shadow-xl pointer-events-none opacity-0 group-hover/chat:opacity-100 transition whitespace-nowrap z-50">
+                                  Open chat
+                                </div>
+                              </div>
+
+                              <button
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  sound.playClick();
+                                  onOpenInviteModal?.();
+                                }}
+                                className="p-1.5 rounded-lg hover:bg-white/10 text-slate-400 hover:text-white transition cursor-pointer"
+                                title="Invite to party"
+                              >
+                                <Plus className="w-4 h-4" />
+                              </button>
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+
+                    {/* Offline Section */}
+                    <div>
+                      <div className="text-[11px] font-mono font-bold text-slate-500 mb-2 px-1 flex items-center justify-between">
+                        <span>Offline • {offlineFriends.length}</span>
+                      </div>
+                      <div className="space-y-1">
+                        {offlineFriends.map(friend => (
+                          <div 
+                            key={friend.id}
+                            onClick={() => openChatWithUser(friend)}
+                            className="p-2 rounded-xl hover:bg-white/[0.03] transition flex items-center justify-between gap-2.5 cursor-pointer opacity-70 hover:opacity-100 group relative"
+                          >
+                            <div className="flex items-center gap-2.5 min-w-0">
+                              <div className="relative w-8 h-8 shrink-0">
+                                <img src={friend.avatar} alt={friend.name} className="w-full h-full rounded-full object-cover border border-white/10 grayscale" />
+                                <span className="absolute bottom-0 right-0 w-2.5 h-2.5 rounded-full bg-slate-600 border-2 border-[#0B0D13]" />
+                              </div>
+                              <span className="text-xs font-semibold text-slate-400 group-hover:text-white transition truncate">{friend.name}</span>
+                            </div>
+
+                            {/* Hover Action Buttons */}
+                            <div className="opacity-0 group-hover:opacity-100 transition-opacity flex items-center gap-1 shrink-0">
+                              <div className="relative group/chat">
+                                <button
+                                  onClick={(e) => {
+                                    e.stopPropagation();
+                                    openChatWithUser(friend);
+                                  }}
+                                  className="p-1.5 rounded-lg bg-white/10 hover:bg-white/20 text-slate-200 hover:text-white transition cursor-pointer"
+                                  title="Open chat"
+                                >
+                                  <MessageSquare className="w-4 h-4" />
+                                </button>
+                                <div className="absolute right-0 bottom-full mb-1.5 px-2 py-0.5 rounded bg-[#12141C] border border-[#222533] text-white text-[10px] font-mono font-bold shadow-xl pointer-events-none opacity-0 group-hover/chat:opacity-100 transition whitespace-nowrap z-50">
+                                  Open chat
+                                </div>
+                              </div>
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+
+                  </div>
+                )}
+
+                {/* 2. DIRECT MESSAGES SUB-TAB (LIST VIEW - EXACT MATCH TO uploaded_media_1794674870290.png) */}
+                {socialSubTab === 'dms' && (
+                  <div className="flex-1 overflow-y-auto p-2 space-y-1">
+                    {dmsList
+                      .filter(dm => dm.name.toLowerCase().includes(socialSearch.toLowerCase()))
+                      .map(dm => (
+                        <div
+                          key={dm.id}
+                          onClick={() => openChatWithUser(dm)}
+                          className="p-2.5 rounded-xl hover:bg-white/[0.05] transition flex items-center justify-between gap-3 cursor-pointer group"
+                        >
+                          <div className="flex items-center gap-2.5 min-w-0">
+                            <div className="relative w-9 h-9 shrink-0">
+                              <img src={dm.avatar} alt={dm.name} className="w-full h-full rounded-full object-cover border border-white/10" />
+                            </div>
+                            <div className="min-w-0">
+                              <div className="flex items-center gap-1.5">
+                                <span className="text-xs font-bold text-white group-hover:text-[#A3E635] transition truncate">{dm.name}</span>
+                                {dm.badge && (
+                                  <span className="w-3.5 h-3.5 rounded bg-[#A3E635] text-black text-[8px] font-black flex items-center justify-center">
+                                    {dm.badge}
+                                  </span>
+                                )}
+                              </div>
+                              <div className="text-[11px] text-slate-400 font-sans truncate">{dm.lastMessage}</div>
+                            </div>
+                          </div>
+                          <span className="text-[10px] font-mono text-slate-500 shrink-0">{dm.date}</span>
+                        </div>
+                      ))}
+                  </div>
+                )}
+
+                {/* 3. FRIEND REQUESTS SUB-TAB */}
+                {socialSubTab === 'requests' && (
+                  <div className="flex-1 p-6 flex flex-col items-center justify-center text-center space-y-3 text-slate-400">
+                    <UserPlus className="w-10 h-10 text-slate-600" />
+                    <div className="text-xs font-mono font-bold text-slate-300">No Pending Requests</div>
+                    <p className="text-[11px] text-slate-500 max-w-[200px]">When other players add you on Vortex, their friend requests will appear here.</p>
+                  </div>
+                )}
+              </>
             )}
 
-            {/* 3. FRIEND REQUESTS SUB-TAB */}
-            {socialSubTab === 'requests' && (
-              <div className="flex-1 p-6 flex flex-col items-center justify-center text-center space-y-3 text-slate-400">
-                <UserPlus className="w-10 h-10 text-slate-600" />
-                <div className="text-xs font-mono font-bold text-slate-300">No Pending Requests</div>
-                <p className="text-[11px] text-slate-500 max-w-[200px]">When other players add you on Vortex, their friend requests will appear here.</p>
+          </div>
+        </>
+      )}
+
+      {/* ======================================================== */}
+      {/* 2.5 SLIDING DRAWER: NOTIFICATIONS (1:1 FACEIT DRAWER)      */}
+      {/* ======================================================== */}
+      {activeDrawer === 'notifications' && (
+        <>
+          <div 
+            className="fixed inset-0 z-40 bg-black/40 backdrop-blur-[1px]" 
+            onClick={() => setActiveDrawer('none')} 
+          />
+
+          <div className="fixed right-64 top-0 bottom-0 w-80 bg-[#0B0D13] border-l border-[#1A1D27] z-50 flex flex-col shadow-2xl animate-in slide-in-from-right duration-200 select-none">
+            {/* Header: Notifications + Close ✕ */}
+            <div className="p-4 border-b border-[#181B26] flex items-center justify-between">
+              <h2 className="font-display font-extrabold text-white text-base tracking-wide">
+                Notifications
+              </h2>
+              <button
+                onClick={() => {
+                  sound.playClick();
+                  setActiveDrawer('none');
+                }}
+                className="p-1 rounded-lg text-slate-400 hover:text-white hover:bg-white/[0.06] transition cursor-pointer"
+                title="Close"
+              >
+                <X className="w-4 h-4" />
+              </button>
+            </div>
+
+            {/* Account Selector Dropdown */}
+            <div className="p-3 border-b border-[#181B26]">
+              <div className="flex items-center justify-between px-3 py-2 rounded-xl bg-[#12141C] border border-[#202330] cursor-pointer hover:border-slate-500 transition">
+                <div className="flex items-center gap-2.5 min-w-0">
+                  <img
+                    src={currentAvatarUrl || '/images/blockeerz_avatar.png'}
+                    alt={currentGamerTag}
+                    className="w-5 h-5 rounded-full object-cover border border-white/10"
+                  />
+                  <span className="text-xs font-bold text-white truncate font-sans">
+                    {currentGamerTag}
+                  </span>
+                </div>
+                <ChevronDown className="w-4 h-4 text-slate-400 shrink-0" />
               </div>
-            )}
+            </div>
 
+            {/* Notifications Feed */}
+            <div className="flex-1 overflow-y-auto p-3 space-y-4">
+              {/* Date Group 1: 12 Nov 2026 */}
+              <div>
+                <div className="text-[11px] font-sans font-medium text-slate-400 mb-2 px-1">
+                  12 Nov 2026
+                </div>
+                <div className="space-y-3">
+                  {/* Case 50 Points */}
+                  <div className="flex items-start gap-3 p-2 rounded-xl hover:bg-white/[0.03] transition cursor-pointer">
+                    <div className="w-9 h-9 rounded-full bg-[#151722] border border-[#222533] flex items-center justify-center shrink-0">
+                      <span className="text-orange-500 font-black text-xs">◀</span>
+                    </div>
+                    <div className="min-w-0 flex-1 text-xs">
+                      <p className="text-slate-200">
+                        <strong className="text-white font-bold">You</strong> received 50 FACEIT Points from your FACEIT Case.
+                      </p>
+                      <button className="text-orange-500 hover:text-orange-400 font-bold mt-0.5 inline-block cursor-pointer">
+                        Explore the shop.
+                      </button>
+                      <div className="flex items-center gap-1 text-[10px] text-slate-500 mt-1 font-mono">
+                        <ShoppingBag className="w-3 h-3" />
+                        <span>13:20 GMT+1</span>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Access Token */}
+                  <div className="flex items-start gap-3 p-2 rounded-xl hover:bg-white/[0.03] transition cursor-pointer">
+                    <div className="w-9 h-9 rounded-full bg-[#151722] border border-[#222533] flex items-center justify-center shrink-0">
+                      <span className="text-orange-500 font-black text-xs">◀</span>
+                    </div>
+                    <div className="min-w-0 flex-1 text-xs">
+                      <p className="text-slate-200">
+                        <strong className="text-white font-bold">You</strong> received 1 Access Token from your FACEIT Case
+                      </p>
+                      <div className="flex items-center gap-1 text-[10px] text-slate-500 mt-1 font-mono">
+                        <ShoppingBag className="w-3 h-3" />
+                        <span>13:20 GMT+1</span>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Case 100 Points */}
+                  <div className="flex items-start gap-3 p-2 rounded-xl hover:bg-white/[0.03] transition cursor-pointer">
+                    <div className="w-9 h-9 rounded-full bg-[#151722] border border-[#222533] flex items-center justify-center shrink-0">
+                      <span className="text-orange-500 font-black text-xs">◀</span>
+                    </div>
+                    <div className="min-w-0 flex-1 text-xs">
+                      <p className="text-slate-200">
+                        <strong className="text-white font-bold">You</strong> received 100 FACEIT Points from your FACEIT Case.
+                      </p>
+                      <button className="text-orange-500 hover:text-orange-400 font-bold mt-0.5 inline-block cursor-pointer">
+                        Explore the shop.
+                      </button>
+                      <div className="flex items-center gap-1 text-[10px] text-slate-500 mt-1 font-mono">
+                        <ShoppingBag className="w-3 h-3" />
+                        <span>13:19 GMT+1</span>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Case 80 Points */}
+                  <div className="flex items-start gap-3 p-2 rounded-xl hover:bg-white/[0.03] transition cursor-pointer">
+                    <div className="w-9 h-9 rounded-full bg-[#151722] border border-[#222533] flex items-center justify-center shrink-0">
+                      <span className="text-orange-500 font-black text-xs">◀</span>
+                    </div>
+                    <div className="min-w-0 flex-1 text-xs">
+                      <p className="text-slate-200">
+                        <strong className="text-white font-bold">You</strong> received 80 FACEIT Points from your FACEIT Case.
+                      </p>
+                      <button className="text-orange-500 hover:text-orange-400 font-bold mt-0.5 inline-block cursor-pointer">
+                        Explore the shop.
+                      </button>
+                      <div className="flex items-center gap-1 text-[10px] text-slate-500 mt-1 font-mono">
+                        <ShoppingBag className="w-3 h-3" />
+                        <span>13:19 GMT+1</span>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Case 500 Points */}
+                  <div className="flex items-start gap-3 p-2 rounded-xl hover:bg-white/[0.03] transition cursor-pointer">
+                    <div className="w-9 h-9 rounded-full bg-[#151722] border border-[#222533] flex items-center justify-center shrink-0">
+                      <span className="text-orange-500 font-black text-xs">◀</span>
+                    </div>
+                    <div className="min-w-0 flex-1 text-xs">
+                      <p className="text-slate-200">
+                        <strong className="text-white font-bold">You</strong> received 500 FACEIT Points from your FACEIT Case.
+                      </p>
+                      <button className="text-orange-500 hover:text-orange-400 font-bold mt-0.5 inline-block cursor-pointer">
+                        Explore the shop.
+                      </button>
+                      <div className="flex items-center gap-1 text-[10px] text-slate-500 mt-1 font-mono">
+                        <ShoppingBag className="w-3 h-3" />
+                        <span>13:14 GMT+1</span>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              {/* Date Group 2: 09 Nov 2026 */}
+              <div className="pt-2 border-t border-[#181B26]">
+                <div className="text-[11px] font-sans font-medium text-slate-400 mb-2 px-1">
+                  09 Nov 2026
+                </div>
+                <div className="space-y-3">
+                  {/* Challenge Completed */}
+                  <div className="flex items-start gap-3 p-2 rounded-xl hover:bg-white/[0.03] transition cursor-pointer">
+                    <div className="w-9 h-9 rounded-xl bg-[#151722] border border-[#222533] flex items-center justify-center shrink-0">
+                      <Trophy className="w-4 h-4 text-orange-500" />
+                    </div>
+                    <div className="min-w-0 flex-1 text-xs">
+                      <span className="text-[10px] font-mono font-bold text-slate-500 uppercase tracking-widest block mb-0.5">
+                        CHALLENGE COMPLETED
+                      </span>
+                      <p className="text-slate-200 font-medium">
+                        Challenge completed! Check your progress and see what's unlocked next.
+                      </p>
+                      <div className="flex items-center gap-1 text-[10px] text-slate-500 mt-1 font-mono">
+                        <span>22:21 GMT+1</span>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* edd1- Accepted friend request */}
+                  <div 
+                    onClick={() => {
+                      openChatWithUser({
+                        id: 'f-edd1',
+                        name: 'edd1-',
+                        avatar: '/avatars/edd1.png',
+                        verification: 'verified',
+                        code: 'XK',
+                        countryName: 'Kosovo'
+                      });
+                    }}
+                    className="flex items-start gap-3 p-2 rounded-xl hover:bg-white/[0.05] transition cursor-pointer group"
+                  >
+                    <img 
+                      src="/avatars/edd1.png" 
+                      alt="edd1-" 
+                      className="w-9 h-9 rounded-full object-cover shrink-0 border border-white/10" 
+                    />
+                    <div className="min-w-0 flex-1 text-xs">
+                      <p className="text-slate-200">
+                        <strong className="text-white font-bold group-hover:text-[#A3E635] transition">edd1-</strong> accepted your friend request
+                      </p>
+                      <div className="flex items-center gap-1 text-[10px] text-slate-500 mt-1 font-mono">
+                        <Users className="w-3 h-3" />
+                        <span>21:26 GMT+1</span>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+            </div>
           </div>
         </>
       )}

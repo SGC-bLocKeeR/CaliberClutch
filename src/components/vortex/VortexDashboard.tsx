@@ -635,6 +635,16 @@ export const VortexDashboard: React.FC<VortexDashboardProps> = ({
     };
   }>>([
     {
+      id: 'notif-1',
+      type: 'party',
+      title: 'edd1- accepted your friend request',
+      subtitle: 'You and edd1- are now friends. You can send messages or invite them to your party.',
+      time: '21:26 GMT+1',
+      read: false,
+      actionStatus: 'accepted',
+      data: { sender: 'edd1-' },
+    },
+    {
       id: 'notif-2',
       type: 'party',
       title: 'Party Invite from juanflatroo',
@@ -740,19 +750,19 @@ export const VortexDashboard: React.FC<VortexDashboardProps> = ({
   };
 
   const handleTriggerTestNotif = () => {
-    sound.playJoinScrim();
+    sound.playSelect();
     const newNotif = {
       id: `notif-${Date.now()}`,
-      type: 'match' as const,
-      title: '5v5 Match Ready Check (New)',
-      subtitle: 'Ranked 5v5 on de_inferno (128-tick EU Vienna). Accept within 20s.',
+      type: 'party' as const,
+      title: 'DIVA- accepted your party invite',
+      subtitle: 'Joined your CS2 competitive lobby. Party is now full and ready.',
       time: 'Just now',
       read: false,
-      actionStatus: 'pending' as const,
-      data: { map: 'de_inferno', server: '194.156.98.5:27015' }
+      actionStatus: 'accepted' as const,
+      data: { sender: 'DIVA-' }
     };
     setNotifications(prev => [newNotif, ...prev]);
-    setDashboardToast('⚡ Incoming Match Ready alert!');
+    setDashboardToast('👥 DIVA- accepted your party invite!');
   };
 
   // =========================================================================
