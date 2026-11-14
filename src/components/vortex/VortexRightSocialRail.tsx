@@ -19,7 +19,8 @@ import {
   UserCheck,
   User,
   Shield,
-  Volume2
+  Volume2,
+  ArrowLeft
 } from 'lucide-react';
 import { sound } from '../../utils/soundEffects';
 import { CountryFlag } from './CountryFlag';
@@ -88,6 +89,134 @@ export const VortexRightSocialRail: React.FC<VortexRightSocialRailProps> = ({
     timestamp: string;
   }>>([]);
   const partyFileInputRef = useRef<HTMLInputElement>(null);
+
+  // Active DM Chat view
+  const [activeDmUser, setActiveDmUser] = useState<{
+    id: string;
+    name: string;
+    avatar: string;
+    badge?: string;
+  } | null>(null);
+
+  const [dmInput, setDmInput] = useState('');
+  const dmFileInputRef = useRef<HTMLInputElement>(null);
+
+  // Exact 1:1 Direct Messages from User Reference Screenshot (uploaded_media_1794674870290.png)
+  const dmsList = [
+    {
+      id: 'dm-edd1',
+      name: 'edd1-',
+      avatar: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=150&q=80',
+      lastMessage: 'https://www.faceit.com/en/...',
+      date: '9 Nov'
+    },
+    {
+      id: 'dm-blackbars1',
+      name: 'blackbars1',
+      avatar: 'https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?auto=format&fit=crop&w=150&q=80',
+      lastMessage: 'aje tu lu ti',
+      date: '9 Nov'
+    },
+    {
+      id: 'dm-toxi',
+      name: 'toxi---',
+      avatar: 'https://images.unsplash.com/photo-1570295999919-56ceb5ecca61?auto=format&fit=crop&w=150&q=80',
+      lastMessage: 'a',
+      date: '31 Oct'
+    },
+    {
+      id: 'dm-n19',
+      name: 'N19',
+      avatar: 'https://images.unsplash.com/photo-1566492031773-4f4e44671857?auto=format&fit=crop&w=150&q=80',
+      badge: '★',
+      lastMessage: ';;',
+      date: '24 Oct'
+    },
+    {
+      id: 'dm-diva',
+      name: 'DIVA-',
+      avatar: 'https://images.unsplash.com/photo-1494790108377-be9c29b29330?auto=format&fit=crop&w=150&q=80',
+      badge: '★',
+      lastMessage: 'hec moj lujm fitojm naj loj',
+      date: '18 Oct'
+    },
+    {
+      id: 'dm-amatuero',
+      name: 'amatuero',
+      avatar: 'https://images.unsplash.com/photo-1579546929518-9e396f3cc809?auto=format&fit=crop&w=150&q=80',
+      lastMessage: 'OKI',
+      date: '12 Apr'
+    }
+  ];
+
+  const [dmHistory, setDmHistory] = useState<Record<string, Array<{
+    id: string;
+    sender: string;
+    text?: string;
+    imageUrl?: string;
+    timestamp: string;
+  }>>>({
+    'edd1-': [
+      { id: '1', sender: 'edd1-', text: 'https://www.faceit.com/en/cs2/room/1-a48291f0', timestamp: '9 Nov, 18:24' }
+    ],
+    'blackbars1': [
+      { id: '1', sender: 'blackbars1', text: 'aje tu lu ti', timestamp: '9 Nov, 21:05' }
+    ],
+    'toxi---': [
+      { id: '1', sender: 'toxi---', text: 'a', timestamp: '31 Oct, 14:12' }
+    ],
+    'N19': [
+      { id: '1', sender: 'N19', text: ';;', timestamp: '24 Oct, 23:40' }
+    ],
+    'DIVA-': [
+      { id: '1', sender: 'DIVA-', text: 'hec moj lujm fitojm naj loj', timestamp: '18 Oct, 19:15' }
+    ],
+    'amatuero': [
+      { id: '1', sender: 'amatuero', text: 'OKI', timestamp: '12 Apr, 16:02' }
+    ]
+  });
+
+  const handleSendDm = (e?: React.FormEvent) => {
+    e?.preventDefault();
+    if (!dmInput.trim() || !activeDmUser) return;
+    sound.playClick();
+    const newMsg = {
+      id: `dm-msg-${Date.now()}`,
+      sender: currentGamerTag,
+      text: dmInput.trim(),
+      timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', hour12: true }).toLowerCase()
+    };
+    setDmHistory(prev => ({
+      ...prev,
+      [activeDmUser.name]: [...(prev[activeDmUser.name] || []), newMsg]
+    }));
+    setDmInput('');
+  };
+
+  const handleDmImage = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file || !activeDmUser) return;
+    const reader = new FileReader();
+    reader.onload = (event) => {
+      const dataUrl = event.target?.result as string;
+      if (!dataUrl) return;
+      const newMsg = {
+        id: `dm-img-${Date.now()}`,
+        sender: currentGamerTag,
+        text: dmInput.trim() || undefined,
+        imageUrl: dataUrl,
+        timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', hour12: true }).toLowerCase()
+      };
+      setDmHistory(prev => ({
+        ...prev,
+        [activeDmUser.name]: [...(prev[activeDmUser.name] || []), newMsg]
+      }));
+      setDmInput('');
+      sound.playChatMessage();
+    };
+    reader.readAsDataURL(file);
+    e.target.value = '';
+  };
 
   // Exact 1:1 Friends List from User Reference Screenshot
   const friendsList: SocialFriend[] = [
@@ -541,92 +670,306 @@ export const VortexRightSocialRail: React.FC<VortexRightSocialRailProps> = ({
               </div>
             </div>
 
-            {/* Friends List Feed (Grouped: Playing • Online • Offline) */}
-            <div className="flex-1 overflow-y-auto p-3 space-y-4">
-              
-              {/* Playing Section */}
-              {playingFriends.length > 0 && (
+            {/* 1. FRIENDS LIST SUB-TAB */}
+            {socialSubTab === 'friends' && (
+              <div className="flex-1 overflow-y-auto p-3 space-y-4">
+                
+                {/* Playing Section */}
+                {playingFriends.length > 0 && (
+                  <div>
+                    <div className="text-[11px] font-mono font-bold text-slate-400 mb-2 px-1 flex items-center justify-between">
+                      <span>Playing • {playingFriends.length}</span>
+                    </div>
+                    <div className="space-y-1">
+                      {playingFriends.map(friend => (
+                        <div 
+                          key={friend.id}
+                          className="p-2 rounded-xl hover:bg-white/[0.04] transition flex items-center justify-between gap-2.5 cursor-pointer group relative"
+                        >
+                          <div className="flex items-center gap-2.5 min-w-0">
+                            <div className="relative w-8 h-8 shrink-0">
+                              <img src={friend.avatar} alt={friend.name} className="w-full h-full rounded-full object-cover border border-white/10" />
+                              <span className="absolute bottom-0 right-0 w-2.5 h-2.5 rounded-full bg-[#A3E635] border-2 border-[#0B0D13]" />
+                            </div>
+                            <div className="min-w-0">
+                              <div className="text-xs font-bold text-white group-hover:text-[#A3E635] transition truncate">{friend.name}</div>
+                              <div className="text-[10px] text-slate-400 font-mono truncate">{friend.gameStatus}</div>
+                            </div>
+                          </div>
+
+                          {/* Hover Action Buttons: Open Chat (with Tooltip) & Invite (Exact match to uploaded_media_1794674924199.png) */}
+                          <div className="opacity-0 group-hover:opacity-100 transition-opacity flex items-center gap-1 shrink-0">
+                            <div className="relative group/chat">
+                              <button
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  sound.playClick();
+                                  setSocialSubTab('dms');
+                                  setActiveDmUser({
+                                    id: friend.id,
+                                    name: friend.name,
+                                    avatar: friend.avatar,
+                                    badge: friend.hasPriority ? '★' : undefined
+                                  });
+                                }}
+                                className="p-1.5 rounded-lg bg-white/10 hover:bg-white/20 text-slate-200 hover:text-white transition cursor-pointer"
+                                title="Open chat"
+                              >
+                                <MessageSquare className="w-4 h-4" />
+                              </button>
+                              <div className="absolute right-0 bottom-full mb-1.5 px-2 py-0.5 rounded bg-[#12141C] border border-[#222533] text-white text-[10px] font-mono font-bold shadow-xl pointer-events-none opacity-0 group-hover/chat:opacity-100 transition whitespace-nowrap z-50">
+                                Open chat
+                              </div>
+                            </div>
+
+                            <button
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                sound.playClick();
+                                onOpenInviteModal?.();
+                              }}
+                              className="p-1.5 rounded-lg hover:bg-white/10 text-slate-400 hover:text-white transition cursor-pointer"
+                              title="Invite to party"
+                            >
+                              <Plus className="w-4 h-4" />
+                            </button>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                )}
+
+                {/* Online Section */}
                 <div>
                   <div className="text-[11px] font-mono font-bold text-slate-400 mb-2 px-1 flex items-center justify-between">
-                    <span>Playing • {playingFriends.length}</span>
+                    <span>Online • {onlineFriends.length}</span>
                   </div>
                   <div className="space-y-1">
-                    {playingFriends.map(friend => (
+                    {onlineFriends.map(friend => (
                       <div 
                         key={friend.id}
-                        onClick={() => sound.playClick()}
-                        className="p-2 rounded-xl hover:bg-white/[0.04] transition flex items-center justify-between gap-2.5 cursor-pointer group"
+                        className="p-2 rounded-xl hover:bg-white/[0.04] transition flex items-center justify-between gap-2.5 cursor-pointer group relative"
                       >
                         <div className="flex items-center gap-2.5 min-w-0">
                           <div className="relative w-8 h-8 shrink-0">
                             <img src={friend.avatar} alt={friend.name} className="w-full h-full rounded-full object-cover border border-white/10" />
-                            <span className="absolute bottom-0 right-0 w-2.5 h-2.5 rounded-full bg-[#A3E635] border-2 border-[#0B0D13]" />
+                            <span className="absolute bottom-0 right-0 w-2.5 h-2.5 rounded-full bg-emerald-400 border-2 border-[#0B0D13]" />
                           </div>
-                          <div className="min-w-0">
-                            <div className="text-xs font-bold text-white group-hover:text-[#A3E635] transition truncate">{friend.name}</div>
-                            <div className="text-[10px] text-slate-400 font-mono truncate">{friend.gameStatus}</div>
+                          <div className="flex items-center gap-1.5 truncate">
+                            <span className="text-xs font-bold text-white group-hover:text-[#A3E635] transition truncate">{friend.name}</span>
+                            {friend.hasPriority && (
+                              <span className="w-3.5 h-3.5 rounded bg-[#A3E635] text-black text-[8px] font-black flex items-center justify-center">★</span>
+                            )}
+                          </div>
+                        </div>
+
+                        {/* Hover Action Buttons: Open Chat & Invite */}
+                        <div className="opacity-0 group-hover:opacity-100 transition-opacity flex items-center gap-1 shrink-0">
+                          <div className="relative group/chat">
+                            <button
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                sound.playClick();
+                                setSocialSubTab('dms');
+                                setActiveDmUser({
+                                  id: friend.id,
+                                  name: friend.name,
+                                  avatar: friend.avatar,
+                                  badge: friend.hasPriority ? '★' : undefined
+                                });
+                              }}
+                              className="p-1.5 rounded-lg bg-white/10 hover:bg-white/20 text-slate-200 hover:text-white transition cursor-pointer"
+                              title="Open chat"
+                            >
+                              <MessageSquare className="w-4 h-4" />
+                            </button>
+                            <div className="absolute right-0 bottom-full mb-1.5 px-2 py-0.5 rounded bg-[#12141C] border border-[#222533] text-white text-[10px] font-mono font-bold shadow-xl pointer-events-none opacity-0 group-hover/chat:opacity-100 transition whitespace-nowrap z-50">
+                              Open chat
+                            </div>
+                          </div>
+
+                          <button
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              sound.playClick();
+                              onOpenInviteModal?.();
+                            }}
+                            className="p-1.5 rounded-lg hover:bg-white/10 text-slate-400 hover:text-white transition cursor-pointer"
+                            title="Invite to party"
+                          >
+                            <Plus className="w-4 h-4" />
+                          </button>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+
+                {/* Offline Section */}
+                <div>
+                  <div className="text-[11px] font-mono font-bold text-slate-500 mb-2 px-1 flex items-center justify-between">
+                    <span>Offline • {offlineFriends.length}</span>
+                  </div>
+                  <div className="space-y-1">
+                    {offlineFriends.map(friend => (
+                      <div 
+                        key={friend.id}
+                        className="p-2 rounded-xl hover:bg-white/[0.03] transition flex items-center justify-between gap-2.5 cursor-pointer opacity-70 hover:opacity-100 group relative"
+                      >
+                        <div className="flex items-center gap-2.5 min-w-0">
+                          <div className="relative w-8 h-8 shrink-0">
+                            <img src={friend.avatar} alt={friend.name} className="w-full h-full rounded-full object-cover border border-white/10 grayscale" />
+                            <span className="absolute bottom-0 right-0 w-2.5 h-2.5 rounded-full bg-slate-600 border-2 border-[#0B0D13]" />
+                          </div>
+                          <span className="text-xs font-semibold text-slate-400 group-hover:text-white transition truncate">{friend.name}</span>
+                        </div>
+
+                        {/* Hover Action Buttons */}
+                        <div className="opacity-0 group-hover:opacity-100 transition-opacity flex items-center gap-1 shrink-0">
+                          <div className="relative group/chat">
+                            <button
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                sound.playClick();
+                                setSocialSubTab('dms');
+                                setActiveDmUser({
+                                  id: friend.id,
+                                  name: friend.name,
+                                  avatar: friend.avatar,
+                                  badge: undefined
+                                });
+                              }}
+                              className="p-1.5 rounded-lg bg-white/10 hover:bg-white/20 text-slate-200 hover:text-white transition cursor-pointer"
+                              title="Open chat"
+                            >
+                              <MessageSquare className="w-4 h-4" />
+                            </button>
+                            <div className="absolute right-0 bottom-full mb-1.5 px-2 py-0.5 rounded bg-[#12141C] border border-[#222533] text-white text-[10px] font-mono font-bold shadow-xl pointer-events-none opacity-0 group-hover/chat:opacity-100 transition whitespace-nowrap z-50">
+                              Open chat
+                            </div>
                           </div>
                         </div>
                       </div>
                     ))}
                   </div>
                 </div>
-              )}
 
-              {/* Online Section */}
-              <div>
-                <div className="text-[11px] font-mono font-bold text-slate-400 mb-2 px-1 flex items-center justify-between">
-                  <span>Online • {onlineFriends.length}</span>
-                </div>
-                <div className="space-y-1">
-                  {onlineFriends.map(friend => (
-                    <div 
-                      key={friend.id}
-                      onClick={() => sound.playClick()}
-                      className="p-2 rounded-xl hover:bg-white/[0.04] transition flex items-center justify-between gap-2.5 cursor-pointer group"
+              </div>
+            )}
+
+            {/* 2. DIRECT MESSAGES SUB-TAB (LIST VIEW - EXACT MATCH TO uploaded_media_1794674870290.png) */}
+            {socialSubTab === 'dms' && !activeDmUser && (
+              <div className="flex-1 overflow-y-auto p-2 space-y-1">
+                {dmsList
+                  .filter(dm => dm.name.toLowerCase().includes(socialSearch.toLowerCase()))
+                  .map(dm => (
+                    <div
+                      key={dm.id}
+                      onClick={() => {
+                        sound.playClick();
+                        setActiveDmUser(dm);
+                      }}
+                      className="p-2.5 rounded-xl hover:bg-white/[0.05] transition flex items-center justify-between gap-3 cursor-pointer group"
                     >
                       <div className="flex items-center gap-2.5 min-w-0">
-                        <div className="relative w-8 h-8 shrink-0">
-                          <img src={friend.avatar} alt={friend.name} className="w-full h-full rounded-full object-cover border border-white/10" />
-                          <span className="absolute bottom-0 right-0 w-2.5 h-2.5 rounded-full bg-emerald-400 border-2 border-[#0B0D13]" />
+                        <div className="relative w-9 h-9 shrink-0">
+                          <img src={dm.avatar} alt={dm.name} className="w-full h-full rounded-full object-cover border border-white/10" />
                         </div>
-                        <div className="flex items-center gap-1.5 truncate">
-                          <span className="text-xs font-bold text-white group-hover:text-[#A3E635] transition truncate">{friend.name}</span>
-                          {friend.hasPriority && (
-                            <span className="w-3.5 h-3.5 rounded bg-[#A3E635] text-black text-[8px] font-black flex items-center justify-center">★</span>
-                          )}
+                        <div className="min-w-0">
+                          <div className="flex items-center gap-1.5">
+                            <span className="text-xs font-bold text-white group-hover:text-[#A3E635] transition truncate">{dm.name}</span>
+                            {dm.badge && (
+                              <span className="w-3.5 h-3.5 rounded bg-[#A3E635] text-black text-[8px] font-black flex items-center justify-center">
+                                {dm.badge}
+                              </span>
+                            )}
+                          </div>
+                          <div className="text-[11px] text-slate-400 font-sans truncate">{dm.lastMessage}</div>
                         </div>
+                      </div>
+                      <span className="text-[10px] font-mono text-slate-500 shrink-0">{dm.date}</span>
+                    </div>
+                  ))}
+              </div>
+            )}
+
+            {/* 2. DIRECT MESSAGES SUB-TAB (ACTIVE CHAT CONVERSATION VIEW) */}
+            {socialSubTab === 'dms' && activeDmUser && (
+              <div className="flex-1 flex flex-col justify-between overflow-hidden">
+                {/* Conversation Header */}
+                <div className="px-3 py-2.5 border-b border-[#181B26] flex items-center justify-between bg-black/20">
+                  <button
+                    onClick={() => setActiveDmUser(null)}
+                    className="flex items-center gap-1 text-xs font-mono text-slate-400 hover:text-white transition cursor-pointer"
+                  >
+                    <ArrowLeft className="w-3.5 h-3.5" />
+                    <span>Back</span>
+                  </button>
+                  <div className="flex items-center gap-2">
+                    <img src={activeDmUser.avatar} alt={activeDmUser.name} className="w-6 h-6 rounded-full object-cover border border-white/10" />
+                    <span className="text-xs font-bold text-white">{activeDmUser.name}</span>
+                  </div>
+                  <button
+                    onClick={() => setActiveDrawer('none')}
+                    className="text-slate-400 hover:text-white p-1"
+                  >
+                    <X className="w-3.5 h-3.5" />
+                  </button>
+                </div>
+
+                {/* Conversation Messages Feed */}
+                <div className="flex-1 overflow-y-auto p-3 space-y-3">
+                  {(dmHistory[activeDmUser.name] || []).map(msg => (
+                    <div key={msg.id} className={`flex items-start gap-2 ${msg.sender === currentGamerTag ? 'justify-end' : 'justify-start'}`}>
+                      {msg.sender !== currentGamerTag && (
+                        <img src={activeDmUser.avatar} alt="" className="w-6 h-6 rounded-full object-cover shrink-0 mt-0.5" />
+                      )}
+                      <div className={`p-2.5 rounded-xl max-w-[80%] text-xs ${
+                        msg.sender === currentGamerTag ? 'bg-[#A3E635] text-slate-950 font-medium' : 'bg-[#181A24] text-white border border-white/10'
+                      }`}>
+                        {msg.text && <p className="break-words font-sans">{msg.text}</p>}
+                        {msg.imageUrl && (
+                          <img src={msg.imageUrl} alt="" className="mt-1 rounded-lg max-h-40 object-cover cursor-pointer" onClick={() => window.open(msg.imageUrl, '_blank')} />
+                        )}
+                        <span className="text-[9px] opacity-60 mt-1 block text-right font-mono">{msg.timestamp}</span>
                       </div>
                     </div>
                   ))}
                 </div>
-              </div>
 
-              {/* Offline Section */}
-              <div>
-                <div className="text-[11px] font-mono font-bold text-slate-500 mb-2 px-1 flex items-center justify-between">
-                  <span>Offline • {offlineFriends.length}</span>
-                </div>
-                <div className="space-y-1">
-                  {offlineFriends.map(friend => (
-                    <div 
-                      key={friend.id}
-                      onClick={() => sound.playClick()}
-                      className="p-2 rounded-xl hover:bg-white/[0.03] transition flex items-center justify-between gap-2.5 cursor-pointer opacity-70 hover:opacity-100 group"
-                    >
-                      <div className="flex items-center gap-2.5 min-w-0">
-                        <div className="relative w-8 h-8 shrink-0">
-                          <img src={friend.avatar} alt={friend.name} className="w-full h-full rounded-full object-cover border border-white/10 grayscale" />
-                          <span className="absolute bottom-0 right-0 w-2.5 h-2.5 rounded-full bg-slate-600 border-2 border-[#0B0D13]" />
-                        </div>
-                        <span className="text-xs font-semibold text-slate-400 group-hover:text-white transition truncate">{friend.name}</span>
-                      </div>
+                {/* Conversation Input Form */}
+                <div className="p-2.5 bg-[#07080B] border-t border-[#14151C] shrink-0">
+                  <form onSubmit={handleSendDm} className="relative flex items-center">
+                    <input
+                      type="text"
+                      value={dmInput}
+                      onChange={e => setDmInput(e.target.value)}
+                      placeholder={`Message ${activeDmUser.name}...`}
+                      className="w-full h-9 pl-3 pr-16 rounded-md bg-[#111218] border border-[#20222B] text-xs text-white placeholder-slate-500 focus:outline-none focus:border-slate-500 transition font-sans"
+                    />
+                    <div className="absolute right-2 flex items-center gap-1.5 text-slate-400">
+                      <input ref={dmFileInputRef} type="file" accept="image/*" className="hidden" onChange={handleDmImage} />
+                      <button type="button" onClick={() => dmFileInputRef.current?.click()} className="hover:text-white transition p-1 cursor-pointer" title="Send image">
+                        <ImageIcon className="w-3.5 h-3.5" />
+                      </button>
+                      <button type="button" onClick={() => setDmInput(prev => prev + ' 🎯')} className="hover:text-white transition p-1 cursor-pointer" title="Add emoji">
+                        <Smile className="w-3.5 h-3.5" />
+                      </button>
                     </div>
-                  ))}
+                  </form>
                 </div>
               </div>
+            )}
 
-            </div>
+            {/* 3. FRIEND REQUESTS SUB-TAB */}
+            {socialSubTab === 'requests' && (
+              <div className="flex-1 p-6 flex flex-col items-center justify-center text-center space-y-3 text-slate-400">
+                <UserPlus className="w-10 h-10 text-slate-600" />
+                <div className="text-xs font-mono font-bold text-slate-300">No Pending Requests</div>
+                <p className="text-[11px] text-slate-500 max-w-[200px]">When other players add you on Vortex, their friend requests will appear here.</p>
+              </div>
+            )}
 
           </div>
         </>
