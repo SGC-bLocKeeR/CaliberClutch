@@ -23,6 +23,7 @@ import {
 } from 'lucide-react';
 import { sound } from '../../utils/soundEffects';
 import { CountryFlag } from './CountryFlag';
+import { FaceitVerificationBadge } from './VortexDashboard';
 
 export interface SocialFriend {
   id: string;
@@ -232,188 +233,211 @@ export const VortexRightSocialRail: React.FC<VortexRightSocialRailProps> = ({
   return (
     <>
       {/* ======================================================== */}
-      {/* 1. PERSISTENT RIGHT VERTICAL RAIL (1:1 FACEIT)           */}
+      {/* 1. PERSISTENT RIGHT SIDEBAR (MATCHING USER SNIPPET WIDTH) */}
       {/* ======================================================== */}
-      <aside className="fixed right-0 top-0 bottom-0 w-16 bg-[#08090D] border-l border-[#191C26] z-[80] flex flex-col items-center justify-between py-3 select-none shadow-2xl">
+      <aside className="fixed right-0 top-0 bottom-0 w-64 bg-[#08090D] border-l border-[#191C26] z-[80] flex flex-col justify-between p-3 select-none shadow-2xl">
         
-        {/* TOP SECTION: User Profile Widget (Kept rich as user requested) */}
-        <div className="flex flex-col items-center gap-3 w-full">
-          {/* User Avatar with Profile Popover Trigger */}
-          <div className="relative group flex justify-center w-full">
-            <button
-              onClick={() => {
-                sound.playClick();
-                setActiveDrawer(prev => prev === 'profile' ? 'none' : 'profile');
-              }}
-              className="relative w-11 h-11 rounded-full p-0.5 transition cursor-pointer hover:scale-105"
-              title="Profile"
-            >
-              <img 
-                src={currentAvatarUrl} 
-                alt={currentGamerTag} 
-                className="w-full h-full rounded-full object-cover border-2 border-[#A3E635] shadow-[0_0_12px_rgba(163,230,53,0.3)] block"
-                onError={(e) => {
-                  (e.target as HTMLImageElement).src = '/images/blockeerz_avatar.png';
-                }}
-              />
-              <span className="absolute bottom-0 right-0 w-3 h-3 rounded-full bg-emerald-400 border-2 border-[#08090D]" />
-            </button>
-
-            {/* Hover Tooltip */}
-            <div className="absolute right-full mr-2 top-1/2 -translate-y-1/2 px-2 py-1 rounded-md bg-[#12141C] border border-[#222533] text-white text-xs font-mono font-bold shadow-xl pointer-events-none opacity-0 group-hover:opacity-100 transition whitespace-nowrap z-50">
-              Profile
+        {/* TOP SECTION: User Profile Row - Exact 1:1 match to uploaded snippet */}
+        <div className="w-full pb-3 border-b border-[#1A1D27]">
+          <button
+            onClick={() => {
+              sound.playClick();
+              setActiveDrawer(prev => prev === 'profile' ? 'none' : 'profile');
+            }}
+            className="w-full flex items-center justify-between p-1.5 rounded-xl hover:bg-white/[0.05] transition cursor-pointer group"
+            title="Player Profile"
+          >
+            <div className="flex items-center gap-2 min-w-0">
+              <div className="relative w-8 h-8 shrink-0">
+                <img 
+                  src={currentAvatarUrl} 
+                  alt={currentGamerTag} 
+                  className="w-full h-full rounded-full object-cover border-2 border-[#A3E635] shadow-[0_0_10px_rgba(163,230,53,0.3)] block"
+                  onError={(e) => {
+                    (e.target as HTMLImageElement).src = '/images/blockeerz_avatar.png';
+                  }}
+                />
+                <span className="absolute bottom-0 right-0 w-2.5 h-2.5 rounded-full bg-emerald-400 border-2 border-[#08090D]" />
+              </div>
+              <span className="font-display font-black text-sm text-white group-hover:text-[#A3E635] transition tracking-tight truncate">
+                {currentGamerTag}
+              </span>
+              <FaceitVerificationBadge type={currentVerification} size="sm" />
+              <CountryFlag code={currentCountry.code} name={currentCountry.name} size="xs" />
             </div>
-          </div>
+            <ChevronDown className={`w-4 h-4 text-slate-400 group-hover:text-white transition-transform duration-200 shrink-0 ml-1 ${activeDrawer === 'profile' ? 'rotate-180 text-[#A3E635]' : ''}`} />
+          </button>
         </div>
 
         {/* MIDDLE SECTION: Notifications • Social • Party Capsule */}
-        <div className="flex flex-col items-center gap-4 w-full">
+        <div className="flex flex-col gap-3 w-full flex-1 pt-3 overflow-y-auto">
           
-          {/* VS Matchmaking Badge / Indicator */}
-          <div className="text-[11px] font-black font-display text-slate-500 tracking-wider select-none py-1">
-            VS
-          </div>
-
-          {/* Notifications Bell */}
-          <div className="relative group w-full flex justify-center">
-            <button
-              onClick={() => {
-                sound.playClick();
-                onOpenNotifications?.();
-              }}
-              className="relative w-10 h-10 rounded-xl bg-white/[0.03] hover:bg-white/[0.08] text-slate-400 hover:text-white transition flex items-center justify-center cursor-pointer"
-              title="Notifications"
-            >
-              <Bell className="w-5 h-5" />
-              {unreadNotificationsCount > 0 && (
-                <span className="absolute -top-1 -right-1 w-4 h-4 rounded-full bg-[#181922] border border-white/20 text-white font-mono font-bold text-[9px] flex items-center justify-center shadow-md">
-                  {unreadNotificationsCount}
-                </span>
-              )}
-            </button>
-            <div className="absolute right-full mr-2.5 top-1/2 -translate-y-1/2 px-2.5 py-1 rounded-lg bg-[#12141C] border border-[#222533] text-white text-xs font-mono font-bold shadow-xl pointer-events-none opacity-0 group-hover:opacity-100 transition whitespace-nowrap z-50">
-              Notifications
+          {/* Notifications Button */}
+          <button
+            onClick={() => {
+              sound.playClick();
+              onOpenNotifications?.();
+            }}
+            className="w-full flex items-center justify-between px-3 py-2.5 rounded-xl bg-white/[0.03] hover:bg-white/[0.07] text-slate-300 hover:text-white transition cursor-pointer group"
+            title="Notifications"
+          >
+            <div className="flex items-center gap-2.5">
+              <Bell className="w-4 h-4 text-[#A3E635]" />
+              <span className="text-xs font-bold font-sans">Notifications</span>
             </div>
-          </div>
+            {unreadNotificationsCount > 0 && (
+              <span className="min-w-[18px] h-[18px] px-1.5 rounded-full bg-[#A3E635] text-slate-950 font-mono font-black text-[10px] flex items-center justify-center shadow-md">
+                {unreadNotificationsCount}
+              </span>
+            )}
+          </button>
 
-          {/* Social (Friends) Button with Active Indicator & Badge */}
-          <div className="relative group w-full flex justify-center">
+          {/* Social (Friends) Button */}
+          <div className="relative w-full">
             {activeDrawer === 'social' && (
-              <span className="absolute left-0 top-1/2 -translate-y-1/2 w-1 h-6 rounded-r bg-white z-30" />
+              <span className="absolute -left-3 top-1/2 -translate-y-1/2 w-1 h-6 rounded-r bg-[#A3E635]" />
             )}
             <button
               onClick={() => {
                 sound.playClick();
                 setActiveDrawer(prev => prev === 'social' ? 'none' : 'social');
               }}
-              className={`relative w-10 h-10 rounded-xl transition flex items-center justify-center cursor-pointer ${
+              className={`w-full flex items-center justify-between px-3 py-2.5 rounded-xl transition cursor-pointer ${
                 activeDrawer === 'social' 
-                  ? 'bg-white/[0.1] text-white' 
-                  : 'bg-white/[0.03] hover:bg-white/[0.08] text-slate-400 hover:text-white'
+                  ? 'bg-white/[0.1] text-white border border-white/10' 
+                  : 'bg-white/[0.03] hover:bg-white/[0.07] text-slate-300 hover:text-white'
               }`}
               title="Social"
             >
-              <Users className="w-5 h-5" />
-              <span className="absolute -top-1 -right-1 w-4 h-4 rounded-full bg-[#00E599] text-black font-mono font-black text-[9px] flex items-center justify-center shadow-sm">
-                6
+              <div className="flex items-center gap-2.5">
+                <Users className="w-4 h-4 text-emerald-400" />
+                <span className="text-xs font-bold font-sans">Social</span>
+              </div>
+              <span className="px-2 py-0.5 rounded-full bg-emerald-400/20 text-emerald-400 border border-emerald-400/30 font-mono font-black text-[10px] flex items-center gap-1">
+                <span className="w-1.5 h-1.5 rounded-full bg-emerald-400" />
+                6 Online
               </span>
             </button>
-            <div className="absolute right-full mr-2.5 top-1/2 -translate-y-1/2 px-2.5 py-1 rounded-lg bg-[#12141C] border border-[#222533] text-white text-xs font-mono font-bold shadow-xl pointer-events-none opacity-0 group-hover:opacity-100 transition whitespace-nowrap z-50">
-              Social
-            </div>
           </div>
 
-          {/* Party Capsule (Grouped Container Matching User Reference) */}
-          <div className="relative w-full flex justify-center">
+          {/* Party Capsule Card */}
+          <div className="relative w-full">
             {activeDrawer === 'party' && (
-              <span className="absolute left-0 top-1/2 -translate-y-1/2 w-1 h-10 rounded-r bg-white z-30" />
+              <span className="absolute -left-3 top-1/2 -translate-y-1/2 w-1 h-8 rounded-r bg-[#A3E635]" />
             )}
-            <div className="rounded-2xl bg-[#12141C] border border-[#1E212D] p-1.5 flex flex-col items-center gap-3 shadow-lg">
+            <div className="rounded-2xl bg-[#10121A] border border-[#1E2333] p-3 flex flex-col gap-2.5 shadow-lg">
               
-              {/* Party Chat Trigger */}
-              <button
-                onClick={() => {
-                  sound.playClick();
-                  setActiveDrawer(prev => prev === 'party' ? 'none' : 'party');
-                }}
-                className="relative p-1 text-slate-400 hover:text-white transition cursor-pointer"
-                title="Party Chat"
-              >
-                <div className="flex items-center gap-0.5">
-                  <span className="text-[10px] font-black text-slate-400">((</span>
-                  <Users className="w-3.5 h-3.5" />
-                </div>
-                <span className="absolute -top-1.5 -right-1.5 w-3.5 h-3.5 rounded-full bg-[#181922] border border-white/20 text-white font-mono font-bold text-[8px] flex items-center justify-center">
-                  1
-                </span>
-              </button>
-
-              {/* Add Teammate / Invite Button */}
-              <button
-                onClick={() => {
-                  sound.playClick();
-                  onOpenInviteModal?.();
-                }}
-                className="p-1 rounded-full text-slate-400 hover:text-white hover:bg-white/[0.06] transition cursor-pointer"
-                title="Invite to party"
-              >
-                <PlusCircle className="w-4 h-4" />
-              </button>
-
-              {/* User Avatar Inside Capsule with Captain Crown */}
-              <div 
-                onClick={() => {
-                  sound.playClick();
-                  setActiveDrawer('party');
-                }}
-                className="relative w-8 h-8 rounded-full cursor-pointer hover:scale-105 transition"
-                title={`${currentGamerTag} (Leader)`}
-              >
-                <img 
-                  src={currentAvatarUrl} 
-                  alt={currentGamerTag} 
-                  className="w-full h-full rounded-full object-cover border border-white/20 block"
-                  onError={(e) => {
-                    (e.target as HTMLImageElement).src = '/images/blockeerz_avatar.png';
+              {/* Party Header: team_bLocKeeRz & Chat Trigger */}
+              <div className="flex items-center justify-between">
+                <button
+                  onClick={() => {
+                    sound.playClick();
+                    setActiveDrawer(prev => prev === 'party' ? 'none' : 'party');
                   }}
-                />
+                  className="flex items-center gap-2 hover:text-[#A3E635] transition text-left cursor-pointer min-w-0"
+                >
+                  <span className="text-xs font-black font-display text-white truncate">
+                    team_{currentGamerTag}
+                  </span>
+                  <span className="text-[10px] font-mono text-slate-400 shrink-0">
+                    (1/5)
+                  </span>
+                </button>
+
+                <button
+                  onClick={() => {
+                    sound.playClick();
+                    setActiveDrawer(prev => prev === 'party' ? 'none' : 'party');
+                  }}
+                  className="p-1 rounded-md text-slate-400 hover:text-white hover:bg-white/10 transition cursor-pointer relative"
+                  title="Open Party Chat"
+                >
+                  <MessageSquare className="w-3.5 h-3.5" />
+                  <span className="absolute -top-1 -right-1 w-3.5 h-3.5 rounded-full bg-[#181922] border border-white/20 text-white font-mono font-bold text-[8px] flex items-center justify-center">
+                    1
+                  </span>
+                </button>
               </div>
 
-              {/* Voice Comms Headset Button (Lime Green) */}
+              {/* Teammates Slot Row */}
+              <div className="flex items-center gap-2 pt-1">
+                {/* Leader Avatar with Crown */}
+                <div 
+                  onClick={() => {
+                    sound.playClick();
+                    setActiveDrawer('party');
+                  }}
+                  className="relative w-8 h-8 rounded-full cursor-pointer hover:scale-105 transition"
+                  title={`${currentGamerTag} (Party Leader)`}
+                >
+                  <span className="absolute -top-2 left-1/2 -translate-x-1/2 text-[9px]">👑</span>
+                  <img 
+                    src={currentAvatarUrl} 
+                    alt={currentGamerTag} 
+                    className="w-full h-full rounded-full object-cover border-2 border-[#A3E635]"
+                    onError={(e) => {
+                      (e.target as HTMLImageElement).src = '/images/blockeerz_avatar.png';
+                    }}
+                  />
+                </div>
+
+                {/* Plus / Invite Button */}
+                <button
+                  onClick={() => {
+                    sound.playClick();
+                    onOpenInviteModal?.();
+                  }}
+                  className="w-8 h-8 rounded-full border border-dashed border-white/20 hover:border-[#A3E635] text-slate-400 hover:text-[#A3E635] flex items-center justify-center transition cursor-pointer"
+                  title="Invite Teammate"
+                >
+                  <Plus className="w-3.5 h-3.5" />
+                </button>
+              </div>
+
+              {/* Voice Comms Trigger (Lime Green VORTEX theme) */}
               <button
                 onClick={() => {
                   sound.playClick();
                   setActiveDrawer('party');
                   setPartySubTab('voice');
                 }}
-                className="p-1 text-[#A3E635] hover:brightness-125 transition cursor-pointer"
-                title="Voice Chat (Ready)"
+                className="w-full mt-1 py-1.5 px-2.5 rounded-xl bg-[#A3E635]/10 hover:bg-[#A3E635]/20 border border-[#A3E635]/30 text-[#A3E635] transition flex items-center justify-between cursor-pointer text-xs font-mono font-bold"
+                title="Voice Comms (Ready)"
               >
-                <Headphones className="w-4 h-4" />
+                <div className="flex items-center gap-1.5">
+                  <Headphones className="w-3.5 h-3.5" />
+                  <span>Voice Comms</span>
+                </div>
+                <span className="px-1.5 py-0.2 rounded bg-[#A3E635] text-black text-[9px] font-black uppercase">
+                  READY
+                </span>
               </button>
+
             </div>
           </div>
 
         </div>
 
-        {/* BOTTOM SECTION: Profile Shortcut & Vortex Wolf Badge */}
-        <div className="flex flex-col items-center gap-3">
+        {/* BOTTOM SECTION: Profile Settings & Vortex Wolf Badge */}
+        <div className="w-full pt-3 border-t border-[#1A1D27] flex items-center justify-between">
           <button
             onClick={() => {
               sound.playSelect();
               onOpenProfileTab?.();
             }}
-            className="w-9 h-9 rounded-xl bg-white/[0.03] hover:bg-white/[0.08] text-slate-400 hover:text-white transition flex items-center justify-center cursor-pointer"
+            className="flex items-center gap-2 p-1.5 rounded-xl hover:bg-white/[0.05] text-slate-400 hover:text-white transition cursor-pointer text-xs font-mono"
             title="User Settings"
           >
-            <User className="w-4 h-4" />
+            <User className="w-4 h-4 text-slate-400" />
+            <span className="font-sans font-semibold">Settings</span>
           </button>
 
           {/* Vortex Wolf Shield Emblem */}
-          <div className="w-8 h-8 rounded-lg flex items-center justify-center text-slate-400 opacity-60 hover:opacity-100 transition cursor-default" title="VORTEX GAMING">
-            <svg className="w-5 h-5 fill-current text-white" viewBox="0 0 24 24">
+          <div className="flex items-center gap-1.5 text-slate-400 opacity-60 hover:opacity-100 transition cursor-default" title="VORTEX GAMING">
+            <svg className="w-4 h-4 fill-current text-white" viewBox="0 0 24 24">
               <path d="M12 2L4 5v6.09c0 5.05 3.41 9.76 8 10.91 4.59-1.15 8-5.86 8-10.91V5l-8-3zm0 2.18l6 2.25v4.66c0 4.02-2.67 7.77-6 8.8-3.33-1.03-6-4.78-6-8.8V6.43l6-2.25z" />
             </svg>
+            <span className="font-display font-black text-[10px] text-white">VORTEX</span>
           </div>
         </div>
 
@@ -430,7 +454,7 @@ export const VortexRightSocialRail: React.FC<VortexRightSocialRailProps> = ({
             onClick={() => setActiveDrawer('none')} 
           />
 
-          <div className="fixed right-16 top-0 bottom-0 w-80 bg-[#0B0D13] border-l border-[#1A1D27] z-50 flex flex-col shadow-2xl animate-in slide-in-from-right duration-200 select-none">
+          <div className="fixed right-64 top-0 bottom-0 w-80 bg-[#0B0D13] border-l border-[#1A1D27] z-50 flex flex-col shadow-2xl animate-in slide-in-from-right duration-200 select-none">
             
             {/* Header: Social + Search User Button + Close ✕ */}
             <div className="p-4 border-b border-[#181B26] flex items-center justify-between">
@@ -618,7 +642,7 @@ export const VortexRightSocialRail: React.FC<VortexRightSocialRailProps> = ({
             onClick={() => setActiveDrawer('none')} 
           />
 
-          <div className="fixed right-16 top-0 bottom-0 w-80 bg-[#0B0D13] border-l border-[#1A1D27] z-50 flex flex-col shadow-2xl animate-in slide-in-from-right duration-200 select-none">
+          <div className="fixed right-64 top-0 bottom-0 w-80 bg-[#0B0D13] border-l border-[#1A1D27] z-50 flex flex-col shadow-2xl animate-in slide-in-from-right duration-200 select-none">
             
             {/* Header: team_bLocKeeRz + Close ✕ */}
             <div className="p-4 border-b border-[#181B26] flex items-center justify-between">
@@ -880,7 +904,7 @@ export const VortexRightSocialRail: React.FC<VortexRightSocialRailProps> = ({
             onClick={() => setActiveDrawer('none')} 
           />
 
-          <div className="fixed right-16 top-0 bottom-0 w-84 bg-[#0D0F17] border-l border-[#1F2435] z-50 p-5 flex flex-col justify-between shadow-2xl animate-in slide-in-from-right duration-200 select-none overflow-y-auto">
+          <div className="fixed right-64 top-0 bottom-0 w-84 bg-[#0D0F17] border-l border-[#1F2435] z-50 p-5 flex flex-col justify-between shadow-2xl animate-in slide-in-from-right duration-200 select-none overflow-y-auto">
             
             <div className="space-y-5 text-center">
               {/* Close Button */}

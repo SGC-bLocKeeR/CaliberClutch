@@ -134,7 +134,7 @@ interface FaceitVerificationBadgeProps {
   className?: string;
 }
 
-const FaceitVerificationBadge: React.FC<FaceitVerificationBadgeProps> = ({
+export const FaceitVerificationBadge: React.FC<FaceitVerificationBadgeProps> = ({
   type = 'none',
   size = 'md',
   className = ''
@@ -1753,7 +1753,7 @@ export const VortexDashboard: React.FC<VortexDashboardProps> = ({
       {/* ======================================================== */}
       {/* UNIFIED PERSISTENT LAYOUT (SIDEBAR + MAIN CONTENT AREA)  */}
       {/* ======================================================== */}
-      <div className="w-full max-w-[1780px] mx-auto flex flex-col lg:flex-row gap-6 p-4 sm:p-6 md:pr-20 min-h-[92vh]">
+      <div className="w-full max-w-[1780px] mx-auto flex flex-col lg:flex-row gap-6 p-4 sm:p-6 pr-68 xl:pr-72 min-h-[92vh]">
         
         {/* ==================== LEFT SIDEBAR ==================== */}
         <aside className={`bg-[#0E1017] border border-[#202536] rounded-3xl flex flex-col justify-between shrink-0 shadow-xl transition-all duration-300 ease-in-out ${
@@ -3070,9 +3070,6 @@ export const VortexDashboard: React.FC<VortexDashboardProps> = ({
                             <div className="w-full text-center">
                               <div className="text-xs font-bold text-white tracking-tight truncate">
                                 {srv.name}
-                              </div>
-                              <div className="text-[10px] font-mono text-emerald-400 font-semibold mt-0.5">
-                                {srv.ping}
                               </div>
                             </div>
                           </button>
