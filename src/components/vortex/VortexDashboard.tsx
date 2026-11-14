@@ -4689,36 +4689,45 @@ export const VortexDashboard: React.FC<VortexDashboardProps> = ({
         </div>
       )}
 
-      {/* Connect Server Toast Notification */}
+      {/* Connect Server Toast Notification (Centered & Clean Neutral Theme) */}
       {connectToast && (
-        <div className="fixed top-20 right-8 z-50 animate-in fade-in slide-in-from-top-4 flex items-center gap-3 bg-[#131620] border border-[#A3E635] px-5 py-3 rounded-2xl shadow-2xl shadow-lime-500/30">
-          <div className="w-3 h-3 rounded-full bg-[#A3E635] animate-ping" />
+        <div className="fixed top-6 left-1/2 -translate-x-1/2 z-[100] animate-in fade-in slide-in-from-top-4 flex items-center gap-3 bg-[#12141D] border border-white/15 px-5 py-3 rounded-2xl shadow-2xl">
+          <div className="w-2.5 h-2.5 rounded-full bg-white animate-ping" />
           <div className="text-xs font-mono">
             <div className="text-white font-bold">CONNECTING TO CS2 SERVER...</div>
-            <div className="text-emerald-400 text-[11px]">connect {connectToast.ip} (Copied to clipboard)</div>
+            <div className="text-slate-300 text-[11px]">connect {connectToast.ip} (Copied to clipboard)</div>
           </div>
+          <button onClick={() => setConnectToast(null)} className="ml-2 text-slate-400 hover:text-white p-1">
+            <X className="w-3.5 h-3.5" />
+          </button>
         </div>
       )}
 
-      {/* Download Demo Toast Notification */}
+      {/* Download Demo Toast Notification (Centered & Clean Neutral Theme) */}
       {downloadDemoToast && (
-        <div className="fixed top-20 right-8 z-50 animate-in fade-in slide-in-from-top-4 flex items-center gap-3 bg-[#131620] border border-emerald-400 px-5 py-3 rounded-2xl shadow-2xl shadow-emerald-500/30">
-          <Download className="w-4 h-4 text-emerald-400 animate-bounce" />
+        <div className="fixed top-6 left-1/2 -translate-x-1/2 z-[100] animate-in fade-in slide-in-from-top-4 flex items-center gap-3 bg-[#12141D] border border-white/15 px-5 py-3 rounded-2xl shadow-2xl">
+          <Download className="w-4 h-4 text-slate-300 animate-bounce" />
           <div className="text-xs font-mono">
             <div className="text-white font-bold">DOWNLOADING GOTV BROADCAST DEMO...</div>
             <div className="text-slate-300 text-[11px]">{downloadDemoToast}</div>
           </div>
+          <button onClick={() => setDownloadDemoToast(null)} className="ml-2 text-slate-400 hover:text-white p-1">
+            <X className="w-3.5 h-3.5" />
+          </button>
         </div>
       )}
 
-      {/* Dashboard General Action Toast Notification */}
+      {/* Dashboard General Action Toast Notification (Centered & Clean Neutral Theme - Never Behind Sidebar) */}
       {dashboardToast && (
-        <div className="fixed top-20 right-8 z-50 animate-in fade-in slide-in-from-top-4 flex items-center gap-3 bg-[#131620] border border-[#A3E635] px-5 py-3 rounded-2xl shadow-2xl shadow-lime-500/30">
-          <Sparkles className="w-4 h-4 text-[#A3E635] animate-pulse" />
+        <div className="fixed top-6 left-1/2 -translate-x-1/2 z-[100] animate-in fade-in slide-in-from-top-4 flex items-center gap-3 bg-[#12141D] border border-white/15 px-5 py-3 rounded-2xl shadow-2xl">
+          <Sparkles className="w-4 h-4 text-slate-300" />
           <div className="text-xs font-mono">
             <div className="text-white font-bold">VORTEX COMMAND TELEMETRY</div>
-            <div className="text-[#A3E635] text-[11px]">{dashboardToast}</div>
+            <div className="text-slate-300 text-[11px]">{dashboardToast}</div>
           </div>
+          <button onClick={() => setDashboardToast(null)} className="ml-2 text-slate-400 hover:text-white p-1 cursor-pointer" title="Dismiss">
+            <X className="w-3.5 h-3.5" />
+          </button>
         </div>
       )}
 
