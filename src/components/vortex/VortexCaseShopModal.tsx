@@ -73,6 +73,17 @@ const getSkinWearBreakdown = (item: CS2Skin): SkinWearBreakdown[] => {
   const basePrice = item.priceEur;
   const baseDrop = item.dropChancePercent ?? 1.0;
 
+  if (item.wearPrices) {
+    const wp = item.wearPrices;
+    const res: SkinWearBreakdown[] = [];
+    if (wp.BS !== undefined) res.push({ wearLabel: 'BS', price: wp.BS, dropPercent: Number((baseDrop * 0.12).toFixed(3)), wearColor: '#F87171' });
+    if (wp.WW !== undefined) res.push({ wearLabel: 'WW', price: wp.WW, dropPercent: Number((baseDrop * 0.16).toFixed(3)), wearColor: '#FB923C' });
+    if (wp.FT !== undefined) res.push({ wearLabel: 'FT', price: wp.FT, dropPercent: Number((baseDrop * 0.40).toFixed(3)), wearColor: '#F59E0B' });
+    if (wp.MW !== undefined) res.push({ wearLabel: 'MW', price: wp.MW, dropPercent: Number((baseDrop * 0.22).toFixed(3)), wearColor: '#38BDF8' });
+    if (wp.FN !== undefined) res.push({ wearLabel: 'FN', price: wp.FN, dropPercent: Number((baseDrop * 0.10).toFixed(3)), wearColor: '#A3E635' });
+    return res;
+  }
+
   if (item.rarity === 'extraordinary') {
     return [
       { wearLabel: 'FN', price: Number((basePrice * 1.25).toFixed(2)), dropPercent: Number((baseDrop * 0.45).toFixed(3)), wearColor: '#A3E635' },

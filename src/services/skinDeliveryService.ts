@@ -17,6 +17,13 @@ export interface CS2Skin {
   image: string;
   dropChancePercent?: number; // Provably Fair drop rate percentage (e.g. 11.417% or 0.260%)
   isStatTrak?: boolean;
+  wearPrices?: {
+    FN?: number;
+    MW?: number;
+    FT?: number;
+    WW?: number;
+    BS?: number;
+  };
 }
 
 export interface CS2Case {
@@ -132,6 +139,7 @@ export const VORTEX_CASE_CATALOG: CS2Case[] = [
         "floatValue": "0.0315",
         "priceEur": 1480.0,
         "dropChancePercent": 0.26,
+        "wearPrices": { "FN": 1480.0, "MW": 1250.0, "FT": 1050.0 },
         "image": "https://imgproxy.dmarket.com/insecure/rs:fit:360:260:0/g:ce/aHR0cHM6Ly9jb21tdW5pdHkuYWthbWFpLnN0ZWFtc3RhdGljLmNvbS9lY29ub215L2ltYWdlL2kwQ29aODFVaTBtLTlLd2xCWTFMXzE4bXl1R3VxMXdmaFdTYVpnTXR0eVZmUGFFUlNSMFdxbXU3TEFvY0dJR3ozVXFsWE9McnhNLXZNR21XOFZOeHU1RHg2MG5vVHlMNmtKX20tQjFaLXVhNmJiWnJMT21zRDJxdjItdDBvdUJXUXlDMG5RbHA0R19kbWRhdUlDX0RQUUJ6RHBjbFJMSU5zRVhzeDkyeVA3anE3Z1hkMnQxTnpDVDNpQ3djNlRFcnZiaGZOcGJvRnc=.webp"
       },
       {
@@ -143,8 +151,9 @@ export const VORTEX_CASE_CATALOG: CS2Case[] = [
         "rarityColor": "#EB4B4B",
         "wear": "Field-Tested",
         "floatValue": "0.2240",
-        "priceEur": 58.0,
+        "priceEur": 7.20,
         "dropChancePercent": 0.32,
+        "wearPrices": { "FN": 24.50, "MW": 12.00, "FT": 7.20, "WW": 5.80, "BS": 4.90 },
         "image": "https://imgproxy.dmarket.com/insecure/rs:fit:360:260:0/g:ce/aHR0cHM6Ly9jb21tdW5pdHkuYWthbWFpLnN0ZWFtc3RhdGljLmNvbS9lY29ub215L2ltYWdlL2kwQ29aODFVaTBtLTlLd2xCWTFMXzE4bXl1R3VxMXdmaFdTYVpnTXR0eVZmUGFFUlNSMFdxbXU3TEFvY0dJR3ozVXFsWE9McnhNLXZNR21XOFZOeHU1RHg2MG5vVHlMd2xjSzN3aUZPMFBPbFBQTlNMdm1VQm5PSHlQMS1qLTFnU0NHbjIwZ2x0Mm5YbnQ3OGNuS1Vid04yWEpwMlItWmJ1eEhxbE5YbE1MaXc1QUhjM3RvV25DdXIyM2hYcm5FOHAwVDJieDQ=.webp"
       },
       {
@@ -156,8 +165,9 @@ export const VORTEX_CASE_CATALOG: CS2Case[] = [
         "rarityColor": "#EB4B4B",
         "wear": "Field-Tested",
         "floatValue": "0.2240",
-        "priceEur": 8.5,
+        "priceEur": 2.10,
         "dropChancePercent": 0.32,
+        "wearPrices": { "FN": 7.80, "MW": 3.50, "FT": 2.10, "WW": 1.80, "BS": 1.60 },
         "image": "https://imgproxy.dmarket.com/insecure/rs:fit:360:260:0/g:ce/aHR0cHM6Ly9jb21tdW5pdHkuYWthbWFpLnN0ZWFtc3RhdGljLmNvbS9lY29ub215L2ltYWdlL2kwQ29aODFVaTBtLTlLd2xCWTFMXzE4bXl1R3VxMXdmaFdTYVpnTXR0eVZmUGFFUlNSMFdxbXU3TEFvY0dJR3ozVXFsWE9McnhNLXZNR21XOFZOeHU1RHg2MG5vVHlMOGpzX2YtakZrNHVMM1Y3ZDVJZUtmQjJDWTFkRjZ1ZVpoVzJmbGtVdHp0el9Tell5cEpTcVJhbFVoREpOd1FPNFBzQlh0eDlIa04tSzM3dzNiZ29oR21IbjNrR29YdVozbFJkdkY=.webp"
       },
       {
@@ -169,8 +179,9 @@ export const VORTEX_CASE_CATALOG: CS2Case[] = [
         "rarityColor": "#D32CE6",
         "wear": "Field-Tested",
         "floatValue": "0.1820",
-        "priceEur": 8.9,
+        "priceEur": 1.60,
         "dropChancePercent": 1.066,
+        "wearPrices": { "FN": 6.50, "MW": 2.80, "FT": 1.60, "WW": 1.30, "BS": 1.10 },
         "image": "https://imgproxy.dmarket.com/insecure/rs:fit:360:260:0/g:ce/aHR0cHM6Ly9jb21tdW5pdHkuYWthbWFpLnN0ZWFtc3RhdGljLmNvbS9lY29ub215L2ltYWdlL2kwQ29aODFVaTBtLTlLd2xCWTFMXzE4bXl1R3VxMXdmaFdTYVpnTXR0eVZmUGFFUlNSMFdxbXU3TEFvY0dJR3ozVXFsWE9McnhNLXZNR21XOFZOeHU1RHg2MG5vVHlMMGtwXzAtQjFZLXMyclpLMTVKZU9zREdLSHdQeHpqLTFnU0NHbjIwdF81VGlCbWRmOUp5LVFhUUlpVzVGMUUtQmVzeEc5bElheE51TGo0MUhlMzQwUnlpNzlpaTVYcm5FOFhsN1FobGs=.webp"
       },
       {
@@ -182,8 +193,9 @@ export const VORTEX_CASE_CATALOG: CS2Case[] = [
         "rarityColor": "#D32CE6",
         "wear": "Field-Tested",
         "floatValue": "0.1820",
-        "priceEur": 7.5,
+        "priceEur": 1.35,
         "dropChancePercent": 1.066,
+        "wearPrices": { "FN": 5.20, "MW": 2.30, "FT": 1.35, "WW": 1.10, "BS": 0.95 },
         "image": "https://imgproxy.dmarket.com/insecure/rs:fit:360:260:0/g:ce/aHR0cHM6Ly9jb21tdW5pdHkuYWthbWFpLnN0ZWFtc3RhdGljLmNvbS9lY29ub215L2ltYWdlL2kwQ29aODFVaTBtLTlLd2xCWTFMXzE4bXl1R3VxMXdmaFdTYVpnTXR0eVZmUGFFUlNSMFdxbXU3TEFvY0dJR3ozVXFsWE9McnhNLXZNR21XOFZOeHU1RHg2MG5vVHlMM241dmg3aDFjX00yb2FhbHNNOC1CRDNlWnhkRnpxZVI2Y0NXNmtoVXpfV2pSbU43OUpYbWVQQUJ4RHNCMVFlWmV0eG5xeDlYaE4tbms0QTNmMzk5Q3pYMnFpQ3NhN3lkMW83RlZJTmlNSDk4.webp"
       },
       {
@@ -195,8 +207,9 @@ export const VORTEX_CASE_CATALOG: CS2Case[] = [
         "rarityColor": "#D32CE6",
         "wear": "Field-Tested",
         "floatValue": "0.1820",
-        "priceEur": 9.2,
+        "priceEur": 1.40,
         "dropChancePercent": 1.066,
+        "wearPrices": { "FN": 5.40, "MW": 2.40, "FT": 1.40, "WW": 1.15, "BS": 0.98 },
         "image": "https://imgproxy.dmarket.com/insecure/rs:fit:360:260:0/g:ce/aHR0cHM6Ly9jb21tdW5pdHkuYWthbWFpLnN0ZWFtc3RhdGljLmNvbS9lY29ub215L2ltYWdlL2kwQ29aODFVaTBtLTlLd2xCWTFMXzE4bXl1R3VxMXdmaFdTYVpnTXR0eVZmUGFFUlNSMFdxbXU3TEFvY0dJR3ozVXFsWE9McnhNLXZNR21XOFZOeHU1RHg2MG5vVHlMOGpzSGZfamRrNHVMNVY2Sm9JZUtzQW02WHlmbzQ1dWM5R25ubnpCaC01enpUdzluOUkzbVFQQUVnRDVZbEZ1SU90aEM2d05LMU1lS3dzZ0hlaVpVRmszdmNPaXloUFE=.webp"
       },
       {
@@ -208,8 +221,9 @@ export const VORTEX_CASE_CATALOG: CS2Case[] = [
         "rarityColor": "#8847FF",
         "wear": "Field-Tested",
         "floatValue": "0.2105",
-        "priceEur": 1.8,
+        "priceEur": 0.42,
         "dropChancePercent": 3.196,
+        "wearPrices": { "FN": 1.50, "MW": 0.75, "FT": 0.42, "WW": 0.38, "BS": 0.35 },
         "image": "https://imgproxy.dmarket.com/insecure/rs:fit:360:260:0/g:ce/aHR0cHM6Ly9jb21tdW5pdHkuYWthbWFpLnN0ZWFtc3RhdGljLmNvbS9lY29ub215L2ltYWdlL2kwQ29aODFVaTBtLTlLd2xCWTFMXzE4bXl1R3VxMXdmaFdTYVpnTXR0eVZmUGFFUlNSMFdxbXU3TEFvY0dJR3ozVXFsWE9McnhNLXZNR21XOFZOeHU1RHg2MG5vVHlMemw0enY4eDFZLXMyc1liNWlMcy1BSG1hVHhPMTNwTjVsUmk2N2dWTjA0anZjbVl2NklIbkdidzUxWHNZbVFPNWZ0Qkc5eG9leE5yaXg0Z1BZaklKRXpYXzJpWDlJOEc4MXRPSXpRQzVK.webp"
       },
       {
@@ -221,8 +235,9 @@ export const VORTEX_CASE_CATALOG: CS2Case[] = [
         "rarityColor": "#8847FF",
         "wear": "Field-Tested",
         "floatValue": "0.2105",
-        "priceEur": 1.5,
+        "priceEur": 0.35,
         "dropChancePercent": 3.196,
+        "wearPrices": { "FN": 1.25, "MW": 0.60, "FT": 0.35, "WW": 0.30, "BS": 0.28 },
         "image": "https://imgproxy.dmarket.com/insecure/rs:fit:360:260:0/g:ce/aHR0cHM6Ly9jb21tdW5pdHkuYWthbWFpLnN0ZWFtc3RhdGljLmNvbS9lY29ub215L2ltYWdlL2kwQ29aODFVaTBtLTlLd2xCWTFMXzE4bXl1R3VxMXdmaFdTYVpnTXR0eVZmUGFFUlNSMFdxbXU3TEFvY0dJR3ozVXFsWE9McnhNLXZNR21XOFZOeHU1RHg2MG5vVHlMMnpZWG5yQjFZLXMycE83ZHFjYy1VQW1hVXhORjZ1ZVpoVzJlM3drbDE2MlRWbWRxdmQzbVVQdzl5REpaNEZPWUo0VUt4a05maU5ydm40UUNNamRsSG1IajZrR29YdWI5Z1hLa1c=.webp"
       },
       {
@@ -234,8 +249,9 @@ export const VORTEX_CASE_CATALOG: CS2Case[] = [
         "rarityColor": "#8847FF",
         "wear": "Field-Tested",
         "floatValue": "0.2105",
-        "priceEur": 3.1,
+        "priceEur": 0.65,
         "dropChancePercent": 3.196,
+        "wearPrices": { "FN": 1.89, "MW": 1.00, "FT": 0.65, "WW": 0.76, "BS": 0.82 },
         "image": "https://imgproxy.dmarket.com/insecure/rs:fit:360:260:0/g:ce/aHR0cHM6Ly9jb21tdW5pdHkuYWthbWFpLnN0ZWFtc3RhdGljLmNvbS9lY29ub215L2ltYWdlL2kwQ29aODFVaTBtLTlLd2xCWTFMXzE4bXl1R3VxMXdmaFdTYVpnTXR0eVZmUGFFUlNSMFdxbXU3TEFvY0dJR3ozVXFsWE9McnhNLXZNR21XOFZOeHU1RHg2MG5vVHlMOHlwZXh3akZTNF9lZ2E2Rl9IX2VBTVdyRXdMOWxqLWhuWENhLW14UW1qREdNbllmdGJ5M0ZQRlZ4QTVad1JlY090VVh1eHRQaU5MX2pzUUxjMk5rVHpTMzhqQzVMN3lkajV1OEVVS283dXZxQWdHU000TE0=.webp"
       },
       {
@@ -247,8 +263,9 @@ export const VORTEX_CASE_CATALOG: CS2Case[] = [
         "rarityColor": "#8847FF",
         "wear": "Field-Tested",
         "floatValue": "0.2105",
-        "priceEur": 1.6,
+        "priceEur": 0.35,
         "dropChancePercent": 3.196,
+        "wearPrices": { "FN": 1.30, "MW": 0.65, "FT": 0.35, "WW": 0.30, "BS": 0.28 },
         "image": "https://imgproxy.dmarket.com/insecure/rs:fit:360:260:0/g:ce/aHR0cHM6Ly9jb21tdW5pdHkuYWthbWFpLnN0ZWFtc3RhdGljLmNvbS9lY29ub215L2ltYWdlL2kwQ29aODFVaTBtLTlLd2xCWTFMXzE4bXl1R3VxMXdmaFdTYVpnTXR0eVZmUGFFUlNSMFdxbXU3TEFvY0dJR3ozVXFsWE9McnhNLXZNR21XOFZOeHU1RHg2MG5vVHlMcGs4ZXdySFprN3YtUmNLbFNPdi1lREc2Vl91Rnd0dVJuWENDbGtDSXJ1anFOanNHcWRuekVPRlVqVzVvbVJPUU50MEx1d05LeVllS3dzbGZZaU4wUW15cjgzSHNkNmlaajVlc0FULU43clJjY3BEeVo=.webp"
       },
       {
@@ -260,8 +277,9 @@ export const VORTEX_CASE_CATALOG: CS2Case[] = [
         "rarityColor": "#8847FF",
         "wear": "Field-Tested",
         "floatValue": "0.2105",
-        "priceEur": 1.4,
+        "priceEur": 0.55,
         "dropChancePercent": 3.196,
+        "wearPrices": { "FN": 2.10, "MW": 0.95, "FT": 0.55, "WW": 0.45, "BS": 0.40 },
         "image": "https://imgproxy.dmarket.com/insecure/rs:fit:360:260:0/g:ce/aHR0cHM6Ly9jb21tdW5pdHkuYWthbWFpLnN0ZWFtc3RhdGljLmNvbS9lY29ub215L2ltYWdlL2kwQ29aODFVaTBtLTlLd2xCWTFMXzE4bXl1R3VxMXdmaFdTYVpnTXR0eVZmUGFFUlNSMFdxbXU3TEFvY0dJR3ozVXFsWE9McnhNLXZNR21XOFZOeHU1RHg2MG5vVHlMa2pZYmY3aXRYNnZ5dGJiWlNJLVdzRzNTQV92cDVqLWxzUXlXTW1SUWd1eW5MenRfOEpYaVZPd0YyQXNGNFItRUNzaGZ0bHRLeFplNng0MUNLam90RXhTVDhqbjhmN2lscjVQRkNEX1RaVnZnRzVn.webp"
       },
       {
@@ -273,8 +291,9 @@ export const VORTEX_CASE_CATALOG: CS2Case[] = [
         "rarityColor": "#4B69FF",
         "wear": "Field-Tested",
         "floatValue": "0.1942",
-        "priceEur": 0.35,
+        "priceEur": 0.09,
         "dropChancePercent": 11.417,
+        "wearPrices": { "FN": 0.73, "MW": 0.17, "FT": 0.09, "WW": 0.09, "BS": 0.09 },
         "image": "https://imgproxy.dmarket.com/insecure/rs:fit:360:260:0/g:ce/aHR0cHM6Ly9jb21tdW5pdHkuYWthbWFpLnN0ZWFtc3RhdGljLmNvbS9lY29ub215L2ltYWdlL2kwQ29aODFVaTBtLTlLd2xCWTFMXzE4bXl1R3VxMXdmaFdTYVpnTXR0eVZmUGFFUlNSMFdxbXU3TEFvY0dJR3ozVXFsWE9McnhNLXZNR21XOFZOeHU1RHg2MG5vVHlMM2w0RGw3aWRONnZ5UmE3RlNKdm1GQzNTVjEtdDRqLUJsWHlHeXFoSXF0anFFcFlQd0ppUFRjQUluQTVKMEZPOWNzQlN3dzRiaFpydXpzd0xjaklzWG1DdXNqQ3NidW5vXzU3dFhVcUIzODZISnoxYVcycElfbTVR.webp"
       },
       {
@@ -286,8 +305,9 @@ export const VORTEX_CASE_CATALOG: CS2Case[] = [
         "rarityColor": "#4B69FF",
         "wear": "Field-Tested",
         "floatValue": "0.1942",
-        "priceEur": 0.28,
+        "priceEur": 0.08,
         "dropChancePercent": 11.417,
+        "wearPrices": { "FN": 0.65, "MW": 0.16, "FT": 0.08, "WW": 0.08, "BS": 0.08 },
         "image": "https://imgproxy.dmarket.com/insecure/rs:fit:360:260:0/g:ce/aHR0cHM6Ly9jb21tdW5pdHkuYWthbWFpLnN0ZWFtc3RhdGljLmNvbS9lY29ub215L2ltYWdlL2kwQ29aODFVaTBtLTlLd2xCWTFMXzE4bXl1R3VxMXdmaFdTYVpnTXR0eVZmUGFFUlNSMFdxbXU3TEFvY0dJR3ozVXFsWE9McnhNLXZNR21XOFZOeHU1RHg2MG5vVHlMOG41V3hyUjFZLXMyamFhYzhjTS1EQjMtWnhORjZ1ZVpoVzJmaWtCOTM1emlHenRqN0pIeVFiZ0lrV1pzbUZySlk0eFRwd2RPelAtT3o3bGFOajRsRnl5MnRrR29YdWRiTDV1SWY=.webp"
       },
       {
@@ -299,8 +319,9 @@ export const VORTEX_CASE_CATALOG: CS2Case[] = [
         "rarityColor": "#4B69FF",
         "wear": "Field-Tested",
         "floatValue": "0.1942",
-        "priceEur": 0.22,
+        "priceEur": 0.08,
         "dropChancePercent": 11.417,
+        "wearPrices": { "FN": 0.60, "MW": 0.15, "FT": 0.08, "WW": 0.08, "BS": 0.07 },
         "image": "https://imgproxy.dmarket.com/insecure/rs:fit:360:260:0/g:ce/aHR0cHM6Ly9jb21tdW5pdHkuYWthbWFpLnN0ZWFtc3RhdGljLmNvbS9lY29ub215L2ltYWdlL2kwQ29aODFVaTBtLTlLd2xCWTFMXzE4bXl1R3VxMXdmaFdTYVpnTXR0eVZmUGFFUlNSMFdxbXU3TEFvY0dJR3ozVXFsWE9McnhNLXZNR21XOFZOeHU1RHg2MG5vVHlMOG41RzN3aUZPMFAtdmJfTlNNT0tXQ202VDFlRmtqLTFnU0NHbjJ4Z21zV3ZSbTk2c2VYT2ZiRk1qWEpSMVItTlk0eGp1a05MbFl1cm40UWVOM3Q1Q21DVDdqSHhYcm5FOFVFTkdYbHM=.webp"
       },
       {
@@ -312,8 +333,9 @@ export const VORTEX_CASE_CATALOG: CS2Case[] = [
         "rarityColor": "#4B69FF",
         "wear": "Field-Tested",
         "floatValue": "0.1942",
-        "priceEur": 0.4,
+        "priceEur": 0.09,
         "dropChancePercent": 11.417,
+        "wearPrices": { "FN": 0.70, "MW": 0.18, "FT": 0.09, "WW": 0.08, "BS": 0.08 },
         "image": "https://imgproxy.dmarket.com/insecure/rs:fit:360:260:0/g:ce/aHR0cHM6Ly9jb21tdW5pdHkuYWthbWFpLnN0ZWFtc3RhdGljLmNvbS9lY29ub215L2ltYWdlL2kwQ29aODFVaTBtLTlLd2xCWTFMXzE4bXl1R3VxMXdmaFdTYVpnTXR0eVZmUGFFUlNSMFdxbXU3TEFvY0dJR3ozVXFsWE9McnhNLXZNR21XOFZOeHU1RHg2MG5vVHlMOGpzUHotUjFjX00yamVQRlNLX21YTVdtVnd2eDV2dTVrUmlxOG15SXJ1anFOanNIOEpYcVhQVkFoRFpWeVI3WU80RVRyeHRMdlpibXh0QVhmaUlwQ3pIcjVoM3RCNjM1ajQtZ0NULU43cmVKZm1kZmg=.webp"
       },
       {
@@ -325,8 +347,9 @@ export const VORTEX_CASE_CATALOG: CS2Case[] = [
         "rarityColor": "#4B69FF",
         "wear": "Field-Tested",
         "floatValue": "0.1942",
-        "priceEur": 0.3,
+        "priceEur": 0.08,
         "dropChancePercent": 11.417,
+        "wearPrices": { "FN": 0.62, "MW": 0.15, "FT": 0.08, "WW": 0.08, "BS": 0.08 },
         "image": "https://imgproxy.dmarket.com/insecure/rs:fit:360:260:0/g:ce/aHR0cHM6Ly9jb21tdW5pdHkuYWthbWFpLnN0ZWFtc3RhdGljLmNvbS9lY29ub215L2ltYWdlL2kwQ29aODFVaTBtLTlLd2xCWTFMXzE4bXl1R3VxMXdmaFdTYVpnTXR0eVZmUGFFUlNSMFdxbXU3TEFvY0dJR3ozVXFsWE9McnhNLXZNR21XOFZOeHU1RHg2MG5vVHlMNWxZYXlyWElMMFBHN1Y3UV9LOC1WQW42WnotbEp0UE5zVGlTTW1SUWd1eW5MeWRhdGNIckVPZ0loWEpaeFJlSU50Uk83bHRleFp1aXd0UVBkMzRsRnhYcXFqaXNZdW40NDRmRkNEX1IxYWpJNlJR.webp"
       },
       {
@@ -338,8 +361,9 @@ export const VORTEX_CASE_CATALOG: CS2Case[] = [
         "rarityColor": "#4B69FF",
         "wear": "Field-Tested",
         "floatValue": "0.1942",
-        "priceEur": 0.25,
+        "priceEur": 0.07,
         "dropChancePercent": 11.417,
+        "wearPrices": { "FN": 0.55, "MW": 0.14, "FT": 0.07, "WW": 0.07, "BS": 0.07 },
         "image": "https://imgproxy.dmarket.com/insecure/rs:fit:360:260:0/g:ce/aHR0cHM6Ly9jb21tdW5pdHkuYWthbWFpLnN0ZWFtc3RhdGljLmNvbS9lY29ub215L2ltYWdlL2kwQ29aODFVaTBtLTlLd2xCWTFMXzE4bXl1R3VxMXdmaFdTYVpnTXR0eVZmUGFFUlNSMFdxbXU3TEFvY0dJR3ozVXFsWE9McnhNLXZNR21XOFZOeHU1RHg2MG5vVHlMaW5aZnlyM0prX09LUmU2ZHNNcy1RQm02VHl1dDR0dWh1UnoyTW1SUWd1eW5Mbm8ycGRubkdPdzl4V2NGd0ViTUN0a0hzbW9YdU5lMjN0VkdOaUlOQ3l5djZpeWxKdXlaaTVfRkNEX1Rsd3AxRUln.webp"
       },
       {
@@ -351,8 +375,9 @@ export const VORTEX_CASE_CATALOG: CS2Case[] = [
         "rarityColor": "#4B69FF",
         "wear": "Field-Tested",
         "floatValue": "0.1942",
-        "priceEur": 0.2,
+        "priceEur": 0.07,
         "dropChancePercent": 11.42,
+        "wearPrices": { "FN": 0.55, "MW": 0.14, "FT": 0.07, "WW": 0.07, "BS": 0.07 },
         "image": "https://imgproxy.dmarket.com/insecure/rs:fit:360:260:0/g:ce/aHR0cHM6Ly9jb21tdW5pdHkuYWthbWFpLnN0ZWFtc3RhdGljLmNvbS9lY29ub215L2ltYWdlL2kwQ29aODFVaTBtLTlLd2xCWTFMXzE4bXl1R3VxMXdmaFdTYVpnTXR0eVZmUGFFUlNSMFdxbXU3TEFvY0dJR3ozVXFsWE9McnhNLXZNR21XOFZOeHU1RHg2MG5vVHlMaW40SGwtUzFkNmMydGZadC1JZWVXQ21pV3g5RjVwZWhqVGhhX25Cb3ZwM09FeU4tb2NDbVdQd1lrQ3BvaUUtUU10MGJzeE5ibk5MbTI1d2FLMzQ1RHlTVDIzQ3BQNXl0cF9hOWNCbTRtR3FkRw==.webp"
       }
     ]
