@@ -188,6 +188,56 @@ export async function fetchLiveFaceitPlayer(nickname: string): Promise<any | nul
 }
 
 /**
+ * Fetch real-time match details and live server/state from FACEIT Open API v4
+ */
+export async function fetchLiveFaceitMatch(matchId: string): Promise<any | null> {
+  const auth = formatBearerAuth();
+  if (!auth) return null;
+
+  try {
+    const url = `${getOpenFaceitBaseUrl()}/matches/${matchId}`;
+    const res = await fetch(url, {
+      headers: {
+        'Authorization': auth,
+        'Accept': 'application/json'
+      }
+    });
+
+    if (res.ok) {
+      return await res.json();
+    }
+  } catch (err) {
+    console.warn('Real-time FACEIT Match query error:', err);
+  }
+  return null;
+}
+
+/**
+ * Fetch real-time match statistics (Kills, Deaths, ADR, Rating, T & CT rounds) from FACEIT Open API v4
+ */
+export async function fetchLiveFaceitMatchStats(matchId: string): Promise<any | null> {
+  const auth = formatBearerAuth();
+  if (!auth) return null;
+
+  try {
+    const url = `${getOpenFaceitBaseUrl()}/matches/${matchId}/stats`;
+    const res = await fetch(url, {
+      headers: {
+        'Authorization': auth,
+        'Accept': 'application/json'
+      }
+    });
+
+    if (res.ok) {
+      return await res.json();
+    }
+  } catch (err) {
+    console.warn('Real-time FACEIT Match Stats query error:', err);
+  }
+  return null;
+}
+
+/**
  * Creates a tournament on the official FACEIT Organizer Hub.
  * Uses real FACEIT Open API v4 when API key is set.
  */
