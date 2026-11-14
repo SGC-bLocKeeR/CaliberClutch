@@ -39,6 +39,8 @@ import confetti from 'canvas-confetti';
 import { sound } from '../../utils/soundEffects';
 import { CountryFlag } from './CountryFlag';
 import { FaceitVerificationBadge } from './VortexDashboard';
+import { VortexCaseShopModal } from './VortexCaseShopModal';
+import { getVortexWalletBalance } from '../../services/skinDeliveryService';
 
 export interface SocialFriend {
   id: string;
@@ -120,6 +122,19 @@ export const VortexRightSocialRail: React.FC<VortexRightSocialRailProps> = ({
     code?: string;
     countryName?: string;
   } | null>(null);
+
+  // In-Platform White-Label CS2 Cases Store State
+  const [showCaseShopModal, setShowCaseShopModal] = useState(false);
+  const [vortexBalance, setVortexBalance] = useState<number>(() => getVortexWalletBalance());
+
+  useEffect(() => {
+    const handleBalance = (e: Event) => {
+      const custom = e as CustomEvent<number>;
+      setVortexBalance(custom.detail);
+    };
+    window.addEventListener('vortex_wallet_updated', handleBalance);
+    return () => window.removeEventListener('vortex_wallet_updated', handleBalance);
+  }, []);
 
   // CS2 Cases & Skins Affiliate / Partner State
   const [showPartnerModal, setShowPartnerModal] = useState(false);
@@ -732,49 +747,41 @@ export const VortexRightSocialRail: React.FC<VortexRightSocialRailProps> = ({
           </div>
 
           {/* ======================================================== */}
-          {/* CS2 CASES & SKINS (OFFICIAL PARTNERS) CAPSULE             */}
+          {/* VORTEX CS2 CASES (OFFICIAL WHITE-LABEL STORE) CAPSULE     */}
           {/* ======================================================== */}
-          <div className="rounded-2xl bg-[#10121A] border border-[#1E2333] p-3 flex flex-col gap-2.5 shadow-lg hover:border-amber-500/30 transition group">
+          <div className="rounded-2xl bg-[#10121A] border border-[#1E2333] p-3 flex flex-col gap-2.5 shadow-lg hover:border-amber-500/40 transition group">
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-1.5 text-xs font-bold text-white font-sans">
                 <Gift className="w-3.5 h-3.5 text-amber-400 group-hover:scale-110 transition" />
-                <span>CS2 Cases & Drops</span>
+                <span>VORTEX CS2 Cases</span>
               </div>
-              <span className="text-[9px] font-mono font-bold bg-amber-400/15 text-amber-400 border border-amber-400/30 px-1.5 py-0.5 rounded uppercase">
-                +10% Bonus
+              <span className="text-[9px] font-mono font-bold bg-emerald-500/15 text-emerald-400 border border-emerald-500/30 px-1.5 py-0.5 rounded uppercase flex items-center gap-1">
+                <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />
+                STEAM BOT LIVE
               </span>
             </div>
 
             <p className="text-[11px] text-slate-400 leading-snug">
-              Hap CS2 cases & fito thika të vërteta me kodin <strong className="text-amber-400 font-mono">VORTEX</strong> në faqet partnere.
+              Hap arkat zyrtare & fito thika e skinë CS2. Dërgesë e menjëhershme me Steam Trade Bot.
             </p>
 
-            {/* Promo Code & Open Partner Modal Button */}
-            <div className="flex items-center justify-between gap-1.5 pt-0.5">
-              <button
-                onClick={handleCopyPartnerCode}
-                className="flex items-center gap-1 text-[10px] font-mono font-bold text-amber-400 bg-amber-400/10 hover:bg-amber-400/20 px-2 py-1 rounded-md border border-amber-400/25 transition cursor-pointer"
-                title="Kopjo Kodin VORTEX (+10% Bonus)"
-              >
-                <span>KODI:</span>
-                <span className="text-white underline decoration-amber-400">VORTEX</span>
-                {copiedCode ? (
-                  <Check className="w-3 h-3 text-emerald-400 ml-0.5" />
-                ) : (
-                  <Copy className="w-3 h-3 text-amber-400 ml-0.5" />
-                )}
-              </button>
+            {/* Wallet Balance & Open Store Button */}
+            <div className="flex items-center justify-between gap-2 pt-0.5">
+              <div className="flex items-center gap-1.5 text-[11px] font-mono font-bold text-slate-200 bg-white/[0.04] px-2 py-1 rounded-lg border border-white/5">
+                <Coins className="w-3.5 h-3.5 text-amber-400" />
+                <span className="text-emerald-400">{vortexBalance.toFixed(2)} €</span>
+              </div>
 
               <button
                 onClick={() => {
                   sound.playSelect();
-                  setShowPartnerModal(true);
+                  setShowCaseShopModal(true);
                 }}
-                className="flex items-center gap-1 text-[10px] font-mono font-bold text-slate-100 hover:text-white bg-gradient-to-r from-amber-500/20 to-yellow-500/20 hover:from-amber-500/30 hover:to-yellow-500/30 px-2.5 py-1 rounded-md border border-amber-500/30 hover:border-amber-400 transition cursor-pointer"
-                title="Shiko Faqet Partnere të CS2 Cases"
+                className="flex items-center gap-1 text-[11px] font-mono font-black text-black bg-gradient-to-r from-amber-400 to-yellow-500 hover:from-amber-300 hover:to-yellow-400 px-3 py-1.5 rounded-xl transition cursor-pointer shadow-[0_0_15px_rgba(245,158,11,0.3)] hover:scale-105 active:scale-95"
+                title="Hap Dyqanin e Arkave Vortex"
               >
-                <span>Hap Cases</span>
-                <ExternalLink className="w-3 h-3 text-amber-400" />
+                <span>Hap Arkat</span>
+                <ChevronRight className="w-3.5 h-3.5" />
               </button>
             </div>
           </div>
@@ -1390,7 +1397,7 @@ export const VortexRightSocialRail: React.FC<VortexRightSocialRailProps> = ({
                       <button 
                         onClick={() => {
                           sound.playSelect();
-                          setShowPartnerModal(true);
+                          setShowCaseShopModal(true);
                         }}
                         className="text-orange-500 hover:text-orange-400 font-bold mt-0.5 inline-block cursor-pointer"
                       >
@@ -1431,7 +1438,7 @@ export const VortexRightSocialRail: React.FC<VortexRightSocialRailProps> = ({
                       <button 
                         onClick={() => {
                           sound.playSelect();
-                          setShowPartnerModal(true);
+                          setShowCaseShopModal(true);
                         }}
                         className="text-orange-500 hover:text-orange-400 font-bold mt-0.5 inline-block cursor-pointer"
                       >
@@ -1456,7 +1463,7 @@ export const VortexRightSocialRail: React.FC<VortexRightSocialRailProps> = ({
                       <button 
                         onClick={() => {
                           sound.playSelect();
-                          setShowPartnerModal(true);
+                          setShowCaseShopModal(true);
                         }}
                         className="text-orange-500 hover:text-orange-400 font-bold mt-0.5 inline-block cursor-pointer"
                       >
@@ -1481,7 +1488,7 @@ export const VortexRightSocialRail: React.FC<VortexRightSocialRailProps> = ({
                       <button 
                         onClick={() => {
                           sound.playSelect();
-                          setShowPartnerModal(true);
+                          setShowCaseShopModal(true);
                         }}
                         className="text-orange-500 hover:text-orange-400 font-bold mt-0.5 inline-block cursor-pointer"
                       >
@@ -2047,6 +2054,14 @@ export const VortexRightSocialRail: React.FC<VortexRightSocialRailProps> = ({
           <span>{spectateToast}</span>
         </div>
       )}
+
+      {/* ======================================================== */}
+      {/* 7. VORTEX WHITE-LABEL CS2 CASES & STEAM TRADE BOT MODAL   */}
+      {/* ======================================================== */}
+      <VortexCaseShopModal 
+        isOpen={showCaseShopModal} 
+        onClose={() => setShowCaseShopModal(false)} 
+      />
 
     </>
   );
