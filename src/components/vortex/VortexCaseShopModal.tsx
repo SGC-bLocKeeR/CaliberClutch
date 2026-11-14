@@ -134,6 +134,29 @@ export const VortexCaseShopModal: React.FC<VortexCaseShopModalProps> = ({ isOpen
     }
   }, [activeCase]);
 
+  // Fallback handler: if proxy image fails, fallback directly to official Steam Akamai CDN
+  const handleImageFallback = (e: React.SyntheticEvent<HTMLImageElement, Event>) => {
+    const img = e.currentTarget;
+    const currentSrc = img.src;
+
+    if (currentSrc.includes('imgproxy.dmarket.com')) {
+      try {
+        const match = currentSrc.match(/\/g:ce\/([^.]+)/);
+        if (match && match[1]) {
+          const b64 = match[1].replace(/-/g, '+').replace(/_/g, '/');
+          const decoded = atob(b64);
+          if (decoded.startsWith('http')) {
+            img.src = decoded;
+            return;
+          }
+        }
+      } catch {
+        // Fallback error, continue
+      }
+    }
+    img.onerror = null;
+  };
+
   if (!isOpen) return null;
 
   // Save Trade URL
@@ -561,8 +584,8 @@ export const VortexCaseShopModal: React.FC<VortexCaseShopModalProps> = ({ isOpen
                               src={c.image} 
                               alt={c.name}
                               referrerPolicy="no-referrer"
-                              crossOrigin="anonymous"
                               loading="eager"
+                              onError={handleImageFallback}
                               className="relative w-36 h-32 object-contain drop-shadow-[0_15px_30px_rgba(0,0,0,0.85)] group-hover:scale-110 transition-transform duration-300" 
                             />
                           </div>
@@ -584,8 +607,8 @@ export const VortexCaseShopModal: React.FC<VortexCaseShopModalProps> = ({ isOpen
                                 src={item.image} 
                                 alt={item.name} 
                                 referrerPolicy="no-referrer"
-                                crossOrigin="anonymous"
                                 loading="eager"
+                                onError={handleImageFallback}
                                 className="w-8 h-8 rounded-full bg-black/60 border border-white/10 object-contain p-0.5"
                                 title={item.name}
                               />
@@ -613,8 +636,8 @@ export const VortexCaseShopModal: React.FC<VortexCaseShopModalProps> = ({ isOpen
                           src={activeCase.image} 
                           alt={activeCase.name} 
                           referrerPolicy="no-referrer"
-                          crossOrigin="anonymous"
                           loading="eager"
+                          onError={handleImageFallback}
                           className="w-14 h-12 object-contain" 
                         />
                         <div>
@@ -661,8 +684,8 @@ export const VortexCaseShopModal: React.FC<VortexCaseShopModalProps> = ({ isOpen
                                   src={item.image} 
                                   alt={item.name} 
                                   referrerPolicy="no-referrer"
-                                  crossOrigin="anonymous"
                                   loading="eager"
+                                  onError={handleImageFallback}
                                   className="w-24 h-20 object-contain drop-shadow-md my-auto" 
                                 />
 
@@ -712,8 +735,8 @@ export const VortexCaseShopModal: React.FC<VortexCaseShopModalProps> = ({ isOpen
                                 src={it.image} 
                                 alt={it.name} 
                                 referrerPolicy="no-referrer"
-                                crossOrigin="anonymous"
                                 loading="eager"
+                                onError={handleImageFallback}
                                 className="w-20 h-14 object-contain group-hover:scale-110 transition drop-shadow-md" 
                               />
                               <div className="text-[11px] font-bold text-white truncate w-full mt-2">{it.name}</div>
@@ -755,8 +778,8 @@ export const VortexCaseShopModal: React.FC<VortexCaseShopModalProps> = ({ isOpen
                           src={wonSkin.image} 
                           alt={wonSkin.name} 
                           referrerPolicy="no-referrer"
-                          crossOrigin="anonymous"
                           loading="eager"
+                          onError={handleImageFallback}
                           className="w-56 h-40 object-contain drop-shadow-[0_20px_35px_rgba(0,0,0,0.9)] scale-110 animate-bounce duration-1000"
                         />
                       </div>
@@ -963,8 +986,8 @@ export const VortexCaseShopModal: React.FC<VortexCaseShopModalProps> = ({ isOpen
                           src={item.image} 
                           alt={item.name}
                           referrerPolicy="no-referrer"
-                          crossOrigin="anonymous"
                           loading="eager"
+                          onError={handleImageFallback}
                           className="relative w-36 h-28 object-contain drop-shadow-[0_10px_20px_rgba(0,0,0,0.8)] group-hover:scale-105 transition-transform duration-300" 
                         />
                       </div>

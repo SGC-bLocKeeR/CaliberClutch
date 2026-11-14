@@ -116,7 +116,7 @@ export const VORTEX_CASE_CATALOG: CS2Case[] = [
     subtitle: 'Official CS2 Case • Butterfly & Gamma Doppler Knives',
     priceEur: 1.85,
     // Official Valve Dreams & Nightmares Case 3D Crate Render
-    image: 'https://community.akamai.steamstatic.com/economy/image/i0CoZ81Ui0m-9KwlBY1L_18myuGuq1wfhWSaZgMttyVfPaERSR0Wqmu7LAocGJKz2lu_XsnXwtmkJjSU91dh8bj35VTqVBP4io_frnIV7Kb5OaU-JqfHDzXFle0u4LY8Gy_kkRgisGzcm4v4J3vDOAQmDMdyRvlK7EcmeCU3yw',
+    image: 'https://imgproxy.dmarket.com/insecure/rs:fit:360:260:0/g:ce/aHR0cHM6Ly9jb21tdW5pdHkuYWthbWFpLnN0ZWFtc3RhdGljLmNvbS9lY29ub215L2ltYWdlL2kwQ29aODFVaTBtLTlLd2xCWTFMXzE4bXl1R3VxMXdmaFdTYVpnTXR0eVZmUGFFUlNSMFdxbXU3TEFvY0dKS3oybHVfWHNuWHd0bWtKalNVOTFkaDhiajM1VlRxVkJQNGlvX2ZybklWN0tiNU9hVS1KcWZIRHpYRmxlMHU0TFk4R3lfa2tSZ2lzR3pjbTR2NEozdkRPQVFtRE1keVJ2bEs3RWNtZUNVM3l3.webp',
     bannerGradient: 'from-amber-600/30 via-yellow-600/15 to-transparent',
     glowColor: '#F59E0B',
     description: 'Përmban thikat Butterfly Knife, Gamma Doppler, dhe armët e preferuara AK-47 Nightwish e MP9 Starlight.',
@@ -131,7 +131,7 @@ export const VORTEX_CASE_CATALOG: CS2Case[] = [
         wear: 'Factory New',
         floatValue: '0.0315',
         priceEur: 1480.00,
-        image: 'https://community.akamai.steamstatic.com/economy/image/i0CoZ81Ui0m-9KwlBY1L_18myuGuq1wfhWSaZgMttyVfPaERSR0Wqmu7LAocGIGz3UqlXOLrxM-vMGmW8VNxu5Dx60noTyL6kJ_m-B1Z-ua6bbZrLOmsD2qv2-t0ouBWQyC0nQlp4G_dmdauIC_DPQBzDpclRLINsEXsx92yP7jq7gXd2t1NzCT3iCwc6TErvbhfNpboFw'
+        image: 'https://imgproxy.dmarket.com/insecure/rs:fit:360:260:0/g:ce/aHR0cHM6Ly9jb21tdW5pdHkuYWthbWFpLnN0ZWFtc3RhdGljLmNvbS9lY29ub215L2ltYWdlL2kwQ29aODFVaTBtLTlLd2xCWTFMXzE4bXl1R3VxMXdmaFdTYVpnTXR0eVZmUGFFUlNSMFdxbXU3TEFvY0dJR3ozVXFsWE9McnhNLXZNR21XOFZOeHU1RHg2MG5vVHlMNmtKX20tQjFaLXVhNmJiWnJMT21zRDJxdjItdDBvdUJXUXlDMG5RbHA0R19kbWRhdUlDX0RQUUJ6RHBjbFJMSU5zRVhzeDkyeVA3anE3Z1hkMnQxTnpDVDNpQ3djNlRFcnZiaGZOcGJvRnc.webp'
       },
       {
         id: 'karambit-doppler',
@@ -143,7 +143,7 @@ export const VORTEX_CASE_CATALOG: CS2Case[] = [
         wear: 'Factory New',
         floatValue: '0.0142',
         priceEur: 1250.00,
-        image: 'https://community.akamai.steamstatic.com/economy/image/i0CoZ81Ui0m-9KwlBY1L_18myuGuq1wfhWSaZgMttyVfPaERSR0Wqmu7LAocGIGz3UqlXOLrxM-vMGmW8VNxu5Dx60noTyL6kJ_m-B1Q7uCvZaZkNM-SA1iDwP5muOh7Sha-lA8lvziMgIr9HifOOV5kFMRxFuEM5hi_xNXhMbmx5VCMjd9MyCv6jigc6n064ucLAvZ3_6bViV3fcepqpLtspE0'
+        image: 'https://imgproxy.dmarket.com/insecure/rs:fit:360:260:0/g:ce/aHR0cHM6Ly9jb21tdW5pdHkuYWthbWFpLnN0ZWFtc3RhdGljLmNvbS9lY29ub215L2ltYWdlL2kwQ29aODFVaTBtLTlLd2xCWTFMXzE4bXl1R3VxMXdmaFdTYVpnTXR0eVZmUGFFUlNSMFdxbXU3TEFvY0dJR3ozVXFsWE9McnhNLXZNR21XOFZOeHU1RHg2MG5vVHlMNmtKX20tQjFRN3VDdlphWmtOTS1TQTFpRHdQNW11T2g3U2hhLWxBOGx2emlNZ0lyOUhpZk9PVjVrRk1SeEZ1RU01aGlfeE5YaE1ibXg1VkNNamQ5TXlDdjZqaWdjNm4wNjR1Y0xBdlozXzZiVmlWM2ZjZXBxcEx0c3BFMA.webp'
       },
       {
         id: 'mp9-starlight',
@@ -155,7 +155,7 @@ export const VORTEX_CASE_CATALOG: CS2Case[] = [
         wear: 'Field-Tested',
         floatValue: '0.2210',
         priceEur: 8.50,
-        image: 'https://community.akamai.steamstatic.com/economy/image/i0CoZ81Ui0m-9KwlBY1L_18myuGuq1wfhWSaZgMttyVfPaERSR0Wqmu7LAocGIGz3UqlXOLrxM-vMGmW8VNxu5Dx60noTyL8js_f-jFk4uL3V7d5IeKfB2CY1dF6ueZhW2flkUtztz_SzYypJSqRalUhDJNwQO4PsBXtx9HkN-K37w3bgohGmHn3kGoXuZ3lRdvF'
+        image: 'https://imgproxy.dmarket.com/insecure/rs:fit:360:260:0/g:ce/aHR0cHM6Ly9jb21tdW5pdHkuYWthbWFpLnN0ZWFtc3RhdGljLmNvbS9lY29ub215L2ltYWdlL2kwQ29aODFVaTBtLTlLd2xCWTFMXzE4bXl1R3VxMXdmaFdTYVpnTXR0eVZmUGFFUlNSMFdxbXU3TEFvY0dJR3ozVXFsWE9McnhNLXZNR21XOFZOeHU1RHg2MG5vVHlMOGpzX2YtakZrNHVMM1Y3ZDVJZUtmQjJDWTFkRjZ1ZVpoVzJmbGtVdHp0el9Tell5cEpTcVJhbFVoREpOd1FPNFBzQlh0eDlIa04tSzM3dzNiZ29oR21IbjNrR29YdVozbFJkdkY.webp'
       },
       {
         id: 'usp-ticket',
@@ -167,7 +167,7 @@ export const VORTEX_CASE_CATALOG: CS2Case[] = [
         wear: 'Field-Tested',
         floatValue: '0.1850',
         priceEur: 1.40,
-        image: 'https://community.akamai.steamstatic.com/economy/image/i0CoZ81Ui0m-9KwlBY1L_18myuGuq1wfhWSaZgMttyVfPaERSR0Wqmu7LAocGIGz3UqlXOLrxM-vMGmW8VNxu5Dx60noTyLkjYbf7itX6vytbbZSI-WsG3SA_vp5j-lsQyWMmRQguynLzt_8JXiVOwF2AsF4R-ECshftltKxZe6x41CKjotExST8jn8f7ilr5PFCD_TZVvgG5g'
+        image: 'https://imgproxy.dmarket.com/insecure/rs:fit:360:260:0/g:ce/aHR0cHM6Ly9jb21tdW5pdHkuYWthbWFpLnN0ZWFtc3RhdGljLmNvbS9lY29ub215L2ltYWdlL2kwQ29aODFVaTBtLTlLd2xCWTFMXzE4bXl1R3VxMXdmaFdTYVpnTXR0eVZmUGFFUlNSMFdxbXU3TEFvY0dJR3ozVXFsWE9McnhNLXZNR21XOFZOeHU1RHg2MG5vVHlMa2pZYmY3aXRYNnZ5dGJiWlNJLVdzRzNTQV92cDVqLWxzUXlXTW1SUWd1eW5MenRfOEpYaVZPd0YyQXNGNFItRUNzaGZ0bHRLeFplNng0MUNLam90RXhTVDhqbjhmN2lscjVQRkNEX1RaVnZnRzVn.webp'
       }
     ]
   },
@@ -177,7 +177,7 @@ export const VORTEX_CASE_CATALOG: CS2Case[] = [
     subtitle: 'Official CS2 Release Case • Kukri Knife & AWP Chrome',
     priceEur: 2.45,
     // Official Valve Kilowatt Case 3D Crate Render
-    image: 'https://community.akamai.steamstatic.com/economy/image/i0CoZ81Ui0m-9KwlBY1L_18myuGuq1wfhWSaZgMttyVfPaERSR0Wqmu7LAocGJKz2lu_XsnXwtmkJjSU91dh8bj35VTqVBP4io_frnEVvqf_a6VoIfGSXz7Hlbwg57QwSS_mxhl15jiGyN37c3_GZw91W8BwRflK7EfKsa2sfw',
+    image: 'https://imgproxy.dmarket.com/insecure/rs:fit:360:260:0/g:ce/aHR0cHM6Ly9jb21tdW5pdHkuYWthbWFpLnN0ZWFtc3RhdGljLmNvbS9lY29ub215L2ltYWdlL2kwQ29aODFVaTBtLTlLd2xCWTFMXzE4bXl1R3VxMXdmaFdTYVpnTXR0eVZmUGFFUlNSMFdxbXU3TEFvY0dKS3oybHVfWHNuWHd0bWtKalNVOTFkaDhiajM1VlRxVkJQNGlvX2ZybkVWdnFmX2E2Vm9JZkdTWHo3SGxid2c1N1F3U1NfbXhobDE1amlHeU4zN2MzX0dadzkxVzhCd1JmbEs3RWZLc2Eyc2Z3.webp',
     bannerGradient: 'from-blue-600/30 via-indigo-600/15 to-transparent',
     glowColor: '#3B82F6',
     description: 'Arka më e re zyrtare në CS2 me thikat Kukri, skinin e parë të Zeus x27 dhe AWP Chrome Cannon.',
@@ -192,7 +192,7 @@ export const VORTEX_CASE_CATALOG: CS2Case[] = [
         wear: 'Factory New',
         floatValue: '0.0089',
         priceEur: 890.00,
-        image: 'https://community.akamai.steamstatic.com/economy/image/i0CoZ81Ui0m-9KwlBY1L_18myuGuq1wfhWSaZgMttyVfPaERSR0Wqmu7LAocGIGz3UqlXOLrxM-vMGmW8VNxu5Dx60noTyL6kJ_m-B1Wts2sab1iLvWHMWae_vp_t-R7cCahlBMgtgKJk4jxNWWTa1QhDMMmQOMJ5BPtkYHuM-KwsVTYjIoQy3n-iStL7yxj57wDB_cs5OSJ2H8uCzPz'
+        image: 'https://imgproxy.dmarket.com/insecure/rs:fit:360:260:0/g:ce/aHR0cHM6Ly9jb21tdW5pdHkuYWthbWFpLnN0ZWFtc3RhdGljLmNvbS9lY29ub215L2ltYWdlL2kwQ29aODFVaTBtLTlLd2xCWTFMXzE4bXl1R3VxMXdmaFdTYVpnTXR0eVZmUGFFUlNSMFdxbXU3TEFvY0dJR3ozVXFsWE9McnhNLXZNR21XOFZOeHU1RHg2MG5vVHlMNmtKX20tQjFXdHMyc2FiMWlMdldITVdhZV92cF90LVI3Y0NhaGxCTWd0Z0tKazRqeE5XV1RhMVFoRE1NbVFPTUo1QlB0a1lIdU0tS3dzVlRZaklvUXkzbi1pU3RMN3l4ajU3d0RCX2NzNU9TSjJIOHVDelB6.webp'
       },
       {
         id: 'ak-phantom',
@@ -204,7 +204,7 @@ export const VORTEX_CASE_CATALOG: CS2Case[] = [
         wear: 'Field-Tested',
         floatValue: '0.1980',
         priceEur: 9.80,
-        image: 'https://community.akamai.steamstatic.com/economy/image/i0CoZ81Ui0m-9KwlBY1L_18myuGuq1wfhWSaZgMttyVfPaERSR0Wqmu7LAocGIGz3UqlXOLrxM-vMGmW8VNxu5Dx60noTyLwlcK3wiFO0POlJfA6H-CbD2mEzuNJtOh6XTyjgRI1jDGMnYftb3qTbQMpCZVxF-8Ku0Xtw4XkYu2xtQSL3d5FxSz-3H5Ovy895epRA6E7uvqAsbzZtpo'
+        image: 'https://imgproxy.dmarket.com/insecure/rs:fit:360:260:0/g:ce/aHR0cHM6Ly9jb21tdW5pdHkuYWthbWFpLnN0ZWFtc3RhdGljLmNvbS9lY29ub215L2ltYWdlL2kwQ29aODFVaTBtLTlLd2xCWTFMXzE4bXl1R3VxMXdmaFdTYVpnTXR0eVZmUGFFUlNSMFdxbXU3TEFvY0dJR3ozVXFsWE9McnhNLXZNR21XOFZOeHU1RHg2MG5vVHlMd2xjSzN3aUZPMFBPbEpmQTZILUNiRDJtRXp1Tkp0T2g2WFR5amdSSTFqREdNbllmdGIzcVRiUU1wQ1pWeEYtOEt1MFh0dzRYa1l1Mnh0UVNMM2Q1RnhTei0zSDVPdnk4OTVlcFJBNkU3dXZxQXNielp0cG8.webp'
       },
       {
         id: 'deagle-mecha',
@@ -216,7 +216,7 @@ export const VORTEX_CASE_CATALOG: CS2Case[] = [
         wear: 'Field-Tested',
         floatValue: '0.2010',
         priceEur: 9.20,
-        image: 'https://community.akamai.steamstatic.com/economy/image/i0CoZ81Ui0m-9KwlBY1L_18myuGuq1wfhWSaZgMttyVfPaERSR0Wqmu7LAocGIGz3UqlXOLrxM-vMGmW8VNxu5Dx60noTyL1m5fn8Sdk6OGRbKFsJ_yWMWqVwuZ3j-1gSCGn20h042vSyY2tdyjCZwIlXJBxQeNe4EWxxoHkMOq0sQGIid5Fnyr42HtXrnE8p4gbgvE'
+        image: 'https://imgproxy.dmarket.com/insecure/rs:fit:360:260:0/g:ce/aHR0cHM6Ly9jb21tdW5pdHkuYWthbWFpLnN0ZWFtc3RhdGljLmNvbS9lY29ub215L2ltYWdlL2kwQ29aODFVaTBtLTlLd2xCWTFMXzE4bXl1R3VxMXdmaFdTYVpnTXR0eVZmUGFFUlNSMFdxbXU3TEFvY0dJR3ozVXFsWE9McnhNLXZNR21XOFZOeHU1RHg2MG5vVHlMMW01Zm44U2RrNk9HUmJLRnNKX3lXTVdxVnd1WjNqLTFnU0NHbjIwaDA0MnZTeVkydGR5akNad0lsWEpCeFFlTmU0RVd4eG9Ia01PcTBzUUdJaWQ1Rm55cjQySHRYcm5FOHA0Z2JndkU.webp'
       },
       {
         id: 'usp-cyrex',
@@ -228,7 +228,7 @@ export const VORTEX_CASE_CATALOG: CS2Case[] = [
         wear: 'Factory New',
         floatValue: '0.0420',
         priceEur: 5.10,
-        image: 'https://community.akamai.steamstatic.com/economy/image/i0CoZ81Ui0m-9KwlBY1L_18myuGuq1wfhWSaZgMttyVfPaERSR0Wqmu7LAocGIGz3UqlXOLrxM-vMGmW8VNxu5Dx60noTyLkjYbf7itX6vytbbZSI-WsG3SA_u1vouRxcCW6khUz_TjdzdmsJyiTZg8kX8N4ELUP5EPsw9G1YeLn5VTXjY0WxS6rhiIYuCd1o7FV2N83Spg'
+        image: 'https://imgproxy.dmarket.com/insecure/rs:fit:360:260:0/g:ce/aHR0cHM6Ly9jb21tdW5pdHkuYWthbWFpLnN0ZWFtc3RhdGljLmNvbS9lY29ub215L2ltYWdlL2kwQ29aODFVaTBtLTlLd2xCWTFMXzE4bXl1R3VxMXdmaFdTYVpnTXR0eVZmUGFFUlNSMFdxbXU3TEFvY0dJR3ozVXFsWE9McnhNLXZNR21XOFZOeHU1RHg2MG5vVHlMa2pZYmY3aXRYNnZ5dGJiWlNJLVdzRzNTQV91MXZvdVJ4Y0NXNmtoVXpfVGpkemRtc0p5aVRaZzhrWDhONEVMVVA1RVBzdzlHMVllTG41VlRYalkwV3hTNnJoaUlZdUNkMW83RlYyTjgzU3Bn.webp'
       }
     ]
   },
@@ -238,7 +238,7 @@ export const VORTEX_CASE_CATALOG: CS2Case[] = [
     subtitle: 'Official CS2 Case • Gloves & M4A4 Temukau',
     priceEur: 1.95,
     // Official Valve Revolution Case 3D Crate Render
-    image: 'https://community.akamai.steamstatic.com/economy/image/i0CoZ81Ui0m-9KwlBY1L_18myuGuq1wfhWSaZgMttyVfPaERSR0Wqmu7LAocGJKz2lu_XsnXwtmkJjSU91dh8bj35VTqVBP4io_frnAVvfb6aqduc_TFVjTCxbx05OU4S3jilE9w4DzRnImtIy2Sa1JzDJEhRPlK7EcO4U8gfA',
+    image: 'https://imgproxy.dmarket.com/insecure/rs:fit:360:260:0/g:ce/aHR0cHM6Ly9jb21tdW5pdHkuYWthbWFpLnN0ZWFtc3RhdGljLmNvbS9lY29ub215L2ltYWdlL2kwQ29aODFVaTBtLTlLd2xCWTFMXzE4bXl1R3VxMXdmaFdTYVpnTXR0eVZmUGFFUlNSMFdxbXU3TEFvY0dKS3oybHVfWHNuWHd0bWtKalNVOTFkaDhiajM1VlRxVkJQNGlvX2ZybkFWdmZiNmFxZHVjX1RGVmpUQ3hieDA1T1U0UzNqaWxFOXc0RHpSbkltdEl5MlNhMUp6REpFaFJQbEs3RWNPNFU4Z2ZB.webp',
     bannerGradient: 'from-rose-600/30 via-red-600/15 to-transparent',
     glowColor: '#EF4444',
     description: 'Një nga arkat më të suksesshme me doreza Clutch Gloves, AWP Duality dhe M4A4 Temukau.',
@@ -253,7 +253,7 @@ export const VORTEX_CASE_CATALOG: CS2Case[] = [
         wear: 'Field-Tested',
         floatValue: '0.2104',
         priceEur: 145.00,
-        image: 'https://community.akamai.steamstatic.com/economy/image/i0CoZ81Ui0m-9KwlBY1L_18myuGuq1wfhWSaZgMttyVfPaERSR0Wqmu7LAocGIGz3UqlXOLrxM-vMGmW8VNxu5Dx60noTyLwiYbf_DVL0OK8Yap5M-SBC2ad_uJ_t-l9AX_qlk4k5GyAzo6ocC-QZgZxX8AjEbZY5xnrxtPjM7vnsgGIj9oTmXngznQeg3pfcPs'
+        image: 'https://imgproxy.dmarket.com/insecure/rs:fit:360:260:0/g:ce/aHR0cHM6Ly9jb21tdW5pdHkuYWthbWFpLnN0ZWFtc3RhdGljLmNvbS9lY29ub215L2ltYWdlL2kwQ29aODFVaTBtLTlLd2xCWTFMXzE4bXl1R3VxMXdmaFdTYVpnTXR0eVZmUGFFUlNSMFdxbXU3TEFvY0dJR3ozVXFsWE9McnhNLXZNR21XOFZOeHU1RHg2MG5vVHlMd2lZYmZfRFZMME9LOFlhcDVNLVNCQzJhZF91Sl90LWw5QVhfcWxrNGs1R3lBem82b2NDLVFaZ1p4WDhBakViWlk1eG5yeHRQak03dm5zZ0dJajlvVG1Ybmd6blFlZzNwZmNQcw.webp'
       },
       {
         id: 'ak-asiimov',
@@ -265,7 +265,7 @@ export const VORTEX_CASE_CATALOG: CS2Case[] = [
         wear: 'Field-Tested',
         floatValue: '0.2450',
         priceEur: 65.00,
-        image: 'https://community.akamai.steamstatic.com/economy/image/i0CoZ81Ui0m-9KwlBY1L_18myuGuq1wfhWSaZgMttyVfPaERSR0Wqmu7LAocGIGz3UqlXOLrxM-vMGmW8VNxu5Dx60noTyLwlcK3wiFO0POlPPNSIeOaB2qf19F6ueZhW2e2wEt-t2jcytf6dymSO1JxA5oiRecLsRa5kIfkYr-241aLgotHz3-rkGoXuUp8oX57'
+        image: 'https://imgproxy.dmarket.com/insecure/rs:fit:360:260:0/g:ce/aHR0cHM6Ly9jb21tdW5pdHkuYWthbWFpLnN0ZWFtc3RhdGljLmNvbS9lY29ub215L2ltYWdlL2kwQ29aODFVaTBtLTlLd2xCWTFMXzE4bXl1R3VxMXdmaFdTYVpnTXR0eVZmUGFFUlNSMFdxbXU3TEFvY0dJR3ozVXFsWE9McnhNLXZNR21XOFZOeHU1RHg2MG5vVHlMd2xjSzN3aUZPMFBPbFBQTlNJZU9hQjJxZjE5RjZ1ZVpoVzJlMndFdC10MmpjeXRmNmR5bVNPMUp4QTVvaVJlY0xzUmE1a0lma1lyLTI0MWFMZ290SHozLXJrR29YdVVwOG9YNTc.webp'
       },
       {
         id: 'm4a4-emperor',
@@ -277,7 +277,7 @@ export const VORTEX_CASE_CATALOG: CS2Case[] = [
         wear: 'Field-Tested',
         floatValue: '0.2240',
         priceEur: 42.00,
-        image: 'https://community.akamai.steamstatic.com/economy/image/i0CoZ81Ui0m-9KwlBY1L_18myuGuq1wfhWSaZgMttyVfPaERSR0Wqmu7LAocGIGz3UqlXOLrxM-vMGmW8VNxu5Dx60noTyL8ypexwiVI0P_6afBSJf2DC3Wf09F6ueZhW2exwBh_6m3dnt36InjDPQ4oXJt1TbJeshW_mtfjN-vrsgaKiokWy333kGoXuRj4z9Nd'
+        image: 'https://imgproxy.dmarket.com/insecure/rs:fit:360:260:0/g:ce/aHR0cHM6Ly9jb21tdW5pdHkuYWthbWFpLnN0ZWFtc3RhdGljLmNvbS9lY29ub215L2ltYWdlL2kwQ29aODFVaTBtLTlLd2xCWTFMXzE4bXl1R3VxMXdmaFdTYVpnTXR0eVZmUGFFUlNSMFdxbXU3TEFvY0dJR3ozVXFsWE9McnhNLXZNR21XOFZOeHU1RHg2MG5vVHlMOHlwZXh3aVZJMFBfNmFmQlNKZjJEQzNXZjA5RjZ1ZVpoVzJleHdCaF82bTNkbnQzNkluakRQUTRvWEp0MVRiSmVzaFdfbXRmak4tdnJzZ2FLaW9rV3kzMzNrR29YdVJqNHo5TmQ.webp'
       },
       {
         id: 'deagle-printstream',
@@ -289,7 +289,7 @@ export const VORTEX_CASE_CATALOG: CS2Case[] = [
         wear: 'Field-Tested',
         floatValue: '0.2105',
         priceEur: 55.00,
-        image: 'https://community.akamai.steamstatic.com/economy/image/i0CoZ81Ui0m-9KwlBY1L_18myuGuq1wfhWSaZgMttyVfPaERSR0Wqmu7LAocGIGz3UqlXOLrxM-vMGmW8VNxu5Dx60noTyL1m5fn8Sdk7OeRbKFsJ8-DHG6e1f1iouRoQha_nBovp3OGmdeqInyVP1V0XsYlRbEI50a5wNyzZr605AyI3t5MmCSohylAuC89_a9cBoMY9UkV'
+        image: 'https://imgproxy.dmarket.com/insecure/rs:fit:360:260:0/g:ce/aHR0cHM6Ly9jb21tdW5pdHkuYWthbWFpLnN0ZWFtc3RhdGljLmNvbS9lY29ub215L2ltYWdlL2kwQ29aODFVaTBtLTlLd2xCWTFMXzE4bXl1R3VxMXdmaFdTYVpnTXR0eVZmUGFFUlNSMFdxbXU3TEFvY0dJR3ozVXFsWE9McnhNLXZNR21XOFZOeHU1RHg2MG5vVHlMMW01Zm44U2RrN09lUmJLRnNKOC1ESEc2ZTFmMWlvdVJvUWhhX25Cb3ZwM09HbWRlcUlueVZQMVYwWHNZbFJiRUk1MGE1d055elpyNjA1QXlJM3Q1TW1DU29oeWxBdUM4OV9hOWNCb01ZOVVrVg.webp'
       }
     ]
   },
@@ -299,7 +299,7 @@ export const VORTEX_CASE_CATALOG: CS2Case[] = [
     subtitle: 'Official CS2 Case • Skeleton Knives & Desert Eagle Printstream',
     priceEur: 0.95,
     // Official Valve Fracture Case 3D Crate Render
-    image: 'https://community.akamai.steamstatic.com/economy/image/i0CoZ81Ui0m-9KwlBY1L_18myuGuq1wfhWSaZgMttyVfPaERSR0Wqmu7LAocGJKz2lu_XsnXwtmkJjSU91dh8bj35VTqVBP4io_fr3QV7aD7OP01IfbGDzPCmbsm4LU5GnvkzUsi4WvUmIqtci_CPQNyApsjE_lK7EfrhW545A',
+    image: 'https://imgproxy.dmarket.com/insecure/rs:fit:360:260:0/g:ce/aHR0cHM6Ly9jb21tdW5pdHkuYWthbWFpLnN0ZWFtc3RhdGljLmNvbS9lY29ub215L2ltYWdlL2kwQ29aODFVaTBtLTlLd2xCWTFMXzE4bXl1R3VxMXdmaFdTYVpnTXR0eVZmUGFFUlNSMFdxbXU3TEFvY0dKS3oybHVfWHNuWHd0bWtKalNVOTFkaDhiajM1VlRxVkJQNGlvX2ZyM1FWN2FEN09QMDFJZmJHRHpQQ21ic200TFU1R252a3pVc2k0V3ZVbUlxdGNpX0NQUU55QXBzakVfbEs3RWZyaFc1NDVB.webp',
     bannerGradient: 'from-lime-600/30 via-emerald-600/15 to-transparent',
     glowColor: '#A3E635',
     description: 'Arka më e kërkuar ekonomike me shansin ekskluziv për Skeleton Knife dhe AK-47 Legion of Anubis.',
@@ -314,7 +314,7 @@ export const VORTEX_CASE_CATALOG: CS2Case[] = [
         wear: 'Field-Tested',
         floatValue: '0.2284',
         priceEur: 560.00,
-        image: 'https://community.akamai.steamstatic.com/economy/image/i0CoZ81Ui0m-9KwlBY1L_18myuGuq1wfhWSaZgMttyVfPaERSR0Wqmu7LAocGIGz3UqlXOLrxM-vMGmW8VNxu5Dx60noTyL6kJ_m-B1I5PeibbBiLs-SH1ifyOJztN5lRi67gVMj6m3Rnt2sdnOUZwIgWJAkTLUJ4xbrx9buYuywsgCLjItBmC79jiNN8G81tGbdgHHm'
+        image: 'https://imgproxy.dmarket.com/insecure/rs:fit:360:260:0/g:ce/aHR0cHM6Ly9jb21tdW5pdHkuYWthbWFpLnN0ZWFtc3RhdGljLmNvbS9lY29ub215L2ltYWdlL2kwQ29aODFVaTBtLTlLd2xCWTFMXzE4bXl1R3VxMXdmaFdTYVpnTXR0eVZmUGFFUlNSMFdxbXU3TEFvY0dJR3ozVXFsWE9McnhNLXZNR21XOFZOeHU1RHg2MG5vVHlMNmtKX20tQjFJNVBlaWJiQmlMcy1TSDFpZnlPSnp0TjVsUmk2N2dWTWo2bTNSbnQyc2RuT1Vad0lnV0pBa1RMVUo0eGJyeDlidVl1eXdzZ0NMakl0Qm1DNzlqaU5OOEc4MXRHYmRnSEht.webp'
       },
       {
         id: 'ak-slate',
@@ -326,7 +326,7 @@ export const VORTEX_CASE_CATALOG: CS2Case[] = [
         wear: 'Field-Tested',
         floatValue: '0.1650',
         priceEur: 4.50,
-        image: 'https://community.akamai.steamstatic.com/economy/image/i0CoZ81Ui0m-9KwlBY1L_18myuGuq1wfhWSaZgMttyVfPaERSR0Wqmu7LAocGIGz3UqlXOLrxM-vMGmW8VNxu5Dx60noTyLwlcK3wiVI0POlPPNSMOKcCGKD0ud5vuBlcCW6khUz_W3Sytb4cCqTOFUpWJtzTOUD5hPsw9a0Yrnrs1SK3ooXzy6shilM5311o7FVYrIufmI'
+        image: 'https://imgproxy.dmarket.com/insecure/rs:fit:360:260:0/g:ce/aHR0cHM6Ly9jb21tdW5pdHkuYWthbWFpLnN0ZWFtc3RhdGljLmNvbS9lY29ub215L2ltYWdlL2kwQ29aODFVaTBtLTlLd2xCWTFMXzE4bXl1R3VxMXdmaFdTYVpnTXR0eVZmUGFFUlNSMFdxbXU3TEFvY0dJR3ozVXFsWE9McnhNLXZNR21XOFZOeHU1RHg2MG5vVHlMd2xjSzN3aVZJMFBPbFBQTlNNT0tjQ0dLRDB1ZDV2dUJsY0NXNmtoVXpfVzNTeXRiNGNDcVRPRlVwV0p0elRPVUQ1aFBzdzlhMFlybnJzMVNLM29vWHp5NnNoaWxNNTMxMW83RlZZckl1Zm1J.webp'
       },
       {
         id: 'awp-atheris',
@@ -338,7 +338,7 @@ export const VORTEX_CASE_CATALOG: CS2Case[] = [
         wear: 'Field-Tested',
         floatValue: '0.2130',
         priceEur: 7.80,
-        image: 'https://community.akamai.steamstatic.com/economy/image/i0CoZ81Ui0m-9KwlBY1L_18myuGuq1wfhWSaZgMttyVfPaERSR0Wqmu7LAocGIGz3UqlXOLrxM-vMGmW8VNxu5Dx60noTyLwiYbf_jdk7uW-V7JkMPWBMWuZxuZi_rZsS3zgzU8isW3dnIr6eHKfPVAhDpojEe9YsUW4xta1Nuzm5FDci4NbjXKpmWVQppo'
+        image: 'https://imgproxy.dmarket.com/insecure/rs:fit:360:260:0/g:ce/aHR0cHM6Ly9jb21tdW5pdHkuYWthbWFpLnN0ZWFtc3RhdGljLmNvbS9lY29ub215L2ltYWdlL2kwQ29aODFVaTBtLTlLd2xCWTFMXzE4bXl1R3VxMXdmaFdTYVpnTXR0eVZmUGFFUlNSMFdxbXU3TEFvY0dJR3ozVXFsWE9McnhNLXZNR21XOFZOeHU1RHg2MG5vVHlMd2lZYmZfamRrN3VXLVY3SmtNUFdCTVd1Wnh1WmlfclpzUzN6Z3pVOGlzVzNkbklyNmVIS2ZQVkFoRHBvakVlOVlzVVc0eHRhMU51em01RkRjaTROYmpYS3BtV1ZRcHBv.webp'
       },
       {
         id: 'glock-high-beam',
@@ -350,7 +350,7 @@ export const VORTEX_CASE_CATALOG: CS2Case[] = [
         wear: 'Factory New',
         floatValue: '0.0210',
         priceEur: 1.80,
-        image: 'https://community.akamai.steamstatic.com/economy/image/i0CoZ81Ui0m-9KwlBY1L_18myuGuq1wfhWSaZgMttyVfPaERSR0Wqmu7LAocGIGz3UqlXOLrxM-vMGmW8VNxu5Dx60noTyL2kpnj9h1a7s24bbZ5KfecMWWc1OtJvOhuRz39zU5yt2vQntn9dC3Dbw8iDJQhF-IJ5xDqkdSxMr6251aMiI5BynqtiTQJsHhqpMNExQ'
+        image: 'https://imgproxy.dmarket.com/insecure/rs:fit:360:260:0/g:ce/aHR0cHM6Ly9jb21tdW5pdHkuYWthbWFpLnN0ZWFtc3RhdGljLmNvbS9lY29ub215L2ltYWdlL2kwQ29aODFVaTBtLTlLd2xCWTFMXzE4bXl1R3VxMXdmaFdTYVpnTXR0eVZmUGFFUlNSMFdxbXU3TEFvY0dJR3ozVXFsWE9McnhNLXZNR21XOFZOeHU1RHg2MG5vVHlMMmtwbmo5aDFhN3MyNGJiWjVLZmVjTVdXYzFPdEp2T2h1UnozOXpVNXl0MnZRbnRuOWRDM0RidzhpREpRaEYtSUo1eERxa2RTeE1yNjI1MWFNaUk1QnlucXRpVFFKc0hocXBNTkV4UQ.webp'
       },
       {
         id: 'p250-valence',
@@ -362,7 +362,7 @@ export const VORTEX_CASE_CATALOG: CS2Case[] = [
         wear: 'Field-Tested',
         floatValue: '0.1900',
         priceEur: 1.20,
-        image: 'https://community.akamai.steamstatic.com/economy/image/i0CoZ81Ui0m-9KwlBY1L_18myuGuq1wfhWSaZgMttyVfPaERSR0Wqmu7LAocGIGz3UqlXOLrxM-vMGmW8VNxu5Dx60noTyLhzMOwwiNK0OL8PfRSI_-dGmiF09F6ueZhW2fiwUx14zmDnNagcC-WagUkApslQuBYsUW_ktexPry3swPfiogTyyiqkGoXuQius2mt'
+        image: 'https://imgproxy.dmarket.com/insecure/rs:fit:360:260:0/g:ce/aHR0cHM6Ly9jb21tdW5pdHkuYWthbWFpLnN0ZWFtc3RhdGljLmNvbS9lY29ub215L2ltYWdlL2kwQ29aODFVaTBtLTlLd2xCWTFMXzE4bXl1R3VxMXdmaFdTYVpnTXR0eVZmUGFFUlNSMFdxbXU3TEFvY0dJR3ozVXFsWE9McnhNLXZNR21XOFZOeHU1RHg2MG5vVHlMaHpNT3d3aU5LME9MOFBmUlNJXy1kR21pRjA5RjZ1ZVpoVzJmaXdVeDE0em1Ebk5hZ2NDLVdhZ1VrQXBzbFF1QllzVVdfa3RleFByeTNzd1BmaW9nVHl5aXFrR29YdVFpdXMybXQ.webp'
       }
     ]
   }
@@ -500,7 +500,7 @@ export const DMARKET_LIVE_SKINS: DMarketMarketItem[] = [
     wholesalePriceEur: 1180.00,
     priceEur: 1250.00,
     instantTrade: true,
-    image: 'https://community.akamai.steamstatic.com/economy/image/i0CoZ81Ui0m-9KwlBY1L_18myuGuq1wfhWSaZgMttyVfPaERSR0Wqmu7LAocGIGz3UqlXOLrxM-vMGmW8VNxu5Dx60noTyL6kJ_m-B1Q7uCvZaZkNM-SA1iDwP5muOh7Sha-lA8lvziMgIr9HifOOV5kFMRxFuEM5hi_xNXhMbmx5VCMjd9MyCv6jigc6n064ucLAvZ3_6bViV3fcepqpLtspE0'
+    image: 'https://imgproxy.dmarket.com/insecure/rs:fit:360:260:0/g:ce/aHR0cHM6Ly9jb21tdW5pdHkuYWthbWFpLnN0ZWFtc3RhdGljLmNvbS9lY29ub215L2ltYWdlL2kwQ29aODFVaTBtLTlLd2xCWTFMXzE4bXl1R3VxMXdmaFdTYVpnTXR0eVZmUGFFUlNSMFdxbXU3TEFvY0dJR3ozVXFsWE9McnhNLXZNR21XOFZOeHU1RHg2MG5vVHlMNmtKX20tQjFRN3VDdlphWmtOTS1TQTFpRHdQNW11T2g3U2hhLWxBOGx2emlNZ0lyOUhpZk9PVjVrRk1SeEZ1RU01aGlfeE5YaE1ibXg1VkNNamQ5TXlDdjZqaWdjNm4wNjR1Y0xBdlozXzZiVmlWM2ZjZXBxcEx0c3BFMA.webp'
   },
   {
     id: 'dm-butterfly-slaughter',
@@ -515,7 +515,7 @@ export const DMARKET_LIVE_SKINS: DMarketMarketItem[] = [
     wholesalePriceEur: 1390.00,
     priceEur: 1480.00,
     instantTrade: true,
-    image: 'https://community.akamai.steamstatic.com/economy/image/i0CoZ81Ui0m-9KwlBY1L_18myuGuq1wfhWSaZgMttyVfPaERSR0Wqmu7LAocGIGz3UqlXOLrxM-vMGmW8VNxu5Dx60noTyL6kJ_m-B1Z-ua6bbZrLOmsD2qv2-t0ouBWQyC0nQlp4G_dmdauIC_DPQBzDpclRLINsEXsx92yP7jq7gXd2t1NzCT3iCwc6TErvbhfNpboFw'
+    image: 'https://imgproxy.dmarket.com/insecure/rs:fit:360:260:0/g:ce/aHR0cHM6Ly9jb21tdW5pdHkuYWthbWFpLnN0ZWFtc3RhdGljLmNvbS9lY29ub215L2ltYWdlL2kwQ29aODFVaTBtLTlLd2xCWTFMXzE4bXl1R3VxMXdmaFdTYVpnTXR0eVZmUGFFUlNSMFdxbXU3TEFvY0dJR3ozVXFsWE9McnhNLXZNR21XOFZOeHU1RHg2MG5vVHlMNmtKX20tQjFaLXVhNmJiWnJMT21zRDJxdjItdDBvdUJXUXlDMG5RbHA0R19kbWRhdUlDX0RQUUJ6RHBjbFJMSU5zRVhzeDkyeVA3anE3Z1hkMnQxTnpDVDNpQ3djNlRFcnZiaGZOcGJvRnc.webp'
   },
   {
     id: 'dm-m9-tiger',
@@ -530,7 +530,7 @@ export const DMARKET_LIVE_SKINS: DMarketMarketItem[] = [
     wholesalePriceEur: 820.00,
     priceEur: 890.00,
     instantTrade: true,
-    image: 'https://community.akamai.steamstatic.com/economy/image/i0CoZ81Ui0m-9KwlBY1L_18myuGuq1wfhWSaZgMttyVfPaERSR0Wqmu7LAocGIGz3UqlXOLrxM-vMGmW8VNxu5Dx60noTyL6kJ_m-B1Wts2sab1iLvWHMWae_vp_t-R7cCahlBMgtgKJk4jxNWWTa1QhDMMmQOMJ5BPtkYHuM-KwsVTYjIoQy3n-iStL7yxj57wDB_cs5OSJ2H8uCzPz'
+    image: 'https://imgproxy.dmarket.com/insecure/rs:fit:360:260:0/g:ce/aHR0cHM6Ly9jb21tdW5pdHkuYWthbWFpLnN0ZWFtc3RhdGljLmNvbS9lY29ub215L2ltYWdlL2kwQ29aODFVaTBtLTlLd2xCWTFMXzE4bXl1R3VxMXdmaFdTYVpnTXR0eVZmUGFFUlNSMFdxbXU3TEFvY0dJR3ozVXFsWE9McnhNLXZNR21XOFZOeHU1RHg2MG5vVHlMNmtKX20tQjFXdHMyc2FiMWlMdldITVdhZV92cF90LVI3Y0NhaGxCTWd0Z0tKazRqeE5XV1RhMVFoRE1NbVFPTUo1QlB0a1lIdU0tS3dzVlRZaklvUXkzbi1pU3RMN3l4ajU3d0RCX2NzNU9TSjJIOHVDelB6.webp'
   },
   {
     id: 'dm-skeleton-ch',
@@ -545,7 +545,7 @@ export const DMARKET_LIVE_SKINS: DMarketMarketItem[] = [
     wholesalePriceEur: 510.00,
     priceEur: 560.00,
     instantTrade: true,
-    image: 'https://community.akamai.steamstatic.com/economy/image/i0CoZ81Ui0m-9KwlBY1L_18myuGuq1wfhWSaZgMttyVfPaERSR0Wqmu7LAocGIGz3UqlXOLrxM-vMGmW8VNxu5Dx60noTyL6kJ_m-B1I5PeibbBiLs-SH1ifyOJztN5lRi67gVMj6m3Rnt2sdnOUZwIgWJAkTLUJ4xbrx9buYuywsgCLjItBmC79jiNN8G81tGbdgHHm'
+    image: 'https://imgproxy.dmarket.com/insecure/rs:fit:360:260:0/g:ce/aHR0cHM6Ly9jb21tdW5pdHkuYWthbWFpLnN0ZWFtc3RhdGljLmNvbS9lY29ub215L2ltYWdlL2kwQ29aODFVaTBtLTlLd2xCWTFMXzE4bXl1R3VxMXdmaFdTYVpnTXR0eVZmUGFFUlNSMFdxbXU3TEFvY0dJR3ozVXFsWE9McnhNLXZNR21XOFZOeHU1RHg2MG5vVHlMNmtKX20tQjFJNVBlaWJiQmlMcy1TSDFpZnlPSnp0TjVsUmk2N2dWTWo2bTNSbnQyc2RuT1Vad0lnV0pBa1RMVUo0eGJyeDlidVl1eXdzZ0NMakl0Qm1DNzlqaU5OOEc4MXRHYmRnSEht.webp'
   },
   {
     id: 'dm-huntsman-fade',
@@ -560,7 +560,7 @@ export const DMARKET_LIVE_SKINS: DMarketMarketItem[] = [
     wholesalePriceEur: 355.00,
     priceEur: 390.00,
     instantTrade: true,
-    image: 'https://community.akamai.steamstatic.com/economy/image/i0CoZ81Ui0m-9KwlBY1L_18myuGuq1wfhWSaZgMttyVfPaERSR0Wqmu7LAocGIGz3UqlXOLrxM-vMGmW8VNxu5Dx60noTyL6kJ_m-B1P7vG6YadsLM-SD1iWwOpzj-1gSCGn2x8hsW6DmIqpcXjBZgYkCZt5F7VcthS8ldS2Nr7m5VCMi4gRyyuqjHtXrnE8oar8MtU'
+    image: 'https://imgproxy.dmarket.com/insecure/rs:fit:360:260:0/g:ce/aHR0cHM6Ly9jb21tdW5pdHkuYWthbWFpLnN0ZWFtc3RhdGljLmNvbS9lY29ub215L2ltYWdlL2kwQ29aODFVaTBtLTlLd2xCWTFMXzE4bXl1R3VxMXdmaFdTYVpnTXR0eVZmUGFFUlNSMFdxbXU3TEFvY0dJR3ozVXFsWE9McnhNLXZNR21XOFZOeHU1RHg2MG5vVHlMNmtKX20tQjFQN3ZHNllhZHNMTS1TRDFpV3dPcHpqLTFnU0NHbjJ4OGhzVzZEbUlxcGNYakJaZ1lrQ1p0NUY3VmN0aFM4bGRTMk5yN201VkNNaTRnUnl5dXFqSHRYcm5FOG9hcjhNdFU.webp'
   },
   {
     id: 'dm-awp-printstream',
@@ -575,7 +575,7 @@ export const DMARKET_LIVE_SKINS: DMarketMarketItem[] = [
     wholesalePriceEur: 132.00,
     priceEur: 145.00,
     instantTrade: true,
-    image: 'https://community.akamai.steamstatic.com/economy/image/i0CoZ81Ui0m-9KwlBY1L_18myuGuq1wfhWSaZgMttyVfPaERSR0Wqmu7LAocGIGz3UqlXOLrxM-vMGmW8VNxu5Dx60noTyLwiYbf_DVL0OK8Yap5M-SBC2ad_uJ_t-l9AX_qlk4k5GyAzo6ocC-QZgZxX8AjEbZY5xnrxtPjM7vnsgGIj9oTmXngznQeg3pfcPs'
+    image: 'https://imgproxy.dmarket.com/insecure/rs:fit:360:260:0/g:ce/aHR0cHM6Ly9jb21tdW5pdHkuYWthbWFpLnN0ZWFtc3RhdGljLmNvbS9lY29ub215L2ltYWdlL2kwQ29aODFVaTBtLTlLd2xCWTFMXzE4bXl1R3VxMXdmaFdTYVpnTXR0eVZmUGFFUlNSMFdxbXU3TEFvY0dJR3ozVXFsWE9McnhNLXZNR21XOFZOeHU1RHg2MG5vVHlMd2lZYmZfRFZMME9LOFlhcDVNLVNCQzJhZF91Sl90LWw5QVhfcWxrNGs1R3lBem82b2NDLVFaZ1p4WDhBakViWlk1eG5yeHRQak03dm5zZ0dJajlvVG1Ybmd6blFlZzNwZmNQcw.webp'
   },
   {
     id: 'dm-ak-fire-serpent',
@@ -590,7 +590,7 @@ export const DMARKET_LIVE_SKINS: DMarketMarketItem[] = [
     wholesalePriceEur: 440.00,
     priceEur: 480.00,
     instantTrade: true,
-    image: 'https://community.akamai.steamstatic.com/economy/image/i0CoZ81Ui0m-9KwlBY1L_18myuGuq1wfhWSaZgMttyVfPaERSR0Wqmu7LAocGIGz3UqlXOLrxM-vMGmW8VNxu5Dx60noTyLwlcK3wiFO0PSneqF-JeKDC2mE_u995LZWTTuygxIYvzSCkpu3cnvFPQB2DpUkROFY4Rntw93lP7i241DbiI1BxSuviHlKunk_6-sHU71lpPMTRLyP4Q'
+    image: 'https://imgproxy.dmarket.com/insecure/rs:fit:360:260:0/g:ce/aHR0cHM6Ly9jb21tdW5pdHkuYWthbWFpLnN0ZWFtc3RhdGljLmNvbS9lY29ub215L2ltYWdlL2kwQ29aODFVaTBtLTlLd2xCWTFMXzE4bXl1R3VxMXdmaFdTYVpnTXR0eVZmUGFFUlNSMFdxbXU3TEFvY0dJR3ozVXFsWE9McnhNLXZNR21XOFZOeHU1RHg2MG5vVHlMd2xjSzN3aUZPMFBTbmVxRi1KZUtEQzJtRV91OTk1TFpXVFR1eWd4SVl2elNDa3B1M2NudkZQUUIyRHBVa1JPRlk0Um50dzkzbFA3aTI0MURiaUkxQnhTdXZpSGxLdW5rXzYtc0hVNzFscFBNVFJMeVA0UQ.webp'
   },
   {
     id: 'dm-ak-asiimov',
@@ -605,7 +605,7 @@ export const DMARKET_LIVE_SKINS: DMarketMarketItem[] = [
     wholesalePriceEur: 58.00,
     priceEur: 65.00,
     instantTrade: true,
-    image: 'https://community.akamai.steamstatic.com/economy/image/i0CoZ81Ui0m-9KwlBY1L_18myuGuq1wfhWSaZgMttyVfPaERSR0Wqmu7LAocGIGz3UqlXOLrxM-vMGmW8VNxu5Dx60noTyLwlcK3wiFO0POlPPNSIeOaB2qf19F6ueZhW2e2wEt-t2jcytf6dymSO1JxA5oiRecLsRa5kIfkYr-241aLgotHz3-rkGoXuUp8oX57'
+    image: 'https://imgproxy.dmarket.com/insecure/rs:fit:360:260:0/g:ce/aHR0cHM6Ly9jb21tdW5pdHkuYWthbWFpLnN0ZWFtc3RhdGljLmNvbS9lY29ub215L2ltYWdlL2kwQ29aODFVaTBtLTlLd2xCWTFMXzE4bXl1R3VxMXdmaFdTYVpnTXR0eVZmUGFFUlNSMFdxbXU3TEFvY0dJR3ozVXFsWE9McnhNLXZNR21XOFZOeHU1RHg2MG5vVHlMd2xjSzN3aUZPMFBPbFBQTlNJZU9hQjJxZjE5RjZ1ZVpoVzJlMndFdC10MmpjeXRmNmR5bVNPMUp4QTVvaVJlY0xzUmE1a0lma1lyLTI0MWFMZ290SHozLXJrR29YdVVwOG9YNTc.webp'
   },
   {
     id: 'dm-m4a1-player-two',
@@ -620,7 +620,7 @@ export const DMARKET_LIVE_SKINS: DMarketMarketItem[] = [
     wholesalePriceEur: 70.00,
     priceEur: 78.00,
     instantTrade: true,
-    image: 'https://community.akamai.steamstatic.com/economy/image/i0CoZ81Ui0m-9KwlBY1L_18myuGuq1wfhWSaZgMttyVfPaERSR0Wqmu7LAocGIGz3UqlXOLrxM-vMGmW8VNxu5Dx60noTyL8ypexwjFS4_ega6F_H_OGMWrEwL9lj-J6SCbhxUl_jDGMnYftby7BbVdyCsB0EeZY4RPukNfhZOO2sQ3W398Qy3_6jHxIunptsO9TUqs7uvqAAWrfZoM'
+    image: 'https://imgproxy.dmarket.com/insecure/rs:fit:360:260:0/g:ce/aHR0cHM6Ly9jb21tdW5pdHkuYWthbWFpLnN0ZWFtc3RhdGljLmNvbS9lY29ub215L2ltYWdlL2kwQ29aODFVaTBtLTlLd2xCWTFMXzE4bXl1R3VxMXdmaFdTYVpnTXR0eVZmUGFFUlNSMFdxbXU3TEFvY0dJR3ozVXFsWE9McnhNLXZNR21XOFZOeHU1RHg2MG5vVHlMOHlwZXh3akZTNF9lZ2E2Rl9IX09HTVdyRXdMOWxqLUo2U0NiaHhVbF9qREdNbllmdGJ5N0JiVmR5Q3NCMEVlWlk0UlB1a05maFpPTzJzUTNXMzk4UXkzXzZqSHhJdW5wdHNPOVRVcXM3dXZxQUFXcmZab00.webp'
   },
   {
     id: 'dm-usp-kill-confirmed',
@@ -635,7 +635,7 @@ export const DMARKET_LIVE_SKINS: DMarketMarketItem[] = [
     wholesalePriceEur: 98.00,
     priceEur: 110.00,
     instantTrade: true,
-    image: 'https://community.akamai.steamstatic.com/economy/image/i0CoZ81Ui0m-9KwlBY1L_18myuGuq1wfhWSaZgMttyVfPaERSR0Wqmu7LAocGIGz3UqlXOLrxM-vMGmW8VNxu5Dx60noTyLkjYbf7itX6vytbbZSI-WsG3SA_uV_vO1WTCa9kxQ1vjiBpYPwJiPTcFB2Xpp5TO5cskG9lYCxZu_jsVCL3o4Xnij23ClO5ik9tegFA_It8qHJz1aWe-uc160'
+    image: 'https://imgproxy.dmarket.com/insecure/rs:fit:360:260:0/g:ce/aHR0cHM6Ly9jb21tdW5pdHkuYWthbWFpLnN0ZWFtc3RhdGljLmNvbS9lY29ub215L2ltYWdlL2kwQ29aODFVaTBtLTlLd2xCWTFMXzE4bXl1R3VxMXdmaFdTYVpnTXR0eVZmUGFFUlNSMFdxbXU3TEFvY0dJR3ozVXFsWE9McnhNLXZNR21XOFZOeHU1RHg2MG5vVHlMa2pZYmY3aXRYNnZ5dGJiWlNJLVdzRzNTQV91Vl92TzFXVENhOWt4UTF2amlCcFlQd0ppUFRjRkIyWHBwNVRPNWNza0c5bFlDeFp1X2pzVkNMM280WG5pajIzQ2xPNWlrOXRlZ0ZBX0l0OHFISnoxYVdlLXVjMTYw.webp'
   },
   {
     id: 'dm-m4a4-emperor',
@@ -650,7 +650,7 @@ export const DMARKET_LIVE_SKINS: DMarketMarketItem[] = [
     wholesalePriceEur: 37.00,
     priceEur: 42.00,
     instantTrade: true,
-    image: 'https://community.akamai.steamstatic.com/economy/image/i0CoZ81Ui0m-9KwlBY1L_18myuGuq1wfhWSaZgMttyVfPaERSR0Wqmu7LAocGIGz3UqlXOLrxM-vMGmW8VNxu5Dx60noTyL8ypexwiVI0P_6afBSJf2DC3Wf09F6ueZhW2exwBh_6m3dnt36InjDPQ4oXJt1TbJeshW_mtfjN-vrsgaKiokWy333kGoXuRj4z9Nd'
+    image: 'https://imgproxy.dmarket.com/insecure/rs:fit:360:260:0/g:ce/aHR0cHM6Ly9jb21tdW5pdHkuYWthbWFpLnN0ZWFtc3RhdGljLmNvbS9lY29ub215L2ltYWdlL2kwQ29aODFVaTBtLTlLd2xCWTFMXzE4bXl1R3VxMXdmaFdTYVpnTXR0eVZmUGFFUlNSMFdxbXU3TEFvY0dJR3ozVXFsWE9McnhNLXZNR21XOFZOeHU1RHg2MG5vVHlMOHlwZXh3aVZJMFBfNmFmQlNKZjJEQzNXZjA5RjZ1ZVpoVzJleHdCaF82bTNkbnQzNkluakRQUTRvWEp0MVRiSmVzaFdfbXRmak4tdnJzZ2FLaW9rV3kzMzNrR29YdVJqNHo5TmQ.webp'
   },
   {
     id: 'dm-deagle-printstream',
@@ -665,7 +665,7 @@ export const DMARKET_LIVE_SKINS: DMarketMarketItem[] = [
     wholesalePriceEur: 49.00,
     priceEur: 55.00,
     instantTrade: true,
-    image: 'https://community.akamai.steamstatic.com/economy/image/i0CoZ81Ui0m-9KwlBY1L_18myuGuq1wfhWSaZgMttyVfPaERSR0Wqmu7LAocGIGz3UqlXOLrxM-vMGmW8VNxu5Dx60noTyL1m5fn8Sdk7OeRbKFsJ8-DHG6e1f1iouRoQha_nBovp3OGmdeqInyVP1V0XsYlRbEI50a5wNyzZr605AyI3t5MmCSohylAuC89_a9cBoMY9UkV'
+    image: 'https://imgproxy.dmarket.com/insecure/rs:fit:360:260:0/g:ce/aHR0cHM6Ly9jb21tdW5pdHkuYWthbWFpLnN0ZWFtc3RhdGljLmNvbS9lY29ub215L2ltYWdlL2kwQ29aODFVaTBtLTlLd2xCWTFMXzE4bXl1R3VxMXdmaFdTYVpnTXR0eVZmUGFFUlNSMFdxbXU3TEFvY0dJR3ozVXFsWE9McnhNLXZNR21XOFZOeHU1RHg2MG5vVHlMMW01Zm44U2RrN09lUmJLRnNKOC1ESEc2ZTFmMWlvdVJvUWhhX25Cb3ZwM09HbWRlcUlueVZQMVYwWHNZbFJiRUk1MGE1d055elpyNjA1QXlJM3Q1TW1DU29oeWxBdUM4OV9hOWNCb01ZOVVrVg.webp'
   },
   {
     id: 'dm-ak-slate',
@@ -680,7 +680,7 @@ export const DMARKET_LIVE_SKINS: DMarketMarketItem[] = [
     wholesalePriceEur: 3.80,
     priceEur: 4.50,
     instantTrade: true,
-    image: 'https://community.akamai.steamstatic.com/economy/image/i0CoZ81Ui0m-9KwlBY1L_18myuGuq1wfhWSaZgMttyVfPaERSR0Wqmu7LAocGIGz3UqlXOLrxM-vMGmW8VNxu5Dx60noTyLwlcK3wiVI0POlPPNSMOKcCGKD0ud5vuBlcCW6khUz_W3Sytb4cCqTOFUpWJtzTOUD5hPsw9a0Yrnrs1SK3ooXzy6shilM5311o7FVYrIufmI'
+    image: 'https://imgproxy.dmarket.com/insecure/rs:fit:360:260:0/g:ce/aHR0cHM6Ly9jb21tdW5pdHkuYWthbWFpLnN0ZWFtc3RhdGljLmNvbS9lY29ub215L2ltYWdlL2kwQ29aODFVaTBtLTlLd2xCWTFMXzE4bXl1R3VxMXdmaFdTYVpnTXR0eVZmUGFFUlNSMFdxbXU3TEFvY0dJR3ozVXFsWE9McnhNLXZNR21XOFZOeHU1RHg2MG5vVHlMd2xjSzN3aVZJMFBPbFBQTlNNT0tjQ0dLRDB1ZDV2dUJsY0NXNmtoVXpfVzNTeXRiNGNDcVRPRlVwV0p0elRPVUQ1aFBzdzlhMFlybnJzMVNLM29vWHp5NnNoaWxNNTMxMW83RlZZckl1Zm1J.webp'
   },
   {
     id: 'dm-awp-atheris',
@@ -695,7 +695,7 @@ export const DMARKET_LIVE_SKINS: DMarketMarketItem[] = [
     wholesalePriceEur: 6.90,
     priceEur: 7.80,
     instantTrade: true,
-    image: 'https://community.akamai.steamstatic.com/economy/image/i0CoZ81Ui0m-9KwlBY1L_18myuGuq1wfhWSaZgMttyVfPaERSR0Wqmu7LAocGIGz3UqlXOLrxM-vMGmW8VNxu5Dx60noTyLwiYbf_jdk7uW-V7JkMPWBMWuZxuZi_rZsS3zgzU8isW3dnIr6eHKfPVAhDpojEe9YsUW4xta1Nuzm5FDci4NbjXKpmWVQppo'
+    image: 'https://imgproxy.dmarket.com/insecure/rs:fit:360:260:0/g:ce/aHR0cHM6Ly9jb21tdW5pdHkuYWthbWFpLnN0ZWFtc3RhdGljLmNvbS9lY29ub215L2ltYWdlL2kwQ29aODFVaTBtLTlLd2xCWTFMXzE4bXl1R3VxMXdmaFdTYVpnTXR0eVZmUGFFUlNSMFdxbXU3TEFvY0dJR3ozVXFsWE9McnhNLXZNR21XOFZOeHU1RHg2MG5vVHlMd2lZYmZfamRrN3VXLVY3SmtNUFdCTVd1Wnh1WmlfclpzUzN6Z3pVOGlzVzNkbklyNmVIS2ZQVkFoRHBvakVlOVlzVVc0eHRhMU51em01RkRjaTROYmpYS3BtV1ZRcHBv.webp'
   },
   {
     id: 'dm-deagle-mecha',
@@ -710,7 +710,7 @@ export const DMARKET_LIVE_SKINS: DMarketMarketItem[] = [
     wholesalePriceEur: 8.10,
     priceEur: 9.20,
     instantTrade: true,
-    image: 'https://community.akamai.steamstatic.com/economy/image/i0CoZ81Ui0m-9KwlBY1L_18myuGuq1wfhWSaZgMttyVfPaERSR0Wqmu7LAocGIGz3UqlXOLrxM-vMGmW8VNxu5Dx60noTyL1m5fn8Sdk6OGRbKFsJ_yWMWqVwuZ3j-1gSCGn20h042vSyY2tdyjCZwIlXJBxQeNe4EWxxoHkMOq0sQGIid5Fnyr42HtXrnE8p4gbgvE'
+    image: 'https://imgproxy.dmarket.com/insecure/rs:fit:360:260:0/g:ce/aHR0cHM6Ly9jb21tdW5pdHkuYWthbWFpLnN0ZWFtc3RhdGljLmNvbS9lY29ub215L2ltYWdlL2kwQ29aODFVaTBtLTlLd2xCWTFMXzE4bXl1R3VxMXdmaFdTYVpnTXR0eVZmUGFFUlNSMFdxbXU3TEFvY0dJR3ozVXFsWE9McnhNLXZNR21XOFZOeHU1RHg2MG5vVHlMMW01Zm44U2RrNk9HUmJLRnNKX3lXTVdxVnd1WjNqLTFnU0NHbjIwaDA0MnZTeVkydGR5akNad0lsWEpCeFFlTmU0RVd4eG9Ia01PcTBzUUdJaWQ1Rm55cjQySHRYcm5FOHA0Z2JndkU.webp'
   },
   {
     id: 'dm-usp-cyrex',
@@ -725,7 +725,7 @@ export const DMARKET_LIVE_SKINS: DMarketMarketItem[] = [
     wholesalePriceEur: 4.40,
     priceEur: 5.10,
     instantTrade: true,
-    image: 'https://community.akamai.steamstatic.com/economy/image/i0CoZ81Ui0m-9KwlBY1L_18myuGuq1wfhWSaZgMttyVfPaERSR0Wqmu7LAocGIGz3UqlXOLrxM-vMGmW8VNxu5Dx60noTyLkjYbf7itX6vytbbZSI-WsG3SA_u1vouRxcCW6khUz_TjdzdmsJyiTZg8kX8N4ELUP5EPsw9G1YeLn5VTXjY0WxS6rhiIYuCd1o7FV2N83Spg'
+    image: 'https://imgproxy.dmarket.com/insecure/rs:fit:360:260:0/g:ce/aHR0cHM6Ly9jb21tdW5pdHkuYWthbWFpLnN0ZWFtc3RhdGljLmNvbS9lY29ub215L2ltYWdlL2kwQ29aODFVaTBtLTlLd2xCWTFMXzE4bXl1R3VxMXdmaFdTYVpnTXR0eVZmUGFFUlNSMFdxbXU3TEFvY0dJR3ozVXFsWE9McnhNLXZNR21XOFZOeHU1RHg2MG5vVHlMa2pZYmY3aXRYNnZ5dGJiWlNJLVdzRzNTQV91MXZvdVJ4Y0NXNmtoVXpfVGpkemRtc0p5aVRaZzhrWDhONEVMVVA1RVBzdzlHMVllTG41VlRYalkwV3hTNnJoaUlZdUNkMW83RlYyTjgzU3Bn.webp'
   }
 ];
 
