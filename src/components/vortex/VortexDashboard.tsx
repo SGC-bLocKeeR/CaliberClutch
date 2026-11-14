@@ -62,6 +62,7 @@ import { CountryFlag } from './CountryFlag';
 import { ALL_COUNTRIES, getCountryByCode, Country } from '../../data/countries';
 import { VortexPartyChat } from './VortexPartyChat';
 import { VortexMatchRoom } from './VortexMatchRoom';
+import { VortexRightSocialRail } from './VortexRightSocialRail';
 
 interface VortexDashboardProps {
   userGamerTag?: string;
@@ -329,13 +330,13 @@ const SUGGESTED_TEAMMATES: PartySlotMember[] = [
 ];
 
 const AVAILABLE_MAP_POOL = [
-  { id: 'mirage', name: 'Mirage', code: 'de_mirage', image: '/images/maps/de_mirage.jpg' },
-  { id: 'inferno', name: 'Inferno', code: 'de_inferno', image: '/images/maps/de_inferno.jpg' },
-  { id: 'nuke', name: 'Nuke', code: 'de_nuke', image: '/images/maps/de_nuke.jpg' },
-  { id: 'dust2', name: 'Dust II', code: 'de_dust2', image: 'https://images.unsplash.com/photo-1579783902614-a3fb3927b675?auto=format&fit=crop&w=600&q=80' },
-  { id: 'anubis', name: 'Anubis', code: 'de_anubis', image: 'https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?auto=format&fit=crop&w=600&q=80' },
-  { id: 'ancient', name: 'Ancient', code: 'de_ancient', image: 'https://images.unsplash.com/photo-1518709268805-4e9042af9f23?auto=format&fit=crop&w=600&q=80' },
-  { id: 'vertigo', name: 'Vertigo', code: 'de_vertigo', image: 'https://images.unsplash.com/photo-1486406146926-c627a92ad1ab?auto=format&fit=crop&w=600&q=80' }
+  { id: 'mirage', name: 'Mirage', code: 'de_mirage', image: '/images/maps/cs2_mirage.png' },
+  { id: 'inferno', name: 'Inferno', code: 'de_inferno', image: '/images/maps/cs2_inferno.png' },
+  { id: 'nuke', name: 'Nuke', code: 'de_nuke', image: '/images/maps/cs2_nuke.png' },
+  { id: 'dust2', name: 'Dust II', code: 'de_dust2', image: '/images/maps/cs2_dust2.png' },
+  { id: 'anubis', name: 'Anubis', code: 'de_anubis', image: '/images/maps/cs2_anubis.png' },
+  { id: 'ancient', name: 'Ancient', code: 'de_ancient', image: '/images/maps/cs2_ancient.png' },
+  { id: 'vertigo', name: 'Vertigo', code: 'de_vertigo', image: '/images/maps/cs2_vertigo.png' }
 ];
 
 // Exact FACEIT Server Country Locations as in reference screenshot
@@ -1752,7 +1753,7 @@ export const VortexDashboard: React.FC<VortexDashboardProps> = ({
       {/* ======================================================== */}
       {/* UNIFIED PERSISTENT LAYOUT (SIDEBAR + MAIN CONTENT AREA)  */}
       {/* ======================================================== */}
-      <div className="w-full max-w-[1780px] mx-auto flex flex-col lg:flex-row gap-6 p-4 sm:p-6 min-h-[92vh]">
+      <div className="w-full max-w-[1780px] mx-auto flex flex-col lg:flex-row gap-6 p-4 sm:p-6 md:pr-20 min-h-[92vh]">
         
         {/* ==================== LEFT SIDEBAR ==================== */}
         <aside className={`bg-[#0E1017] border border-[#202536] rounded-3xl flex flex-col justify-between shrink-0 shadow-xl transition-all duration-300 ease-in-out ${
@@ -2348,15 +2349,15 @@ export const VortexDashboard: React.FC<VortexDashboardProps> = ({
                             key={member.id}
                             className={`h-56 rounded-2xl border flex flex-col items-center justify-between p-4 transition-all relative group ${
                               isLeader
-                                ? 'bg-gradient-to-b from-[#181D2A] to-[#11141D] border-[#FF5500]/60 shadow-lg shadow-[#FF5500]/15'
+                                ? 'bg-gradient-to-b from-[#18210C] via-[#121612] to-[#0E1118] border-[#A3E635]/60 shadow-lg shadow-[#A3E635]/15'
                                 : 'bg-[#12141C] border-[#252B3B] hover:border-[#A3E635]/40'
                             }`}
                           >
                             {/* Member Top Row */}
                             <div className="w-full flex items-center justify-between text-[10px] font-mono">
                               {isLeader ? (
-                                <span className="px-2 py-0.5 rounded bg-[#FF5500]/15 text-[#FF5500] font-bold border border-[#FF5500]/30 flex items-center gap-1">
-                                  <Crown className="w-3 h-3 fill-[#FF5500]" />
+                                <span className="px-2 py-0.5 rounded bg-[#A3E635]/15 text-[#A3E635] font-bold border border-[#A3E635]/30 flex items-center gap-1">
+                                  <Crown className="w-3 h-3 fill-[#A3E635]" />
                                   LEADER
                                 </span>
                               ) : (
@@ -2401,7 +2402,7 @@ export const VortexDashboard: React.FC<VortexDashboardProps> = ({
                             <div className="flex flex-col items-center text-center space-y-2">
                               <div className="relative">
                                 {member.name === 'M18' || !member.avatar ? (
-                                  <div className="w-16 h-16 rounded-full bg-black border-2 border-[#FF5500] flex flex-col items-center justify-center p-1 shadow-md">
+                                  <div className="w-16 h-16 rounded-full bg-black border-2 border-[#A3E635] shadow-[0_0_15px_rgba(163,230,53,0.35)] flex flex-col items-center justify-center p-1">
                                     <svg className="w-10 h-5 text-white" viewBox="0 0 100 40" fill="currentColor">
                                       <path d="M 6 22 L 20 22 L 22 17 L 36 17 L 38 20 L 52 20 L 57 18 L 82 18 L 84 20 L 92 20 L 92 23 L 83 23 L 83 26 L 76 26 L 75 23 L 52 23 L 50 30 L 44 30 L 47 23 L 38 23 L 34 32 L 28 32 L 26 24 L 6 26 Z" />
                                     </svg>
@@ -2413,7 +2414,7 @@ export const VortexDashboard: React.FC<VortexDashboardProps> = ({
                                     alt={member.name}
                                     className={`w-16 h-16 rounded-full object-cover border-2 shadow-md ${
                                       isCenterLeader 
-                                        ? 'border-[#FF5500] shadow-[#FF5500]/25' 
+                                        ? 'border-[#A3E635] shadow-[0_0_18px_rgba(163,230,53,0.4)]' 
                                         : 'border-[#A3E635]/60'
                                     }`}
                                     onError={(e) => {
@@ -2701,11 +2702,11 @@ export const VortexDashboard: React.FC<VortexDashboardProps> = ({
                       onClick={() => { sound.playClick(); setPlaySubTab('match_type'); }}
                       className={`relative pb-3 font-bold transition flex items-center gap-2 cursor-pointer ${
                         playSubTab === 'match_type'
-                          ? 'text-white border-b-2 border-[#FF5500]'
+                          ? 'text-white border-b-2 border-[#A3E635]'
                           : 'text-slate-400 hover:text-white'
                       }`}
                     >
-                      <Crosshair className="w-3.5 h-3.5 text-[#FF5500]" />
+                      <Crosshair className="w-3.5 h-3.5 text-[#A3E635]" />
                       <span>MATCH TYPE</span>
                     </button>
 
@@ -2719,7 +2720,7 @@ export const VortexDashboard: React.FC<VortexDashboardProps> = ({
                     >
                       <Compass className="w-3.5 h-3.5 text-[#A3E635]" />
                       <span>MAPS ({selectedMaps.length}/7)</span>
-                      <span className="px-1.5 py-0.2 rounded text-[9px] bg-[#FF5500] text-black font-black uppercase">
+                      <span className="px-1.5 py-0.2 rounded text-[9px] bg-[#A3E635] text-black font-black uppercase shadow-[0_0_8px_rgba(163,230,53,0.3)]">
                         ACTIVE DUTY
                       </span>
                     </button>
@@ -2729,7 +2730,7 @@ export const VortexDashboard: React.FC<VortexDashboardProps> = ({
                     onClick={() => { sound.playClick(); setPlaySubTab('servers'); }}
                     className={`relative pb-3 font-bold transition flex items-center gap-2 cursor-pointer ${
                       playSubTab === 'servers'
-                        ? 'text-white border-b-2 border-[#FF5500]'
+                        ? 'text-white border-b-2 border-[#A3E635]'
                         : 'text-slate-400 hover:text-white'
                     }`}
                   >
@@ -2977,22 +2978,49 @@ export const VortexDashboard: React.FC<VortexDashboardProps> = ({
                       <span className="text-slate-300 font-bold">ACTIVE DUTY MAP POOL ({selectedMaps.length}/7):</span>
                       <span className="text-slate-500 text-[11px]">Click maps to toggle them in your queue preference</span>
                     </div>
-                    <div className="grid grid-cols-2 sm:grid-cols-4 lg:grid-cols-7 gap-2.5">
+                    <div className="grid grid-cols-2 sm:grid-cols-4 lg:grid-cols-7 gap-3">
                       {AVAILABLE_MAP_POOL.map((map) => {
                         const isSelected = selectedMaps.includes(map.id);
                         return (
                           <button
                             key={map.id}
                             onClick={() => handleToggleMap(map.id)}
-                            className={`p-3 rounded-xl border flex flex-col items-center gap-1.5 transition cursor-pointer text-xs font-mono font-bold ${
+                            className={`group relative h-28 sm:h-32 rounded-xl overflow-hidden border transition-all duration-200 cursor-pointer flex flex-col justify-between p-3 text-left select-none ${
                               isSelected
-                                ? 'bg-[#18210C] text-[#A3E635] border-[#A3E635]/60 shadow-md'
-                                : 'bg-[#151924] text-slate-500 border-white/5 hover:border-white/20'
+                                ? 'border-[#A3E635] shadow-[0_0_20px_rgba(163,230,53,0.35)] ring-1 ring-[#A3E635]'
+                                : 'border-white/10 opacity-55 hover:opacity-90 hover:border-white/30'
                             }`}
                           >
-                            <span className="text-sm">{isSelected ? '✓' : '+'}</span>
-                            <span>{map.name}</span>
-                            <span className="text-[10px] text-slate-400 font-normal">{map.code}</span>
+                            {/* CS2 Official Map Background Photo */}
+                            <img 
+                              src={map.image} 
+                              alt={map.name}
+                              className={`absolute inset-0 w-full h-full object-cover transition-all duration-300 group-hover:scale-105 ${
+                                isSelected ? 'brightness-90 contrast-105' : 'grayscale brightness-60'
+                              }`} 
+                            />
+                            {/* Dark Gradient Overlay for Readability */}
+                            <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/40 to-black/30 pointer-events-none" />
+
+                            {/* Top Selection Status Pill (✓ or +) */}
+                            <div className="relative z-10 flex items-center justify-between w-full">
+                              <span className={`w-5 h-5 rounded-md flex items-center justify-center font-bold text-xs transition ${
+                                isSelected 
+                                  ? 'bg-[#A3E635] text-black shadow-sm font-black' 
+                                  : 'bg-black/60 text-slate-400 border border-white/15'
+                              }`}>
+                                {isSelected ? '✓' : '+'}
+                              </span>
+                            </div>
+
+                            {/* Single Clean Map Name (No duplicate de_ prefix) */}
+                            <div className="relative z-10">
+                              <span className={`font-display font-black text-sm tracking-wide drop-shadow-md transition ${
+                                isSelected ? 'text-white' : 'text-slate-300'
+                              }`}>
+                                {map.name}
+                              </span>
+                            </div>
                           </button>
                         );
                       })}
@@ -5931,6 +5959,34 @@ export const VortexDashboard: React.FC<VortexDashboardProps> = ({
           onClose={() => setIsMatchRoomOpen(false)}
         />
       )}
+
+      {/* ======================================================== */}
+      {/* AUTHENTIC 1:1 FACEIT RIGHT VERTICAL SOCIAL RAIL          */}
+      {/* ======================================================== */}
+      <VortexRightSocialRail
+        currentGamerTag={currentGamerTag}
+        currentAvatarUrl={currentAvatarUrl}
+        currentClanTag={currentClanTag}
+        currentVerification={currentVerification}
+        currentCountry={currentCountry}
+        userMembershipTier={userMembershipTier}
+        partyMembers={partySlots}
+        unreadNotificationsCount={unreadCount}
+        onOpenNotifications={() => {
+          sound.playClick();
+          setNotificationsOpen(prev => !prev);
+        }}
+        onOpenInviteModal={() => handleOpenInviteModal(1)}
+        onOpenProfileTab={() => {
+          sound.playSelect();
+          setActiveTab('profile');
+        }}
+        onOpenEditProfile={() => {
+          sound.playClick();
+          setEditProfileOpen(true);
+        }}
+        onLeaveParty={handleLeaveParty}
+      />
 
     </div>
   );
