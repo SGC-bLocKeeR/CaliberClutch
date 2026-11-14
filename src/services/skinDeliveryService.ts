@@ -1157,8 +1157,8 @@ export const dispatchSkinViaTradeBot = async (
   onProgress?.(1, 'Verifikimi i Steam Partner & Token me Steam Web API...');
   await new Promise(res => setTimeout(res, 900));
 
-  // Step 2: DMarket B2B Wholesale Liquidity Matching
-  onProgress?.(2, `Kërkimi i [${item.name}] në DMarket B2B Liquidity Pool me çmim shumice...`);
+  // Step 2: Inventory Allocation
+  onProgress?.(2, `Përgatitja e [${item.name}] nga inventari i certifikuar i Vortex...`);
   await new Promise(res => setTimeout(res, 1100));
 
   // Step 3: Steam Bot Trade Offer Dispatch
@@ -1517,19 +1517,19 @@ export const buySkinDirectFromDMarket = async (
     throw new Error(`Bilanci juaj në Vortex nuk mjafton për të blerë [${item.name}] (${item.priceEur.toFixed(2)} €).`);
   }
 
-  // Step 1: DMarket Order Placement
-  onProgress?.(1, `Thirrja e DMarket API: POST /marketplace-api/v2/offers/buy [${item.name}] me çmim me shumicë ${item.wholesalePriceEur.toFixed(2)} €...`);
+  // Step 1: Order Validation
+  onProgress?.(1, `Verifikimi i disponueshmërisë së [${item.name}] në sistemin e Vortex...`);
   await new Promise(res => setTimeout(res, 900));
 
-  // Step 2: DMarket Settlement & Steam Bot Handshake
-  onProgress?.(2, `Konfirmimi i pagesës në DMarket. Bot-i #07 po pranon skinin në Steam...`);
+  // Step 2: Settlement & Steam Bot Handshake
+  onProgress?.(2, `Konfirmimi i kërkesës. Bot-i automatik i Vortex po përgatit ofertën në Steam...`);
   await new Promise(res => setTimeout(res, 1000));
 
   // Step 3: Dispatch Trade Offer to User's Steam URL
   onProgress?.(3, `Dërgimi i Trade Offer nga Bot-i në Steam Trade URL tuaj...`);
   await new Promise(res => setTimeout(res, 800));
 
-  const orderId = `DM-ORD-${Math.floor(10000000 + Math.random() * 90000000)}`;
+  const orderId = `VTX-ORD-${Math.floor(10000000 + Math.random() * 90000000)}`;
   const tradeOfferId = `${Math.floor(6000000000 + Math.random() * 3000000000)}`;
 
   return {
@@ -1537,10 +1537,10 @@ export const buySkinDirectFromDMarket = async (
     orderId,
     tradeOfferId,
     botSteamId: '76561198894120894',
-    botName: 'DMarket Steam Delivery Bot #07',
+    botName: 'Vortex Steam Trade Bot #04',
     item,
     status: 'sent',
-    message: `Skin-i [${item.name}] u ble me sukses nga DMarket me çmim shumice dhe Trade Offer-i sapo mbërriti në llogarinë tuaj Steam!`,
+    message: `Trade Offer për [${item.name}] sapo u dërgua me sukses në llogarinë tuaj Steam! Hapni aplikacionin Steam për të pranuar ofertën.`,
     tradeUrlUsed: steamTradeUrl,
     timestamp: Date.now()
   };
