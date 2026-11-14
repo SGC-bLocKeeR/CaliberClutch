@@ -717,44 +717,7 @@ export const VortexRightSocialRail: React.FC<VortexRightSocialRailProps> = ({
           </div>
 
           {/* ======================================================== */}
-          {/* 1. ANTI-CHEAT KERNEL GUARD STATUS CAPSULE                */}
-          {/* ======================================================== */}
-          <div className="rounded-2xl bg-[#10121A] border border-[#1E2333] p-3 flex flex-col gap-2 shadow-lg hover:border-white/10 transition">
-            <div className="flex items-center justify-between">
-              <div className="flex items-center gap-2.5">
-                <div className={`w-7 h-7 rounded-lg flex items-center justify-center ${isAntiCheatActive ? 'bg-[#A3E635]/15 text-[#A3E635]' : 'bg-amber-500/15 text-amber-400'}`}>
-                  {isAntiCheatActive ? <ShieldCheck className="w-4 h-4" /> : <ShieldAlert className="w-4 h-4" />}
-                </div>
-                <div>
-                  <div className="text-xs font-bold text-white flex items-center gap-1.5 font-sans">
-                    <span>Anti-Cheat</span>
-                    <span className={`w-1.5 h-1.5 rounded-full ${isAntiCheatActive ? 'bg-[#A3E635] shadow-[0_0_8px_#A3E635] animate-pulse' : 'bg-amber-400'}`} />
-                  </div>
-                  <div className="text-[10px] text-slate-400 font-mono">
-                    {isAntiCheatActive ? 'Kernel Driver Active' : 'Stopped (Click to Start)'}
-                  </div>
-                </div>
-              </div>
-
-              <button
-                onClick={() => {
-                  sound.playClick();
-                  onToggleAntiCheat?.();
-                }}
-                className={`px-2 py-0.5 rounded-full text-[9px] font-black uppercase font-mono transition cursor-pointer ${
-                  isAntiCheatActive 
-                    ? 'bg-[#A3E635]/20 text-[#A3E635] border border-[#A3E635]/40 hover:bg-[#A3E635]/30' 
-                    : 'bg-amber-500/20 text-amber-400 border border-amber-500/40 hover:bg-amber-500/30'
-                }`}
-                title="Toggle Anti-Cheat"
-              >
-                {isAntiCheatActive ? 'ACTIVE' : 'START'}
-              </button>
-            </div>
-          </div>
-
-          {/* ======================================================== */}
-          {/* 2. DAILY MISSIONS & CS2 CASE OPENING CAPSULE             */}
+          {/* DAILY MISSIONS & CS2 CASE OPENING CAPSULE                */}
           {/* ======================================================== */}
           <div className="rounded-2xl bg-[#10121A] border border-[#1E2333] p-3 flex flex-col gap-2.5 shadow-lg hover:border-white/10 transition">
             <div className="flex items-center justify-between">
