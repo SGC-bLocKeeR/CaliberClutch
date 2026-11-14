@@ -3298,16 +3298,21 @@ export const VortexMatchRoom: React.FC<VortexMatchRoomProps> = ({
             </div>
 
             {/* CENTER COLUMN: Server • Map with ⓘ Veto Tooltip • CTA */}
-            <div className="lg:col-span-4 space-y-4">
-              
-              {/* Server Card */}
-              <div className="p-3.5 rounded-xl bg-[#14151D] border border-[#212330] space-y-1">
-                <div className="text-[10px] font-mono uppercase text-slate-400 font-bold">Server</div>
-                <div className="flex items-center gap-2.5">
-                  <CountryFlag code="DE" name="Germany" size="md" />
-                  <span className="font-display font-bold text-white text-sm">Germany</span>
-                </div>
+            <div className="lg:col-span-4 space-y-3">
+              {/* Invisible header matching "Players" height for exact horizontal alignment with player cards */}
+              <div className="text-xs font-mono font-bold text-transparent select-none px-1 hidden lg:block" aria-hidden="true">
+                &nbsp;
               </div>
+
+              <div className="space-y-4">
+                {/* Server Card */}
+                <div className="p-3.5 rounded-xl bg-[#14151D] border border-[#212330] space-y-1">
+                  <div className="text-[10px] font-mono uppercase text-slate-400 font-bold">Server</div>
+                  <div className="flex items-center gap-2.5">
+                    <CountryFlag code="DE" name="Germany" size="md" />
+                    <span className="font-display font-bold text-white text-sm">Germany</span>
+                  </div>
+                </div>
 
               {/* Map Card with ⓘ Veto Popover */}
               <div className="p-3.5 rounded-xl bg-[#14151D] border border-[#212330] space-y-2 relative">
@@ -3398,6 +3403,8 @@ export const VortexMatchRoom: React.FC<VortexMatchRoomProps> = ({
                 >
                   <span>BACK TO MATCHMAKING</span>
                 </button>
+              </div>
+
               </div>
 
             </div>
