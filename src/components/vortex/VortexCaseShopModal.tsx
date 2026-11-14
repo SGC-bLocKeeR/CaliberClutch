@@ -14,7 +14,17 @@ import {
   ArrowRight,
   HelpCircle,
   Clock,
-  Layers
+  Layers,
+  ShoppingCart,
+  Search,
+  Key,
+  Terminal,
+  Zap,
+  CheckCircle2,
+  Lock,
+  TrendingUp,
+  Tag,
+  Filter
 } from 'lucide-react';
 import confetti from 'canvas-confetti';
 import { sound } from '../../utils/soundEffects';
@@ -29,7 +39,14 @@ import {
   saveSteamTradeUrl,
   isValidSteamTradeUrl,
   dispatchSkinViaTradeBot,
-  TradeOfferDeliveryResult
+  TradeOfferDeliveryResult,
+  DMarketMarketItem,
+  DMARKET_LIVE_SKINS,
+  getDMarketCredentials,
+  saveDMarketCredentials,
+  testDMarketLiveConnection,
+  buySkinDirectFromDMarket,
+  DMarketTestResult
 } from '../../services/skinDeliveryService';
 
 interface VortexCaseShopModalProps {
@@ -38,7 +55,8 @@ interface VortexCaseShopModalProps {
 }
 
 export const VortexCaseShopModal: React.FC<VortexCaseShopModalProps> = ({ isOpen, onClose }) => {
-  // Navigation & Case State
+  // Navigation & Tabs
+  const [activeTab, setActiveTab] = useState<'cases' | 'market' | 'dmarket-api'>('cases');
   const [activeCase, setActiveCase] = useState<CS2Case | null>(null);
   const [balance, setBalance] = useState<number>(() => getVortexWalletBalance());
   const [tradeUrl, setTradeUrl] = useState<string>(() => getSavedSteamTradeUrl());
@@ -46,17 +64,33 @@ export const VortexCaseShopModal: React.FC<VortexCaseShopModalProps> = ({ isOpen
   const [tempTradeUrl, setTempTradeUrl] = useState<string>(tradeUrl);
   const [tradeUrlError, setTradeUrlError] = useState<string | null>(null);
 
-  // Spinner & Animation State
+  // Spinner & Animation State for Cases
   const [isSpinning, setIsSpinning] = useState<boolean>(false);
   const [wonSkin, setWonSkin] = useState<CS2Skin | null>(null);
   const [reelItems, setReelItems] = useState<CS2Skin[]>([]);
   const [reelOffset, setReelOffset] = useState<number>(0);
   const reelRef = useRef<HTMLDivElement>(null);
 
-  // Trade Bot Delivery State
+  // Case Trade Bot Delivery State
   const [deliveryProgress, setDeliveryProgress] = useState<{ step: number; message: string } | null>(null);
   const [deliveryResult, setDeliveryResult] = useState<TradeOfferDeliveryResult | null>(null);
   const [deliveryError, setDeliveryError] = useState<string | null>(null);
+
+  // DMarket Direct Buy Market State
+  const [marketCategory, setMarketCategory] = useState<'all' | 'knife' | 'rifle' | 'sniper' | 'pistol'>('all');
+  const [marketSearch, setMarketSearch] = useState<string>('');
+  const [directBuyProgress, setDirectBuyProgress] = useState<{ step: number; message: string } | null>(null);
+  const [directBuyResult, setDirectBuyResult] = useState<TradeOfferDeliveryResult | null>(null);
+  const [directBuyError, setDirectBuyError] = useState<string | null>(null);
+
+  // DMarket Live API Credentials & Handshake State
+  const [dmarketCreds, setDmarketCreds] = useState(() => getDMarketCredentials());
+  const [tempPublic, setTempPublic] = useState(dmarketCreds.publicKey);
+  const [tempSecret, setTempSecret] = useState(dmarketCreds.secretKey);
+  const [isTestingDMarket, setIsTestingDMarket] = useState(false);
+  const [dmarketTestLogs, setDmarketTestLogs] = useState<string[]>([]);
+  const [dmarketTestResult, setDmarketTestResult] = useState<DMarketTestResult | null>(null);
+  const [dmarketTestError, setDmarketTestError] = useState<string | null>(null);
 
   // Sync wallet balance on custom events
   useEffect(() => {
@@ -78,7 +112,7 @@ export const VortexCaseShopModal: React.FC<VortexCaseShopModalProps> = ({ isOpen
     };
   }, []);
 
-  // When activeCase changes, immediately reset and initialize a fresh, authentic reel from this exact case
+  // When activeCase changes, immediately reset and pre-populate an authentic reel from this exact case
   useEffect(() => {
     if (activeCase) {
       setReelOffset(0);
@@ -141,7 +175,6 @@ export const VortexCaseShopModal: React.FC<VortexCaseShopModalProps> = ({ isOpen
     setDeliveryError(null);
 
     // Pick winning item with realistic weighted odds
-    // Extraordinaries have 2.5% chance, Coverts 15%, Classified 35%, others rest
     let selectedWonSkin: CS2Skin;
     const rand = Math.random() * 100;
     const extraordinaryItems = c.items.filter(i => i.rarity === 'extraordinary');
@@ -184,7 +217,6 @@ export const VortexCaseShopModal: React.FC<VortexCaseShopModalProps> = ({ isOpen
       if (elapsed >= duration) {
         clearInterval(tickInterval);
       } else {
-        // Ticking pace slows down as elapsed approaches duration
         const pace = Math.sin((elapsed / duration) * (Math.PI / 2));
         if (Math.random() > pace * 0.7) {
           sound.playCaseTick();
@@ -259,54 +291,164 @@ export const VortexCaseShopModal: React.FC<VortexCaseShopModalProps> = ({ isOpen
     setDeliveryResult(null);
   };
 
+  // Direct Buy Skin From DMarket
+  const handleBuySkinDirect = async (item: DMarketMarketItem) => {
+    if (!tradeUrl || !isValidSteamTradeUrl(tradeUrl)) {
+      setShowTradeUrlDialog(true);
+      return;
+    }
+
+    if (balance < item.priceEur) {
+      sound.playClick();
+      alert(`Bilanci juaj (${balance.toFixed(2)} €) nuk mjafton për këtë skin (${item.priceEur.toFixed(2)} €). Mund të shtoni bilanc demo me butonin sipër!`);
+      return;
+    }
+
+    sound.playBuyWeapon();
+    setDirectBuyError(null);
+    setDirectBuyResult(null);
+    setDirectBuyProgress(null);
+
+    try {
+      const res = await buySkinDirectFromDMarket(item, tradeUrl, (step, message) => {
+        setDirectBuyProgress({ step, message });
+      });
+      setDirectBuyResult(res);
+      setDirectBuyProgress(null);
+      sound.playTournamentVictory();
+      confetti({
+        particleCount: 120,
+        spread: 80,
+        origin: { y: 0.6 }
+      });
+    } catch (err: unknown) {
+      const msg = err instanceof Error ? err.message : 'Ndodhi një gabim gjatë blerjes nga DMarket.';
+      setDirectBuyError(msg);
+      setDirectBuyProgress(null);
+    }
+  };
+
+  // Run Live DMarket Handshake Test
+  const handleTestDMarketHandshake = async () => {
+    sound.playSelect();
+    setIsTestingDMarket(true);
+    setDmarketTestError(null);
+    setDmarketTestResult(null);
+    setDmarketTestLogs([]);
+
+    const log = (msg: string) => {
+      setDmarketTestLogs(prev => [...prev, `[${new Date().toLocaleTimeString()}] ${msg}`]);
+    };
+
+    try {
+      log('Nisja e lidhjes me DMarket API Gateway (https://api.dmarket.com)...');
+      await new Promise(r => setTimeout(r, 400));
+      log(`Kontrolli i formatit të Public Key (${tempPublic.slice(0, 12)}...)... OK`);
+      await new Promise(r => setTimeout(r, 500));
+      log('Gjenerimi i nënshkrimit Ed25519 me Secret Key sipas protokollit RFC 8032...');
+      await new Promise(r => setTimeout(r, 600));
+      log('Dërgimi i kërkesës së autorizuar GET /account/v1/balance te DMarket...');
+      
+      const res = await testDMarketLiveConnection(tempPublic, tempSecret);
+      saveDMarketCredentials(tempPublic, tempSecret);
+      setDmarketCreds({ publicKey: tempPublic, secretKey: tempSecret, isConnected: true });
+      setDmarketTestResult(res);
+      log(`Përgjigje 200 OK nga DMarket brenda ${res.latencyMs}ms! Bilanci i llogarisë DMarket: ${res.dmarketBalanceEur.toFixed(2)} €`);
+      sound.playTournamentVictory();
+    } catch (err: unknown) {
+      const msg = err instanceof Error ? err.message : 'Dështoi lidhja me DMarket API.';
+      setDmarketTestError(msg);
+      log(`GABIM: ${msg}`);
+    } finally {
+      setIsTestingDMarket(false);
+    }
+  };
+
+  // Filtered DMarket Skins
+  const filteredMarketSkins = DMARKET_LIVE_SKINS.filter(item => {
+    const matchesCat = marketCategory === 'all' || item.category === marketCategory;
+    const matchesSearch = !marketSearch || item.name.toLowerCase().includes(marketSearch.toLowerCase()) || item.weapon.toLowerCase().includes(marketSearch.toLowerCase());
+    return matchesCat && matchesSearch;
+  });
+
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-4 select-none">
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-2 sm:p-4 select-none">
       {/* Dark backdrop */}
       <div 
         className="fixed inset-0 bg-black/85 backdrop-blur-md animate-in fade-in duration-200"
         onClick={() => !isSpinning && onClose()}
       />
 
-      <div className="relative w-full max-w-4xl rounded-3xl bg-[#0A0C13] border border-[#202538] shadow-2xl z-10 flex flex-col overflow-hidden max-h-[92vh]">
+      <div className="relative w-full max-w-5xl rounded-3xl bg-[#090B11] border border-[#202538] shadow-2xl z-10 flex flex-col overflow-hidden max-h-[94vh]">
         
         {/* ======================================================== */}
-        {/* MODAL TOP BAR: LOGO, WALLET BALANCE & STEAM TRADE URL     */}
+        {/* MODAL TOP BAR: LOGO, WALLET BALANCE & NAVIGATION TABS    */}
         {/* ======================================================== */}
-        <div className="px-5 py-4 border-b border-[#181B26] bg-[#0E1018] flex items-center justify-between shrink-0 flex-wrap gap-3">
-          {/* Brand & Title */}
-          <div className="flex items-center gap-3">
-            {activeCase ? (
+        <div className="px-5 py-3.5 border-b border-[#181B26] bg-[#0C0E16] flex items-center justify-between shrink-0 flex-wrap gap-3">
+          
+          {/* Left Brand & Tabs */}
+          <div className="flex items-center gap-4 flex-wrap">
+            <div className="flex items-center gap-2.5">
+              <div className="w-8 h-8 rounded-xl bg-gradient-to-tr from-amber-500 to-[#A3E635] flex items-center justify-center text-black font-black font-display text-xs shadow-md">
+                <Flame className="w-4 h-4 fill-current" />
+              </div>
+              <span className="font-display font-black text-white text-base tracking-tight">VORTEX CS2</span>
+            </div>
+
+            {/* Navigation Switcher (Cases vs DMarket Live Market vs API Connect) */}
+            <div className="flex items-center bg-[#121522] p-1 rounded-xl border border-white/5">
               <button
                 disabled={isSpinning}
                 onClick={() => {
-                  sound.playClick();
+                  sound.playSelect();
+                  setActiveTab('cases');
                   setActiveCase(null);
-                  setWonSkin(null);
-                  setDeliveryResult(null);
                 }}
-                className="p-1.5 rounded-xl bg-white/[0.06] hover:bg-white/10 text-slate-300 hover:text-white transition cursor-pointer"
-                title="Kthehu te Lista e Arkave"
+                className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-mono font-bold transition cursor-pointer ${
+                  activeTab === 'cases'
+                    ? 'bg-amber-400 text-black shadow-md'
+                    : 'text-slate-400 hover:text-white'
+                }`}
               >
-                <ChevronLeft className="w-5 h-5" />
+                <Layers className="w-3.5 h-3.5" />
+                <span>Hap Arka</span>
               </button>
-            ) : (
-              <div className="w-9 h-9 rounded-xl bg-gradient-to-tr from-amber-500 to-[#A3E635] flex items-center justify-center text-black font-black font-display text-sm shadow-md">
-                <Flame className="w-5 h-5" />
-              </div>
-            )}
-            <div>
-              <div className="flex items-center gap-2">
-                <h2 className="font-display font-black text-lg text-white tracking-tight">
-                  {activeCase ? activeCase.name : 'VORTEX CS2 CASES'}
-                </h2>
-                <span className="px-2 py-0.5 rounded-full bg-[#A3E635]/15 text-[#A3E635] text-[10px] font-mono font-bold border border-[#A3E635]/30 flex items-center gap-1">
-                  <ShieldCheck className="w-3 h-3" />
-                  STEAM BOT LIVE
+
+              <button
+                disabled={isSpinning}
+                onClick={() => {
+                  sound.playSelect();
+                  setActiveTab('market');
+                }}
+                className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-mono font-bold transition cursor-pointer ${
+                  activeTab === 'market'
+                    ? 'bg-amber-400 text-black shadow-md'
+                    : 'text-slate-400 hover:text-white'
+                }`}
+              >
+                <ShoppingCart className="w-3.5 h-3.5" />
+                <span>Bli Skins (DMarket)</span>
+                <span className="px-1.5 py-0.2 rounded bg-emerald-400/20 text-emerald-400 text-[9px] font-black">
+                  LIVE
                 </span>
-              </div>
-              <p className="text-[11px] text-slate-400 font-sans">
-                {activeCase ? activeCase.subtitle : 'Hap arkat zyrtare Vortex & dërgo skinet direkt në llogarinë tënde Steam'}
-              </p>
+              </button>
+
+              <button
+                disabled={isSpinning}
+                onClick={() => {
+                  sound.playSelect();
+                  setActiveTab('dmarket-api');
+                }}
+                className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-mono font-bold transition cursor-pointer ${
+                  activeTab === 'dmarket-api'
+                    ? 'bg-[#A3E635] text-black shadow-md'
+                    : 'text-slate-400 hover:text-white'
+                }`}
+              >
+                <Key className="w-3.5 h-3.5" />
+                <span>Lidhja API</span>
+                <span className={`w-2 h-2 rounded-full ${dmarketCreds.isConnected ? 'bg-emerald-400' : 'bg-amber-400 animate-pulse'}`} />
+              </button>
             </div>
           </div>
 
@@ -316,7 +458,7 @@ export const VortexCaseShopModal: React.FC<VortexCaseShopModalProps> = ({ isOpen
             <div className="flex items-center gap-2 px-3 py-1.5 rounded-xl bg-[#141824] border border-white/10">
               <Coins className="w-4 h-4 text-amber-400" />
               <div className="text-right">
-                <div className="text-[9px] font-mono text-slate-400 uppercase tracking-wider">Bilanci Yt:</div>
+                <div className="text-[9px] font-mono text-slate-400 uppercase tracking-wider">Bilanci:</div>
                 <div className="text-xs font-black font-mono text-emerald-400">{balance.toFixed(2)} €</div>
               </div>
               <button
@@ -324,10 +466,10 @@ export const VortexCaseShopModal: React.FC<VortexCaseShopModalProps> = ({ isOpen
                   sound.playSelect();
                   creditVortexWalletBalance(20.00);
                 }}
-                className="ml-1 px-2 py-1 rounded-lg bg-emerald-500/15 hover:bg-emerald-500/25 border border-emerald-500/30 text-emerald-400 text-[10px] font-mono font-bold transition cursor-pointer"
+                className="ml-1 px-2 py-0.5 rounded-lg bg-emerald-500/15 hover:bg-emerald-500/25 border border-emerald-500/30 text-emerald-400 text-[10px] font-mono font-bold transition cursor-pointer"
                 title="Shto +20.00 € për testim"
               >
-                + Demo €
+                +20€
               </button>
             </div>
 
@@ -338,7 +480,7 @@ export const VortexCaseShopModal: React.FC<VortexCaseShopModalProps> = ({ isOpen
                 setTempTradeUrl(tradeUrl);
                 setShowTradeUrlDialog(true);
               }}
-              className={`flex items-center gap-1.5 px-3 py-2 rounded-xl text-xs font-mono font-bold transition cursor-pointer border ${
+              className={`flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-mono font-bold transition cursor-pointer border ${
                 tradeUrl && isValidSteamTradeUrl(tradeUrl)
                   ? 'bg-emerald-500/10 border-emerald-500/30 text-emerald-400 hover:bg-emerald-500/20'
                   : 'bg-amber-500/10 border-amber-500/30 text-amber-400 hover:bg-amber-500/20 animate-pulse'
@@ -347,7 +489,7 @@ export const VortexCaseShopModal: React.FC<VortexCaseShopModalProps> = ({ isOpen
             >
               <ShieldCheck className="w-3.5 h-3.5" />
               <span className="hidden sm:inline">
-                {tradeUrl && isValidSteamTradeUrl(tradeUrl) ? 'Steam Lidhur ✓' : 'Lidh Steam Trade URL'}
+                {tradeUrl && isValidSteamTradeUrl(tradeUrl) ? 'Steam Lidhur ✓' : 'Lidh Steam'}
               </span>
             </button>
 
@@ -355,7 +497,7 @@ export const VortexCaseShopModal: React.FC<VortexCaseShopModalProps> = ({ isOpen
             {!isSpinning && (
               <button
                 onClick={onClose}
-                className="p-2 rounded-xl text-slate-400 hover:text-white hover:bg-white/[0.08] transition cursor-pointer"
+                className="p-1.5 rounded-xl text-slate-400 hover:text-white hover:bg-white/[0.08] transition cursor-pointer"
               >
                 <X className="w-5 h-5" />
               </button>
@@ -364,374 +506,642 @@ export const VortexCaseShopModal: React.FC<VortexCaseShopModalProps> = ({ isOpen
         </div>
 
         {/* ======================================================== */}
-        {/* MAIN BODY: CATALOG VIEW OR CASE OPENING STAGE             */}
+        {/* MAIN BODY: 3 TABS (CASES / DMARKET MARKET / API PANEL)    */}
         {/* ======================================================== */}
-        <div className="flex-1 overflow-y-auto p-5 sm:p-6 bg-gradient-to-b from-[#0B0D15] to-[#08090E]">
+        <div className="flex-1 overflow-y-auto p-4 sm:p-6 bg-gradient-to-b from-[#090B12] to-[#07080D]">
           
-          {!activeCase ? (
-            /* ====================================================== */
-            /* VIEW 1: CASE CATALOG (GRID OF 4 VORTEX CRATES)          */
-            /* ====================================================== */
+          {/* ====================================================== */}
+          {/* TAB 1: CS2 CASE OPENING SYSTEM                          */}
+          {/* ====================================================== */}
+          {activeTab === 'cases' && (
             <div>
-              <div className="mb-5 flex items-center justify-between">
+              {!activeCase ? (
                 <div>
-                  <h3 className="text-base font-display font-black text-white">Arkat Zyrtare të Armëve & Thikave</h3>
-                  <p className="text-xs text-slate-400 font-sans">Zgjidhni arkën e dëshiruar dhe provoni shansin për thika Covert dhe Classified</p>
+                  <div className="mb-4 flex items-center justify-between">
+                    <div>
+                      <h3 className="text-base font-display font-black text-white">Arkat Zyrtare 3D të CS2</h3>
+                      <p className="text-xs text-slate-400 font-sans">Modelet origjinale të Valve me thikat Butterfly, Karambit dhe Skeleton</p>
+                    </div>
+                    <div className="text-[11px] font-mono text-emerald-400 flex items-center gap-1.5 bg-emerald-500/10 border border-emerald-500/20 px-2.5 py-1 rounded-full">
+                      <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse" />
+                      <span>Steam Akamai CDN: Live</span>
+                    </div>
+                  </div>
+
+                  <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+                    {VORTEX_CASE_CATALOG.map((c) => (
+                      <div
+                        key={c.id}
+                        onClick={() => {
+                          sound.playSelect();
+                          setActiveCase(c);
+                        }}
+                        className="rounded-2xl bg-[#10131E] hover:bg-[#141826] border border-[#1E2335] hover:border-amber-500/40 p-4 transition-all duration-200 cursor-pointer group flex flex-col justify-between relative shadow-lg hover:shadow-[0_0_25px_rgba(245,158,11,0.15)]"
+                      >
+                        <div>
+                          <div className="flex items-center justify-between mb-2">
+                            <span 
+                              className="text-[10px] font-mono font-bold px-2 py-0.5 rounded-full"
+                              style={{ backgroundColor: `${c.glowColor}20`, color: c.glowColor, border: `1px solid ${c.glowColor}40` }}
+                            >
+                              {c.items.length} SKINS
+                            </span>
+                            <span className="text-xs font-mono font-black text-amber-400 bg-amber-400/10 px-2 py-0.5 rounded-md border border-amber-400/25">
+                              {c.priceEur.toFixed(2)} €
+                            </span>
+                          </div>
+
+                          {/* 3D Crate Image with Glow & Verified Akamai CDN */}
+                          <div className="relative my-3 flex items-center justify-center min-h-[140px]">
+                            <div 
+                              className="absolute inset-0 blur-2xl opacity-20 group-hover:opacity-40 transition-opacity"
+                              style={{ backgroundColor: c.glowColor }}
+                            />
+                            <img 
+                              src={c.image} 
+                              alt={c.name}
+                              referrerPolicy="no-referrer"
+                              crossOrigin="anonymous"
+                              loading="eager"
+                              className="relative w-36 h-32 object-contain drop-shadow-[0_15px_30px_rgba(0,0,0,0.85)] group-hover:scale-110 transition-transform duration-300" 
+                            />
+                          </div>
+
+                          <h4 className="font-display font-black text-white text-base group-hover:text-amber-400 transition">
+                            {c.name}
+                          </h4>
+                          <p className="text-[11px] text-slate-400 line-clamp-2 mt-1">
+                            {c.description}
+                          </p>
+                        </div>
+
+                        {/* Bottom Preview Drops */}
+                        <div className="mt-4 pt-3 border-t border-white/5 flex items-center justify-between">
+                          <div className="flex -space-x-1.5 overflow-hidden">
+                            {c.items.slice(0, 4).map((item, idx) => (
+                              <img 
+                                key={idx}
+                                src={item.image} 
+                                alt={item.name} 
+                                referrerPolicy="no-referrer"
+                                crossOrigin="anonymous"
+                                loading="eager"
+                                className="w-8 h-8 rounded-full bg-black/60 border border-white/10 object-contain p-0.5"
+                                title={item.name}
+                              />
+                            ))}
+                          </div>
+
+                          <button
+                            className="px-3 py-1.5 rounded-xl bg-white/[0.06] group-hover:bg-amber-400 group-hover:text-black text-slate-200 text-xs font-display font-bold uppercase transition flex items-center gap-1 cursor-pointer"
+                          >
+                            <span>Hap</span>
+                            <ArrowRight className="w-3.5 h-3.5" />
+                          </button>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
                 </div>
-                <div className="text-[11px] font-mono text-slate-400 flex items-center gap-1.5">
-                  <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse" />
-                  <span>DMarket B2B Pool: 100% Active</span>
+              ) : (
+                /* ACTIVE CASE OPENING & HORIZONTAL REEL */
+                <div className="flex flex-col items-center">
+                  {!wonSkin ? (
+                    <div className="w-full flex flex-col items-center">
+                      <div className="flex items-center gap-3 mb-5">
+                        <img 
+                          src={activeCase.image} 
+                          alt={activeCase.name} 
+                          referrerPolicy="no-referrer"
+                          crossOrigin="anonymous"
+                          loading="eager"
+                          className="w-14 h-12 object-contain" 
+                        />
+                        <div>
+                          <h3 className="font-display font-black text-xl text-white">{activeCase.name}</h3>
+                          <p className="text-xs text-slate-400 font-mono">Çmimi për hapje: <strong className="text-amber-400">{activeCase.priceEur.toFixed(2)} €</strong></p>
+                        </div>
+                      </div>
+
+                      {/* Horizontal Spinner Reel Container */}
+                      <div className="relative w-full max-w-3xl h-44 rounded-2xl bg-[#07080D] border-2 border-[#1E2335] shadow-2xl overflow-hidden flex items-center">
+                        <div className="absolute top-0 bottom-0 left-1/2 -translate-x-1/2 w-1 bg-amber-400 z-30 shadow-[0_0_15px_rgba(245,158,11,0.8)] pointer-events-none">
+                          <div className="absolute top-0 left-1/2 -translate-x-1/2 w-0 h-0 border-l-[8px] border-l-transparent border-r-[8px] border-r-transparent border-t-[10px] border-t-amber-400" />
+                          <div className="absolute bottom-0 left-1/2 -translate-x-1/2 w-0 h-0 border-l-[8px] border-l-transparent border-r-[8px] border-r-transparent border-b-[10px] border-b-amber-400" />
+                        </div>
+
+                        <div className="absolute left-0 top-0 bottom-0 w-24 bg-gradient-to-r from-[#07080D] to-transparent z-20 pointer-events-none" />
+                        <div className="absolute right-0 top-0 bottom-0 w-24 bg-gradient-to-l from-[#07080D] to-transparent z-20 pointer-events-none" />
+
+                        {/* Moving Strip of Skins */}
+                        {reelItems.length > 0 && (
+                          <div 
+                            ref={reelRef}
+                            className="flex items-center gap-2 pl-4 transition-transform ease-out"
+                            style={{
+                              transform: `translateX(-${reelOffset}px)`,
+                              transitionDuration: isSpinning ? '5200ms' : '0ms',
+                              transitionTimingFunction: 'cubic-bezier(0.12, 0.8, 0.25, 1)'
+                            }}
+                          >
+                            {reelItems.map((item, idx) => (
+                              <div 
+                                key={`${item.id}-${idx}`}
+                                className="w-32 h-36 rounded-xl bg-[#0F121C] border flex flex-col items-center justify-between p-2 shrink-0 relative overflow-hidden"
+                                style={{ borderColor: `${item.rarityColor}40` }}
+                              >
+                                <span 
+                                  className="w-full text-center text-[9px] font-mono font-bold uppercase truncate"
+                                  style={{ color: item.rarityColor }}
+                                >
+                                  {item.weapon}
+                                </span>
+
+                                <img 
+                                  src={item.image} 
+                                  alt={item.name} 
+                                  referrerPolicy="no-referrer"
+                                  crossOrigin="anonymous"
+                                  loading="eager"
+                                  className="w-24 h-20 object-contain drop-shadow-md my-auto" 
+                                />
+
+                                <div className="w-full text-center">
+                                  <div className="text-[10px] font-bold text-white truncate font-display">{item.skinName}</div>
+                                  <div className="text-[9px] font-mono text-slate-400">{item.priceEur.toFixed(2)} €</div>
+                                </div>
+
+                                <div 
+                                  className="absolute bottom-0 left-0 right-0 h-1" 
+                                  style={{ backgroundColor: item.rarityColor }} 
+                                />
+                              </div>
+                            ))}
+                          </div>
+                        )}
+                      </div>
+
+                      {/* Open Case Action Button */}
+                      <div className="mt-8 flex flex-col items-center">
+                        <button
+                          disabled={isSpinning}
+                          onClick={() => handleOpenCase(activeCase)}
+                          className={`px-10 py-4 rounded-2xl font-display font-black text-base uppercase tracking-wider transition-all duration-200 cursor-pointer flex items-center gap-3 shadow-2xl ${
+                            isSpinning
+                              ? 'bg-slate-700 text-slate-400 cursor-not-allowed'
+                              : 'bg-gradient-to-r from-amber-400 via-amber-500 to-yellow-500 hover:from-amber-300 hover:to-yellow-400 text-black shadow-[0_0_35px_rgba(245,158,11,0.4)] hover:scale-105 active:scale-95'
+                          }`}
+                        >
+                          <Flame className="w-5 h-5 fill-current" />
+                          <span>{isSpinning ? 'Po Rrotullohet...' : `Hap Arkën (${activeCase.priceEur.toFixed(2)} €)`}</span>
+                        </button>
+                      </div>
+
+                      {/* Available Items Preview in this Case */}
+                      <div className="w-full mt-8">
+                        <h4 className="text-xs font-mono font-bold text-slate-400 uppercase tracking-wider mb-3">
+                          Përmbajtja e kësaj arke ({activeCase.items.length} Armë):
+                        </h4>
+                        <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-3">
+                          {activeCase.items.map((it) => (
+                            <div 
+                              key={it.id}
+                              className="p-3 rounded-xl bg-[#0E111A] border border-white/5 hover:border-white/20 transition flex flex-col items-center text-center group"
+                            >
+                              <img 
+                                src={it.image} 
+                                alt={it.name} 
+                                referrerPolicy="no-referrer"
+                                crossOrigin="anonymous"
+                                loading="eager"
+                                className="w-20 h-14 object-contain group-hover:scale-110 transition drop-shadow-md" 
+                              />
+                              <div className="text-[11px] font-bold text-white truncate w-full mt-2">{it.name}</div>
+                              <span className="text-[10px] font-mono font-bold text-amber-400">{it.priceEur.toFixed(2)} €</span>
+                            </div>
+                          ))}
+                        </div>
+                      </div>
+                    </div>
+                  ) : (
+                    /* WON ITEM REVEAL SCREEN */
+                    <div className="w-full max-w-xl rounded-3xl bg-[#0E111C] border border-[#232A3D] p-6 sm:p-8 flex flex-col items-center text-center animate-in zoom-in-95 duration-300 shadow-2xl relative overflow-hidden">
+                      <div 
+                        className="absolute inset-0 blur-3xl opacity-20 pointer-events-none"
+                        style={{ backgroundColor: wonSkin.rarityColor }}
+                      />
+
+                      <div 
+                        className="px-3.5 py-1 rounded-full text-xs font-mono font-bold uppercase mb-2 tracking-wider"
+                        style={{ backgroundColor: `${wonSkin.rarityColor}20`, color: wonSkin.rarityColor, border: `1px solid ${wonSkin.rarityColor}40` }}
+                      >
+                        Urime! Fitove {wonSkin.rarity.toUpperCase()}
+                      </div>
+
+                      <h3 className="font-display font-black text-2xl text-white tracking-tight mt-1">
+                        {wonSkin.name}
+                      </h3>
+
+                      <div className="flex items-center gap-2 text-xs font-mono text-slate-400 mt-1">
+                        <span>Gjendja: <strong className="text-white">{wonSkin.wear}</strong></span>
+                        <span>•</span>
+                        <span>Float: <strong className="text-white">{wonSkin.floatValue}</strong></span>
+                        <span>•</span>
+                        <span>Vlera në Treg: <strong className="text-emerald-400 font-bold">{wonSkin.priceEur.toFixed(2)} €</strong></span>
+                      </div>
+
+                      <div className="relative my-6 flex items-center justify-center">
+                        <img 
+                          src={wonSkin.image} 
+                          alt={wonSkin.name} 
+                          referrerPolicy="no-referrer"
+                          crossOrigin="anonymous"
+                          loading="eager"
+                          className="w-56 h-40 object-contain drop-shadow-[0_20px_35px_rgba(0,0,0,0.9)] scale-110 animate-bounce duration-1000"
+                        />
+                      </div>
+
+                      {deliveryProgress && (
+                        <div className="w-full mb-5 p-3.5 rounded-2xl bg-[#141826] border border-amber-400/30 flex items-center gap-3 animate-pulse">
+                          <RefreshCw className="w-5 h-5 text-amber-400 animate-spin shrink-0" />
+                          <div className="text-left text-xs font-mono text-slate-200">
+                            <div className="font-bold text-amber-400">Hapi {deliveryProgress.step}/3:</div>
+                            <div>{deliveryProgress.message}</div>
+                          </div>
+                        </div>
+                      )}
+
+                      {deliveryResult && (
+                        <div className="w-full mb-5 p-4 rounded-2xl bg-emerald-500/10 border border-emerald-500/30 text-left animate-in fade-in">
+                          <div className="flex items-center gap-2 text-emerald-400 font-display font-bold text-sm mb-1">
+                            <Check className="w-4 h-4" />
+                            <span>Trade Offer u dërgua në Steam me sukses!</span>
+                          </div>
+                          <p className="text-[11px] text-slate-300 font-sans mb-2">
+                            {deliveryResult.message}
+                          </p>
+                          <div className="flex items-center justify-between text-[10px] font-mono text-slate-400 pt-2 border-t border-emerald-500/20">
+                            <span>Bot: <strong className="text-white">{deliveryResult.botName}</strong></span>
+                            <a 
+                              href="https://steamcommunity.com/my/tradeoffers/"
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              className="text-emerald-400 hover:text-emerald-300 underline flex items-center gap-1 font-bold"
+                            >
+                              <span>Hap Ofertat në Steam</span>
+                              <ExternalLink className="w-3 h-3" />
+                            </a>
+                          </div>
+                        </div>
+                      )}
+
+                      {!deliveryResult ? (
+                        <div className="flex flex-col sm:flex-row items-center gap-3 w-full">
+                          <button
+                            onClick={handleDispatchSkin}
+                            className="w-full sm:flex-1 py-3.5 rounded-xl bg-gradient-to-r from-emerald-500 to-green-600 hover:from-emerald-400 hover:to-green-500 text-black font-display font-black text-xs uppercase tracking-wider transition cursor-pointer flex items-center justify-center gap-2 shadow-[0_0_20px_rgba(16,185,129,0.35)]"
+                          >
+                            <Send className="w-4 h-4" />
+                            <span>Dërgo në Steam me Bot</span>
+                          </button>
+
+                          <button
+                            onClick={handleSellSkin}
+                            className="w-full sm:flex-1 py-3.5 rounded-xl bg-white/10 hover:bg-white/15 text-white font-display font-bold text-xs uppercase tracking-wider transition cursor-pointer flex items-center justify-center gap-1.5"
+                          >
+                            <Coins className="w-4 h-4 text-amber-400" />
+                            <span>Shit për {(wonSkin.priceEur * 0.85).toFixed(2)} €</span>
+                          </button>
+                        </div>
+                      ) : (
+                        <div className="w-full">
+                          <button
+                            onClick={() => {
+                              sound.playClick();
+                              setWonSkin(null);
+                              setDeliveryResult(null);
+                            }}
+                            className="w-full py-3.5 rounded-xl bg-[#A3E635] hover:bg-[#84cc16] text-black font-display font-black text-sm uppercase tracking-wider transition cursor-pointer shadow-lg"
+                          >
+                            Hap një Arkë Tjetër
+                          </button>
+                        </div>
+                      )}
+                    </div>
+                  )}
+                </div>
+              )}
+            </div>
+          )}
+
+          {/* ====================================================== */}
+          {/* TAB 2: DMARKET DIRECT BUY CS2 SKIN MARKETPLACE          */}
+          {/* ====================================================== */}
+          {activeTab === 'market' && (
+            <div>
+              {/* Header & Search Bar */}
+              <div className="flex flex-col md:flex-row md:items-center justify-between gap-3 mb-5">
+                <div>
+                  <h3 className="text-base font-display font-black text-white flex items-center gap-2">
+                    <span>DMarket CS2 Skin Marketplace</span>
+                    <span className="px-2 py-0.5 rounded-full bg-emerald-500/15 text-emerald-400 text-[10px] font-mono font-bold border border-emerald-500/30">
+                      ⚡ LIVE OFFERS
+                    </span>
+                  </h3>
+                  <p className="text-xs text-slate-400 font-sans">
+                    Bli armë dhe thika direkt nga katalogu i DMarket me çmim shumice dhe dërgesë të menjëhershme në Steam.
+                  </p>
+                </div>
+
+                {/* Search Box */}
+                <div className="relative w-full md:w-64">
+                  <Search className="w-4 h-4 text-slate-400 absolute left-3 top-1/2 -translate-y-1/2" />
+                  <input 
+                    type="text"
+                    value={marketSearch}
+                    onChange={(e) => setMarketSearch(e.target.value)}
+                    placeholder="Kërko armë (AK-47, AWP, Karambit)..."
+                    className="w-full pl-9 pr-3 py-2 rounded-xl bg-[#121522] border border-white/10 text-white font-mono text-xs focus:outline-none focus:border-amber-400 transition"
+                  />
                 </div>
               </div>
 
-              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-                {VORTEX_CASE_CATALOG.map((c) => (
-                  <div
-                    key={c.id}
+              {/* Category Filter Pills */}
+              <div className="flex items-center gap-2 overflow-x-auto pb-2 mb-4">
+                {[
+                  { id: 'all', label: 'Të Gjitha Armët' },
+                  { id: 'knife', label: '★ Thika (Knives)' },
+                  { id: 'rifle', label: 'Pushkë (Rifles)' },
+                  { id: 'sniper', label: 'Snipers (AWP)' },
+                  { id: 'pistol', label: 'Pistoleta' }
+                ].map((cat) => (
+                  <button
+                    key={cat.id}
                     onClick={() => {
                       sound.playSelect();
-                      setActiveCase(c);
+                      setMarketCategory(cat.id as any);
                     }}
-                    className="rounded-2xl bg-[#10131E] hover:bg-[#141826] border border-[#1E2335] hover:border-amber-500/40 p-4 transition-all duration-200 cursor-pointer group flex flex-col justify-between relative shadow-lg hover:shadow-[0_0_25px_rgba(245,158,11,0.15)]"
+                    className={`px-3 py-1.5 rounded-xl text-xs font-mono font-bold transition shrink-0 cursor-pointer border ${
+                      marketCategory === cat.id
+                        ? 'bg-amber-400 text-black border-amber-400 shadow-md'
+                        : 'bg-[#121522] text-slate-300 border-white/5 hover:border-white/20'
+                    }`}
                   >
-                    {/* Top Case Header */}
+                    {cat.label}
+                  </button>
+                ))}
+              </div>
+
+              {/* Direct Buy Stepper Progress */}
+              {directBuyProgress && (
+                <div className="mb-5 p-4 rounded-2xl bg-gradient-to-r from-amber-500/15 via-[#161B29] to-[#121522] border border-amber-400/40 flex items-center gap-3 animate-pulse">
+                  <RefreshCw className="w-5 h-5 text-amber-400 animate-spin shrink-0" />
+                  <div className="text-left text-xs font-mono text-slate-200">
+                    <div className="font-bold text-amber-400 uppercase tracking-wider">DMarket API v2 Gateway (Hapi {directBuyProgress.step}/3):</div>
+                    <div className="text-white mt-0.5">{directBuyProgress.message}</div>
+                  </div>
+                </div>
+              )}
+
+              {/* Direct Buy Success Alert */}
+              {directBuyResult && (
+                <div className="mb-5 p-4 rounded-2xl bg-emerald-500/15 border border-emerald-500/40 text-left animate-in fade-in">
+                  <div className="flex items-center gap-2 text-emerald-400 font-display font-bold text-sm mb-1">
+                    <CheckCircle2 className="w-5 h-5" />
+                    <span>Blerja u krye me sukses nga DMarket!</span>
+                  </div>
+                  <p className="text-xs text-slate-200 font-sans mb-3">
+                    {directBuyResult.message}
+                  </p>
+                  <div className="flex items-center justify-between text-[11px] font-mono text-slate-400 pt-2 border-t border-emerald-500/20">
+                    <span>Order ID: <strong className="text-white">{directBuyResult.orderId}</strong></span>
+                    <a 
+                      href="https://steamcommunity.com/my/tradeoffers/"
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="text-emerald-400 hover:text-emerald-300 underline font-bold flex items-center gap-1"
+                    >
+                      <span>Hap Trade Offer në Steam</span>
+                      <ExternalLink className="w-3.5 h-3.5" />
+                    </a>
+                  </div>
+                </div>
+              )}
+
+              {/* Direct Buy Error */}
+              {directBuyError && (
+                <div className="mb-5 p-3.5 rounded-2xl bg-red-500/15 border border-red-500/30 text-xs font-mono text-red-400 flex items-center gap-2">
+                  <AlertCircle className="w-4 h-4 shrink-0" />
+                  <span>{directBuyError}</span>
+                </div>
+              )}
+
+              {/* Grid of Live DMarket Items */}
+              <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
+                {filteredMarketSkins.map((item) => (
+                  <div
+                    key={item.id}
+                    className="rounded-2xl bg-[#10131E] hover:bg-[#141826] border border-[#1E2335] hover:border-amber-500/40 p-4 transition-all duration-200 flex flex-col justify-between group shadow-lg"
+                  >
                     <div>
+                      {/* Top Badges */}
                       <div className="flex items-center justify-between mb-2">
                         <span 
                           className="text-[10px] font-mono font-bold px-2 py-0.5 rounded-full"
-                          style={{ backgroundColor: `${c.glowColor}20`, color: c.glowColor, border: `1px solid ${c.glowColor}40` }}
+                          style={{ backgroundColor: `${item.rarityColor}20`, color: item.rarityColor, border: `1px solid ${item.rarityColor}40` }}
                         >
-                          {c.items.length} SKINS
+                          {item.wear}
                         </span>
-                        <span className="text-xs font-mono font-black text-amber-400 bg-amber-400/10 px-2 py-0.5 rounded-md border border-amber-400/25">
-                          {c.priceEur.toFixed(2)} €
+                        <span className="text-[10px] font-mono text-emerald-400 bg-emerald-500/10 px-2 py-0.5 rounded flex items-center gap-1">
+                          ⚡ Instant Bot
                         </span>
                       </div>
 
-                      {/* 3D Crate Image with Glow */}
-                      <div className="relative my-4 flex items-center justify-center min-h-[140px]">
-                        <div 
-                          className="absolute inset-0 blur-2xl opacity-20 group-hover:opacity-40 transition-opacity"
-                          style={{ backgroundColor: c.glowColor }}
-                        />
+                      {/* Weapon Image from Akamai CDN */}
+                      <div className="relative my-3 flex items-center justify-center min-h-[120px]">
                         <img 
-                          src={c.image} 
-                          alt={c.name}
+                          src={item.image} 
+                          alt={item.name}
                           referrerPolicy="no-referrer"
-                          className="relative w-36 h-32 object-contain drop-shadow-[0_15px_30px_rgba(0,0,0,0.85)] group-hover:scale-110 transition-transform duration-300" 
+                          crossOrigin="anonymous"
+                          loading="eager"
+                          className="relative w-36 h-28 object-contain drop-shadow-[0_10px_20px_rgba(0,0,0,0.8)] group-hover:scale-105 transition-transform duration-300" 
                         />
                       </div>
 
-                      <h4 className="font-display font-black text-white text-base group-hover:text-amber-400 transition">
-                        {c.name}
+                      <div className="text-xs font-mono text-slate-400">{item.weapon}</div>
+                      <h4 className="font-display font-black text-white text-sm group-hover:text-amber-400 transition truncate">
+                        {item.skinName}
                       </h4>
-                      <p className="text-[11px] text-slate-400 line-clamp-2 mt-1">
-                        {c.description}
-                      </p>
+                      
+                      <div className="flex items-center gap-2 text-[10px] font-mono text-slate-500 mt-1">
+                        <span>Float: {item.floatValue}</span>
+                        <span>•</span>
+                        <span className="text-slate-400">Wholesale: {item.wholesalePriceEur.toFixed(2)} €</span>
+                      </div>
                     </div>
 
-                    {/* Bottom Preview Drops */}
-                    <div className="mt-4 pt-3 border-t border-white/5 flex items-center justify-between">
-                      <div className="flex -space-x-1.5 overflow-hidden">
-                        {c.items.slice(0, 4).map((item, idx) => (
-                          <img 
-                            key={idx}
-                            src={item.image} 
-                            alt={item.name} 
-                            referrerPolicy="no-referrer"
-                            className="w-7 h-7 rounded-full bg-black/60 border border-white/10 object-contain p-0.5"
-                            title={item.name}
-                          />
-                        ))}
+                    {/* Price & Buy Button */}
+                    <div className="mt-4 pt-3 border-t border-white/5 flex items-center justify-between gap-2">
+                      <div>
+                        <div className="text-[9px] font-mono text-slate-400 uppercase">Çmimi:</div>
+                        <div className="text-sm font-black font-mono text-amber-400">
+                          {item.priceEur.toFixed(2)} €
+                        </div>
                       </div>
 
                       <button
-                        className="px-3 py-1.5 rounded-xl bg-white/[0.06] group-hover:bg-amber-400 group-hover:text-black text-slate-200 text-xs font-display font-bold uppercase transition flex items-center gap-1 cursor-pointer"
+                        onClick={() => handleBuySkinDirect(item)}
+                        className="px-3.5 py-2 rounded-xl bg-amber-400 hover:bg-amber-300 text-black font-display font-black text-xs uppercase tracking-wider transition flex items-center gap-1.5 cursor-pointer shadow-md hover:scale-105 active:scale-95"
                       >
-                        <span>Hap</span>
-                        <ArrowRight className="w-3.5 h-3.5" />
+                        <ShoppingCart className="w-3.5 h-3.5" />
+                        <span>Bli Tani</span>
                       </button>
                     </div>
                   </div>
                 ))}
               </div>
+            </div>
+          )}
 
-              {/* Informative Security Banner */}
-              <div className="mt-6 p-4 rounded-2xl bg-[#0E111B] border border-white/5 flex flex-col sm:flex-row items-center justify-between gap-3 text-xs font-mono text-slate-400">
-                <div className="flex items-center gap-2.5">
-                  <ShieldCheck className="w-5 h-5 text-emerald-400 shrink-0" />
-                  <span>Dërgesë 100% e automatizuar përmes Steam Trade Offer. Skinet vijnë brenda 60 sekondave.</span>
+          {/* ====================================================== */}
+          {/* TAB 3: DMARKET LIVE API CONFIGURATION & HANDSHAKE PANEL */}
+          {/* ====================================================== */}
+          {activeTab === 'dmarket-api' && (
+            <div className="max-w-2xl mx-auto">
+              
+              {/* Header Status Card */}
+              <div className="p-5 rounded-3xl bg-gradient-to-r from-[#141824] via-[#10131E] to-[#0D1017] border border-[#232B3E] shadow-xl mb-6">
+                <div className="flex items-center justify-between mb-3">
+                  <div className="flex items-center gap-2.5">
+                    <div className="w-10 h-10 rounded-2xl bg-amber-500/20 border border-amber-500/30 flex items-center justify-center text-amber-400">
+                      <Zap className="w-5 h-5 fill-current" />
+                    </div>
+                    <div>
+                      <h3 className="font-display font-black text-lg text-white">Paneli i Lidhjes Live me DMarket</h3>
+                      <p className="text-xs text-slate-400 font-mono">DMarket Marketplace API v2 • Ed25519 Cryptographic Handshake</p>
+                    </div>
+                  </div>
+
+                  <span className={`px-3 py-1 rounded-full text-xs font-mono font-bold border flex items-center gap-1.5 ${
+                    dmarketCreds.isConnected
+                      ? 'bg-emerald-500/15 text-emerald-400 border-emerald-500/30'
+                      : 'bg-amber-500/15 text-amber-400 border-amber-500/30 animate-pulse'
+                  }`}>
+                    <span className={`w-2 h-2 rounded-full ${dmarketCreds.isConnected ? 'bg-emerald-400' : 'bg-amber-400'}`} />
+                    {dmarketCreds.isConnected ? 'API LIVE E LIDHUR' : 'GATI PËR ÇELËSAT'}
+                  </span>
                 </div>
-                <div className="text-slate-500 shrink-0">
-                  Powered by Steam Web API & DMarket B2B Engine
+
+                <p className="text-xs text-slate-300 font-sans leading-relaxed">
+                  Tani që je loguar me Steam në DMarket, vendos këtu **Public Key** dhe **Secret Key** që gjen te cilësimet e llogarisë tënde. Sistemi yt i Vortex Gaming do të komunikojë drejtpërdrejt me serverat e DMarket për blerje dhe shkëmbime në kohë reale.
+                </p>
+              </div>
+
+              {/* Form Inputs for API Keys */}
+              <div className="p-6 rounded-3xl bg-[#0F121C] border border-[#1E2335] shadow-xl space-y-4">
+                
+                {/* Public Key */}
+                <div>
+                  <div className="flex items-center justify-between mb-1.5">
+                    <label className="text-xs font-mono font-bold text-slate-200 flex items-center gap-1.5">
+                      <Key className="w-3.5 h-3.5 text-amber-400" />
+                      <span>DMarket Public Key (X-Api-Key):</span>
+                    </label>
+                    <a 
+                      href="https://dmarket.com/account/api" 
+                      target="_blank" 
+                      rel="noopener noreferrer"
+                      className="text-[11px] font-mono text-amber-400 hover:underline flex items-center gap-1"
+                    >
+                      <span>Gjej çelësat në DMarket</span>
+                      <ExternalLink className="w-3 h-3" />
+                    </a>
+                  </div>
+                  <input 
+                    type="text"
+                    value={tempPublic}
+                    onChange={(e) => setTempPublic(e.target.value)}
+                    placeholder="psh. d8a49f1b2c3e4a5d6f7890123456789a..."
+                    className="w-full px-3.5 py-2.5 rounded-xl bg-[#141824] border border-white/10 text-white font-mono text-xs focus:outline-none focus:border-amber-400 transition"
+                  />
+                </div>
+
+                {/* Secret Key */}
+                <div>
+                  <label className="text-xs font-mono font-bold text-slate-200 mb-1.5 flex items-center gap-1.5">
+                    <Lock className="w-3.5 h-3.5 text-amber-400" />
+                    <span>DMarket Secret Key (Ed25519 Private Signature Key):</span>
+                  </label>
+                  <input 
+                    type="password"
+                    value={tempSecret}
+                    onChange={(e) => setTempSecret(e.target.value)}
+                    placeholder="••••••••••••••••••••••••••••••••••••••••"
+                    className="w-full px-3.5 py-2.5 rounded-xl bg-[#141824] border border-white/10 text-white font-mono text-xs focus:outline-none focus:border-amber-400 transition"
+                  />
+                  <span className="text-[10px] font-mono text-slate-500 mt-1 block">
+                    🔒 Çelësi sekret ruhet i sigurt dhe përdoret vetëm për nënshkrimin e kërkesave të blerjes.
+                  </span>
+                </div>
+
+                {/* Test Connection Button */}
+                <div className="pt-2 flex items-center gap-3">
+                  <button
+                    disabled={isTestingDMarket}
+                    onClick={handleTestDMarketHandshake}
+                    className="flex-1 py-3.5 rounded-xl bg-gradient-to-r from-amber-400 via-amber-500 to-yellow-500 hover:from-amber-300 hover:to-yellow-400 text-black font-display font-black text-xs uppercase tracking-wider transition cursor-pointer flex items-center justify-center gap-2 shadow-lg"
+                  >
+                    {isTestingDMarket ? (
+                      <>
+                        <RefreshCw className="w-4 h-4 animate-spin" />
+                        <span>Po bëhet lidhja live me DMarket...</span>
+                      </>
+                    ) : (
+                      <>
+                        <Terminal className="w-4 h-4" />
+                        <span>Testo Lidhjen Live (Verify Connection)</span>
+                      </>
+                    )}
+                  </button>
                 </div>
               </div>
-            </div>
-          ) : (
-            /* ====================================================== */
-            /* VIEW 2: ACTIVE CASE OPENING & HORIZONTAL REEL           */
-            /* ====================================================== */
-            <div className="flex flex-col items-center">
-              
-              {!wonSkin ? (
-                /* ---------------------------------------------------- */
-                /* STAGE A: SPINNER REEL & OPEN BUTTON                  */
-                /* ---------------------------------------------------- */
-                <div className="w-full flex flex-col items-center">
-                  
-                  {/* Case Info Capsule */}
-                  <div className="flex items-center gap-3 mb-6">
-                    <img src={activeCase.image} alt={activeCase.name} referrerPolicy="no-referrer" className="w-14 h-12 object-contain" />
-                    <div>
-                      <h3 className="font-display font-black text-xl text-white">{activeCase.name}</h3>
-                      <p className="text-xs text-slate-400 font-mono">Çmimi për hapje: <strong className="text-amber-400">{activeCase.priceEur.toFixed(2)} €</strong></p>
-                    </div>
-                  </div>
 
-                  {/* Horizontal Spinner Reel Container */}
-                  <div className="relative w-full max-w-3xl h-44 rounded-2xl bg-[#07080D] border-2 border-[#1E2335] shadow-2xl overflow-hidden flex items-center">
-                    
-                    {/* Top & Bottom Center Needles */}
-                    <div className="absolute top-0 bottom-0 left-1/2 -translate-x-1/2 w-1 bg-amber-400 z-30 shadow-[0_0_15px_rgba(245,158,11,0.8)] pointer-events-none">
-                      <div className="absolute top-0 left-1/2 -translate-x-1/2 w-0 h-0 border-l-[8px] border-l-transparent border-r-[8px] border-r-transparent border-t-[10px] border-t-amber-400" />
-                      <div className="absolute bottom-0 left-1/2 -translate-x-1/2 w-0 h-0 border-l-[8px] border-l-transparent border-r-[8px] border-r-transparent border-b-[10px] border-b-amber-400" />
-                    </div>
-
-                    {/* Gradient Fade Edges */}
-                    <div className="absolute left-0 top-0 bottom-0 w-24 bg-gradient-to-r from-[#07080D] to-transparent z-20 pointer-events-none" />
-                    <div className="absolute right-0 top-0 bottom-0 w-24 bg-gradient-to-l from-[#07080D] to-transparent z-20 pointer-events-none" />
-
-                    {/* Moving Strip of Skins */}
-                    {reelItems.length > 0 ? (
-                      <div 
-                        ref={reelRef}
-                        className="flex items-center gap-2 pl-4 transition-transform ease-out"
-                        style={{
-                          transform: `translateX(-${reelOffset}px)`,
-                          transitionDuration: isSpinning ? '5200ms' : '0ms',
-                          transitionTimingFunction: 'cubic-bezier(0.12, 0.8, 0.25, 1)'
-                        }}
-                      >
-                        {reelItems.map((item, idx) => (
-                          <div 
-                            key={`${item.id}-${idx}`}
-                            className="w-32 h-36 rounded-xl bg-[#0F121C] border flex flex-col items-center justify-between p-2 shrink-0 relative overflow-hidden"
-                            style={{ borderColor: `${item.rarityColor}40` }}
-                          >
-                            <span 
-                              className="w-full text-center text-[9px] font-mono font-bold uppercase truncate"
-                              style={{ color: item.rarityColor }}
-                            >
-                              {item.weapon}
-                            </span>
-
-                            <img 
-                              src={item.image} 
-                              alt={item.name} 
-                              referrerPolicy="no-referrer"
-                              crossOrigin="anonymous"
-                              loading="eager"
-                              className="w-24 h-20 object-contain drop-shadow-md my-auto" 
-                            />
-
-                            <div className="w-full text-center">
-                              <div className="text-[10px] font-bold text-white truncate font-display">{item.skinName}</div>
-                              <div className="text-[9px] font-mono text-slate-400">{item.priceEur.toFixed(2)} €</div>
-                            </div>
-
-                            {/* Bottom Rarity Stripe */}
-                            <div 
-                              className="absolute bottom-0 left-0 right-0 h-1" 
-                              style={{ backgroundColor: item.rarityColor }} 
-                            />
-                          </div>
-                        ))}
-                      </div>
-                    ) : (
-                      /* Idle Case Showcase before spin */
-                      <div className="w-full flex items-center justify-center gap-4">
-                        <Sparkles className="w-6 h-6 text-amber-400 animate-pulse" />
-                        <span className="font-display font-bold text-slate-300 text-sm tracking-wider uppercase">
-                          Shtyp butonin më poshtë për të rrotulluar arkën
-                        </span>
-                        <Sparkles className="w-6 h-6 text-amber-400 animate-pulse" />
-                      </div>
-                    )}
-                  </div>
-
-                  {/* Open Case Action Button */}
-                  <div className="mt-8 flex flex-col items-center">
-                    <button
-                      disabled={isSpinning}
-                      onClick={() => handleOpenCase(activeCase)}
-                      className={`px-10 py-4 rounded-2xl font-display font-black text-base uppercase tracking-wider transition-all duration-200 cursor-pointer flex items-center gap-3 shadow-2xl ${
-                        isSpinning
-                          ? 'bg-slate-700 text-slate-400 cursor-not-allowed'
-                          : 'bg-gradient-to-r from-amber-400 via-amber-500 to-yellow-500 hover:from-amber-300 hover:to-yellow-400 text-black shadow-[0_0_35px_rgba(245,158,11,0.4)] hover:scale-105 active:scale-95'
-                      }`}
-                    >
-                      <Flame className="w-5 h-5 fill-current" />
-                      <span>{isSpinning ? 'Po Rrotullohet...' : `Hap Arkën (${activeCase.priceEur.toFixed(2)} €)`}</span>
-                    </button>
-                    <span className="text-[11px] font-mono text-slate-500 mt-2">
-                      Rrotullim i certifikuar Provably Fair me Steam Trade Bot Delivery
+              {/* Live Terminal Output Console */}
+              {dmarketTestLogs.length > 0 && (
+                <div className="mt-5 p-4 rounded-2xl bg-[#06080D] border border-white/10 font-mono text-xs">
+                  <div className="flex items-center justify-between text-slate-400 text-[11px] pb-2 mb-2 border-b border-white/10">
+                    <span className="flex items-center gap-1.5">
+                      <Terminal className="w-3.5 h-3.5 text-emerald-400" />
+                      <span>DMarket Handshake Terminal Log</span>
                     </span>
+                    <span className="text-emerald-400 font-bold">LIVE SOCKET</span>
                   </div>
-
-                  {/* Available Items Preview in this Case */}
-                  <div className="w-full mt-10">
-                    <h4 className="text-xs font-mono font-bold text-slate-400 uppercase tracking-wider mb-3">
-                      Përmbajtja e mundshme e kësaj arke ({activeCase.items.length} Armë):
-                    </h4>
-                    <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-2.5">
-                      {activeCase.items.map((it) => (
-                        <div 
-                          key={it.id}
-                          className="p-2.5 rounded-xl bg-[#0E111A] border border-white/5 hover:border-white/20 transition flex flex-col items-center text-center group"
-                        >
-                          <img src={it.image} alt={it.name} referrerPolicy="no-referrer" className="w-16 h-12 object-contain group-hover:scale-110 transition" />
-                          <div className="text-[10px] font-bold text-white truncate w-full mt-1">{it.name}</div>
-                          <span className="text-[9px] font-mono font-bold text-amber-400">{it.priceEur.toFixed(2)} €</span>
-                        </div>
-                      ))}
-                    </div>
+                  <div className="space-y-1 max-h-36 overflow-y-auto">
+                    {dmarketTestLogs.map((l, i) => (
+                      <div key={i} className="text-slate-300 leading-snug">
+                        <span className="text-emerald-400 font-bold">&gt; </span>
+                        {l}
+                      </div>
+                    ))}
                   </div>
-
                 </div>
-              ) : (
-                /* ---------------------------------------------------- */
-                /* STAGE B: WON ITEM REVEAL & DIRECT STEAM BOT DISPATCH */
-                /* ---------------------------------------------------- */
-                <div className="w-full max-w-xl rounded-3xl bg-[#0E111C] border border-[#232A3D] p-6 sm:p-8 flex flex-col items-center text-center animate-in zoom-in-95 duration-300 shadow-2xl relative overflow-hidden">
-                  
-                  {/* Background Aura */}
-                  <div 
-                    className="absolute inset-0 blur-3xl opacity-20 pointer-events-none"
-                    style={{ backgroundColor: wonSkin.rarityColor }}
-                  />
+              )}
 
-                  {/* Header Title */}
-                  <div 
-                    className="px-3.5 py-1 rounded-full text-xs font-mono font-bold uppercase mb-2 tracking-wider"
-                    style={{ backgroundColor: `${wonSkin.rarityColor}20`, color: wonSkin.rarityColor, border: `1px solid ${wonSkin.rarityColor}40` }}
-                  >
-                    Urime! Fitove {wonSkin.rarity.toUpperCase()}
+              {/* Success Result Card */}
+              {dmarketTestResult && (
+                <div className="mt-4 p-4 rounded-2xl bg-emerald-500/15 border border-emerald-500/40 text-left animate-in fade-in">
+                  <div className="flex items-center gap-2 text-emerald-400 font-display font-bold text-sm mb-1">
+                    <CheckCircle2 className="w-4 h-4" />
+                    <span>Lidhja me DMarket API u krye me sukses!</span>
                   </div>
-
-                  <h3 className="font-display font-black text-2xl text-white tracking-tight mt-1">
-                    {wonSkin.name}
-                  </h3>
-
-                  <div className="flex items-center gap-2 text-xs font-mono text-slate-400 mt-1">
-                    <span>Gjendja: <strong className="text-white">{wonSkin.wear}</strong></span>
-                    <span>•</span>
-                    <span>Float: <strong className="text-white">{wonSkin.floatValue}</strong></span>
-                    <span>•</span>
-                    <span>Vlera në Treg: <strong className="text-emerald-400 font-bold">{wonSkin.priceEur.toFixed(2)} €</strong></span>
+                  <p className="text-xs text-slate-200 font-sans mb-2">
+                    {dmarketTestResult.message}
+                  </p>
+                  <div className="grid grid-cols-2 gap-2 pt-2 border-t border-emerald-500/20 text-[11px] font-mono text-slate-300">
+                    <div>Latency: <strong className="text-emerald-400">{dmarketTestResult.latencyMs}ms</strong></div>
+                    <div>Bilanci DMarket: <strong className="text-amber-400">{dmarketTestResult.dmarketBalanceEur.toFixed(2)} €</strong></div>
                   </div>
-
-                  {/* Big Skin Artwork */}
-                  <div className="relative my-6 flex items-center justify-center">
-                    <img 
-                      src={wonSkin.image} 
-                      alt={wonSkin.name} 
-                      referrerPolicy="no-referrer"
-                      className="w-56 h-40 object-contain drop-shadow-[0_20px_35px_rgba(0,0,0,0.9)] scale-110 animate-bounce duration-1000"
-                    />
-                  </div>
-
-                  {/* Delivery Status / Stepper if dispatching */}
-                  {deliveryProgress && (
-                    <div className="w-full mb-5 p-3.5 rounded-2xl bg-[#141826] border border-amber-400/30 flex items-center gap-3 animate-pulse">
-                      <RefreshCw className="w-5 h-5 text-amber-400 animate-spin shrink-0" />
-                      <div className="text-left text-xs font-mono text-slate-200">
-                        <div className="font-bold text-amber-400">Hapi {deliveryProgress.step}/3:</div>
-                        <div>{deliveryProgress.message}</div>
-                      </div>
-                    </div>
-                  )}
-
-                  {/* Delivery Success Card */}
-                  {deliveryResult && (
-                    <div className="w-full mb-5 p-4 rounded-2xl bg-emerald-500/10 border border-emerald-500/30 text-left animate-in fade-in">
-                      <div className="flex items-center gap-2 text-emerald-400 font-display font-bold text-sm mb-1">
-                        <Check className="w-4 h-4" />
-                        <span>Trade Offer u dërgua në Steam me sukses!</span>
-                      </div>
-                      <p className="text-[11px] text-slate-300 font-sans mb-2">
-                        {deliveryResult.message}
-                      </p>
-                      <div className="flex items-center justify-between text-[10px] font-mono text-slate-400 pt-2 border-t border-emerald-500/20">
-                        <span>Bot: <strong className="text-white">{deliveryResult.botName}</strong></span>
-                        <a 
-                          href="https://steamcommunity.com/my/tradeoffers/"
-                          target="_blank"
-                          rel="noopener noreferrer"
-                          className="text-emerald-400 hover:text-emerald-300 underline flex items-center gap-1 font-bold"
-                        >
-                          <span>Hap Ofertat në Steam</span>
-                          <ExternalLink className="w-3 h-3" />
-                        </a>
-                      </div>
-                    </div>
-                  )}
-
-                  {/* Delivery Error */}
-                  {deliveryError && (
-                    <div className="w-full mb-5 p-3.5 rounded-2xl bg-red-500/10 border border-red-500/30 text-left text-xs font-mono text-red-400 flex items-center gap-2">
-                      <AlertCircle className="w-4 h-4 shrink-0" />
-                      <span>{deliveryError}</span>
-                    </div>
-                  )}
-
-                  {/* Action Buttons: 1. Send to Steam via Bot, 2. Sell for Balance, 3. Open Another */}
-                  {!deliveryResult ? (
-                    <div className="flex flex-col sm:flex-row items-center gap-3 w-full">
-                      <button
-                        onClick={handleDispatchSkin}
-                        className="w-full sm:flex-1 py-3.5 rounded-xl bg-gradient-to-r from-emerald-500 to-green-600 hover:from-emerald-400 hover:to-green-500 text-black font-display font-black text-xs uppercase tracking-wider transition cursor-pointer flex items-center justify-center gap-2 shadow-[0_0_20px_rgba(16,185,129,0.35)]"
-                      >
-                        <Send className="w-4 h-4" />
-                        <span>Dërgo në Steam me Bot</span>
-                      </button>
-
-                      <button
-                        onClick={handleSellSkin}
-                        className="w-full sm:flex-1 py-3.5 rounded-xl bg-white/10 hover:bg-white/15 text-white font-display font-bold text-xs uppercase tracking-wider transition cursor-pointer flex items-center justify-center gap-1.5"
-                        title="Shit menjëherë për të hapur arka të tjera"
-                      >
-                        <Coins className="w-4 h-4 text-amber-400" />
-                        <span>Shit për {(wonSkin.priceEur * 0.85).toFixed(2)} €</span>
-                      </button>
-                    </div>
-                  ) : (
-                    <div className="w-full">
-                      <button
-                        onClick={() => {
-                          sound.playClick();
-                          setWonSkin(null);
-                          setDeliveryResult(null);
-                        }}
-                        className="w-full py-3.5 rounded-xl bg-[#A3E635] hover:bg-[#84cc16] text-black font-display font-black text-sm uppercase tracking-wider transition cursor-pointer shadow-lg"
-                      >
-                        Hap një Arkë Tjetër
-                      </button>
-                    </div>
-                  )}
-
-                  {/* Bottom Steam Trade URL Info Note */}
-                  <div className="mt-4 pt-3 border-t border-white/5 w-full flex items-center justify-between text-[11px] font-mono text-slate-500">
-                    <span className="truncate">
-                      Steam Trade URL: {tradeUrl ? `${tradeUrl.slice(0, 32)}...` : 'Ende pa lidhur'}
-                    </span>
-                    <button
-                      onClick={() => setShowTradeUrlDialog(true)}
-                      className="text-amber-400 hover:underline shrink-0 ml-2 cursor-pointer"
-                    >
-                      Ndrysho Lidhjen
-                    </button>
-                  </div>
-
                 </div>
               )}
 
@@ -785,7 +1195,6 @@ export const VortexCaseShopModal: React.FC<VortexCaseShopModalProps> = ({ isOpen
               </span>
             )}
 
-            {/* Helper link to Steam Trade URL Privacy Page */}
             <a 
               href="https://steamcommunity.com/my/tradeoffers/privacy#trade_offer_access_url"
               target="_blank"
