@@ -164,7 +164,7 @@ export const VortexPartyChat: React.FC<PartyChatProps> = ({
   };
 
   return (
-    <div className="fixed bottom-5 right-5 z-[100] font-sans">
+    <div className="fixed bottom-5 right-20 z-30 font-sans">
       {/* Expanded Chat Window */}
       {isOpen ? (
         <div className="w-[360px] sm:w-[400px] h-[480px] bg-[#0E121B]/95 backdrop-blur-xl border border-[#A3E635]/40 rounded-2xl shadow-[0_20px_50px_rgba(0,0,0,0.8),0_0_30px_rgba(163,230,53,0.15)] flex flex-col overflow-hidden animate-in slide-in-from-bottom-5 duration-200">

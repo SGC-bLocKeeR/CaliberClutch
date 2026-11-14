@@ -2023,7 +2023,7 @@ export const VortexDashboard: React.FC<VortexDashboardProps> = ({
               </button>
 
               {/* User Profile (Avatar + GamerTag + Chevron as in Photo 2) */}
-              <div className="relative">
+              <div className="relative flex items-center gap-2.5">
                 <button
                   onClick={() => { sound.playClick(); setProfileDropdownOpen(!profileDropdownOpen); }}
                   className="flex items-center gap-2.5 py-1 px-1.5 rounded-xl hover:bg-white/[0.05] transition cursor-pointer group"
@@ -2043,6 +2043,9 @@ export const VortexDashboard: React.FC<VortexDashboardProps> = ({
                   </span>
                   <ChevronDown className={`w-4 h-4 text-slate-400 group-hover:text-white transition-transform duration-200 ${profileDropdownOpen ? 'rotate-180 text-[#A3E635]' : ''}`} />
                 </button>
+
+                {/* Vija vertikale në pjesën e djathtë (sa lartësia e logos me emër, verifikim dhe flamur) */}
+                <div className="h-7 w-[1px] bg-white/20 rounded-full shrink-0" />
 
                 {/* AUTHENTIC PRO ESPORTS PROFILE CARD POPOVER */}
                 {profileDropdownOpen && (

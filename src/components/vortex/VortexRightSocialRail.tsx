@@ -234,7 +234,7 @@ export const VortexRightSocialRail: React.FC<VortexRightSocialRailProps> = ({
       {/* ======================================================== */}
       {/* 1. PERSISTENT RIGHT VERTICAL RAIL (1:1 FACEIT)           */}
       {/* ======================================================== */}
-      <aside className="fixed right-0 top-0 bottom-0 w-16 bg-[#08090D] border-l border-[#191C26] z-[60] hidden md:flex flex-col items-center justify-between py-3 select-none">
+      <aside className="fixed right-0 top-0 bottom-0 w-16 bg-[#08090D] border-l border-[#191C26] z-[80] flex flex-col items-center justify-between py-3 select-none shadow-2xl">
         
         {/* TOP SECTION: User Profile Widget (Kept rich as user requested) */}
         <div className="flex flex-col items-center gap-3 w-full">
