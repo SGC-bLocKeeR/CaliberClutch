@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect, useRef, useMemo } from 'react';
 import { 
   Play, 
   Copy, 
@@ -47,6 +47,7 @@ export interface FaceitMatchPlayer {
   verified?: boolean;
   matches: number;
   winRate: string;
+  recentResults?: ('W' | 'L')[];
   rating: string;
   swing: string;
   isPositiveSwing?: boolean;
@@ -338,6 +339,7 @@ export const VortexMatchRoom: React.FC<VortexMatchRoomProps> = ({
   const [copiedLink, setCopiedLink] = useState(false);
   const [copiedCrosshairId, setCopiedCrosshairId] = useState<string | null>(null);
   const [selectedFlyoutPlayer, setSelectedFlyoutPlayer] = useState<FaceitMatchPlayer | null>(null);
+  const [flyoutPosition, setFlyoutPosition] = useState<{ top: number; left: number } | null>(null);
 
   const handleCopyCrosshair = (id: string, code: string) => {
     sound.playClick();
@@ -454,7 +456,8 @@ export const VortexMatchRoom: React.FC<VortexMatchRoomProps> = ({
       isCaptain: true,
       hasPriority: true,
       matches: 429,
-      winRate: '43%',
+      winRate: '54%',
+      recentResults: ['W', 'W', 'W', 'L', 'W'],
       rating: '1.16',
       swing: '+0.96%',
       isPositiveSwing: true,
@@ -474,7 +477,8 @@ export const VortexMatchRoom: React.FC<VortexMatchRoomProps> = ({
       countryName: 'Sweden',
       verified: true,
       matches: 160,
-      winRate: '46%',
+      winRate: '48%',
+      recentResults: ['W', 'W', 'L', 'L', 'W'],
       rating: '1.00',
       swing: '-1.82%',
       isPositiveSwing: false,
@@ -489,13 +493,14 @@ export const VortexMatchRoom: React.FC<VortexMatchRoomProps> = ({
       name: 'wast3dtalen1',
       avatar: 'https://images.unsplash.com/photo-1517841905240-472988babdf9?auto=format&fit=crop&w=150&q=80',
       level: 9,
-      elo: 1810,
+      elo: 1780,
       code: 'RU',
       countryName: 'Russia',
       verified: true,
       hasPriority: true,
       matches: 2085,
-      winRate: '40%',
+      winRate: '49%',
+      recentResults: ['L', 'L', 'L', 'L', 'L'],
       rating: '1.08',
       swing: '-0.41%',
       isPositiveSwing: false,
@@ -515,7 +520,8 @@ export const VortexMatchRoom: React.FC<VortexMatchRoomProps> = ({
       countryName: 'Sweden',
       verified: true,
       matches: 1127,
-      winRate: '46%',
+      winRate: '51%',
+      recentResults: ['W', 'L', 'W', 'W', 'L'],
       rating: '1.20',
       swing: '+1.58%',
       isPositiveSwing: true,
@@ -535,7 +541,8 @@ export const VortexMatchRoom: React.FC<VortexMatchRoomProps> = ({
       countryName: 'Russia',
       verified: true,
       matches: 989,
-      winRate: '50%',
+      winRate: '52%',
+      recentResults: ['W', 'W', 'W', 'L', 'W'],
       rating: '1.08',
       swing: '-0.34%',
       isPositiveSwing: false,
@@ -559,8 +566,9 @@ export const VortexMatchRoom: React.FC<VortexMatchRoomProps> = ({
       countryName: 'Ukraine',
       verified: true,
       isCaptain: true,
-      matches: 404,
-      winRate: '55%',
+      matches: 512,
+      winRate: '50%',
+      recentResults: ['L', 'W', 'L', 'L', 'W'],
       rating: '1.10',
       swing: '-0.17%',
       isPositiveSwing: false,
@@ -581,6 +589,7 @@ export const VortexMatchRoom: React.FC<VortexMatchRoomProps> = ({
       verified: true,
       matches: 1121,
       winRate: '53%',
+      recentResults: ['L', 'W', 'L', 'L', 'W'],
       rating: '1.19',
       swing: '+1.27%',
       isPositiveSwing: true,
@@ -599,8 +608,9 @@ export const VortexMatchRoom: React.FC<VortexMatchRoomProps> = ({
       code: 'PL',
       countryName: 'Poland',
       verified: true,
-      matches: 1264,
-      winRate: '65%',
+      matches: 2890,
+      winRate: '55%',
+      recentResults: ['W', 'W', 'W', 'W', 'L'],
       rating: '1.22',
       swing: '+2.22%',
       isPositiveSwing: true,
@@ -619,8 +629,9 @@ export const VortexMatchRoom: React.FC<VortexMatchRoomProps> = ({
       code: 'XK',
       countryName: 'Kosovo',
       verified: true,
-      matches: 900,
-      winRate: '56%',
+      matches: 3421,
+      winRate: '58%',
+      recentResults: ['W', 'L', 'W', 'L', 'L'],
       rating: '1.18',
       swing: '+1.44%',
       isPositiveSwing: true,
@@ -639,8 +650,9 @@ export const VortexMatchRoom: React.FC<VortexMatchRoomProps> = ({
       code: 'GY',
       countryName: 'Guyana',
       verified: true,
-      matches: 1644,
-      winRate: '43%',
+      matches: 640,
+      winRate: '51%',
+      recentResults: ['W', 'W', 'L', 'L', 'W'],
       rating: '0.94',
       swing: '-2.90%',
       isPositiveSwing: false,
@@ -2456,6 +2468,40 @@ export const VortexMatchRoom: React.FC<VortexMatchRoomProps> = ({
   const activeTeam1Rows: FaceitStatsRow[] = activeAllStats.filter(p => p.team === 'team1');
   const activeTeam2Rows: FaceitStatsRow[] = activeAllStats.filter(p => p.team === 'team2');
 
+  // Unified lookup map for player profiles (matches, winRate, recentResults, etc.)
+  const allPlayersMap: Record<string, FaceitMatchPlayer> = useMemo(() => {
+    const map: Record<string, FaceitMatchPlayer> = {};
+    [...team1Players, ...team2Players].forEach(p => {
+      map[p.name] = p;
+    });
+    return map;
+  }, [team1Players, team2Players]);
+
+  const handleOpenPlayerFlyout = (e: React.MouseEvent, playerName: string) => {
+    e.stopPropagation();
+    sound.playClick();
+    if (selectedFlyoutPlayer?.name === playerName) {
+      setSelectedFlyoutPlayer(null);
+      setFlyoutPosition(null);
+      return;
+    }
+    const fullPlayer = allPlayersMap[playerName] || team1Players.find(p => p.name === playerName) || team2Players.find(p => p.name === playerName);
+    if (!fullPlayer) return;
+
+    const rect = e.currentTarget.getBoundingClientRect();
+    const cardHeight = 420;
+    const cardWidth = 285;
+    const spaceBelow = window.innerHeight - rect.bottom;
+
+    const top = spaceBelow < cardHeight 
+      ? Math.max(10, rect.top - cardHeight + 20) 
+      : rect.bottom + 4;
+    const left = Math.max(10, Math.min(rect.left, window.innerWidth - cardWidth - 10));
+
+    setSelectedFlyoutPlayer(fullPlayer);
+    setFlyoutPosition({ top, left });
+  };
+
   const renderStatsTable = (
     rows: FaceitStatsRow[],
     isUnified: boolean = false,
@@ -2593,9 +2639,12 @@ export const VortexMatchRoom: React.FC<VortexMatchRoomProps> = ({
 
                 return (
                   <tr key={row.id} className={`${rowBg} transition`}>
-                    {/* Player Column */}
+                    {/* Player Column - Clickable Profile Flyout (1:1 FACEIT) */}
                     <td className="py-3 px-4">
-                      <div className="flex items-center gap-2.5">
+                      <div 
+                        onClick={(e) => handleOpenPlayerFlyout(e, row.name)}
+                        className="flex items-center gap-2.5 cursor-pointer group w-fit select-none"
+                      >
                         {/* Party shape indicator */}
                         <div className="w-3 flex items-center justify-center shrink-0">
                           {row.partyShape === 'circle' && (
@@ -2616,11 +2665,11 @@ export const VortexMatchRoom: React.FC<VortexMatchRoomProps> = ({
                         </div>
 
                         {/* Avatar */}
-                        <div className="relative w-7 h-7 shrink-0">
+                        <div className="relative w-7 h-7 shrink-0 transition-transform group-hover:scale-105">
                           <img 
                             src={row.avatar} 
                             alt={row.name} 
-                            className={`w-7 h-7 rounded-full object-cover border border-white/10 ${row.name === 'M18' ? 'bg-black object-contain' : ''}`} 
+                            className={`w-7 h-7 rounded-full object-cover border border-white/10 group-hover:border-white/40 ${row.name === 'M18' ? 'bg-black object-contain' : ''}`} 
                           />
                           {row.hasPriority && (
                             <div className="absolute -top-1 -right-0.5 w-3 h-3 rounded-full bg-[#FF5500] flex items-center justify-center text-[7px] text-black font-black shadow-sm" title="Priority">
@@ -2629,7 +2678,7 @@ export const VortexMatchRoom: React.FC<VortexMatchRoomProps> = ({
                           )}
                         </div>
 
-                        <span className="font-display font-bold text-xs text-white truncate max-w-[120px]">
+                        <span className="font-display font-bold text-xs text-white group-hover:text-[#FF5500] group-hover:underline transition truncate max-w-[120px]">
                           {row.name}
                         </span>
                       </div>
@@ -2842,286 +2891,71 @@ export const VortexMatchRoom: React.FC<VortexMatchRoomProps> = ({
   // 1:1 FACEIT Overview Player Card with separated columns & clickable profile flyout
   const renderOverviewPlayerCard = (player: FaceitMatchPlayer, team: 'team1' | 'team2') => {
     const isCurrentUser = player.name === currentGamerTag;
-    const isFlyoutOpen = selectedFlyoutPlayer?.id === player.id;
-
-    // 5 Recent Match Form Results (W in emerald, L in red)
-    const recentResults = (
-      player.name === 'M18' 
-        ? ['W', 'L', 'W', 'L', 'L'] 
-        : player.name === 'bLocKeeRz'
-        ? ['W', 'W', 'L', 'L', 'W']
-        : player.name === 'Rosen33'
-        ? ['W', 'W', 'W', 'L', 'W']
-        : player.name === 'Nascar777'
-        ? ['W', 'W', 'W', 'W', 'L']
-        : player.name === 'Zalevvo'
-        ? ['L', 'W', 'L', 'L', 'W']
-        : player.isPositiveSwing
-        ? ['W', 'L', 'W', 'W', 'L']
-        : ['W', 'L', 'W', 'L', 'L']
-    );
+    const isSelected = selectedFlyoutPlayer?.name === player.name;
 
     return (
       <div 
         key={player.id}
-        onClick={() => {
-          sound.playClick();
-          if (selectedFlyoutPlayer?.id === player.id) {
-            setSelectedFlyoutPlayer(null);
-          } else {
-            setSelectedFlyoutPlayer(player);
-          }
-        }}
+        onClick={(e) => handleOpenPlayerFlyout(e, player.name)}
         className={`rounded-xl border transition p-3 shadow-md relative group cursor-pointer ${
-          isFlyoutOpen 
-            ? 'border-white/40 bg-[#161722]' 
+          isSelected 
+            ? 'border-[#FF5500]/70 bg-[#161722]' 
             : 'border-[#222432] bg-[#14151D] hover:border-white/20'
         }`}
       >
-        {/* TOP ROW: AVATAR MODULE (LEFT) + PLAYER IDENTITY (RIGHT) */}
-        <div className="flex items-start gap-3">
-          
-          {/* Left: Dedicated Avatar Container with Exact 1:1 FACEIT Anti-Cheat Placement (Poshtë Djathtas) */}
-          <div className="relative w-12 h-12 shrink-0">
-            {/* Captain Crown if player.isCaptain */}
-            {player.isCaptain && <FaceitCaptainCrown />}
+        <div className="flex items-center justify-between gap-3">
+          {/* Left: Avatar with Priority Badge & Name */}
+          <div className="flex items-center gap-3 min-w-0">
+            <div className="relative w-10 h-10 shrink-0">
+              <img 
+                src={player.avatar} 
+                alt={player.name} 
+                className={`w-10 h-10 rounded-full object-cover border border-white/10 group-hover:border-white/30 transition ${player.name === 'M18' ? 'bg-black object-contain' : ''}`} 
+              />
+              {player.hasPriority && (
+                <div className="absolute -top-1 -right-0.5 w-3.5 h-3.5 rounded-full bg-[#FF5500] flex items-center justify-center text-[8px] text-black font-black shadow-sm" title="Priority">
+                  ★
+                </div>
+              )}
+            </div>
 
-            {/* Circular Avatar Photo */}
-            <img 
-              src={player.avatar} 
-              alt={player.name} 
-              className="w-full h-full rounded-full object-cover border border-[#262838] shadow-sm block" 
-            />
-
-            {/* Authentic FACEIT Anti-Cheat Shield Badge (Overlapping photo at bottom-right) */}
-            <FaceitAntiCheatShield 
-              size={18} 
-              className="absolute -bottom-1 -right-1 z-10" 
-            />
-          </div>
-
-          {/* Right: Country, Name, Verified, Elo, Level Ring */}
-          <div className="flex-1 min-w-0">
-            <div className="flex items-center justify-between gap-1.5">
-              <div className="flex items-center gap-1.5 truncate">
-                <CountryFlag code={player.code} name={player.countryName} size="xs" />
-                <span className={`font-display font-bold text-xs truncate ${
+            <div className="min-w-0">
+              <div className="flex items-center gap-1.5">
+                <span className={`font-display font-bold text-sm truncate group-hover:text-[#FF5500] group-hover:underline transition ${
                   isCurrentUser ? 'text-[#A3E635]' : 'text-white'
                 }`}>
                   {player.name}
                 </span>
                 {player.verified && (
-                  <CheckCircle2 className="w-3.5 h-3.5 text-slate-200 fill-white/[0.08] shrink-0" />
+                  <CheckCircle2 className="w-3.5 h-3.5 text-white fill-white/10 shrink-0" />
                 )}
+                <CountryFlag code={player.code} name={player.countryName} size="xs" />
               </div>
-
-              <div className="flex items-center gap-2 shrink-0">
-                <div className="flex items-center gap-1 text-slate-400 font-mono text-[11px] font-bold">
-                  <Activity className="w-3 h-3 text-slate-500" />
-                  <span className="text-slate-200">{player.elo.toLocaleString()}</span>
-                </div>
-                <FaceitLevelRing level={player.level} size={24} />
+              <div className="flex items-center gap-1.5 mt-0.5">
+                <FaceitLevelRing level={player.level} size={18} />
+                <span className="font-mono text-xs text-slate-400 font-semibold">
+                  {player.elo.toLocaleString()}
+                </span>
               </div>
             </div>
+          </div>
 
-            {/* Subtitle: "Last 30 matches" */}
-            <div className="text-[9px] font-mono text-slate-500 uppercase tracking-wider mt-1">
-              Last 30 matches
+          {/* Right: K/D • K/R • ADR mini stats */}
+          <div className="flex items-center gap-3 text-right font-mono text-xs shrink-0 divide-x divide-white/[0.08]">
+            <div className="px-1.5">
+              <div className="font-bold text-white">{player.kd}</div>
+              <div className="text-[9px] text-slate-500 uppercase font-semibold">K/D</div>
+            </div>
+            <div className="px-1.5">
+              <div className="font-bold text-white">{player.kr}</div>
+              <div className="text-[9px] text-slate-500 uppercase font-semibold">K/R</div>
+            </div>
+            <div className="pl-1.5">
+              <div className="font-bold text-white">{player.adr}</div>
+              <div className="text-[9px] text-slate-500 uppercase font-semibold">ADR</div>
             </div>
           </div>
         </div>
-
-        {/* BOTTOM ROW: SEPARATED STATS COLUMNS ("le te jen te ndara sikur ne faceit") */}
-        <div className="mt-2.5 pt-2 border-t border-white/[0.06] flex items-center justify-between text-center font-mono overflow-x-auto scrollbar-none">
-          {/* Matches Column (Separated by vertical line on right) */}
-          <div className="pr-2.5 text-left shrink-0">
-            <div className="text-xs font-bold text-white">{player.matches.toLocaleString()}</div>
-            <div className="text-[9px] text-slate-500 uppercase font-semibold">Matches</div>
-          </div>
-
-          {/* Vertical divider */}
-          <div className="h-6 w-px bg-white/10 shrink-0 mr-2" />
-
-          {/* Wins */}
-          <div className="px-1 flex-1 min-w-[34px]">
-            <div className="text-xs font-bold text-white">{player.winRate}</div>
-            <div className="text-[9px] text-slate-500 uppercase font-semibold">Wins</div>
-          </div>
-
-          {/* Rating (Clean text with subtle underline - No pill/box) */}
-          <div className="px-1 flex-1 min-w-[34px]">
-            <div className="text-xs font-bold text-white underline decoration-white/25 underline-offset-2">
-              {player.rating}
-            </div>
-            <div className="text-[9px] text-slate-500 uppercase font-semibold mt-0.5">Rating</div>
-          </div>
-
-          {/* Swing (1:1 FACEIT Pill from Reference Image 2) */}
-          <div className="px-1 flex-1 min-w-[42px] flex flex-col items-center">
-            <div className={`px-1.5 py-0.5 rounded-[4px] text-[11px] font-mono font-bold border ${
-              player.isPositiveSwing 
-                ? 'bg-[#0A2018] text-[#00E599] border-[#124234]' 
-                : 'bg-[#261215] text-[#F87171] border-[#4A171D]'
-            }`}>
-              {player.swing}
-            </div>
-            <div className="text-[9px] text-slate-500 uppercase font-semibold mt-0.5">Swing</div>
-          </div>
-
-          {/* K/D/A */}
-          <div className="px-1 flex-1 min-w-[46px]">
-            <div className="text-xs font-bold text-slate-200">{player.kda}</div>
-            <div className="text-[9px] text-slate-500 uppercase font-semibold">K/D/A</div>
-          </div>
-
-          {/* K/D */}
-          <div className="px-1 flex-1 min-w-[32px]">
-            <div className="text-xs font-bold text-slate-200">{player.kd}</div>
-            <div className="text-[9px] text-slate-500 uppercase font-semibold">K/D</div>
-          </div>
-
-          {/* K/R */}
-          <div className="px-1 flex-1 min-w-[32px]">
-            <div className="text-xs font-bold text-slate-200">{player.kr}</div>
-            <div className="text-[9px] text-slate-500 uppercase font-semibold">K/R</div>
-          </div>
-
-          {/* ADR */}
-          <div className="pl-1 flex-1 min-w-[34px]">
-            <div className="text-xs font-bold text-white">{player.adr}</div>
-            <div className="text-[9px] text-slate-500 uppercase font-semibold">ADR</div>
-          </div>
-        </div>
-
-        {/* CLICKABLE PROFILE FLYOUT ("pasi klikohet shfaqet profili majtas") */}
-        {isFlyoutOpen && (
-          <div 
-            onClick={(e) => e.stopPropagation()}
-            className={`w-72 rounded-2xl bg-[#111218] border border-[#262835] shadow-2xl p-4 z-50 text-center animate-in fade-in zoom-in-95 duration-100 select-text cursor-default ${
-              team === 'team2'
-                ? 'absolute right-full mr-3.5 top-0 max-md:fixed max-md:left-1/2 max-md:top-1/2 max-md:-translate-x-1/2 max-md:-translate-y-1/2 max-md:right-auto max-md:mr-0'
-                : 'absolute left-full ml-3.5 top-0 max-md:fixed max-md:left-1/2 max-md:top-1/2 max-md:-translate-x-1/2 max-md:-translate-y-1/2 max-md:ml-0'
-            }`}
-          >
-            {/* Top Close Button */}
-            <button
-              onClick={(e) => {
-                e.stopPropagation();
-                sound.playClick();
-                setSelectedFlyoutPlayer(null);
-              }}
-              className="absolute top-3 right-3 text-slate-400 hover:text-white transition cursor-pointer p-1 rounded-lg hover:bg-white/[0.06]"
-              title="Close"
-            >
-              <X className="w-4 h-4" />
-            </button>
-
-            {/* Profile Avatar with authentic Anti-Cheat badge (Overlapping photo at bottom-right) */}
-            <div className="relative w-20 h-20 mx-auto shrink-0 mt-1">
-              {/* Circular Avatar */}
-              <img 
-                src={player.avatar} 
-                alt={player.name} 
-                className="w-full h-full rounded-full object-cover border border-[#2B2D3C] shadow-xl block" 
-              />
-
-              {/* Authentic Anti-Cheat Shield Badge (Mbi foto poshtë djathtas) */}
-              <FaceitAntiCheatShield size={26} className="absolute -bottom-1.5 -right-1.5 z-10" />
-            </div>
-
-            {/* Name + Verified + Flag */}
-            <div className="flex items-center justify-center gap-2 mt-3">
-              <span className={`font-display font-black text-xl ${
-                isCurrentUser ? 'text-[#A3E635]' : 'text-white'
-              }`}>
-                {player.name}
-              </span>
-              {player.verified && (
-                <CheckCircle2 className="w-4 h-4 text-white fill-white/[0.1] shrink-0" />
-              )}
-              <CountryFlag code={player.code} name={player.countryName} size="sm" />
-            </div>
-
-            {/* Shooter + Level Ring + Elo */}
-            <div className="flex items-center justify-center gap-2.5 mt-2">
-              <Crosshair className="w-4 h-4 text-slate-400" />
-              <FaceitLevelRing level={player.level} size={26} />
-              <span className="font-mono font-black text-white text-base">
-                {player.elo.toLocaleString()}
-              </span>
-            </div>
-
-            {/* Stats Bar: MATCHES • WIN RATE • RECENT RESULTS (W L W L L) */}
-            <div className="border-y border-white/[0.08] py-3 my-3 px-2 flex items-center justify-around text-center font-mono">
-              <div>
-                <div className="text-[10px] text-slate-500 font-bold uppercase tracking-wider">Matches</div>
-                <div className="text-base font-black text-white mt-0.5">{player.matches.toLocaleString()}</div>
-              </div>
-              <div className="h-7 w-px bg-white/10" />
-              <div>
-                <div className="text-[10px] text-slate-500 font-bold uppercase tracking-wider">Win Rate</div>
-                <div className="text-base font-black text-white mt-0.5">{player.winRate}</div>
-              </div>
-              <div className="h-7 w-px bg-white/10" />
-              <div>
-                <div className="text-[10px] text-slate-500 font-bold uppercase tracking-wider">Recent Results</div>
-                <div className="flex items-center justify-center gap-1.5 font-black text-sm mt-0.5">
-                  {recentResults.map((r, i) => (
-                    <span key={i} className={r === 'W' ? 'text-emerald-400' : 'text-red-500'}>
-                      {r}
-                    </span>
-                  ))}
-                </div>
-              </div>
-            </div>
-
-            {/* Action List: Go to profile, View Steam profile, Message, Block */}
-            <div className="space-y-1 text-left text-xs font-mono font-bold">
-              <button
-                onClick={(e) => {
-                  e.stopPropagation();
-                  sound.playSelect();
-                  setSelectedFlyoutPlayer(null);
-                }}
-                className="w-full text-left py-2 px-3 rounded-lg text-slate-300 hover:text-white hover:bg-white/[0.06] transition cursor-pointer"
-              >
-                Go to profile
-              </button>
-              <button
-                onClick={(e) => {
-                  e.stopPropagation();
-                  sound.playClick();
-                  window.open('https://steamcommunity.com', '_blank');
-                }}
-                className="w-full text-left py-2 px-3 rounded-lg text-slate-300 hover:text-white hover:bg-white/[0.06] transition cursor-pointer"
-              >
-                View Steam profile
-              </button>
-              <button
-                onClick={(e) => {
-                  e.stopPropagation();
-                  sound.playClick();
-                  setIsChatDrawerOpen(true);
-                  setTeamInput(`@${player.name} `);
-                  setSelectedFlyoutPlayer(null);
-                }}
-                className="w-full text-left py-2 px-3 rounded-lg text-slate-300 hover:text-white hover:bg-white/[0.06] transition cursor-pointer"
-              >
-                Message
-              </button>
-              <button
-                onClick={(e) => {
-                  e.stopPropagation();
-                  sound.playClick();
-                  setSelectedFlyoutPlayer(null);
-                }}
-                className="w-full text-left py-2 px-3 rounded-lg text-red-500 hover:text-red-400 hover:bg-red-500/10 transition cursor-pointer"
-              >
-                Block
-              </button>
-            </div>
-          </div>
-        )}
       </div>
     );
   };
@@ -3379,13 +3213,7 @@ export const VortexMatchRoom: React.FC<VortexMatchRoomProps> = ({
       {/* ======================================================== */}
       {activeTab === 'overview' && (
         <div className="max-w-[1400px] w-full mx-auto px-4 sm:px-6 py-4 flex-1 relative">
-          {/* Backdrop for open profile flyout */}
-          {selectedFlyoutPlayer && (
-            <div 
-              className="fixed inset-0 z-40 bg-black/25 backdrop-blur-[1px]" 
-              onClick={() => setSelectedFlyoutPlayer(null)} 
-            />
-          )}
+
 
           <div className="grid grid-cols-1 lg:grid-cols-12 gap-5 items-start">
             
@@ -4196,6 +4024,153 @@ export const VortexMatchRoom: React.FC<VortexMatchRoomProps> = ({
           </div>
 
         </div>
+      )}
+
+      {/* ======================================================== */}
+      {/* 5. AUTHENTIC 1:1 FACEIT PLAYER PROFILE FLYOUT             */}
+      {/* ======================================================== */}
+      {selectedFlyoutPlayer && flyoutPosition && (
+        <>
+          {/* Backdrop to close on click outside */}
+          <div 
+            className="fixed inset-0 z-[140] bg-black/30 backdrop-blur-[0.5px]" 
+            onClick={() => {
+              setSelectedFlyoutPlayer(null);
+              setFlyoutPosition(null);
+            }} 
+          />
+          
+          <div 
+            onClick={(e) => e.stopPropagation()}
+            style={{ top: `${flyoutPosition.top}px`, left: `${flyoutPosition.left}px` }}
+            className="fixed z-[150] w-[285px] rounded-2xl bg-[#14151E] border border-[#262838] shadow-[0_16px_50px_rgba(0,0,0,0.9)] p-4 pt-3.5 select-text animate-in fade-in zoom-in-95 duration-100"
+          >
+            {/* Top Close Button */}
+            <button
+              onClick={() => {
+                sound.playClick();
+                setSelectedFlyoutPlayer(null);
+                setFlyoutPosition(null);
+              }}
+              className="absolute top-3.5 right-3.5 text-slate-400 hover:text-white transition cursor-pointer p-1 rounded-lg hover:bg-white/[0.06]"
+              title="Close"
+            >
+              <X className="w-4 h-4" />
+            </button>
+
+            {/* Profile Avatar (Clean circular photo matching 1:1 FACEIT) */}
+            <div className="w-20 h-20 mx-auto mt-1 shrink-0">
+              <img 
+                src={selectedFlyoutPlayer.avatar} 
+                alt={selectedFlyoutPlayer.name} 
+                className="w-full h-full rounded-full object-cover border-2 border-white/10 shadow-xl block" 
+              />
+            </div>
+
+            {/* Name + Verified Checkmark Badge + Flag */}
+            <div className="flex items-center justify-center gap-1.5 mt-3">
+              <span className="font-display font-black text-xl text-white tracking-wide">
+                {selectedFlyoutPlayer.name}
+              </span>
+              {selectedFlyoutPlayer.verified && (
+                <svg className="w-4 h-4 text-white fill-current shrink-0" viewBox="0 0 24 24">
+                  <path d="M12 2l2.4 2.4 3.4-.4 1.4 3.1 3.1 1.4-.4 3.4L24 14.3l-2.1 2.7.4 3.4-3.4.4-1.4 3.1-3.1-1.4-.4 3.4L12 2l-2.4-2.4-3.4.4-1.4-3.1-3.1-1.4.4-3.4L0 9.7l2.1-2.7-.4-3.4 3.4-.4 1.4-3.1 3.1 1.4.4-3.4L12 2zm-1.5 13.5l6-6-1.4-1.4-4.6 4.6-2.1-2.1-1.4 1.4 3.5 3.5z" />
+                </svg>
+              )}
+              <CountryFlag code={selectedFlyoutPlayer.code} name={selectedFlyoutPlayer.countryName} size="sm" />
+            </div>
+
+            {/* CS Soldier Silhouette + Level Ring + Elo */}
+            <div className="flex items-center justify-center gap-2 mt-2">
+              <svg className="w-4 h-4 text-slate-300 fill-current shrink-0" viewBox="0 0 24 24">
+                <circle cx="15.5" cy="4.5" r="2" />
+                <path d="M7 8.5l3.5 1.5 3-2 1.5.5-2 3.5 2 2-1.5 1.5-3-3-1.5 1v5.5H7.5v-6l2-2.5-2.5-1.5z" />
+                <path d="M12 11l6-2 3 .5v1l-3 .5-5 1.5z" />
+              </svg>
+              <FaceitLevelRing level={selectedFlyoutPlayer.level} size={22} />
+              <span className="font-mono font-bold text-white text-sm">
+                {selectedFlyoutPlayer.elo.toLocaleString()}
+              </span>
+            </div>
+
+            {/* Stats Box: MATCHES • WIN RATE • RECENT RESULTS (1:1 with user reference) */}
+            <div className="bg-[#0F1017] rounded-xl p-2.5 my-3.5 border border-white/[0.05]">
+              <div className="grid grid-cols-3 divide-x divide-white/[0.08] text-center font-mono">
+                <div>
+                  <div className="text-[9px] font-bold uppercase text-slate-400 tracking-wider">Matches</div>
+                  <div className="text-sm font-black text-white mt-0.5">{selectedFlyoutPlayer.matches.toLocaleString()}</div>
+                </div>
+                <div>
+                  <div className="text-[9px] font-bold uppercase text-slate-400 tracking-wider">Win Rate</div>
+                  <div className="text-sm font-black text-white mt-0.5">{selectedFlyoutPlayer.winRate}</div>
+                </div>
+                <div>
+                  <div className="text-[9px] font-bold uppercase text-slate-400 tracking-wider">Recent Results</div>
+                  <div className="flex items-center justify-center gap-1 font-black text-xs mt-1">
+                    {(selectedFlyoutPlayer.recentResults || ['L', 'L', 'L', 'L', 'L']).map((r, i) => (
+                      <span key={i} className={r === 'W' ? 'text-emerald-400' : 'text-rose-500'}>
+                        {r}
+                      </span>
+                    ))}
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            {/* Action List (Exact 1:1 match with uploaded_media_1794661054728.png) */}
+            <div className="space-y-0.5 text-left text-xs font-mono font-semibold pt-0.5">
+              <button
+                onClick={() => {
+                  sound.playSelect();
+                  setSelectedFlyoutPlayer(null);
+                  setFlyoutPosition(null);
+                }}
+                className="w-full text-left py-2 px-3 rounded-lg text-slate-300 hover:text-white hover:bg-white/[0.06] transition cursor-pointer"
+              >
+                Go to profile
+              </button>
+              <button
+                onClick={() => {
+                  sound.playClick();
+                  setSelectedFlyoutPlayer(null);
+                  setFlyoutPosition(null);
+                }}
+                className="w-full text-left py-2 px-3 rounded-lg text-slate-300 hover:text-white hover:bg-white/[0.06] transition cursor-pointer"
+              >
+                Equipped inventory items
+              </button>
+              <button
+                onClick={() => {
+                  sound.playClick();
+                  window.open('https://steamcommunity.com', '_blank');
+                }}
+                className="w-full text-left py-2 px-3 rounded-lg text-slate-300 hover:text-white hover:bg-white/[0.06] transition cursor-pointer"
+              >
+                View Steam profile
+              </button>
+              <button
+                onClick={() => {
+                  sound.playNotification();
+                  setSelectedFlyoutPlayer(null);
+                  setFlyoutPosition(null);
+                }}
+                className="w-full text-left py-2 px-3 rounded-lg text-slate-300 hover:text-white hover:bg-white/[0.06] transition cursor-pointer"
+              >
+                Add friend
+              </button>
+              <button
+                onClick={() => {
+                  sound.playClick();
+                  setSelectedFlyoutPlayer(null);
+                  setFlyoutPosition(null);
+                }}
+                className="w-full text-left py-2 px-3 rounded-lg text-rose-500 hover:text-rose-400 hover:bg-rose-500/10 transition cursor-pointer"
+              >
+                Block
+              </button>
+            </div>
+          </div>
+        </>
       )}
 
       {/* ======================================================== */}
