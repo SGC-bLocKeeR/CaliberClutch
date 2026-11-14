@@ -29,7 +29,8 @@ import {
   ChevronDown,
   Flame,
   Award,
-  Smile
+  Smile,
+  ImageIcon
 } from 'lucide-react';
 import { sound } from '../../utils/soundEffects';
 import { CountryFlag } from './CountryFlag';
@@ -151,6 +152,7 @@ export interface MatchChatMessage {
   isSystem?: boolean;
   isAdmin?: boolean;
   text: string;
+  imageUrl?: string;
   timestamp: string;
   code?: string;
 }
@@ -435,6 +437,58 @@ export const VortexMatchRoom: React.FC<VortexMatchRoomProps> = ({
 
   const teamEndRef = useRef<HTMLDivElement>(null);
   const roomEndRef = useRef<HTMLDivElement>(null);
+  const roomFileInputRef = useRef<HTMLInputElement>(null);
+  const teamFileInputRef = useRef<HTMLInputElement>(null);
+
+  const handleRoomImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    const reader = new FileReader();
+    reader.onload = (event) => {
+      const dataUrl = event.target?.result as string;
+      if (!dataUrl) return;
+      const newMsg: MatchChatMessage = {
+        id: `usr-room-img-${Date.now()}`,
+        sender: currentGamerTag || 'bLocKeeRz',
+        avatar: currentAvatarUrl || '/images/blockeerz_avatar.png',
+        team: 'team2',
+        code: 'GY',
+        text: roomInput.trim(),
+        imageUrl: dataUrl,
+        timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', hour12: true }).toLowerCase()
+      };
+      setRoomMessages(prev => [...prev, newMsg]);
+      setRoomInput('');
+      sound.playChatMessage();
+    };
+    reader.readAsDataURL(file);
+    e.target.value = '';
+  };
+
+  const handleTeamImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    const reader = new FileReader();
+    reader.onload = (event) => {
+      const dataUrl = event.target?.result as string;
+      if (!dataUrl) return;
+      const newMsg: MatchChatMessage = {
+        id: `usr-team-img-${Date.now()}`,
+        sender: currentGamerTag || 'bLocKeeRz',
+        avatar: currentAvatarUrl || '/images/blockeerz_avatar.png',
+        team: 'team2',
+        code: 'GY',
+        text: teamInput.trim(),
+        imageUrl: dataUrl,
+        timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', hour12: true }).toLowerCase()
+      };
+      setTeamMessages(prev => [...prev, newMsg]);
+      setTeamInput('');
+      sound.playChatMessage();
+    };
+    reader.readAsDataURL(file);
+    e.target.value = '';
+  };
 
   useEffect(() => {
     if (isChatDrawerOpen) {
@@ -3955,7 +4009,19 @@ export const VortexMatchRoom: React.FC<VortexMatchRoomProps> = ({
                         <span className="text-xs font-bold text-white truncate">{msg.sender}</span>
                         <span className="text-[10px] text-slate-500 font-mono">{msg.timestamp}</span>
                       </div>
-                      <p className="text-xs text-slate-300 font-sans mt-0.5 break-words">{msg.text}</p>
+                      {msg.text && (
+                        <p className="text-xs text-slate-300 font-sans mt-0.5 break-words">{msg.text}</p>
+                      )}
+                      {msg.imageUrl && (
+                        <div className="mt-1.5 max-w-[220px] rounded-lg overflow-hidden border border-white/10 shadow-md">
+                          <img 
+                            src={msg.imageUrl} 
+                            alt="Attachment" 
+                            className="w-full h-auto max-h-[180px] object-cover cursor-pointer hover:opacity-90 transition"
+                            onClick={() => window.open(msg.imageUrl, '_blank')}
+                          />
+                        </div>
+                      )}
                     </div>
                   </div>
                 ))}
@@ -3974,13 +4040,29 @@ export const VortexMatchRoom: React.FC<VortexMatchRoomProps> = ({
                   className="w-full h-9 pl-3 pr-16 rounded-md bg-[#111218] border border-[#20222B] text-xs text-white placeholder-slate-500 focus:outline-none focus:border-slate-500 transition"
                 />
                 <div className="absolute right-2 flex items-center gap-1.5 text-slate-400">
-                  <span className="text-[10px] font-bold select-none cursor-pointer hover:text-white px-0.5">
-                    AA
-                  </span>
+                  <input 
+                    ref={roomFileInputRef}
+                    type="file" 
+                    accept="image/*" 
+                    className="hidden" 
+                    onChange={handleRoomImageUpload} 
+                  />
+                  <button
+                    type="button"
+                    onClick={() => {
+                      sound.playClick();
+                      roomFileInputRef.current?.click();
+                    }}
+                    className="hover:text-white transition p-0.5 cursor-pointer"
+                    title="Send image"
+                  >
+                    <ImageIcon className="w-4 h-4" />
+                  </button>
                   <button
                     type="button"
                     onClick={() => setRoomInput(prev => prev + ' 🎯')}
                     className="hover:text-white transition p-0.5 cursor-pointer"
+                    title="Emoji"
                   >
                     <Smile className="w-4 h-4" />
                   </button>
@@ -4047,9 +4129,21 @@ export const VortexMatchRoom: React.FC<VortexMatchRoomProps> = ({
                               <span className="text-[10px] text-slate-500 font-mono">{msg.timestamp}</span>
                             </div>
                           )}
-                          <p className="text-xs text-slate-200 font-sans break-words leading-relaxed">
-                            {msg.text}
-                          </p>
+                          {msg.text && (
+                            <p className="text-xs text-slate-200 font-sans break-words leading-relaxed">
+                              {msg.text}
+                            </p>
+                          )}
+                          {msg.imageUrl && (
+                            <div className="mt-1.5 max-w-[220px] rounded-lg overflow-hidden border border-white/10 shadow-md">
+                              <img 
+                                src={msg.imageUrl} 
+                                alt="Attachment" 
+                                className="w-full h-auto max-h-[180px] object-cover cursor-pointer hover:opacity-90 transition"
+                                onClick={() => window.open(msg.imageUrl, '_blank')}
+                              />
+                            </div>
+                          )}
                         </div>
                       </div>
                     );
@@ -4081,13 +4175,29 @@ export const VortexMatchRoom: React.FC<VortexMatchRoomProps> = ({
                       className="w-full h-9 pl-3 pr-16 rounded-md bg-[#111218] border border-[#20222B] text-xs text-white placeholder-slate-500 focus:outline-none focus:border-slate-500 transition"
                     />
                     <div className="absolute right-2 flex items-center gap-1.5 text-slate-400">
-                      <span className="text-[10px] font-bold select-none cursor-pointer hover:text-white px-0.5">
-                        AA
-                      </span>
+                      <input 
+                        ref={teamFileInputRef}
+                        type="file" 
+                        accept="image/*" 
+                        className="hidden" 
+                        onChange={handleTeamImageUpload} 
+                      />
+                      <button
+                        type="button"
+                        onClick={() => {
+                          sound.playClick();
+                          teamFileInputRef.current?.click();
+                        }}
+                        className="hover:text-white transition p-0.5 cursor-pointer"
+                        title="Send image"
+                      >
+                        <ImageIcon className="w-4 h-4" />
+                      </button>
                       <button
                         type="button"
                         onClick={() => setTeamInput(prev => prev + ' 🎯')}
                         className="hover:text-white transition p-0.5 cursor-pointer"
+                        title="Emoji"
                       >
                         <Smile className="w-4 h-4" />
                       </button>
