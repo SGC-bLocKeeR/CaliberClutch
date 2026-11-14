@@ -395,7 +395,8 @@ export const VortexCaseShopModal: React.FC<VortexCaseShopModalProps> = ({ isOpen
                         <img 
                           src={c.image} 
                           alt={c.name}
-                          className="relative w-32 h-28 object-contain drop-shadow-[0_15px_25px_rgba(0,0,0,0.8)] group-hover:scale-105 transition-transform duration-300" 
+                          referrerPolicy="no-referrer"
+                          className="relative w-36 h-32 object-contain drop-shadow-[0_15px_30px_rgba(0,0,0,0.85)] group-hover:scale-110 transition-transform duration-300" 
                         />
                       </div>
 
@@ -415,7 +416,8 @@ export const VortexCaseShopModal: React.FC<VortexCaseShopModalProps> = ({ isOpen
                             key={idx}
                             src={item.image} 
                             alt={item.name} 
-                            className="w-7 h-7 rounded-full bg-black/50 border border-white/10 object-contain p-0.5"
+                            referrerPolicy="no-referrer"
+                            className="w-7 h-7 rounded-full bg-black/60 border border-white/10 object-contain p-0.5"
                             title={item.name}
                           />
                         ))}
@@ -457,7 +459,7 @@ export const VortexCaseShopModal: React.FC<VortexCaseShopModalProps> = ({ isOpen
                   
                   {/* Case Info Capsule */}
                   <div className="flex items-center gap-3 mb-6">
-                    <img src={activeCase.image} alt={activeCase.name} className="w-12 h-10 object-contain" />
+                    <img src={activeCase.image} alt={activeCase.name} referrerPolicy="no-referrer" className="w-14 h-12 object-contain" />
                     <div>
                       <h3 className="font-display font-black text-xl text-white">{activeCase.name}</h3>
                       <p className="text-xs text-slate-400 font-mono">Çmimi për hapje: <strong className="text-amber-400">{activeCase.priceEur.toFixed(2)} €</strong></p>
@@ -504,6 +506,7 @@ export const VortexCaseShopModal: React.FC<VortexCaseShopModalProps> = ({ isOpen
                             <img 
                               src={item.image} 
                               alt={item.name} 
+                              referrerPolicy="no-referrer"
                               className="w-24 h-20 object-contain drop-shadow-md my-auto" 
                             />
 
@@ -562,7 +565,7 @@ export const VortexCaseShopModal: React.FC<VortexCaseShopModalProps> = ({ isOpen
                           key={it.id}
                           className="p-2.5 rounded-xl bg-[#0E111A] border border-white/5 hover:border-white/20 transition flex flex-col items-center text-center group"
                         >
-                          <img src={it.image} alt={it.name} className="w-16 h-12 object-contain group-hover:scale-110 transition" />
+                          <img src={it.image} alt={it.name} referrerPolicy="no-referrer" className="w-16 h-12 object-contain group-hover:scale-110 transition" />
                           <div className="text-[10px] font-bold text-white truncate w-full mt-1">{it.name}</div>
                           <span className="text-[9px] font-mono font-bold text-amber-400">{it.priceEur.toFixed(2)} €</span>
                         </div>
@@ -608,6 +611,7 @@ export const VortexCaseShopModal: React.FC<VortexCaseShopModalProps> = ({ isOpen
                     <img 
                       src={wonSkin.image} 
                       alt={wonSkin.name} 
+                      referrerPolicy="no-referrer"
                       className="w-56 h-40 object-contain drop-shadow-[0_20px_35px_rgba(0,0,0,0.9)] scale-110 animate-bounce duration-1000"
                     />
                   </div>

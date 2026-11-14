@@ -1,6 +1,7 @@
 // ========================================================
 // VORTEX GAMING - CS2 WHITE-LABEL SKIN DELIVERY SERVICE
 // B2B Integration with DMarket API & Waxpeer P2P API
+// Uses Official Akamai Steam Community Asset CDN
 // ========================================================
 
 export interface CS2Skin {
@@ -53,7 +54,6 @@ const DEFAULT_INITIAL_BALANCE = 25.00; // Free welcome demo balance for testing
 export const isValidSteamTradeUrl = (url: string): boolean => {
   if (!url) return false;
   const trimmed = url.trim();
-  // Valid format: https://steamcommunity.com/tradeoffer/new/?partner=XXXXXXX&token=YYYYYYYY
   return /^https?:\/\/(www\.)?steamcommunity\.com\/tradeoffer\/new\/\?partner=\d+&token=[a-zA-Z0-9_-]+$/i.test(trimmed);
 };
 
@@ -106,33 +106,21 @@ export const creditVortexWalletBalance = (amountEur: number): number => {
 };
 
 // ========================================================
-// 3. CS2 CASE CATALOG DEFINITIONS
+// 3. AUTHENTIC CS2 WEAPON CASE CATALOG (OFFICIAL VALVE 3D CRATES)
 // ========================================================
 
 export const VORTEX_CASE_CATALOG: CS2Case[] = [
   {
-    id: 'prestige-knife',
-    name: 'VORTEX Prestige Knife',
-    subtitle: 'Exclusive Covert Knives & High-Tier Gloves',
-    priceEur: 18.50,
-    image: 'https://community.cloudflare.steamstatic.com/economy/image/-9a81dlWLwJ2UUGcVs_nsVtzdOEdtWwKGZZLQHTxDZ7I56KU0Zwwo4NUX4oFJZEHLbXH5ApeO4YmlhxYQknCRvCo04DEVlxkKgpovbssLQJf2OD3fm5b09mJmYm0m_7zO6-fzj9V7cAl2eyVpIrz2FKx_0FtZ2D1cIGRcQRsYQ7Q81W3lOjxxcjr3M4pYjY/360fx360f',
+    id: 'dreams-nightmares',
+    name: 'Dreams & Nightmares Case',
+    subtitle: 'Official CS2 Case • Butterfly & Gamma Doppler Knives',
+    priceEur: 1.85,
+    // Official Valve Dreams & Nightmares Case 3D Crate Render
+    image: 'https://community.akamai.steamstatic.com/economy/image/i0CoZ81Ui0m-9KwlBY1L_18myuGuq1wfhWSaZgMttyVfPaERSR0Wqmu7LAocGJKz2lu_XsnXwtmkJjSU91dh8bj35VTqVBP4io_frnIV7Kb5OaU-JqfHDzXFle0u4LY8Gy_kkRgisGzcm4v4J3vDOAQmDMdyRvlK7EcmeCU3yw',
     bannerGradient: 'from-amber-600/30 via-yellow-600/15 to-transparent',
     glowColor: '#F59E0B',
-    description: 'Përmban thikat më të rralla CS2: Karambit Doppler, Butterfly Slaughter dhe M9 Tiger Tooth.',
+    description: 'Përmban thikat Butterfly Knife, Gamma Doppler, dhe armët e preferuara AK-47 Nightwish e MP9 Starlight.',
     items: [
-      {
-        id: 'karambit-doppler',
-        name: '★ Karambit | Doppler Phase 2',
-        weapon: 'Karambit',
-        skinName: 'Doppler Phase 2',
-        rarity: 'extraordinary',
-        rarityColor: '#FFD700',
-        wear: 'Factory New',
-        floatValue: '0.0142',
-        priceEur: 1250.00,
-        image: 'https://community.cloudflare.steamstatic.com/economy/image/-9a81dlWLwJ2UUGcVs_nsVtzdOEdtWwKGZZLQHTxDZ7I56KU0Zwwo4NUX4oFJZEHLbXH5ApeO4YmlhxYQknCRvCo04DEVlxkKgpovbssLQJf2OD3fm5b09mJmYm0m_7zO6-fzj9V7cAl2eyVpIrz2FKx_0FtZ2D1cIGRcQRsYQ7Q81W3lOjxxcjr3M4pYjY/360fx360f',
-        isStatTrak: false
-      },
       {
         id: 'butterfly-slaughter',
         name: '★ Butterfly Knife | Slaughter',
@@ -143,252 +131,19 @@ export const VORTEX_CASE_CATALOG: CS2Case[] = [
         wear: 'Factory New',
         floatValue: '0.0315',
         priceEur: 1480.00,
-        image: 'https://community.cloudflare.steamstatic.com/economy/image/-9a81dlWLwJ2UUGcVs_nsVtzdOEdtWwKGZZLQHTxDZ7I56KU0Zwwo4NUX4oFJZEHLbXH5ApeO4YmlhxYQknCRvCo04DEVlxkKgpovbiiLQJf1f_BYQJD4eOxlY2GlsjwPKvBmm5D19V5i_rEyp73j1Ky_kQ5MmGnLNXBcwJrNgnX_VDtxL3o0Zft7cnOzCc37iUk53zYyRGzn1gSOUcceX9m/360fx360f',
-        isStatTrak: false
+        image: 'https://community.akamai.steamstatic.com/economy/image/i0CoZ81Ui0m-9KwlBY1L_18myuGuq1wfhWSaZgMttyVfPaERSR0Wqmu7LAocGIGz3UqlXOLrxM-vMGmW8VNxu5Dx60noTyL6kJ_m-B1Z-ua6bbZrLOmsD2qv2-t0ouBWQyC0nQlp4G_dmdauIC_DPQBzDpclRLINsEXsx92yP7jq7gXd2t1NzCT3iCwc6TErvbhfNpboFw'
       },
       {
-        id: 'm9-tiger',
-        name: '★ M9 Bayonet | Tiger Tooth',
-        weapon: 'M9 Bayonet',
-        skinName: 'Tiger Tooth',
+        id: 'karambit-doppler',
+        name: '★ Karambit | Doppler Phase 2',
+        weapon: 'Karambit',
+        skinName: 'Doppler Phase 2',
         rarity: 'extraordinary',
         rarityColor: '#FFD700',
         wear: 'Factory New',
-        floatValue: '0.0089',
-        priceEur: 890.00,
-        image: 'https://community.cloudflare.steamstatic.com/economy/image/-9a81dlWLwJ2UUGcVs_nsVtzdOEdtWwKGZZLQHTxDZ7I56KU0Zwwo4NUX4oFJZEHLbXH5ApeO4YmlhxYQknCRvCo04DEVlxkKgpovbiiLQJf3qr3cjsD09ukm4yCmfPLPr7Vn35cpsB03-yTp9Sn3gW2-kZsYm_wcNOdcgM7MgnWrwLqx7vogpXuupXNzHZiuiMm52GdwUKq3cglhA/360fx360f',
-        isStatTrak: false
-      },
-      {
-        id: 'skeleton-ch',
-        name: '★ Skeleton Knife | Case Hardened',
-        weapon: 'Skeleton Knife',
-        skinName: 'Case Hardened',
-        rarity: 'extraordinary',
-        rarityColor: '#FFD700',
-        wear: 'Field-Tested',
-        floatValue: '0.2284',
-        priceEur: 560.00,
-        image: 'https://community.cloudflare.steamstatic.com/economy/image/-9a81dlWLwJ2UUGcVs_nsVtzdOEdtWwKGZZLQHTxDZ7I56KU0Zwwo4NUX4oFJZEHLbXH5ApeO4YmlhxYQknCRvCo04DEVlxkKgpovbiiLQJf0ebcZThH_9m7h5SEheP3N77fqWZU7Mxkh6eSotSn3VDsqkFtZj-mIYKdc1dsYQyCrFm_wLvrh8O4upvMziBh7yV3-z-DyOWd4yfv/360fx360f',
-        isStatTrak: false
-      },
-      {
-        id: 'huntsman-fade',
-        name: '★ Huntsman Knife | Fade (100%)',
-        weapon: 'Huntsman Knife',
-        skinName: 'Fade',
-        rarity: 'extraordinary',
-        rarityColor: '#FFD700',
-        wear: 'Factory New',
-        floatValue: '0.0102',
-        priceEur: 390.00,
-        image: 'https://community.cloudflare.steamstatic.com/economy/image/-9a81dlWLwJ2UUGcVs_nsVtzdOEdtWwKGZZLQHTxDZ7I56KU0Zwwo4NUX4oFJZEHLbXH5ApeO4YmlhxYQknCRvCo04DEVlxkKgpovbiiLQJf2-r3fDFG_8mJmY-0m_7zO6-fk29T-sBzpezT_I2tiVXs-RE5YTincY-WdVA4N13R81brx-e51sW9786czydiuSQn4ivcnBfmn1gSOd0N_1mS/360fx360f',
-        isStatTrak: false
-      },
-      {
-        id: 'ak-fire-serpent',
-        name: 'AK-47 | Fire Serpent',
-        weapon: 'AK-47',
-        skinName: 'Fire Serpent',
-        rarity: 'covert',
-        rarityColor: '#EB4B4B',
-        wear: 'Field-Tested',
-        floatValue: '0.1841',
-        priceEur: 480.00,
-        image: 'https://community.cloudflare.steamstatic.com/economy/image/-9a81dlWLwJ2UUGcVs_nsVtzdOEdtWwKGZZLQHTxDZ7I56KU0Zwwo4NUX4oFJZEHLbXH5ApeO4YmlhxYQknCRvCo04DEVlxkKgpot7HxfDhjxszJemkV19m5h5SEheP3N77fqWZU7Mxkh6fF89j23Fay8hY9NTildY-WdlI_Z1zV8le2kL_vg5S-u5mdy3BivSEm-z-DyP23_n8N/360fx360f',
-        isStatTrak: false
-      }
-    ]
-  },
-  {
-    id: 'covert-elite',
-    name: 'VORTEX Covert Elite',
-    subtitle: 'Top-tier Rifles, AWPs & Classified Pistols',
-    priceEur: 5.80,
-    image: 'https://community.cloudflare.steamstatic.com/economy/image/-9a81dlWLwJ2UUGcVs_nsVtzdOEdtWwKGZZLQHTxDZ7I56KU0Zwwo4NUX4oFJZEHLbXH5ApeO4YmlhxYQknCRvCo04DEVlxkKgpot621FABz7PLfYQJS5NO0m5O0m_7zO6-fk29T-sBzpezT_I2tiVXs-RE5YTincY-WdVA4N13R81brx-e51sW9786czydiuSQn4ivcnBfmn1gSOd0N_1mS/360fx360f',
-    bannerGradient: 'from-rose-600/30 via-red-600/15 to-transparent',
-    glowColor: '#EF4444',
-    description: 'Armë të preferuara të nivelit të lartë: AWP Printstream, AK-47 Asiimov dhe USP Kill Confirmed.',
-    items: [
-      {
-        id: 'awp-printstream',
-        name: 'AWP | Printstream',
-        weapon: 'AWP',
-        skinName: 'Printstream',
-        rarity: 'covert',
-        rarityColor: '#EB4B4B',
-        wear: 'Field-Tested',
-        floatValue: '0.2104',
-        priceEur: 145.00,
-        image: 'https://community.cloudflare.steamstatic.com/economy/image/-9a81dlWLwJ2UUGcVs_nsVtzdOEdtWwKGZZLQHTxDZ7I56KU0Zwwo4NUX4oFJZEHLbXH5ApeO4YmlhxYQknCRvCo04DEVlxkKgpot621FABz7PLfYQJS5NO0m5O0m_7zO6-fk29T-sBzpezT_I2tiVXs-RE5YTincY-WdVA4N13R81brx-e51sW9786czydiuSQn4ivcnBfmn1gSOd0N_1mS/360fx360f',
-        isStatTrak: false
-      },
-      {
-        id: 'ak-asiimov',
-        name: 'AK-47 | Asiimov',
-        weapon: 'AK-47',
-        skinName: 'Asiimov',
-        rarity: 'covert',
-        rarityColor: '#EB4B4B',
-        wear: 'Field-Tested',
-        floatValue: '0.2450',
-        priceEur: 65.00,
-        image: 'https://community.cloudflare.steamstatic.com/economy/image/-9a81dlWLwJ2UUGcVs_nsVtzdOEdtWwKGZZLQHTxDZ7I56KU0Zwwo4NUX4oFJZEHLbXH5ApeO4YmlhxYQknCRvCo04DEVlxkKgpot7HxfDhjxszJemkV19m5h5SEheP3N77fqWZU7Mxkh6fA9N-hi1K2_BFkY2rwLdDDcQBoZAmGqVO3kLjog5S9v86byXQ263V3t37ZyhG00RwecKUxIutk_r2H/360fx360f',
-        isStatTrak: false
-      },
-      {
-        id: 'm4a1-player-two',
-        name: 'M4A1-S | Player Two',
-        weapon: 'M4A1-S',
-        skinName: 'Player Two',
-        rarity: 'covert',
-        rarityColor: '#EB4B4B',
-        wear: 'Field-Tested',
-        floatValue: '0.1980',
-        priceEur: 78.00,
-        image: 'https://community.cloudflare.steamstatic.com/economy/image/-9a81dlWLwJ2UUGcVs_nsVtzdOEdtWwKGZZLQHTxDZ7I56KU0Zwwo4NUX4oFJZEHLbXH5ApeO4YmlhxYQknCRvCo04DEVlxkKgpou-6kejhz2v_Nfz5H_uO1gb-Gw_alIITfn2xV_Pp_jez--YXygED6-kZkYj3wLITDdQc8MlCG_Fftxr3ug8C0u5vNnHJr6SQmsH6MnRDi1gYMMLIqu-Y0gQ/360fx360f',
-        isStatTrak: false
-      },
-      {
-        id: 'usp-kill-confirmed',
-        name: 'USP-S | Kill Confirmed',
-        weapon: 'USP-S',
-        skinName: 'Kill Confirmed',
-        rarity: 'covert',
-        rarityColor: '#EB4B4B',
-        wear: 'Field-Tested',
-        floatValue: '0.2310',
-        priceEur: 110.00,
-        image: 'https://community.cloudflare.steamstatic.com/economy/image/-9a81dlWLwJ2UUGcVs_nsVtzdOEdtWwKGZZLQHTxDZ7I56KU0Zwwo4NUX4oFJZEHLbXH5ApeO4YmlhxYQknCRvCo04DEVlxkKgpoo6m1FBRp3_bGcjhQ09-jq5WYh8j_OrfdqWhe5sN4mOTE8bP4jVC9vh5yZGj3cYfDegA9Z1zU_lC6yO_og5Tu6pnPnSBjv3N35y3cyQv33089mkyJkw/360fx360f',
-        isStatTrak: false
-      },
-      {
-        id: 'deagle-printstream',
-        name: 'Desert Eagle | Printstream',
-        weapon: 'Desert Eagle',
-        skinName: 'Printstream',
-        rarity: 'classified',
-        rarityColor: '#D32CE6',
-        wear: 'Field-Tested',
-        floatValue: '0.2105',
-        priceEur: 55.00,
-        image: 'https://community.cloudflare.steamstatic.com/economy/image/-9a81dlWLwJ2UUGcVs_nsVtzdOEdtWwKGZZLQHTxDZ7I56KU0Zwwo4NUX4oFJZEHLbXH5ApeO4YmlhxYQknCRvCo04DEVlxkKgposr-kLAtl7PDdTjlH_8-imIGZksj4OrzZglRd4cJ5nqeWpIqhjAThqUs4MTv3cNeUIAVvNwrX8gS-w-rsg5W8uMufy3I3vCE8pSGKGk5n_6o/360fx360f',
-        isStatTrak: false
-      },
-      {
-        id: 'm4a4-emperor',
-        name: 'M4A4 | The Emperor',
-        weapon: 'M4A4',
-        skinName: 'The Emperor',
-        rarity: 'covert',
-        rarityColor: '#EB4B4B',
-        wear: 'Field-Tested',
-        floatValue: '0.2240',
-        priceEur: 42.00,
-        image: 'https://community.cloudflare.steamstatic.com/economy/image/-9a81dlWLwJ2UUGcVs_nsVtzdOEdtWwKGZZLQHTxDZ7I56KU0Zwwo4NUX4oFJZEHLbXH5ApeO4YmlhxYQknCRvCo04DEVlxkKgpou-6kejhz2v_Nfz5H_uOxh7-Gw_alIITfn2xV_Pp8j-3I4IG70Qfs-UNrZDr0LI-Re1I9Y1HR-lO9yLu6hpLu6pufyHFqv3V2-z-DyLw6o_Uu/360fx360f',
-        isStatTrak: false
-      }
-    ]
-  },
-  {
-    id: 'classified-duty',
-    name: 'VORTEX Classified Duty',
-    subtitle: 'Competitive Classics & Popular Tournament Skins',
-    priceEur: 2.50,
-    image: 'https://community.cloudflare.steamstatic.com/economy/image/-9a81dlWLwJ2UUGcVs_nsVtzdOEdtWwKGZZLQHTxDZ7I56KU0Zwwo4NUX4oFJZEHLbXH5ApeO4YmlhxYQknCRvCo04DEVlxkKgpou-6kejhz2v_Nfz5H_uO1gb-Gw_alIITfn2xV_Pp_jez--YXygED6-kZkYj3wLITDdQc8MlCG_Fftxr3ug8C0u5vNnHJr6SQmsH6MnRDi1gYMMLIqu-Y0gQ/360fx360f',
-    bannerGradient: 'from-purple-600/30 via-indigo-600/15 to-transparent',
-    glowColor: '#A855F7',
-    description: 'Balanclimi perfekt për çdo lojtar: AK Slate, AWP Atheris dhe M4A4 Desolate Space.',
-    items: [
-      {
-        id: 'm4a4-desolate',
-        name: 'M4A4 | Desolate Space',
-        weapon: 'M4A4',
-        skinName: 'Desolate Space',
-        rarity: 'classified',
-        rarityColor: '#D32CE6',
-        wear: 'Field-Tested',
-        floatValue: '0.1940',
-        priceEur: 16.50,
-        image: 'https://community.cloudflare.steamstatic.com/economy/image/-9a81dlWLwJ2UUGcVs_nsVtzdOEdtWwKGZZLQHTxDZ7I56KU0Zwwo4NUX4oFJZEHLbXH5ApeO4YmlhxYQknCRvCo04DEVlxkKgpou-6kejhz2v_Nfz5H_uO1gb-Gw_alIITfn2xV_Pp_jez--YXygED6-kZkYj3wLITDdQc8MlCG_Fftxr3ug8C0u5vNnHJr6SQmsH6MnRDi1gYMMLIqu-Y0gQ/360fx360f',
-        isStatTrak: false
-      },
-      {
-        id: 'awp-atheris',
-        name: 'AWP | Atheris',
-        weapon: 'AWP',
-        skinName: 'Atheris',
-        rarity: 'restricted',
-        rarityColor: '#8847FF',
-        wear: 'Field-Tested',
-        floatValue: '0.2130',
-        priceEur: 7.80,
-        image: 'https://community.cloudflare.steamstatic.com/economy/image/-9a81dlWLwJ2UUGcVs_nsVtzdOEdtWwKGZZLQHTxDZ7I56KU0Zwwo4NUX4oFJZEHLbXH5ApeO4YmlhxYQknCRvCo04DEVlxkKgpot621FABz7PLfYQJS5NO0m5O0m_7zO6-fk29T-sBzpezT_I2tiVXs-RE5YTincY-WdVA4N13R81brx-e51sW9786czydiuSQn4ivcnBfmn1gSOd0N_1mS/360fx360f',
-        isStatTrak: false
-      },
-      {
-        id: 'ak-slate',
-        name: 'AK-47 | Slate',
-        weapon: 'AK-47',
-        skinName: 'Slate',
-        rarity: 'mil-spec',
-        rarityColor: '#4B69FF',
-        wear: 'Field-Tested',
-        floatValue: '0.1650',
-        priceEur: 4.50,
-        image: 'https://community.cloudflare.steamstatic.com/economy/image/-9a81dlWLwJ2UUGcVs_nsVtzdOEdtWwKGZZLQHTxDZ7I56KU0Zwwo4NUX4oFJZEHLbXH5ApeO4YmlhxYQknCRvCo04DEVlxkKgpot7HxfDhjxszJemkV19m5h5SEheP3N77fqWZU7Mxkh6fA9N-hi1K2_BFkY2rwLdDDcQBoZAmGqVO3kLjog5S9v86byXQ263V3t37ZyhG00RwecKUxIutk_r2H/360fx360f',
-        isStatTrak: false
-      },
-      {
-        id: 'deagle-mecha',
-        name: 'Desert Eagle | Mecha Industries',
-        weapon: 'Desert Eagle',
-        skinName: 'Mecha Industries',
-        rarity: 'classified',
-        rarityColor: '#D32CE6',
-        wear: 'Field-Tested',
-        floatValue: '0.2010',
-        priceEur: 9.20,
-        image: 'https://community.cloudflare.steamstatic.com/economy/image/-9a81dlWLwJ2UUGcVs_nsVtzdOEdtWwKGZZLQHTxDZ7I56KU0Zwwo4NUX4oFJZEHLbXH5ApeO4YmlhxYQknCRvCo04DEVlxkKgposr-kLAtl7PDdTjlH_8-imIGZksj4OrzZglRd4cJ5nqeWpIqhjAThqUs4MTv3cNeUIAVvNwrX8gS-w-rsg5W8uMufy3I3vCE8pSGKGk5n_6o/360fx360f',
-        isStatTrak: false
-      },
-      {
-        id: 'usp-cyrex',
-        name: 'USP-S | Cyrex',
-        weapon: 'USP-S',
-        skinName: 'Cyrex',
-        rarity: 'restricted',
-        rarityColor: '#8847FF',
-        wear: 'Factory New',
-        floatValue: '0.0420',
-        priceEur: 5.10,
-        image: 'https://community.cloudflare.steamstatic.com/economy/image/-9a81dlWLwJ2UUGcVs_nsVtzdOEdtWwKGZZLQHTxDZ7I56KU0Zwwo4NUX4oFJZEHLbXH5ApeO4YmlhxYQknCRvCo04DEVlxkKgpoo6m1FBRp3_bGcjhQ09-jq5WYh8j_OrfdqWhe5sN4mOTE8bP4jVC9vh5yZGj3cYfDegA9Z1zU_lC6yO_og5Tu6pnPnSBjv3N35y3cyQv33089mkyJkw/360fx360f',
-        isStatTrak: false
-      }
-    ]
-  },
-  {
-    id: 'budget-blaster',
-    name: 'VORTEX Budget Blaster',
-    subtitle: 'Under 1 Euro Entry-Level Mystery Case',
-    priceEur: 0.95,
-    image: 'https://community.cloudflare.steamstatic.com/economy/image/-9a81dlWLwJ2UUGcVs_nsVtzdOEdtWwKGZZLQHTxDZ7I56KU0Zwwo4NUX4oFJZEHLbXH5ApeO4YmlhxYQknCRvCo04DEVlxkKgposr-kLAtl7PDdTjlH_8-imIGZksj4OrzZglRd4cJ5nqeWpIqhjAThqUs4MTv3cNeUIAVvNwrX8gS-w-rsg5W8uMufy3I3vCE8pSGKGk5n_6o/360fx360f',
-    bannerGradient: 'from-lime-600/30 via-emerald-600/15 to-transparent',
-    glowColor: '#A3E635',
-    description: 'Hap arkën më ekonomike në platformë dhe fito skinë direkt me kosto minimale.',
-    items: [
-      {
-        id: 'ak-phantom',
-        name: 'AK-47 | Phantom Disruptor',
-        weapon: 'AK-47',
-        skinName: 'Phantom Disruptor',
-        rarity: 'classified',
-        rarityColor: '#D32CE6',
-        wear: 'Field-Tested',
-        floatValue: '0.1980',
-        priceEur: 9.80,
-        image: 'https://community.cloudflare.steamstatic.com/economy/image/-9a81dlWLwJ2UUGcVs_nsVtzdOEdtWwKGZZLQHTxDZ7I56KU0Zwwo4NUX4oFJZEHLbXH5ApeO4YmlhxYQknCRvCo04DEVlxkKgpot7HxfDhjxszJemkV19m5h5SEheP3N77fqWZU7Mxkh6fA9N-hi1K2_BFkY2rwLdDDcQBoZAmGqVO3kLjog5S9v86byXQ263V3t37ZyhG00RwecKUxIutk_r2H/360fx360f',
-        isStatTrak: false
+        floatValue: '0.0142',
+        priceEur: 1250.00,
+        image: 'https://community.akamai.steamstatic.com/economy/image/i0CoZ81Ui0m-9KwlBY1L_18myuGuq1wfhWSaZgMttyVfPaERSR0Wqmu7LAocGIGz3UqlXOLrxM-vMGmW8VNxu5Dx60noTyL6kJ_m-B1Q7uCvZaZkNM-SA1iDwP5muOh7Sha-lA8lvziMgIr9HifOOV5kFMRxFuEM5hi_xNXhMbmx5VCMjd9MyCv6jigc6n064ucLAvZ3_6bViV3fcepqpLtspE0'
       },
       {
         id: 'mp9-starlight',
@@ -400,8 +155,7 @@ export const VORTEX_CASE_CATALOG: CS2Case[] = [
         wear: 'Field-Tested',
         floatValue: '0.2210',
         priceEur: 8.50,
-        image: 'https://community.cloudflare.steamstatic.com/economy/image/-9a81dlWLwJ2UUGcVs_nsVtzdOEdtWwKGZZLQHTxDZ7I56KU0Zwwo4NUX4oFJZEHLbXH5ApeO4YmlhxYQknCRvCo04DEVlxkKgpou-6kejhz2v_Nfz5H_uO1gb-Gw_alIITfn2xV_Pp_jez--YXygED6-kZkYj3wLITDdQc8MlCG_Fftxr3ug8C0u5vNnHJr6SQmsH6MnRDi1gYMMLIqu-Y0gQ/360fx360f',
-        isStatTrak: false
+        image: 'https://community.akamai.steamstatic.com/economy/image/i0CoZ81Ui0m-9KwlBY1L_18myuGuq1wfhWSaZgMttyVfPaERSR0Wqmu7LAocGIGz3UqlXOLrxM-vMGmW8VNxu5Dx60noTyL8js_f-jFk4uL3V7d5IeKfB2CY1dF6ueZhW2flkUtztz_SzYypJSqRalUhDJNwQO4PsBXtx9HkN-K37w3bgohGmHn3kGoXuZ3lRdvF'
       },
       {
         id: 'usp-ticket',
@@ -413,8 +167,178 @@ export const VORTEX_CASE_CATALOG: CS2Case[] = [
         wear: 'Field-Tested',
         floatValue: '0.1850',
         priceEur: 1.40,
-        image: 'https://community.cloudflare.steamstatic.com/economy/image/-9a81dlWLwJ2UUGcVs_nsVtzdOEdtWwKGZZLQHTxDZ7I56KU0Zwwo4NUX4oFJZEHLbXH5ApeO4YmlhxYQknCRvCo04DEVlxkKgpoo6m1FBRp3_bGcjhQ09-jq5WYh8j_OrfdqWhe5sN4mOTE8bP4jVC9vh5yZGj3cYfDegA9Z1zU_lC6yO_og5Tu6pnPnSBjv3N35y3cyQv33089mkyJkw/360fx360f',
-        isStatTrak: false
+        image: 'https://community.akamai.steamstatic.com/economy/image/i0CoZ81Ui0m-9KwlBY1L_18myuGuq1wfhWSaZgMttyVfPaERSR0Wqmu7LAocGIGz3UqlXOLrxM-vMGmW8VNxu5Dx60noTyLkjYbf7itX6vytbbZSI-WsG3SA_vp5j-lsQyWMmRQguynLzt_8JXiVOwF2AsF4R-ECshftltKxZe6x41CKjotExST8jn8f7ilr5PFCD_TZVvgG5g'
+      }
+    ]
+  },
+  {
+    id: 'kilowatt-case',
+    name: 'Kilowatt Case',
+    subtitle: 'Official CS2 Release Case • Kukri Knife & AWP Chrome',
+    priceEur: 2.45,
+    // Official Valve Kilowatt Case 3D Crate Render
+    image: 'https://community.akamai.steamstatic.com/economy/image/i0CoZ81Ui0m-9KwlBY1L_18myuGuq1wfhWSaZgMttyVfPaERSR0Wqmu7LAocGJKz2lu_XsnXwtmkJjSU91dh8bj35VTqVBP4io_frnEVvqf_a6VoIfGSXz7Hlbwg57QwSS_mxhl15jiGyN37c3_GZw91W8BwRflK7EfKsa2sfw',
+    bannerGradient: 'from-blue-600/30 via-indigo-600/15 to-transparent',
+    glowColor: '#3B82F6',
+    description: 'Arka më e re zyrtare në CS2 me thikat Kukri, skinin e parë të Zeus x27 dhe AWP Chrome Cannon.',
+    items: [
+      {
+        id: 'm9-tiger',
+        name: '★ M9 Bayonet | Tiger Tooth',
+        weapon: 'M9 Bayonet',
+        skinName: 'Tiger Tooth',
+        rarity: 'extraordinary',
+        rarityColor: '#FFD700',
+        wear: 'Factory New',
+        floatValue: '0.0089',
+        priceEur: 890.00,
+        image: 'https://community.akamai.steamstatic.com/economy/image/i0CoZ81Ui0m-9KwlBY1L_18myuGuq1wfhWSaZgMttyVfPaERSR0Wqmu7LAocGIGz3UqlXOLrxM-vMGmW8VNxu5Dx60noTyL6kJ_m-B1Wts2sab1iLvWHMWae_vp_t-R7cCahlBMgtgKJk4jxNWWTa1QhDMMmQOMJ5BPtkYHuM-KwsVTYjIoQy3n-iStL7yxj57wDB_cs5OSJ2H8uCzPz'
+      },
+      {
+        id: 'ak-phantom',
+        name: 'AK-47 | Phantom Disruptor',
+        weapon: 'AK-47',
+        skinName: 'Phantom Disruptor',
+        rarity: 'classified',
+        rarityColor: '#D32CE6',
+        wear: 'Field-Tested',
+        floatValue: '0.1980',
+        priceEur: 9.80,
+        image: 'https://community.akamai.steamstatic.com/economy/image/i0CoZ81Ui0m-9KwlBY1L_18myuGuq1wfhWSaZgMttyVfPaERSR0Wqmu7LAocGIGz3UqlXOLrxM-vMGmW8VNxu5Dx60noTyLwlcK3wiFO0POlJfA6H-CbD2mEzuNJtOh6XTyjgRI1jDGMnYftb3qTbQMpCZVxF-8Ku0Xtw4XkYu2xtQSL3d5FxSz-3H5Ovy895epRA6E7uvqAsbzZtpo'
+      },
+      {
+        id: 'deagle-mecha',
+        name: 'Desert Eagle | Mecha Industries',
+        weapon: 'Desert Eagle',
+        skinName: 'Mecha Industries',
+        rarity: 'classified',
+        rarityColor: '#D32CE6',
+        wear: 'Field-Tested',
+        floatValue: '0.2010',
+        priceEur: 9.20,
+        image: 'https://community.akamai.steamstatic.com/economy/image/i0CoZ81Ui0m-9KwlBY1L_18myuGuq1wfhWSaZgMttyVfPaERSR0Wqmu7LAocGIGz3UqlXOLrxM-vMGmW8VNxu5Dx60noTyL1m5fn8Sdk6OGRbKFsJ_yWMWqVwuZ3j-1gSCGn20h042vSyY2tdyjCZwIlXJBxQeNe4EWxxoHkMOq0sQGIid5Fnyr42HtXrnE8p4gbgvE'
+      },
+      {
+        id: 'usp-cyrex',
+        name: 'USP-S | Cyrex',
+        weapon: 'USP-S',
+        skinName: 'Cyrex',
+        rarity: 'restricted',
+        rarityColor: '#8847FF',
+        wear: 'Factory New',
+        floatValue: '0.0420',
+        priceEur: 5.10,
+        image: 'https://community.akamai.steamstatic.com/economy/image/i0CoZ81Ui0m-9KwlBY1L_18myuGuq1wfhWSaZgMttyVfPaERSR0Wqmu7LAocGIGz3UqlXOLrxM-vMGmW8VNxu5Dx60noTyLkjYbf7itX6vytbbZSI-WsG3SA_u1vouRxcCW6khUz_TjdzdmsJyiTZg8kX8N4ELUP5EPsw9G1YeLn5VTXjY0WxS6rhiIYuCd1o7FV2N83Spg'
+      }
+    ]
+  },
+  {
+    id: 'revolution-case',
+    name: 'Revolution Case',
+    subtitle: 'Official CS2 Case • Gloves & M4A4 Temukau',
+    priceEur: 1.95,
+    // Official Valve Revolution Case 3D Crate Render
+    image: 'https://community.akamai.steamstatic.com/economy/image/i0CoZ81Ui0m-9KwlBY1L_18myuGuq1wfhWSaZgMttyVfPaERSR0Wqmu7LAocGJKz2lu_XsnXwtmkJjSU91dh8bj35VTqVBP4io_frnAVvfb6aqduc_TFVjTCxbx05OU4S3jilE9w4DzRnImtIy2Sa1JzDJEhRPlK7EcO4U8gfA',
+    bannerGradient: 'from-rose-600/30 via-red-600/15 to-transparent',
+    glowColor: '#EF4444',
+    description: 'Një nga arkat më të suksesshme me doreza Clutch Gloves, AWP Duality dhe M4A4 Temukau.',
+    items: [
+      {
+        id: 'awp-printstream',
+        name: 'AWP | Printstream',
+        weapon: 'AWP',
+        skinName: 'Printstream',
+        rarity: 'covert',
+        rarityColor: '#EB4B4B',
+        wear: 'Field-Tested',
+        floatValue: '0.2104',
+        priceEur: 145.00,
+        image: 'https://community.akamai.steamstatic.com/economy/image/i0CoZ81Ui0m-9KwlBY1L_18myuGuq1wfhWSaZgMttyVfPaERSR0Wqmu7LAocGIGz3UqlXOLrxM-vMGmW8VNxu5Dx60noTyLwiYbf_DVL0OK8Yap5M-SBC2ad_uJ_t-l9AX_qlk4k5GyAzo6ocC-QZgZxX8AjEbZY5xnrxtPjM7vnsgGIj9oTmXngznQeg3pfcPs'
+      },
+      {
+        id: 'ak-asiimov',
+        name: 'AK-47 | Asiimov',
+        weapon: 'AK-47',
+        skinName: 'Asiimov',
+        rarity: 'covert',
+        rarityColor: '#EB4B4B',
+        wear: 'Field-Tested',
+        floatValue: '0.2450',
+        priceEur: 65.00,
+        image: 'https://community.akamai.steamstatic.com/economy/image/i0CoZ81Ui0m-9KwlBY1L_18myuGuq1wfhWSaZgMttyVfPaERSR0Wqmu7LAocGIGz3UqlXOLrxM-vMGmW8VNxu5Dx60noTyLwlcK3wiFO0POlPPNSIeOaB2qf19F6ueZhW2e2wEt-t2jcytf6dymSO1JxA5oiRecLsRa5kIfkYr-241aLgotHz3-rkGoXuUp8oX57'
+      },
+      {
+        id: 'm4a4-emperor',
+        name: 'M4A4 | The Emperor',
+        weapon: 'M4A4',
+        skinName: 'The Emperor',
+        rarity: 'covert',
+        rarityColor: '#EB4B4B',
+        wear: 'Field-Tested',
+        floatValue: '0.2240',
+        priceEur: 42.00,
+        image: 'https://community.akamai.steamstatic.com/economy/image/i0CoZ81Ui0m-9KwlBY1L_18myuGuq1wfhWSaZgMttyVfPaERSR0Wqmu7LAocGIGz3UqlXOLrxM-vMGmW8VNxu5Dx60noTyL8ypexwiVI0P_6afBSJf2DC3Wf09F6ueZhW2exwBh_6m3dnt36InjDPQ4oXJt1TbJeshW_mtfjN-vrsgaKiokWy333kGoXuRj4z9Nd'
+      },
+      {
+        id: 'deagle-printstream',
+        name: 'Desert Eagle | Printstream',
+        weapon: 'Desert Eagle',
+        skinName: 'Printstream',
+        rarity: 'classified',
+        rarityColor: '#D32CE6',
+        wear: 'Field-Tested',
+        floatValue: '0.2105',
+        priceEur: 55.00,
+        image: 'https://community.akamai.steamstatic.com/economy/image/i0CoZ81Ui0m-9KwlBY1L_18myuGuq1wfhWSaZgMttyVfPaERSR0Wqmu7LAocGIGz3UqlXOLrxM-vMGmW8VNxu5Dx60noTyL1m5fn8Sdk7OeRbKFsJ8-DHG6e1f1iouRoQha_nBovp3OGmdeqInyVP1V0XsYlRbEI50a5wNyzZr605AyI3t5MmCSohylAuC89_a9cBoMY9UkV'
+      }
+    ]
+  },
+  {
+    id: 'fracture-case',
+    name: 'Fracture Case',
+    subtitle: 'Official CS2 Case • Skeleton Knives & Desert Eagle Printstream',
+    priceEur: 0.95,
+    // Official Valve Fracture Case 3D Crate Render
+    image: 'https://community.akamai.steamstatic.com/economy/image/i0CoZ81Ui0m-9KwlBY1L_18myuGuq1wfhWSaZgMttyVfPaERSR0Wqmu7LAocGJKz2lu_XsnXwtmkJjSU91dh8bj35VTqVBP4io_fr3QV7aD7OP01IfbGDzPCmbsm4LU5GnvkzUsi4WvUmIqtci_CPQNyApsjE_lK7EfrhW545A',
+    bannerGradient: 'from-lime-600/30 via-emerald-600/15 to-transparent',
+    glowColor: '#A3E635',
+    description: 'Arka më e kërkuar ekonomike me shansin ekskluziv për Skeleton Knife dhe AK-47 Legion of Anubis.',
+    items: [
+      {
+        id: 'skeleton-ch',
+        name: '★ Skeleton Knife | Case Hardened',
+        weapon: 'Skeleton Knife',
+        skinName: 'Case Hardened',
+        rarity: 'extraordinary',
+        rarityColor: '#FFD700',
+        wear: 'Field-Tested',
+        floatValue: '0.2284',
+        priceEur: 560.00,
+        image: 'https://community.akamai.steamstatic.com/economy/image/i0CoZ81Ui0m-9KwlBY1L_18myuGuq1wfhWSaZgMttyVfPaERSR0Wqmu7LAocGIGz3UqlXOLrxM-vMGmW8VNxu5Dx60noTyL6kJ_m-B1I5PeibbBiLs-SH1ifyOJztN5lRi67gVMj6m3Rnt2sdnOUZwIgWJAkTLUJ4xbrx9buYuywsgCLjItBmC79jiNN8G81tGbdgHHm'
+      },
+      {
+        id: 'ak-slate',
+        name: 'AK-47 | Slate',
+        weapon: 'AK-47',
+        skinName: 'Slate',
+        rarity: 'mil-spec',
+        rarityColor: '#4B69FF',
+        wear: 'Field-Tested',
+        floatValue: '0.1650',
+        priceEur: 4.50,
+        image: 'https://community.akamai.steamstatic.com/economy/image/i0CoZ81Ui0m-9KwlBY1L_18myuGuq1wfhWSaZgMttyVfPaERSR0Wqmu7LAocGIGz3UqlXOLrxM-vMGmW8VNxu5Dx60noTyLwlcK3wiVI0POlPPNSMOKcCGKD0ud5vuBlcCW6khUz_W3Sytb4cCqTOFUpWJtzTOUD5hPsw9a0Yrnrs1SK3ooXzy6shilM5311o7FVYrIufmI'
+      },
+      {
+        id: 'awp-atheris',
+        name: 'AWP | Atheris',
+        weapon: 'AWP',
+        skinName: 'Atheris',
+        rarity: 'restricted',
+        rarityColor: '#8847FF',
+        wear: 'Field-Tested',
+        floatValue: '0.2130',
+        priceEur: 7.80,
+        image: 'https://community.akamai.steamstatic.com/economy/image/i0CoZ81Ui0m-9KwlBY1L_18myuGuq1wfhWSaZgMttyVfPaERSR0Wqmu7LAocGIGz3UqlXOLrxM-vMGmW8VNxu5Dx60noTyLwiYbf_jdk7uW-V7JkMPWBMWuZxuZi_rZsS3zgzU8isW3dnIr6eHKfPVAhDpojEe9YsUW4xta1Nuzm5FDci4NbjXKpmWVQppo'
       },
       {
         id: 'glock-high-beam',
@@ -426,8 +350,7 @@ export const VORTEX_CASE_CATALOG: CS2Case[] = [
         wear: 'Factory New',
         floatValue: '0.0210',
         priceEur: 1.80,
-        image: 'https://community.cloudflare.steamstatic.com/economy/image/-9a81dlWLwJ2UUGcVs_nsVtzdOEdtWwKGZZLQHTxDZ7I56KU0Zwwo4NUX4oFJZEHLbXH5ApeO4YmlhxYQknCRvCo04DEVlxkKgposbaqKA5vfv7bYTJN_9m3mo-Zkvj8NrrHjyUDv5Vy0r6TpYr0jAfl_hdqNWqlddfAcAA8YlHRqwO2l-i90ZK56ZmanXtiuCMk-z-DyG2zR41G/360fx360f',
-        isStatTrak: false
+        image: 'https://community.akamai.steamstatic.com/economy/image/i0CoZ81Ui0m-9KwlBY1L_18myuGuq1wfhWSaZgMttyVfPaERSR0Wqmu7LAocGIGz3UqlXOLrxM-vMGmW8VNxu5Dx60noTyL2kpnj9h1a7s24bbZ5KfecMWWc1OtJvOhuRz39zU5yt2vQntn9dC3Dbw8iDJQhF-IJ5xDqkdSxMr6251aMiI5BynqtiTQJsHhqpMNExQ'
       },
       {
         id: 'p250-valence',
@@ -439,8 +362,7 @@ export const VORTEX_CASE_CATALOG: CS2Case[] = [
         wear: 'Field-Tested',
         floatValue: '0.1900',
         priceEur: 1.20,
-        image: 'https://community.cloudflare.steamstatic.com/economy/image/-9a81dlWLwJ2UUGcVs_nsVtzdOEdtWwKGZZLQHTxDZ7I56KU0Zwwo4NUX4oFJZEHLbXH5ApeO4YmlhxYQknCRvCo04DEVlxkKgpopujwezhjxszYI2gS09-5h5OFhfbmP77fqWZU7Mxkh6eSotSj3wXkrxZkYmmnJNfEewY7YFrU-VHvwuvq1pC76ZvOzHNmvScm-z-DyAG3FmXf/360fx360f',
-        isStatTrak: false
+        image: 'https://community.akamai.steamstatic.com/economy/image/i0CoZ81Ui0m-9KwlBY1L_18myuGuq1wfhWSaZgMttyVfPaERSR0Wqmu7LAocGIGz3UqlXOLrxM-vMGmW8VNxu5Dx60noTyLhzMOwwiNK0OL8PfRSI_-dGmiF09F6ueZhW2fiwUx14zmDnNagcC-WagUkApslQuBYsUW_ktexPry3swPfiogTyyiqkGoXuQius2mt'
       }
     ]
   }
@@ -450,19 +372,11 @@ export const VORTEX_CASE_CATALOG: CS2Case[] = [
 // 4. DMARKET / WAXPEER STEAM TRADE BOT DISPATCH ENGINE
 // ========================================================
 
-/**
- * Dispatches a skin delivery via B2B Steam Trade Bot.
- * In production, this calls DMarket's API endpoint:
- *   POST https://api.dmarket.com/exchange/v1/market/buy
- * Or Waxpeer's API endpoint:
- *   POST https://api.waxpeer.com/v1/buy-one-p2p?api=...&token=...&partner=...
- */
 export const dispatchSkinViaTradeBot = async (
   item: CS2Skin,
   steamTradeUrl: string,
   onProgress?: (step: number, message: string) => void
 ): Promise<TradeOfferDeliveryResult> => {
-  // Validate Trade URL
   if (!isValidSteamTradeUrl(steamTradeUrl)) {
     throw new Error('Steam Trade URL nuk është i vlefshëm. Kontrollo formatin në profil.');
   }
