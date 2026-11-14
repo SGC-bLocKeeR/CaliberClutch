@@ -46,8 +46,20 @@ import {
   saveDMarketCredentials,
   testDMarketLiveConnection,
   buySkinDirectFromDMarket,
-  DMarketTestResult
+  DMarketTestResult,
+  rollProvablyFairSkin,
+  generateRealisticReel
 } from '../../services/skinDeliveryService';
+
+
+const RECENT_LUCKY_DROPS = [
+  { weapon: 'Butterfly Knife', skin: 'Slaughter', wear: 'FN', price: 1480.00, mult: 'x800.0', rarityColor: '#FFD700', image: 'https://community.akamai.steamstatic.com/economy/image/i0CoZ81Ui0m-9KwlBY1L_18myuGuq1wfhWSaZgMttyVfPaERSR0Wqmu7LAocGIGz3UqlXOLrxM-vMGmW8VNxu5Dx60noTyL6kJ_m-B1Z-ua6bbZrLOmsD2qv2-t0ouBWQyC0nQlp4G_dmdauIC_DPQBzDpclRLINsEXsx92yP7jq7gXd2t1NzCT3iCwc6TErvbhfNpboFw' },
+  { weapon: 'AWP', skin: 'Chrome Cannon', wear: 'FN', price: 120.00, mult: 'x48.9', rarityColor: '#EB4B4B', image: 'https://community.akamai.steamstatic.com/economy/image/i0CoZ81Ui0m-9KwlBY1L_18myuGuq1wfhWSaZgMttyVfPaERSR0Wqmu7LAocGIGz3UqlXOLrxM-vMGmW8VNxu5Dx60noTyL6kJ_m-B1Q-vm8YZtsLc-IC2WSBdB6ueZhW2e3wh0h62XW2d6veXjDL4S0H8BiRuFbsxS-g1W1Irzr7gOD2ogTxXu5nzQJsm_sP3yR2s' },
+  { weapon: 'AK-47', skin: 'Nightwish', wear: 'MW', price: 58.00, mult: 'x31.3', rarityColor: '#EB4B4B', image: 'https://community.akamai.steamstatic.com/economy/image/i0CoZ81Ui0m-9KwlBY1L_18myuGuq1wfhWSaZgMttyVfPaERSR0Wqmu7LAocGIGz3UqlXOLrxM-vMGmW8VNxu5Dx60noTyL8ypexwiVI0P_6afBSJf2DC3Wf09F6ueZhW2exwBh_6m3dnt36InjDPQ4oXJt1TbJeshW_mtfjN-vrsgaKiokWy333kGoXuRj4z9Nd' },
+  { weapon: 'Desert Eagle', skin: 'Printstream', wear: 'FT', price: 55.00, mult: 'x57.8', rarityColor: '#EB4B4B', image: 'https://community.akamai.steamstatic.com/economy/image/i0CoZ81Ui0m-9KwlBY1L_18myuGuq1wfhWSaZgMttyVfPaERSR0Wqmu7LAocGIGz3UqlXOLrxM-vMGmW8VNxu5Dx60noTyL1m5fn8Sdk7OeRbKFsJ8-DHG6e1f1iouRoQha_nBovp3OGmdeqInyVP1V0XsYlRbEI50a5wNyzZr605AyI3t5MmCSohylAuC89_a9cBoMY9UkV' },
+  { weapon: 'M4A4', skin: 'Temukau', wear: 'FT', price: 75.00, mult: 'x38.4', rarityColor: '#EB4B4B', image: 'https://community.akamai.steamstatic.com/economy/image/i0CoZ81Ui0m-9KwlBY1L_18myuGuq1wfhWSaZgMttyVfPaERSR0Wqmu7LAocGIGz3UqlXOLrxM-vMGmW8VNxu5Dx60noTyL8ypexwiVI0P_6afBSJf2DC3Wf09F6ueZhW2exwBh_6m3dnt36InjDPQ4oXJt1TbJeshW_mtfjN-vrsgaKiokWy333kGoXuRj4z9Nd' },
+  { weapon: 'Skeleton Knife', skin: 'Case Hardened', wear: 'FT', price: 560.00, mult: 'x589.4', rarityColor: '#FFD700', image: 'https://community.akamai.steamstatic.com/economy/image/i0CoZ81Ui0m-9KwlBY1L_18myuGuq1wfhWSaZgMttyVfPaERSR0Wqmu7LAocGIGz3UqlXOLrxM-vMGmW8VNxu5Dx60noTyL6kJ_m-B1I5PeibbBiLs-SH1ifyOJztN5lRi67gVMj6m3Rnt2sdnOUZwIgWJAkTLUJ4xbrx9buYuywsgCLjItBmC79jiNN8G81tGbdgHHm' }
+];
 
 interface VortexCaseShopModalProps {
   isOpen: boolean;
@@ -64,9 +76,12 @@ export const VortexCaseShopModal: React.FC<VortexCaseShopModalProps> = ({ isOpen
   const [tempTradeUrl, setTempTradeUrl] = useState<string>(tradeUrl);
   const [tradeUrlError, setTradeUrlError] = useState<string | null>(null);
 
-  // Spinner & Animation State for Cases
+  // Spinner & Animation State for Cases (Hellcase Style Multi-Case & Fast Mode)
   const [isSpinning, setIsSpinning] = useState<boolean>(false);
   const [wonSkin, setWonSkin] = useState<CS2Skin | null>(null);
+  const [wonSkins, setWonSkins] = useState<CS2Skin[]>([]);
+  const [caseCount, setCaseCount] = useState<number>(1);
+  const [fastMode, setFastMode] = useState<boolean>(false);
   const [reelItems, setReelItems] = useState<CS2Skin[]>([]);
   const [reelOffset, setReelOffset] = useState<number>(0);
   const reelRef = useRef<HTMLDivElement>(null);
@@ -117,20 +132,19 @@ export const VortexCaseShopModal: React.FC<VortexCaseShopModalProps> = ({ isOpen
     if (activeCase) {
       setReelOffset(0);
       setWonSkin(null);
+      setWonSkins([]);
       setDeliveryResult(null);
       setDeliveryProgress(null);
       setDeliveryError(null);
 
-      // Pre-populate with authentic items from this exact case
-      const initialReel: CS2Skin[] = [];
-      for (let i = 0; i < 45; i++) {
-        const item = activeCase.items[i % activeCase.items.length];
-        initialReel.push(item);
-      }
+      // Pre-populate with authentic Provably Fair weighted items from this exact case
+      const placeholderWinner = rollProvablyFairSkin(activeCase.items);
+      const initialReel = generateRealisticReel(activeCase.items, placeholderWinner, 36, 48);
       setReelItems(initialReel);
     } else {
       setReelItems([]);
       setWonSkin(null);
+      setWonSkins([]);
     }
   }, [activeCase]);
 
@@ -176,62 +190,77 @@ export const VortexCaseShopModal: React.FC<VortexCaseShopModalProps> = ({ isOpen
     setTradeUrlError(null);
   };
 
-  // Start Case Opening Spin
+  // Start Case Opening Spin with Provably Fair Weighted Odds & Multi-Case / Fast Mode
   const handleOpenCase = (c: CS2Case) => {
     if (isSpinning) return;
 
-    if (balance < c.priceEur) {
+    const totalCost = c.priceEur * caseCount;
+    if (balance < totalCost) {
       sound.playClick();
-      alert(`Bilanci juaj (${balance.toFixed(2)} €) nuk mjafton për këtë arkë (${c.priceEur.toFixed(2)} €). Mund të shtoni bilanc demo me butonin sipër!`);
+      alert(`Bilanci juaj (${balance.toFixed(2)} €) nuk mjafton për të hapur ${caseCount} arka (${totalCost.toFixed(2)} €). Mund të shtoni bilanc demo me butonin "+20€"!`);
       return;
     }
 
     // Deduct balance
-    const success = deductVortexWalletBalance(c.priceEur);
+    const success = deductVortexWalletBalance(totalCost);
     if (!success) return;
 
     sound.playBuyWeapon();
     setIsSpinning(true);
     setWonSkin(null);
+    setWonSkins([]);
     setDeliveryResult(null);
     setDeliveryProgress(null);
     setDeliveryError(null);
 
-    // Pick winning item with realistic weighted odds
-    let selectedWonSkin: CS2Skin;
-    const rand = Math.random() * 100;
-    const extraordinaryItems = c.items.filter(i => i.rarity === 'extraordinary');
-    const covertItems = c.items.filter(i => i.rarity === 'covert');
-    const otherItems = c.items.filter(i => i.rarity !== 'extraordinary' && i.rarity !== 'covert');
-
-    if (rand < 5 && extraordinaryItems.length > 0) {
-      selectedWonSkin = extraordinaryItems[Math.floor(Math.random() * extraordinaryItems.length)];
-    } else if (rand < 30 && covertItems.length > 0) {
-      selectedWonSkin = covertItems[Math.floor(Math.random() * covertItems.length)];
-    } else {
-      selectedWonSkin = (otherItems.length > 0 ? otherItems : c.items)[Math.floor(Math.random() * (otherItems.length || c.items.length))];
+    // Roll winners strictly using Provably Fair drop rates
+    const rolledWinners: CS2Skin[] = [];
+    for (let k = 0; k < caseCount; k++) {
+      rolledWinners.push(rollProvablyFairSkin(c.items));
     }
 
-    // Build reel with 45 items, placing winning item at index 36
-    const generatedReel: CS2Skin[] = [];
-    for (let i = 0; i < 45; i++) {
-      if (i === 36) {
-        generatedReel.push(selectedWonSkin);
-      } else {
-        const randItem = c.items[Math.floor(Math.random() * c.items.length)];
-        generatedReel.push(randItem);
-      }
+    const primaryWinner = rolledWinners[0];
+
+    // If Fast Mode is enabled: Instant reveal!
+    if (fastMode) {
+      setTimeout(() => {
+        setIsSpinning(false);
+        setWonSkin(primaryWinner);
+        setWonSkins(rolledWinners);
+
+        const hasGold = rolledWinners.some(w => w.rarity === 'extraordinary');
+        const hasCovert = rolledWinners.some(w => w.rarity === 'covert');
+        if (hasGold) {
+          sound.playRareGoldDrop();
+          confetti({
+            particleCount: 200,
+            spread: 100,
+            origin: { y: 0.55 },
+            colors: ['#FFD700', '#FFA500', '#FFFFFF', '#A3E635']
+          });
+        } else if (hasCovert) {
+          sound.playTournamentVictory();
+          confetti({
+            particleCount: 120,
+            spread: 80,
+            origin: { y: 0.6 },
+            colors: ['#EB4B4B', '#FF3881', '#FFFFFF']
+          });
+        } else {
+          sound.playSelect();
+        }
+      }, 350);
+      return;
     }
+
+    // Build authentic reel strip landing on primaryWinner at index 36
+    const generatedReel = generateRealisticReel(c.items, primaryWinner, 36, 48);
     setReelItems(generatedReel);
-
-    // Reset offset
     setReelOffset(0);
 
-    // Animate spinner deceleration
     const cardWidth = 140; // width of each card + margin
-    const targetOffset = 36 * cardWidth - 280 + Math.floor(Math.random() * 60) - 30; // center on item 36 with small random jitter
+    const targetOffset = 36 * cardWidth - 280 + Math.floor(Math.random() * 40) - 20;
 
-    // Play tick sounds as it decelerates
     const startTime = Date.now();
     const duration = 5200; // 5.2 seconds spin
     let tickCount = 0;
@@ -255,21 +284,24 @@ export const VortexCaseShopModal: React.FC<VortexCaseShopModalProps> = ({ isOpen
     // Finished spinning
     setTimeout(() => {
       setIsSpinning(false);
-      setWonSkin(selectedWonSkin);
+      setWonSkin(primaryWinner);
+      setWonSkins(rolledWinners);
 
-      if (selectedWonSkin.rarity === 'extraordinary') {
+      const hasGold = rolledWinners.some(w => w.rarity === 'extraordinary');
+      const hasCovert = rolledWinners.some(w => w.rarity === 'covert');
+      if (hasGold) {
         sound.playRareGoldDrop();
         confetti({
-          particleCount: 160,
+          particleCount: 180,
           spread: 100,
           origin: { y: 0.55 },
           colors: ['#FFD700', '#FFA500', '#FFFFFF', '#A3E635']
         });
-      } else if (selectedWonSkin.rarity === 'covert') {
+      } else if (hasCovert) {
         sound.playTournamentVictory();
         confetti({
-          particleCount: 90,
-          spread: 70,
+          particleCount: 100,
+          spread: 75,
           origin: { y: 0.6 },
           colors: ['#EB4B4B', '#FF3881', '#FFFFFF']
         });
@@ -627,34 +659,182 @@ export const VortexCaseShopModal: React.FC<VortexCaseShopModalProps> = ({ isOpen
                   </div>
                 </div>
               ) : (
-                /* ACTIVE CASE OPENING & HORIZONTAL REEL */
+                /* ACTIVE CASE OPENING & HELLCASE-STYLE REEL & ODDS */
                 <div className="flex flex-col items-center">
                   {!wonSkin ? (
                     <div className="w-full flex flex-col items-center">
-                      <div className="flex items-center gap-3 mb-5">
-                        <img 
-                          src={activeCase.image} 
-                          alt={activeCase.name} 
-                          referrerPolicy="no-referrer"
-                          loading="eager"
-                          onError={handleImageFallback}
-                          className="w-14 h-12 object-contain" 
-                        />
-                        <div>
-                          <h3 className="font-display font-black text-xl text-white">{activeCase.name}</h3>
-                          <p className="text-xs text-slate-400 font-mono">Çmimi për hapje: <strong className="text-amber-400">{activeCase.priceEur.toFixed(2)} €</strong></p>
+                      
+                      {/* Hellcase Top Bar: Case Info, Multiplier Selector, Open Button & Fast Mode */}
+                      <div className="w-full mb-5 p-3.5 sm:p-4 rounded-2xl bg-[#0B0D16] border border-[#1A1E2E] flex flex-col lg:flex-row items-center justify-between gap-4 shadow-xl">
+                        
+                        {/* Left: Case Info & Back Button */}
+                        <div className="flex items-center gap-3">
+                          <button
+                            disabled={isSpinning}
+                            onClick={() => {
+                              sound.playSelect();
+                              setActiveCase(null);
+                            }}
+                            className="p-2 rounded-xl bg-white/5 hover:bg-white/10 text-slate-300 hover:text-white transition cursor-pointer"
+                            title="Kthehu te Arkat"
+                          >
+                            <ChevronLeft className="w-5 h-5" />
+                          </button>
+                          <img 
+                            src={activeCase.image} 
+                            alt={activeCase.name} 
+                            referrerPolicy="no-referrer"
+                            loading="eager"
+                            onError={handleImageFallback}
+                            className="w-14 h-12 object-contain drop-shadow-md" 
+                          />
+                          <div>
+                            <div className="flex items-center gap-2">
+                              <h3 className="font-display font-black text-base sm:text-lg text-white">{activeCase.name}</h3>
+                              <span className="px-2 py-0.5 rounded-full bg-emerald-400/10 text-emerald-400 text-[10px] font-mono font-bold flex items-center gap-1">
+                                <ShieldCheck className="w-3 h-3" />
+                                Provably Fair
+                              </span>
+                            </div>
+                            <p className="text-xs text-slate-400 font-mono">
+                              Çmimi: <strong className="text-amber-400 font-bold">{activeCase.priceEur.toFixed(2)} €</strong> / arkë
+                            </p>
+                          </div>
+                        </div>
+
+                        {/* Center: Case Multiplier Selector [1] [2] [3] [4] [5] [10] */}
+                        <div className="flex items-center gap-1 bg-[#06070B] p-1 rounded-xl border border-white/10">
+                          {[1, 2, 3, 4, 5, 10].map((num) => (
+                            <button
+                              key={num}
+                              disabled={isSpinning}
+                              onClick={() => {
+                                sound.playSelect();
+                                setCaseCount(num);
+                              }}
+                              className={`px-3 py-1.5 rounded-lg text-xs font-mono font-bold transition cursor-pointer ${
+                                caseCount === num
+                                  ? 'bg-amber-400 text-black shadow-md font-black'
+                                  : 'text-slate-400 hover:text-white'
+                              }`}
+                            >
+                              {num}
+                            </button>
+                          ))}
+                        </div>
+
+                        {/* Right: Big Open Button & Fast Mode Toggle */}
+                        <div className="flex items-center gap-3">
+                          {/* Fast mode switch */}
+                          <label className="flex items-center gap-2 cursor-pointer select-none">
+                            <input 
+                              type="checkbox"
+                              checked={fastMode}
+                              disabled={isSpinning}
+                              onChange={(e) => {
+                                sound.playSelect();
+                                setFastMode(e.target.checked);
+                              }}
+                              className="sr-only peer"
+                            />
+                            <div className="w-8 h-4 bg-slate-700 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-3 after:w-3 after:transition-all peer-checked:bg-[#A3E635] relative cursor-pointer" />
+                            <span className="text-xs font-mono text-slate-300 flex items-center gap-1">
+                              <Zap className="w-3 h-3 text-amber-400" />
+                              Fast mode
+                            </span>
+                          </label>
+
+                          {/* Open Button */}
+                          <button
+                            disabled={isSpinning}
+                            onClick={() => handleOpenCase(activeCase)}
+                            className={`px-6 py-2.5 rounded-xl font-display font-black text-xs uppercase tracking-wider transition-all duration-200 cursor-pointer flex items-center gap-2 shadow-lg ${
+                              isSpinning
+                                ? 'bg-slate-700 text-slate-400 cursor-not-allowed'
+                                : 'bg-gradient-to-r from-amber-400 to-yellow-500 hover:from-amber-300 hover:to-yellow-400 text-black shadow-[0_0_20px_rgba(245,158,11,0.35)] hover:scale-105 active:scale-95'
+                            }`}
+                          >
+                            <Flame className="w-4 h-4 fill-current" />
+                            <span>
+                              {isSpinning 
+                                ? 'Po Rrotullohet...' 
+                                : `HAP ${caseCount > 1 ? `${caseCount}X ` : ''}(${(activeCase.priceEur * caseCount).toFixed(2)} €)`}
+                            </span>
+                          </button>
+                        </div>
+                      </div>
+
+                      {/* Hellcase Style: Provably Fair Drop Probability Tier Bar */}
+                      <div className="w-full max-w-4xl mb-4 px-4 py-2 rounded-xl bg-[#080A12] border border-white/5 flex flex-wrap items-center justify-between text-[11px] font-mono gap-2">
+                        <span className="text-slate-400 font-bold flex items-center gap-1.5">
+                          <ShieldCheck className="w-3.5 h-3.5 text-emerald-400" />
+                          <span>Shanset Zyrtare të Armëve:</span>
+                        </span>
+                        <div className="flex items-center gap-3 flex-wrap">
+                          <span className="flex items-center gap-1 text-[#FFD700] font-bold">
+                            <span className="w-2 h-2 rounded-full bg-[#FFD700]" />
+                            ★ Thikë: 0.260%
+                          </span>
+                          <span className="flex items-center gap-1 text-[#EB4B4B] font-bold">
+                            <span className="w-2 h-2 rounded-full bg-[#EB4B4B]" />
+                            Covert: 0.640%
+                          </span>
+                          <span className="flex items-center gap-1 text-[#D32CE6] font-bold">
+                            <span className="w-2 h-2 rounded-full bg-[#D32CE6]" />
+                            Classified: 3.200%
+                          </span>
+                          <span className="flex items-center gap-1 text-[#8847FF] font-bold">
+                            <span className="w-2 h-2 rounded-full bg-[#8847FF]" />
+                            Restricted: 15.980%
+                          </span>
+                          <span className="flex items-center gap-1 text-[#4B69FF] font-bold">
+                            <span className="w-2 h-2 rounded-full bg-[#4B69FF]" />
+                            Mil-Spec: 79.920%
+                          </span>
+                        </div>
+                      </div>
+
+                      {/* Hellcase Style: Last 7 Days Top Drop Ticker */}
+                      <div className="w-full max-w-4xl mb-5">
+                        <div className="flex items-center gap-1.5 text-xs font-mono font-bold text-slate-400 mb-2 uppercase tracking-wider">
+                          <Flame className="w-3.5 h-3.5 text-amber-400 fill-current" />
+                          <span>Fitoret më të mira nga kjo arkë (Top Drops):</span>
+                        </div>
+                        <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-6 gap-2">
+                          {RECENT_LUCKY_DROPS.map((drop, idx) => (
+                            <div 
+                              key={idx}
+                              className="p-2 rounded-xl bg-[#090C16] border border-white/5 flex flex-col items-center text-center group relative overflow-hidden"
+                            >
+                              <div className="w-full flex items-center justify-between text-[9px] font-mono mb-1">
+                                <span className="text-white font-bold">{drop.price.toFixed(2)} €</span>
+                                <span className="px-1 rounded bg-rose-500/20 text-rose-400 font-bold">{drop.mult}</span>
+                              </div>
+                              <img 
+                                src={drop.image} 
+                                alt={drop.skin} 
+                                referrerPolicy="no-referrer"
+                                loading="eager"
+                                onError={handleImageFallback}
+                                className="w-16 h-12 object-contain my-1 group-hover:scale-110 transition-transform duration-300 drop-shadow-sm" 
+                              />
+                              <div className="text-[10px] font-mono text-slate-400 truncate w-full">{drop.weapon}</div>
+                              <div className="text-[10px] font-display font-bold text-white truncate w-full">{drop.skin}</div>
+                              <div className="absolute bottom-0 left-0 right-0 h-0.5" style={{ backgroundColor: drop.rarityColor }} />
+                            </div>
+                          ))}
                         </div>
                       </div>
 
                       {/* Horizontal Spinner Reel Container */}
-                      <div className="relative w-full max-w-3xl h-44 rounded-2xl bg-[#07080D] border-2 border-[#1E2335] shadow-2xl overflow-hidden flex items-center">
+                      <div className="relative w-full max-w-4xl h-44 rounded-2xl bg-[#07080D] border-2 border-[#1E2335] shadow-2xl overflow-hidden flex items-center my-2">
                         <div className="absolute top-0 bottom-0 left-1/2 -translate-x-1/2 w-1 bg-amber-400 z-30 shadow-[0_0_15px_rgba(245,158,11,0.8)] pointer-events-none">
                           <div className="absolute top-0 left-1/2 -translate-x-1/2 w-0 h-0 border-l-[8px] border-l-transparent border-r-[8px] border-r-transparent border-t-[10px] border-t-amber-400" />
                           <div className="absolute bottom-0 left-1/2 -translate-x-1/2 w-0 h-0 border-l-[8px] border-l-transparent border-r-[8px] border-r-transparent border-b-[10px] border-b-amber-400" />
                         </div>
 
-                        <div className="absolute left-0 top-0 bottom-0 w-24 bg-gradient-to-r from-[#07080D] to-transparent z-20 pointer-events-none" />
-                        <div className="absolute right-0 top-0 bottom-0 w-24 bg-gradient-to-l from-[#07080D] to-transparent z-20 pointer-events-none" />
+                        <div className="absolute left-0 top-0 bottom-0 w-28 bg-gradient-to-r from-[#07080D] to-transparent z-20 pointer-events-none" />
+                        <div className="absolute right-0 top-0 bottom-0 w-28 bg-gradient-to-l from-[#07080D] to-transparent z-20 pointer-events-none" />
 
                         {/* Moving Strip of Skins */}
                         {reelItems.length > 0 && (
@@ -673,12 +853,17 @@ export const VortexCaseShopModal: React.FC<VortexCaseShopModalProps> = ({ isOpen
                                 className="w-32 h-36 rounded-xl bg-[#0F121C] border flex flex-col items-center justify-between p-2 shrink-0 relative overflow-hidden"
                                 style={{ borderColor: `${item.rarityColor}40` }}
                               >
-                                <span 
-                                  className="w-full text-center text-[9px] font-mono font-bold uppercase truncate"
-                                  style={{ color: item.rarityColor }}
-                                >
-                                  {item.weapon}
-                                </span>
+                                <div className="w-full flex items-center justify-between text-[9px] font-mono">
+                                  <span 
+                                    className="font-bold uppercase truncate"
+                                    style={{ color: item.rarityColor }}
+                                  >
+                                    {item.weapon}
+                                  </span>
+                                  <span className="text-slate-400 font-mono text-[8px]">
+                                    {(item.dropChancePercent ?? 0) < 1 ? `${(item.dropChancePercent ?? 0).toFixed(3)}%` : `${(item.dropChancePercent ?? 0).toFixed(1)}%`}
+                                  </span>
+                                </div>
 
                                 <img 
                                   src={item.image} 
@@ -704,51 +889,93 @@ export const VortexCaseShopModal: React.FC<VortexCaseShopModalProps> = ({ isOpen
                         )}
                       </div>
 
-                      {/* Open Case Action Button */}
-                      <div className="mt-8 flex flex-col items-center">
-                        <button
-                          disabled={isSpinning}
-                          onClick={() => handleOpenCase(activeCase)}
-                          className={`px-10 py-4 rounded-2xl font-display font-black text-base uppercase tracking-wider transition-all duration-200 cursor-pointer flex items-center gap-3 shadow-2xl ${
-                            isSpinning
-                              ? 'bg-slate-700 text-slate-400 cursor-not-allowed'
-                              : 'bg-gradient-to-r from-amber-400 via-amber-500 to-yellow-500 hover:from-amber-300 hover:to-yellow-400 text-black shadow-[0_0_35px_rgba(245,158,11,0.4)] hover:scale-105 active:scale-95'
-                          }`}
-                        >
-                          <Flame className="w-5 h-5 fill-current" />
-                          <span>{isSpinning ? 'Po Rrotullohet...' : `Hap Arkën (${activeCase.priceEur.toFixed(2)} €)`}</span>
-                        </button>
-                      </div>
+                      {/* Hellcase Style: "Case contains" Grid */}
+                      <div className="w-full max-w-4xl mt-6">
+                        <div className="flex items-center justify-between mb-3 border-b border-white/5 pb-2">
+                          <h4 className="text-xs font-mono font-bold text-slate-300 uppercase tracking-wider flex items-center gap-2">
+                            <span>🧰 Përmbajtja e kësaj arke ({activeCase.items.length} Armë zyrtare)</span>
+                          </h4>
+                          <span className="text-[11px] font-mono text-slate-500">
+                            Renditur sipas vlerës dhe shansit të rënies
+                          </span>
+                        </div>
 
-                      {/* Available Items Preview in this Case */}
-                      <div className="w-full mt-8">
-                        <h4 className="text-xs font-mono font-bold text-slate-400 uppercase tracking-wider mb-3">
-                          Përmbajtja e kësaj arke ({activeCase.items.length} Armë):
-                        </h4>
-                        <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-3">
+                        <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-2.5">
                           {activeCase.items.map((it) => (
                             <div 
                               key={it.id}
-                              className="p-3 rounded-xl bg-[#0E111A] border border-white/5 hover:border-white/20 transition flex flex-col items-center text-center group"
+                              className="relative p-2.5 rounded-xl bg-[#090C16] border border-[#1A1E2E] hover:border-amber-400/50 transition-all duration-200 flex flex-col justify-between group overflow-hidden shadow-md"
                             >
-                              <img 
-                                src={it.image} 
-                                alt={it.name} 
-                                referrerPolicy="no-referrer"
-                                loading="eager"
-                                onError={handleImageFallback}
-                                className="w-20 h-14 object-contain group-hover:scale-110 transition drop-shadow-md" 
+                              {/* Top Bar: Drops: X.XXX% & Info Icon */}
+                              <div className="flex items-center justify-between gap-1 mb-1">
+                                <span 
+                                  className="text-[9px] font-mono font-black px-1.5 py-0.5 rounded"
+                                  style={{ 
+                                    backgroundColor: `${it.rarityColor}18`, 
+                                    color: it.rarityColor, 
+                                    border: `1px solid ${it.rarityColor}40` 
+                                  }}
+                                >
+                                  Drops: {(it.dropChancePercent ?? 0).toFixed(3)}%
+                                </span>
+                                <span 
+                                  className="text-[10px] text-slate-500 hover:text-slate-300 cursor-pointer" 
+                                  title={`Raritet: ${it.rarity.toUpperCase()} • Float: ${it.floatValue} • Gjendja: ${it.wear}`}
+                                >
+                                  ⓘ
+                                </span>
+                              </div>
+
+                              {/* Weapon Image with Akamai CDN and fallback */}
+                              <div className="relative my-2 h-18 flex items-center justify-center">
+                                <div 
+                                  className="absolute inset-0 blur-lg opacity-0 group-hover:opacity-20 transition-opacity"
+                                  style={{ backgroundColor: it.rarityColor }}
+                                />
+                                <img 
+                                  src={it.image} 
+                                  alt={it.name} 
+                                  referrerPolicy="no-referrer"
+                                  loading="eager"
+                                  onError={handleImageFallback}
+                                  className="max-h-16 max-w-full object-contain group-hover:scale-110 transition-transform duration-300 drop-shadow-md" 
+                                />
+                              </div>
+
+                              {/* Weapon & Skin Name */}
+                              <div className="mt-1">
+                                <div className="text-[10px] font-mono text-slate-400 truncate">{it.weapon}</div>
+                                <div className="text-xs font-display font-black text-white truncate group-hover:text-amber-400 transition">
+                                  {it.skinName}
+                                </div>
+                              </div>
+
+                              {/* Price tag & Wear */}
+                              <div className="mt-2 pt-1.5 border-t border-white/5 flex items-center justify-between">
+                                <span className="text-[11px] font-mono font-bold text-amber-400">
+                                  {it.priceEur.toFixed(2)} €
+                                </span>
+                                <span 
+                                  className="text-[9px] font-mono font-bold uppercase tracking-wider"
+                                  style={{ color: it.rarityColor }}
+                                >
+                                  {it.wear === 'Factory New' ? 'FN' : it.wear === 'Minimal Wear' ? 'MW' : 'FT'}
+                                </span>
+                              </div>
+
+                              {/* Colored bottom accent line */}
+                              <div 
+                                className="absolute bottom-0 left-0 right-0 h-1" 
+                                style={{ backgroundColor: it.rarityColor }} 
                               />
-                              <div className="text-[11px] font-bold text-white truncate w-full mt-2">{it.name}</div>
-                              <span className="text-[10px] font-mono font-bold text-amber-400">{it.priceEur.toFixed(2)} €</span>
                             </div>
                           ))}
                         </div>
                       </div>
                     </div>
                   ) : (
-                    /* WON ITEM REVEAL SCREEN */
-                    <div className="w-full max-w-xl rounded-3xl bg-[#0E111C] border border-[#232A3D] p-6 sm:p-8 flex flex-col items-center text-center animate-in zoom-in-95 duration-300 shadow-2xl relative overflow-hidden">
+                    /* WON ITEM(S) REVEAL SCREEN */
+                    <div className="w-full max-w-2xl rounded-3xl bg-[#0E111C] border border-[#232A3D] p-6 sm:p-8 flex flex-col items-center text-center animate-in zoom-in-95 duration-300 shadow-2xl relative overflow-hidden">
                       <div 
                         className="absolute inset-0 blur-3xl opacity-20 pointer-events-none"
                         style={{ backgroundColor: wonSkin.rarityColor }}
@@ -758,32 +985,67 @@ export const VortexCaseShopModal: React.FC<VortexCaseShopModalProps> = ({ isOpen
                         className="px-3.5 py-1 rounded-full text-xs font-mono font-bold uppercase mb-2 tracking-wider"
                         style={{ backgroundColor: `${wonSkin.rarityColor}20`, color: wonSkin.rarityColor, border: `1px solid ${wonSkin.rarityColor}40` }}
                       >
-                        Urime! Fitove {wonSkin.rarity.toUpperCase()}
+                        {wonSkins.length > 1 ? `Urime! Fitove ${wonSkins.length} Armë CS2` : `Urime! Fitove ${wonSkin.rarity.toUpperCase()}`}
                       </div>
 
-                      <h3 className="font-display font-black text-2xl text-white tracking-tight mt-1">
-                        {wonSkin.name}
-                      </h3>
+                      {/* If multiple skins won (caseCount > 1) */}
+                      {wonSkins.length > 1 ? (
+                        <div className="w-full my-4">
+                          <div className="text-xs font-mono text-slate-400 mb-3">
+                            Vlera totale e fituar: <strong className="text-emerald-400 font-bold text-base">{wonSkins.reduce((acc, s) => acc + s.priceEur, 0).toFixed(2)} €</strong>
+                          </div>
+                          <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-2.5 max-h-64 overflow-y-auto p-1">
+                            {wonSkins.map((s, idx) => (
+                              <div 
+                                key={idx}
+                                className="p-2 rounded-xl bg-[#090C16] border flex flex-col items-center text-center"
+                                style={{ borderColor: `${s.rarityColor}40` }}
+                              >
+                                <img 
+                                  src={s.image} 
+                                  alt={s.name} 
+                                  referrerPolicy="no-referrer"
+                                  onError={handleImageFallback}
+                                  className="w-16 h-12 object-contain my-1"
+                                />
+                                <div className="text-[10px] font-mono text-slate-300 truncate w-full">{s.weapon}</div>
+                                <div className="text-[10px] font-bold text-white truncate w-full">{s.skinName}</div>
+                                <span className="text-[10px] font-mono font-bold text-amber-400 mt-1">{s.priceEur.toFixed(2)} €</span>
+                              </div>
+                            ))}
+                          </div>
+                        </div>
+                      ) : (
+                        /* Single Won Skin Cinematic Display */
+                        <>
+                          <h3 className="font-display font-black text-2xl text-white tracking-tight mt-1">
+                            {wonSkin.name}
+                          </h3>
 
-                      <div className="flex items-center gap-2 text-xs font-mono text-slate-400 mt-1">
-                        <span>Gjendja: <strong className="text-white">{wonSkin.wear}</strong></span>
-                        <span>•</span>
-                        <span>Float: <strong className="text-white">{wonSkin.floatValue}</strong></span>
-                        <span>•</span>
-                        <span>Vlera në Treg: <strong className="text-emerald-400 font-bold">{wonSkin.priceEur.toFixed(2)} €</strong></span>
-                      </div>
+                          <div className="flex items-center gap-2 text-xs font-mono text-slate-400 mt-1 flex-wrap justify-center">
+                            <span>Gjendja: <strong className="text-white">{wonSkin.wear}</strong></span>
+                            <span>•</span>
+                            <span>Float: <strong className="text-white">{wonSkin.floatValue}</strong></span>
+                            <span>•</span>
+                            <span>Shansi: <strong className="text-amber-400 font-bold">{(wonSkin.dropChancePercent ?? 0).toFixed(3)}%</strong></span>
+                            <span>•</span>
+                            <span>Vlera në Treg: <strong className="text-emerald-400 font-bold">{wonSkin.priceEur.toFixed(2)} €</strong></span>
+                          </div>
 
-                      <div className="relative my-6 flex items-center justify-center">
-                        <img 
-                          src={wonSkin.image} 
-                          alt={wonSkin.name} 
-                          referrerPolicy="no-referrer"
-                          loading="eager"
-                          onError={handleImageFallback}
-                          className="w-56 h-40 object-contain drop-shadow-[0_20px_35px_rgba(0,0,0,0.9)] scale-110 animate-bounce duration-1000"
-                        />
-                      </div>
+                          <div className="relative my-6 flex items-center justify-center">
+                            <img 
+                              src={wonSkin.image} 
+                              alt={wonSkin.name} 
+                              referrerPolicy="no-referrer"
+                              loading="eager"
+                              onError={handleImageFallback}
+                              className="w-56 h-40 object-contain drop-shadow-[0_20px_35px_rgba(0,0,0,0.9)] scale-110 animate-bounce duration-1000"
+                            />
+                          </div>
+                        </>
+                      )}
 
+                      {/* Delivery Progress */}
                       {deliveryProgress && (
                         <div className="w-full mb-5 p-3.5 rounded-2xl bg-[#141826] border border-amber-400/30 flex items-center gap-3 animate-pulse">
                           <RefreshCw className="w-5 h-5 text-amber-400 animate-spin shrink-0" />
@@ -794,6 +1056,7 @@ export const VortexCaseShopModal: React.FC<VortexCaseShopModalProps> = ({ isOpen
                         </div>
                       )}
 
+                      {/* Delivery Result */}
                       {deliveryResult && (
                         <div className="w-full mb-5 p-4 rounded-2xl bg-emerald-500/10 border border-emerald-500/30 text-left animate-in fade-in">
                           <div className="flex items-center gap-2 text-emerald-400 font-display font-bold text-sm mb-1">
@@ -818,6 +1081,7 @@ export const VortexCaseShopModal: React.FC<VortexCaseShopModalProps> = ({ isOpen
                         </div>
                       )}
 
+                      {/* Actions */}
                       {!deliveryResult ? (
                         <div className="flex flex-col sm:flex-row items-center gap-3 w-full">
                           <button
@@ -842,11 +1106,12 @@ export const VortexCaseShopModal: React.FC<VortexCaseShopModalProps> = ({ isOpen
                             onClick={() => {
                               sound.playClick();
                               setWonSkin(null);
+                              setWonSkins([]);
                               setDeliveryResult(null);
                             }}
                             className="w-full py-3.5 rounded-xl bg-[#A3E635] hover:bg-[#84cc16] text-black font-display font-black text-sm uppercase tracking-wider transition cursor-pointer shadow-lg"
                           >
-                            Hap një Arkë Tjetër
+                            Hap Përsëri
                           </button>
                         </div>
                       )}
