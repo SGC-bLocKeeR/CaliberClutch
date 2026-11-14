@@ -650,16 +650,17 @@ export const VortexMatchRoom: React.FC<VortexMatchRoomProps> = ({
       code: 'GY',
       countryName: 'Guyana',
       verified: true,
-      matches: 640,
-      winRate: '51%',
-      recentResults: ['W', 'W', 'L', 'L', 'W'],
+      hasPriority: true,
+      matches: 1644,
+      winRate: '43%',
+      recentResults: ['L', 'L', 'W', 'L', 'L'],
       rating: '0.94',
       swing: '-2.90%',
       isPositiveSwing: false,
-      kda: '13/17/7',
+      kda: '13/17/6',
       kd: '0.77',
       kr: '0.58',
-      adr: '71.5',
+      adr: '70.8',
       badgeIndex: 1
     }
   ];
@@ -2903,57 +2904,125 @@ export const VortexMatchRoom: React.FC<VortexMatchRoomProps> = ({
             : 'border-[#222432] bg-[#14151D] hover:border-white/20'
         }`}
       >
-        <div className="flex items-center justify-between gap-3">
-          {/* Left: Avatar with Priority Badge & Name */}
-          <div className="flex items-center gap-3 min-w-0">
-            <div className="relative w-10 h-10 shrink-0">
-              <img 
-                src={player.avatar} 
-                alt={player.name} 
-                className={`w-10 h-10 rounded-full object-cover border border-white/10 group-hover:border-white/30 transition ${player.name === 'M18' ? 'bg-black object-contain' : ''}`} 
-              />
-              {player.hasPriority && (
-                <div className="absolute -top-1 -right-0.5 w-3.5 h-3.5 rounded-full bg-[#FF5500] flex items-center justify-center text-[8px] text-black font-black shadow-sm" title="Priority">
-                  ★
-                </div>
-              )}
-            </div>
+        {/* TOP ROW: AVATAR MODULE (LEFT) + PLAYER IDENTITY (RIGHT) */}
+        <div className="flex items-start gap-3">
+          
+          {/* Left: Dedicated Avatar Container with Exact 1:1 FACEIT Anti-Cheat Placement */}
+          <div className="relative w-12 h-12 shrink-0">
+            {/* Captain Crown if player.isCaptain */}
+            {player.isCaptain && <FaceitCaptainCrown />}
 
-            <div className="min-w-0">
-              <div className="flex items-center gap-1.5">
-                <span className={`font-display font-bold text-sm truncate group-hover:text-[#FF5500] group-hover:underline transition ${
-                  isCurrentUser ? 'text-[#A3E635]' : 'text-white'
+            {/* Circular Avatar Photo */}
+            <img 
+              src={player.avatar} 
+              alt={player.name} 
+              className={`w-full h-full rounded-full object-cover border border-[#262838] shadow-sm block ${player.name === 'M18' ? 'bg-black object-contain' : ''}`} 
+            />
+
+            {/* Target priority badge at top-right */}
+            {player.hasPriority && (
+              <div className="absolute -top-1 -right-1 w-3.5 h-3.5 rounded-full bg-[#FF5500] flex items-center justify-center text-[8px] text-black font-black shadow-sm" title="Priority">
+                ★
+              </div>
+            )}
+
+            {/* Authentic FACEIT Anti-Cheat Shield Badge (Overlapping photo at bottom-right) */}
+            <FaceitAntiCheatShield 
+              size={18} 
+              className="absolute -bottom-1 -right-1 z-10" 
+            />
+          </div>
+
+          {/* Right: Country, Name, Verified, Elo, Level Ring */}
+          <div className="flex-1 min-w-0">
+            <div className="flex items-center justify-between gap-1.5">
+              <div className="flex items-center gap-1.5 truncate">
+                <CountryFlag code={player.code} name={player.countryName} size="xs" />
+                <span className={`font-display font-bold text-xs truncate ${
+                  isCurrentUser ? 'text-[#FF5500]' : 'text-white'
                 }`}>
                   {player.name}
                 </span>
                 {player.verified && (
-                  <CheckCircle2 className="w-3.5 h-3.5 text-white fill-white/10 shrink-0" />
+                  <CheckCircle2 className="w-3.5 h-3.5 text-slate-200 fill-white/[0.08] shrink-0" />
                 )}
-                <CountryFlag code={player.code} name={player.countryName} size="xs" />
               </div>
-              <div className="flex items-center gap-1.5 mt-0.5">
-                <FaceitLevelRing level={player.level} size={18} />
-                <span className="font-mono text-xs text-slate-400 font-semibold">
-                  {player.elo.toLocaleString()}
-                </span>
+
+              <div className="flex items-center gap-2 shrink-0">
+                <div className="flex items-center gap-1 text-slate-400 font-mono text-[11px] font-bold">
+                  <Activity className="w-3 h-3 text-slate-500" />
+                  <span className="text-slate-200">{player.elo.toLocaleString()}</span>
+                </div>
+                <FaceitLevelRing level={player.level} size={24} />
               </div>
+            </div>
+
+            {/* Subtitle: "Last 30 matches" */}
+            <div className="text-[9px] font-mono text-slate-500 uppercase tracking-wider mt-1">
+              Last 30 matches
             </div>
           </div>
+        </div>
 
-          {/* Right: K/D • K/R • ADR mini stats */}
-          <div className="flex items-center gap-3 text-right font-mono text-xs shrink-0 divide-x divide-white/[0.08]">
-            <div className="px-1.5">
-              <div className="font-bold text-white">{player.kd}</div>
-              <div className="text-[9px] text-slate-500 uppercase font-semibold">K/D</div>
+        {/* BOTTOM ROW: SEPARATED STATS COLUMNS ("le te jen te ndara sikur ne faceit") */}
+        <div className="mt-2.5 pt-2 border-t border-white/[0.06] flex items-center justify-between text-center font-mono overflow-x-auto scrollbar-none">
+          {/* Matches Column (Separated by vertical line on right) */}
+          <div className="pr-2.5 text-left shrink-0">
+            <div className="text-xs font-bold text-white">{player.matches.toLocaleString()}</div>
+            <div className="text-[9px] text-slate-500 uppercase font-semibold">Matches</div>
+          </div>
+
+          {/* Vertical divider */}
+          <div className="h-6 w-px bg-white/10 shrink-0 mr-2" />
+
+          {/* Wins */}
+          <div className="px-1 flex-1 min-w-[34px]">
+            <div className="text-xs font-bold text-white">{player.winRate}</div>
+            <div className="text-[9px] text-slate-500 uppercase font-semibold">Wins</div>
+          </div>
+
+          {/* Rating (Clean text with subtle underline - No pill/box) */}
+          <div className="px-1 flex-1 min-w-[34px]">
+            <div className="text-xs font-bold text-white underline decoration-white/25 underline-offset-2">
+              {player.rating}
             </div>
-            <div className="px-1.5">
-              <div className="font-bold text-white">{player.kr}</div>
-              <div className="text-[9px] text-slate-500 uppercase font-semibold">K/R</div>
+            <div className="text-[9px] text-slate-500 uppercase font-semibold mt-0.5">Rating</div>
+          </div>
+
+          {/* Swing */}
+          <div className="px-1 flex-1 min-w-[42px] flex flex-col items-center">
+            <div className={`px-1 py-0.5 text-[11px] font-mono font-bold ${
+              player.isPositiveSwing 
+                ? 'text-[#00E599]' 
+                : 'text-[#F87171]'
+            }`}>
+              {player.swing}
             </div>
-            <div className="pl-1.5">
-              <div className="font-bold text-white">{player.adr}</div>
-              <div className="text-[9px] text-slate-500 uppercase font-semibold">ADR</div>
-            </div>
+            <div className="text-[9px] text-slate-500 uppercase font-semibold mt-0.5">Swing</div>
+          </div>
+
+          {/* K/D/A */}
+          <div className="px-1 flex-1 min-w-[46px]">
+            <div className="text-xs font-bold text-slate-200">{player.kda}</div>
+            <div className="text-[9px] text-slate-500 uppercase font-semibold">K/D/A</div>
+          </div>
+
+          {/* K/D */}
+          <div className="px-1 flex-1 min-w-[32px]">
+            <div className="text-xs font-bold text-slate-200">{player.kd}</div>
+            <div className="text-[9px] text-slate-500 uppercase font-semibold">K/D</div>
+          </div>
+
+          {/* K/R */}
+          <div className="px-1 flex-1 min-w-[32px]">
+            <div className="text-xs font-bold text-slate-200">{player.kr}</div>
+            <div className="text-[9px] text-slate-500 uppercase font-semibold">K/R</div>
+          </div>
+
+          {/* ADR */}
+          <div className="pl-1 flex-1 min-w-[34px]">
+            <div className="text-xs font-bold text-white">{player.adr}</div>
+            <div className="text-[9px] text-slate-500 uppercase font-semibold">ADR</div>
           </div>
         </div>
       </div>
