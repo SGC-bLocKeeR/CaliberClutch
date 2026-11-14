@@ -2360,7 +2360,7 @@ export const VortexDashboard: React.FC<VortexDashboardProps> = ({
                         return (
                           <div
                             key={member.id}
-                            className={`h-56 rounded-2xl border flex flex-col items-center justify-between p-4 transition-all relative group ${
+                            className={`h-56 rounded-2xl border flex flex-col items-center justify-between px-2 py-3.5 transition-all relative group overflow-hidden ${
                               isLeader
                                 ? 'bg-gradient-to-b from-[#18210C] via-[#121612] to-[#0E1118] border-[#A3E635]/60 shadow-lg shadow-[#A3E635]/15'
                                 : 'bg-[#12141C] border-[#252B3B] hover:border-[#A3E635]/40'
@@ -2438,17 +2438,19 @@ export const VortexDashboard: React.FC<VortexDashboardProps> = ({
                                 <span className="absolute bottom-0 right-0 w-3.5 h-3.5 rounded-full bg-emerald-400 border-2 border-[#12141C]" />
                               </div>
 
-                              <div>
-                                <div className="text-sm font-bold text-white flex items-center justify-center gap-1.5 font-display">
-                                  <span>{member.name}</span>
+                              <div className="w-full px-1 min-w-0 flex flex-col items-center">
+                                <div className="text-xs font-bold text-white flex items-center justify-center gap-1 font-display max-w-full min-w-0">
+                                  <span className="truncate min-w-0 max-w-[68px] sm:max-w-[74px]" title={member.name}>{member.name}</span>
                                   <FaceitVerificationBadge 
                                     type={member.verification || (isCenterLeader ? currentVerification : 'none')} 
-                                    size="sm" 
+                                    size="xs" 
+                                    className="shrink-0"
                                   />
                                   <CountryFlag 
                                     code={member.code || (isCenterLeader ? currentCountry.code : 'XK')} 
                                     name={member.countryName || (isCenterLeader ? currentCountry.name : 'Kosovo')} 
                                     size="xs" 
+                                    className="shrink-0"
                                   />
                                 </div>
                                 <div className="inline-flex items-center gap-2 px-2.5 py-0.5 rounded-full bg-[#151922] border border-white/10 shadow-inner mt-1">

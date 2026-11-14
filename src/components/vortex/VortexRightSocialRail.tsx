@@ -30,7 +30,10 @@ import {
   Gift,
   Coins,
   Eye,
-  Sparkles
+  Sparkles,
+  Copy,
+  Check,
+  ExternalLink
 } from 'lucide-react';
 import confetti from 'canvas-confetti';
 import { sound } from '../../utils/soundEffects';
@@ -118,38 +121,50 @@ export const VortexRightSocialRail: React.FC<VortexRightSocialRailProps> = ({
     countryName?: string;
   } | null>(null);
 
-  // Interactive Case & Spectate State
-  const [showCaseModal, setShowCaseModal] = useState(false);
-  const [isOpeningCase, setIsOpeningCase] = useState(false);
-  const [wonSkin, setWonSkin] = useState<{ name: string; wear: string; rarity: string; color: string; image: string } | null>(null);
+  // CS2 Cases & Skins Affiliate / Partner State
+  const [showPartnerModal, setShowPartnerModal] = useState(false);
+  const [copiedCode, setCopiedCode] = useState(false);
   const [spectateToast, setSpectateToast] = useState<string | null>(null);
 
-  const CS2_CASE_SKINS = [
-    { name: '★ Karambit | Doppler Phase 2', wear: 'Factory New', rarity: 'Covert (Extraordinary)', color: '#FF3881', image: 'https://community.cloudflare.steamstatic.com/economy/image/-9a81dlWLwJ2UUGcVs_nsVtzdOEdtWwKGZZLQHTxDZ7I56KU0Zwwo4NUX4oFJZEHLbXH5ApeO4YmlhxYQknCRvCo04DEVlxkKgpovbssLQJf2OD3fm5b09mJmYm0m_7zO6-fzj9V7cAl2eyVpIrz2FKx_0FtZ2D1cIGRcQRsYQ7Q81W3lOjxxcjr3M4pYjY/360fx360f' },
-    { name: 'AWP | Dragon Lore', wear: 'Minimal Wear', rarity: 'Covert', color: '#EB4B4B', image: 'https://community.cloudflare.steamstatic.com/economy/image/-9a81dlWLwJ2UUGcVs_nsVtzdOEdtWwKGZZLQHTxDZ7I56KU0Zwwo4NUX4oFJZEHLbXH5ApeO4YmlhxYQknCRvCo04DEVlxkKgpot621FABz7PLfYQJS5NO0m5O0m_7zO6-fk29T-sBzpezT_I2tiVXs-RE5YTincY-WdVA4N13R81brx-e51sW9786czydiuSQn4ivcnBfmn1gSOd0N_1mS/360fx360f' },
-    { name: 'AK-47 | Fire Serpent', wear: 'Field-Tested', rarity: 'Classified', color: '#D32CE6', image: 'https://community.cloudflare.steamstatic.com/economy/image/-9a81dlWLwJ2UUGcVs_nsVtzdOEdtWwKGZZLQHTxDZ7I56KU0Zwwo4NUX4oFJZEHLbXH5ApeO4YmlhxYQknCRvCo04DEVlxkKgpot7HxfDhjxszJemkV19m5h5SEheP3N77fqWZU7Mxkh6fF89j23Fay8hY9NTildY-WdlI_Z1zV8le2kL_vg5S-u5mdy3BivSEm-z-DyP23_n8N/360fx360f' },
-    { name: 'M4A1-S | Printstream', wear: 'Factory New', rarity: 'Classified', color: '#D32CE6', image: 'https://community.cloudflare.steamstatic.com/economy/image/-9a81dlWLwJ2UUGcVs_nsVtzdOEdtWwKGZZLQHTxDZ7I56KU0Zwwo4NUX4oFJZEHLbXH5ApeO4YmlhxYQknCRvCo04DEVlxkKgpou-6kejhz2v_Nfz5H_uO1gb-Gw_alIITfn2xV_Pp_jez--YXygED6-kZkYj3wLITDdQc8MlCG_Fftxr3ug8C0u5vNnHJr6SQmsH6MnRDi1gYMMLIqu-Y0gQ/360fx360f' },
-    { name: 'Desert Eagle | Printstream', wear: 'Field-Tested', rarity: 'Classified', color: '#D32CE6', image: 'https://community.cloudflare.steamstatic.com/economy/image/-9a81dlWLwJ2UUGcVs_nsVtzdOEdtWwKGZZLQHTxDZ7I56KU0Zwwo4NUX4oFJZEHLbXH5ApeO4YmlhxYQknCRvCo04DEVlxkKgposr-kLAtl7PDdTjlH_8-imIGZksj4OrzZglRd4cJ5nqeWpIqhjAThqUs4MTv3cNeUIAVvNwrX8gS-w-rsg5W8uMufy3I3vCE8pSGKGk5n_6o/360fx360f' }
-  ];
-
-  const handleOpenCase = () => {
-    if (isOpeningCase) return;
-    setIsOpeningCase(true);
-    setWonSkin(null);
+  const handleCopyPartnerCode = () => {
     sound.playSelect();
-    
-    setTimeout(() => {
-      const randomSkin = CS2_CASE_SKINS[Math.floor(Math.random() * CS2_CASE_SKINS.length)];
-      setWonSkin(randomSkin);
-      setIsOpeningCase(false);
-      sound.playTournamentVictory();
-      confetti({
-        particleCount: 120,
-        spread: 80,
-        origin: { y: 0.6 }
-      });
-    }, 2200);
+    navigator.clipboard.writeText('VORTEX');
+    setCopiedCode(true);
+    setTimeout(() => setCopiedCode(false), 2500);
   };
+
+  const CS2_PARTNERS = [
+    {
+      id: 'key-drop',
+      name: 'Key-Drop CS2',
+      tagline: 'Best Case Battles & Upgrade System',
+      bonus: '+10% Deposit Bonus + Free Gold Case',
+      url: 'https://key-drop.com/?code=VORTEX',
+      badgeColor: '#EAB308',
+      image: 'https://community.cloudflare.steamstatic.com/economy/image/-9a81dlWLwJ2UUGcVs_nsVtzdOEdtWwKGZZLQHTxDZ7I56KU0Zwwo4NUX4oFJZEHLbXH5ApeO4YmlhxYQknCRvCo04DEVlxkKgpovbssLQJf2OD3fm5b09mJmYm0m_7zO6-fzj9V7cAl2eyVpIrz2FKx_0FtZ2D1cIGRcQRsYQ7Q81W3lOjxxcjr3M4pYjY/360fx360f',
+      features: ['Instant Steam Bot Trades', 'Daily Free Crates', 'Provably Fair 100%']
+    },
+    {
+      id: 'hellcase',
+      name: 'Hellcase CS2',
+      tagline: 'World Leading CS2 Crate Platform',
+      bonus: '+10% Bonus + Free $0.70 Starter Case',
+      url: 'https://hellcase.com/f/VORTEX',
+      badgeColor: '#EF4444',
+      image: 'https://community.cloudflare.steamstatic.com/economy/image/-9a81dlWLwJ2UUGcVs_nsVtzdOEdtWwKGZZLQHTxDZ7I56KU0Zwwo4NUX4oFJZEHLbXH5ApeO4YmlhxYQknCRvCo04DEVlxkKgpot621FABz7PLfYQJS5NO0m5O0m_7zO6-fk29T-sBzpezT_I2tiVXs-RE5YTincY-WdVA4N13R81brx-e51sW9786czydiuSQn4ivcnBfmn1gSOd0N_1mS/360fx360f',
+      features: ['Covert Knife Crates', 'Contracts & Upgrades', '10M+ Users Worldwide']
+    },
+    {
+      id: 'skinport',
+      name: 'Skinport Market',
+      tagline: 'Safest CS2 Skin Marketplace',
+      bonus: '0% Buyer Commission • Direct Cashout',
+      url: 'https://skinport.com/r/vortex',
+      badgeColor: '#3B82F6',
+      image: 'https://community.cloudflare.steamstatic.com/economy/image/-9a81dlWLwJ2UUGcVs_nsVtzdOEdtWwKGZZLQHTxDZ7I56KU0Zwwo4NUX4oFJZEHLbXH5ApeO4YmlhxYQknCRvCo04DEVlxkKgpou-6kejhz2v_Nfz5H_uO1gb-Gw_alIITfn2xV_Pp_jez--YXygED6-kZkYj3wLITDdQc8MlCG_Fftxr3ug8C0u5vNnHJr6SQmsH6MnRDi1gYMMLIqu-Y0gQ/360fx360f',
+      features: ['Official Steam WebAPI', 'Real Bank & Card Cashout', 'Guaranteed Anti-Scam']
+    }
+  ];
 
   const [dmInput, setDmInput] = useState('');
   const dmFileInputRef = useRef<HTMLInputElement>(null);
@@ -717,47 +732,49 @@ export const VortexRightSocialRail: React.FC<VortexRightSocialRailProps> = ({
           </div>
 
           {/* ======================================================== */}
-          {/* DAILY MISSIONS & CS2 CASE OPENING CAPSULE                */}
+          {/* CS2 CASES & SKINS (OFFICIAL PARTNERS) CAPSULE             */}
           {/* ======================================================== */}
-          <div className="rounded-2xl bg-[#10121A] border border-[#1E2333] p-3 flex flex-col gap-2.5 shadow-lg hover:border-white/10 transition">
+          <div className="rounded-2xl bg-[#10121A] border border-[#1E2333] p-3 flex flex-col gap-2.5 shadow-lg hover:border-amber-500/30 transition group">
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-1.5 text-xs font-bold text-white font-sans">
-                <Target className="w-3.5 h-3.5 text-[#A3E635]" />
-                <span>Daily Mission</span>
+                <Gift className="w-3.5 h-3.5 text-amber-400 group-hover:scale-110 transition" />
+                <span>CS2 Cases & Drops</span>
               </div>
-              <span className="text-[10px] font-mono text-[#A3E635] font-bold">
-                1 / 2 Completed
+              <span className="text-[9px] font-mono font-bold bg-amber-400/15 text-amber-400 border border-amber-400/30 px-1.5 py-0.5 rounded uppercase">
+                +10% Bonus
               </span>
             </div>
 
-            <div>
-              <div className="flex items-center justify-between text-[11px] text-slate-300 font-sans mb-1.5">
-                <span className="truncate">Win 2 Matches on Mirage</span>
-                <span className="font-mono text-slate-400 shrink-0 ml-1">1/2</span>
-              </div>
-              {/* Progress Bar with Lime Glow */}
-              <div className="w-full h-1.5 rounded-full bg-[#181B26] overflow-hidden">
-                <div className="h-full bg-gradient-to-r from-[#84cc16] to-[#A3E635] rounded-full w-1/2 transition-all duration-500 shadow-[0_0_8px_rgba(163,230,53,0.5)]" />
-              </div>
-            </div>
+            <p className="text-[11px] text-slate-400 leading-snug">
+              Hap CS2 cases & fito thika të vërteta me kodin <strong className="text-amber-400 font-mono">VORTEX</strong> në faqet partnere.
+            </p>
 
-            {/* Reward & Open Case Button */}
-            <div className="flex items-center justify-between pt-0.5">
-              <div className="flex items-center gap-1 text-[10px] font-mono font-bold text-amber-400 bg-amber-400/10 px-2 py-0.5 rounded-md border border-amber-400/20">
-                <Coins className="w-3 h-3" />
-                <span>+150 VTX</span>
-              </div>
+            {/* Promo Code & Open Partner Modal Button */}
+            <div className="flex items-center justify-between gap-1.5 pt-0.5">
+              <button
+                onClick={handleCopyPartnerCode}
+                className="flex items-center gap-1 text-[10px] font-mono font-bold text-amber-400 bg-amber-400/10 hover:bg-amber-400/20 px-2 py-1 rounded-md border border-amber-400/25 transition cursor-pointer"
+                title="Kopjo Kodin VORTEX (+10% Bonus)"
+              >
+                <span>KODI:</span>
+                <span className="text-white underline decoration-amber-400">VORTEX</span>
+                {copiedCode ? (
+                  <Check className="w-3 h-3 text-emerald-400 ml-0.5" />
+                ) : (
+                  <Copy className="w-3 h-3 text-amber-400 ml-0.5" />
+                )}
+              </button>
 
               <button
                 onClick={() => {
                   sound.playSelect();
-                  setShowCaseModal(true);
+                  setShowPartnerModal(true);
                 }}
-                className="flex items-center gap-1 text-[10px] font-mono font-bold text-slate-200 hover:text-white bg-white/[0.06] hover:bg-white/10 px-2.5 py-1 rounded-md border border-white/10 transition cursor-pointer group"
-                title="Open VORTEX Weapon Case"
+                className="flex items-center gap-1 text-[10px] font-mono font-bold text-slate-100 hover:text-white bg-gradient-to-r from-amber-500/20 to-yellow-500/20 hover:from-amber-500/30 hover:to-yellow-500/30 px-2.5 py-1 rounded-md border border-amber-500/30 hover:border-amber-400 transition cursor-pointer"
+                title="Shiko Faqet Partnere të CS2 Cases"
               >
-                <Gift className="w-3 h-3 text-[#A3E635] group-hover:scale-110 transition" />
-                <span>Open Case</span>
+                <span>Hap Cases</span>
+                <ExternalLink className="w-3 h-3 text-amber-400" />
               </button>
             </div>
           </div>
@@ -1370,7 +1387,13 @@ export const VortexRightSocialRail: React.FC<VortexRightSocialRailProps> = ({
                       <p className="text-slate-200">
                         <strong className="text-white font-bold">You</strong> received 50 FACEIT Points from your FACEIT Case.
                       </p>
-                      <button className="text-orange-500 hover:text-orange-400 font-bold mt-0.5 inline-block cursor-pointer">
+                      <button 
+                        onClick={() => {
+                          sound.playSelect();
+                          setShowPartnerModal(true);
+                        }}
+                        className="text-orange-500 hover:text-orange-400 font-bold mt-0.5 inline-block cursor-pointer"
+                      >
                         Explore the shop.
                       </button>
                       <div className="flex items-center gap-1 text-[10px] text-slate-500 mt-1 font-mono">
@@ -1405,7 +1428,13 @@ export const VortexRightSocialRail: React.FC<VortexRightSocialRailProps> = ({
                       <p className="text-slate-200">
                         <strong className="text-white font-bold">You</strong> received 100 FACEIT Points from your FACEIT Case.
                       </p>
-                      <button className="text-orange-500 hover:text-orange-400 font-bold mt-0.5 inline-block cursor-pointer">
+                      <button 
+                        onClick={() => {
+                          sound.playSelect();
+                          setShowPartnerModal(true);
+                        }}
+                        className="text-orange-500 hover:text-orange-400 font-bold mt-0.5 inline-block cursor-pointer"
+                      >
                         Explore the shop.
                       </button>
                       <div className="flex items-center gap-1 text-[10px] text-slate-500 mt-1 font-mono">
@@ -1424,7 +1453,13 @@ export const VortexRightSocialRail: React.FC<VortexRightSocialRailProps> = ({
                       <p className="text-slate-200">
                         <strong className="text-white font-bold">You</strong> received 80 FACEIT Points from your FACEIT Case.
                       </p>
-                      <button className="text-orange-500 hover:text-orange-400 font-bold mt-0.5 inline-block cursor-pointer">
+                      <button 
+                        onClick={() => {
+                          sound.playSelect();
+                          setShowPartnerModal(true);
+                        }}
+                        className="text-orange-500 hover:text-orange-400 font-bold mt-0.5 inline-block cursor-pointer"
+                      >
                         Explore the shop.
                       </button>
                       <div className="flex items-center gap-1 text-[10px] text-slate-500 mt-1 font-mono">
@@ -1443,7 +1478,13 @@ export const VortexRightSocialRail: React.FC<VortexRightSocialRailProps> = ({
                       <p className="text-slate-200">
                         <strong className="text-white font-bold">You</strong> received 500 FACEIT Points from your FACEIT Case.
                       </p>
-                      <button className="text-orange-500 hover:text-orange-400 font-bold mt-0.5 inline-block cursor-pointer">
+                      <button 
+                        onClick={() => {
+                          sound.playSelect();
+                          setShowPartnerModal(true);
+                        }}
+                        className="text-orange-500 hover:text-orange-400 font-bold mt-0.5 inline-block cursor-pointer"
+                      >
                         Explore the shop.
                       </button>
                       <div className="flex items-center gap-1 text-[10px] text-slate-500 mt-1 font-mono">
@@ -1862,119 +1903,137 @@ export const VortexRightSocialRail: React.FC<VortexRightSocialRailProps> = ({
       )}
 
       {/* ======================================================== */}
-      {/* 5. CS2 CASE OPENING MODAL                                 */}
+      {/* 5. CS2 CASES & SKINS (OFFICIAL PARTNERS) MODAL           */}
       {/* ======================================================== */}
-      {showCaseModal && (
+      {showPartnerModal && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
           <div 
-            className="fixed inset-0 bg-black/80 backdrop-blur-md animate-in fade-in duration-200"
-            onClick={() => !isOpeningCase && setShowCaseModal(false)}
+            className="fixed inset-0 bg-black/85 backdrop-blur-md animate-in fade-in duration-200"
+            onClick={() => setShowPartnerModal(false)}
           />
 
-          <div className="relative w-full max-w-lg rounded-3xl bg-[#0B0D14] border border-[#232738] p-6 shadow-2xl z-10 flex flex-col items-center text-center animate-in zoom-in-95 duration-200">
+          <div className="relative w-full max-w-2xl rounded-3xl bg-[#0B0D14] border border-[#232738] p-6 sm:p-7 shadow-2xl z-10 flex flex-col text-left animate-in zoom-in-95 duration-200 max-h-[90vh] overflow-y-auto">
             {/* Close Button */}
-            {!isOpeningCase && (
-              <button
-                onClick={() => setShowCaseModal(false)}
-                className="absolute top-4 right-4 p-1.5 rounded-xl text-slate-400 hover:text-white hover:bg-white/[0.08] transition cursor-pointer"
-              >
-                <X className="w-5 h-5" />
-              </button>
-            )}
+            <button
+              onClick={() => setShowPartnerModal(false)}
+              className="absolute top-5 right-5 p-2 rounded-xl text-slate-400 hover:text-white hover:bg-white/[0.08] transition cursor-pointer"
+            >
+              <X className="w-5 h-5" />
+            </button>
 
             {/* Header Badge */}
-            <div className="flex items-center gap-2 px-3 py-1 rounded-full bg-amber-400/10 border border-amber-400/30 text-amber-400 text-xs font-mono font-bold uppercase mb-3">
-              <Gift className="w-3.5 h-3.5" />
-              <span>VORTEX Case Drop</span>
+            <div className="flex items-center gap-2">
+              <span className="flex items-center gap-1.5 px-3 py-1 rounded-full bg-amber-400/10 border border-amber-400/30 text-amber-400 text-xs font-mono font-bold uppercase">
+                <Gift className="w-3.5 h-3.5" />
+                <span>Partnerët Zyrtarë CS2 Case</span>
+              </span>
+              <span className="text-[11px] font-mono text-emerald-400 font-bold bg-emerald-500/10 border border-emerald-500/20 px-2 py-0.5 rounded-full">
+                ● LIVE BONUS
+              </span>
             </div>
 
-            <h3 className="font-display font-black text-2xl text-white tracking-tight">
-              Challenger Weapon Case
+            <h3 className="font-display font-black text-2xl text-white tracking-tight mt-3">
+              Hap CS2 Cases & Fito Thika të Vërteta
             </h3>
-            <p className="text-xs text-slate-400 font-sans mt-1 max-w-sm">
-              Contains exclusive Covert Knives and Classified CS2 skins.
+            <p className="text-xs text-slate-400 font-sans mt-1 max-w-lg">
+              Përdor kodin promocional <strong className="text-amber-400 font-mono">VORTEX</strong> në faqet partnere për të përfituar <strong className="text-white">+10% Bonus në çdo depozitë</strong> dhe arkë falas. Skinet vijnë direkt në Steam tuaj!
             </p>
 
-            {/* Center Showcase Area */}
-            <div className="relative w-full my-6 p-6 rounded-2xl bg-gradient-to-b from-[#131622] to-[#0A0B10] border border-white/10 flex flex-col items-center justify-center min-h-[220px] overflow-hidden">
-              {isOpeningCase ? (
-                <div className="flex flex-col items-center space-y-4 animate-pulse">
-                  <div className="w-24 h-24 rounded-2xl bg-amber-400/10 border border-amber-400/30 flex items-center justify-center animate-spin">
-                    <Sparkles className="w-10 h-10 text-amber-400" />
-                  </div>
-                  <div className="font-display font-bold text-amber-400 text-sm tracking-widest uppercase">
-                    Unlocking Weapon Crate...
+            {/* Promo Code Highlight Banner */}
+            <div className="w-full my-4 p-3.5 rounded-2xl bg-gradient-to-r from-amber-500/15 via-[#161A26] to-[#12141F] border border-amber-500/30 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 shadow-inner">
+              <div className="flex items-center gap-3">
+                <div className="w-10 h-10 rounded-xl bg-amber-500/20 border border-amber-500/40 flex items-center justify-center shrink-0">
+                  <Sparkles className="w-5 h-5 text-amber-400" />
+                </div>
+                <div>
+                  <div className="text-[11px] font-mono text-slate-400 uppercase tracking-wider">Kodi Promocional Ekskluziv:</div>
+                  <div className="text-lg font-black font-mono text-amber-400 tracking-wider">
+                    VORTEX
+                    <span className="text-xs font-normal text-slate-300 ml-2">(+10% EXTRA & FREE CRATE)</span>
                   </div>
                 </div>
-              ) : wonSkin ? (
-                <div className="flex flex-col items-center animate-in zoom-in-75 duration-300">
-                  <div className="relative mb-2">
-                    <div className="absolute inset-0 blur-xl opacity-50" style={{ backgroundColor: wonSkin.color }} />
-                    <img src={wonSkin.image} alt={wonSkin.name} className="relative w-36 h-28 object-contain drop-shadow-[0_10px_20px_rgba(0,0,0,0.8)]" />
-                  </div>
-                  <div className="text-[11px] font-mono font-bold tracking-wider uppercase px-2 py-0.5 rounded" style={{ color: wonSkin.color, backgroundColor: `${wonSkin.color}20` }}>
-                    {wonSkin.rarity}
-                  </div>
-                  <h4 className="font-display font-black text-lg text-white mt-1">
-                    {wonSkin.name}
-                  </h4>
-                  <span className="text-xs text-slate-400 font-mono mt-0.5">
-                    Exterior: {wonSkin.wear}
-                  </span>
-                </div>
-              ) : (
-                <div className="flex flex-col items-center">
-                  <div className="w-28 h-28 rounded-2xl bg-gradient-to-tr from-amber-500/20 to-[#A3E635]/20 border border-white/10 flex items-center justify-center mb-2 shadow-inner">
-                    <Gift className="w-14 h-14 text-amber-400 drop-shadow-[0_0_15px_rgba(245,158,11,0.5)]" />
-                  </div>
-                  <span className="text-xs font-mono text-slate-300">
-                    Cost to Open: <strong className="text-amber-400">100 VTX Points</strong>
-                  </span>
-                </div>
-              )}
+              </div>
+
+              <button
+                onClick={handleCopyPartnerCode}
+                className="w-full sm:w-auto px-4 py-2 rounded-xl bg-amber-400 hover:bg-amber-300 text-black font-mono font-bold text-xs uppercase transition cursor-pointer flex items-center justify-center gap-2 shrink-0 shadow-[0_0_15px_rgba(245,158,11,0.3)]"
+              >
+                {copiedCode ? (
+                  <>
+                    <Check className="w-4 h-4 text-black" />
+                    <span>U KOPJUA!</span>
+                  </>
+                ) : (
+                  <>
+                    <Copy className="w-4 h-4" />
+                    <span>KOPJO KODIN</span>
+                  </>
+                )}
+              </button>
             </div>
 
-            {/* Action Buttons */}
-            {wonSkin ? (
-              <div className="flex items-center gap-3 w-full">
-                <button
-                  onClick={() => {
-                    sound.playClick();
-                    setWonSkin(null);
-                  }}
-                  className="flex-1 py-3 rounded-xl bg-white/10 hover:bg-white/15 text-white font-display font-bold text-xs uppercase transition cursor-pointer"
+            {/* 3 Partner Cards List */}
+            <div className="space-y-2.5">
+              {CS2_PARTNERS.map((partner) => (
+                <div
+                  key={partner.id}
+                  className="p-3.5 rounded-2xl bg-[#121520] hover:bg-[#151926] border border-[#202538] hover:border-amber-500/40 transition flex flex-col sm:flex-row sm:items-center justify-between gap-3.5 group"
                 >
-                  Open Another
-                </button>
-                <button
-                  onClick={() => {
-                    sound.playClick();
-                    setShowCaseModal(false);
-                    setWonSkin(null);
-                  }}
-                  className="flex-1 py-3 rounded-xl bg-[#A3E635] hover:bg-[#84cc16] text-black font-display font-black text-xs uppercase transition cursor-pointer shadow-[0_0_20px_rgba(163,230,53,0.3)]"
-                >
-                  Claim Skin
-                </button>
-              </div>
-            ) : (
-              <button
-                disabled={isOpeningCase}
-                onClick={handleOpenCase}
-                className={`w-full py-3.5 rounded-xl font-display font-black text-sm uppercase tracking-wider transition shadow-xl cursor-pointer ${
-                  isOpeningCase
-                    ? 'bg-slate-700 text-slate-400 cursor-not-allowed'
-                    : 'bg-gradient-to-r from-amber-400 via-amber-500 to-yellow-500 hover:from-amber-300 hover:to-yellow-400 text-black shadow-[0_0_25px_rgba(245,158,11,0.4)]'
-                }`}
-              >
-                {isOpeningCase ? 'Opening...' : 'Unlock Crate (100 VTX)'}
-              </button>
-            )}
+                  <div className="flex items-center gap-3.5 min-w-0">
+                    <div className="relative w-14 h-14 rounded-xl bg-black/40 border border-white/10 flex items-center justify-center shrink-0 overflow-hidden">
+                      <img 
+                        src={partner.image} 
+                        alt={partner.name} 
+                        className="w-12 h-12 object-contain group-hover:scale-110 transition duration-300 drop-shadow-md" 
+                      />
+                    </div>
+                    <div className="min-w-0">
+                      <div className="flex items-center gap-2 flex-wrap">
+                        <h4 className="font-display font-black text-white text-sm group-hover:text-amber-400 transition truncate">
+                          {partner.name}
+                        </h4>
+                        <span 
+                          className="text-[10px] font-mono font-bold px-2 py-0.5 rounded-full"
+                          style={{ backgroundColor: `${partner.badgeColor}20`, color: partner.badgeColor, border: `1px solid ${partner.badgeColor}40` }}
+                        >
+                          {partner.bonus}
+                        </span>
+                      </div>
+                      <p className="text-[11px] text-slate-400 truncate mt-0.5">
+                        {partner.tagline}
+                      </p>
+                      <div className="flex items-center gap-3 text-[10px] text-slate-500 font-mono mt-1">
+                        {partner.features.map((feat, i) => (
+                          <span key={i} className="flex items-center gap-1">
+                            <span className="text-emerald-400">✓</span> {feat}
+                          </span>
+                        ))}
+                      </div>
+                    </div>
+                  </div>
 
-            {/* Odds / Info footnote */}
-            <span className="text-[10px] font-mono text-slate-500 mt-3">
-              Special Item: ★ Karambit | Doppler (Covert) • Provably Fair CS2 Seed
-            </span>
+                  <a
+                    href={partner.url}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    onClick={() => sound.playSelect()}
+                    className="w-full sm:w-auto px-4 py-2.5 rounded-xl bg-white/[0.06] hover:bg-amber-400 text-slate-200 hover:text-black font-display font-bold text-xs uppercase tracking-wider transition cursor-pointer flex items-center justify-center gap-2 shrink-0 border border-white/10 hover:border-amber-400 group-hover:shadow-[0_0_15px_rgba(245,158,11,0.25)]"
+                  >
+                    <span>Hap Faqen</span>
+                    <ExternalLink className="w-3.5 h-3.5" />
+                  </a>
+                </div>
+              ))}
+            </div>
+
+            {/* Footnote / Trust info */}
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between text-[11px] font-mono text-slate-500 mt-4 pt-3 border-t border-white/5 gap-1">
+              <span className="flex items-center gap-1.5">
+                <span className="text-emerald-400">🔒</span>
+                Steam Web API • Provably Fair • Instant Bot Delivery
+              </span>
+              <span className="text-slate-400">Zero rrezik apo kosto për Vortex Gaming</span>
+            </div>
           </div>
         </div>
       )}
