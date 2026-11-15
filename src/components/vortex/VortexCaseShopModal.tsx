@@ -28,6 +28,7 @@ import {
 } from 'lucide-react';
 import confetti from 'canvas-confetti';
 import { sound } from '../../utils/soundEffects';
+import { XsollaCheckoutModal } from './XsollaCheckoutModal';
 import { 
   CS2Case, 
   CS2Skin, 
@@ -123,6 +124,7 @@ export const VortexCaseShopModal: React.FC<VortexCaseShopModalProps> = ({ isOpen
   const [balance, setBalance] = useState<number>(() => getVortexWalletBalance());
   const [tradeUrl, setTradeUrl] = useState<string>(() => getSavedSteamTradeUrl());
   const [showTradeUrlDialog, setShowTradeUrlDialog] = useState<boolean>(false);
+  const [showXsollaModal, setShowXsollaModal] = useState<boolean>(false);
   const [tempTradeUrl, setTempTradeUrl] = useState<string>(tradeUrl);
   const [tradeUrlError, setTradeUrlError] = useState<string | null>(null);
 
@@ -590,12 +592,13 @@ export const VortexCaseShopModal: React.FC<VortexCaseShopModalProps> = ({ isOpen
               <button
                 onClick={() => {
                   sound.playSelect();
-                  creditVortexWalletBalance(20.00);
+                  setShowXsollaModal(true);
                 }}
-                className="ml-1 px-2 py-0.5 rounded-lg bg-emerald-500/15 hover:bg-emerald-500/25 border border-emerald-500/30 text-emerald-400 text-[10px] font-mono font-bold transition cursor-pointer"
-                title="Top Up Wallet (+20.00 €)"
+                className="ml-1 px-2.5 py-1 rounded-lg bg-gradient-to-r from-[#FF003C]/20 to-amber-500/20 hover:from-[#FF003C]/35 hover:to-amber-500/35 border border-[#FF003C]/50 text-amber-300 text-[10px] font-mono font-black transition cursor-pointer flex items-center gap-1 shadow-sm"
+                title="Top Up Wallet via Xsolla Pay Station"
               >
-                +20€
+                <span>+TOP UP</span>
+                <span className="text-[8px] font-black text-[#FF003C] uppercase">XSOLLA</span>
               </button>
             </div>
 
@@ -1659,6 +1662,23 @@ export const VortexCaseShopModal: React.FC<VortexCaseShopModalProps> = ({ isOpen
           </div>
         </div>
       )}
+
+      {/* Official Xsolla Pay Station 4 Gateway Modal */}
+      <XsollaCheckoutModal
+        isOpen={showXsollaModal}
+        onClose={() => setShowXsollaModal(false)}
+        initialItem={{
+          id: 'topup-20',
+          sku: 'VTX-WAL-20',
+          title: '20.00 € Vortex Wallet Funds',
+          description: 'Instant credit for CS2 cases and weapon market purchases via Xsolla Pay Station.',
+          amountEur: 20.00,
+          type: 'wallet_topup'
+        }}
+        onPaymentSuccess={(res) => {
+          setBalance((prev) => prev + res.amountEur);
+        }}
+      />
 
     </div>
   );

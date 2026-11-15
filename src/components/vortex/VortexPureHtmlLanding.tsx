@@ -947,6 +947,11 @@ export const VortexPureHtmlLanding: React.FC<VortexPureHtmlLandingProps> = ({
 
               {/* Payment Badges */}
               <div className="flex flex-wrap items-center gap-2.5 text-xs font-mono font-bold">
+                <span className="px-3.5 py-1.5 rounded-lg bg-[#FF003C]/15 border border-[#FF003C]/40 text-white flex items-center gap-1.5 shadow-sm">
+                  <span className="w-4 h-4 rounded bg-[#FF003C] text-white flex items-center justify-center font-black text-[10px] font-display">X</span>
+                  <span>POWERED BY XSOLLA</span>
+                  <span className="text-[10px] text-[#FF003C] font-mono font-black">• 700+ METHODS</span>
+                </span>
                 <span className="px-3 py-1.5 rounded-lg bg-white/5 border border-white/10 text-white flex items-center gap-1.5">
                   💳 VISA / MASTERCARD
                 </span>

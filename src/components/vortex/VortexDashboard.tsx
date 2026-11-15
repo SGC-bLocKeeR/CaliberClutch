@@ -63,6 +63,8 @@ import { ALL_COUNTRIES, getCountryByCode, Country } from '../../data/countries';
 import { VortexPartyChat } from './VortexPartyChat';
 import { VortexMatchRoom } from './VortexMatchRoom';
 import { VortexRightSocialRail } from './VortexRightSocialRail';
+import { XsollaCheckoutModal } from './XsollaCheckoutModal';
+import { XsollaOrderItem } from '../../services/xsollaService';
 
 interface VortexDashboardProps {
   userGamerTag?: string;
@@ -626,6 +628,7 @@ export const VortexDashboard: React.FC<VortexDashboardProps> = ({
   const [profileDropdownOpen, setProfileDropdownOpen] = useState(false);
   const [notificationsOpen, setNotificationsOpen] = useState(false);
   const [showPremiumModal, setShowPremiumModal] = useState(initialOpenPremium);
+  const [xsollaCheckoutItem, setXsollaCheckoutItem] = useState<XsollaOrderItem | null>(null);
 
   // =========================================================================
   // NOTIFICATIONS SYSTEM STATE (Interactive esports alerts & actions)
@@ -4955,20 +4958,29 @@ export const VortexDashboard: React.FC<VortexDashboardProps> = ({
 
                 <button
                   onClick={() => {
-                    sound.playTournamentVictory();
-                    setUserMembershipTier('premium');
-                    confetti({ particleCount: 70, spread: 80, origin: { y: 0.6 } });
-                    setDashboardToast('Upgraded to VORTEX PREMIUM! Super Match queue unlocked.');
-                    setTimeout(() => setDashboardToast(null), 4000);
-                    setShowPremiumModal(false);
+                    if (userMembershipTier === 'premium') return;
+                    sound.playSelect();
+                    setXsollaCheckoutItem({
+                      id: 'sub-premium',
+                      sku: 'VTX-SUB-PREMIUM',
+                      title: 'Vortex Premium Membership (1 Month)',
+                      description: 'Super Match 5v5 queue, strict ±250 ELO balance, captain map veto priority.',
+                      amountEur: 5.99,
+                      type: 'membership_premium'
+                    });
                   }}
-                  className={`w-full py-3 rounded-xl font-display font-black text-xs uppercase tracking-wider transition cursor-pointer shadow-md ${
+                  className={`w-full py-3 rounded-xl font-display font-black text-xs uppercase tracking-wider transition cursor-pointer shadow-md flex items-center justify-center gap-1.5 ${
                     userMembershipTier === 'premium'
                       ? 'bg-amber-500/20 text-amber-400 border border-amber-500/40 cursor-default'
                       : 'bg-gradient-to-r from-amber-500 to-amber-600 hover:brightness-110 text-slate-950 shadow-amber-500/20'
                   }`}
                 >
-                  {userMembershipTier === 'premium' ? 'CURRENT PLAN' : 'UPGRADE TO PREMIUM'}
+                  <span>{userMembershipTier === 'premium' ? 'CURRENT PLAN' : 'UPGRADE TO PREMIUM'}</span>
+                  {userMembershipTier !== 'premium' && (
+                    <span className="text-[9px] font-mono font-black text-black/80 bg-black/10 px-1 py-0.5 rounded">
+                      XSOLLA
+                    </span>
+                  )}
                 </button>
               </div>
 
@@ -5009,23 +5021,56 @@ export const VortexDashboard: React.FC<VortexDashboardProps> = ({
 
                 <button
                   onClick={() => {
-                    sound.playTournamentVictory();
-                    setUserMembershipTier('vip');
-                    confetti({ particleCount: 90, spread: 90, origin: { y: 0.6 } });
-                    setDashboardToast('Upgraded to VIP ELITE! All pro queues & GOTV active.');
-                    setTimeout(() => setDashboardToast(null), 4000);
-                    setShowPremiumModal(false);
+                    if (userMembershipTier === 'vip') return;
+                    sound.playSelect();
+                    setXsollaCheckoutItem({
+                      id: 'sub-vip',
+                      sku: 'VTX-SUB-VIP',
+                      title: 'Vortex VIP Elite Pass (1 Month)',
+                      description: 'VIP Match queue, ultra-strict ±150 ELO, automated GOTV demo recording, 2x Points.',
+                      amountEur: 12.99,
+                      type: 'membership_vip'
+                    });
                   }}
-                  className={`w-full py-3 rounded-xl font-display font-black text-xs uppercase tracking-wider transition cursor-pointer shadow-md ${
+                  className={`w-full py-3 rounded-xl font-display font-black text-xs uppercase tracking-wider transition cursor-pointer shadow-md flex items-center justify-center gap-1.5 ${
                     userMembershipTier === 'vip'
                       ? 'bg-purple-500/20 text-purple-400 border border-purple-500/40 cursor-default'
                       : 'bg-gradient-to-r from-purple-500 via-fuchsia-500 to-amber-400 hover:brightness-110 text-slate-950 shadow-purple-500/20'
                   }`}
                 >
-                  {userMembershipTier === 'vip' ? 'CURRENT PLAN' : 'UPGRADE TO VIP ELITE'}
+                  <span>{userMembershipTier === 'vip' ? 'CURRENT PLAN' : 'UPGRADE TO VIP ELITE'}</span>
+                  {userMembershipTier !== 'vip' && (
+                    <span className="text-[9px] font-mono font-black text-black/80 bg-black/10 px-1 py-0.5 rounded">
+                      XSOLLA
+                    </span>
+                  )}
                 </button>
               </div>
 
+            </div>
+
+            {/* Official Xsolla Trust Banner */}
+            <div className="flex flex-col sm:flex-row items-center justify-between gap-3 px-4 py-3 rounded-2xl bg-gradient-to-r from-[#FF003C]/10 via-black/40 to-white/[0.02] border border-[#FF003C]/30 text-xs font-mono">
+              <div className="flex items-center gap-2.5">
+                <div className="w-6 h-6 rounded-lg bg-gradient-to-br from-[#FF003C] to-[#FF456A] flex items-center justify-center text-white font-black text-xs font-display shadow-sm">
+                  X
+                </div>
+                <div>
+                  <div className="flex items-center gap-1.5 font-bold text-white text-[11px]">
+                    <span>POWERED BY XSOLLA</span>
+                    <span className="text-[9px] font-mono text-[#FF003C] bg-[#FF003C]/10 px-1.5 py-0.5 rounded border border-[#FF003C]/30 font-black">
+                      PAY STATION 4
+                    </span>
+                  </div>
+                  <div className="text-[10px] text-slate-400">
+                    Cards, PayPal, Apple Pay, Google Pay, Paysafecard, Crypto & 700+ Local Gateways
+                  </div>
+                </div>
+              </div>
+              <div className="flex items-center gap-1.5 text-[10px] text-emerald-400 font-bold shrink-0">
+                <ShieldCheck className="w-3.5 h-3.5" />
+                <span>Authorized Merchant</span>
+              </div>
             </div>
 
             {/* Quick Testing Simulator Bar */}
@@ -5082,6 +5127,29 @@ export const VortexDashboard: React.FC<VortexDashboardProps> = ({
 
           </div>
         </div>
+      )}
+
+      {/* Official Xsolla Pay Station 4 Gateway Checkout Dialog */}
+      {xsollaCheckoutItem && (
+        <XsollaCheckoutModal
+          isOpen={Boolean(xsollaCheckoutItem)}
+          onClose={() => setXsollaCheckoutItem(null)}
+          initialItem={xsollaCheckoutItem}
+          onPaymentSuccess={(res) => {
+            if (res.item.type === 'membership_premium') {
+              setUserMembershipTier('premium');
+              confetti({ particleCount: 75, spread: 80, origin: { y: 0.6 } });
+              setDashboardToast('🎉 Payment Confirmed via Xsolla! Upgraded to VORTEX PREMIUM!');
+            } else if (res.item.type === 'membership_vip') {
+              setUserMembershipTier('vip');
+              confetti({ particleCount: 100, spread: 90, origin: { y: 0.6 } });
+              setDashboardToast('👑 Payment Confirmed via Xsolla! Upgraded to VIP ELITE!');
+            }
+            setTimeout(() => setDashboardToast(null), 5000);
+            setShowPremiumModal(false);
+            setXsollaCheckoutItem(null);
+          }}
+        />
       )}
 
       {/* ======================================================== */}
