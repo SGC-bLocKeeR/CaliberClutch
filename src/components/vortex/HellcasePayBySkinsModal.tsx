@@ -8,6 +8,7 @@ import {
   Sparkles, 
   ShieldCheck, 
   ChevronDown, 
+  ChevronUp,
   Coins, 
   AlertCircle,
   ArrowLeft,
@@ -91,6 +92,18 @@ const CRYPTO_CONFIGS = [
   }
 ];
 
+// Farmskins Skin2PAY Rarity Filter Tiers (1:1 with live platform)
+const RARITY_OPTIONS = [
+  { id: 'all', label: 'All', color: '#b0c3d9' },
+  { id: 'mil-spec', label: 'Mil-Spec', color: '#4b69ff' },
+  { id: 'restricted', label: 'Restricted', color: '#8847ff' },
+  { id: 'classified', label: 'Classified', color: '#d32ce6' },
+  { id: 'covert', label: 'Covert', color: '#eb4b4b' },
+  { id: 'rare', label: 'Rare', color: '#ffd700' }
+] as const;
+
+type RarityFilterId = typeof RARITY_OPTIONS[number]['id'];
+
 // Helper for CS2 rarity accent colors matching Farmskins
 const getRarityColor = (rarity: string) => {
   switch (rarity) {
@@ -125,10 +138,10 @@ export const HellcasePayBySkinsModal: React.FC<HellcasePayBySkinsModalProps> = (
   const [selectedSkinIds, setSelectedSkinIds] = useState<Set<string>>(new Set());
   const [skinSearch, setSkinSearch] = useState('');
   const [onlyTradableSkins, setOnlyTradableSkins] = useState<boolean>(true);
-  const [selectedCategory, setSelectedCategory] = useState<'all' | 'knife' | 'rifle' | 'sniper' | 'pistol' | 'sticker' | 'other'>('all');
+  const [selectedRarity, setSelectedRarity] = useState<RarityFilterId>('all');
   const [sortBy, setSortBy] = useState<'price-desc' | 'price-asc' | 'name'>('price-desc');
   const [sortDropdownOpen, setSortDropdownOpen] = useState(false);
-  const [categoryDropdownOpen, setCategoryDropdownOpen] = useState(false);
+  const [rarityDropdownOpen, setRarityDropdownOpen] = useState(false);
   const [isReloading, setIsReloading] = useState(false);
   const [isDepositingSkins, setIsDepositingSkins] = useState(false);
   const [depositSuccessMessage, setDepositSuccessMessage] = useState<string | null>(null);
@@ -544,8 +557,12 @@ export const HellcasePayBySkinsModal: React.FC<HellcasePayBySkinsModalProps> = (
         s.weapon.toLowerCase().includes(skinSearch.toLowerCase()) ||
         s.skinName.toLowerCase().includes(skinSearch.toLowerCase());
       
-      const matchCategory = selectedCategory === 'all' || s.type === selectedCategory;
-      return matchSearch && matchCategory;
+      const matchRarity = selectedRarity === 'all' || 
+        (selectedRarity === 'rare'
+          ? (s.rarity === 'extraordinary' || s.type === 'knife' || s.fullName.includes('★'))
+          : s.rarity === selectedRarity);
+
+      return matchSearch && matchRarity;
     });
 
     return [...list].sort((a, b) => {
@@ -560,7 +577,7 @@ export const HellcasePayBySkinsModal: React.FC<HellcasePayBySkinsModalProps> = (
       }
       return 0;
     });
-  }, [inventory, onlyTradableSkins, skinSearch, selectedCategory, sortBy]);
+  }, [inventory, onlyTradableSkins, skinSearch, selectedRarity, sortBy]);
 
   const selectedSkins = useMemo(() => {
     return inventory.filter(s => selectedSkinIds.has(s.id));
@@ -678,18 +695,18 @@ export const HellcasePayBySkinsModal: React.FC<HellcasePayBySkinsModalProps> = (
       />
 
       {/* Main Modal Window */}
-      <div className="relative w-full max-w-6xl xl:max-w-7xl rounded-3xl bg-[#141722] border border-[#222838] shadow-[0_25px_80px_rgba(0,0,0,0.95)] z-10 flex flex-col overflow-hidden max-h-[94vh]">
+      <div className="relative w-full max-w-6xl xl:max-w-7xl rounded-3xl bg-[#0A0B0E] border border-[#252B3B] shadow-[0_25px_80px_rgba(0,0,0,0.95)] z-10 flex flex-col overflow-hidden max-h-[94vh]">
         
         {/* Global Toast Success */}
         {depositSuccessMessage && (
-          <div className="mx-6 mt-3 p-3.5 rounded-2xl bg-emerald-500/15 border border-emerald-500/40 text-emerald-300 text-xs font-mono flex items-center justify-between gap-3 animate-in fade-in duration-200 shrink-0">
+          <div className="mx-6 mt-3 p-3.5 rounded-2xl bg-amber-500/15 border border-amber-500/40 text-amber-300 text-xs font-mono flex items-center justify-between gap-3 animate-in fade-in duration-200 shrink-0">
             <div className="flex items-center gap-2">
-              <ShieldCheck className="w-4 h-4 text-emerald-400 shrink-0" />
+              <ShieldCheck className="w-4 h-4 text-amber-400 shrink-0" />
               <span>{depositSuccessMessage}</span>
             </div>
             <button
               onClick={() => setDepositSuccessMessage(null)}
-              className="text-emerald-400 hover:text-white cursor-pointer"
+              className="text-amber-400 hover:text-white cursor-pointer"
             >
               <X className="w-3.5 h-3.5" />
             </button>
@@ -697,28 +714,33 @@ export const HellcasePayBySkinsModal: React.FC<HellcasePayBySkinsModalProps> = (
         )}
 
         {/* ======================================================== */}
-        {/* VIEW 1: DEDICATED FARMSKINS Skin2PAY TRADING DESK        */}
+        {/* VIEW 1: DEDICATED VORTEX Skin2PAY TRADING DESK           */}
         {/* ======================================================== */}
         {activeView === 'skins' ? (
-          <div className="flex-1 flex flex-col min-h-0 bg-[#141722] overflow-hidden">
+          <div className="flex-1 flex flex-col min-h-0 bg-[#0A0B0E] overflow-hidden">
             
             {/* Top Navigation Bar: Back, Skin2PAY, Payment History, Close */}
-            <div className="px-6 py-4 flex items-center justify-between border-b border-[#22293e] shrink-0">
+            <div className="px-6 py-4 flex items-center justify-between border-b border-[#252B3B] bg-[#0E1117] shrink-0">
               <button
                 type="button"
                 onClick={() => {
                   sound.playSelect();
                   setActiveView('cards');
                 }}
-                className="flex items-center gap-2 px-3.5 py-1.5 rounded-xl bg-white/5 hover:bg-white/10 text-slate-300 hover:text-white transition cursor-pointer text-sm font-sans"
+                className="flex items-center gap-2 px-3.5 py-1.5 rounded-xl bg-[#151821] hover:bg-[#1C202C] border border-[#252B3B] text-slate-300 hover:text-white transition cursor-pointer text-sm font-sans"
               >
                 <ArrowLeft className="w-4 h-4" />
                 <span>Back</span>
               </button>
 
-              <h1 className="text-2xl font-black font-display text-white tracking-wide">
-                Skin2PAY
-              </h1>
+              <div className="flex items-center gap-3">
+                <h1 className="text-2xl font-black font-display text-white tracking-wide">
+                  Skin2PAY
+                </h1>
+                <span className="px-2.5 py-0.5 rounded-full bg-red-500/15 border border-red-500/30 text-red-400 font-mono text-[10px] font-bold uppercase tracking-wider">
+                  VORTEX FAST-TRACK
+                </span>
+              </div>
 
               <div className="flex items-center gap-4">
                 <button
@@ -727,7 +749,7 @@ export const HellcasePayBySkinsModal: React.FC<HellcasePayBySkinsModalProps> = (
                     sound.playSelect();
                     setPaymentHistoryOpen(prev => !prev);
                   }}
-                  className="text-sm font-sans text-slate-400 hover:text-white transition cursor-pointer flex items-center gap-1.5"
+                  className="text-sm font-sans text-slate-400 hover:text-amber-400 transition cursor-pointer flex items-center gap-1.5"
                 >
                   <History className="w-4 h-4" />
                   <span>Payment history</span>
@@ -739,7 +761,7 @@ export const HellcasePayBySkinsModal: React.FC<HellcasePayBySkinsModalProps> = (
                     sound.playClick();
                     onClose();
                   }}
-                  className="w-8 h-8 rounded-xl bg-white/5 hover:bg-white/10 text-slate-400 hover:text-white flex items-center justify-center transition cursor-pointer"
+                  className="w-8 h-8 rounded-xl bg-[#151821] hover:bg-[#1C202C] border border-[#252B3B] text-slate-400 hover:text-white flex items-center justify-center transition cursor-pointer"
                 >
                   <X className="w-4 h-4" />
                 </button>
@@ -747,7 +769,7 @@ export const HellcasePayBySkinsModal: React.FC<HellcasePayBySkinsModalProps> = (
             </div>
 
             {/* Filter & Action Toolbar */}
-            <div className="px-6 py-3 flex flex-wrap items-end justify-between gap-3 border-b border-[#22293e]/60 bg-[#171b29]/60 shrink-0">
+            <div className="px-6 py-3 flex flex-wrap items-end justify-between gap-3 border-b border-[#252B3B] bg-[#101217] shrink-0">
               <div className="flex flex-wrap items-end gap-3">
                 {/* Search Input */}
                 <div className="space-y-1">
@@ -760,7 +782,7 @@ export const HellcasePayBySkinsModal: React.FC<HellcasePayBySkinsModalProps> = (
                       value={skinSearch}
                       onChange={(e) => setSkinSearch(e.target.value)}
                       placeholder="For example, Talon Knife Slaughter"
-                      className="w-56 sm:w-64 px-3 py-2 pr-9 rounded-xl bg-[#1c2234] border border-[#2b354e] text-xs font-sans text-white placeholder-slate-500 outline-none focus:border-[#695be8] transition"
+                      className="w-56 sm:w-64 px-3 py-2 pr-9 rounded-xl bg-[#151821] border border-[#252B3B] text-xs font-sans text-white placeholder-slate-500 outline-none focus:border-amber-400 transition"
                     />
                     <Search className="w-3.5 h-3.5 text-slate-400 absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none" />
                   </div>
@@ -775,12 +797,12 @@ export const HellcasePayBySkinsModal: React.FC<HellcasePayBySkinsModalProps> = (
                   }}
                   className={`h-9 px-3.5 rounded-xl border flex items-center gap-2.5 transition cursor-pointer select-none ${
                     onlyTradableSkins
-                      ? 'bg-[#1c2234] border-[#eab308]/70 text-white'
-                      : 'bg-[#1c2234] border-[#2b354e] text-slate-400 hover:text-slate-200'
+                      ? 'bg-[#151821] border-amber-400/80 text-white'
+                      : 'bg-[#151821] border-[#252B3B] text-slate-400 hover:text-slate-200'
                   }`}
                 >
                   <div className={`w-4 h-4 rounded flex items-center justify-center transition ${
-                    onlyTradableSkins ? 'bg-[#eab308] text-slate-950 font-black' : 'border border-slate-600'
+                    onlyTradableSkins ? 'bg-amber-400 text-slate-950 font-black' : 'border border-slate-600'
                   }`}>
                     {onlyTradableSkins && <Check className="w-3 h-3 stroke-[3]" />}
                   </div>
@@ -794,9 +816,9 @@ export const HellcasePayBySkinsModal: React.FC<HellcasePayBySkinsModalProps> = (
                     onClick={() => {
                       sound.playSelect();
                       setSortDropdownOpen(prev => !prev);
-                      setCategoryDropdownOpen(false);
+                      setRarityDropdownOpen(false);
                     }}
-                    className="h-9 px-3.5 rounded-xl bg-[#1c2234] border border-[#2b354e] hover:border-slate-500 text-xs font-bold font-sans text-white flex items-center gap-2 cursor-pointer transition select-none"
+                    className="h-9 px-3.5 rounded-xl bg-[#151821] border border-[#252B3B] hover:border-slate-500 text-xs font-bold font-sans text-white flex items-center gap-2 cursor-pointer transition select-none"
                   >
                     <span className="font-mono text-sm leading-none">=</span>
                     <span>
@@ -805,7 +827,7 @@ export const HellcasePayBySkinsModal: React.FC<HellcasePayBySkinsModalProps> = (
                   </button>
 
                   {sortDropdownOpen && (
-                    <div className="absolute left-0 top-full mt-1.5 w-44 rounded-xl bg-[#1c2234] border border-[#2b354e] shadow-2xl z-50 p-1 space-y-0.5">
+                    <div className="absolute left-0 top-full mt-1.5 w-44 rounded-xl bg-[#151821] border border-[#252B3B] shadow-2xl z-50 p-1 space-y-0.5 animate-in fade-in zoom-in-95 duration-150">
                       {[
                         { id: 'price-desc', label: 'Price: High to Low' },
                         { id: 'price-asc', label: 'Price: Low to High' },
@@ -820,59 +842,73 @@ export const HellcasePayBySkinsModal: React.FC<HellcasePayBySkinsModalProps> = (
                             sound.playSelect();
                           }}
                           className={`w-full px-3 py-1.5 rounded-lg text-left text-xs font-sans transition cursor-pointer flex items-center justify-between ${
-                            sortBy === opt.id ? 'bg-[#695be8] text-white font-bold' : 'text-slate-300 hover:bg-white/5'
+                            sortBy === opt.id ? 'bg-amber-400/10 text-amber-300 font-bold border border-amber-400/20' : 'text-slate-300 hover:bg-white/5'
                           }`}
                         >
                           <span>{opt.label}</span>
-                          {sortBy === opt.id && <Check className="w-3 h-3" />}
+                          {sortBy === opt.id && <Check className="w-3 h-3 text-amber-400" />}
                         </button>
                       ))}
                     </div>
                   )}
                 </div>
 
-                {/* Category: ● All */}
+                {/* CS2 Rarity Dropdown: ● All (1:1 with live screenshot) */}
                 <div className="relative">
                   <button
                     type="button"
                     onClick={() => {
                       sound.playSelect();
-                      setCategoryDropdownOpen(prev => !prev);
+                      setRarityDropdownOpen(prev => !prev);
                       setSortDropdownOpen(false);
                     }}
-                    className="h-9 px-3.5 rounded-xl bg-[#1c2234] border border-[#2b354e] hover:border-slate-500 text-xs font-bold font-sans text-white flex items-center gap-2 cursor-pointer transition select-none"
+                    className={`h-9 px-3.5 rounded-xl bg-[#151821] text-xs font-bold font-sans text-white flex items-center gap-2 cursor-pointer transition select-none ${
+                      rarityDropdownOpen 
+                        ? 'border-2 border-amber-400 shadow-[0_0_12px_rgba(245,158,11,0.25)]' 
+                        : 'border border-[#252B3B] hover:border-slate-500'
+                    }`}
                   >
-                    <span className="text-[#695be8] text-xs">●</span>
+                    <span 
+                      className="w-2.5 h-2.5 rounded-full shrink-0 shadow-sm"
+                      style={{ 
+                        backgroundColor: RARITY_OPTIONS.find(r => r.id === selectedRarity)?.color || '#b0c3d9' 
+                      }} 
+                    />
                     <span className="capitalize">
-                      {selectedCategory === 'all' ? 'All' : selectedCategory}
+                      {RARITY_OPTIONS.find(r => r.id === selectedRarity)?.label || 'All'}
                     </span>
-                    <ChevronDown className="w-3.5 h-3.5 text-slate-400" />
+                    {rarityDropdownOpen ? (
+                      <ChevronUp className="w-3.5 h-3.5 text-amber-400" />
+                    ) : (
+                      <ChevronDown className="w-3.5 h-3.5 text-slate-400" />
+                    )}
                   </button>
 
-                  {categoryDropdownOpen && (
-                    <div className="absolute left-0 top-full mt-1.5 w-36 rounded-xl bg-[#1c2234] border border-[#2b354e] shadow-2xl z-50 p-1 space-y-0.5">
-                      {[
-                        { id: 'all', label: 'All' },
-                        { id: 'knife', label: 'Knives' },
-                        { id: 'rifle', label: 'Rifles' },
-                        { id: 'sniper', label: 'Snipers' },
-                        { id: 'pistol', label: 'Pistols' },
-                        { id: 'sticker', label: 'Stickers' }
-                      ].map(cat => (
+                  {rarityDropdownOpen && (
+                    <div className="absolute left-0 top-full mt-1.5 w-40 rounded-xl bg-[#151821] border border-[#252B3B] shadow-2xl z-50 p-1.5 space-y-0.5 animate-in fade-in zoom-in-95 duration-150">
+                      {RARITY_OPTIONS.map(r => (
                         <button
-                          key={cat.id}
+                          key={r.id}
                           type="button"
                           onClick={() => {
-                            setSelectedCategory(cat.id as any);
-                            setCategoryDropdownOpen(false);
+                            setSelectedRarity(r.id);
+                            setRarityDropdownOpen(false);
                             sound.playSelect();
                           }}
-                          className={`w-full px-3 py-1.5 rounded-lg text-left text-xs font-sans transition cursor-pointer flex items-center justify-between ${
-                            selectedCategory === cat.id ? 'bg-[#695be8] text-white font-bold' : 'text-slate-300 hover:bg-white/5'
+                          className={`w-full px-3 py-2 rounded-lg text-left text-xs font-sans transition cursor-pointer flex items-center justify-between ${
+                            selectedRarity === r.id 
+                              ? 'bg-amber-400/10 text-amber-300 font-bold border border-amber-400/20' 
+                              : 'text-slate-300 hover:text-white hover:bg-white/5'
                           }`}
                         >
-                          <span>{cat.label}</span>
-                          {selectedCategory === cat.id && <Check className="w-3 h-3" />}
+                          <span className="flex items-center gap-2.5">
+                            <span 
+                              className="w-2.5 h-2.5 rounded-full shrink-0 shadow-sm" 
+                              style={{ backgroundColor: r.color }} 
+                            />
+                            <span>{r.label}</span>
+                          </span>
+                          {selectedRarity === r.id && <Check className="w-3 h-3 text-amber-400" />}
                         </button>
                       ))}
                     </div>
@@ -885,7 +921,7 @@ export const HellcasePayBySkinsModal: React.FC<HellcasePayBySkinsModalProps> = (
                 type="button"
                 disabled={isReloading}
                 onClick={handleReloadInventory}
-                className="h-9 px-4 rounded-xl bg-[#695be8] hover:bg-[#5b4cd8] active:scale-95 text-white text-xs font-black font-sans uppercase flex items-center gap-2 shadow-lg transition cursor-pointer"
+                className="h-9 px-4 rounded-xl bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-400 hover:to-amber-500 active:scale-95 text-slate-950 font-black font-sans uppercase flex items-center gap-2 shadow-[0_0_15px_rgba(245,158,11,0.25)] transition cursor-pointer"
               >
                 <RotateCw className={`w-3.5 h-3.5 ${isReloading ? 'animate-spin' : ''}`} />
                 <span>RELOAD</span>
@@ -894,40 +930,40 @@ export const HellcasePayBySkinsModal: React.FC<HellcasePayBySkinsModalProps> = (
 
             {/* Payment History Dialog */}
             {paymentHistoryOpen && (
-              <div className="mx-6 mt-3 p-4 rounded-2xl bg-[#1c2234] border border-[#2b354e] shadow-2xl flex flex-col gap-2 shrink-0 animate-in fade-in">
+              <div className="mx-6 mt-3 p-4 rounded-2xl bg-[#151821] border border-[#252B3B] shadow-2xl flex flex-col gap-2 shrink-0 animate-in fade-in">
                 <div className="flex items-center justify-between border-b border-white/5 pb-2">
                   <div className="flex items-center gap-2 text-xs font-bold text-white font-sans">
-                    <History className="w-4 h-4 text-[#695be8]" />
+                    <History className="w-4 h-4 text-amber-400" />
                     <span>Recent Skin Deposits & History</span>
                   </div>
-                  <button onClick={() => setPaymentHistoryOpen(false)} className="text-slate-400 hover:text-white text-xs">
+                  <button onClick={() => setPaymentHistoryOpen(false)} className="text-slate-400 hover:text-white text-xs cursor-pointer">
                     Close
                   </button>
                 </div>
                 <div className="text-xs font-mono text-slate-300 space-y-1.5 max-h-36 overflow-y-auto pr-1">
-                  <div className="p-2 rounded-lg bg-black/30 flex items-center justify-between">
+                  <div className="p-2 rounded-lg bg-black/40 border border-white/5 flex items-center justify-between">
                     <div>
-                      <span className="text-emerald-400 font-bold">Fast-Track Deposit</span>
+                      <span className="text-amber-400 font-bold">Fast-Track Deposit</span>
                       <div className="text-[10px] text-slate-500">Verified via Steam Bot P2P Escrow</div>
                     </div>
-                    <span className="text-emerald-400 font-bold font-mono">+38.24 €</span>
+                    <span className="text-amber-400 font-bold font-mono">+38.24 €</span>
                   </div>
-                  <div className="p-2 rounded-lg bg-black/30 flex items-center justify-between">
+                  <div className="p-2 rounded-lg bg-black/40 border border-white/5 flex items-center justify-between">
                     <div>
                       <span className="text-slate-300 font-bold">Automatic Bot Hold Bypass</span>
                       <div className="text-[10px] text-slate-500">0-Day Hold Confirmed</div>
                     </div>
-                    <span className="text-emerald-400 font-bold font-mono">+10.70 €</span>
+                    <span className="text-amber-400 font-bold font-mono">+10.70 €</span>
                   </div>
                 </div>
               </div>
             )}
 
             {/* Main Trading Area: YOUR INVENTORY & SELECTED ITEMS */}
-            <div className="flex-1 p-5 overflow-y-auto flex flex-col lg:flex-row gap-5 min-h-0">
+            <div className="flex-1 p-5 overflow-y-auto flex flex-col lg:flex-row gap-5 min-h-0 bg-[#0A0B0E]">
               
               {/* Left Column: YOUR INVENTORY */}
-              <div className="flex-1 bg-[#171b29]/90 border border-[#22293e] rounded-2xl p-4 flex flex-col min-h-0 overflow-hidden shadow-lg">
+              <div className="flex-1 bg-[#0E1117] border border-[#252B3B] rounded-2xl p-4 flex flex-col min-h-0 overflow-hidden shadow-xl">
                 <div className="flex items-center justify-between mb-3 shrink-0">
                   <h2 className="text-base font-black font-display text-white tracking-wider uppercase">
                     YOUR INVENTORY
@@ -944,7 +980,7 @@ export const HellcasePayBySkinsModal: React.FC<HellcasePayBySkinsModalProps> = (
                       {onlyTradableSkins && (
                         <button
                           onClick={() => setOnlyTradableSkins(false)}
-                          className="mt-2 text-xs text-[#695be8] hover:underline cursor-pointer"
+                          className="mt-2 text-xs text-amber-400 hover:text-amber-300 hover:underline cursor-pointer"
                         >
                           Uncheck "Only Tradable skins" to see overstocked items
                         </button>
@@ -968,10 +1004,10 @@ export const HellcasePayBySkinsModal: React.FC<HellcasePayBySkinsModalProps> = (
                             }}
                             className={`relative p-2.5 rounded-xl transition flex flex-col justify-between h-40 select-none group border ${
                               isOverstocked
-                                ? 'bg-[#1b2030]/60 border-[#252d43]/50 opacity-70 cursor-not-allowed'
+                                ? 'bg-[#101217]/60 border-[#252B3B]/40 opacity-55 cursor-not-allowed'
                                 : isSelected
-                                ? 'bg-[#252e46] border-[#695be8] ring-2 ring-[#695be8]/50 shadow-[0_0_15px_rgba(105,91,232,0.3)] cursor-pointer'
-                                : 'bg-[#1c2234] hover:bg-[#22283c] border-[#27314a] hover:border-[#3d496c] cursor-pointer'
+                                ? 'bg-[#1E2333] border-2 border-amber-400 ring-2 ring-amber-400/30 shadow-[0_0_15px_rgba(245,158,11,0.25)] cursor-pointer'
+                                : 'bg-[#151821] hover:bg-[#1C202C] border-[#252B3B] hover:border-slate-500 cursor-pointer'
                             }`}
                           >
                             {/* Top Row: Price in Gold or OVERSTOCK & Wear */}
@@ -982,7 +1018,7 @@ export const HellcasePayBySkinsModal: React.FC<HellcasePayBySkinsModalProps> = (
                                   <span>OVERSTOCK</span>
                                 </span>
                               ) : (
-                                <span className="text-xs font-mono font-bold text-[#f6b100]">
+                                <span className="text-xs font-mono font-bold text-amber-400">
                                   $ {item.marketPriceEur.toFixed(2)}
                                 </span>
                               )}
@@ -1032,9 +1068,9 @@ export const HellcasePayBySkinsModal: React.FC<HellcasePayBySkinsModalProps> = (
               </div>
 
               {/* Right Column: SELECTED ITEMS (0/30) */}
-              <div className="w-full lg:w-80 xl:w-96 shrink-0 bg-[#171b29]/90 border border-[#22293e] rounded-2xl p-5 flex flex-col justify-between shadow-lg">
-                <div className="shrink-0 flex items-center justify-between pb-3 border-b border-white/5">
-                  <h2 className="text-sm font-bold font-display text-[#f6b100] tracking-wider uppercase">
+              <div className="w-full lg:w-80 xl:w-96 shrink-0 bg-[#0E1117] border border-[#252B3B] rounded-2xl p-5 flex flex-col justify-between shadow-xl">
+                <div className="shrink-0 flex items-center justify-between pb-3 border-b border-[#252B3B]">
+                  <h2 className="text-sm font-bold font-display text-amber-400 tracking-wider uppercase">
                     SELECTED ITEMS ({selectedSkins.length}/30)
                   </h2>
                   {selectedSkins.length > 0 && (
@@ -1061,7 +1097,7 @@ export const HellcasePayBySkinsModal: React.FC<HellcasePayBySkinsModalProps> = (
                       {selectedSkins.map(skin => (
                         <div
                           key={skin.id}
-                          className="p-2.5 rounded-xl bg-[#1c2234] border border-[#27314a] flex items-center justify-between gap-3 group"
+                          className="p-2.5 rounded-xl bg-[#151821] border border-[#252B3B] flex items-center justify-between gap-3 group"
                         >
                           <img src={skin.image} alt="" className="w-10 h-8 object-contain shrink-0" />
                           <div className="flex-1 min-w-0">
@@ -1073,7 +1109,7 @@ export const HellcasePayBySkinsModal: React.FC<HellcasePayBySkinsModalProps> = (
                             </div>
                           </div>
                           <div className="text-right shrink-0">
-                            <div className="text-xs font-mono font-bold text-[#f6b100]">
+                            <div className="text-xs font-mono font-bold text-amber-400">
                               $ {skin.marketPriceEur.toFixed(2)}
                             </div>
                             <button
@@ -1091,7 +1127,7 @@ export const HellcasePayBySkinsModal: React.FC<HellcasePayBySkinsModalProps> = (
                 </div>
 
                 {/* Footer Area: Minimum $1 & Big SELL ITEMS Button */}
-                <div className="shrink-0 pt-3 border-t border-white/5 space-y-2.5">
+                <div className="shrink-0 pt-3 border-t border-[#252B3B] space-y-2.5">
                   <p className="text-[11px] font-mono text-slate-400 text-center">
                     Minimum $1 in skins required
                   </p>
@@ -1102,13 +1138,13 @@ export const HellcasePayBySkinsModal: React.FC<HellcasePayBySkinsModalProps> = (
                     onClick={handleDepositSkins}
                     className={`w-full py-3.5 rounded-xl font-black text-sm tracking-wide uppercase transition duration-200 shadow-xl flex items-center justify-center gap-2 ${
                       selectedSkins.length > 0 && totalPayoutEur >= 1.0 && !isDepositingSkins
-                        ? 'bg-[#695be8] hover:bg-[#5b4cd8] text-white shadow-[0_0_25px_rgba(105,91,232,0.4)] cursor-pointer active:scale-[0.98]'
-                        : 'bg-[#22283a] text-slate-500 cursor-not-allowed'
+                        ? 'bg-gradient-to-r from-amber-400 via-amber-500 to-yellow-500 hover:from-amber-300 hover:to-yellow-400 text-slate-950 font-black font-display tracking-wider shadow-[0_0_25px_rgba(245,158,11,0.35)] cursor-pointer active:scale-[0.98]'
+                        : 'bg-[#151821] text-slate-600 border border-[#252B3B] cursor-not-allowed'
                     }`}
                   >
                     {isDepositingSkins ? (
                       <>
-                        <span className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
+                        <span className="w-4 h-4 border-2 border-slate-950 border-t-transparent rounded-full animate-spin" />
                         <span>Processing Trade...</span>
                       </>
                     ) : selectedSkins.length > 0 && totalPayoutEur >= 1.0 ? (
@@ -1125,11 +1161,11 @@ export const HellcasePayBySkinsModal: React.FC<HellcasePayBySkinsModalProps> = (
           /* ======================================================== */
           /* VIEW 2: GENERAL PAYMENT METHODS SPLIT SCREEN             */
           /* ======================================================== */
-          <div className="flex-1 flex flex-col min-h-0">
+          <div className="flex-1 flex flex-col min-h-0 bg-[#0A0B0E]">
             {/* Header */}
-            <div className="px-6 py-4 bg-[#101420] border-b border-white/[0.08] flex items-center justify-between gap-4 shrink-0">
+            <div className="px-6 py-4 bg-[#0E1117] border-b border-[#252B3B] flex items-center justify-between gap-4 shrink-0">
               <div className="flex items-center gap-2.5">
-                <div className="w-5 h-5 rounded-md bg-emerald-500/20 border border-emerald-500/40 flex items-center justify-center text-emerald-400">
+                <div className="w-6 h-6 rounded-lg bg-amber-500/20 border border-amber-500/30 flex items-center justify-center text-amber-400 font-bold">
                   <span className="text-xs">📁</span>
                 </div>
                 <h2 className="text-base sm:text-lg font-black font-display text-white tracking-tight">
@@ -1138,9 +1174,9 @@ export const HellcasePayBySkinsModal: React.FC<HellcasePayBySkinsModalProps> = (
               </div>
 
               <div className="flex items-center gap-3">
-                <div className="flex items-center gap-1.5 px-3 py-1 rounded-xl bg-black/40 border border-white/10 text-xs font-mono">
+                <div className="flex items-center gap-1.5 px-3 py-1 rounded-xl bg-black/60 border border-amber-400/30 text-xs font-mono">
                   <span className="text-slate-400">Current Balance:</span>
-                  <span className="font-bold text-emerald-400">{getVortexWalletBalance().toFixed(2)} €</span>
+                  <span className="font-bold text-amber-400">{getVortexWalletBalance().toFixed(2)} €</span>
                 </div>
 
                 <button
@@ -1148,7 +1184,7 @@ export const HellcasePayBySkinsModal: React.FC<HellcasePayBySkinsModalProps> = (
                     sound.playClick();
                     onClose();
                   }}
-                  className="w-8 h-8 rounded-xl bg-white/5 hover:bg-white/10 text-slate-400 hover:text-white flex items-center justify-center transition cursor-pointer"
+                  className="w-8 h-8 rounded-xl bg-[#151821] hover:bg-[#1C202C] border border-[#252B3B] text-slate-400 hover:text-white flex items-center justify-center transition cursor-pointer"
                 >
                   <X className="w-4 h-4" />
                 </button>
@@ -1159,7 +1195,7 @@ export const HellcasePayBySkinsModal: React.FC<HellcasePayBySkinsModalProps> = (
             <div className="flex-1 flex flex-col lg:flex-row overflow-hidden min-h-0">
               
               {/* LEFT PANE: 10 PAYMENT METHODS GRID */}
-              <div className="w-full lg:w-[460px] xl:w-[490px] shrink-0 border-b lg:border-b-0 lg:border-r border-white/10 p-5 overflow-y-auto space-y-4 flex flex-col justify-between bg-[#0E121D]/70">
+              <div className="w-full lg:w-[460px] xl:w-[490px] shrink-0 border-b lg:border-b-0 lg:border-r border-[#252B3B] p-5 overflow-y-auto space-y-4 flex flex-col justify-between bg-[#0E1117]">
                 <div className="space-y-3.5">
                   {/* Select Country */}
                   <div className="space-y-1">
@@ -1170,7 +1206,7 @@ export const HellcasePayBySkinsModal: React.FC<HellcasePayBySkinsModalProps> = (
                       <button
                         type="button"
                         onClick={() => setCountryDropdownOpen(prev => !prev)}
-                        className="w-full px-3.5 py-2 rounded-xl bg-[#141724] border border-white/10 hover:border-white/20 text-white text-xs font-mono flex items-center justify-between cursor-pointer transition"
+                        className="w-full px-3.5 py-2 rounded-xl bg-[#151821] border border-[#252B3B] hover:border-slate-500 text-white text-xs font-mono flex items-center justify-between cursor-pointer transition"
                       >
                         <span className="flex items-center gap-2">
                           <span className="text-base">{selectedCountry.flag}</span>
@@ -1180,7 +1216,7 @@ export const HellcasePayBySkinsModal: React.FC<HellcasePayBySkinsModalProps> = (
                       </button>
 
                       {countryDropdownOpen && (
-                        <div className="absolute left-0 right-0 top-full mt-1.5 rounded-xl bg-[#141724] border border-white/15 shadow-2xl z-50 max-h-52 overflow-y-auto p-1 space-y-0.5">
+                        <div className="absolute left-0 right-0 top-full mt-1.5 rounded-xl bg-[#151821] border border-[#252B3B] shadow-2xl z-50 max-h-52 overflow-y-auto p-1 space-y-0.5 animate-in fade-in zoom-in-95 duration-150">
                           {COUNTRIES.map(c => (
                             <button
                               key={c.code}
@@ -1191,14 +1227,14 @@ export const HellcasePayBySkinsModal: React.FC<HellcasePayBySkinsModalProps> = (
                                 sound.playSelect();
                               }}
                               className={`w-full px-3 py-2 rounded-lg text-left text-xs font-mono flex items-center justify-between transition cursor-pointer ${
-                                selectedCountry.code === c.code ? 'bg-emerald-500/20 text-emerald-400' : 'text-slate-300 hover:bg-white/5 hover:text-white'
+                                selectedCountry.code === c.code ? 'bg-amber-400/10 text-amber-300 font-bold border border-amber-400/20' : 'text-slate-300 hover:bg-white/5 hover:text-white'
                               }`}
                             >
                               <span className="flex items-center gap-2">
                                 <span>{c.flag}</span>
                                 <span>{c.label}</span>
                               </span>
-                              {selectedCountry.code === c.code && <Check className="w-3.5 h-3.5 text-emerald-400" />}
+                              {selectedCountry.code === c.code && <Check className="w-3.5 h-3.5 text-amber-400" />}
                             </button>
                           ))}
                         </div>
@@ -1215,10 +1251,10 @@ export const HellcasePayBySkinsModal: React.FC<HellcasePayBySkinsModalProps> = (
                         sound.playSelect();
                         setActiveView('cards');
                       }}
-                      className={`relative p-3 rounded-2xl bg-[#141724] hover:bg-[#181D2E] text-left transition cursor-pointer group flex flex-col justify-between h-28 shadow-lg overflow-hidden ${
+                      className={`relative p-3 rounded-2xl bg-[#151821] hover:bg-[#1C202C] text-left transition cursor-pointer group flex flex-col justify-between h-28 shadow-lg overflow-hidden ${
                         activeView === 'cards'
-                          ? 'border-2 border-emerald-500/80 shadow-[0_0_15px_rgba(16,185,129,0.25)]'
-                          : 'border border-white/10 hover:border-white/20'
+                          ? 'border-2 border-amber-400 shadow-[0_0_15px_rgba(245,158,11,0.25)] bg-[#1A1F2C]'
+                          : 'border border-[#252B3B] hover:border-amber-400/40'
                       }`}
                     >
                       <div className="absolute top-0 left-0 bg-gradient-to-r from-orange-500 to-amber-500 text-slate-950 font-black text-[8px] font-mono px-2 py-0.5 rounded-br shadow">
@@ -1239,7 +1275,7 @@ export const HellcasePayBySkinsModal: React.FC<HellcasePayBySkinsModalProps> = (
 
                       <div className="flex items-center justify-between text-[9px] font-mono text-slate-400">
                         <span>Card Payments</span>
-                        {activeView === 'cards' && <Check className="w-3.5 h-3.5 text-emerald-400" />}
+                        {activeView === 'cards' && <Check className="w-3.5 h-3.5 text-amber-400" />}
                       </div>
                     </button>
 
@@ -1250,7 +1286,7 @@ export const HellcasePayBySkinsModal: React.FC<HellcasePayBySkinsModalProps> = (
                         sound.playSelect();
                         setActiveView('cards');
                       }}
-                      className="p-3 rounded-2xl bg-[#141724] hover:bg-[#181D2E] border border-white/10 hover:border-white/20 text-left transition cursor-pointer group flex flex-col justify-between h-28 shadow-lg"
+                      className="p-3 rounded-2xl bg-[#151821] hover:bg-[#1C202C] border border-[#252B3B] hover:border-amber-400/40 text-left transition cursor-pointer group flex flex-col justify-between h-28 shadow-lg"
                     >
                       <div className="text-sm font-black font-display text-white tracking-wider flex items-center gap-1 pt-1">
                         <span>VISA</span>
@@ -1267,7 +1303,7 @@ export const HellcasePayBySkinsModal: React.FC<HellcasePayBySkinsModalProps> = (
                         sound.playSelect();
                         setActiveView('cards');
                       }}
-                      className="p-3 rounded-2xl bg-[#141724] hover:bg-[#181D2E] border border-white/10 hover:border-white/20 text-left transition cursor-pointer group flex flex-col justify-between h-28 shadow-lg"
+                      className="p-3 rounded-2xl bg-[#151821] hover:bg-[#1C202C] border border-[#252B3B] hover:border-amber-400/40 text-left transition cursor-pointer group flex flex-col justify-between h-28 shadow-lg"
                     >
                       <div className="flex flex-wrap items-center gap-1 text-[9px] font-mono font-bold text-slate-300">
                         <span className="px-1 py-0.5 rounded bg-black/40">Pay</span>
@@ -1284,7 +1320,7 @@ export const HellcasePayBySkinsModal: React.FC<HellcasePayBySkinsModalProps> = (
                         sound.playSelect();
                         setActiveView('skins');
                       }}
-                      className="relative p-2.5 rounded-2xl bg-[#141724] hover:bg-[#181D2E] text-left transition cursor-pointer group flex items-center justify-between h-28 shadow-lg overflow-hidden border border-white/10 hover:border-white/20"
+                      className="relative p-2.5 rounded-2xl bg-[#151821] hover:bg-[#1C202C] text-left transition cursor-pointer group flex items-center justify-between h-28 shadow-lg overflow-hidden border border-[#252B3B] hover:border-amber-400/50"
                     >
                       <div className="relative w-14 sm:w-16 h-14 sm:h-16 shrink-0 flex items-center justify-center select-none pointer-events-none">
                         <img 
@@ -1313,10 +1349,10 @@ export const HellcasePayBySkinsModal: React.FC<HellcasePayBySkinsModalProps> = (
                         sound.playSelect();
                         setActiveView('crypto');
                       }}
-                      className={`relative p-3 rounded-2xl bg-[#141724] hover:bg-[#181D2E] text-left transition cursor-pointer group flex flex-col justify-between h-28 shadow-lg overflow-hidden ${
+                      className={`relative p-3 rounded-2xl bg-[#151821] hover:bg-[#1C202C] text-left transition cursor-pointer group flex flex-col justify-between h-28 shadow-lg overflow-hidden ${
                         activeView === 'crypto'
-                          ? 'border-2 border-emerald-500/80 shadow-[0_0_15px_rgba(16,185,129,0.25)]'
-                          : 'border border-white/10 hover:border-white/20'
+                          ? 'border-2 border-amber-400 shadow-[0_0_15px_rgba(245,158,11,0.25)] bg-[#1A1F2C]'
+                          : 'border border-[#252B3B] hover:border-amber-400/40'
                       }`}
                     >
                       <div className="space-y-1">
@@ -1324,13 +1360,13 @@ export const HellcasePayBySkinsModal: React.FC<HellcasePayBySkinsModalProps> = (
                           <span className="text-amber-400 font-mono font-bold">₿</span>
                           <span className="tracking-wide">CRYPTO</span>
                         </div>
-                        <div className="text-[8px] font-mono text-purple-300 font-bold">
+                        <div className="text-[8px] font-mono text-amber-300 font-bold">
                           BTC ETH USDT SOL
                         </div>
                       </div>
                       <div className="flex items-center justify-between text-[9px] font-mono text-slate-400">
                         <span>Instant On-Chain</span>
-                        {activeView === 'crypto' && <Check className="w-3.5 h-3.5 text-emerald-400" />}
+                        {activeView === 'crypto' && <Check className="w-3.5 h-3.5 text-amber-400" />}
                       </div>
                     </button>
 
@@ -1341,7 +1377,7 @@ export const HellcasePayBySkinsModal: React.FC<HellcasePayBySkinsModalProps> = (
                         sound.playSelect();
                         setActiveView('giftcards');
                       }}
-                      className="p-3 rounded-2xl bg-[#141724] hover:bg-[#181D2E] border border-white/10 hover:border-white/20 text-left transition cursor-pointer group flex flex-col justify-between h-28 shadow-lg"
+                      className="p-3 rounded-2xl bg-[#151821] hover:bg-[#1C202C] border border-[#252B3B] hover:border-amber-400/40 text-left transition cursor-pointer group flex flex-col justify-between h-28 shadow-lg"
                     >
                       <div className="flex items-center gap-1.5">
                         <span className="text-amber-400 text-xs">👑</span>
@@ -1357,7 +1393,7 @@ export const HellcasePayBySkinsModal: React.FC<HellcasePayBySkinsModalProps> = (
                         sound.playSelect();
                         setActiveView('giftcards');
                       }}
-                      className="p-3 rounded-2xl bg-[#141724] hover:bg-[#181D2E] border border-white/10 hover:border-white/20 text-left transition cursor-pointer group flex flex-col justify-between h-28 shadow-lg"
+                      className="p-3 rounded-2xl bg-[#151821] hover:bg-[#1C202C] border border-[#252B3B] hover:border-amber-400/40 text-left transition cursor-pointer group flex flex-col justify-between h-28 shadow-lg"
                     >
                       <div className="flex items-center gap-1.5">
                         <span className="text-purple-400 text-xs">🎮</span>
@@ -1373,7 +1409,7 @@ export const HellcasePayBySkinsModal: React.FC<HellcasePayBySkinsModalProps> = (
                         sound.playSelect();
                         setActiveView('cards');
                       }}
-                      className="p-3 rounded-2xl bg-[#141724] hover:bg-[#181D2E] border border-white/10 hover:border-white/20 text-left transition cursor-pointer group flex flex-col justify-between h-28 shadow-lg"
+                      className="p-3 rounded-2xl bg-[#151821] hover:bg-[#1C202C] border border-[#252B3B] hover:border-amber-400/40 text-left transition cursor-pointer group flex flex-col justify-between h-28 shadow-lg"
                     >
                       <div className="text-[10px] font-mono font-bold text-slate-300">SWAPPED</div>
                       <div className="text-[8px] font-mono text-slate-400">paysafecard • Revolut • 30+ more</div>
@@ -1386,17 +1422,17 @@ export const HellcasePayBySkinsModal: React.FC<HellcasePayBySkinsModalProps> = (
                         sound.playSelect();
                         setActiveView('giftcards');
                       }}
-                      className={`relative p-3 rounded-2xl bg-[#141724] hover:bg-[#181D2E] text-left transition cursor-pointer group flex flex-col justify-between h-28 shadow-lg overflow-hidden ${
+                      className={`relative p-3 rounded-2xl bg-[#151821] hover:bg-[#1C202C] text-left transition cursor-pointer group flex flex-col justify-between h-28 shadow-lg overflow-hidden ${
                         activeView === 'giftcards'
-                          ? 'border-2 border-emerald-500/80 shadow-[0_0_15px_rgba(16,185,129,0.25)]'
-                          : 'border border-white/10 hover:border-white/20'
+                          ? 'border-2 border-amber-400 shadow-[0_0_15px_rgba(245,158,11,0.25)] bg-[#1A1F2C]'
+                          : 'border border-[#252B3B] hover:border-amber-400/40'
                       }`}
                     >
                       <div className="flex items-center gap-1 text-[11px] font-bold text-white font-sans">
                         <span>🎁</span>
                         <span>GIFTCARDS</span>
                       </div>
-                      <div className="text-[9px] font-mono text-cyan-400">PayPal Supported</div>
+                      <div className="text-[9px] font-mono text-amber-300">PayPal Supported</div>
                     </button>
 
                     {/* 10. PREMIUM */}
@@ -1406,11 +1442,11 @@ export const HellcasePayBySkinsModal: React.FC<HellcasePayBySkinsModalProps> = (
                         sound.playSelect();
                         setActiveView('cards');
                       }}
-                      className="p-3 rounded-2xl bg-[#141724] hover:bg-[#181D2E] border border-white/10 hover:border-white/20 text-left transition cursor-pointer group flex flex-col justify-between h-28 shadow-lg"
+                      className="p-3 rounded-2xl bg-[#151821] hover:bg-[#1C202C] border border-[#252B3B] hover:border-amber-400/40 text-left transition cursor-pointer group flex flex-col justify-between h-28 shadow-lg"
                     >
                       <div className="flex items-center gap-1.5">
                         <span className="text-sm">💎</span>
-                        <span className="font-display font-black text-xs text-purple-400">PREMIUM</span>
+                        <span className="font-display font-black text-xs text-amber-400">PREMIUM</span>
                       </div>
                       <div className="text-[9px] font-mono text-slate-400">VIP Status</div>
                     </button>
@@ -1423,7 +1459,7 @@ export const HellcasePayBySkinsModal: React.FC<HellcasePayBySkinsModalProps> = (
               </div>
 
               {/* RIGHT PANE: CARDS / CRYPTO / GIFTCARDS */}
-              <div className="flex-1 p-5 sm:p-6 overflow-y-auto bg-[#080B12]/80 flex flex-col justify-between min-h-0">
+              <div className="flex-1 p-5 sm:p-6 overflow-y-auto bg-[#0A0B0E] flex flex-col justify-between min-h-0">
                 {/* VIEW: CRYPTO */}
                 {activeView === 'crypto' && (
                   <div className="space-y-5 flex-1 flex flex-col justify-between">
@@ -1441,8 +1477,8 @@ export const HellcasePayBySkinsModal: React.FC<HellcasePayBySkinsModalProps> = (
                             }}
                             className={`px-3 py-2 rounded-xl font-mono text-xs font-bold transition cursor-pointer flex items-center gap-2 border ${
                               selectedCrypto.symbol === coin.symbol
-                                ? 'bg-white/10 text-white border-white/30 shadow-md'
-                                : 'bg-[#141724] text-slate-400 hover:text-white border-white/5'
+                                ? 'bg-amber-400/10 text-white border-amber-400/40 shadow-md'
+                                : 'bg-[#151821] text-slate-400 hover:text-white border-[#252B3B]'
                             }`}
                           >
                             <span className="w-2.5 h-2.5 rounded-full" style={{ backgroundColor: coin.color }} />
@@ -1452,17 +1488,17 @@ export const HellcasePayBySkinsModal: React.FC<HellcasePayBySkinsModalProps> = (
                         ))}
                       </div>
 
-                      <div className="p-4 rounded-2xl bg-[#141724] border border-white/10 space-y-3 shadow-lg">
+                      <div className="p-4 rounded-2xl bg-[#151821] border border-[#252B3B] space-y-3 shadow-lg">
                         <div className="flex items-center justify-between">
                           <span className="text-xs font-mono font-bold text-white flex items-center gap-1.5">
                             <span>Official Deposit Address</span>
-                            <span className="text-[10px] text-emerald-400 bg-emerald-500/10 px-2 py-0.5 rounded-full">Automated 1-Conf Credit</span>
+                            <span className="text-[10px] text-amber-400 bg-amber-500/10 px-2 py-0.5 rounded-full">Automated 1-Conf Credit</span>
                           </span>
                           <span className="text-xs font-mono text-slate-400">{selectedCrypto.name}</span>
                         </div>
 
                         <div className="flex items-center gap-2">
-                          <div className="flex-1 p-3 rounded-xl bg-black/60 border border-white/10 font-mono text-xs text-amber-300 break-all select-all">
+                          <div className="flex-1 p-3 rounded-xl bg-black/60 border border-[#252B3B] font-mono text-xs text-amber-300 break-all select-all">
                             {selectedCrypto.address}
                           </div>
                           <button
@@ -1470,7 +1506,7 @@ export const HellcasePayBySkinsModal: React.FC<HellcasePayBySkinsModalProps> = (
                             onClick={handleCopyCrypto}
                             className={`px-4 py-3 rounded-xl font-mono text-xs font-bold transition cursor-pointer flex items-center gap-1.5 shrink-0 ${
                               cryptoCopied
-                                ? 'bg-emerald-500 text-slate-950 font-black'
+                                ? 'bg-amber-400 text-slate-950 font-black'
                                 : 'bg-white/10 hover:bg-white/20 text-white'
                             }`}
                           >
@@ -1480,7 +1516,7 @@ export const HellcasePayBySkinsModal: React.FC<HellcasePayBySkinsModalProps> = (
                         </div>
                       </div>
 
-                      <div className="p-4 rounded-2xl bg-[#141724] border border-white/10 space-y-2">
+                      <div className="p-4 rounded-2xl bg-[#151821] border border-[#252B3B] space-y-2">
                         <label className="text-xs font-mono font-bold text-white block">
                           Have you sent the funds? Verify TxID / Transaction Hash:
                         </label>
@@ -1490,13 +1526,13 @@ export const HellcasePayBySkinsModal: React.FC<HellcasePayBySkinsModalProps> = (
                             value={cryptoTxid}
                             onChange={(e) => setCryptoTxid(e.target.value)}
                             placeholder="Enter transaction hash / hash ID..."
-                            className="flex-1 p-2.5 rounded-xl bg-black/40 border border-white/10 text-xs font-mono text-white outline-none focus:border-amber-400"
+                            className="flex-1 p-2.5 rounded-xl bg-black/40 border border-[#252B3B] text-xs font-mono text-white outline-none focus:border-amber-400"
                           />
                           <button
                             type="button"
                             disabled={cryptoVerifying}
                             onClick={handleVerifyCryptoTxid}
-                            className="px-4 py-2.5 rounded-xl bg-emerald-500 hover:bg-emerald-400 text-slate-950 font-mono font-black text-xs transition cursor-pointer disabled:opacity-50"
+                            className="px-4 py-2.5 rounded-xl bg-gradient-to-r from-amber-400 to-amber-500 hover:from-amber-300 hover:to-amber-400 text-slate-950 font-mono font-black text-xs transition cursor-pointer disabled:opacity-50 shadow-[0_0_15px_rgba(245,158,11,0.2)]"
                           >
                             {cryptoVerifying ? 'Verifying...' : 'Verify Deposit'}
                           </button>
@@ -1532,8 +1568,8 @@ export const HellcasePayBySkinsModal: React.FC<HellcasePayBySkinsModalProps> = (
                             }}
                             className={`p-3.5 rounded-2xl text-center transition cursor-pointer border ${
                               selectedCardAmount === amt
-                                ? 'bg-emerald-500/20 border-emerald-500 text-emerald-300 shadow-[0_0_15px_rgba(16,185,129,0.25)]'
-                                : 'bg-[#141724] border-white/10 text-white hover:border-white/25'
+                                ? 'bg-amber-500/20 border-2 border-amber-400 text-amber-300 shadow-[0_0_15px_rgba(245,158,11,0.25)]'
+                                : 'bg-[#151821] border-[#252B3B] text-white hover:border-slate-500'
                             }`}
                           >
                             <div className="text-lg font-black font-display">{amt.toFixed(2)} €</div>
@@ -1543,10 +1579,10 @@ export const HellcasePayBySkinsModal: React.FC<HellcasePayBySkinsModalProps> = (
                       </div>
                     </div>
 
-                    <div className="p-4 rounded-2xl bg-[#141724] border border-white/10 flex items-center justify-between">
+                    <div className="p-4 rounded-2xl bg-[#151821] border border-[#252B3B] flex items-center justify-between">
                       <div>
                         <div className="text-xs font-mono text-slate-400">Amount to pay:</div>
-                        <div className="text-xl font-black font-display text-emerald-400">{selectedCardAmount.toFixed(2)} €</div>
+                        <div className="text-xl font-black font-display text-amber-400">{selectedCardAmount.toFixed(2)} €</div>
                       </div>
 
                       <button
@@ -1564,7 +1600,7 @@ export const HellcasePayBySkinsModal: React.FC<HellcasePayBySkinsModalProps> = (
                             onSuccess?.(selectedCardAmount);
                           }, 1600);
                         }}
-                        className="px-6 py-3 rounded-xl bg-emerald-500 hover:bg-emerald-400 text-slate-950 font-mono font-black text-xs transition cursor-pointer"
+                        className="px-6 py-3 rounded-xl bg-gradient-to-r from-amber-400 via-amber-500 to-yellow-500 hover:from-amber-300 hover:to-yellow-400 text-slate-950 font-mono font-black text-xs transition cursor-pointer shadow-[0_0_20px_rgba(245,158,11,0.3)]"
                       >
                         {cardProcessing ? 'Connecting Gateway...' : 'Pay with Card'}
                       </button>
@@ -1581,7 +1617,7 @@ export const HellcasePayBySkinsModal: React.FC<HellcasePayBySkinsModalProps> = (
                         <p className="text-xs font-mono text-slate-400 mt-1">Kinguin, Eneba, or PayPal Digital Giftcard code</p>
                       </div>
 
-                      <div className="p-4 rounded-2xl bg-[#141724] border border-white/10 space-y-3">
+                      <div className="p-4 rounded-2xl bg-[#151821] border border-[#252B3B] space-y-3">
                         <label className="text-xs font-mono font-bold text-white block">
                           Enter 16-character voucher code:
                         </label>
@@ -1590,7 +1626,7 @@ export const HellcasePayBySkinsModal: React.FC<HellcasePayBySkinsModalProps> = (
                           value={voucherCode}
                           onChange={(e) => setVoucherCode(e.target.value.toUpperCase())}
                           placeholder="VRTX-XXXX-XXXX-XXXX"
-                          className="w-full p-3 rounded-xl bg-black/50 border border-white/15 font-mono text-sm tracking-widest text-emerald-400 outline-none focus:border-emerald-400 uppercase"
+                          className="w-full p-3 rounded-xl bg-black/50 border border-[#252B3B] font-mono text-sm tracking-widest text-amber-300 outline-none focus:border-amber-400 uppercase"
                         />
                         {voucherError && (
                           <p className="text-xs font-mono text-red-400 flex items-center gap-1">
@@ -1618,7 +1654,7 @@ export const HellcasePayBySkinsModal: React.FC<HellcasePayBySkinsModalProps> = (
                         setVoucherError(null);
                         onSuccess?.(val);
                       }}
-                      className="w-full py-3 rounded-xl bg-emerald-500 hover:bg-emerald-400 text-slate-950 font-mono font-black text-xs uppercase tracking-wide transition cursor-pointer"
+                      className="w-full py-3.5 rounded-xl bg-gradient-to-r from-amber-400 via-amber-500 to-yellow-500 hover:from-amber-300 hover:to-yellow-400 text-slate-950 font-mono font-black text-xs uppercase tracking-wide transition cursor-pointer shadow-[0_0_20px_rgba(245,158,11,0.3)]"
                     >
                       Redeem Giftcard Voucher
                     </button>
