@@ -33,6 +33,16 @@ export function App() {
         if (profile?.personaName) {
           setUserGamerTag(profile.personaName);
           localStorage.setItem('vortex_user_gamertag', profile.personaName);
+
+          // If a new player / nephew logs in with Steam, ensure they start unverified with starter level
+          if (profile.personaName !== 'bLocKeeRz') {
+            const hasLinkedFaceit = localStorage.getItem('vortex_faceit_connected') === 'true';
+            if (!hasLinkedFaceit) {
+              localStorage.setItem('vortex_user_level', '1');
+              localStorage.setItem('vortex_user_elo', '800');
+              localStorage.setItem('vortex_user_verification', 'none');
+            }
+          }
         }
         if (profile?.avatarUrl) {
           setAvatarUrl(profile.avatarUrl);
@@ -76,6 +86,11 @@ export function App() {
     localStorage.removeItem('vortex_steam_id64');
     localStorage.removeItem('vortex_user_gamertag');
     localStorage.removeItem('vortex_user_avatar');
+    localStorage.removeItem('vortex_user_level');
+    localStorage.removeItem('vortex_user_elo');
+    localStorage.removeItem('vortex_user_verification');
+    localStorage.removeItem('vortex_faceit_nickname');
+    localStorage.removeItem('vortex_faceit_connected');
     setUserGamerTag('bLocKeeRz');
   };
 
