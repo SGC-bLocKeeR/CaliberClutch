@@ -29,7 +29,7 @@ import {
 } from '../../services/xsollaService';
 
 interface CryptoCoinOption {
-  id: 'usdt_trc20' | 'btc' | 'eth' | 'sol' | 'ltc';
+  id: 'usdt_trc20' | 'usdt_erc20' | 'btc' | 'eth' | 'sol' | 'ltc';
   symbol: string;
   name: string;
   network: string;
@@ -47,7 +47,17 @@ const CRYPTO_COINS: Record<string, CryptoCoinOption> = {
     network: 'TRON (TRC20)',
     icon: '₮',
     color: '#26A17B',
-    address: 'TCHMrzrHhH9qXxmJjXHBgvuPu2dHwDXkED', // User's Official Binance USDT Deposit Address
+    address: 'TCHMrzrHhH9qXxmJjXHBgvuPu2dHwDXkED', // User's Official Binance USDT TRC-20 Deposit Address (Starts with T)
+    calcAmount: (eur: number) => (eur * 1.085).toFixed(2)
+  },
+  usdt_erc20: {
+    id: 'usdt_erc20',
+    symbol: 'USDT',
+    name: 'Tether ERC-20',
+    network: 'Ethereum (ERC20)',
+    icon: '₮',
+    color: '#627EEA',
+    address: '0x222d5de82afc63237006ce3f51dcfc436063a3eb', // User's Official Binance USDT ERC-20 Deposit Address (Starts with 0x)
     calcAmount: (eur: number) => (eur * 1.085).toFixed(2)
   },
   btc: {
@@ -150,7 +160,7 @@ export const XsollaCheckoutModal: React.FC<XsollaCheckoutModalProps> = ({
   const [saveToast, setSaveToast] = useState<string | null>(null);
 
   // Crypto Payment State
-  const [selectedCrypto, setSelectedCrypto] = useState<'usdt_trc20' | 'btc' | 'eth' | 'sol' | 'ltc'>('usdt_trc20');
+  const [selectedCrypto, setSelectedCrypto] = useState<'usdt_trc20' | 'usdt_erc20' | 'btc' | 'eth' | 'sol' | 'ltc'>('usdt_trc20');
   const [copiedCryptoAddress, setCopiedCryptoAddress] = useState(false);
   const [copiedCryptoAmount, setCopiedCryptoAmount] = useState(false);
   const [cryptoSecondsLeft, setCryptoSecondsLeft] = useState(899);
@@ -682,7 +692,7 @@ export const XsollaCheckoutModal: React.FC<XsollaCheckoutModalProps> = ({
                           Live Blockchain Sync
                         </span>
                       </div>
-                      <div className="grid grid-cols-3 sm:grid-cols-5 gap-1.5">
+                      <div className="grid grid-cols-3 sm:grid-cols-6 gap-1.5">
                         {Object.values(CRYPTO_COINS).map((coin) => (
                           <button
                             key={coin.id}
@@ -691,7 +701,7 @@ export const XsollaCheckoutModal: React.FC<XsollaCheckoutModalProps> = ({
                               sound.playSelect();
                               setSelectedCrypto(coin.id as any);
                             }}
-                            className={`px-2.5 py-2 rounded-xl border text-center transition cursor-pointer flex flex-col items-center gap-0.5 ${
+                            className={`px-2 py-2 rounded-xl border text-center transition cursor-pointer flex flex-col items-center gap-0.5 ${
                               selectedCrypto === coin.id
                                 ? 'bg-amber-500/15 border-amber-400 text-white shadow-md shadow-amber-950/30'
                                 : 'bg-[#141724] border-white/5 text-slate-400 hover:text-white hover:border-white/15'
@@ -699,8 +709,8 @@ export const XsollaCheckoutModal: React.FC<XsollaCheckoutModalProps> = ({
                           >
                             <span className="text-base font-black" style={{ color: coin.color }}>{coin.icon}</span>
                             <span className="text-[11px] font-bold font-mono text-white">{coin.symbol}</span>
-                            <span className="text-[8px] font-mono text-slate-500 truncate w-full">
-                              {coin.id === 'usdt_trc20' ? 'TRC20' : coin.network.split(' ')[0]}
+                            <span className="text-[8px] font-mono font-bold text-slate-400 truncate w-full">
+                              {coin.id === 'usdt_trc20' ? 'TRC20' : coin.id === 'usdt_erc20' ? 'ERC20' : coin.network.split(' ')[0]}
                             </span>
                           </button>
                         ))}
