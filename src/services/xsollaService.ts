@@ -40,7 +40,7 @@ const STORAGE_XSOLLA_SECRET_KEY = 'vortex_xsolla_secret_key';
 
 export const DEFAULT_XSOLLA_CONFIG: XsollaConfig = {
   projectId: '321543', // Official VORTEX Gaming Project ID on Xsolla Publisher
-  merchantId: '870122', // Official Nexus Esports Merchant ID
+  merchantId: '870122', // Official VORTEX Gaming Merchant ID
   mode: 'sandbox', // Starts in sandbox for testing, toggleable to live
   apiKey: 'c067e12d8b1829007277de34c5f3ed9ab446aafc',
   secretKey: 'zK17ILbblZfq35s8ggkz44j-olQBn_B35XgEhhKUsrg',

@@ -193,7 +193,7 @@ export const XsollaCheckoutModal: React.FC<XsollaCheckoutModalProps> = ({
                   </span>
                 </div>
                 <div className="text-[10px] font-mono text-slate-400 mt-0.5">
-                  Nexus Esports (Merchant #{config.merchantId}) • VORTEX Gaming #{config.projectId}
+                  VORTEX Gaming (Merchant #{config.merchantId}) • VORTEX Gaming #{config.projectId}
                 </div>
               </div>
             </div>

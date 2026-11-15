@@ -187,7 +187,7 @@ export const INITIAL_TOURNAMENTS: Tournament[] = [
   },
   {
     id: 'tourney-pro-special',
-    title: 'Nexus Pro Elite Weekly Cup (PRO Only)',
+    title: 'VORTEX Pro Elite Weekly Cup (PRO Only)',
     gameId: 'cs2',
     gameName: 'Counter-Strike 2',
     prizePool: 10000,
@@ -202,12 +202,12 @@ export const INITIAL_TOURNAMENTS: Tournament[] = [
     banner: 'https://images.unsplash.com/photo-1511512578047-dfb367046420?q=80&w=1200&auto=format&fit=crop',
     isProOnly: true,
     organizer: {
-      name: 'Nexus Pro Tier Circuit',
+      name: 'VORTEX Pro Tier Circuit',
       verified: true,
-      avatar: 'https://api.dicebear.com/7.x/bottts/svg?seed=nexus_pro'
+      avatar: 'https://api.dicebear.com/7.x/bottts/svg?seed=vortex_pro'
     },
     rules: [
-      'Nexus PRO or ELITE Membership Required for Squad Leader',
+      'VORTEX PRO or ELITE Membership Required for Squad Leader',
       'Instant $10,000 cash prize distributed same-day with 0% fee',
       'Exclusive 128-tick private European servers'
     ],
@@ -343,9 +343,9 @@ export const INITIAL_TOURNAMENTS: Tournament[] = [
     startDate: 'Saturday, Nov 15 - 16:00 CET',
     banner: 'https://images.unsplash.com/photo-1560253023-3ec5d502959f?q=80&w=1200&auto=format&fit=crop',
     organizer: {
-      name: 'Nexus LoL Community',
+      name: 'VORTEX Gaming Community',
       verified: true,
-      avatar: 'https://api.dicebear.com/7.x/bottts/svg?seed=nexus_lol'
+      avatar: 'https://api.dicebear.com/7.x/bottts/svg?seed=vortex_lol'
     },
     rules: [
       'Tournament Draft Mode on Summoners Rift',
@@ -404,7 +404,7 @@ export const INITIAL_SCRIMS: ScrimLobby[] = [
     format: 'BO3',
     region: 'EU Central (Frankfurt 128-tick)',
     maps: ['Mirage', 'Ancient', 'Nuke', 'Inferno', 'Dust II'],
-    serverLocation: 'Nexus Dedicated Frankfurt #04',
+    serverLocation: 'VORTEX Dedicated Frankfurt #04',
     antiCheatRequired: true,
     scheduledTime: 'Now - Looking for challenger',
     status: 'waiting',
@@ -426,7 +426,7 @@ export const INITIAL_SCRIMS: ScrimLobby[] = [
     format: 'BO1',
     region: 'EU East (Warsaw)',
     maps: ['Inferno', 'Overpass', 'Anubis'],
-    serverLocation: 'Nexus Dedicated Warsaw #12',
+    serverLocation: 'VORTEX Dedicated Warsaw #12',
     antiCheatRequired: true,
     scheduledTime: 'Instant / Ready Now',
     status: 'waiting',
@@ -448,7 +448,7 @@ export const INITIAL_SCRIMS: ScrimLobby[] = [
     format: 'BO3',
     region: 'EU Central (Frankfurt 128-tick)',
     maps: ['Nuke', 'Mirage', 'Ancient'],
-    serverLocation: 'Nexus Dedicated Frankfurt #09',
+    serverLocation: 'VORTEX Dedicated Frankfurt #09',
     antiCheatRequired: true,
     scheduledTime: 'Starts in 10 mins',
     status: 'waiting',
@@ -767,7 +767,7 @@ export const SCOUTING_PLAYERS: GamerPassport[] = [
     eloHistory: [],
     connectedServices: [],
     badges: [
-      { id: 'b1', name: 'Nexus Verified', icon: '🛡️', color: 'var(--nexus-primary)', description: 'Verified player' },
+      { id: 'b1', name: 'VORTEX Verified', icon: '🛡️', color: 'var(--nexus-primary)', description: 'Verified player' },
       { id: 'b2', name: 'LAN Veteran', icon: '🎖️', color: '#8B5CF6', description: 'Competed in DreamHack Open' }
     ],
     hardwareSpecs: {
@@ -812,7 +812,7 @@ export const SCOUTING_PLAYERS: GamerPassport[] = [
     eloHistory: [],
     connectedServices: [],
     badges: [
-      { id: 'b1', name: 'Nexus Verified', icon: '🛡️', color: 'var(--nexus-primary)', description: 'Verified' },
+      { id: 'b1', name: 'VORTEX Verified', icon: '🛡️', color: 'var(--nexus-primary)', description: 'Verified' },
       { id: 'b4', name: 'SoloQ Prodigy', icon: '✨', color: '#F59E0B', description: 'Top 50 EUW SoloQ' }
     ],
     hardwareSpecs: {
@@ -955,7 +955,7 @@ export const INITIAL_SHOP_ITEMS: ShopItem[] = [
     image: 'https://images.unsplash.com/photo-1550745165-9bc0b252726f?q=80&w=600&auto=format&fit=crop',
     rarity: 'rare',
     inStock: true,
-    description: 'Global Steam code sent to your registered Nexus email immediately for CS2 cases & keys.',
+    description: 'Global Steam code sent to your registered VORTEX email immediately for CS2 cases & keys.',
     tag: 'Steam Code'
   },
   {
@@ -1037,7 +1037,7 @@ export const INITIAL_NOTIFICATIONS: NotificationItem[] = [
   {
     id: 'n1',
     title: 'CS2 Major Grand Finals Live!',
-    message: 'Nexus CS2 Major Championship: NAVI Youth vs Team Liquid Gen is in Map 3!',
+    message: 'VORTEX CS2 Major Championship: NAVI Youth vs Team Liquid Gen is in Map 3!',
     time: '2m ago',
     type: 'tournament',
     read: false
@@ -1045,7 +1045,7 @@ export const INITIAL_NOTIFICATIONS: NotificationItem[] = [
   {
     id: 'n2',
     title: 'Daily Quest Completed',
-    message: 'You achieved "CS2: Headhunter Precision"! Claim your 120 Nexus Coins now.',
+    message: 'You achieved "CS2: Headhunter Precision"! Claim your 120 VORTEX Coins now.',
     time: '15m ago',
     type: 'bounty',
     read: false
