@@ -108,7 +108,7 @@ const BASE_CATALOG = [
     skinName: 'Asiimov',
     fullName: 'AK-47 | Asiimov (Field-Tested)',
     type: 'rifle',
-    rarity: 'classified',
+    rarity: 'covert',
     wear: 'Field-Tested',
     wearShort: 'FT',
     floatValue: 0.224,
@@ -136,7 +136,7 @@ const BASE_CATALOG = [
     skinName: 'Firebreathing',
     fullName: 'Desert Eagle | Firebreathing (Well-Worn)',
     type: 'pistol',
-    rarity: 'mil-spec',
+    rarity: 'restricted',
     wear: 'Well-Worn',
     wearShort: 'WW',
     floatValue: 0.412,
@@ -150,7 +150,7 @@ const BASE_CATALOG = [
     skinName: 'Tilted',
     fullName: 'Desert Eagle | Tilted (Minimal Wear)',
     type: 'pistol',
-    rarity: 'restricted',
+    rarity: 'mil-spec',
     wear: 'Minimal Wear',
     wearShort: 'MW',
     floatValue: 0.095,
@@ -262,7 +262,7 @@ const BASE_CATALOG = [
     skinName: 'Plum Netting',
     fullName: 'P250 | Plum Netting (Well-Worn)',
     type: 'pistol',
-    rarity: 'consumer',
+    rarity: 'mil-spec',
     wear: 'Well-Worn',
     wearShort: 'WW',
     floatValue: 0.425,
@@ -276,7 +276,7 @@ const BASE_CATALOG = [
     skinName: 'Sand Mesh',
     fullName: 'SCAR-20 | Sand Mesh (Field-Tested)',
     type: 'sniper',
-    rarity: 'consumer',
+    rarity: 'mil-spec',
     wear: 'Field-Tested',
     wearShort: 'FT',
     floatValue: 0.218,
@@ -290,7 +290,7 @@ const BASE_CATALOG = [
     skinName: 'Grey Smoke',
     fullName: 'Galil AR | Grey Smoke (Minimal Wear)',
     type: 'rifle',
-    rarity: 'industrial',
+    rarity: 'mil-spec',
     wear: 'Minimal Wear',
     wearShort: 'MW',
     floatValue: 0.105,
@@ -304,7 +304,7 @@ const BASE_CATALOG = [
     skinName: 'Raw Ceramic',
     fullName: 'Negev | Raw Ceramic (Minimal Wear)',
     type: 'other',
-    rarity: 'industrial',
+    rarity: 'mil-spec',
     wear: 'Minimal Wear',
     wearShort: 'MW',
     floatValue: 0.114,
@@ -318,7 +318,7 @@ const BASE_CATALOG = [
     skinName: 'Sage Spray',
     fullName: 'Galil AR | Sage Spray (Well-Worn)',
     type: 'rifle',
-    rarity: 'consumer',
+    rarity: 'mil-spec',
     wear: 'Well-Worn',
     wearShort: 'WW',
     floatValue: 0.388,
@@ -332,7 +332,7 @@ const BASE_CATALOG = [
     skinName: 'Sand Dune',
     fullName: 'P250 | Sand Dune (Field-Tested)',
     type: 'pistol',
-    rarity: 'consumer',
+    rarity: 'mil-spec',
     wear: 'Field-Tested',
     wearShort: 'FT',
     floatValue: 0.222,
@@ -478,10 +478,11 @@ export default async function handler(req, res) {
               const isSticker = fullName.startsWith('Sticker |') || desc.type?.toLowerCase().includes('sticker');
               const isCase = fullName.includes('Case') || fullName.includes('Capsule') || fullName.includes('Package');
 
-              const rarityTag = desc.tags?.find(t => t.category === 'Rarity')?.internal_name || '';
+              const rarityTagObj = desc.tags?.find(t => t.category === 'Rarity' || t.category_name === 'Quality' || t.category === 'Quality');
+              const rarityName = `${rarityTagObj?.name || ''} ${rarityTagObj?.internal_name || ''}`.toLowerCase();
 
               // Accurate CS2 market price from live Skinport index
-              const livePrice = getLivePrice(fullName, isKnife, rarityTag, isSticker, isCase);
+              const livePrice = getLivePrice(fullName, isKnife, rarityName, isSticker, isCase);
               const isOverstock = checkIsOverstock(fullName, livePrice);
 
               // Accurate item wear parsing
@@ -504,6 +505,16 @@ export default async function handler(req, res) {
                 weaponName = fullName;
               }
 
+              const resolvedRarity = isKnife || fullName.includes('★')
+                ? 'extraordinary'
+                : (rarityName.includes('covert') || rarityName.includes('ancient') || (fullName.includes('AK-47') && fullName.includes('Asiimov')))
+                ? 'covert'
+                : (rarityName.includes('classified') || rarityName.includes('legendary') || (fullName.includes('P250') && fullName.includes('Asiimov')))
+                ? 'classified'
+                : (rarityName.includes('restricted') || rarityName.includes('mythical') || fullName.includes('Firebreathing'))
+                ? 'restricted'
+                : 'mil-spec';
+
               parsedItems.push({
                 id: `steam-${a.assetid}`,
                 assetId: a.assetid,
@@ -511,7 +522,7 @@ export default async function handler(req, res) {
                 skinName: skinTitle,
                 fullName,
                 type: isKnife ? 'knife' : isSniper ? 'sniper' : isPistol ? 'pistol' : (isSmg || isRifle) ? 'rifle' : isSticker ? 'sticker' : 'other',
-                rarity: isKnife ? 'extraordinary' : rarityTag.toLowerCase().includes('covert') ? 'covert' : rarityTag.toLowerCase().includes('classified') ? 'classified' : 'restricted',
+                rarity: resolvedRarity,
                 wear,
                 wearShort,
                 floatValue: 0.15,

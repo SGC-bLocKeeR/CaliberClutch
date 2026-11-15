@@ -106,16 +106,13 @@ type RarityFilterId = typeof RARITY_OPTIONS[number]['id'];
 
 // Helper for CS2 rarity accent colors matching Farmskins
 const getRarityColor = (rarity: string) => {
-  switch (rarity) {
-    case 'extraordinary': return '#ffd700'; // Gold / Knife
-    case 'covert': return '#eb4b4b';        // Red
-    case 'classified': return '#d32ce6';    // Pink
-    case 'restricted': return '#8847ff';    // Purple
-    case 'mil-spec': return '#4b69ff';      // Blue
-    case 'industrial': return '#5e98d9';    // Light blue
-    case 'consumer': return '#b0c3d9';      // Gray
-    default: return '#4b69ff';
-  }
+  const r = (rarity || '').toLowerCase();
+  if (r === 'extraordinary' || r === 'rare') return '#ffd700'; // Gold / Knife
+  if (r === 'covert' || r.includes('covert') || r.includes('ancient')) return '#eb4b4b'; // Red Covert
+  if (r === 'classified' || r.includes('classified') || r.includes('legendary')) return '#d32ce6'; // Pink Classified
+  if (r === 'restricted' || r.includes('restricted') || r.includes('mythical')) return '#8847ff'; // Purple Restricted
+  if (r === 'mil-spec' || r.includes('mil-spec') || r === 'industrial' || r === 'consumer') return '#4b69ff'; // Blue Mil-Spec
+  return '#4b69ff';
 };
 
 export const HellcasePayBySkinsModal: React.FC<HellcasePayBySkinsModalProps> = ({
@@ -208,7 +205,7 @@ export const HellcasePayBySkinsModal: React.FC<HellcasePayBySkinsModalProps> = (
         skinName: 'Asiimov',
         fullName: 'AK-47 | Asiimov (Field-Tested)',
         type: 'rifle',
-        rarity: 'classified',
+        rarity: 'covert',
         wear: 'Field-Tested',
         wearShort: 'FT',
         floatValue: 0.224,
@@ -242,7 +239,7 @@ export const HellcasePayBySkinsModal: React.FC<HellcasePayBySkinsModalProps> = (
         skinName: 'Firebreathing',
         fullName: 'Desert Eagle | Firebreathing (Well-Worn)',
         type: 'pistol',
-        rarity: 'mil-spec',
+        rarity: 'restricted',
         wear: 'Well-Worn',
         wearShort: 'WW',
         floatValue: 0.412,
@@ -259,7 +256,7 @@ export const HellcasePayBySkinsModal: React.FC<HellcasePayBySkinsModalProps> = (
         skinName: 'Tilted',
         fullName: 'Desert Eagle | Tilted (Minimal Wear)',
         type: 'pistol',
-        rarity: 'restricted',
+        rarity: 'mil-spec',
         wear: 'Minimal Wear',
         wearShort: 'MW',
         floatValue: 0.095,
@@ -395,7 +392,7 @@ export const HellcasePayBySkinsModal: React.FC<HellcasePayBySkinsModalProps> = (
         skinName: 'Plum Netting',
         fullName: 'P250 | Plum Netting (Well-Worn)',
         type: 'pistol',
-        rarity: 'consumer',
+        rarity: 'mil-spec',
         wear: 'Well-Worn',
         wearShort: 'WW',
         floatValue: 0.425,
@@ -412,7 +409,7 @@ export const HellcasePayBySkinsModal: React.FC<HellcasePayBySkinsModalProps> = (
         skinName: 'Sand Mesh',
         fullName: 'SCAR-20 | Sand Mesh (Field-Tested)',
         type: 'sniper',
-        rarity: 'consumer',
+        rarity: 'mil-spec',
         wear: 'Field-Tested',
         wearShort: 'FT',
         floatValue: 0.218,
@@ -429,7 +426,7 @@ export const HellcasePayBySkinsModal: React.FC<HellcasePayBySkinsModalProps> = (
         skinName: 'Grey Smoke',
         fullName: 'Galil AR | Grey Smoke (Minimal Wear)',
         type: 'rifle',
-        rarity: 'industrial',
+        rarity: 'mil-spec',
         wear: 'Minimal Wear',
         wearShort: 'MW',
         floatValue: 0.105,
@@ -446,7 +443,7 @@ export const HellcasePayBySkinsModal: React.FC<HellcasePayBySkinsModalProps> = (
         skinName: 'Raw Ceramic',
         fullName: 'Negev | Raw Ceramic (Minimal Wear)',
         type: 'other',
-        rarity: 'industrial',
+        rarity: 'mil-spec',
         wear: 'Minimal Wear',
         wearShort: 'MW',
         floatValue: 0.114,
@@ -463,7 +460,7 @@ export const HellcasePayBySkinsModal: React.FC<HellcasePayBySkinsModalProps> = (
         skinName: 'Sage Spray',
         fullName: 'Galil AR | Sage Spray (Well-Worn)',
         type: 'rifle',
-        rarity: 'consumer',
+        rarity: 'mil-spec',
         wear: 'Well-Worn',
         wearShort: 'WW',
         floatValue: 0.388,
@@ -480,7 +477,7 @@ export const HellcasePayBySkinsModal: React.FC<HellcasePayBySkinsModalProps> = (
         skinName: 'Sand Dune',
         fullName: 'P250 | Sand Dune (Field-Tested)',
         type: 'pistol',
-        rarity: 'consumer',
+        rarity: 'mil-spec',
         wear: 'Field-Tested',
         wearShort: 'FT',
         floatValue: 0.222,
@@ -557,10 +554,21 @@ export const HellcasePayBySkinsModal: React.FC<HellcasePayBySkinsModalProps> = (
         s.weapon.toLowerCase().includes(skinSearch.toLowerCase()) ||
         s.skinName.toLowerCase().includes(skinSearch.toLowerCase());
       
-      const matchRarity = selectedRarity === 'all' || 
-        (selectedRarity === 'rare'
-          ? (s.rarity === 'extraordinary' || s.type === 'knife' || s.fullName.includes('★'))
-          : s.rarity === selectedRarity);
+      const r = (s.rarity || '').toLowerCase();
+      const filter = selectedRarity.toLowerCase();
+
+      const matchRarity = filter === 'all' || 
+        (filter === 'rare'
+          ? (r === 'extraordinary' || r === 'rare' || s.type === 'knife' || s.fullName.includes('★'))
+          : filter === 'covert'
+          ? (r === 'covert' || r.includes('covert') || r.includes('ancient') || (s.fullName.includes('AK-47') && s.fullName.includes('Asiimov')))
+          : filter === 'classified'
+          ? (r === 'classified' || r.includes('classified') || r.includes('legendary') || (s.fullName.includes('P250') && s.fullName.includes('Asiimov')))
+          : filter === 'restricted'
+          ? (r === 'restricted' || r.includes('restricted') || r.includes('mythical') || s.fullName.includes('Firebreathing'))
+          : filter === 'mil-spec'
+          ? (r === 'mil-spec' || r.includes('mil-spec') || r === 'industrial' || r === 'consumer')
+          : r === filter);
 
       return matchSearch && matchRarity;
     });
