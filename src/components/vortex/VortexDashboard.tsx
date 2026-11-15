@@ -2009,29 +2009,6 @@ export const VortexDashboard: React.FC<VortexDashboardProps> = ({
                 </button>
               )}
             </div>
-
-            <div className="flex items-center gap-3 sm:gap-4">
-              {/* Notification Bell with Dynamic Unread Counter */}
-              <button
-                id="vortex-notifications-bell-btn"
-                onClick={() => {
-                  try { sound.playClick(); } catch {}
-                  setNotificationsOpen(prev => !prev);
-                }}
-                className="p-1.5 text-lime-400 hover:text-lime-300 transition cursor-pointer relative"
-                aria-label="Notifications"
-                title="Notifications"
-              >
-                <Bell className="w-5 h-5 text-[#A3E635] hover:brightness-125 transition drop-shadow-[0_0_8px_rgba(163,230,53,0.5)] pointer-events-none" />
-                {unreadCount > 0 ? (
-                  <span className="absolute -top-1 -right-1 min-w-[18px] h-[18px] px-1 rounded-full bg-[#A3E635] text-slate-950 font-black text-[10px] flex items-center justify-center shadow-[0_0_10px_rgba(163,230,53,0.95)] font-mono leading-none pointer-events-none">
-                    {unreadCount}
-                  </span>
-                ) : (
-                  <span className="absolute top-0.5 right-0.5 w-2 h-2 rounded-full bg-slate-600 pointer-events-none" />
-                )}
-              </button>
-            </div>
           </header>
 
           {/* ========================================================================= */}
