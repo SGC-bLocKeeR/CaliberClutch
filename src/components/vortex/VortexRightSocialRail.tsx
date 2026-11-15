@@ -649,7 +649,7 @@ export const VortexRightSocialRail: React.FC<VortexRightSocialRailProps> = ({
                 setShowHellcaseModal(true);
               }}
               className="flex items-center gap-1 shrink-0 cursor-pointer"
-              title="Click to view balance or fill up (+5% Bonus)"
+              title="Click to view balance or fill up"
             >
               <div className="flex items-center gap-0.5 px-1.5 py-0.5 rounded-lg bg-black/60 border border-white/5 shrink-0">
                 <span className="text-[11px] leading-none">💵</span>
@@ -664,18 +664,17 @@ export const VortexRightSocialRail: React.FC<VortexRightSocialRailProps> = ({
               </div>
             </div>
 
-            {/* REFILL +5% Button matching Hellcase Screenshot (Compact & Refined) */}
+            {/* REFILL Button matching Hellcase Screenshot (Compact & Clean) */}
             <button
               type="button"
               onClick={() => {
                 sound.playSelect();
                 setShowHellcaseModal(true);
               }}
-              className="px-1.5 py-0.5 rounded-lg bg-gradient-to-r from-emerald-500 to-teal-400 hover:from-emerald-400 hover:to-teal-300 text-slate-950 font-mono font-black text-[10px] leading-none transition cursor-pointer shadow-[0_0_10px_rgba(16,185,129,0.3)] flex items-center gap-1 shrink-0 hover:scale-105 active:scale-95"
+              className="px-2 py-1 rounded-lg bg-gradient-to-r from-emerald-500 to-teal-400 hover:from-emerald-400 hover:to-teal-300 text-slate-950 font-mono font-black text-[10px] leading-none transition cursor-pointer shadow-[0_0_10px_rgba(16,185,129,0.3)] flex items-center justify-center shrink-0 hover:scale-105 active:scale-95"
               title="Filling up the balance • Pay by Skins, Crypto & Cards"
             >
               <span className="tracking-tight">REFILL</span>
-              <span className="text-[8px] font-black text-white bg-black/45 px-1 py-[1.5px] rounded leading-none">+5%</span>
             </button>
           </div>
 
@@ -852,90 +851,52 @@ export const VortexRightSocialRail: React.FC<VortexRightSocialRailProps> = ({
             </p>
 
             {/* Wallet Balance & Action Buttons */}
-            <div className="flex items-center justify-between gap-1.5 pt-0.5">
+            <div className="space-y-2 pt-1">
               <div 
                 onClick={() => {
                   sound.playSelect();
                   setShowHellcaseModal(true);
                 }}
-                className="flex items-center gap-1 text-[11px] font-mono font-bold text-slate-200 bg-white/[0.04] hover:bg-white/[0.08] px-2 py-1.5 rounded-xl border border-white/5 hover:border-amber-400/40 cursor-pointer transition select-none"
+                className="flex items-center justify-between text-xs font-mono font-bold text-slate-200 bg-white/[0.04] hover:bg-white/[0.08] px-3 py-1.5 rounded-xl border border-white/5 hover:border-amber-400/40 cursor-pointer transition select-none"
                 title="Filling up the balance • Pay by Skins, Crypto & Cards"
               >
-                <Coins className="w-3.5 h-3.5 text-amber-400" />
-                <span className="text-emerald-400">{vortexBalance.toFixed(2)} €</span>
-                <span className="text-[8px] text-emerald-400 font-black uppercase bg-emerald-500/10 px-1 py-0.2 rounded border border-emerald-500/30">+TOP UP</span>
+                <div className="flex items-center gap-1.5">
+                  <Coins className="w-3.5 h-3.5 text-amber-400" />
+                  <span className="text-emerald-400 font-black">{vortexBalance.toFixed(2)} €</span>
+                </div>
+                <span className="text-[9px] text-emerald-400 font-black uppercase bg-emerald-500/15 border border-emerald-500/30 px-1.5 py-0.5 rounded">
+                  +TOP UP
+                </span>
               </div>
 
-              <div className="flex items-center gap-1">
+              {/* 2-Button Action Grid: WITHDRAW + Open Cases */}
+              <div className="grid grid-cols-2 gap-2">
                 <button
+                  type="button"
                   onClick={() => {
                     sound.playSelect();
                     setShowWithdrawModal(true);
                   }}
-                  className="px-2 py-1.5 rounded-xl bg-amber-500/15 hover:bg-amber-500/25 border border-amber-500/35 text-amber-400 font-mono text-[10px] font-bold transition cursor-pointer flex items-center gap-1 hover:scale-105 active:scale-95"
+                  className="py-2 px-2.5 rounded-xl bg-amber-500/10 hover:bg-amber-500/20 border border-amber-500/30 text-amber-400 font-mono text-xs font-bold transition cursor-pointer flex items-center justify-center gap-1.5 hover:scale-[1.02] active:scale-95"
                   title="Withdraw won CS2 skins to Steam or Cashout to Crypto"
                 >
                   <span>WITHDRAW</span>
-                  <ArrowUpRight className="w-3 h-3" />
+                  <ArrowUpRight className="w-3.5 h-3.5" />
                 </button>
 
                 <button
+                  type="button"
                   onClick={() => {
                     sound.playSelect();
                     setShowCaseShopModal(true);
                   }}
-                  className="flex items-center gap-1 text-[11px] font-mono font-black text-black bg-gradient-to-r from-amber-400 to-yellow-500 hover:from-amber-300 hover:to-yellow-400 px-2.5 py-1.5 rounded-xl transition cursor-pointer shadow-[0_0_15px_rgba(245,158,11,0.3)] hover:scale-105 active:scale-95"
+                  className="py-2 px-2.5 rounded-xl font-mono font-black text-xs text-slate-950 bg-gradient-to-r from-amber-400 to-yellow-500 hover:from-amber-300 hover:to-yellow-400 transition cursor-pointer shadow-[0_0_15px_rgba(245,158,11,0.25)] flex items-center justify-center gap-1 hover:scale-[1.02] active:scale-95"
                   title="Open Vortex CS2 Case Shop"
                 >
-                  <span>Cases</span>
+                  <span>Open Cases</span>
                   <ChevronRight className="w-3.5 h-3.5" />
                 </button>
               </div>
-            </div>
-          </div>
-
-          {/* ======================================================== */}
-          {/* 3. LIVE MATCH ACTIVITY TICKER                            */}
-          {/* ======================================================== */}
-          <div className="rounded-2xl bg-[#10121A] border border-[#1E2333] p-3 flex flex-col gap-2 shadow-lg hover:border-white/10 transition">
-            <div className="flex items-center justify-between">
-              <div className="flex items-center gap-1.5 text-xs font-bold text-white font-sans">
-                <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse" />
-                <span>Live Matches</span>
-              </div>
-              <span className="text-[10px] font-mono text-slate-500">
-                1 Active
-              </span>
-            </div>
-
-            <div className="p-2 rounded-xl bg-white/[0.02] border border-white/5 flex items-center justify-between gap-2">
-              <div className="flex items-center gap-2 min-w-0">
-                <img
-                  src="https://images.unsplash.com/photo-1566492031773-4f4e44671857?auto=format&fit=crop&w=150&q=80"
-                  alt="Icykilleer"
-                  className="w-7 h-7 rounded-full object-cover border border-white/10 shrink-0"
-                />
-                <div className="min-w-0">
-                  <div className="text-xs font-bold text-white truncate">Icykilleer</div>
-                  <div className="text-[10px] text-emerald-400 font-mono flex items-center gap-1">
-                    <span>Mirage</span>
-                    <span className="text-slate-500">•</span>
-                    <span className="text-white font-bold">11 - 9</span>
-                  </div>
-                </div>
-              </div>
-
-              <button
-                onClick={() => {
-                  sound.playClick();
-                  setSpectateToast('📡 Connecting to GOTV Relay (128-tick EU Vienna)... Spectating Icykilleer on Mirage [11-9]');
-                  setTimeout(() => setSpectateToast(null), 4000);
-                }}
-                className="p-1.5 rounded-lg bg-white/5 hover:bg-white/10 text-slate-300 hover:text-white transition cursor-pointer"
-                title="Watch GOTV Spectate"
-              >
-                <Eye className="w-3.5 h-3.5" />
-              </button>
             </div>
           </div>
 

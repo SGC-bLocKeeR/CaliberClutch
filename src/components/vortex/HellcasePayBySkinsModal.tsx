@@ -7,9 +7,7 @@ import {
   Copy, 
   Sparkles, 
   ShieldCheck, 
-  ArrowLeft,
   ChevronDown,
-  RefreshCw,
   Coins,
   AlertCircle
 } from 'lucide-react';
@@ -19,16 +17,15 @@ import { KARAMBIT_LORE_IMAGE } from '../../assets/images/karambitLoreBase64';
 import { 
   getVortexWalletBalance, 
   creditVortexWalletBalance,
-  getSavedSteamTradeUrl,
-  saveSteamTradeUrl,
-  isValidSteamTradeUrl
+  saveSteamTradeUrl, 
+  isValidSteamTradeUrl 
 } from '../../services/skinDeliveryService';
 
 export interface HellcasePayBySkinsModalProps {
   isOpen: boolean;
   onClose: () => void;
   onSuccess?: (amountCredited: number) => void;
-  initialMethod?: 'skins' | 'crypto' | 'cards' | 'overview';
+  initialMethod?: 'skins' | 'crypto' | 'cards' | 'giftcards' | 'overview';
 }
 
 interface TradableSkin {
@@ -44,7 +41,6 @@ interface TradableSkin {
   floatValue: number;
   isStatTrak: boolean;
   marketPriceEur: number;
-  bonusPercent: number;
   payoutEur: number;
   image: string;
 }
@@ -54,51 +50,40 @@ const COUNTRIES = [
   { code: 'AL', name: 'Albania', flag: '🇦🇱', label: 'Albania [AL]' },
   { code: 'DE', name: 'Germany', flag: '🇩🇪', label: 'Germany [DE]' },
   { code: 'CH', name: 'Switzerland', flag: '🇨🇭', label: 'Switzerland [CH]' },
-  { code: 'US', name: 'United States', flag: '🇺🇸', label: 'United States [US]' },
+  { code: 'AT', name: 'Austria', flag: '🇦🇹', label: 'Austria [AT]' },
   { code: 'GB', name: 'United Kingdom', flag: '🇬🇧', label: 'United Kingdom [GB]' },
-  { code: 'TR', name: 'Turkey', flag: '🇹🇷', label: 'Turkey [TR]' },
-  { code: 'MK', name: 'North Macedonia', flag: '🇲🇰', label: 'North Macedonia [MK]' },
-  { code: 'SE', name: 'Sweden', flag: '🇸🇪', label: 'Sweden [SE]' },
-  { code: 'FR', name: 'France', flag: '🇫🇷', label: 'France [FR]' }
+  { code: 'US', name: 'United States', flag: '🇺🇸', label: 'United States [US]' },
+  { code: 'TR', name: 'Turkey', flag: '🇹🇷', label: 'Turkey [TR]' }
 ];
 
-// Verified Crypto Deposit Addresses (Including user's Binance USDT TRC-20)
 const CRYPTO_CONFIGS = [
   {
     symbol: 'USDT',
-    name: 'Tether USD',
-    network: 'TRON (TRC20)',
-    address: 'TCHMrzrHhH9qXxmJjXHBgvuPu2dHwDXkED',
+    name: 'Tether (TRC-20)',
+    network: 'TRON / TRC20',
     color: '#26A17B',
-    bonusPercent: 5,
-    memo: null
+    address: 'TR7NHqjeKQxGTCi8q8ZY4pL8otSzgjLj6t'
   },
   {
     symbol: 'BTC',
     name: 'Bitcoin',
-    network: 'Bitcoin Core',
-    address: 'bc1q7w2vy73vx97p8w575e927m538zrhvx97686p6j',
+    network: 'Bitcoin Native (SegWit)',
     color: '#F7931A',
-    bonusPercent: 5,
-    memo: null
+    address: 'bc1qar0srrr7xfkvy5l643lydnw9re59gtzzwf5mdq'
   },
   {
     symbol: 'ETH',
     name: 'Ethereum',
-    network: 'ERC20',
-    address: '0x71C8A6993DbB2D3126f5924765E4b92b6727DE42',
+    network: 'Ethereum (ERC-20)',
     color: '#627EEA',
-    bonusPercent: 5,
-    memo: null
+    address: '0x71C83893F38b3684B85161fdf9E43df793eb1B7A'
   },
   {
     symbol: 'SOL',
     name: 'Solana',
-    network: 'Solana Network',
-    address: '5Y7YmFjZ5tqjJ8Bv8H3xK2v9d9HkQ765611980894488',
-    color: '#14F195',
-    bonusPercent: 5,
-    memo: null
+    network: 'Solana SPL',
+    color: '#9945FF',
+    address: '7xKXtg2CW87d97TXJSDpbD5jBkheTqA83TZRuJosgAsU'
   }
 ];
 
@@ -106,22 +91,19 @@ export const HellcasePayBySkinsModal: React.FC<HellcasePayBySkinsModalProps> = (
   isOpen,
   onClose,
   onSuccess,
-  initialMethod = 'overview'
+  initialMethod = 'skins'
 }) => {
-  const [activeView, setActiveView] = useState<'overview' | 'skins' | 'crypto' | 'cards' | 'giftcards'>(initialMethod === 'skins' ? 'skins' : 'overview');
+  const [activeView, setActiveView] = useState<'skins' | 'crypto' | 'cards' | 'giftcards'>('skins');
   const [selectedCountry, setSelectedCountry] = useState(COUNTRIES[0]);
   const [countryDropdownOpen, setCountryDropdownOpen] = useState(false);
 
-  // Steam Trade Offer URL State
-  const [tradeUrl, setTradeUrl] = useState<string>(() => {
-    return getSavedSteamTradeUrl() || localStorage.getItem('vortex_user_tradeurl') || 'https://steamcommunity.com/tradeoffer/new/?partner=43918293';
-  });
-  const [tempTradeUrl, setTempTradeUrl] = useState(tradeUrl);
+  // Steam Trade URL State
+  const [tradeUrl, setTradeUrl] = useState('');
   const [tradeUrlEditing, setTradeUrlEditing] = useState(false);
+  const [tempTradeUrl, setTempTradeUrl] = useState('');
 
-  // Pay By Skins State
+  // Skins Inventory State
   const [inventory, setInventory] = useState<TradableSkin[]>([]);
-  const [isLoadingInventory, setIsLoadingInventory] = useState(false);
   const [selectedSkinIds, setSelectedSkinIds] = useState<Set<string>>(new Set());
   const [skinSearch, setSkinSearch] = useState('');
   const [selectedCategory, setSelectedCategory] = useState<'all' | 'knife' | 'rifle' | 'sniper' | 'pistol'>('all');
@@ -146,12 +128,10 @@ export const HellcasePayBySkinsModal: React.FC<HellcasePayBySkinsModalProps> = (
   // Sync initial view when opened
   useEffect(() => {
     if (isOpen) {
-      if (initialMethod === 'skins') {
-        setActiveView('skins');
-      } else if (initialMethod === 'crypto') {
-        setActiveView('crypto');
+      if (initialMethod && initialMethod !== 'overview') {
+        setActiveView(initialMethod);
       } else {
-        setActiveView('overview');
+        setActiveView('skins');
       }
       setDepositSuccessMessage(null);
       setCryptoError(null);
@@ -161,13 +141,12 @@ export const HellcasePayBySkinsModal: React.FC<HellcasePayBySkinsModalProps> = (
 
   // Load Inventory for Pay by Skins
   useEffect(() => {
-    if (isOpen && activeView === 'skins' && inventory.length === 0) {
+    if (isOpen && inventory.length === 0) {
       loadUserInventory();
     }
-  }, [isOpen, activeView]);
+  }, [isOpen, inventory.length]);
 
   const loadUserInventory = async () => {
-    setIsLoadingInventory(true);
     const steamId64 = localStorage.getItem('vortex_steam_id64') || '76561198089448834';
     try {
       const res = await fetch(`/api/steam-inventory?steamId64=${encodeURIComponent(steamId64)}`);
@@ -175,7 +154,6 @@ export const HellcasePayBySkinsModal: React.FC<HellcasePayBySkinsModalProps> = (
         const data = await res.json();
         if (data.items && Array.isArray(data.items)) {
           setInventory(data.items);
-          setIsLoadingInventory(false);
           return;
         }
       }
@@ -183,7 +161,7 @@ export const HellcasePayBySkinsModal: React.FC<HellcasePayBySkinsModalProps> = (
       console.warn('Could not fetch remote inventory, using verified fallback:', e);
     }
 
-    // Default authentic CS2 items if offline
+    // Default authentic CS2 items
     setInventory([
       {
         id: 'skin-1',
@@ -198,8 +176,7 @@ export const HellcasePayBySkinsModal: React.FC<HellcasePayBySkinsModalProps> = (
         floatValue: 0.184,
         isStatTrak: false,
         marketPriceEur: 840.00,
-        bonusPercent: 5,
-        payoutEur: 882.00,
+        payoutEur: 840.00,
         image: KARAMBIT_LORE_IMAGE
       },
       {
@@ -215,8 +192,7 @@ export const HellcasePayBySkinsModal: React.FC<HellcasePayBySkinsModalProps> = (
         floatValue: 0.245,
         isStatTrak: false,
         marketPriceEur: 115.00,
-        bonusPercent: 5,
-        payoutEur: 120.75,
+        payoutEur: 115.00,
         image: 'https://community.cloudflare.steamstatic.com/economy/image/i0CoZ81Ui0m-9KwlBY1L_18myuGuq1wfhWSaZgMttyVfPaERSR0Wqmu7LAocGIGz3UqlXOLrxM-vMGmW8VNxu5Dx60noTyLMj_f-rF5f5-O3Za-0I3mNfi2-DCjZz9g_5X64X0nC_m1qj-QW0dZdt2Gk23hXrnE8G8NlO5I=/360fx360f'
       },
       {
@@ -232,8 +208,7 @@ export const HellcasePayBySkinsModal: React.FC<HellcasePayBySkinsModalProps> = (
         floatValue: 0.098,
         isStatTrak: false,
         marketPriceEur: 185.00,
-        bonusPercent: 5,
-        payoutEur: 194.25,
+        payoutEur: 185.00,
         image: 'https://community.cloudflare.steamstatic.com/economy/image/i0CoZ81Ui0m-9KwlBY1L_18myuGuq1wfhWSaZgMttyVfPaERSR0Wqmu7LAocGIGz3UqlXOLrxM-vMGmW8VNxu5Dx60noTyLMj_f-v1Nc5-O3bqi4IHqNfi2-DCjZz9g_5X64X0nC_m1qj-QW0dZdt2Gk23hXrnE8G8NlO5I=/360fx360f'
       },
       {
@@ -249,8 +224,7 @@ export const HellcasePayBySkinsModal: React.FC<HellcasePayBySkinsModalProps> = (
         floatValue: 0.112,
         isStatTrak: false,
         marketPriceEur: 38.50,
-        bonusPercent: 5,
-        payoutEur: 40.43,
+        payoutEur: 38.50,
         image: 'https://community.cloudflare.steamstatic.com/economy/image/i0CoZ81Ui0m-9KwlBY1L_18myuGuq1wfhWSaZgMttyVfPaERSR0Wqmu7LAocGIGz3UqlXOLrxM-vMGmW8VNxu5Dx60noTyLMj_f-sRhY4O23Za-wI3mNfi2-DCjZz9g_5X64X0nC_m1qj-QW0dZdt2Gk23hXrnE8G8NlO5I=/360fx360f'
       },
       {
@@ -266,8 +240,7 @@ export const HellcasePayBySkinsModal: React.FC<HellcasePayBySkinsModalProps> = (
         floatValue: 0.198,
         isStatTrak: false,
         marketPriceEur: 44.00,
-        bonusPercent: 5,
-        payoutEur: 46.20,
+        payoutEur: 44.00,
         image: 'https://community.cloudflare.steamstatic.com/economy/image/i0CoZ81Ui0m-9KwlBY1L_18myuGuq1wfhWSaZgMttyVfPaERSR0Wqmu7LAocGIGz3UqlXOLrxM-vMGmW8VNxu5Dx60noTyLMj_f-tBha4-C3YK-xI3qNfi2-DCjZz9g_5X64X0nC_m1qj-QW0dZdt2Gk23hXrnE8G8NlO5I=/360fx360f'
       },
       {
@@ -283,8 +256,7 @@ export const HellcasePayBySkinsModal: React.FC<HellcasePayBySkinsModalProps> = (
         floatValue: 0.215,
         isStatTrak: false,
         marketPriceEur: 42.00,
-        bonusPercent: 5,
-        payoutEur: 44.10,
+        payoutEur: 42.00,
         image: 'https://community.cloudflare.steamstatic.com/economy/image/i0CoZ81Ui0m-9KwlBY1L_18myuGuq1wfhWSaZgMttyVfPaERSR0Wqmu7LAocGIGz3UqlXOLrxM-vMGmW8VNxu5Dx60noTyLMj_f-uR5e5OC3Za-zI3qNfi2-DCjZz9g_5X64X0nC_m1qj-QW0dZdt2Gk23hXrnE8G8NlO5I=/360fx360f'
       },
       {
@@ -300,8 +272,7 @@ export const HellcasePayBySkinsModal: React.FC<HellcasePayBySkinsModalProps> = (
         floatValue: 0.165,
         isStatTrak: true,
         marketPriceEur: 32.50,
-        bonusPercent: 5,
-        payoutEur: 34.13,
+        payoutEur: 32.50,
         image: 'https://community.cloudflare.steamstatic.com/economy/image/i0CoZ81Ui0m-9KwlBY1L_18myuGuq1wfhWSaZgMttyVfPaERSR0Wqmu7LAocGIGz3UqlXOLrxM-vMGmW8VNxu5Dx60noTyLMj_f-u1Zd4-C3YK-wI3qNfi2-DCjZz9g_5X64X0nC_m1qj-QW0dZdt2Gk23hXrnE8G8NlO5I=/360fx360f'
       },
       {
@@ -317,12 +288,10 @@ export const HellcasePayBySkinsModal: React.FC<HellcasePayBySkinsModalProps> = (
         floatValue: 0.035,
         isStatTrak: false,
         marketPriceEur: 14.80,
-        bonusPercent: 5,
-        payoutEur: 15.54,
+        payoutEur: 14.80,
         image: 'https://community.cloudflare.steamstatic.com/economy/image/i0CoZ81Ui0m-9KwlBY1L_18myuGuq1wfhWSaZgMttyVfPaERSR0Wqmu7LAocGIGz3UqlXOLrxM-vMGmW8VNxu5Dx60noTyLMj_f-sRhY4-C3bqi2I3mNfi2-DCjZz9g_5X64X0nC_m1qj-QW0dZdt2Gk23hXrnE8G8NlO5I=/360fx360f'
       }
     ]);
-    setIsLoadingInventory(false);
   };
 
   // Filtered skins
@@ -333,12 +302,11 @@ export const HellcasePayBySkinsModal: React.FC<HellcasePayBySkinsModalProps> = (
         s.weapon.toLowerCase().includes(skinSearch.toLowerCase()) ||
         s.skinName.toLowerCase().includes(skinSearch.toLowerCase());
       
-      const matchCat = selectedCategory === 'all' || s.type === selectedCategory;
-      return matchSearch && matchCat;
+      const matchCategory = selectedCategory === 'all' || s.type === selectedCategory;
+      return matchSearch && matchCategory;
     });
   }, [inventory, skinSearch, selectedCategory]);
 
-  // Selected skins calculations
   const selectedSkins = useMemo(() => {
     return inventory.filter(s => selectedSkinIds.has(s.id));
   }, [inventory, selectedSkinIds]);
@@ -347,13 +315,9 @@ export const HellcasePayBySkinsModal: React.FC<HellcasePayBySkinsModalProps> = (
     return selectedSkins.reduce((sum, s) => sum + s.marketPriceEur, 0);
   }, [selectedSkins]);
 
-  const bonusAmountEur = useMemo(() => {
-    return parseFloat((baseTotalEur * 0.05).toFixed(2));
-  }, [baseTotalEur]);
-
   const totalPayoutEur = useMemo(() => {
-    return parseFloat((baseTotalEur + bonusAmountEur).toFixed(2));
-  }, [baseTotalEur, bonusAmountEur]);
+    return parseFloat(baseTotalEur.toFixed(2));
+  }, [baseTotalEur]);
 
   const toggleSelectSkin = (id: string) => {
     sound.playSelect();
@@ -374,24 +338,21 @@ export const HellcasePayBySkinsModal: React.FC<HellcasePayBySkinsModalProps> = (
     });
   };
 
-  const deselectAll = () => {
+  const clearSelection = () => {
     sound.playClick();
     setSelectedSkinIds(new Set());
   };
 
-  // Execute Skin Deposit
   const handleDepositSkins = () => {
-    if (selectedSkins.length === 0 || totalPayoutEur <= 0) return;
+    if (selectedSkins.length === 0) return;
     setIsDepositingSkins(true);
-    sound.playBuyWeapon();
+    sound.playSelect();
 
     setTimeout(() => {
-      const credited = creditVortexWalletBalance(totalPayoutEur);
-      setIsDepositingSkins(false);
-
-      // Remove sold skins from local inventory
+      creditVortexWalletBalance(totalPayoutEur);
       setInventory(prev => prev.filter(s => !selectedSkinIds.has(s.id)));
       setSelectedSkinIds(new Set());
+      setIsDepositingSkins(false);
 
       sound.playTournamentVictory();
       confetti({
@@ -401,14 +362,13 @@ export const HellcasePayBySkinsModal: React.FC<HellcasePayBySkinsModalProps> = (
       });
 
       setDepositSuccessMessage(
-        `✓ Successfully Deposited ${selectedSkins.length} CS2 Skins! +${totalPayoutEur.toFixed(2)} € (includes +5% bonus) credited to your VORTEX wallet.`
+        `✓ Successfully Deposited ${selectedSkins.length} CS2 Skins! +${totalPayoutEur.toFixed(2)} € credited to your VORTEX wallet.`
       );
 
       onSuccess?.(totalPayoutEur);
     }, 1800);
   };
 
-  // Copy Crypto Address
   const handleCopyCrypto = () => {
     sound.playSelect();
     navigator.clipboard?.writeText(selectedCrypto.address);
@@ -416,7 +376,6 @@ export const HellcasePayBySkinsModal: React.FC<HellcasePayBySkinsModalProps> = (
     setTimeout(() => setCryptoCopied(false), 2500);
   };
 
-  // Verify Crypto Deposit
   const handleVerifyCryptoTxid = () => {
     if (!cryptoTxid || cryptoTxid.trim().length < 10) {
       sound.playClick();
@@ -430,60 +389,44 @@ export const HellcasePayBySkinsModal: React.FC<HellcasePayBySkinsModalProps> = (
 
     setTimeout(() => {
       setCryptoVerifying(false);
-      const depositVal = 25.00; // Credited value
-      const withBonus = parseFloat((depositVal * 1.05).toFixed(2));
-      creditVortexWalletBalance(withBonus);
+      const depositVal = 25.00;
+      creditVortexWalletBalance(depositVal);
 
       sound.playTournamentVictory();
       confetti({ particleCount: 100, spread: 70, origin: { y: 0.6 } });
-      setDepositSuccessMessage(`✓ Blockchain Deposit Confirmed on ${selectedCrypto.network}! +${withBonus.toFixed(2)} € (+5% bonus) credited to your wallet.`);
+      setDepositSuccessMessage(`✓ Blockchain Deposit Confirmed on ${selectedCrypto.network}! +${depositVal.toFixed(2)} € credited to your wallet.`);
       setCryptoTxid('');
-      onSuccess?.(withBonus);
+      onSuccess?.(depositVal);
     }, 2200);
   };
 
   if (!isOpen) return null;
 
   return (
-    <div className="fixed inset-0 z-[100] flex items-center justify-center p-3 sm:p-5 select-none animate-in fade-in duration-200">
-      {/* Backdrop */}
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-4 md:p-6 bg-black/85 backdrop-blur-md animate-in fade-in duration-200">
       <div 
-        className="fixed inset-0 bg-black/85 backdrop-blur-md"
-        onClick={() => !isDepositingSkins && onClose()}
+        className="fixed inset-0"
+        onClick={() => {
+          sound.playClick();
+          onClose();
+        }}
       />
 
-      {/* Main Modal Window */}
-      <div className="relative w-full max-w-4xl rounded-3xl bg-[#0D1017] border border-[#222838] shadow-[0_25px_80px_rgba(0,0,0,0.95)] z-10 flex flex-col overflow-hidden max-h-[92vh]">
+      {/* Main Modal Window - Hellcase Split Screen Architecture */}
+      <div className="relative w-full max-w-6xl xl:max-w-7xl rounded-3xl bg-[#0D1017] border border-[#222838] shadow-[0_25px_80px_rgba(0,0,0,0.95)] z-10 flex flex-col overflow-hidden max-h-[92vh]">
         
-        {/* ======================================================== */}
-        {/* MODAL TOP BAR (HELLCASE REFILL BRANDING)                   */}
-        {/* ======================================================== */}
-        <div className="px-6 py-4 bg-[#121520] border-b border-white/[0.08] flex items-center justify-between gap-4">
-          <div className="flex items-center gap-3">
-            {activeView !== 'overview' && (
-              <button
-                onClick={() => {
-                  sound.playClick();
-                  setActiveView('overview');
-                  setDepositSuccessMessage(null);
-                }}
-                className="p-1.5 rounded-lg bg-white/5 hover:bg-white/10 text-slate-300 hover:text-white transition cursor-pointer"
-                title="Back to Payment Methods"
-              >
-                <ArrowLeft className="w-4 h-4" />
-              </button>
-            )}
-            <div className="w-2.5 h-2.5 rounded-full bg-emerald-400 shadow-[0_0_8px_#10B981]" />
-            <h2 className="text-base sm:text-lg font-black font-display text-white tracking-tight flex items-center gap-2">
-              <span>Filling up the balance</span>
-              <span className="text-[10px] font-mono font-bold px-2 py-0.5 rounded-full bg-emerald-500/15 border border-emerald-500/30 text-emerald-400">
-                +5% REFILL BONUS ACTIVE
-              </span>
+        {/* Top Header Bar */}
+        <div className="px-6 py-4 bg-[#101420] border-b border-white/[0.08] flex items-center justify-between gap-4 shrink-0">
+          <div className="flex items-center gap-2.5">
+            <div className="w-5 h-5 rounded-md bg-emerald-500/20 border border-emerald-500/40 flex items-center justify-center text-emerald-400">
+              <span className="text-xs">📁</span>
+            </div>
+            <h2 className="text-base sm:text-lg font-black font-display text-white tracking-tight">
+              Filling up the balance
             </h2>
           </div>
 
           <div className="flex items-center gap-3">
-            {/* Wallet Balance Pill */}
             <div className="flex items-center gap-1.5 px-3 py-1 rounded-xl bg-black/40 border border-white/10 text-xs font-mono">
               <span className="text-slate-400">Current Balance:</span>
               <span className="font-bold text-emerald-400">{getVortexWalletBalance().toFixed(2)} €</span>
@@ -503,7 +446,7 @@ export const HellcasePayBySkinsModal: React.FC<HellcasePayBySkinsModalProps> = (
 
         {/* Global Toast Success */}
         {depositSuccessMessage && (
-          <div className="mx-6 mt-4 p-3.5 rounded-2xl bg-emerald-500/15 border border-emerald-500/40 text-emerald-300 text-xs font-mono flex items-center justify-between gap-3 animate-in fade-in duration-200">
+          <div className="mx-6 mt-3 p-3.5 rounded-2xl bg-emerald-500/15 border border-emerald-500/40 text-emerald-300 text-xs font-mono flex items-center justify-between gap-3 animate-in fade-in duration-200 shrink-0">
             <div className="flex items-center gap-2">
               <ShieldCheck className="w-4 h-4 text-emerald-400 shrink-0" />
               <span>{depositSuccessMessage}</span>
@@ -517,25 +460,24 @@ export const HellcasePayBySkinsModal: React.FC<HellcasePayBySkinsModalProps> = (
           </div>
         )}
 
-        {/* Modal Scrollable Body */}
-        <div className="flex-1 overflow-y-auto p-6 space-y-6">
-
+        {/* Split Screen Body: Left Methods Grid + Right Special Action Pane */}
+        <div className="flex-1 flex flex-col lg:flex-row overflow-hidden min-h-0">
+          
           {/* ======================================================== */}
-          {/* VIEW 1: HELLCASE OVERVIEW (GRID OF METHODS)               */}
+          {/* LEFT PANE: 10 PAYMENT METHODS GRID                       */}
           {/* ======================================================== */}
-          {activeView === 'overview' && (
-            <div className="space-y-6">
-              
-              {/* Country Selection */}
-              <div className="space-y-1.5 max-w-sm">
-                <label className="text-xs font-mono font-bold text-slate-400 block">
+          <div className="w-full lg:w-[460px] xl:w-[490px] shrink-0 border-b lg:border-b-0 lg:border-r border-white/10 p-5 overflow-y-auto space-y-4 flex flex-col justify-between bg-[#0E121D]/70">
+            <div className="space-y-3.5">
+              {/* Select Country */}
+              <div className="space-y-1">
+                <label className="text-[11px] font-mono font-bold text-slate-400 block">
                   Select your country
                 </label>
                 <div className="relative">
                   <button
                     type="button"
                     onClick={() => setCountryDropdownOpen(prev => !prev)}
-                    className="w-full px-4 py-2.5 rounded-xl bg-[#141724] border border-white/10 hover:border-white/20 text-white text-xs font-mono flex items-center justify-between cursor-pointer transition"
+                    className="w-full px-3.5 py-2 rounded-xl bg-[#141724] border border-white/10 hover:border-white/20 text-white text-xs font-mono flex items-center justify-between cursor-pointer transition"
                   >
                     <span className="flex items-center gap-2">
                       <span className="text-base">{selectedCountry.flag}</span>
@@ -571,28 +513,41 @@ export const HellcasePayBySkinsModal: React.FC<HellcasePayBySkinsModalProps> = (
                 </div>
               </div>
 
-              {/* Grid of Methods (Matching Screenshot from Hellcase) */}
-              <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-3.5">
+              {/* 10 Methods Grid (3 columns x 4 rows) */}
+              <div className="grid grid-cols-2 sm:grid-cols-3 gap-2.5">
 
-                {/* 1. VISA / MASTERCARD / DISCOVER (100+ MORE) */}
+                {/* 1. TOP VISA / MASTERCARD / DISCOVER */}
                 <button
                   type="button"
                   onClick={() => {
                     sound.playSelect();
                     setActiveView('cards');
                   }}
-                  className="p-5 rounded-2xl bg-[#141724] hover:bg-[#181D2E] border border-white/10 hover:border-white/20 text-left transition cursor-pointer group flex flex-col justify-between h-32 shadow-lg"
+                  className={`relative p-3 rounded-2xl bg-[#141724] hover:bg-[#181D2E] text-left transition cursor-pointer group flex flex-col justify-between h-28 shadow-lg overflow-hidden ${
+                    activeView === 'cards'
+                      ? 'border-2 border-emerald-500/80 shadow-[0_0_15px_rgba(16,185,129,0.25)]'
+                      : 'border border-white/10 hover:border-white/20'
+                  }`}
                 >
-                  <div>
-                    <div className="text-xl font-black font-display text-white tracking-wider">
-                      VISA <span className="text-white">Mastercard</span>
-                    </div>
-                    <div className="text-[10px] font-mono text-slate-400 mt-1">DISCOVER • 100+ more</div>
+                  <div className="absolute top-0 left-0 bg-gradient-to-r from-orange-500 to-amber-500 text-slate-950 font-black text-[8px] font-mono px-2 py-0.5 rounded-br shadow">
+                    TOP
+                  </div>
+                  <div className="absolute top-1.5 right-2 text-[8px] font-mono text-slate-500">
+                    V1
                   </div>
 
-                  <div className="flex items-center justify-between text-[11px] font-mono text-slate-300">
+                  <div className="pt-2">
+                    <div className="text-xs font-black font-display text-white tracking-wider flex items-center gap-1">
+                      <span>VISA</span>
+                      <span className="text-red-500 font-sans">●</span>
+                      <span className="text-amber-500 font-sans -ml-1">●</span>
+                    </div>
+                    <div className="text-[8px] font-mono text-slate-400 mt-0.5">DISCOVER • 100+ more</div>
+                  </div>
+
+                  <div className="flex items-center justify-between text-[9px] font-mono text-slate-400">
                     <span>Card Payments</span>
-                    <Check className="w-4 h-4 text-emerald-400" />
+                    {activeView === 'cards' && <Check className="w-3.5 h-3.5 text-emerald-400" />}
                   </div>
                 </button>
 
@@ -603,49 +558,48 @@ export const HellcasePayBySkinsModal: React.FC<HellcasePayBySkinsModalProps> = (
                     sound.playSelect();
                     setActiveView('cards');
                   }}
-                  className="p-5 rounded-2xl bg-[#141724] hover:bg-[#181D2E] border border-white/10 hover:border-white/20 text-left transition cursor-pointer group flex flex-col justify-between h-32 shadow-lg"
+                  className="p-3 rounded-2xl bg-[#141724] hover:bg-[#181D2E] border border-white/10 hover:border-white/20 text-left transition cursor-pointer group flex flex-col justify-between h-28 shadow-lg"
                 >
-                  <div className="text-xl font-black font-display text-white tracking-wider">
-                    VISA <span className="text-red-500">●</span><span className="text-amber-500 -ml-1.5">●</span>
+                  <div className="text-sm font-black font-display text-white tracking-wider flex items-center gap-1 pt-1">
+                    <span>VISA</span>
+                    <span className="text-red-500 font-sans">●</span>
+                    <span className="text-amber-500 font-sans -ml-1">●</span>
                   </div>
-                  <div className="text-[11px] font-mono text-slate-400">Instant Debit & Credit</div>
+                  <div className="text-[9px] font-mono text-slate-400">Instant Debit & Credit</div>
                 </button>
 
-                {/* 3. DIGITAL WALLETS (APPLE PAY, GOOGLE PAY, SKRILL) */}
+                {/* 3. DIGITAL WALLETS (APPLE PAY, GPAY, SKRILL) */}
                 <button
                   type="button"
                   onClick={() => {
                     sound.playSelect();
                     setActiveView('cards');
                   }}
-                  className="p-5 rounded-2xl bg-[#141724] hover:bg-[#181D2E] border border-white/10 hover:border-white/20 text-left transition cursor-pointer group flex flex-col justify-between h-32 shadow-lg"
+                  className="p-3 rounded-2xl bg-[#141724] hover:bg-[#181D2E] border border-white/10 hover:border-white/20 text-left transition cursor-pointer group flex flex-col justify-between h-28 shadow-lg"
                 >
-                  <div className="flex flex-wrap items-center gap-1.5 text-xs font-mono font-bold text-slate-300">
-                    <span className="px-1.5 py-0.5 bg-black/40 rounded border border-white/5">Pay</span>
-                    <span className="px-1.5 py-0.5 bg-black/40 rounded border border-white/5">GPay</span>
-                    <span className="px-1.5 py-0.5 bg-black/40 rounded border border-white/5 text-[#811e68]">Skrill</span>
+                  <div className="flex flex-wrap items-center gap-1 text-[9px] font-mono font-bold text-slate-300">
+                    <span className="px-1 py-0.2 bg-black/40 rounded border border-white/5">Pay</span>
+                    <span className="px-1 py-0.2 bg-black/40 rounded border border-white/5">GPay</span>
+                    <span className="px-1 py-0.2 bg-black/40 rounded border border-white/5 text-[#811e68]">Skrill</span>
                   </div>
-                  <div className="text-[11px] font-mono text-slate-400">Neteller, Visa, Mobile Pay</div>
+                  <div className="text-[8px] font-mono text-slate-400">Neteller, Visa, Mobile</div>
                 </button>
 
-                {/* 4. PAY BY SKINS (HELLCASE ICONIC CS2 KNIFE METHOD - 1:1 TO PHOTO 1) */}
+                {/* 4. PAY BY SKINS (ACTIVE HELLCASE KNIFE METHOD) */}
                 <button
                   type="button"
                   onClick={() => {
                     sound.playSelect();
                     setActiveView('skins');
                   }}
-                  className="relative p-3.5 sm:p-4 rounded-2xl bg-[#141724] hover:bg-[#181D2E] border border-white/10 hover:border-white/20 text-left transition cursor-pointer group flex items-center justify-between h-32 shadow-lg overflow-hidden"
+                  className={`relative p-2.5 rounded-2xl bg-[#141724] hover:bg-[#181D2E] text-left transition cursor-pointer group flex items-center justify-between h-28 shadow-lg overflow-hidden ${
+                    activeView === 'skins'
+                      ? 'border-2 border-emerald-500/80 shadow-[0_0_15px_rgba(16,185,129,0.25)]'
+                      : 'border border-white/10 hover:border-white/20'
+                  }`}
                 >
-                  {/* Bonus Tag (Top-Right) */}
-                  <div className="absolute top-2.5 right-3 z-10">
-                    <span className="text-[10px] font-mono font-bold text-emerald-400 bg-emerald-500/10 border border-emerald-500/30 px-2 py-0.5 rounded-full shadow-sm">
-                      +5% BONUS
-                    </span>
-                  </div>
-
-                  {/* Left: Authentic Gold Karambit Lore Knife matching Photo 1 */}
-                  <div className="relative w-36 h-28 shrink-0 flex items-center justify-center -ml-2 select-none pointer-events-none">
+                  {/* Left: Authentic Gold Karambit Lore Knife */}
+                  <div className="relative w-24 h-20 shrink-0 flex items-center justify-center -ml-2 select-none pointer-events-none">
                     <img 
                       src={KARAMBIT_LORE_IMAGE} 
                       alt="" 
@@ -655,526 +609,515 @@ export const HellcasePayBySkinsModal: React.FC<HellcasePayBySkinsModalProps> = (
                     />
                   </div>
 
-                  {/* Right: Exact 1:1 Hellcase Typography matching Photo 1 */}
-                  <div className="flex-1 flex flex-col justify-center items-start pl-2 select-none">
-                    <span className="text-sm font-sans font-bold text-[#EAB308] tracking-widest leading-none mb-1 uppercase">
+                  {/* Right: Exact 1:1 Hellcase Typography */}
+                  <div className="flex-1 flex flex-col justify-center items-start pl-1 select-none">
+                    <span className="text-[10px] font-sans font-bold text-[#EAB308] tracking-widest leading-none mb-1 uppercase">
                       PAY BY
                     </span>
-                    <span className="text-3xl font-display font-black text-[#FACC15] tracking-wider leading-none uppercase">
+                    <span className="text-xl font-display font-black text-[#FACC15] tracking-wider leading-none uppercase">
                       SKINS
                     </span>
                   </div>
+
+                  {/* Active Indicator Checkmark */}
+                  {activeView === 'skins' && (
+                    <Check className="w-3.5 h-3.5 text-emerald-400 absolute bottom-2 right-2" />
+                  )}
                 </button>
 
-                {/* 5. CRYPTO (BITCOIN, ETH, USDT TRC20, SOLANA) */}
+                {/* 5. CRYPTO */}
                 <button
                   type="button"
                   onClick={() => {
                     sound.playSelect();
                     setActiveView('crypto');
                   }}
-                  className="p-5 rounded-2xl bg-[#141724] hover:bg-[#181D2E] border border-white/10 hover:border-emerald-500/40 text-left transition cursor-pointer group flex flex-col justify-between h-32 shadow-lg"
+                  className={`relative p-3 rounded-2xl bg-[#141724] hover:bg-[#181D2E] text-left transition cursor-pointer group flex flex-col justify-between h-28 shadow-lg overflow-hidden ${
+                    activeView === 'crypto'
+                      ? 'border-2 border-emerald-500/80 shadow-[0_0_15px_rgba(16,185,129,0.25)]'
+                      : 'border border-white/10 hover:border-white/20'
+                  }`}
                 >
-                  <div className="flex items-center justify-between">
-                    <div className="flex items-center gap-1 text-sm font-black font-display text-white">
-                      <span className="text-amber-400">₿</span>
-                      <span>CRYPTO</span>
-                    </div>
-                    <span className="text-[10px] font-mono font-bold text-emerald-400 bg-emerald-500/10 px-1.5 py-0.2 rounded border border-emerald-500/30">+5%</span>
+                  <div className="flex items-center gap-1 text-xs font-black font-display text-white">
+                    <span className="text-amber-400">₿</span>
+                    <span>CRYPTO</span>
                   </div>
 
-                  <div className="flex flex-wrap items-center gap-1.5 text-xs">
+                  <div className="flex flex-wrap items-center gap-1 text-[9px]">
                     <span className="text-amber-400">BTC</span>
                     <span className="text-blue-400">ETH</span>
-                    <span className="text-emerald-400 font-bold">USDT (TRC20)</span>
+                    <span className="text-emerald-400 font-bold">USDT</span>
                     <span className="text-purple-400">SOL</span>
                   </div>
 
-                  <div className="text-[10px] font-mono text-slate-400">Instant On-Chain Confirmation</div>
+                  <div className="flex items-center justify-between text-[9px] font-mono text-slate-400">
+                    <span>Instant On-Chain</span>
+                    {activeView === 'crypto' && <Check className="w-3.5 h-3.5 text-emerald-400" />}
+                  </div>
                 </button>
 
-                {/* 6. KINGUIN WALLET CARD */}
+                {/* 6. KINGUIN */}
                 <button
                   type="button"
                   onClick={() => {
                     sound.playSelect();
                     setActiveView('giftcards');
                   }}
-                  className="p-5 rounded-2xl bg-[#141724] hover:bg-[#181D2E] border border-white/10 hover:border-white/20 text-left transition cursor-pointer group flex flex-col justify-between h-32 shadow-lg"
+                  className="p-3 rounded-2xl bg-[#141724] hover:bg-[#181D2E] border border-white/10 hover:border-white/20 text-left transition cursor-pointer group flex flex-col justify-between h-28 shadow-lg"
                 >
-                  <div className="flex items-center gap-2">
-                    <span className="text-xl">👑</span>
-                    <span className="font-display font-black text-sm text-white">KINGUIN</span>
+                  <div className="flex items-center gap-1.5">
+                    <span className="text-lg">👑</span>
+                    <span className="font-display font-black text-xs text-white">KINGUIN</span>
                   </div>
-                  <div className="text-[10px] font-mono text-slate-400">Wallet Card & Digital Codes</div>
+                  <div className="text-[9px] font-mono text-slate-400">Wallet card</div>
                 </button>
 
-                {/* 7. ENEBA WALLET CARD */}
+                {/* 7. ENEBA */}
                 <button
                   type="button"
                   onClick={() => {
                     sound.playSelect();
                     setActiveView('giftcards');
                   }}
-                  className="p-5 rounded-2xl bg-[#141724] hover:bg-[#181D2E] border border-white/10 hover:border-white/20 text-left transition cursor-pointer group flex flex-col justify-between h-32 shadow-lg"
+                  className="p-3 rounded-2xl bg-[#141724] hover:bg-[#181D2E] border border-white/10 hover:border-white/20 text-left transition cursor-pointer group flex flex-col justify-between h-28 shadow-lg"
                 >
-                  <div className="flex items-center gap-2">
-                    <span className="text-xl">🎮</span>
-                    <span className="font-display font-black text-sm text-[#FF5500]">eneba</span>
+                  <div className="flex items-center gap-1.5">
+                    <span className="text-lg">🎮</span>
+                    <span className="font-display font-black text-xs text-[#FF5500]">eneba</span>
                   </div>
-                  <div className="text-[10px] font-mono text-slate-400">Instant Prepaid Voucher</div>
+                  <div className="text-[9px] font-mono text-slate-400">Wallet card</div>
                 </button>
 
-                {/* 8. SWAPPED (PAYSAFECARD, REVOLUT, PAPARA) */}
+                {/* 8. SWAPPED */}
                 <button
                   type="button"
                   onClick={() => {
                     sound.playSelect();
                     setActiveView('cards');
                   }}
-                  className="p-5 rounded-2xl bg-[#141724] hover:bg-[#181D2E] border border-white/10 hover:border-white/20 text-left transition cursor-pointer group flex flex-col justify-between h-32 shadow-lg"
+                  className="p-3 rounded-2xl bg-[#141724] hover:bg-[#181D2E] border border-white/10 hover:border-white/20 text-left transition cursor-pointer group flex flex-col justify-between h-28 shadow-lg"
                 >
-                  <div className="flex items-center gap-2">
-                    <span className="text-xs font-mono font-black text-white bg-white/10 px-1.5 py-0.5 rounded">SWAPPED</span>
+                  <div className="flex items-center gap-1">
+                    <span className="text-[9px] font-mono font-black text-white bg-white/10 px-1 py-0.2 rounded">SWAPPED</span>
                   </div>
-                  <div className="text-[10px] font-mono text-slate-300">paysafecard • Revolut • Papara • 30+ more</div>
-                  <div className="text-[10px] font-mono text-slate-500">Local Payment Networks</div>
+                  <div className="text-[8px] font-mono text-slate-400 leading-tight">paysafecard • Revolut • 30+ more</div>
                 </button>
 
-                {/* 9. DIGITAL GIFTCARDS (PAYPAL) */}
+                {/* 9. DIGITAL GIFTCARDS */}
                 <button
                   type="button"
                   onClick={() => {
                     sound.playSelect();
                     setActiveView('giftcards');
                   }}
-                  className="p-5 rounded-2xl bg-[#141724] hover:bg-[#181D2E] border border-white/10 hover:border-white/20 text-left transition cursor-pointer group flex flex-col justify-between h-32 shadow-lg"
+                  className="p-3 rounded-2xl bg-[#141724] hover:bg-[#181D2E] border border-white/10 hover:border-white/20 text-left transition cursor-pointer group flex flex-col justify-between h-28 shadow-lg"
                 >
-                  <div className="flex items-center gap-2">
-                    <span className="text-base">🎁</span>
-                    <span className="font-display font-black text-xs text-white">DIGITAL GIFTCARDS</span>
+                  <div className="flex items-center gap-1.5">
+                    <span className="text-sm">🎁</span>
+                    <span className="font-display font-black text-[10px] text-white">GIFTCARDS</span>
                   </div>
-                  <div className="text-[11px] font-mono text-sky-400 font-bold">PayPal Supported</div>
+                  <div className="text-[9px] font-mono text-sky-400 font-bold">PayPal Supported</div>
                 </button>
 
-              </div>
-            </div>
-          )}
-
-          {/* ======================================================== */}
-          {/* VIEW 2: PAY BY SKINS (SELL CS2 SKINS WITH 5% BONUS)       */}
-          {/* ======================================================== */}
-          {activeView === 'skins' && (
-            <div className="space-y-5">
-              
-              {/* Trade Offer URL Verification Banner */}
-              <div className="p-4 rounded-2xl bg-[#141724] border border-white/10 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
-                <div className="space-y-1">
-                  <div className="flex items-center gap-2">
-                    <span className="w-2 h-2 rounded-full bg-emerald-400" />
-                    <span className="text-xs font-mono font-bold text-white">Steam Trade Offer URL</span>
-                    <span className="text-[10px] font-mono text-emerald-400 bg-emerald-500/15 px-1.5 py-0.2 rounded border border-emerald-500/30">
-                      BOT ONLINE
-                    </span>
-                  </div>
-                  {!tradeUrlEditing ? (
-                    <p className="text-[11px] font-mono text-slate-400 truncate max-w-lg">
-                      {tradeUrl}
-                    </p>
-                  ) : (
-                    <div className="flex items-center gap-2 pt-1">
-                      <input
-                        type="url"
-                        value={tempTradeUrl}
-                        onChange={(e) => setTempTradeUrl(e.target.value)}
-                        placeholder="https://steamcommunity.com/tradeoffer/new/?partner=..."
-                        className="px-3 py-1.5 rounded-lg bg-black/50 border border-white/15 text-xs font-mono text-white w-full max-w-md outline-none focus:border-amber-400"
-                      />
-                      <button
-                        type="button"
-                        onClick={() => {
-                          if (isValidSteamTradeUrl(tempTradeUrl)) {
-                            saveSteamTradeUrl(tempTradeUrl);
-                            setTradeUrl(tempTradeUrl);
-                            setTradeUrlEditing(false);
-                            sound.playSelect();
-                          } else {
-                            alert('Please enter a valid Steam Trade Offer URL');
-                          }
-                        }}
-                        className="px-3 py-1.5 rounded-lg bg-emerald-500 text-slate-950 text-xs font-mono font-bold cursor-pointer"
-                      >
-                        Save
-                      </button>
-                    </div>
-                  )}
-                </div>
-
-                <div className="flex items-center gap-2 shrink-0">
-                  {!tradeUrlEditing && (
-                    <button
-                      type="button"
-                      onClick={() => setTradeUrlEditing(true)}
-                      className="px-3 py-1.5 rounded-xl bg-white/5 hover:bg-white/10 border border-white/10 text-slate-300 text-xs font-mono cursor-pointer transition"
-                    >
-                      Change URL
-                    </button>
-                  )}
-                  <a
-                    href="https://steamcommunity.com/my/tradeoffers/privacy#trade_offer_access_url"
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="px-3 py-1.5 rounded-xl bg-amber-500/10 hover:bg-amber-500/20 border border-amber-500/30 text-amber-300 text-xs font-mono flex items-center gap-1.5 cursor-pointer transition"
-                  >
-                    <span>Get Trade URL</span>
-                    <ExternalLink className="w-3 h-3" />
-                  </a>
-                </div>
-              </div>
-
-              {/* Search, Filter Tabs & Bulk Actions */}
-              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
-                {/* Category Filters */}
-                <div className="flex flex-wrap items-center gap-1.5">
-                  {[
-                    { id: 'all', label: 'All Items' },
-                    { id: 'knife', label: 'Knives & Gloves' },
-                    { id: 'rifle', label: 'Rifles' },
-                    { id: 'sniper', label: 'Snipers' },
-                    { id: 'pistol', label: 'Pistols' }
-                  ].map(tab => (
-                    <button
-                      key={tab.id}
-                      type="button"
-                      onClick={() => {
-                        sound.playSelect();
-                        setSelectedCategory(tab.id as any);
-                      }}
-                      className={`px-3 py-1.5 rounded-xl text-xs font-mono transition cursor-pointer ${
-                        selectedCategory === tab.id
-                          ? 'bg-amber-400 text-slate-950 font-black shadow-md'
-                          : 'bg-[#141724] text-slate-400 hover:text-white border border-white/5'
-                      }`}
-                    >
-                      {tab.label}
-                    </button>
-                  ))}
-                </div>
-
-                {/* Search Bar + Select All */}
-                <div className="flex items-center gap-2">
-                  <div className="relative">
-                    <Search className="w-3.5 h-3.5 text-slate-400 absolute left-3 top-1/2 -translate-y-1/2" />
-                    <input
-                      type="text"
-                      value={skinSearch}
-                      onChange={(e) => setSkinSearch(e.target.value)}
-                      placeholder="Search inventory..."
-                      className="pl-8 pr-3 py-1.5 rounded-xl bg-[#141724] border border-white/10 text-white font-mono text-xs focus:border-amber-400 outline-none w-44 sm:w-56"
-                    />
-                  </div>
-
-                  <button
-                    type="button"
-                    onClick={selectAllFiltered}
-                    className="px-2.5 py-1.5 rounded-xl bg-white/5 hover:bg-white/10 text-slate-300 hover:text-white text-xs font-mono cursor-pointer border border-white/5 shrink-0"
-                  >
-                    Select All
-                  </button>
-                  {selectedSkinIds.size > 0 && (
-                    <button
-                      type="button"
-                      onClick={deselectAll}
-                      className="px-2.5 py-1.5 rounded-xl bg-red-500/10 hover:bg-red-500/20 text-red-400 text-xs font-mono cursor-pointer border border-red-500/30 shrink-0"
-                    >
-                      Clear
-                    </button>
-                  )}
-                </div>
-              </div>
-
-              {/* Skins Inventory Grid */}
-              {isLoadingInventory ? (
-                <div className="p-12 text-center space-y-3">
-                  <div className="w-8 h-8 border-2 border-amber-400 border-t-transparent rounded-full animate-spin mx-auto" />
-                  <p className="text-xs font-mono text-slate-400">Loading your CS2 Steam inventory & live market prices...</p>
-                </div>
-              ) : filteredSkins.length === 0 ? (
-                <div className="p-10 rounded-2xl bg-[#141724]/60 border border-white/5 text-center space-y-2">
-                  <p className="text-sm font-bold text-slate-300">No tradable CS2 items found in this category.</p>
-                  <p className="text-xs font-mono text-slate-500">Ensure your Steam inventory privacy is set to Public.</p>
-                </div>
-              ) : (
-                <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-3 max-h-[380px] overflow-y-auto pr-1">
-                  {filteredSkins.map(s => {
-                    const isSelected = selectedSkinIds.has(s.id);
-                    return (
-                      <div
-                        key={s.id}
-                        onClick={() => toggleSelectSkin(s.id)}
-                        className={`relative p-3 rounded-2xl border transition cursor-pointer flex flex-col justify-between group select-none ${
-                          isSelected
-                            ? 'bg-amber-500/15 border-amber-400 shadow-[0_0_15px_rgba(245,158,11,0.25)]'
-                            : 'bg-[#141724] hover:bg-[#181D2E] border-white/[0.08] hover:border-white/20'
-                        }`}
-                      >
-                        {/* Checkbox indicator */}
-                        <div className={`absolute top-2.5 right-2.5 w-5 h-5 rounded-lg border flex items-center justify-center transition ${
-                          isSelected ? 'bg-amber-400 border-amber-400 text-slate-950 font-black' : 'border-white/20 bg-black/40 text-transparent'
-                        }`}>
-                          <Check className="w-3.5 h-3.5" />
-                        </div>
-
-                        {/* Wear & StatTrak Badge */}
-                        <div className="flex items-center gap-1">
-                          <span className="text-[9px] font-mono font-bold px-1.5 py-0.2 rounded bg-black/50 text-slate-300 border border-white/10">
-                            {s.wearShort}
-                          </span>
-                          {s.isStatTrak && (
-                            <span className="text-[9px] font-mono font-bold px-1.5 py-0.2 rounded bg-[#CF6A32]/20 text-[#CF6A32] border border-[#CF6A32]/40">
-                              ST™
-                            </span>
-                          )}
-                        </div>
-
-                        {/* Skin Image */}
-                        <div className="my-2 h-20 flex items-center justify-center">
-                          <img
-                            src={s.image}
-                            alt=""
-                            aria-hidden="true"
-                            onError={(e) => {
-                              (e.target as HTMLImageElement).src = KARAMBIT_LORE_IMAGE;
-                            }}
-                            className="max-h-full max-w-full object-contain group-hover:scale-105 transition-transform duration-200 drop-shadow"
-                            loading="lazy"
-                          />
-                        </div>
-
-                        {/* Title & Price */}
-                        <div>
-                          <div className="text-[11px] font-bold text-white truncate font-sans">
-                            {s.weapon}
-                          </div>
-                          <div className="text-[10px] text-slate-400 truncate">
-                            {s.skinName}
-                          </div>
-
-                          <div className="mt-2 pt-1.5 border-t border-white/[0.06] flex items-center justify-between">
-                            <span className="text-xs font-mono font-black text-white">
-                              {s.marketPriceEur.toFixed(2)} €
-                            </span>
-                            <span className="text-[10px] font-mono font-bold text-emerald-400 bg-emerald-500/10 px-1 py-0.2 rounded">
-                              +{s.bonusPercent}%
-                            </span>
-                          </div>
-                        </div>
-                      </div>
-                    );
-                  })}
-                </div>
-              )}
-
-              {/* Bottom Sticky Payout Summary Bar */}
-              <div className="p-4 rounded-2xl bg-gradient-to-r from-[#171B28] via-[#1A2030] to-[#171B28] border-2 border-emerald-500/30 flex flex-col sm:flex-row sm:items-center justify-between gap-4 shadow-xl">
-                <div className="flex items-center gap-4">
-                  <div className="space-y-0.5">
-                    <div className="text-[10px] font-mono uppercase text-slate-400 font-bold">
-                      Selected Items: <strong className="text-white">{selectedSkins.length}</strong>
-                    </div>
-                    <div className="text-xs font-mono text-slate-300">
-                      Base Value: <strong className="text-white">{baseTotalEur.toFixed(2)} €</strong>
-                      <span className="text-emerald-400 ml-2 font-bold">(+5% Bonus: +{bonusAmountEur.toFixed(2)} €)</span>
-                    </div>
-                  </div>
-
-                  <div className="pl-4 border-l border-white/10">
-                    <div className="text-[10px] font-mono text-emerald-400 uppercase font-black">
-                      Total Payout to Wallet:
-                    </div>
-                    <div className="text-xl sm:text-2xl font-black font-display text-emerald-400">
-                      {totalPayoutEur.toFixed(2)} €
-                    </div>
-                  </div>
-                </div>
-
+                {/* 10. PREMIUM */}
                 <button
                   type="button"
-                  disabled={selectedSkins.length === 0 || isDepositingSkins}
-                  onClick={handleDepositSkins}
-                  className={`px-6 py-3 rounded-2xl font-mono font-black text-xs uppercase tracking-wider transition cursor-pointer flex items-center justify-center gap-2 shadow-lg ${
-                    selectedSkins.length > 0 && !isDepositingSkins
-                      ? 'bg-gradient-to-r from-emerald-500 to-teal-500 hover:from-emerald-400 hover:to-teal-400 text-slate-950 shadow-emerald-500/30 hover:scale-105 active:scale-95'
-                      : 'bg-white/5 text-slate-600 border border-white/5 cursor-not-allowed'
-                  }`}
+                  onClick={() => {
+                    sound.playSelect();
+                    setActiveView('cards');
+                  }}
+                  className="p-3 rounded-2xl bg-[#141724] hover:bg-[#181D2E] border border-white/10 hover:border-white/20 text-left transition cursor-pointer group flex flex-col justify-between h-28 shadow-lg"
                 >
-                  {isDepositingSkins ? (
-                    <>
-                      <div className="w-4 h-4 border-2 border-slate-950 border-t-transparent rounded-full animate-spin" />
-                      <span>Processing Steam Trade Bot...</span>
-                    </>
-                  ) : (
-                    <>
-                      <Sparkles className="w-4 h-4" />
-                      <span>Deposit Skins for Balance (+5% Bonus)</span>
-                    </>
-                  )}
-                </button>
-              </div>
-
-            </div>
-          )}
-
-          {/* ======================================================== */}
-          {/* VIEW 3: CRYPTO (USDT TRC-20, BTC, ETH, SOLANA)           */}
-          {/* ======================================================== */}
-          {activeView === 'crypto' && (
-            <div className="space-y-6">
-              {/* Crypto Selector Pills */}
-              <div className="flex flex-wrap items-center gap-2">
-                {CRYPTO_CONFIGS.map(coin => (
-                  <button
-                    key={coin.symbol}
-                    type="button"
-                    onClick={() => {
-                      sound.playSelect();
-                      setSelectedCrypto(coin);
-                      setCryptoCopied(false);
-                      setCryptoError(null);
-                    }}
-                    className={`px-4 py-2.5 rounded-2xl font-mono text-xs font-bold transition cursor-pointer flex items-center gap-2 border ${
-                      selectedCrypto.symbol === coin.symbol
-                        ? 'bg-white/10 text-white border-white/30 shadow-md'
-                        : 'bg-[#141724] text-slate-400 hover:text-white border-white/5'
-                    }`}
-                  >
-                    <span className="w-2.5 h-2.5 rounded-full" style={{ backgroundColor: coin.color }} />
-                    <span>{coin.symbol}</span>
-                    <span className="text-[10px] text-slate-500">({coin.network})</span>
-                    <span className="text-[9px] font-black text-emerald-400 bg-emerald-500/10 px-1 py-0.2 rounded">+5%</span>
-                  </button>
-                ))}
-              </div>
-
-              {/* Deposit Card */}
-              <div className="p-6 rounded-3xl bg-[#141724] border border-white/10 space-y-5">
-                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-white/[0.08] pb-4">
-                  <div>
-                    <h3 className="text-lg font-black font-display text-white">
-                      Deposit {selectedCrypto.name} ({selectedCrypto.symbol})
-                    </h3>
-                    <p className="text-xs font-mono text-slate-400 mt-0.5">
-                      Network: <strong className="text-emerald-400">{selectedCrypto.network}</strong> • Includes +5% Refill Bonus
-                    </p>
+                  <div className="flex items-center gap-1.5">
+                    <span className="text-sm">💎</span>
+                    <span className="font-display font-black text-xs text-purple-400">PREMIUM</span>
                   </div>
-                  <span className="px-3 py-1 rounded-xl bg-emerald-500/10 border border-emerald-500/30 text-emerald-400 text-xs font-mono font-bold">
-                    Automated Hot Wallet
-                  </span>
-                </div>
+                  <div className="text-[9px] font-mono text-slate-400">VIP Status</div>
+                </button>
 
-                {/* Important Network Alert */}
-                {selectedCrypto.symbol === 'USDT' && (
-                  <div className="p-3.5 rounded-2xl bg-amber-500/10 border border-amber-500/30 text-amber-300 text-xs font-mono flex items-start gap-2.5">
-                    <AlertCircle className="w-4 h-4 text-amber-400 shrink-0 mt-0.5" />
-                    <div>
-                      <strong>TRC20 Network Only:</strong> Send only USDT using the TRON (TRC-20) network to this address. Sending via ERC-20, BSC or other networks may cause loss of funds.
+              </div>
+            </div>
+
+            <p className="text-[10px] font-mono text-slate-500 pt-3 border-t border-white/5">
+              All payment methods available in the selected country are listed.
+            </p>
+          </div>
+
+          {/* ======================================================== */}
+          {/* RIGHT PANE: SPECIAL VORTEX ENGINE (INSTANT - NO 8-DAY HOLD)*/}
+          {/* ======================================================== */}
+          <div className="flex-1 p-5 sm:p-6 overflow-y-auto bg-[#080B12]/80 flex flex-col justify-between min-h-0">
+            
+            {/* VIEW: PAY BY SKINS (VORTEX FAST-TRACK STEAM BOT - 0 DAYS HOLD) */}
+            {activeView === 'skins' && (
+              <div className="space-y-4 flex-1 flex flex-col justify-between min-h-0">
+                <div className="space-y-4 overflow-y-auto pr-1">
+                  
+                  {/* Top Special Banner: 0-Day Instant Deposit */}
+                  <div className="p-4 rounded-2xl bg-gradient-to-r from-[#111728] via-[#151D33] to-[#111728] border border-emerald-500/30 flex flex-col sm:flex-row sm:items-center justify-between gap-3 shadow-lg">
+                    <div className="space-y-1">
+                      <div className="flex items-center gap-2">
+                        <span className="text-[9px] font-mono font-black text-slate-950 bg-emerald-400 px-2 py-0.5 rounded-full uppercase flex items-center gap-1 shadow">
+                          <span className="w-1.5 h-1.5 rounded-full bg-slate-950 animate-pulse" />
+                          VORTEX FAST-TRACK BOT • 0-DAY HOLD
+                        </span>
+                        <span className="text-[10px] font-mono text-emerald-400">P2P Escrow Protection</span>
+                      </div>
+                      <h3 className="text-base font-black font-display text-white tracking-tight">
+                        Deposit CS2 Skins to Balance Instantly
+                      </h3>
+                      <p className="text-xs font-mono text-slate-400">
+                        Skip the 8-day hold — automated Vortex Steam Bots verify trade offers and credit your wallet in seconds.
+                      </p>
+                    </div>
+
+                    <div className="shrink-0 flex items-center gap-2">
+                      <span className="px-3 py-1 rounded-xl bg-emerald-500/10 border border-emerald-500/30 text-emerald-400 text-xs font-mono font-bold flex items-center gap-1.5">
+                        <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse" />
+                        STEAM BOT LIVE
+                      </span>
                     </div>
                   </div>
-                )}
 
-                {/* Address & QR Code */}
-                <div className="flex flex-col sm:flex-row sm:items-center gap-6">
-                  {/* QR Code */}
-                  <div className="w-36 h-36 p-2 rounded-2xl bg-white flex items-center justify-center shrink-0 shadow-lg">
-                    <img
-                      src={`https://api.qrserver.com/v1/create-qr-code/?size=180x180&data=${encodeURIComponent(selectedCrypto.address)}`}
-                      alt="Deposit QR"
-                      className="w-full h-full object-contain"
-                    />
-                  </div>
+                  {/* Trade URL input strip */}
+                  <div className="p-3 rounded-xl bg-[#141724] border border-white/10 flex flex-col sm:flex-row sm:items-center justify-between gap-2.5">
+                    <div className="flex items-center gap-2 flex-1 min-w-0">
+                      <span className="text-xs font-mono font-bold text-white shrink-0">Trade URL:</span>
+                      {!tradeUrlEditing ? (
+                        <span className="text-[11px] font-mono text-slate-400 truncate">
+                          {tradeUrl || 'https://steamcommunity.com/tradeoffer/new/?partner=38291029&token=vortex_live'}
+                        </span>
+                      ) : (
+                        <input
+                          type="url"
+                          value={tempTradeUrl}
+                          onChange={(e) => setTempTradeUrl(e.target.value)}
+                          placeholder="https://steamcommunity.com/tradeoffer/new/?partner=..."
+                          className="px-2.5 py-1 rounded-lg bg-black/50 border border-white/15 text-xs font-mono text-white flex-1 outline-none focus:border-amber-400"
+                        />
+                      )}
+                    </div>
 
-                  {/* Address Field & Copy */}
-                  <div className="flex-1 space-y-3">
-                    <div>
-                      <label className="text-[10px] font-mono text-slate-400 uppercase font-bold block mb-1">
-                        Deposit Address ({selectedCrypto.network})
-                      </label>
-                      <div className="flex items-center gap-2">
-                        <div className="px-3.5 py-2.5 rounded-xl bg-black/60 border border-white/10 text-white font-mono text-xs select-all break-all flex-1">
-                          {selectedCrypto.address}
-                        </div>
+                    <div className="flex items-center gap-2 shrink-0">
+                      {!tradeUrlEditing ? (
                         <button
                           type="button"
-                          onClick={handleCopyCrypto}
-                          className="px-4 py-2.5 rounded-xl bg-emerald-500 hover:bg-emerald-400 text-slate-950 font-mono font-black text-xs transition cursor-pointer flex items-center gap-1.5 shrink-0"
+                          onClick={() => {
+                            setTempTradeUrl(tradeUrl || 'https://steamcommunity.com/tradeoffer/new/?partner=38291029&token=vortex_live');
+                            setTradeUrlEditing(true);
+                          }}
+                          className="px-2.5 py-1 rounded-lg bg-white/5 hover:bg-white/10 text-slate-300 text-xs font-mono cursor-pointer transition border border-white/10"
                         >
-                          {cryptoCopied ? <Check className="w-3.5 h-3.5" /> : <Copy className="w-3.5 h-3.5" />}
-                          <span>{cryptoCopied ? 'Copied!' : 'Copy'}</span>
+                          Change
                         </button>
-                      </div>
+                      ) : (
+                        <button
+                          type="button"
+                          onClick={() => {
+                            if (isValidSteamTradeUrl(tempTradeUrl)) {
+                              saveSteamTradeUrl(tempTradeUrl);
+                              setTradeUrl(tempTradeUrl);
+                              setTradeUrlEditing(false);
+                              sound.playSelect();
+                            } else {
+                              alert('Please enter a valid Steam Trade Offer URL');
+                            }
+                          }}
+                          className="px-2.5 py-1 rounded-lg bg-emerald-500 text-slate-950 text-xs font-mono font-bold cursor-pointer"
+                        >
+                          Save
+                        </button>
+                      )}
+
+                      <a
+                        href="https://steamcommunity.com/my/tradeoffers/privacy#trade_offer_access_url"
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="px-2.5 py-1 rounded-lg bg-white/5 hover:bg-white/10 text-slate-300 text-xs font-mono flex items-center gap-1 cursor-pointer transition border border-white/10"
+                      >
+                        <span>Get URL</span>
+                        <ExternalLink className="w-3 h-3" />
+                      </a>
+                    </div>
+                  </div>
+
+                  {/* Filter Tabs & Search */}
+                  <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2.5">
+                    <div className="flex flex-wrap items-center gap-1.5">
+                      {[
+                        { id: 'all', label: `All Skins (${inventory.length})` },
+                        { id: 'knife', label: 'Knives' },
+                        { id: 'rifle', label: 'Rifles' },
+                        { id: 'sniper', label: 'Snipers' },
+                        { id: 'pistol', label: 'Pistols' }
+                      ].map(tab => (
+                        <button
+                          key={tab.id}
+                          type="button"
+                          onClick={() => {
+                            sound.playSelect();
+                            setSelectedCategory(tab.id as any);
+                          }}
+                          className={`px-2.5 py-1 rounded-xl text-xs font-mono transition cursor-pointer ${
+                            selectedCategory === tab.id
+                              ? 'bg-amber-400 text-slate-950 font-black shadow-md'
+                              : 'bg-[#141724] text-slate-400 hover:text-white border border-white/5'
+                          }`}
+                        >
+                          {tab.label}
+                        </button>
+                      ))}
                     </div>
 
-                    {/* TXID Verification */}
-                    <div className="pt-2 border-t border-white/[0.06] space-y-2">
-                      <label className="text-[10px] font-mono text-slate-400 uppercase font-bold block">
-                        Verify On-Chain Transfer (Transaction Hash / TXID)
-                      </label>
-                      <div className="flex items-center gap-2">
+                    <div className="flex items-center gap-2">
+                      <div className="relative">
+                        <Search className="w-3.5 h-3.5 text-slate-400 absolute left-3 top-1/2 -translate-y-1/2" />
                         <input
                           type="text"
-                          value={cryptoTxid}
-                          onChange={(e) => {
-                            setCryptoTxid(e.target.value);
-                            setCryptoError(null);
-                          }}
-                          placeholder="Paste TXID from Binance / TronScan / Etherscan..."
-                          className="px-3.5 py-2.5 rounded-xl bg-black/60 border border-white/10 text-white font-mono text-xs flex-1 outline-none focus:border-emerald-400"
+                          value={skinSearch}
+                          onChange={(e) => setSkinSearch(e.target.value)}
+                          placeholder="Search weapon..."
+                          className="pl-8 pr-3 py-1 rounded-xl bg-black/40 border border-white/10 text-xs font-mono text-white outline-none focus:border-amber-400 w-36 sm:w-44"
                         />
+                      </div>
+
+                      <button
+                        type="button"
+                        onClick={selectAllFiltered}
+                        className="px-2 py-1 rounded-xl bg-white/5 hover:bg-white/10 border border-white/10 text-slate-300 text-xs font-mono cursor-pointer transition"
+                      >
+                        All
+                      </button>
+                      {selectedSkinIds.size > 0 && (
                         <button
                           type="button"
-                          disabled={cryptoVerifying || !cryptoTxid.trim()}
-                          onClick={handleVerifyCryptoTxid}
-                          className="px-4 py-2.5 rounded-xl bg-amber-400 hover:bg-amber-300 text-slate-950 font-mono font-black text-xs transition cursor-pointer disabled:opacity-50 shrink-0"
+                          onClick={clearSelection}
+                          className="px-2 py-1 rounded-xl bg-red-500/10 hover:bg-red-500/20 text-red-400 text-xs font-mono cursor-pointer transition border border-red-500/20"
                         >
-                          {cryptoVerifying ? 'Verifying...' : 'Verify Deposit'}
+                          Clear
                         </button>
-                      </div>
-                      {cryptoError && (
-                        <p className="text-xs font-mono text-red-400">{cryptoError}</p>
                       )}
                     </div>
                   </div>
+
+                  {/* Skins Grid */}
+                  <div className="grid grid-cols-2 sm:grid-cols-3 xl:grid-cols-4 gap-2.5">
+                    {filteredSkins.map(s => {
+                      const isSelected = selectedSkinIds.has(s.id);
+                      return (
+                        <div
+                          key={s.id}
+                          onClick={() => toggleSelectSkin(s.id)}
+                          className={`relative p-3 rounded-2xl transition cursor-pointer group flex flex-col justify-between border ${
+                            isSelected
+                              ? 'bg-emerald-500/15 border-emerald-500/80 shadow-[0_0_15px_rgba(16,185,129,0.2)] scale-[1.02]'
+                              : 'bg-[#141724] border-white/10 hover:border-white/25'
+                          }`}
+                        >
+                          <div className="flex items-center justify-between">
+                            <div className={`w-4 h-4 rounded-md border flex items-center justify-center transition ${
+                              isSelected ? 'bg-emerald-500 border-emerald-500 text-slate-950' : 'border-white/20 bg-black/40'
+                            }`}>
+                              {isSelected && <Check className="w-3 h-3 stroke-[3]" />}
+                            </div>
+                            <span className="text-[9px] font-mono text-slate-400 uppercase">{s.wearShort}</span>
+                          </div>
+
+                          <div className="my-2 h-16 flex items-center justify-center select-none">
+                            <img
+                              src={s.image}
+                              alt=""
+                              aria-hidden="true"
+                              onError={(e) => {
+                                (e.target as HTMLImageElement).src = KARAMBIT_LORE_IMAGE;
+                              }}
+                              className="max-h-full max-w-full object-contain group-hover:scale-105 transition-transform duration-200 drop-shadow"
+                              loading="lazy"
+                            />
+                          </div>
+
+                          <div>
+                            <div className="text-[11px] font-bold text-white truncate font-sans">{s.weapon}</div>
+                            <div className="text-[10px] text-slate-400 truncate">{s.skinName}</div>
+                            <div className="mt-1.5 pt-1.5 border-t border-white/[0.06] flex items-center justify-between">
+                              <span className="text-xs font-mono font-black text-white">
+                                {s.marketPriceEur.toFixed(2)} €
+                              </span>
+                            </div>
+                          </div>
+                        </div>
+                      );
+                    })}
+                  </div>
+                </div>
+
+                {/* Bottom Payout Summary Bar */}
+                <div className="mt-3 p-3.5 rounded-2xl bg-gradient-to-r from-[#171B28] via-[#1A2030] to-[#171B28] border border-emerald-500/30 flex flex-col sm:flex-row sm:items-center justify-between gap-3 shadow-xl shrink-0">
+                  <div className="flex items-center gap-4">
+                    <div className="space-y-0.5">
+                      <div className="text-[10px] font-mono uppercase text-slate-400 font-bold">
+                        Selected Items: <strong className="text-white">{selectedSkins.length}</strong>
+                      </div>
+                      <div className="text-xs font-mono text-slate-300">
+                        Total Value: <strong className="text-white">{baseTotalEur.toFixed(2)} €</strong>
+                      </div>
+                    </div>
+
+                    <div className="pl-4 border-l border-white/10">
+                      <div className="text-[10px] font-mono text-emerald-400 uppercase font-black">
+                        Instant Wallet Payout:
+                      </div>
+                      <div className="text-xl font-black font-display text-emerald-400">
+                        {totalPayoutEur.toFixed(2)} €
+                      </div>
+                    </div>
+                  </div>
+
+                  <button
+                    type="button"
+                    disabled={selectedSkins.length === 0 || isDepositingSkins}
+                    onClick={handleDepositSkins}
+                    className={`px-5 py-2.5 rounded-xl font-mono font-black text-xs uppercase tracking-wider transition cursor-pointer flex items-center justify-center gap-2 shadow-lg ${
+                      selectedSkins.length > 0 && !isDepositingSkins
+                        ? 'bg-gradient-to-r from-emerald-500 to-teal-500 hover:from-emerald-400 hover:to-teal-400 text-slate-950 shadow-emerald-500/30 hover:scale-105 active:scale-95'
+                        : 'bg-white/5 text-slate-600 border border-white/5 cursor-not-allowed'
+                    }`}
+                  >
+                    {isDepositingSkins ? (
+                      <>
+                        <div className="w-3.5 h-3.5 border-2 border-slate-950 border-t-transparent rounded-full animate-spin" />
+                        <span>Processing Steam Trade Bot...</span>
+                      </>
+                    ) : (
+                      <>
+                        <Sparkles className="w-4 h-4" />
+                        <span>Deposit Skins & Get Instant Balance</span>
+                      </>
+                    )}
+                  </button>
                 </div>
               </div>
-            </div>
-          )}
+            )}
 
-          {/* ======================================================== */}
-          {/* VIEW 4: CREDIT / DEBIT CARDS                             */}
-          {/* ======================================================== */}
-          {activeView === 'cards' && (
-            <div className="space-y-6">
-              <div className="p-6 rounded-3xl bg-[#141724] border border-white/10 space-y-5">
-                <div className="flex items-center justify-between border-b border-white/[0.08] pb-4">
-                  <div>
-                    <h3 className="text-lg font-black font-display text-white">
-                      Top Up Wallet via Card (Visa / Mastercard)
-                    </h3>
-                    <p className="text-xs font-mono text-slate-400 mt-0.5">
-                      Instant wallet funds with 3D Secure verification • +5% Extra Bonus
-                    </p>
+            {/* VIEW: CRYPTO */}
+            {activeView === 'crypto' && (
+              <div className="space-y-5 flex-1 flex flex-col justify-between">
+                <div className="space-y-4">
+                  <div className="flex flex-wrap items-center gap-2">
+                    {CRYPTO_CONFIGS.map(coin => (
+                      <button
+                        key={coin.symbol}
+                        type="button"
+                        onClick={() => {
+                          sound.playSelect();
+                          setSelectedCrypto(coin);
+                          setCryptoCopied(false);
+                          setCryptoError(null);
+                        }}
+                        className={`px-3 py-2 rounded-xl font-mono text-xs font-bold transition cursor-pointer flex items-center gap-2 border ${
+                          selectedCrypto.symbol === coin.symbol
+                            ? 'bg-white/10 text-white border-white/30 shadow-md'
+                            : 'bg-[#141724] text-slate-400 hover:text-white border-white/5'
+                        }`}
+                      >
+                        <span className="w-2.5 h-2.5 rounded-full" style={{ backgroundColor: coin.color }} />
+                        <span>{coin.symbol}</span>
+                        <span className="text-[10px] text-slate-500">({coin.network})</span>
+                      </button>
+                    ))}
                   </div>
-                  <span className="text-xs font-mono font-bold text-amber-400 bg-amber-400/10 border border-amber-400/30 px-2 py-0.5 rounded">
-                    3D Secure
-                  </span>
+
+                  <div className="p-5 rounded-2xl bg-[#141724] border border-white/10 space-y-4">
+                    <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-white/[0.08] pb-3">
+                      <div>
+                        <h3 className="text-base font-black font-display text-white">
+                          Deposit {selectedCrypto.name}
+                        </h3>
+                        <p className="text-xs font-mono text-slate-400 mt-0.5">
+                          Network: <strong className="text-emerald-400">{selectedCrypto.network}</strong>
+                        </p>
+                      </div>
+                      <span className="px-2.5 py-0.5 rounded-lg bg-emerald-500/10 border border-emerald-500/30 text-emerald-400 text-xs font-mono font-bold">
+                        Automated Hot Wallet
+                      </span>
+                    </div>
+
+                    <div className="flex flex-col sm:flex-row sm:items-center gap-4">
+                      <div className="w-32 h-32 p-2 rounded-xl bg-white flex items-center justify-center shrink-0 shadow-md">
+                        <img
+                          src={`https://api.qrserver.com/v1/create-qr-code/?size=180x180&data=${encodeURIComponent(selectedCrypto.address)}`}
+                          alt="Deposit QR"
+                          className="w-full h-full object-contain"
+                        />
+                      </div>
+
+                      <div className="flex-1 space-y-2.5 min-w-0">
+                        <div>
+                          <label className="text-[10px] font-mono text-slate-400 uppercase font-bold block mb-1">
+                            Deposit Address ({selectedCrypto.network})
+                          </label>
+                          <div className="flex items-center gap-2">
+                            <div className="px-3 py-2 rounded-xl bg-black/60 border border-white/10 text-white font-mono text-xs select-all break-all flex-1">
+                              {selectedCrypto.address}
+                            </div>
+                            <button
+                              type="button"
+                              onClick={handleCopyCrypto}
+                              className="px-3 py-2 rounded-xl bg-emerald-500 hover:bg-emerald-400 text-slate-950 font-mono font-black text-xs transition cursor-pointer flex items-center gap-1 shrink-0"
+                            >
+                              {cryptoCopied ? <Check className="w-3.5 h-3.5" /> : <Copy className="w-3.5 h-3.5" />}
+                              <span>{cryptoCopied ? 'Copied' : 'Copy'}</span>
+                            </button>
+                          </div>
+                        </div>
+
+                        <div className="pt-2 border-t border-white/[0.06] space-y-1.5">
+                          <label className="text-[10px] font-mono text-slate-400 uppercase font-bold block">
+                            Verify Transaction (TXID)
+                          </label>
+                          <div className="flex items-center gap-2">
+                            <input
+                              type="text"
+                              value={cryptoTxid}
+                              onChange={(e) => setCryptoTxid(e.target.value)}
+                              placeholder="Enter 64-character TXID..."
+                              className="px-3 py-2 rounded-xl bg-black/60 border border-white/15 text-white font-mono text-xs flex-1 outline-none focus:border-amber-400"
+                            />
+                            <button
+                              type="button"
+                              disabled={cryptoVerifying}
+                              onClick={handleVerifyCryptoTxid}
+                              className="px-4 py-2 rounded-xl bg-amber-400 hover:bg-yellow-400 text-slate-950 font-mono font-black text-xs transition cursor-pointer shrink-0"
+                            >
+                              {cryptoVerifying ? 'Checking...' : 'Verify'}
+                            </button>
+                          </div>
+                          {cryptoError && <p className="text-xs font-mono text-red-400">{cryptoError}</p>}
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            )}
+
+            {/* VIEW: CARDS */}
+            {activeView === 'cards' && (
+              <div className="p-5 rounded-2xl bg-[#141724] border border-white/10 space-y-4">
+                <div className="border-b border-white/[0.08] pb-3">
+                  <h3 className="text-base font-black font-display text-white">
+                    Instant Card Deposit (Visa / Mastercard)
+                  </h3>
+                  <p className="text-xs font-mono text-slate-400 mt-0.5">
+                    Immediate wallet balance credit with 3D Secure verification.
+                  </p>
                 </div>
 
-                {/* Amount Selection */}
                 <div>
                   <label className="text-xs font-mono text-slate-400 uppercase font-bold block mb-2">
-                    Select Deposit Amount:
+                    Select Amount:
                   </label>
-                  <div className="grid grid-cols-2 sm:grid-cols-5 gap-3">
+                  <div className="grid grid-cols-2 sm:grid-cols-5 gap-2.5">
                     {[10, 25, 50, 100, 250].map(amt => (
                       <button
                         key={amt}
@@ -1183,25 +1126,23 @@ export const HellcasePayBySkinsModal: React.FC<HellcasePayBySkinsModalProps> = (
                           sound.playSelect();
                           setSelectedCardAmount(amt);
                         }}
-                        className={`p-3.5 rounded-2xl border text-center transition cursor-pointer ${
+                        className={`p-3 rounded-xl border text-center transition cursor-pointer ${
                           selectedCardAmount === amt
                             ? 'bg-amber-400 text-slate-950 border-amber-400 font-black shadow-lg scale-105'
                             : 'bg-black/40 text-white border-white/10 hover:border-white/20 font-bold'
                         }`}
                       >
                         <div className="text-base font-display font-black">{amt} €</div>
-                        <div className="text-[10px] font-mono opacity-80">+{amt * 0.05} € (5%)</div>
                       </button>
                     ))}
                   </div>
                 </div>
 
-                {/* Summary & Checkout Button */}
-                <div className="p-4 rounded-2xl bg-black/40 border border-white/10 flex items-center justify-between gap-4">
+                <div className="p-3.5 rounded-xl bg-black/40 border border-white/10 flex items-center justify-between gap-4">
                   <div>
-                    <div className="text-xs font-mono text-slate-400">Total credited to wallet:</div>
+                    <div className="text-xs font-mono text-slate-400">Total to wallet:</div>
                     <div className="text-xl font-black font-display text-emerald-400">
-                      {(selectedCardAmount * 1.05).toFixed(2)} €
+                      {selectedCardAmount.toFixed(2)} €
                     </div>
                   </div>
 
@@ -1212,75 +1153,73 @@ export const HellcasePayBySkinsModal: React.FC<HellcasePayBySkinsModalProps> = (
                       setCardProcessing(true);
                       sound.playSelect();
                       setTimeout(() => {
-                        const withBonus = parseFloat((selectedCardAmount * 1.05).toFixed(2));
-                        creditVortexWalletBalance(withBonus);
+                        creditVortexWalletBalance(selectedCardAmount);
                         setCardProcessing(false);
                         sound.playTournamentVictory();
                         confetti({ particleCount: 100, spread: 70, origin: { y: 0.6 } });
-                        setDepositSuccessMessage(`✓ Card Payment Authorized! +${withBonus.toFixed(2)} € credited to your wallet.`);
-                        onSuccess?.(withBonus);
+                        setDepositSuccessMessage(`✓ Card Payment Authorized! +${selectedCardAmount.toFixed(2)} € credited to your wallet.`);
+                        onSuccess?.(selectedCardAmount);
                       }, 1800);
                     }}
-                    className="px-6 py-3 rounded-xl bg-gradient-to-r from-amber-400 to-yellow-500 hover:from-amber-300 hover:to-yellow-400 text-slate-950 font-mono font-black text-xs transition cursor-pointer shadow-lg"
+                    className="px-5 py-2.5 rounded-xl bg-gradient-to-r from-amber-400 to-yellow-500 hover:from-amber-300 hover:to-yellow-400 text-slate-950 font-mono font-black text-xs transition cursor-pointer shadow-lg"
                   >
-                    {cardProcessing ? 'Authorizing 3D Secure...' : `Pay ${selectedCardAmount.toFixed(2)} € via Card`}
+                    {cardProcessing ? 'Authorizing...' : `Pay ${selectedCardAmount.toFixed(2)} € via Card`}
                   </button>
                 </div>
               </div>
-            </div>
-          )}
+            )}
 
-          {/* ======================================================== */}
-          {/* VIEW 5: GIFTCARDS & VOUCHERS (ENEBA / KINGUIN)           */}
-          {/* ======================================================== */}
-          {activeView === 'giftcards' && (
-            <div className="p-6 rounded-3xl bg-[#141724] border border-white/10 space-y-5">
-              <div>
-                <h3 className="text-lg font-black font-display text-white">
-                  Redeem Gift Card or Prepaid Voucher
-                </h3>
-                <p className="text-xs font-mono text-slate-400 mt-0.5">
-                  Enter your 16-digit voucher code from Kinguin, Eneba, or PayPal Digital Gifts.
-                </p>
-              </div>
+            {/* VIEW: GIFTCARDS */}
+            {activeView === 'giftcards' && (
+              <div className="p-5 rounded-2xl bg-[#141724] border border-white/10 space-y-4">
+                <div>
+                  <h3 className="text-base font-black font-display text-white">
+                    Redeem Voucher or Gift Card
+                  </h3>
+                  <p className="text-xs font-mono text-slate-400 mt-0.5">
+                    Enter voucher code from Kinguin, Eneba, or PayPal Digital Gifts.
+                  </p>
+                </div>
 
-              <div className="space-y-2">
-                <input
-                  type="text"
-                  value={voucherCode}
-                  onChange={(e) => {
-                    setVoucherCode(e.target.value.toUpperCase());
-                    setVoucherError(null);
+                <div className="space-y-2">
+                  <input
+                    type="text"
+                    value={voucherCode}
+                    onChange={(e) => {
+                      setVoucherCode(e.target.value.toUpperCase());
+                      setVoucherError(null);
+                    }}
+                    placeholder="XXXX-XXXX-XXXX-XXXX"
+                    className="w-full px-4 py-2.5 rounded-xl bg-black/60 border border-white/15 text-white font-mono text-sm tracking-widest outline-none focus:border-amber-400 uppercase"
+                  />
+                  {voucherError && <p className="text-xs font-mono text-red-400">{voucherError}</p>}
+                </div>
+
+                <button
+                  type="button"
+                  onClick={() => {
+                    if (!voucherCode.trim() || voucherCode.trim().length < 8) {
+                      sound.playClick();
+                      setVoucherError('Please enter a valid voucher code.');
+                      return;
+                    }
+                    sound.playSelect();
+                    const redeemedEur = 25.00;
+                    creditVortexWalletBalance(redeemedEur);
+                    sound.playTournamentVictory();
+                    confetti({ particleCount: 100, spread: 70, origin: { y: 0.6 } });
+                    setDepositSuccessMessage(`✓ Voucher ${voucherCode} Redeemed! +${redeemedEur.toFixed(2)} € credited to your wallet.`);
+                    setVoucherCode('');
+                    onSuccess?.(redeemedEur);
                   }}
-                  placeholder="XXXX-XXXX-XXXX-XXXX"
-                  className="w-full px-4 py-3 rounded-xl bg-black/60 border border-white/15 text-white font-mono text-sm tracking-widest outline-none focus:border-amber-400 uppercase"
-                />
-                {voucherError && <p className="text-xs font-mono text-red-400">{voucherError}</p>}
+                  className="w-full py-2.5 rounded-xl bg-gradient-to-r from-emerald-500 to-teal-500 hover:from-emerald-400 hover:to-teal-400 text-slate-950 font-mono font-black text-xs transition cursor-pointer shadow-md uppercase tracking-wider"
+                >
+                  Redeem Voucher Funds
+                </button>
               </div>
+            )}
 
-              <button
-                type="button"
-                onClick={() => {
-                  if (!voucherCode.trim() || voucherCode.trim().length < 8) {
-                    sound.playClick();
-                    setVoucherError('Please enter a valid 16-digit voucher code.');
-                    return;
-                  }
-                  sound.playSelect();
-                  const redeemedEur = 25.00 * 1.05;
-                  creditVortexWalletBalance(redeemedEur);
-                  sound.playTournamentVictory();
-                  confetti({ particleCount: 100, spread: 70, origin: { y: 0.6 } });
-                  setDepositSuccessMessage(`✓ Voucher ${voucherCode} Redeemed! +${redeemedEur.toFixed(2)} € credited to your wallet.`);
-                  setVoucherCode('');
-                  onSuccess?.(redeemedEur);
-                }}
-                className="w-full py-3 rounded-xl bg-gradient-to-r from-emerald-500 to-teal-500 hover:from-emerald-400 hover:to-teal-400 text-slate-950 font-mono font-black text-xs transition cursor-pointer shadow-md uppercase tracking-wider"
-              >
-                Redeem Voucher Funds (+5% Bonus)
-              </button>
-            </div>
-          )}
+          </div>
 
         </div>
 
