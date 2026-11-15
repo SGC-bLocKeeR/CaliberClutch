@@ -992,7 +992,7 @@ export const INITIAL_SHOP_ITEMS: ShopItem[] = [
     image: 'https://images.unsplash.com/photo-1542751371-adc38448a05e?q=80&w=600&auto=format&fit=crop',
     rarity: 'legendary',
     inStock: true,
-    description: 'Covert hydrographic AK-47 skin with sci-fi sponsors. Trade offer dërgohet menjëherë në Steam.',
+    description: 'Covert hydrographic AK-47 skin with sci-fi sponsors. Trade offer delivered instantly via Steam Bot.',
     tag: 'CS2 Covert'
   },
   {
@@ -1004,7 +1004,7 @@ export const INITIAL_SHOP_ITEMS: ShopItem[] = [
     image: 'https://images.unsplash.com/photo-1579373903781-fd5c0c30c4cd?q=80&w=600&auto=format&fit=crop',
     rarity: 'legendary',
     inStock: true,
-    description: 'Thikë legjendare me teh të lakuar dhe valë rozë galaxy. Automated instant bot trade.',
+    description: 'Iconic curved blade knife with vibrant pink galaxy hues. Automated instant bot trade.',
     tag: 'CS2 Knife'
   },
   {
@@ -1016,7 +1016,7 @@ export const INITIAL_SHOP_ITEMS: ShopItem[] = [
     image: 'https://images.unsplash.com/photo-1518709268805-4e9042af9f23?q=80&w=600&auto=format&fit=crop',
     rarity: 'epic',
     inStock: true,
-    description: 'Pistoletë monokromatike me efekte holografike pearlescent. E gatshme për tërheqje në Steam.',
+    description: 'Monochrome pistol with custom pearlescent finish. Ready for instant Steam trade withdrawal.',
     tag: 'CS2 Pistol'
   },
   {
@@ -1028,7 +1028,7 @@ export const INITIAL_SHOP_ITEMS: ShopItem[] = [
     image: 'https://images.unsplash.com/photo-1566492031773-4f4e44671857?q=80&w=600&auto=format&fit=crop',
     rarity: 'epic',
     inStock: true,
-    description: 'VOD review, demo leetify analysis dhe rregullim i crosshair placement me analist zyrtar Faceit.',
+    description: 'Comprehensive VOD review, Leetify analytics, and crosshair placement fine-tuning with a certified Faceit coach.',
     tag: 'Live VOD Review'
   }
 ];

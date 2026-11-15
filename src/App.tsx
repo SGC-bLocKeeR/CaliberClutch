@@ -112,7 +112,7 @@ export function App() {
               href={getSteamOpenIdUrl()}
               className="px-4 py-2 rounded-xl bg-[#2A475E] hover:bg-[#3B6484] text-white text-xs font-semibold transition flex items-center gap-2 border border-[#66C0F4]/30 shadow-lg cursor-pointer"
             >
-              <span>Vazhdo te Steam ↗</span>
+              <span>Continue to Steam ↗</span>
             </a>
 
             <button
@@ -124,7 +124,7 @@ export function App() {
               }}
               className="px-4 py-2 rounded-xl bg-gradient-to-r from-red-600 to-rose-600 hover:from-red-500 hover:to-rose-500 text-white text-xs font-bold transition flex items-center gap-1.5 shadow-lg shadow-red-900/40 cursor-pointer"
             >
-              <span>👁️ Hyr si Demo (Pa Steam)</span>
+              <span>👁️ Enter Demo Mode (No Steam)</span>
             </button>
 
             <button
@@ -134,7 +134,7 @@ export function App() {
               }}
               className="px-4 py-2 rounded-xl bg-[#141721] hover:bg-[#1E2333] border border-white/10 text-xs font-mono text-slate-300 hover:text-white transition cursor-pointer"
             >
-              Anulo
+              Cancel
             </button>
           </div>
         </div>

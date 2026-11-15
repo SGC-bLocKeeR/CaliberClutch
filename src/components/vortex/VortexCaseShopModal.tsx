@@ -237,11 +237,11 @@ export const VortexCaseShopModal: React.FC<VortexCaseShopModalProps> = ({ isOpen
   const handleSaveTradeUrl = () => {
     sound.playSelect();
     if (!tempTradeUrl) {
-      setTradeUrlError('Ju lutem vendosni Steam Trade URL-në tuaj.');
+      setTradeUrlError('Please enter your Steam Trade URL.');
       return;
     }
     if (!isValidSteamTradeUrl(tempTradeUrl)) {
-      setTradeUrlError('Formati nuk është i saktë. Duhet të fillojë me https://steamcommunity.com/tradeoffer/new/?partner=...');
+      setTradeUrlError('Invalid format. Must start with https://steamcommunity.com/tradeoffer/new/?partner=...');
       return;
     }
     saveSteamTradeUrl(tempTradeUrl);
@@ -257,7 +257,7 @@ export const VortexCaseShopModal: React.FC<VortexCaseShopModalProps> = ({ isOpen
     const totalCost = c.priceEur * caseCount;
     if (balance < totalCost) {
       sound.playClick();
-      alert(`Bilanci juaj (${balance.toFixed(2)} €) nuk mjafton për të hapur ${caseCount} arka (${totalCost.toFixed(2)} €). Mund të shtoni bilanc demo me butonin "+20€"!`);
+      alert(`Your balance (${balance.toFixed(2)} €) is insufficient to open ${caseCount} cases (${totalCost.toFixed(2)} €). Add demo funds using the "+20€" button!`);
       return;
     }
 
@@ -390,7 +390,7 @@ export const VortexCaseShopModal: React.FC<VortexCaseShopModalProps> = ({ isOpen
       setDeliveryResult(result);
       sound.playTournamentVictory();
     } catch (err: unknown) {
-      const errorMsg = err instanceof Error ? err.message : 'Ndodhi një gabim gjatë lidhjes me Steam Trade Bot.';
+      const errorMsg = err instanceof Error ? err.message : 'An error occurred while connecting to Steam Trade Bot.';
       setDeliveryError(errorMsg);
     }
   };
@@ -427,7 +427,7 @@ export const VortexCaseShopModal: React.FC<VortexCaseShopModalProps> = ({ isOpen
 
     if (balance < item.priceEur) {
       sound.playClick();
-      alert(`Bilanci juaj (${balance.toFixed(2)} €) nuk mjafton për këtë skin (${item.priceEur.toFixed(2)} €). Mund të shtoni bilanc demo me butonin sipër!`);
+      alert(`Your balance (${balance.toFixed(2)} €) is insufficient for this skin (${item.priceEur.toFixed(2)} €). Add demo funds using the button above!`);
       return;
     }
 
@@ -449,7 +449,7 @@ export const VortexCaseShopModal: React.FC<VortexCaseShopModalProps> = ({ isOpen
         origin: { y: 0.6 }
       });
     } catch (err: unknown) {
-      const msg = err instanceof Error ? err.message : 'Ndodhi një gabim gjatë blerjes nga DMarket.';
+      const msg = err instanceof Error ? err.message : 'An error occurred while purchasing from DMarket.';
       setDirectBuyError(msg);
       setDirectBuyProgress(null);
     }
@@ -468,24 +468,24 @@ export const VortexCaseShopModal: React.FC<VortexCaseShopModalProps> = ({ isOpen
     };
 
     try {
-      log('Nisja e lidhjes me DMarket API Gateway (https://api.dmarket.com)...');
+      log('Initiating connection to DMarket API Gateway (https://api.dmarket.com)...');
       await new Promise(r => setTimeout(r, 400));
-      log(`Kontrolli i formatit të Public Key (${tempPublic.slice(0, 12)}...)... OK`);
+      log(`Checking Public Key format (${tempPublic.slice(0, 12)}...)... OK`);
       await new Promise(r => setTimeout(r, 500));
-      log('Gjenerimi i nënshkrimit Ed25519 me Secret Key sipas protokollit RFC 8032...');
+      log('Generating Ed25519 signature with Secret Key (RFC 8032)...');
       await new Promise(r => setTimeout(r, 600));
-      log('Dërgimi i kërkesës së autorizuar GET /account/v1/balance te DMarket...');
+      log('Dispatching authorized request GET /account/v1/balance to DMarket...');
       
       const res = await testDMarketLiveConnection(tempPublic, tempSecret);
       saveDMarketCredentials(tempPublic, tempSecret);
       setDmarketCreds({ publicKey: tempPublic, secretKey: tempSecret, isConnected: true });
       setDmarketTestResult(res);
-      log(`Përgjigje 200 OK nga DMarket brenda ${res.latencyMs}ms! Bilanci i llogarisë DMarket: ${res.dmarketBalanceEur.toFixed(2)} €`);
+      log(`200 OK response from DMarket in ${res.latencyMs}ms! DMarket balance: ${res.dmarketBalanceEur.toFixed(2)} €`);
       sound.playTournamentVictory();
     } catch (err: unknown) {
-      const msg = err instanceof Error ? err.message : 'Dështoi lidhja me DMarket API.';
+      const msg = err instanceof Error ? err.message : 'Connection to DMarket API failed.';
       setDmarketTestError(msg);
-      log(`GABIM: ${msg}`);
+      log(`ERROR: ${msg}`);
     } finally {
       setIsTestingDMarket(false);
     }
@@ -538,7 +538,7 @@ export const VortexCaseShopModal: React.FC<VortexCaseShopModalProps> = ({ isOpen
                 }`}
               >
                 <Layers className="w-3.5 h-3.5" />
-                <span>Hap Arka</span>
+                <span>Case Opening</span>
               </button>
 
               <button
@@ -554,7 +554,7 @@ export const VortexCaseShopModal: React.FC<VortexCaseShopModalProps> = ({ isOpen
                 }`}
               >
                 <ShoppingCart className="w-3.5 h-3.5" />
-                <span>Dyqani i Armëve</span>
+                <span>Weapon Store</span>
                 <span className="px-1.5 py-0.2 rounded bg-emerald-400/20 text-emerald-400 text-[9px] font-black">
                   INSTANT
                 </span>
@@ -585,7 +585,7 @@ export const VortexCaseShopModal: React.FC<VortexCaseShopModalProps> = ({ isOpen
             <div className="flex items-center gap-2 px-3 py-1.5 rounded-xl bg-[#141824] border border-white/10">
               <Coins className="w-4 h-4 text-amber-400" />
               <div className="text-right">
-                <div className="text-[9px] font-mono text-slate-400 uppercase tracking-wider">Bilanci:</div>
+                <div className="text-[9px] font-mono text-slate-400 uppercase tracking-wider">Balance:</div>
                 <div className="text-xs font-black font-mono text-emerald-400">{balance.toFixed(2)} €</div>
               </div>
               <button
@@ -594,7 +594,7 @@ export const VortexCaseShopModal: React.FC<VortexCaseShopModalProps> = ({ isOpen
                   creditVortexWalletBalance(20.00);
                 }}
                 className="ml-1 px-2 py-0.5 rounded-lg bg-emerald-500/15 hover:bg-emerald-500/25 border border-emerald-500/30 text-emerald-400 text-[10px] font-mono font-bold transition cursor-pointer"
-                title="Shto +20.00 € për testim"
+                title="Add +20.00 € Demo Balance"
               >
                 +20€
               </button>
@@ -612,11 +612,11 @@ export const VortexCaseShopModal: React.FC<VortexCaseShopModalProps> = ({ isOpen
                   ? 'bg-emerald-500/10 border-emerald-500/30 text-emerald-400 hover:bg-emerald-500/20'
                   : 'bg-amber-500/10 border-amber-500/30 text-amber-400 hover:bg-amber-500/20 animate-pulse'
               }`}
-              title="Konfiguro Steam Trade URL"
+              title="Configure Steam Trade URL"
             >
               <ShieldCheck className="w-3.5 h-3.5" />
               <span className="hidden sm:inline">
-                {tradeUrl && isValidSteamTradeUrl(tradeUrl) ? 'Steam Lidhur ✓' : 'Lidh Steam'}
+                {tradeUrl && isValidSteamTradeUrl(tradeUrl) ? 'Steam Linked ✓' : 'Link Steam'}
               </span>
             </button>
 
@@ -646,8 +646,8 @@ export const VortexCaseShopModal: React.FC<VortexCaseShopModalProps> = ({ isOpen
                 <div>
                   <div className="mb-4 flex items-center justify-between">
                     <div>
-                      <h3 className="text-base font-display font-black text-white">Arkat Zyrtare 3D të CS2</h3>
-                      <p className="text-xs text-slate-400 font-sans">Modelet origjinale të Valve me thikat Butterfly, Karambit dhe Skeleton</p>
+                      <h3 className="text-base font-display font-black text-white">Official CS2 3D Cases</h3>
+                      <p className="text-xs text-slate-400 font-sans">Authentic Valve cases with Butterfly Knife, Karambit, and Skeleton Knife drops</p>
                     </div>
                     <div className="text-[11px] font-mono text-emerald-400 flex items-center gap-1.5 bg-emerald-500/10 border border-emerald-500/20 px-2.5 py-1 rounded-full">
                       <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse" />
@@ -722,7 +722,7 @@ export const VortexCaseShopModal: React.FC<VortexCaseShopModalProps> = ({ isOpen
                           <button
                             className="px-3 py-1.5 rounded-xl bg-white/[0.06] group-hover:bg-amber-400 group-hover:text-black text-slate-200 text-xs font-display font-bold uppercase transition flex items-center gap-1 cursor-pointer"
                           >
-                            <span>Hap</span>
+                            <span>Open</span>
                             <ArrowRight className="w-3.5 h-3.5" />
                           </button>
                         </div>
@@ -748,7 +748,7 @@ export const VortexCaseShopModal: React.FC<VortexCaseShopModalProps> = ({ isOpen
                               setActiveCase(null);
                             }}
                             className="p-2 rounded-xl bg-white/5 hover:bg-white/10 text-slate-300 hover:text-white transition cursor-pointer"
-                            title="Kthehu te Arkat"
+                            title="Back to Cases"
                           >
                             <ChevronLeft className="w-5 h-5" />
                           </button>
@@ -769,7 +769,7 @@ export const VortexCaseShopModal: React.FC<VortexCaseShopModalProps> = ({ isOpen
                               </span>
                             </div>
                             <p className="text-xs text-slate-400 font-mono">
-                              Çmimi: <strong className="text-amber-400 font-bold">{activeCase.priceEur.toFixed(2)} €</strong> / arkë
+                              Price: <strong className="text-amber-400 font-bold">{activeCase.priceEur.toFixed(2)} €</strong> / case
                             </p>
                           </div>
                         </div>
@@ -829,8 +829,8 @@ export const VortexCaseShopModal: React.FC<VortexCaseShopModalProps> = ({ isOpen
                             <Flame className="w-4 h-4 fill-current" />
                             <span>
                               {isSpinning 
-                                ? 'Po Rrotullohet...' 
-                                : `HAP ${caseCount > 1 ? `${caseCount}X ` : ''}(${(activeCase.priceEur * caseCount).toFixed(2)} €)`}
+                                ? 'Spinning...' 
+                                : `OPEN ${caseCount > 1 ? `${caseCount}X ` : ''}(${(activeCase.priceEur * caseCount).toFixed(2)} €)`}
                             </span>
                           </button>
                         </div>
@@ -840,12 +840,12 @@ export const VortexCaseShopModal: React.FC<VortexCaseShopModalProps> = ({ isOpen
                       <div className="w-full max-w-4xl mb-4 px-4 py-2 rounded-xl bg-[#080A12] border border-white/5 flex flex-wrap items-center justify-between text-[11px] font-mono gap-2">
                         <span className="text-slate-400 font-bold flex items-center gap-1.5">
                           <ShieldCheck className="w-3.5 h-3.5 text-emerald-400" />
-                          <span>Shanset Zyrtare të Armëve:</span>
+                          <span>Official Skin Odds:</span>
                         </span>
                         <div className="flex items-center gap-3 flex-wrap">
                           <span className="flex items-center gap-1 text-[#FFD700] font-bold">
                             <span className="w-2 h-2 rounded-full bg-[#FFD700]" />
-                            ★ Thikë: 0.260%
+                            ★ Knife / Rare Special: 0.260%
                           </span>
                           <span className="flex items-center gap-1 text-[#EB4B4B] font-bold">
                             <span className="w-2 h-2 rounded-full bg-[#EB4B4B]" />
@@ -870,7 +870,7 @@ export const VortexCaseShopModal: React.FC<VortexCaseShopModalProps> = ({ isOpen
                       <div className="w-full max-w-4xl mb-5">
                         <div className="flex items-center gap-1.5 text-xs font-mono font-bold text-slate-400 mb-2 uppercase tracking-wider">
                           <Flame className="w-3.5 h-3.5 text-amber-400 fill-current" />
-                          <span>Fitoret më të mira nga kjo arkë (Top Drops):</span>
+                          <span>Top Drops From This Case:</span>
                         </div>
                         <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-6 gap-2">
                           {RECENT_LUCKY_DROPS.map((drop, idx) => (
@@ -970,10 +970,10 @@ export const VortexCaseShopModal: React.FC<VortexCaseShopModalProps> = ({ isOpen
                       <div className="w-full max-w-4xl mt-6">
                         <div className="flex items-center justify-between mb-3 border-b border-white/5 pb-2">
                           <h4 className="text-xs font-mono font-bold text-slate-300 uppercase tracking-wider flex items-center gap-2">
-                            <span>🧰 Përmbajtja e kësaj arke ({activeCase.items.length} Armë zyrtare)</span>
+                            <span>🧰 Case Items ({activeCase.items.length} Official Skins)</span>
                           </h4>
                           <span className="text-[11px] font-mono text-slate-500">
-                            Renditur sipas vlerës dhe shansit të rënies
+                            Sorted by skin tier & drop probability
                           </span>
                         </div>
 
@@ -1062,7 +1062,7 @@ export const VortexCaseShopModal: React.FC<VortexCaseShopModalProps> = ({ isOpen
                                           toggleCardFlip(it.id);
                                         }}
                                         className="w-4 h-4 rounded-full bg-[#1F273B] hover:bg-amber-400 text-slate-300 hover:text-black flex items-center justify-center text-[10px] font-serif font-black transition cursor-pointer shadow-sm border border-white/10" 
-                                        title="Shfaq shanset sipas konsumimit (Wear / Price / Drops)"
+                                        title="View wear conditions & odds (Wear / Price / Drops)"
                                       >
                                         i
                                       </button>
@@ -1130,14 +1130,14 @@ export const VortexCaseShopModal: React.FC<VortexCaseShopModalProps> = ({ isOpen
                         className="px-3.5 py-1 rounded-full text-xs font-mono font-bold uppercase mb-2 tracking-wider"
                         style={{ backgroundColor: `${wonSkin.rarityColor}20`, color: wonSkin.rarityColor, border: `1px solid ${wonSkin.rarityColor}40` }}
                       >
-                        {wonSkins.length > 1 ? `Urime! Fitove ${wonSkins.length} Armë CS2` : `Urime! Fitove ${wonSkin.rarity.toUpperCase()}`}
+                        {wonSkins.length > 1 ? `Congratulations! You Won ${wonSkins.length} CS2 Skins` : `Congratulations! You Won ${wonSkin.rarity.toUpperCase()}`}
                       </div>
 
                       {/* If multiple skins won (caseCount > 1) */}
                       {wonSkins.length > 1 ? (
                         <div className="w-full my-4">
                           <div className="text-xs font-mono text-slate-400 mb-3">
-                            Vlera totale e fituar: <strong className="text-emerald-400 font-bold text-base">{wonSkins.reduce((acc, s) => acc + s.priceEur, 0).toFixed(2)} €</strong>
+                            Total Value Won: <strong className="text-emerald-400 font-bold text-base">{wonSkins.reduce((acc, s) => acc + s.priceEur, 0).toFixed(2)} €</strong>
                           </div>
                           <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-2.5 max-h-64 overflow-y-auto p-1">
                             {wonSkins.map((s, idx) => (
@@ -1168,13 +1168,13 @@ export const VortexCaseShopModal: React.FC<VortexCaseShopModalProps> = ({ isOpen
                           </h3>
 
                           <div className="flex items-center gap-2 text-xs font-mono text-slate-400 mt-1 flex-wrap justify-center">
-                            <span>Gjendja: <strong className="text-white">{wonSkin.wear}</strong></span>
+                            <span>Wear: <strong className="text-white">{wonSkin.wear}</strong></span>
                             <span>•</span>
                             <span>Float: <strong className="text-white">{wonSkin.floatValue}</strong></span>
                             <span>•</span>
-                            <span>Shansi: <strong className="text-amber-400 font-bold">{(wonSkin.dropChancePercent ?? 0).toFixed(3)}%</strong></span>
+                            <span>Chance: <strong className="text-amber-400 font-bold">{(wonSkin.dropChancePercent ?? 0).toFixed(3)}%</strong></span>
                             <span>•</span>
-                            <span>Vlera: <strong className="text-emerald-400 font-bold">{wonSkin.priceEur.toFixed(2)} €</strong></span>
+                            <span>Value: <strong className="text-emerald-400 font-bold">{wonSkin.priceEur.toFixed(2)} €</strong></span>
                           </div>
 
                           <div className="relative my-6 flex items-center justify-center">
@@ -1195,7 +1195,7 @@ export const VortexCaseShopModal: React.FC<VortexCaseShopModalProps> = ({ isOpen
                         <div className="w-full mb-5 p-3.5 rounded-2xl bg-[#141826] border border-amber-400/30 flex items-center gap-3 animate-pulse">
                           <RefreshCw className="w-5 h-5 text-amber-400 animate-spin shrink-0" />
                           <div className="text-left text-xs font-mono text-slate-200">
-                            <div className="font-bold text-amber-400">Hapi {deliveryProgress.step}/3:</div>
+                            <div className="font-bold text-amber-400">Step {deliveryProgress.step}/3:</div>
                             <div>{deliveryProgress.message}</div>
                           </div>
                         </div>
@@ -1206,7 +1206,7 @@ export const VortexCaseShopModal: React.FC<VortexCaseShopModalProps> = ({ isOpen
                         <div className="w-full mb-5 p-4 rounded-2xl bg-emerald-500/10 border border-emerald-500/30 text-left animate-in fade-in">
                           <div className="flex items-center gap-2 text-emerald-400 font-display font-bold text-sm mb-1">
                             <Check className="w-4 h-4" />
-                            <span>Trade Offer u dërgua në Steam me sukses!</span>
+                            <span>Trade Offer Sent to Steam Successfully!</span>
                           </div>
                           <p className="text-[11px] text-slate-300 font-sans mb-2">
                             {deliveryResult.message}
@@ -1219,7 +1219,7 @@ export const VortexCaseShopModal: React.FC<VortexCaseShopModalProps> = ({ isOpen
                               rel="noopener noreferrer"
                               className="text-emerald-400 hover:text-emerald-300 underline flex items-center gap-1 font-bold"
                             >
-                              <span>Hap Ofertat në Steam</span>
+                              <span>Open Steam Trade Offers</span>
                               <ExternalLink className="w-3 h-3" />
                             </a>
                           </div>
@@ -1234,7 +1234,7 @@ export const VortexCaseShopModal: React.FC<VortexCaseShopModalProps> = ({ isOpen
                             className="w-full sm:flex-1 py-3.5 rounded-xl bg-gradient-to-r from-emerald-500 to-green-600 hover:from-emerald-400 hover:to-green-500 text-black font-display font-black text-xs uppercase tracking-wider transition cursor-pointer flex items-center justify-center gap-2 shadow-[0_0_20px_rgba(16,185,129,0.35)]"
                           >
                             <Send className="w-4 h-4" />
-                            <span>Dërgo në Steam me Bot</span>
+                            <span>Send to Steam Bot</span>
                           </button>
 
                           <button
@@ -1244,8 +1244,8 @@ export const VortexCaseShopModal: React.FC<VortexCaseShopModalProps> = ({ isOpen
                             <Coins className="w-4 h-4 text-amber-400" />
                             <span>
                               {wonSkins && wonSkins.length > 1
-                                ? `Shit të Gjitha për ${(wonSkins.reduce((acc, s) => acc + s.priceEur, 0) * 0.85).toFixed(2)} €`
-                                : `Shit për ${((wonSkin?.priceEur ?? 0) * 0.85).toFixed(2)} €`}
+                                ? `Sell All for ${(wonSkins.reduce((acc, s) => acc + s.priceEur, 0) * 0.85).toFixed(2)} €`
+                                : `Sell for ${((wonSkin?.priceEur ?? 0) * 0.85).toFixed(2)} €`}
                             </span>
                           </button>
                         </div>
@@ -1260,7 +1260,7 @@ export const VortexCaseShopModal: React.FC<VortexCaseShopModalProps> = ({ isOpen
                             }}
                             className="w-full py-3.5 rounded-xl bg-[#A3E635] hover:bg-[#84cc16] text-black font-display font-black text-sm uppercase tracking-wider transition cursor-pointer shadow-lg"
                           >
-                            Hap Përsëri
+                            Open Again
                           </button>
                         </div>
                       )}
@@ -1280,13 +1280,13 @@ export const VortexCaseShopModal: React.FC<VortexCaseShopModalProps> = ({ isOpen
               <div className="flex flex-col md:flex-row md:items-center justify-between gap-3 mb-5">
                 <div>
                   <h3 className="text-base font-display font-black text-white flex items-center gap-2">
-                    <span>Dyqani Zyrtar i Armëve Vortex</span>
+                    <span>Vortex Official Weapon Store</span>
                     <span className="px-2 py-0.5 rounded-full bg-emerald-500/15 text-emerald-400 text-[10px] font-mono font-bold border border-emerald-500/30">
                       ⚡ INSTANT SKINS
                     </span>
                   </h3>
                   <p className="text-xs text-slate-400 font-sans">
-                    Bli armë dhe thika zyrtare CS2 me dërgesë të menjëhershme përmes Steam Bot në llogarinë tuaj.
+                    Purchase official CS2 weapons & knives with instant automated Steam Bot trade delivery.
                   </p>
                 </div>
 
@@ -1297,7 +1297,7 @@ export const VortexCaseShopModal: React.FC<VortexCaseShopModalProps> = ({ isOpen
                     type="text"
                     value={marketSearch}
                     onChange={(e) => setMarketSearch(e.target.value)}
-                    placeholder="Kërko armë (AK-47, AWP, Karambit)..."
+                    placeholder="Search weapons (AK-47, AWP, Karambit)..."
                     className="w-full pl-9 pr-3 py-2 rounded-xl bg-[#121522] border border-white/10 text-white font-mono text-xs focus:outline-none focus:border-amber-400 transition"
                   />
                 </div>
@@ -1306,11 +1306,11 @@ export const VortexCaseShopModal: React.FC<VortexCaseShopModalProps> = ({ isOpen
               {/* Category Filter Pills */}
               <div className="flex items-center gap-2 overflow-x-auto pb-2 mb-4">
                 {[
-                  { id: 'all', label: 'Të Gjitha Armët' },
-                  { id: 'knife', label: '★ Thika (Knives)' },
-                  { id: 'rifle', label: 'Pushkë (Rifles)' },
-                  { id: 'sniper', label: 'Snipers (AWP)' },
-                  { id: 'pistol', label: 'Pistoleta' }
+                  { id: 'all', label: 'All Weapons' },
+                  { id: 'knife', label: '★ Knives' },
+                  { id: 'rifle', label: 'Rifles' },
+                  { id: 'sniper', label: 'Snipers' },
+                  { id: 'pistol', label: 'Pistols' }
                 ].map((cat) => (
                   <button
                     key={cat.id}
@@ -1334,7 +1334,7 @@ export const VortexCaseShopModal: React.FC<VortexCaseShopModalProps> = ({ isOpen
                 <div className="mb-5 p-4 rounded-2xl bg-gradient-to-r from-amber-500/15 via-[#161B29] to-[#121522] border border-amber-400/40 flex items-center gap-3 animate-pulse">
                   <RefreshCw className="w-5 h-5 text-amber-400 animate-spin shrink-0" />
                   <div className="text-left text-xs font-mono text-slate-200">
-                    <div className="font-bold text-amber-400 uppercase tracking-wider">Vortex Steam Trade Bot (Hapi {directBuyProgress.step}/3):</div>
+                    <div className="font-bold text-amber-400 uppercase tracking-wider">Vortex Steam Trade Bot (Step {directBuyProgress.step}/3):</div>
                     <div className="text-white mt-0.5">{directBuyProgress.message}</div>
                   </div>
                 </div>
@@ -1345,7 +1345,7 @@ export const VortexCaseShopModal: React.FC<VortexCaseShopModalProps> = ({ isOpen
                 <div className="mb-5 p-4 rounded-2xl bg-emerald-500/15 border border-emerald-500/40 text-left animate-in fade-in">
                   <div className="flex items-center gap-2 text-emerald-400 font-display font-bold text-sm mb-1">
                     <CheckCircle2 className="w-5 h-5" />
-                    <span>Skin-i u dërgua me sukses në Steam!</span>
+                    <span>Skin Trade Offer Sent to Steam!</span>
                   </div>
                   <p className="text-xs text-slate-200 font-sans mb-3">
                     {directBuyResult.message}
@@ -1358,7 +1358,7 @@ export const VortexCaseShopModal: React.FC<VortexCaseShopModalProps> = ({ isOpen
                       rel="noopener noreferrer"
                       className="text-emerald-400 hover:text-emerald-300 underline font-bold flex items-center gap-1"
                     >
-                      <span>Hap Trade Offer në Steam</span>
+                      <span>Open Steam Trade Offer</span>
                       <ExternalLink className="w-3.5 h-3.5" />
                     </a>
                   </div>
@@ -1414,14 +1414,14 @@ export const VortexCaseShopModal: React.FC<VortexCaseShopModalProps> = ({ isOpen
                       <div className="flex items-center gap-2 text-[10px] font-mono text-slate-500 mt-1">
                         <span>Float: {item.floatValue}</span>
                         <span>•</span>
-                        <span className="text-emerald-400 font-bold">Verifikuar ✓</span>
+                        <span className="text-emerald-400 font-bold">Verified ✓</span>
                       </div>
                     </div>
 
                     {/* Price & Buy Button */}
                     <div className="mt-4 pt-3 border-t border-white/5 flex items-center justify-between gap-2">
                       <div>
-                        <div className="text-[9px] font-mono text-slate-400 uppercase">Çmimi:</div>
+                        <div className="text-[9px] font-mono text-slate-400 uppercase">Price:</div>
                         <div className="text-sm font-black font-mono text-amber-400">
                           {item.priceEur.toFixed(2)} €
                         </div>
@@ -1432,7 +1432,7 @@ export const VortexCaseShopModal: React.FC<VortexCaseShopModalProps> = ({ isOpen
                         className="px-3.5 py-2 rounded-xl bg-amber-400 hover:bg-amber-300 text-black font-display font-black text-xs uppercase tracking-wider transition flex items-center gap-1.5 cursor-pointer shadow-md hover:scale-105 active:scale-95"
                       >
                         <ShoppingCart className="w-3.5 h-3.5" />
-                        <span>Bli Tani</span>
+                        <span>Buy Now</span>
                       </button>
                     </div>
                   </div>
@@ -1455,7 +1455,7 @@ export const VortexCaseShopModal: React.FC<VortexCaseShopModalProps> = ({ isOpen
                       <Zap className="w-5 h-5 fill-current" />
                     </div>
                     <div>
-                      <h3 className="font-display font-black text-lg text-white">Paneli i Lidhjes Live me DMarket</h3>
+                      <h3 className="font-display font-black text-lg text-white">DMarket Live Gateway Panel</h3>
                       <p className="text-xs text-slate-400 font-mono">DMarket Marketplace API v2 • Ed25519 Cryptographic Handshake</p>
                     </div>
                   </div>
@@ -1466,12 +1466,12 @@ export const VortexCaseShopModal: React.FC<VortexCaseShopModalProps> = ({ isOpen
                       : 'bg-amber-500/15 text-amber-400 border-amber-500/30 animate-pulse'
                   }`}>
                     <span className={`w-2 h-2 rounded-full ${dmarketCreds.isConnected ? 'bg-emerald-400' : 'bg-amber-400'}`} />
-                    {dmarketCreds.isConnected ? 'API LIVE E LIDHUR' : 'GATI PËR ÇELËSAT'}
+                    {dmarketCreds.isConnected ? 'LIVE API CONNECTED' : 'READY FOR KEYS'}
                   </span>
                 </div>
 
                 <p className="text-xs text-slate-300 font-sans leading-relaxed">
-                  Tani që je loguar me Steam në DMarket, vendos këtu **Public Key** dhe **Secret Key** që gjen te cilësimet e llogarisë tënde. Sistemi yt i Vortex Gaming do të komunikojë drejtpërdrejt me serverat e DMarket për blerje dhe shkëmbime në kohë reale.
+                  Enter your DMarket **Public Key** and **Secret Key** from your DMarket API settings. Vortex Gaming will directly communicate with DMarket servers for real-time item delivery and automated trade settlements.
                 </p>
               </div>
 
@@ -1491,7 +1491,7 @@ export const VortexCaseShopModal: React.FC<VortexCaseShopModalProps> = ({ isOpen
                       rel="noopener noreferrer"
                       className="text-[11px] font-mono text-amber-400 hover:underline flex items-center gap-1"
                     >
-                      <span>Gjej çelësat në DMarket</span>
+                      <span>Get API keys on DMarket</span>
                       <ExternalLink className="w-3 h-3" />
                     </a>
                   </div>
@@ -1499,7 +1499,7 @@ export const VortexCaseShopModal: React.FC<VortexCaseShopModalProps> = ({ isOpen
                     type="text"
                     value={tempPublic}
                     onChange={(e) => setTempPublic(e.target.value)}
-                    placeholder="psh. d8a49f1b2c3e4a5d6f7890123456789a..."
+                    placeholder="e.g. d8a49f1b2c3e4a5d6f7890123456789a..."
                     className="w-full px-3.5 py-2.5 rounded-xl bg-[#141824] border border-white/10 text-white font-mono text-xs focus:outline-none focus:border-amber-400 transition"
                   />
                 </div>
@@ -1518,7 +1518,7 @@ export const VortexCaseShopModal: React.FC<VortexCaseShopModalProps> = ({ isOpen
                     className="w-full px-3.5 py-2.5 rounded-xl bg-[#141824] border border-white/10 text-white font-mono text-xs focus:outline-none focus:border-amber-400 transition"
                   />
                   <span className="text-[10px] font-mono text-slate-500 mt-1 block">
-                    🔒 Çelësi sekret ruhet i sigurt dhe përdoret vetëm për nënshkrimin e kërkesave të blerjes.
+                    🔒 Secret key is securely encrypted client-side and only used to cryptographically sign purchase trade requests.
                   </span>
                 </div>
 
@@ -1532,12 +1532,12 @@ export const VortexCaseShopModal: React.FC<VortexCaseShopModalProps> = ({ isOpen
                     {isTestingDMarket ? (
                       <>
                         <RefreshCw className="w-4 h-4 animate-spin" />
-                        <span>Po bëhet lidhja live me DMarket...</span>
+                        <span>Connecting to DMarket Live API...</span>
                       </>
                     ) : (
                       <>
                         <Terminal className="w-4 h-4" />
-                        <span>Testo Lidhjen Live (Verify Connection)</span>
+                        <span>Verify Live Connection</span>
                       </>
                     )}
                   </button>
@@ -1570,14 +1570,14 @@ export const VortexCaseShopModal: React.FC<VortexCaseShopModalProps> = ({ isOpen
                 <div className="mt-4 p-4 rounded-2xl bg-emerald-500/15 border border-emerald-500/40 text-left animate-in fade-in">
                   <div className="flex items-center gap-2 text-emerald-400 font-display font-bold text-sm mb-1">
                     <CheckCircle2 className="w-4 h-4" />
-                    <span>Lidhja me DMarket API u krye me sukses!</span>
+                    <span>DMarket API Connected Successfully!</span>
                   </div>
                   <p className="text-xs text-slate-200 font-sans mb-2">
                     {dmarketTestResult.message}
                   </p>
                   <div className="grid grid-cols-2 gap-2 pt-2 border-t border-emerald-500/20 text-[11px] font-mono text-slate-300">
                     <div>Latency: <strong className="text-emerald-400">{dmarketTestResult.latencyMs}ms</strong></div>
-                    <div>Bilanci DMarket: <strong className="text-amber-400">{dmarketTestResult.dmarketBalanceEur.toFixed(2)} €</strong></div>
+                    <div>DMarket Balance: <strong className="text-amber-400">{dmarketTestResult.dmarketBalanceEur.toFixed(2)} €</strong></div>
                   </div>
                 </div>
               )}
@@ -1609,14 +1609,14 @@ export const VortexCaseShopModal: React.FC<VortexCaseShopModalProps> = ({ isOpen
 
             <div className="flex items-center gap-2 mb-2">
               <ShieldCheck className="w-5 h-5 text-emerald-400" />
-              <h3 className="font-display font-black text-lg text-white">Lidhja e Steam Trade URL</h3>
+              <h3 className="font-display font-black text-lg text-white">Link Steam Trade URL</h3>
             </div>
             <p className="text-xs text-slate-400 font-sans mb-4">
-              Për t'ju dërguar skinet dhe thikat automatikisht përmes bot-it në llogarinë tuaj Steam, ju nevojitet Steam Trade URL.
+              To receive skins and knives automatically via automated Steam bots, enter your valid Steam Trade URL.
             </p>
 
             <label className="text-[11px] font-mono text-slate-300 font-bold mb-1.5 block">
-              Vendosni Steam Trade URL tuaj:
+              Enter your Steam Trade URL:
             </label>
             <input 
               type="text"
@@ -1639,7 +1639,7 @@ export const VortexCaseShopModal: React.FC<VortexCaseShopModalProps> = ({ isOpen
               className="text-[11px] font-mono text-amber-400 hover:text-amber-300 underline flex items-center gap-1.5 mb-5 cursor-pointer"
             >
               <HelpCircle className="w-3.5 h-3.5" />
-              <span>Ku ta gjej Trade URL-në time në Steam? (Kliko këtu)</span>
+              <span>Where do I find my Steam Trade URL? (Click here)</span>
               <ExternalLink className="w-3 h-3" />
             </a>
 
@@ -1648,13 +1648,13 @@ export const VortexCaseShopModal: React.FC<VortexCaseShopModalProps> = ({ isOpen
                 onClick={() => setShowTradeUrlDialog(false)}
                 className="px-4 py-2 rounded-xl text-slate-400 hover:text-white text-xs font-mono transition cursor-pointer"
               >
-                Anulo
+                Cancel
               </button>
               <button
                 onClick={handleSaveTradeUrl}
                 className="px-5 py-2.5 rounded-xl bg-amber-400 hover:bg-amber-300 text-black font-mono font-bold text-xs uppercase tracking-wider transition cursor-pointer shadow-md"
               >
-                Ruaj Lidhjen
+                Save Trade URL
               </button>
             </div>
           </div>

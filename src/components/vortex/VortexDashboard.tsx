@@ -825,7 +825,7 @@ export const VortexDashboard: React.FC<VortexDashboardProps> = ({
       invitedPlayerName: player.name,
     });
 
-    setDashboardToast(`✓ Ftesa iu dërgua ${player.name} — Duke shfaqur pamjen e ${player.name}`);
+    setDashboardToast(`✓ Invitation sent to ${player.name} — Displaying view for ${player.name}`);
   };
 
   const handleCancelPendingInvite = (slotIndex: number, e?: React.MouseEvent) => {
@@ -839,7 +839,7 @@ export const VortexDashboard: React.FC<VortexDashboardProps> = ({
     if (activePartyInvite && activePartyInvite.targetSlotIdx === slotIndex) {
       setActivePartyInvite(null);
     }
-    setDashboardToast('Ftesa u anulua');
+    setDashboardToast('Invitation cancelled');
   };
 
   // Party Leader Index (Default to center slot 2: bLocKeeRz) & Match Room modal
@@ -852,7 +852,7 @@ export const VortexDashboard: React.FC<VortexDashboardProps> = ({
     setPartyLeaderIndex(slotIndex);
     const member = partySlots[slotIndex];
     if (member) {
-      setDashboardToast(`👑 ${member.name} u emërua Lider i Party-t!`);
+      setDashboardToast(`👑 ${member.name} was promoted to Party Leader!`);
     }
   };
 
@@ -869,7 +869,7 @@ export const VortexDashboard: React.FC<VortexDashboardProps> = ({
       setPartyLeaderIndex(2); // Fallback to current user
     }
     if (member) {
-      setDashboardToast(`✕ ${member.name} u largua nga party`);
+      setDashboardToast(`✕ ${member.name} left the party`);
     }
   };
 
@@ -880,7 +880,7 @@ export const VortexDashboard: React.FC<VortexDashboardProps> = ({
       return copy;
     });
     setPartyLeaderIndex(2);
-    setDashboardToast('Ju dolët nga party');
+    setDashboardToast('You left the party');
   };
 
   // =========================================================================
@@ -972,7 +972,7 @@ export const VortexDashboard: React.FC<VortexDashboardProps> = ({
         ? (activePartyInvite.invitedPlayerName || playerToAdd.name)
         : activePartyInvite.sender;
 
-      setDashboardToast(`✓ ${joinedName} pranoi ftesën dhe u fut në party!`);
+      setDashboardToast(`✓ ${joinedName} accepted the invitation and joined the party!`);
       setActivePartyInvite(null);
       setActiveTab('play');
     }
@@ -990,10 +990,10 @@ export const VortexDashboard: React.FC<VortexDashboardProps> = ({
         });
       }
       const declinedName = activePartyInvite.isOutgoingSimulation
-        ? (activePartyInvite.invitedPlayerName || 'Lojtari')
+        ? (activePartyInvite.invitedPlayerName || 'Player')
         : activePartyInvite.sender;
 
-      setDashboardToast(`Ftesa për ${declinedName} u refuzua`);
+      setDashboardToast(`Invitation for ${declinedName} was declined`);
       setActivePartyInvite(null);
     }
   };
@@ -2193,7 +2193,7 @@ export const VortexDashboard: React.FC<VortexDashboardProps> = ({
                                   <button
                                     onClick={(e) => handlePromoteToLeader(idx, e)}
                                     className="p-1 rounded hover:bg-amber-500/20 text-slate-400 hover:text-amber-400 transition cursor-pointer"
-                                    title="Bëje Lider (Promote to Leader)"
+                                    title="Promote to Leader"
                                   >
                                     <Crown className="w-3.5 h-3.5" />
                                   </button>
@@ -2202,7 +2202,7 @@ export const VortexDashboard: React.FC<VortexDashboardProps> = ({
                                   <button
                                     onClick={(e) => handleKickMember(idx, e)}
                                     className="p-1 rounded hover:bg-red-500/20 text-slate-400 hover:text-red-400 transition cursor-pointer"
-                                    title="Largo nga grupi (Kick)"
+                                    title="Kick from party"
                                   >
                                     <X className="w-3.5 h-3.5" />
                                   </button>
@@ -2211,7 +2211,7 @@ export const VortexDashboard: React.FC<VortexDashboardProps> = ({
                                     <button
                                       onClick={handleLeaveParty}
                                       className="p-1 rounded hover:bg-red-500/20 text-slate-400 hover:text-red-400 transition cursor-pointer"
-                                      title="Dil nga grupi (Leave Party)"
+                                      title="Leave Party"
                                     >
                                       <LogOut className="w-3.5 h-3.5" />
                                     </button>
@@ -2314,7 +2314,7 @@ export const VortexDashboard: React.FC<VortexDashboardProps> = ({
                               });
                             }}
                             className="h-56 rounded-2xl bg-[#0E1017] border-2 border-dashed border-amber-500/70 p-4 flex flex-col justify-between items-center relative group shadow-[0_0_20px_rgba(245,158,11,0.15)] animate-in zoom-in-95 cursor-pointer hover:border-[#FF5500] transition-all hover:scale-[1.01]"
-                            title="Kliko për të hapur dritaren e testimit të ftesës FACEIT"
+                            title="Click to preview the FACEIT party invitation"
                           >
                             {/* Top Pending Tag */}
                             <div className="w-full flex items-center justify-between">
@@ -2389,7 +2389,7 @@ export const VortexDashboard: React.FC<VortexDashboardProps> = ({
                               <button
                                 onClick={(e) => handleCancelPendingInvite(idx, e)}
                                 className="px-2 py-1 rounded-lg bg-white/5 hover:bg-red-500/20 text-slate-400 hover:text-red-300 border border-white/10 text-[10px] font-mono font-bold transition cursor-pointer"
-                                title="Anulo ftesën"
+                                title="Cancel invitation"
                               >
                                 <X className="w-3 h-3" />
                               </button>

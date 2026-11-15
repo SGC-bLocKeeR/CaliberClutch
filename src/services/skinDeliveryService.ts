@@ -126,7 +126,7 @@ export const VORTEX_CASE_CATALOG: CS2Case[] = [
     "image": "https://imgproxy.dmarket.com/insecure/rs:fit:360:260:0/g:ce/aHR0cHM6Ly9jb21tdW5pdHkuYWthbWFpLnN0ZWFtc3RhdGljLmNvbS9lY29ub215L2ltYWdlL2kwQ29aODFVaTBtLTlLd2xCWTFMXzE4bXl1R3VxMXdmaFdTYVpnTXR0eVZmUGFFUlNSMFdxbXU3TEFvY0dKS3oybHVfWHNuWHd0bWtKalNVOTFkaDhiajM1VlRxVkJQNGlvX2ZybklWN0tiNU9hVS1KcWZIRHpYRmxlMHU0TFk4R3lfa2tSZ2lzR3pjbTR2NEozdkRPQVFtRE1keVJ2bEs3RWNtZUNVM3l3.webp",
     "bannerGradient": "from-amber-600/30 via-yellow-600/15 to-transparent",
     "glowColor": "#F59E0B",
-    "description": "P\u00ebrmban thikat Butterfly Knife, Gamma Doppler, dhe arm\u00ebt e preferuara AK-47 Nightwish e MP9 Starlight.",
+    "description": "Features the iconic Butterfly Knife, Gamma Doppler finishes, alongside AK-47 Nightwish and MP9 Starlight Protector.",
     "items": [
       {
         "id": "butterfly-slaughter",
@@ -390,7 +390,7 @@ export const VORTEX_CASE_CATALOG: CS2Case[] = [
     "image": "https://imgproxy.dmarket.com/insecure/rs:fit:360:260:0/g:ce/aHR0cHM6Ly9jb21tdW5pdHkuYWthbWFpLnN0ZWFtc3RhdGljLmNvbS9lY29ub215L2ltYWdlL2kwQ29aODFVaTBtLTlLd2xCWTFMXzE4bXl1R3VxMXdmaFdTYVpnTXR0eVZmUGFFUlNSMFdxbXU3TEFvY0dKS3oybHVfWHNuWHd0bWtKalNVOTFkaDhiajM1VlRxVkJQNGlvX2ZybkVWdnFmX2E2Vm9JZkdTWHo3SGxid2c1N1F3U1NfbXhobDE1amlHeU4zN2MzX0dadzkxVzhCd1JmbEs3RWZLc2Eyc2Z3.webp",
     "bannerGradient": "from-blue-600/30 via-indigo-600/15 to-transparent",
     "glowColor": "#3B82F6",
-    "description": "Arka m\u00eb e re zyrtare n\u00eb CS2 me thikat Kukri, skinin e par\u00eb t\u00eb Zeus x27 dhe AWP Chrome Cannon.",
+    "description": "The latest premier CS2 case featuring the Kukri Knife, debut Zeus x27 skins, and the AWP Chrome Cannon.",
     "items": [
       {
         "id": "kukri-fade",
@@ -636,7 +636,7 @@ export const VORTEX_CASE_CATALOG: CS2Case[] = [
     "image": "https://imgproxy.dmarket.com/insecure/rs:fit:360:260:0/g:ce/aHR0cHM6Ly9jb21tdW5pdHkuYWthbWFpLnN0ZWFtc3RhdGljLmNvbS9lY29ub215L2ltYWdlL2kwQ29aODFVaTBtLTlLd2xCWTFMXzE4bXl1R3VxMXdmaFdTYVpnTXR0eVZmUGFFUlNSMFdxbXU3TEFvY0dKS3oybHVfWHNuWHd0bWtKalNVOTFkaDhiajM1VlRxVkJQNGlvX2ZybkFWdmZiNmFxZHVjX1RGVmpUQ3hieDA1T1U0UzNqaWxFOXc0RHpSbkltdEl5MlNhMUp6REpFaFJQbEs3RWNPNFU4Z2ZB.webp",
     "bannerGradient": "from-rose-600/30 via-red-600/15 to-transparent",
     "glowColor": "#EF4444",
-    "description": "Nj\u00eb nga arkat m\u00eb t\u00eb suksesshme me doreza Clutch Gloves, AWP Duality dhe M4A4 Temukau.",
+    "description": "One of the most celebrated cases featuring Clutch Gloves, AWP Duality, and anime-inspired M4A4 Temukau.",
     "items": [
       {
         "id": "huntsman-fade",
@@ -882,7 +882,7 @@ export const VORTEX_CASE_CATALOG: CS2Case[] = [
     "image": "https://imgproxy.dmarket.com/insecure/rs:fit:360:260:0/g:ce/aHR0cHM6Ly9jb21tdW5pdHkuYWthbWFpLnN0ZWFtc3RhdGljLmNvbS9lY29ub215L2ltYWdlL2kwQ29aODFVaTBtLTlLd2xCWTFMXzE4bXl1R3VxMXdmaFdTYVpnTXR0eVZmUGFFUlNSMFdxbXU3TEFvY0dKS3oybHVfWHNuWHd0bWtKalNVOTFkaDhiajM1VlRxVkJQNGlvX2ZyM1FWN2FEN09QMDFJZmJHRHpQQ21ic200TFU1R252a3pVc2k0V3ZVbUlxdGNpX0NQUU55QXBzakVfbEs3RWZyaFc1NDVB.webp",
     "bannerGradient": "from-lime-600/30 via-emerald-600/15 to-transparent",
     "glowColor": "#A3E635",
-    "description": "Arka m\u00eb e k\u00ebrkuar ekonomike me shansin ekskluziv p\u00ebr Skeleton Knife dhe AK-47 Legion of Anubis.",
+    "description": "High-demand classic case with exclusive odds for Skeleton Knife finishes and AK-47 Legion of Anubis.",
     "items": [
       {
         "id": "skeleton-ch",
@@ -1175,19 +1175,19 @@ export const dispatchSkinViaTradeBot = async (
   onProgress?: (step: number, message: string) => void
 ): Promise<TradeOfferDeliveryResult> => {
   if (!isValidSteamTradeUrl(steamTradeUrl)) {
-    throw new Error('Steam Trade URL nuk është i vlefshëm. Kontrollo formatin në profil.');
+    throw new Error('Steam Trade URL is invalid. Check format in profile.');
   }
 
   // Step 1: Steam Token Handshake
-  onProgress?.(1, 'Verifikimi i Steam Partner & Token me Steam Web API...');
+  onProgress?.(1, 'Verifying Steam Partner & Token with Steam Web API...');
   await new Promise(res => setTimeout(res, 900));
 
   // Step 2: Inventory Allocation
-  onProgress?.(2, `Përgatitja e [${item.name}] nga inventari i certifikuar i Vortex...`);
+  onProgress?.(2, `Preparing [${item.name}] from Vortex verified inventory...`);
   await new Promise(res => setTimeout(res, 1100));
 
   // Step 3: Steam Bot Trade Offer Dispatch
-  onProgress?.(3, 'Bot-i i automatizuar i Vortex dërgoi Trade Offer në llogarinë tuaj Steam!');
+  onProgress?.(3, 'Automated Vortex Bot dispatched Trade Offer to your Steam account!');
   await new Promise(res => setTimeout(res, 800));
 
   const randomBotNumber = Math.floor(Math.random() * 8) + 1;
@@ -1202,7 +1202,7 @@ export const dispatchSkinViaTradeBot = async (
     botName: `Vortex Steam Trade Bot #${randomBotNumber.toString().padStart(2, '0')}`,
     item,
     status: 'sent',
-    message: `Trade Offer u dërgua me sukses! Hapni aplikacionin Steam në telefon (Steam Mobile Authenticator) ose në shfletues për të pranuar skin-in.`,
+    message: `Trade Offer sent successfully! Open Steam Mobile Authenticator or browser to accept your item.`,
     tradeUrlUsed: steamTradeUrl,
     timestamp: Date.now()
   };
@@ -1260,7 +1260,7 @@ export const testDMarketLiveConnection = async (
   const latencyMs = Date.now() - start;
 
   if (!publicKey || publicKey.trim().length < 8) {
-    throw new Error('Public Key e DMarket është e pavlefshme. Merrni çelësin te DMarket Account Settings -> Trading API.');
+    throw new Error('DMarket Public Key is invalid. Obtain your key from DMarket Account Settings -> Trading API.');
   }
 
   return {
@@ -1268,7 +1268,7 @@ export const testDMarketLiveConnection = async (
     latencyMs,
     dmarketBalanceEur: 48.50, // Connected merchant liquidity
     activeOffersCount: 420894,
-    message: 'Lidhja me DMarket Marketplace API v2 Gateway u verifikua me sukses! Çelësat Ed25519 janë aktivë.',
+    message: 'Connection to DMarket Marketplace API v2 Gateway verified! Ed25519 keys authenticated.',
     timestamp: new Date().toISOString()
   };
 };
@@ -1533,25 +1533,25 @@ export const buySkinDirectFromDMarket = async (
 ): Promise<TradeOfferDeliveryResult> => {
   // Validate Trade URL
   if (!isValidSteamTradeUrl(steamTradeUrl)) {
-    throw new Error('Ju lutem vendosni Steam Trade URL-në tuaj para blerjes.');
+    throw new Error('Please set your Steam Trade URL before purchasing.');
   }
 
   // Deduct user wallet
   const deducted = deductVortexWalletBalance(item.priceEur);
   if (!deducted) {
-    throw new Error(`Bilanci juaj në Vortex nuk mjafton për të blerë [${item.name}] (${item.priceEur.toFixed(2)} €).`);
+    throw new Error(`Your Vortex balance is insufficient to purchase [${item.name}] (${item.priceEur.toFixed(2)} €).`);
   }
 
   // Step 1: Order Validation
-  onProgress?.(1, `Verifikimi i disponueshmërisë së [${item.name}] në sistemin e Vortex...`);
+  onProgress?.(1, `Validating availability of [${item.name}] on Vortex network...`);
   await new Promise(res => setTimeout(res, 900));
 
   // Step 2: Settlement & Steam Bot Handshake
-  onProgress?.(2, `Konfirmimi i kërkesës. Bot-i automatik i Vortex po përgatit ofertën në Steam...`);
+  onProgress?.(2, `Confirming order. Automated Steam Trade Bot is initiating offer handshake...`);
   await new Promise(res => setTimeout(res, 1000));
 
   // Step 3: Dispatch Trade Offer to User's Steam URL
-  onProgress?.(3, `Dërgimi i Trade Offer nga Bot-i në Steam Trade URL tuaj...`);
+  onProgress?.(3, `Dispatching Steam Trade Offer to your Trade URL...`);
   await new Promise(res => setTimeout(res, 800));
 
   const orderId = `VTX-ORD-${Math.floor(10000000 + Math.random() * 90000000)}`;
@@ -1565,7 +1565,7 @@ export const buySkinDirectFromDMarket = async (
     botName: 'Vortex Steam Trade Bot #04',
     item,
     status: 'sent',
-    message: `Trade Offer për [${item.name}] sapo u dërgua me sukses në llogarinë tuaj Steam! Hapni aplikacionin Steam për të pranuar ofertën.`,
+    message: `Trade Offer for [${item.name}] was sent successfully to your Steam account! Open Steam to accept the trade.`,
     tradeUrlUsed: steamTradeUrl,
     timestamp: Date.now()
   };

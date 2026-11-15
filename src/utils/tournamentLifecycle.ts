@@ -118,7 +118,7 @@ export function getActiveHltvEvents(referenceDate: Date = new Date()): HltvEvent
   const now = referenceDate.getTime();
 
   // Filter out any event whose endDate has passed!
-  // Sapo përfundon një tournament, hiqet automatikisht nga lista aktive!
+  // Once a tournament concludes, it is automatically removed from the active list!
   const activeAndUpcoming = SCHEDULED_TOURNAMENTS.filter(item => {
     const end = new Date(item.endDate).getTime();
     return now <= end;

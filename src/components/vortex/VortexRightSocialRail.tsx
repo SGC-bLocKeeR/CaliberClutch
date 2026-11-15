@@ -196,7 +196,7 @@ export const VortexRightSocialRail: React.FC<VortexRightSocialRailProps> = ({
       id: 'dm-edd1',
       name: 'edd1-',
       avatar: '/avatars/edd1.png',
-      lastMessage: 'kallxo kur me ta qu',
+      lastMessage: 'let me know when to send it',
       date: '9 Nov',
       verification: 'verified' as const,
       code: 'XK',
@@ -206,7 +206,7 @@ export const VortexRightSocialRail: React.FC<VortexRightSocialRailProps> = ({
       id: 'dm-blackbars1',
       name: 'blackbars1',
       avatar: 'https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?auto=format&fit=crop&w=150&q=80',
-      lastMessage: 'aje tu lu ti',
+      lastMessage: 'are you playing now?',
       date: '9 Nov',
       verification: 'none' as const,
       code: 'AL',
@@ -216,7 +216,7 @@ export const VortexRightSocialRail: React.FC<VortexRightSocialRailProps> = ({
       id: 'dm-toxi',
       name: 'toxi---',
       avatar: 'https://images.unsplash.com/photo-1570295999919-56ceb5ecca61?auto=format&fit=crop&w=150&q=80',
-      lastMessage: 'a',
+      lastMessage: 'ready',
       date: '31 Oct',
       verification: 'none' as const,
       code: 'XK',
@@ -227,7 +227,7 @@ export const VortexRightSocialRail: React.FC<VortexRightSocialRailProps> = ({
       name: 'N19',
       avatar: 'https://images.unsplash.com/photo-1566492031773-4f4e44671857?auto=format&fit=crop&w=150&q=80',
       badge: '★',
-      lastMessage: ';;',
+      lastMessage: 'gg',
       date: '24 Oct',
       verification: 'vip' as const,
       code: 'DE',
@@ -238,7 +238,7 @@ export const VortexRightSocialRail: React.FC<VortexRightSocialRailProps> = ({
       name: 'DIVA-',
       avatar: 'https://images.unsplash.com/photo-1494790108377-be9c29b29330?auto=format&fit=crop&w=150&q=80',
       badge: '★',
-      lastMessage: 'hec moj lujm fitojm naj loj',
+      lastMessage: "let's queue up and win some games",
       date: '18 Oct',
       verification: 'vip' as const,
       code: 'XK',
@@ -248,7 +248,7 @@ export const VortexRightSocialRail: React.FC<VortexRightSocialRailProps> = ({
       id: 'dm-amatuero',
       name: 'amatuero',
       avatar: 'https://images.unsplash.com/photo-1579546929518-9e396f3cc809?auto=format&fit=crop&w=150&q=80',
-      lastMessage: 'OKI',
+      lastMessage: 'OK',
       date: '12 Apr',
       verification: 'none' as const,
       code: 'XK',
@@ -270,45 +270,45 @@ export const VortexRightSocialRail: React.FC<VortexRightSocialRailProps> = ({
         id: '1',
         sender: currentGamerTag,
         avatar: currentAvatarUrl || '/images/blockeerz_avatar.png',
-        text: 'prit lop\nse po ma nis lojen e marr banned',
+        text: 'wait up bro\nif you start the match now I get banned',
         timestamp: '09:27 pm'
       },
       {
         id: '2',
         sender: 'edd1-',
         avatar: '/avatars/edd1.png',
-        text: 'hahahahahahhahah jojo se nismi pa than ti',
+        text: 'hahaha no worries we will not start without you',
         timestamp: '09:27 pm'
       },
       {
         id: '3',
         sender: currentGamerTag,
         avatar: currentAvatarUrl || '/images/blockeerz_avatar.png',
-        text: 'okej\nprit',
+        text: 'ok\nwait',
         timestamp: '09:28 pm'
       },
       {
         id: '4',
         sender: 'edd1-',
         avatar: '/avatars/edd1.png',
-        text: 'okej\nkallxo kur me ta qu',
+        text: 'ok\nlet me know when to send it',
         timestamp: '09:28 pm'
       }
     ],
     'blackbars1': [
-      { id: '1', sender: 'blackbars1', avatar: 'https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?auto=format&fit=crop&w=150&q=80', text: 'aje tu lu ti', timestamp: '09:05 pm' }
+      { id: '1', sender: 'blackbars1', avatar: 'https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?auto=format&fit=crop&w=150&q=80', text: 'are you playing now?', timestamp: '09:05 pm' }
     ],
     'toxi---': [
-      { id: '1', sender: 'toxi---', avatar: 'https://images.unsplash.com/photo-1570295999919-56ceb5ecca61?auto=format&fit=crop&w=150&q=80', text: 'a', timestamp: '02:12 pm' }
+      { id: '1', sender: 'toxi---', avatar: 'https://images.unsplash.com/photo-1570295999919-56ceb5ecca61?auto=format&fit=crop&w=150&q=80', text: 'ready', timestamp: '02:12 pm' }
     ],
     'N19': [
-      { id: '1', sender: 'N19', avatar: 'https://images.unsplash.com/photo-1566492031773-4f4e44671857?auto=format&fit=crop&w=150&q=80', text: ';;', timestamp: '11:40 pm' }
+      { id: '1', sender: 'N19', avatar: 'https://images.unsplash.com/photo-1566492031773-4f4e44671857?auto=format&fit=crop&w=150&q=80', text: 'gg', timestamp: '11:40 pm' }
     ],
     'DIVA-': [
-      { id: '1', sender: 'DIVA-', avatar: 'https://images.unsplash.com/photo-1494790108377-be9c29b29330?auto=format&fit=crop&w=150&q=80', text: 'hec moj lujm fitojm naj loj', timestamp: '07:15 pm' }
+      { id: '1', sender: 'DIVA-', avatar: 'https://images.unsplash.com/photo-1494790108377-be9c29b29330?auto=format&fit=crop&w=150&q=80', text: "let's queue up and win some games", timestamp: '07:15 pm' }
     ],
     'amatuero': [
-      { id: '1', sender: 'amatuero', avatar: 'https://images.unsplash.com/photo-1579546929518-9e396f3cc809?auto=format&fit=crop&w=150&q=80', text: 'OKI', timestamp: '04:02 pm' }
+      { id: '1', sender: 'amatuero', avatar: 'https://images.unsplash.com/photo-1579546929518-9e396f3cc809?auto=format&fit=crop&w=150&q=80', text: 'OK', timestamp: '04:02 pm' }
     ]
   });
 
@@ -767,7 +767,7 @@ export const VortexRightSocialRail: React.FC<VortexRightSocialRailProps> = ({
             </div>
 
             <p className="text-[11px] text-slate-400 leading-snug">
-              Hap arkat zyrtare & fito thika e skinë CS2. Dërgesë e menjëhershme me Steam Trade Bot.
+              Open official crates & win CS2 knives and rare skins. Instant automated Steam Bot delivery.
             </p>
 
             {/* Wallet Balance & Open Store Button */}
@@ -783,9 +783,9 @@ export const VortexRightSocialRail: React.FC<VortexRightSocialRailProps> = ({
                   setShowCaseShopModal(true);
                 }}
                 className="flex items-center gap-1 text-[11px] font-mono font-black text-black bg-gradient-to-r from-amber-400 to-yellow-500 hover:from-amber-300 hover:to-yellow-400 px-3 py-1.5 rounded-xl transition cursor-pointer shadow-[0_0_15px_rgba(245,158,11,0.3)] hover:scale-105 active:scale-95"
-                title="Hap Dyqanin e Arkave Vortex"
+                title="Open Vortex CS2 Case Shop"
               >
-                <span>Hap Arkat</span>
+                <span>Open Cases</span>
                 <ChevronRight className="w-3.5 h-3.5" />
               </button>
             </div>
@@ -2039,7 +2039,7 @@ export const VortexRightSocialRail: React.FC<VortexRightSocialRailProps> = ({
             <div className="flex items-center gap-2">
               <span className="flex items-center gap-1.5 px-3 py-1 rounded-full bg-amber-400/10 border border-amber-400/30 text-amber-400 text-xs font-mono font-bold uppercase">
                 <Gift className="w-3.5 h-3.5" />
-                <span>Partnerët Zyrtarë CS2 Case</span>
+                <span>Official CS2 Case Partners</span>
               </span>
               <span className="text-[11px] font-mono text-emerald-400 font-bold bg-emerald-500/10 border border-emerald-500/20 px-2 py-0.5 rounded-full">
                 ● LIVE BONUS
@@ -2047,10 +2047,10 @@ export const VortexRightSocialRail: React.FC<VortexRightSocialRailProps> = ({
             </div>
 
             <h3 className="font-display font-black text-2xl text-white tracking-tight mt-3">
-              Hap CS2 Cases & Fito Thika të Vërteta
+              Open CS2 Cases & Win Real Knives
             </h3>
             <p className="text-xs text-slate-400 font-sans mt-1 max-w-lg">
-              Përdor kodin promocional <strong className="text-amber-400 font-mono">VORTEX</strong> në faqet partnere për të përfituar <strong className="text-white">+10% Bonus në çdo depozitë</strong> dhe arkë falas. Skinet vijnë direkt në Steam tuaj!
+              Use promo code <strong className="text-amber-400 font-mono">VORTEX</strong> on partner platforms to receive <strong className="text-white">+10% Extra Deposit Bonus</strong> and free starter crates. Skins withdraw directly to your Steam inventory!
             </p>
 
             {/* Promo Code Highlight Banner */}
@@ -2060,7 +2060,7 @@ export const VortexRightSocialRail: React.FC<VortexRightSocialRailProps> = ({
                   <Sparkles className="w-5 h-5 text-amber-400" />
                 </div>
                 <div>
-                  <div className="text-[11px] font-mono text-slate-400 uppercase tracking-wider">Kodi Promocional Ekskluziv:</div>
+                  <div className="text-[11px] font-mono text-slate-400 uppercase tracking-wider">Exclusive Promo Code:</div>
                   <div className="text-lg font-black font-mono text-amber-400 tracking-wider">
                     VORTEX
                     <span className="text-xs font-normal text-slate-300 ml-2">(+10% EXTRA & FREE CRATE)</span>
@@ -2075,12 +2075,12 @@ export const VortexRightSocialRail: React.FC<VortexRightSocialRailProps> = ({
                 {copiedCode ? (
                   <>
                     <Check className="w-4 h-4 text-black" />
-                    <span>U KOPJUA!</span>
+                    <span>COPIED!</span>
                   </>
                 ) : (
                   <>
                     <Copy className="w-4 h-4" />
-                    <span>KOPJO KODIN</span>
+                    <span>COPY CODE</span>
                   </>
                 )}
               </button>
@@ -2133,7 +2133,7 @@ export const VortexRightSocialRail: React.FC<VortexRightSocialRailProps> = ({
                     onClick={() => sound.playSelect()}
                     className="w-full sm:w-auto px-4 py-2.5 rounded-xl bg-white/[0.06] hover:bg-amber-400 text-slate-200 hover:text-black font-display font-bold text-xs uppercase tracking-wider transition cursor-pointer flex items-center justify-center gap-2 shrink-0 border border-white/10 hover:border-amber-400 group-hover:shadow-[0_0_15px_rgba(245,158,11,0.25)]"
                   >
-                    <span>Hap Faqen</span>
+                    <span>Visit Site</span>
                     <ExternalLink className="w-3.5 h-3.5" />
                   </a>
                 </div>
@@ -2146,7 +2146,7 @@ export const VortexRightSocialRail: React.FC<VortexRightSocialRailProps> = ({
                 <span className="text-emerald-400">🔒</span>
                 Steam Web API • Provably Fair • Instant Bot Delivery
               </span>
-              <span className="text-slate-400">Zero rrezik apo kosto për Vortex Gaming</span>
+              <span className="text-slate-400">Zero fee & 100% verified P2P Steam API</span>
             </div>
           </div>
         </div>
