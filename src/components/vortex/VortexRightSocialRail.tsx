@@ -42,6 +42,7 @@ import { CountryFlag } from './CountryFlag';
 import { FaceitVerificationBadge } from './VortexDashboard';
 import { VortexCaseShopModal } from './VortexCaseShopModal';
 import { XsollaCheckoutModal } from './XsollaCheckoutModal';
+import { HellcasePayBySkinsModal } from './HellcasePayBySkinsModal';
 import { getVortexWalletBalance } from '../../services/skinDeliveryService';
 
 export interface SocialFriend {
@@ -132,6 +133,7 @@ export const VortexRightSocialRail: React.FC<VortexRightSocialRailProps> = ({
   // In-Platform White-Label CS2 Cases Store State
   const [showCaseShopModal, setShowCaseShopModal] = useState(false);
   const [showXsollaTopUp, setShowXsollaTopUp] = useState(false);
+  const [showHellcaseModal, setShowHellcaseModal] = useState(false);
   const [vortexBalance, setVortexBalance] = useState<number>(() => getVortexWalletBalance());
 
   useEffect(() => {
@@ -600,6 +602,45 @@ export const VortexRightSocialRail: React.FC<VortexRightSocialRailProps> = ({
         {/* MIDDLE SECTION: Notifications • Social • Party Capsule */}
         <div className="flex flex-col gap-3 w-full flex-1 pt-3 overflow-y-auto">
           
+          {/* HELLCASE AUTHENTIC BALANCE & REFILL BAR (PLACED DIRECTLY ABOVE NOTIFICATIONS) */}
+          <div className="w-full p-2 rounded-2xl bg-gradient-to-r from-[#0C101A] via-[#121726] to-[#0C101A] border border-emerald-500/35 hover:border-emerald-400/50 shadow-[0_4px_20px_rgba(16,185,129,0.12)] flex items-center justify-between gap-1.5 transition select-none">
+            {/* Balance Chips matching Hellcase Screenshot */}
+            <div 
+              onClick={() => {
+                sound.playSelect();
+                setShowHellcaseModal(true);
+              }}
+              className="flex items-center gap-1.5 min-w-0 cursor-pointer"
+              title="Click to view balance or fill up"
+            >
+              <div className="flex items-center gap-1 px-1.5 py-1 rounded-lg bg-black/60 border border-white/5">
+                <span className="text-xs">💵</span>
+                <span className="text-xs font-mono font-black text-white">0</span>
+              </div>
+              <div className="flex items-center gap-1 px-1.5 py-1 rounded-lg bg-black/60 border border-white/5">
+                <span className="text-xs">🎫</span>
+                <span className="text-xs font-mono font-black text-amber-400">9</span>
+              </div>
+              <div className="flex items-center pl-1 font-mono font-black text-xs text-emerald-400 tracking-tight">
+                {vortexBalance.toFixed(2)} €
+              </div>
+            </div>
+
+            {/* REFILL +5% Button matching Hellcase Screenshot */}
+            <button
+              type="button"
+              onClick={() => {
+                sound.playSelect();
+                setShowHellcaseModal(true);
+              }}
+              className="px-2.5 py-1.5 rounded-xl bg-gradient-to-r from-emerald-500 to-teal-500 hover:from-emerald-400 hover:to-teal-400 text-slate-950 font-mono font-black text-xs transition cursor-pointer shadow-[0_0_12px_rgba(16,185,129,0.35)] flex items-center gap-1 shrink-0 hover:scale-105 active:scale-95"
+              title="Filling up the balance • Pay by Skins, Crypto & Cards"
+            >
+              <span>REFILL</span>
+              <span className="text-[9px] font-black text-white bg-black/35 px-1 py-0.2 rounded">+5%</span>
+            </button>
+          </div>
+
           {/* Notifications Button */}
           <div className="relative w-full">
             {activeDrawer === 'notifications' && (
@@ -777,10 +818,10 @@ export const VortexRightSocialRail: React.FC<VortexRightSocialRailProps> = ({
               <div 
                 onClick={() => {
                   sound.playSelect();
-                  setShowXsollaTopUp(true);
+                  setShowHellcaseModal(true);
                 }}
                 className="flex items-center gap-1.5 text-[11px] font-mono font-bold text-slate-200 bg-white/[0.04] hover:bg-white/[0.08] px-2 py-1 rounded-lg border border-white/5 hover:border-amber-400/40 cursor-pointer transition select-none"
-                title="Top up wallet funds via Xsolla Pay Station"
+                title="Filling up the balance • Pay by Skins, Crypto & Cards"
               >
                 <Coins className="w-3.5 h-3.5 text-amber-400" />
                 <span className="text-emerald-400">{vortexBalance.toFixed(2)} €</span>
@@ -2184,7 +2225,16 @@ export const VortexRightSocialRail: React.FC<VortexRightSocialRailProps> = ({
       />
 
       {/* ======================================================== */}
-      {/* 8. OFFICIAL XSOLLA PAY STATION 4 WALLET TOP-UP GATEWAY    */}
+      {/* 8. HELLCASE PAY BY SKINS & FILLING UP THE BALANCE MODAL   */}
+      {/* ======================================================== */}
+      <HellcasePayBySkinsModal
+        isOpen={showHellcaseModal}
+        onClose={() => setShowHellcaseModal(false)}
+        initialMethod="overview"
+      />
+
+      {/* ======================================================== */}
+      {/* 9. OFFICIAL XSOLLA PAY STATION 4 WALLET TOP-UP GATEWAY    */}
       {/* ======================================================== */}
       <XsollaCheckoutModal
         isOpen={showXsollaTopUp}

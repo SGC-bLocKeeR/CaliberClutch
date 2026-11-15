@@ -470,14 +470,10 @@ export const XsollaCheckoutModal: React.FC<XsollaCheckoutModalProps> = ({
                 <label className="text-[10px] text-slate-400 uppercase font-bold block mb-1">
                   3. Environment Mode
                 </label>
-                <select
-                  value={config.mode}
-                  onChange={(e) => setConfig({ ...config, mode: e.target.value as 'sandbox' | 'live' })}
-                  className="w-full px-3 py-2 rounded-xl bg-[#0A0C13] border border-white/10 text-white font-mono text-xs focus:border-amber-400 outline-none cursor-pointer"
-                >
-                  <option value="live">Live Production (Real Money)</option>
-                  <option value="sandbox">Sandbox Test Mode</option>
-                </select>
+                <div className="w-full px-3 py-2 rounded-xl bg-[#0A0C13] border border-emerald-500/30 text-emerald-400 font-mono text-xs font-bold flex items-center gap-1.5">
+                  <span className="w-2 h-2 rounded-full bg-emerald-400" />
+                  <span>Live Production (Real Money)</span>
+                </div>
               </div>
             </div>
 
@@ -531,10 +527,7 @@ export const XsollaCheckoutModal: React.FC<XsollaCheckoutModalProps> = ({
               </div>
               <div className="flex items-center gap-2">
                 <a
-                  href={config.mode === 'live'
-                    ? `https://secure.xsolla.com/paystation4/?project_id=${config.projectId}`
-                    : `https://sandbox-secure.xsolla.com/paystation4/?project_id=${config.projectId}`
-                  }
+                  href={`https://secure.xsolla.com/paystation4/?project_id=${config.projectId}`}
                   target="_blank"
                   rel="noopener noreferrer"
                   className="px-3 py-2 rounded-xl bg-white/5 hover:bg-white/10 border border-white/10 text-slate-300 hover:text-white transition flex items-center gap-1.5 cursor-pointer text-xs"

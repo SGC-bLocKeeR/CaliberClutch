@@ -41,7 +41,7 @@ const STORAGE_XSOLLA_SECRET_KEY = 'vortex_xsolla_secret_key';
 export const DEFAULT_XSOLLA_CONFIG: XsollaConfig = {
   projectId: '321543', // Official VORTEX Gaming Project ID on Xsolla Publisher
   merchantId: '870122', // Official VORTEX Gaming Merchant ID
-  mode: 'sandbox', // Starts in sandbox for testing, toggleable to live
+  mode: 'live', // Real live production mode (Real money)
   apiKey: 'c067e12d8b1829007277de34c5f3ed9ab446aafc',
   secretKey: 'zK17ILbblZfq35s8ggkz44j-olQBn_B35XgEhhKUsrg',
 };
@@ -51,7 +51,7 @@ export const getXsollaConfig = (): XsollaConfig => {
   return {
     projectId: localStorage.getItem(STORAGE_XSOLLA_PROJECT_ID) || DEFAULT_XSOLLA_CONFIG.projectId,
     merchantId: localStorage.getItem(STORAGE_XSOLLA_MERCHANT_ID) || DEFAULT_XSOLLA_CONFIG.merchantId,
-    mode: (localStorage.getItem(STORAGE_XSOLLA_MODE) as 'sandbox' | 'live') || DEFAULT_XSOLLA_CONFIG.mode,
+    mode: 'live',
     apiKey: localStorage.getItem(STORAGE_XSOLLA_API_KEY) || DEFAULT_XSOLLA_CONFIG.apiKey,
     secretKey: localStorage.getItem(STORAGE_XSOLLA_SECRET_KEY) || DEFAULT_XSOLLA_CONFIG.secretKey,
   };

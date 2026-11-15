@@ -29,6 +29,7 @@ import {
 import confetti from 'canvas-confetti';
 import { sound } from '../../utils/soundEffects';
 import { XsollaCheckoutModal } from './XsollaCheckoutModal';
+import { HellcasePayBySkinsModal } from './HellcasePayBySkinsModal';
 import { 
   CS2Case, 
   CS2Skin, 
@@ -125,6 +126,7 @@ export const VortexCaseShopModal: React.FC<VortexCaseShopModalProps> = ({ isOpen
   const [tradeUrl, setTradeUrl] = useState<string>(() => getSavedSteamTradeUrl());
   const [showTradeUrlDialog, setShowTradeUrlDialog] = useState<boolean>(false);
   const [showXsollaModal, setShowXsollaModal] = useState<boolean>(false);
+  const [showHellcaseModal, setShowHellcaseModal] = useState<boolean>(false);
   const [tempTradeUrl, setTempTradeUrl] = useState<string>(tradeUrl);
   const [tradeUrlError, setTradeUrlError] = useState<string | null>(null);
 
@@ -259,7 +261,7 @@ export const VortexCaseShopModal: React.FC<VortexCaseShopModalProps> = ({ isOpen
     const totalCost = c.priceEur * caseCount;
     if (balance < totalCost) {
       sound.playClick();
-      setShowXsollaModal(true);
+      setShowHellcaseModal(true);
       return;
     }
 
@@ -429,8 +431,8 @@ export const VortexCaseShopModal: React.FC<VortexCaseShopModalProps> = ({ isOpen
 
     if (balance < item.priceEur) {
       sound.playClick();
-      setDirectBuyError(`Insufficient balance (${balance.toFixed(2)} €) to purchase [${item.name}] (${item.priceEur.toFixed(2)} €). Opening Xsolla Pay Station...`);
-      setShowXsollaModal(true);
+      setDirectBuyError(`Insufficient balance (${balance.toFixed(2)} €) to purchase [${item.name}] (${item.priceEur.toFixed(2)} €). Opening Refill & Pay by Skins...`);
+      setShowHellcaseModal(true);
       return;
     }
 
@@ -594,13 +596,13 @@ export const VortexCaseShopModal: React.FC<VortexCaseShopModalProps> = ({ isOpen
               <button
                 onClick={() => {
                   sound.playSelect();
-                  setShowXsollaModal(true);
+                  setShowHellcaseModal(true);
                 }}
-                className="ml-1 px-2.5 py-1 rounded-lg bg-gradient-to-r from-[#FF003C]/20 to-amber-500/20 hover:from-[#FF003C]/35 hover:to-amber-500/35 border border-[#FF003C]/50 text-amber-300 text-[10px] font-mono font-black transition cursor-pointer flex items-center gap-1 shadow-sm"
-                title="Top Up Wallet via Xsolla Pay Station"
+                className="ml-1 px-2.5 py-1 rounded-lg bg-gradient-to-r from-emerald-500/20 to-teal-500/20 hover:from-emerald-500/35 hover:to-teal-500/35 border border-emerald-500/50 text-emerald-300 text-[10px] font-mono font-black transition cursor-pointer flex items-center gap-1 shadow-sm"
+                title="Filling up the balance • Pay by Skins, Crypto & Cards"
               >
-                <span>+TOP UP</span>
-                <span className="text-[8px] font-black text-[#FF003C] uppercase">XSOLLA</span>
+                <span>REFILL</span>
+                <span className="text-[8px] font-black text-white bg-black/35 px-1 py-0.2 rounded">+5%</span>
               </button>
             </div>
 
@@ -1680,6 +1682,13 @@ export const VortexCaseShopModal: React.FC<VortexCaseShopModalProps> = ({ isOpen
         onPaymentSuccess={() => {
           // Wallet balance automatically synchronizes via the global 'vortex_wallet_updated' event
         }}
+      />
+
+      {/* Hellcase Pay By Skins & Deposit Modal */}
+      <HellcasePayBySkinsModal
+        isOpen={showHellcaseModal}
+        onClose={() => setShowHellcaseModal(false)}
+        initialMethod="overview"
       />
 
     </div>
