@@ -34,7 +34,7 @@ interface TradableSkin {
   weapon: string;
   skinName: string;
   fullName: string;
-  type: 'knife' | 'rifle' | 'sniper' | 'pistol' | 'other';
+  type: 'knife' | 'rifle' | 'sniper' | 'pistol' | 'sticker' | 'case' | 'other';
   rarity: 'extraordinary' | 'covert' | 'classified' | 'restricted' | 'mil-spec';
   wear: string;
   wearShort: string;
@@ -106,7 +106,7 @@ export const HellcasePayBySkinsModal: React.FC<HellcasePayBySkinsModalProps> = (
   const [inventory, setInventory] = useState<TradableSkin[]>([]);
   const [selectedSkinIds, setSelectedSkinIds] = useState<Set<string>>(new Set());
   const [skinSearch, setSkinSearch] = useState('');
-  const [selectedCategory, setSelectedCategory] = useState<'all' | 'knife' | 'rifle' | 'sniper' | 'pistol'>('all');
+  const [selectedCategory, setSelectedCategory] = useState<'all' | 'knife' | 'rifle' | 'sniper' | 'pistol' | 'sticker' | 'other'>('all');
   const [isDepositingSkins, setIsDepositingSkins] = useState(false);
   const [depositSuccessMessage, setDepositSuccessMessage] = useState<string | null>(null);
 
@@ -599,7 +599,7 @@ export const HellcasePayBySkinsModal: React.FC<HellcasePayBySkinsModalProps> = (
                   }`}
                 >
                   {/* Left: Authentic Gold Karambit Lore Knife */}
-                  <div className="relative w-24 h-20 shrink-0 flex items-center justify-center -ml-2 select-none pointer-events-none">
+                  <div className="relative w-14 sm:w-16 h-14 sm:h-16 shrink-0 flex items-center justify-center select-none pointer-events-none">
                     <img 
                       src={KARAMBIT_LORE_IMAGE} 
                       alt="" 
@@ -610,11 +610,11 @@ export const HellcasePayBySkinsModal: React.FC<HellcasePayBySkinsModalProps> = (
                   </div>
 
                   {/* Right: Exact 1:1 Hellcase Typography */}
-                  <div className="flex-1 flex flex-col justify-center items-start pl-1 select-none">
-                    <span className="text-[10px] font-sans font-bold text-[#EAB308] tracking-widest leading-none mb-1 uppercase">
+                  <div className="flex-1 flex flex-col justify-center items-start pl-2 select-none min-w-0">
+                    <span className="text-[10px] font-sans font-bold text-[#EAB308] tracking-widest leading-none mb-1 uppercase whitespace-nowrap">
                       PAY BY
                     </span>
-                    <span className="text-xl font-display font-black text-[#FACC15] tracking-wider leading-none uppercase">
+                    <span className="text-lg font-display font-black text-[#FACC15] tracking-wider leading-none uppercase whitespace-nowrap">
                       SKINS
                     </span>
                   </div>
@@ -756,18 +756,22 @@ export const HellcasePayBySkinsModal: React.FC<HellcasePayBySkinsModalProps> = (
                   {/* Top Special Banner: 0-Day Instant Deposit */}
                   <div className="p-4 rounded-2xl bg-gradient-to-r from-[#111728] via-[#151D33] to-[#111728] border border-emerald-500/30 flex flex-col sm:flex-row sm:items-center justify-between gap-3 shadow-lg">
                     <div className="space-y-1">
-                      <div className="flex items-center gap-2">
+                      <div className="flex items-center gap-2 flex-wrap">
                         <span className="text-[9px] font-mono font-black text-slate-950 bg-emerald-400 px-2 py-0.5 rounded-full uppercase flex items-center gap-1 shadow">
                           <span className="w-1.5 h-1.5 rounded-full bg-slate-950 animate-pulse" />
                           VORTEX FAST-TRACK BOT • 0-DAY HOLD
                         </span>
-                        <span className="text-[10px] font-mono text-emerald-400">P2P Escrow Protection</span>
+                        <span className="text-[10px] font-mono text-emerald-400">P2P Escrow</span>
+                        <span className="text-[9px] font-mono text-amber-400 bg-amber-400/10 border border-amber-400/20 px-2 py-0.5 rounded-full flex items-center gap-1 font-bold">
+                          <span className="w-1.5 h-1.5 rounded-full bg-amber-400" />
+                          LIVE CS2 MARKET PRICES (EUR)
+                        </span>
                       </div>
                       <h3 className="text-base font-black font-display text-white tracking-tight">
                         Deposit CS2 Skins to Balance Instantly
                       </h3>
                       <p className="text-xs font-mono text-slate-400">
-                        Skip the 8-day hold — automated Vortex Steam Bots verify trade offers and credit your wallet in seconds.
+                        Skip the 8-day hold — automated Vortex Steam Bots verify trade offers and credit your wallet in seconds at real-time CS2 market rates.
                       </p>
                     </div>
 
@@ -849,7 +853,8 @@ export const HellcasePayBySkinsModal: React.FC<HellcasePayBySkinsModalProps> = (
                         { id: 'knife', label: 'Knives' },
                         { id: 'rifle', label: 'Rifles' },
                         { id: 'sniper', label: 'Snipers' },
-                        { id: 'pistol', label: 'Pistols' }
+                        { id: 'pistol', label: 'Pistols' },
+                        { id: 'sticker', label: 'Stickers' }
                       ].map(tab => (
                         <button
                           key={tab.id}
