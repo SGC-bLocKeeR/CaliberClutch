@@ -53,7 +53,8 @@ export interface TradeOfferDeliveryResult {
 
 const STORAGE_KEY_TRADE_URL = 'vortex_steam_trade_url';
 const STORAGE_KEY_WALLET_EUR = 'vortex_wallet_eur';
-const DEFAULT_INITIAL_BALANCE = 25.00; // Initial verified account balance
+const STORAGE_KEY_WALLET_RESET_LOCK = 'vortex_wallet_zero_locked_v2';
+const DEFAULT_INITIAL_BALANCE = 0.00; // All accounts start strictly at 0.00 € until real deposit
 
 // ========================================================
 // 1. STEAM TRADE URL MANAGEMENT
@@ -87,13 +88,21 @@ export const saveSteamTradeUrl = (url: string): boolean => {
 
 export const getVortexWalletBalance = (): number => {
   if (typeof window === 'undefined') return DEFAULT_INITIAL_BALANCE;
+
+  // Enforce zero initial balance: wipe legacy 25€ faucet balance from all clients
+  if (localStorage.getItem(STORAGE_KEY_WALLET_RESET_LOCK) !== 'true') {
+    localStorage.setItem(STORAGE_KEY_WALLET_RESET_LOCK, 'true');
+    localStorage.setItem(STORAGE_KEY_WALLET_EUR, '0.00');
+    return 0.00;
+  }
+
   const saved = localStorage.getItem(STORAGE_KEY_WALLET_EUR);
   if (saved === null) {
-    localStorage.setItem(STORAGE_KEY_WALLET_EUR, String(DEFAULT_INITIAL_BALANCE));
-    return DEFAULT_INITIAL_BALANCE;
+    localStorage.setItem(STORAGE_KEY_WALLET_EUR, '0.00');
+    return 0.00;
   }
   const parsed = parseFloat(saved);
-  return isNaN(parsed) ? DEFAULT_INITIAL_BALANCE : parsed;
+  return isNaN(parsed) ? 0.00 : parsed;
 };
 
 export const deductVortexWalletBalance = (amountEur: number): boolean => {

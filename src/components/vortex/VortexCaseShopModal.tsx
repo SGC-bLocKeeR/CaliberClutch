@@ -1677,8 +1677,8 @@ export const VortexCaseShopModal: React.FC<VortexCaseShopModalProps> = ({ isOpen
           amountEur: 20.00,
           type: 'wallet_topup'
         }}
-        onPaymentSuccess={(res) => {
-          setBalance((prev) => prev + res.amountEur);
+        onPaymentSuccess={() => {
+          // Wallet balance automatically synchronizes via the global 'vortex_wallet_updated' event
         }}
       />
 

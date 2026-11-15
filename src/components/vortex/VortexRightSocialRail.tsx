@@ -2197,8 +2197,8 @@ export const VortexRightSocialRail: React.FC<VortexRightSocialRailProps> = ({
           amountEur: 25.00,
           type: 'wallet_topup'
         }}
-        onPaymentSuccess={(res) => {
-          setVortexBalance(prev => prev + res.amountEur);
+        onPaymentSuccess={() => {
+          // Wallet balance automatically synchronizes via the global 'vortex_wallet_updated' event
         }}
       />
 

@@ -42,8 +42,8 @@ export async function registerWithSupabase(params: {
       data: {
         gamerTag: params.gamerTag,
         primaryGame: params.primaryGame,
-        coins: 1950,
-        xp: 12800,
+        coins: 0,
+        xp: 0,
         country: 'Kosovo',
         membershipTier: 'free'
       }
