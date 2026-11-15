@@ -157,6 +157,12 @@ export const FaceitVerificationBadge: React.FC<FaceitVerificationBadgeProps> = (
       {isVip ? (
         <svg 
           viewBox="0 0 24 24" 
+          onClick={(e) => {
+            e.stopPropagation();
+            e.preventDefault();
+            sound.playSelect();
+            window.dispatchEvent(new CustomEvent('vortex_open_verification_modal', { detail: { type } }));
+          }}
           className={`${sizeClasses} shrink-0 cursor-pointer transition-transform duration-150 group-hover/vbadge:scale-110 drop-shadow-[0_1px_4px_rgba(235,160,30,0.5)]`}
           fill="none"
           xmlns="http://www.w3.org/2000/svg"
@@ -187,6 +193,12 @@ export const FaceitVerificationBadge: React.FC<FaceitVerificationBadgeProps> = (
       ) : (
         <svg 
           viewBox="0 0 24 24" 
+          onClick={(e) => {
+            e.stopPropagation();
+            e.preventDefault();
+            sound.playSelect();
+            window.dispatchEvent(new CustomEvent('vortex_open_verification_modal', { detail: { type } }));
+          }}
           className={`${sizeClasses} shrink-0 cursor-pointer transition-transform duration-150 group-hover/vbadge:scale-110 drop-shadow-[0_1px_4px_rgba(255,255,255,0.35)]`}
           fill="none"
           xmlns="http://www.w3.org/2000/svg"
@@ -202,30 +214,42 @@ export const FaceitVerificationBadge: React.FC<FaceitVerificationBadgeProps> = (
         </svg>
       )}
 
-      {/* FACEIT AUTHENTIC TOOLTIP */}
-      <span className="absolute left-1/2 -translate-x-1/2 bottom-full mb-2 hidden group-hover/vbadge:flex flex-col z-[100] pointer-events-none min-w-[210px] p-2.5 rounded-xl bg-[#181B22] border border-white/10 shadow-[0_12px_30px_rgba(0,0,0,0.9)] text-left backdrop-blur-md animate-in fade-in duration-150">
-        <span className="flex items-center gap-2">
-          {isVip ? (
-            <svg viewBox="0 0 24 24" className="w-4 h-4 shrink-0" fill="none">
-              <path d="M12 1.5 L15.06 4.61 L19.42 4.58 L19.39 8.94 L22.5 12 L19.39 15.06 L19.42 19.42 L15.06 19.39 L12 22.5 L8.94 19.39 L4.58 19.42 L4.61 15.06 L1.5 12 L4.61 8.94 L4.58 4.58 L8.94 4.61 Z" fill="#F59E0B" />
-              <path d="M8.2 12.2l2.6 2.6 5.2-5.2" stroke="#12141C" strokeWidth="2.4" strokeLinecap="round" strokeLinejoin="round" />
-            </svg>
-          ) : (
-            <span className="w-4 h-4 rounded-full bg-white flex items-center justify-center shrink-0">
-              <svg viewBox="0 0 24 24" className="w-2.5 h-2.5 text-[#12141C]" fill="none" stroke="currentColor" strokeWidth="3">
-                <path d="M5 13l4 4L19 7" strokeLinecap="round" strokeLinejoin="round" />
+      {/* FACEIT AUTHENTIC TOOLTIP WITH ZERO-GAP HOVER BRIDGE & INTERACTIVE BUTTON */}
+      <span className="absolute left-1/2 -translate-x-1/2 bottom-full pb-2.5 hidden group-hover/vbadge:flex flex-col z-[100] pointer-events-auto min-w-[220px] text-left animate-in fade-in duration-150">
+        <span className="p-3 rounded-2xl bg-[#141722] border border-white/15 shadow-[0_16px_40px_rgba(0,0,0,0.95)] backdrop-blur-md flex flex-col">
+          <span className="flex items-center gap-2">
+            {isVip ? (
+              <svg viewBox="0 0 24 24" className="w-4 h-4 shrink-0" fill="none">
+                <path d="M12 1.5 L15.06 4.61 L19.42 4.58 L19.39 8.94 L22.5 12 L19.39 15.06 L19.42 19.42 L15.06 19.39 L12 22.5 L8.94 19.39 L4.58 19.42 L4.61 15.06 L1.5 12 L4.61 8.94 L4.58 4.58 L8.94 4.61 Z" fill="#F59E0B" />
+                <path d="M8.2 12.2l2.6 2.6 5.2-5.2" stroke="#12141C" strokeWidth="2.4" strokeLinecap="round" strokeLinejoin="round" />
               </svg>
+            ) : (
+              <span className="w-4 h-4 rounded-full bg-white flex items-center justify-center shrink-0">
+                <svg viewBox="0 0 24 24" className="w-2.5 h-2.5 text-[#12141C]" fill="none" stroke="currentColor" strokeWidth="3">
+                  <path d="M5 13l4 4L19 7" strokeLinecap="round" strokeLinejoin="round" />
+                </svg>
+              </span>
+            )}
+            <span className="text-xs font-bold text-white font-display whitespace-nowrap">
+              {isVip ? 'VIP verified account' : 'Verified account'}
             </span>
-          )}
-          <span className="text-xs font-bold text-white font-display whitespace-nowrap">
-            {isVip ? 'VIP verified account' : 'Verified account'}
           </span>
-        </span>
 
-        <span className="my-1.5 border-t border-white/10 w-full block" />
+          <span className="my-2 border-t border-white/10 w-full block" />
 
-        <span className="text-[10px] font-sans text-slate-300 leading-snug whitespace-nowrap">
-          <span className="text-[#FF5500] font-bold">Learn more</span> about account verification
+          <button
+            type="button"
+            onClick={(e) => {
+              e.stopPropagation();
+              e.preventDefault();
+              sound.playSelect();
+              window.dispatchEvent(new CustomEvent('vortex_open_verification_modal', { detail: { type } }));
+            }}
+            className="text-[11px] font-sans text-slate-300 hover:text-white leading-snug whitespace-nowrap text-left transition cursor-pointer flex items-center gap-1 group/btn"
+          >
+            <span className="text-[#FF5500] font-bold group-hover/btn:underline">Learn more</span>
+            <span className="text-slate-400 group-hover/btn:text-slate-200">about account verification &rarr;</span>
+          </button>
         </span>
       </span>
     </span>
@@ -629,6 +653,18 @@ export const VortexDashboard: React.FC<VortexDashboardProps> = ({
   const [notificationsOpen, setNotificationsOpen] = useState(false);
   const [showPremiumModal, setShowPremiumModal] = useState(initialOpenPremium);
   const [xsollaCheckoutItem, setXsollaCheckoutItem] = useState<XsollaOrderItem | null>(null);
+  const [showVerificationModal, setShowVerificationModal] = useState<boolean>(false);
+  const [verificationModalType, setVerificationModalType] = useState<'vip' | 'verified'>('vip');
+
+  useEffect(() => {
+    const handleOpenVerification = (e: Event) => {
+      const custom = e as CustomEvent<{ type?: 'vip' | 'verified' }>;
+      setVerificationModalType(custom.detail?.type || 'vip');
+      setShowVerificationModal(true);
+    };
+    window.addEventListener('vortex_open_verification_modal', handleOpenVerification);
+    return () => window.removeEventListener('vortex_open_verification_modal', handleOpenVerification);
+  }, []);
 
   // =========================================================================
   // NOTIFICATIONS SYSTEM STATE (Interactive esports alerts & actions)
@@ -5150,6 +5186,104 @@ export const VortexDashboard: React.FC<VortexDashboardProps> = ({
             setXsollaCheckoutItem(null);
           }}
         />
+      )}
+
+      {/* VORTEX OFFICIAL VERIFICATION INFORMATION MODAL */}
+      {showVerificationModal && (
+        <div className="fixed inset-0 z-[120] bg-black/85 backdrop-blur-md flex items-center justify-center p-4 animate-in fade-in duration-200">
+          <div className="relative w-full max-w-lg bg-[#0F121A] border border-[#262D40] rounded-3xl p-6 sm:p-7 shadow-[0_25px_70px_rgba(0,0,0,0.95)] space-y-5 text-left">
+            {/* Header */}
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-3">
+                <div className="w-10 h-10 rounded-2xl bg-amber-500/15 border border-amber-500/30 flex items-center justify-center text-amber-400">
+                  <ShieldCheck className="w-5 h-5" />
+                </div>
+                <div>
+                  <h3 className="text-base font-black font-display text-white">ACCOUNT VERIFICATION</h3>
+                  <p className="text-xs font-mono text-slate-400">Fair-play validation & esports competitive credentials</p>
+                </div>
+              </div>
+              <button
+                onClick={() => { sound.playClick(); setShowVerificationModal(false); }}
+                className="p-2 rounded-xl text-slate-400 hover:text-white hover:bg-white/10 transition cursor-pointer"
+              >
+                <X className="w-5 h-5" />
+              </button>
+            </div>
+
+            {/* Verification Tiers Comparison */}
+            <div className="space-y-3">
+              {/* 1. Verified Account */}
+              <div className="p-4 rounded-2xl bg-white/[0.03] border border-white/10 flex items-start gap-3">
+                <span className="w-7 h-7 rounded-full bg-white flex items-center justify-center shrink-0 mt-0.5 shadow-sm">
+                  <svg viewBox="0 0 24 24" className="w-4 h-4 text-[#12141C]" fill="none" stroke="currentColor" strokeWidth="3">
+                    <path d="M5 13l4 4L19 7" strokeLinecap="round" strokeLinejoin="round" />
+                  </svg>
+                </span>
+                <div className="space-y-1">
+                  <div className="text-sm font-bold text-white flex items-center gap-2">
+                    <span>Verified Account</span>
+                    <span className="text-[10px] font-mono text-emerald-400 bg-emerald-500/10 px-1.5 py-0.5 rounded border border-emerald-500/30">FREE</span>
+                  </div>
+                  <p className="text-xs text-slate-400 leading-relaxed font-sans">
+                    Awarded automatically to authenticated players with linked Steam 64 ID, 100+ CS2 hours, and verified mobile identity. Guarantees access to anti-smurf queues.
+                  </p>
+                </div>
+              </div>
+
+              {/* 2. VIP Verified Account */}
+              <div className="p-4 rounded-2xl bg-amber-500/10 border border-amber-500/30 flex items-start gap-3 shadow-lg shadow-amber-500/5">
+                <svg viewBox="0 0 24 24" className="w-7 h-7 shrink-0 mt-0.5 drop-shadow-[0_1px_4px_rgba(235,160,30,0.5)]" fill="none">
+                  <path d="M12 1.5 L15.06 4.61 L19.42 4.58 L19.39 8.94 L22.5 12 L19.39 15.06 L19.42 19.42 L15.06 19.39 L12 22.5 L8.94 19.39 L4.58 19.42 L4.61 15.06 L1.5 12 L4.61 8.94 L4.58 4.58 L8.94 4.61 Z" fill="#F59E0B" />
+                  <path d="M8.2 12.2l2.6 2.6 5.2-5.2" stroke="#12141C" strokeWidth="2.4" strokeLinecap="round" strokeLinejoin="round" />
+                </svg>
+                <div className="space-y-1">
+                  <div className="text-sm font-bold text-amber-300 flex items-center gap-2">
+                    <span>VIP Verified Account</span>
+                    <span className="text-[10px] font-mono text-amber-400 bg-amber-500/20 px-1.5 py-0.5 rounded border border-amber-500/40 font-black">ELITE</span>
+                  </div>
+                  <p className="text-xs text-slate-300 leading-relaxed font-sans">
+                    Elite tier verification for esports professionals, verified tournament champions, and Vortex VIP Elite Pass holders. Unlocks automated GOTV recordings, strict ±150 ELO matchmaking, and priority map vetoes.
+                  </p>
+                </div>
+              </div>
+            </div>
+
+            {/* Action Buttons */}
+            <div className="flex flex-col sm:flex-row items-center justify-between gap-3 pt-2 border-t border-white/10">
+              <div className="flex items-center gap-1.5 text-[11px] font-mono text-slate-400">
+                <ShieldCheck className="w-4 h-4 text-emerald-400" />
+                <span>Protected by Kernel Ring 0 Anticheat</span>
+              </div>
+              <div className="flex items-center gap-2 w-full sm:w-auto">
+                <button
+                  onClick={() => setShowVerificationModal(false)}
+                  className="w-full sm:w-auto px-4 py-2.5 rounded-xl bg-white/5 hover:bg-white/10 text-slate-300 text-xs font-mono transition cursor-pointer"
+                >
+                  Close
+                </button>
+                <button
+                  onClick={() => {
+                    setShowVerificationModal(false);
+                    sound.playSelect();
+                    setXsollaCheckoutItem({
+                      id: 'sub-vip',
+                      sku: 'VTX-SUB-VIP',
+                      title: 'Vortex VIP Elite Pass (1 Month)',
+                      description: 'VIP Match queue, ultra-strict ±150 ELO, automated GOTV demo recording, 2x Points.',
+                      amountEur: 12.99,
+                      type: 'membership_vip'
+                    });
+                  }}
+                  className="w-full sm:w-auto px-5 py-2.5 rounded-xl bg-gradient-to-r from-amber-400 to-yellow-500 hover:from-amber-300 hover:to-yellow-400 text-black font-mono font-black text-xs uppercase tracking-wider transition cursor-pointer shadow-lg shadow-amber-500/20 flex items-center justify-center gap-1.5"
+                >
+                  <span>Get VIP via Xsolla</span>
+                  <ArrowRight className="w-3.5 h-3.5" />
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
       )}
 
       {/* ======================================================== */}

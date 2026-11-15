@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import {
   X,
   CreditCard,
@@ -54,6 +54,16 @@ export const XsollaCheckoutModal: React.FC<XsollaCheckoutModalProps> = ({
     paymentMethod: string;
     item: XsollaOrderItem;
   } | null>(null);
+
+  useEffect(() => {
+    if (isOpen) {
+      setPaymentSuccess(null);
+      setIsProcessing(false);
+      if (initialItem) {
+        setSelectedItem(initialItem);
+      }
+    }
+  }, [isOpen, initialItem]);
 
   // Card Form State
   const [cardNumber, setCardNumber] = useState('');

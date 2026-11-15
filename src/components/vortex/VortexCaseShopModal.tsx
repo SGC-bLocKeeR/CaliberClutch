@@ -259,6 +259,7 @@ export const VortexCaseShopModal: React.FC<VortexCaseShopModalProps> = ({ isOpen
     const totalCost = c.priceEur * caseCount;
     if (balance < totalCost) {
       sound.playClick();
+      setShowXsollaModal(true);
       return;
     }
 
@@ -428,7 +429,8 @@ export const VortexCaseShopModal: React.FC<VortexCaseShopModalProps> = ({ isOpen
 
     if (balance < item.priceEur) {
       sound.playClick();
-      setDirectBuyError(`Insufficient balance (${balance.toFixed(2)} €) to purchase [${item.name}] (${item.priceEur.toFixed(2)} €). Please top up your wallet.`);
+      setDirectBuyError(`Insufficient balance (${balance.toFixed(2)} €) to purchase [${item.name}] (${item.priceEur.toFixed(2)} €). Opening Xsolla Pay Station...`);
+      setShowXsollaModal(true);
       return;
     }
 

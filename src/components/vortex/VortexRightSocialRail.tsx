@@ -41,6 +41,7 @@ import { sound } from '../../utils/soundEffects';
 import { CountryFlag } from './CountryFlag';
 import { FaceitVerificationBadge } from './VortexDashboard';
 import { VortexCaseShopModal } from './VortexCaseShopModal';
+import { XsollaCheckoutModal } from './XsollaCheckoutModal';
 import { getVortexWalletBalance } from '../../services/skinDeliveryService';
 
 export interface SocialFriend {
@@ -130,6 +131,7 @@ export const VortexRightSocialRail: React.FC<VortexRightSocialRailProps> = ({
 
   // In-Platform White-Label CS2 Cases Store State
   const [showCaseShopModal, setShowCaseShopModal] = useState(false);
+  const [showXsollaTopUp, setShowXsollaTopUp] = useState(false);
   const [vortexBalance, setVortexBalance] = useState<number>(() => getVortexWalletBalance());
 
   useEffect(() => {
@@ -772,9 +774,17 @@ export const VortexRightSocialRail: React.FC<VortexRightSocialRailProps> = ({
 
             {/* Wallet Balance & Open Store Button */}
             <div className="flex items-center justify-between gap-2 pt-0.5">
-              <div className="flex items-center gap-1.5 text-[11px] font-mono font-bold text-slate-200 bg-white/[0.04] px-2 py-1 rounded-lg border border-white/5">
+              <div 
+                onClick={() => {
+                  sound.playSelect();
+                  setShowXsollaTopUp(true);
+                }}
+                className="flex items-center gap-1.5 text-[11px] font-mono font-bold text-slate-200 bg-white/[0.04] hover:bg-white/[0.08] px-2 py-1 rounded-lg border border-white/5 hover:border-amber-400/40 cursor-pointer transition select-none"
+                title="Top up wallet funds via Xsolla Pay Station"
+              >
                 <Coins className="w-3.5 h-3.5 text-amber-400" />
                 <span className="text-emerald-400">{vortexBalance.toFixed(2)} €</span>
+                <span className="text-[8px] text-[#FF003C] font-black uppercase bg-[#FF003C]/10 px-1 py-0.2 rounded border border-[#FF003C]/30">+TOP UP</span>
               </div>
 
               <button
@@ -2171,6 +2181,25 @@ export const VortexRightSocialRail: React.FC<VortexRightSocialRailProps> = ({
       <VortexCaseShopModal 
         isOpen={showCaseShopModal} 
         onClose={() => setShowCaseShopModal(false)} 
+      />
+
+      {/* ======================================================== */}
+      {/* 8. OFFICIAL XSOLLA PAY STATION 4 WALLET TOP-UP GATEWAY    */}
+      {/* ======================================================== */}
+      <XsollaCheckoutModal
+        isOpen={showXsollaTopUp}
+        onClose={() => setShowXsollaTopUp(false)}
+        initialItem={{
+          id: 'topup-25',
+          sku: 'VTX-WAL-25',
+          title: '25.00 € Vortex Wallet Funds',
+          description: 'Instant credit for official CS2 cases and weapon market withdrawals.',
+          amountEur: 25.00,
+          type: 'wallet_topup'
+        }}
+        onPaymentSuccess={(res) => {
+          setVortexBalance(prev => prev + res.amountEur);
+        }}
       />
 
     </>
