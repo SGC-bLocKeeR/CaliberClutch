@@ -74,10 +74,10 @@ const CRYPTO_COINS: Record<string, CryptoCoinOption> = {
     id: 'sol',
     symbol: 'SOL',
     name: 'Solana',
-    network: 'Solana SPL',
+    network: 'Solana Native / SPL',
     icon: '◎',
     color: '#14F195',
-    address: 'VrtxG7tM8k9bNx3aB2Y1zQ5wL9pKs8yE4dF1rC6uT7m',
+    address: '4nKqGPKp9SHhcepW6pguigAiiUfiaPYNP8DVkrn5uVsC', // User's Official Binance Solana Deposit Address
     calcAmount: (eur: number) => (eur * 0.0062).toFixed(4)
   },
   ltc: {
