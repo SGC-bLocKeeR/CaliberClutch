@@ -47,7 +47,7 @@ const CRYPTO_COINS: Record<string, CryptoCoinOption> = {
     network: 'TRON (TRC20)',
     icon: '₮',
     color: '#26A17B',
-    address: 'TYDzsYUEpvnYmQk4zGP9sWWcTEd36dAtW6',
+    address: 'TCHMrzrHhH9qXxmJjXHBgvuPu2dHwDXkED', // User's Official Binance USDT Deposit Address
     calcAmount: (eur: number) => (eur * 1.085).toFixed(2)
   },
   btc: {
@@ -57,7 +57,7 @@ const CRYPTO_COINS: Record<string, CryptoCoinOption> = {
     network: 'Bitcoin Native SegWit',
     icon: '₿',
     color: '#F7931A',
-    address: 'bc1q9vortexgme8q97fll970kmw25yq2j4sq3qvw7z',
+    address: 'bc1qmxujtjtm8pgqvtps78z29v0zmr6y7jd3tqnzqe', // User's Official Binance BTC Deposit Address
     calcAmount: (eur: number) => (eur * 0.0000114).toFixed(6)
   },
   eth: {
@@ -67,7 +67,7 @@ const CRYPTO_COINS: Record<string, CryptoCoinOption> = {
     network: 'Ethereum (ERC-20)',
     icon: 'Ξ',
     color: '#627EEA',
-    address: '0x71C8A69E0b09f4b3C53C58B4A2F0F93B8eF9683F',
+    address: '0x222d5de82afc63237006ce3f51dcfc436063a3eb', // User's Official Binance ETH/EVM Deposit Address
     calcAmount: (eur: number) => (eur * 0.000342).toFixed(5)
   },
   sol: {
