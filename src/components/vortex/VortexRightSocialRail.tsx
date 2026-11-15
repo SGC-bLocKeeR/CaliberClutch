@@ -33,7 +33,8 @@ import {
   Sparkles,
   Copy,
   Check,
-  ExternalLink
+  ExternalLink,
+  Edit3
 } from 'lucide-react';
 import confetti from 'canvas-confetti';
 import { sound } from '../../utils/soundEffects';
@@ -75,6 +76,8 @@ interface VortexRightSocialRailProps {
   onOpenProfileTab?: () => void;
   onOpenEditProfile?: () => void;
   onLeaveParty?: () => void;
+  onUpgrade?: () => void;
+  onLogout?: () => void;
 }
 
 export const VortexRightSocialRail: React.FC<VortexRightSocialRailProps> = ({
@@ -86,16 +89,18 @@ export const VortexRightSocialRail: React.FC<VortexRightSocialRailProps> = ({
   userMembershipTier = 'vip',
   partyMembers = [],
   unreadNotificationsCount = 1,
-  isAntiCheatActive = true,
   onToggleAntiCheat,
   onOpenNotifications,
   onOpenInviteModal,
   onOpenProfileTab,
   onOpenEditProfile,
-  onLeaveParty
+  onLeaveParty,
+  onUpgrade,
+  onLogout,
 }) => {
   // Drawer active state: 'none' | 'social' | 'party' | 'profile' | 'notifications'
   const [activeDrawer, setActiveDrawer] = useState<'none' | 'social' | 'party' | 'profile' | 'notifications'>('none');
+  const [copiedSteamId, setCopiedSteamId] = useState(false);
   const [socialSubTab, setSocialSubTab] = useState<'friends' | 'dms' | 'requests'>('friends');
   const [socialSearch, setSocialSearch] = useState('');
   const [partySubTab, setPartySubTab] = useState<'chat' | 'members' | 'voice'>('chat');
@@ -1836,67 +1841,169 @@ export const VortexRightSocialRail: React.FC<VortexRightSocialRailProps> = ({
             onClick={() => setActiveDrawer('none')} 
           />
 
-          <div className="fixed right-64 top-0 bottom-0 w-84 bg-[#0D0F17] border-l border-[#1F2435] z-50 p-5 flex flex-col justify-between shadow-2xl animate-in slide-in-from-right duration-200 select-none overflow-y-auto">
+          <div className="fixed right-64 top-0 bottom-0 w-84 max-w-[calc(100vw-1rem)] bg-[#12141C] border-l border-[#252B3B] z-50 p-5 flex flex-col justify-between shadow-[0_20px_50px_rgba(0,0,0,0.85)] animate-in slide-in-from-right duration-200 select-none overflow-y-auto space-y-4 text-center">
             
-            <div className="space-y-5 text-center">
+            <div className="space-y-4">
               {/* Close Button */}
               <div className="flex justify-end">
                 <button
                   onClick={() => setActiveDrawer('none')}
                   className="p-1.5 rounded-lg text-slate-400 hover:text-white hover:bg-white/[0.08] transition cursor-pointer"
+                  title="Close"
                 >
                   <X className="w-4 h-4" />
                 </button>
               </div>
 
-              {/* Large Avatar with glowing border */}
-              <div className="relative inline-block mx-auto">
-                <img
-                  src={currentAvatarUrl}
-                  alt={currentGamerTag}
-                  className="w-20 h-20 rounded-full object-cover border-2 border-[#A3E635] shadow-[0_0_25px_rgba(163,230,53,0.35)] block"
-                  onError={(e) => {
-                    (e.target as HTMLImageElement).src = '/images/blockeerz_avatar.png';
-                  }}
-                />
-                <div className="absolute -bottom-1 -left-1 w-7 h-7 rounded-full bg-gradient-to-br from-amber-400 via-amber-500 to-yellow-600 text-black font-black text-xs flex items-center justify-center border-2 border-[#12141C] shadow-md">
-                  7
-                </div>
-              </div>
-
-              {/* GamerTag + Verification + Flag */}
-              <div>
-                <div className="flex items-center justify-center gap-1.5">
-                  <span className="font-display font-black text-white text-lg">{currentGamerTag}</span>
-                  <CountryFlag code={currentCountry.code} name={currentCountry.name} size="xs" />
-                </div>
-                <div className="text-xs font-mono text-[#A3E635] mt-0.5">[{currentClanTag}] PRO MEMBER</div>
-              </div>
-
-              {/* Quick Actions */}
-              <div className="space-y-2 text-left text-xs font-mono pt-2">
+              {/* Large Avatar with glowing border, Level 7 badge, and online dot */}
+              <div className="relative inline-block mx-auto mt-1 group">
                 <button
                   onClick={() => {
                     sound.playSelect();
                     setActiveDrawer('none');
                     onOpenProfileTab?.();
                   }}
-                  className="w-full p-2.5 rounded-xl bg-white/[0.04] hover:bg-white/[0.08] text-white flex items-center justify-between transition cursor-pointer"
+                  title="Click to view player profile"
+                  className="relative cursor-pointer block rounded-full"
                 >
-                  <span>View Full Profile</span>
-                  <ChevronRight className="w-4 h-4 text-slate-500" />
+                  <img
+                    src={currentAvatarUrl}
+                    alt={currentGamerTag}
+                    className="w-16 h-16 rounded-full object-cover border-2 border-[#A3E635] shadow-[0_0_20px_rgba(163,230,53,0.35)] group-hover:scale-105 group-hover:border-[#FF5500] transition duration-200"
+                    onError={(e) => {
+                      (e.target as HTMLImageElement).src = '/images/blockeerz_avatar.png';
+                    }}
+                  />
+                  <span className="absolute bottom-0 right-0 w-3.5 h-3.5 rounded-full bg-emerald-400 border-2 border-[#12141C]" />
                 </button>
+                <div className="absolute -bottom-1 -left-1 w-6 h-6 rounded-full bg-gradient-to-br from-amber-400 via-amber-500 to-yellow-600 text-black font-black text-xs flex items-center justify-center border-2 border-[#12141C] shadow-md pointer-events-none">
+                  7
+                </div>
+              </div>
+
+              {/* GamerTag with clan tag, verification badge, and flag */}
+              <div>
+                <button
+                  onClick={() => {
+                    sound.playSelect();
+                    setActiveDrawer('none');
+                    onOpenProfileTab?.();
+                  }}
+                  className="group/name inline-flex items-center justify-center gap-2 font-display font-black text-white text-base hover:text-[#A3E635] transition cursor-pointer"
+                  title="Click to view player profile"
+                >
+                  <span className="text-[#A3E635] text-xs font-mono font-bold group-hover/name:brightness-125">[{currentClanTag}]</span>
+                  <span className="group-hover/name:underline underline-offset-4 decoration-[#A3E635]">{currentGamerTag}</span>
+                  <FaceitVerificationBadge type={currentVerification} size="md" />
+                  <CountryFlag code={currentCountry.code} name={currentCountry.name} size="sm" />
+                  <ChevronRight className="w-4 h-4 text-slate-500 group-hover/name:text-[#A3E635] group-hover/name:translate-x-0.5 transition-all" />
+                </button>
+              </div>
+
+              {/* Membership Tier & Upgrade CTA */}
+              <div className="p-3 rounded-2xl bg-gradient-to-r from-amber-500/10 via-[#181D2A] to-purple-500/10 border border-amber-500/30 flex items-center justify-between text-left">
+                <div className="flex items-center gap-2.5">
+                  <div className={`w-8 h-8 rounded-xl flex items-center justify-center ${
+                    userMembershipTier === 'vip'
+                      ? 'bg-purple-500/20 border border-purple-500/40 text-purple-400'
+                      : userMembershipTier === 'premium'
+                      ? 'bg-amber-500/20 border border-amber-500/40 text-amber-400'
+                      : 'bg-white/10 border border-white/20 text-slate-300'
+                  }`}>
+                    <Crown className="w-4 h-4" />
+                  </div>
+                  <div>
+                    <div className="text-xs font-display font-black text-white">
+                      {userMembershipTier === 'vip' ? 'VIP ELITE MEMBER' : userMembershipTier === 'premium' ? 'PREMIUM MEMBER' : 'FREE MEMBER'}
+                    </div>
+                    <div className="text-[10px] font-mono text-slate-400">
+                      {userMembershipTier === 'vip' ? 'All Pro Queues Unlocked' : userMembershipTier === 'premium' ? 'Super Match Unlocked' : 'Unlock Priority & VIP Ladders'}
+                    </div>
+                  </div>
+                </div>
+                {userMembershipTier !== 'vip' && (
+                  <button
+                    onClick={() => {
+                      sound.playTournamentVictory();
+                      setActiveDrawer('none');
+                      onUpgrade?.();
+                    }}
+                    className="px-3 py-1.5 rounded-xl bg-gradient-to-r from-amber-500 to-yellow-500 hover:brightness-110 text-slate-950 font-display font-black text-[10px] uppercase tracking-wider transition cursor-pointer shadow-md"
+                  >
+                    {userMembershipTier === 'premium' ? 'GO VIP' : 'UPGRADE'}
+                  </button>
+                )}
+              </div>
+
+              {/* Quick Profile Actions */}
+              <div className="space-y-1.5 text-left pt-1">
+                {/* EDIT PROFILE & AVATAR ACTION BUTTON */}
                 <button
                   onClick={() => {
                     sound.playClick();
                     setActiveDrawer('none');
                     onOpenEditProfile?.();
                   }}
-                  className="w-full p-2.5 rounded-xl bg-white/[0.04] hover:bg-white/[0.08] text-white flex items-center justify-between transition cursor-pointer"
+                  className="w-full flex items-center justify-between px-3.5 py-2.5 text-xs font-mono font-bold text-white bg-gradient-to-r from-[#A3E635]/15 via-[#1E2C10] to-[#12141C] hover:from-[#A3E635]/25 hover:via-[#263714] border border-[#A3E635]/40 rounded-xl transition cursor-pointer shadow-sm group"
                 >
-                  <span>Edit Profile & Avatar</span>
-                  <ChevronRight className="w-4 h-4 text-slate-500" />
+                  <div className="flex items-center gap-2 text-[#A3E635]">
+                    <Edit3 className="w-4 h-4 group-hover:rotate-12 transition-transform" />
+                    <span>Edit Profile & Avatar</span>
+                  </div>
+                  <span className="text-[10px] font-mono text-[#A3E635] uppercase font-bold tracking-wider">EDIT →</span>
                 </button>
+
+                <button
+                  onClick={() => {
+                    sound.playSelect();
+                    setActiveDrawer('none');
+                    onOpenProfileTab?.();
+                  }}
+                  className="w-full flex items-center justify-between px-3.5 py-2.5 text-xs font-mono text-slate-300 hover:text-white hover:bg-white/[0.05] rounded-xl transition cursor-pointer"
+                >
+                  <div className="flex items-center gap-2">
+                    <User className="w-4 h-4 text-sky-400" />
+                    <span>View Full Profile</span>
+                  </div>
+                  <ChevronRight className="w-3.5 h-3.5 text-slate-500" />
+                </button>
+
+                <button
+                  onClick={() => {
+                    sound.playClick();
+                    navigator.clipboard.writeText('STEAM_0:1:43918293');
+                    setCopiedSteamId(true);
+                    setTimeout(() => setCopiedSteamId(false), 2500);
+                  }}
+                  className="w-full flex items-center justify-between px-3.5 py-2.5 text-xs font-mono text-slate-300 hover:text-white hover:bg-white/[0.05] rounded-xl transition cursor-pointer"
+                >
+                  <div className="flex items-center gap-2">
+                    {copiedSteamId ? (
+                      <Check className="w-4 h-4 text-emerald-400" />
+                    ) : (
+                      <Copy className="w-4 h-4 text-slate-400" />
+                    )}
+                    <span>{copiedSteamId ? 'Copied to Clipboard!' : 'Copy SteamID'}</span>
+                  </div>
+                  <span className="text-[10px] text-slate-500 font-mono">STEAM_0:1:4391...</span>
+                </button>
+
+                {onLogout && (
+                  <button
+                    onClick={() => {
+                      sound.playClick();
+                      setActiveDrawer('none');
+                      onLogout();
+                    }}
+                    className="w-full flex items-center justify-between px-3.5 py-2 text-xs font-mono text-rose-400 hover:text-rose-300 hover:bg-rose-500/10 rounded-xl transition cursor-pointer border-t border-white/[0.04] mt-2 pt-2"
+                  >
+                    <div className="flex items-center gap-2">
+                      <LogOut className="w-4 h-4 text-rose-400" />
+                      <span>Log Out</span>
+                    </div>
+                    <span className="text-[10px] text-rose-400/70">Disconnect session</span>
+                  </button>
+                )}
               </div>
             </div>
 
