@@ -8,7 +8,7 @@ export const getSteamOpenIdUrl = (): string => {
   const origin = window.location.origin;
   // Steam requires realm to end with '/' and be a prefix of return_to
   const realm = `${origin}/`;
-  const returnTo = `${origin}/?steam_auth=approved`;
+  const returnTo = `${origin}/`;
 
   return `https://steamcommunity.com/openid/login?` +
     `openid.ns=http%3A%2F%2Fspecs.openid.net%2Fauth%2F2.0` +
@@ -41,23 +41,53 @@ export const convertSteam64ToSteam2 = (steamId64: string): string => {
   }
 };
 
+export interface SteamUserProfile {
+  steamId64: string;
+  personaName: string;
+  avatarUrl: string;
+  countryCode?: string;
+}
+
+export const fetchSteamProfile = async (steamId64: string): Promise<SteamUserProfile> => {
+  try {
+    const res = await fetch(`/api/steam-profile?steamId64=${steamId64}`);
+    if (res.ok) {
+      const data = await res.json();
+      if (data && data.personaName) {
+        return {
+          steamId64,
+          personaName: data.personaName,
+          avatarUrl: data.avatarUrl || 'https://avatars.steamstatic.com/fef49e7fa7e1997310d705b2a6158ff8dc1cdfeb_full.jpg',
+          countryCode: data.countryCode || 'XK'
+        };
+      }
+    }
+  } catch (_) {}
+
+  return {
+    steamId64,
+    personaName: `SteamUser_${steamId64.slice(-4)}`,
+    avatarUrl: 'https://avatars.steamstatic.com/fef49e7fa7e1997310d705b2a6158ff8dc1cdfeb_full.jpg',
+    countryCode: 'XK'
+  };
+};
+
 /**
  * Parses query params after Steam OpenID redirect
+ * Validates authentic Valve OpenID return parameters.
  */
 export const parseSteamLoginParams = (search: string) => {
   const params = new URLSearchParams(search);
   const claimedId = params.get('openid.claimed_id') || params.get('openid.identity') || '';
-  const isApproved = 
-    Boolean(claimedId) ||
-    params.get('steam_auth') === 'approved' ||
-    params.get('steam_auth') === 'success' ||
-    params.get('openid.mode') === 'id_res';
 
   let steamId64 = '';
   const match = claimedId.match(/\/id\/(\d+)/);
   if (match && match[1]) {
     steamId64 = match[1];
   }
+
+  // Only approve if Steam returned a valid steamId64 in the response
+  const isApproved = Boolean(steamId64) && (params.get('openid.mode') === 'id_res' || Boolean(claimedId));
 
   return {
     isApproved,

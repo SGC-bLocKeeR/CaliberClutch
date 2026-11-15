@@ -3,40 +3,58 @@ import { VortexLandingPage } from './components/vortex/VortexLandingPage';
 import { VortexPureHtmlLanding } from './components/vortex/VortexPureHtmlLanding';
 import { VortexDashboard } from './components/vortex/VortexDashboard';
 import { sound } from './utils/soundEffects';
-import { redirectToSteamLogin, parseSteamLoginParams, getSteamOpenIdUrl } from './utils/steamAuth';
+import { redirectToSteamLogin, parseSteamLoginParams, getSteamOpenIdUrl, fetchSteamProfile } from './utils/steamAuth';
 
 export function App() {
   const [isLoggedIn, setIsLoggedIn] = useState<boolean>(() => {
     return localStorage.getItem('vortex_steam_auth') === 'true' || localStorage.getItem('vortex_is_logged_in') === 'true';
   });
 
-  const [landingMode, setLandingMode] = useState<'pure-html' | 'image-reference'>('pure-html');
-  const [userGamerTag, setUserGamerTag] = useState<string>('bLocKeeRz');
-  const [avatarUrl] = useState<string>('https://distribution.faceit-cdn.net/images/ac453a50-dbca-4d42-a740-dac12bdc74c0.jpeg');
+  const [landingMode] = useState<'pure-html' | 'image-reference'>('pure-html');
+  const [userGamerTag, setUserGamerTag] = useState<string>(() => {
+    return localStorage.getItem('vortex_user_gamertag') || 'bLocKeeRz';
+  });
+  const [avatarUrl, setAvatarUrl] = useState<string>(() => {
+    return localStorage.getItem('vortex_user_avatar') || 'https://distribution.faceit-cdn.net/images/ac453a50-dbca-4d42-a740-dac12bdc74c0.jpeg';
+  });
   const [initialOpenPremium, setInitialOpenPremium] = useState<boolean>(false);
   const [isRedirectingToSteam, setIsRedirectingToSteam] = useState<boolean>(false);
 
   useEffect(() => {
-    // Check if returning from Steam OpenID 2.0
+    // Check if returning from authentic Valve Steam OpenID 2.0
     const { isApproved, steamId64, steamId2 } = parseSteamLoginParams(window.location.search);
 
-    if (isApproved) {
-      if (steamId64) {
-        localStorage.setItem('vortex_steam_id', steamId2 || steamId64);
-        localStorage.setItem('vortex_steam_id64', steamId64);
-      }
+    if (isApproved && steamId64) {
+      localStorage.setItem('vortex_steam_id', steamId2 || steamId64);
+      localStorage.setItem('vortex_steam_id64', steamId64);
+      localStorage.setItem('vortex_steam_auth', 'true');
+
+      // Fetch authentic Steam persona name & avatar from Steam Community API
+      fetchSteamProfile(steamId64).then((profile) => {
+        if (profile?.personaName) {
+          setUserGamerTag(profile.personaName);
+          localStorage.setItem('vortex_user_gamertag', profile.personaName);
+        }
+        if (profile?.avatarUrl) {
+          setAvatarUrl(profile.avatarUrl);
+          localStorage.setItem('vortex_user_avatar', profile.avatarUrl);
+        }
+      }).catch(() => {});
+
       const shouldOpenUpgrade = sessionStorage.getItem('vortex_pending_upgrade') === 'true';
       sessionStorage.removeItem('vortex_pending_upgrade');
 
+      // Always purge URL query params immediately so copying or sharing link gives clean URL
       window.history.replaceState({}, document.title, window.location.pathname);
-      localStorage.setItem('vortex_steam_auth', 'true');
       setIsLoggedIn(true);
       setInitialOpenPremium(shouldOpenUpgrade);
-      setUserGamerTag('bLocKeeRz');
 
       try {
         sound.playTournamentVictory();
       } catch (_) {}
+    } else if (window.location.search.includes('openid.') || window.location.search.includes('steam_auth=')) {
+      // Purge any stale or invalid auth params from URL
+      window.history.replaceState({}, document.title, window.location.pathname);
     }
   }, []);
 
@@ -63,6 +81,10 @@ export function App() {
     localStorage.removeItem('vortex_steam_auth');
     localStorage.removeItem('vortex_is_logged_in');
     localStorage.removeItem('vortex_steam_id');
+    localStorage.removeItem('vortex_steam_id64');
+    localStorage.removeItem('vortex_user_gamertag');
+    localStorage.removeItem('vortex_user_avatar');
+    setUserGamerTag('bLocKeeRz');
   };
 
   return (

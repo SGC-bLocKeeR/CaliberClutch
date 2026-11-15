@@ -482,6 +482,18 @@ export const VortexDashboard: React.FC<VortexDashboardProps> = ({
   const [currentAvatarUrl, setCurrentAvatarUrl] = useState<string>(() => {
     return localStorage.getItem('vortex_user_avatar') || avatarUrl;
   });
+
+  useEffect(() => {
+    if (userGamerTag) {
+      setCurrentGamerTag(userGamerTag);
+    }
+  }, [userGamerTag]);
+
+  useEffect(() => {
+    if (avatarUrl) {
+      setCurrentAvatarUrl(avatarUrl);
+    }
+  }, [avatarUrl]);
   const [currentClanTag, setCurrentClanTag] = useState<string>(() => {
     return localStorage.getItem('vortex_user_clantag') || 'VTX';
   });

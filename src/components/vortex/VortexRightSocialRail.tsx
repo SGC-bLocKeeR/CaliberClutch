@@ -1971,7 +1971,8 @@ export const VortexRightSocialRail: React.FC<VortexRightSocialRailProps> = ({
                 <button
                   onClick={() => {
                     sound.playClick();
-                    navigator.clipboard.writeText('STEAM_0:1:43918293');
+                    const activeSteamId = localStorage.getItem('vortex_steam_id') || 'STEAM_0:1:43918293';
+                    navigator.clipboard.writeText(activeSteamId);
                     setCopiedSteamId(true);
                     setTimeout(() => setCopiedSteamId(false), 2500);
                   }}
@@ -1985,7 +1986,9 @@ export const VortexRightSocialRail: React.FC<VortexRightSocialRailProps> = ({
                     )}
                     <span>{copiedSteamId ? 'Copied to Clipboard!' : 'Copy SteamID'}</span>
                   </div>
-                  <span className="text-[10px] text-slate-500 font-mono">STEAM_0:1:4391...</span>
+                  <span className="text-[10px] text-slate-500 font-mono">
+                    {(localStorage.getItem('vortex_steam_id') || 'STEAM_0:1:43918293').slice(0, 15)}...
+                  </span>
                 </button>
 
                 {onLogout && (
