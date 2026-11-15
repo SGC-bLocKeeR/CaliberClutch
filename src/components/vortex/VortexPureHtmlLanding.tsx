@@ -394,16 +394,12 @@ export const VortexPureHtmlLanding: React.FC<VortexPureHtmlLandingProps> = ({
                           </div>
                         )}
 
-                        {/* Bottom Card Labels: Flag + Map Name */}
+                        {/* Bottom Card Labels: Map Name only */}
                         <div className="absolute inset-x-0 bottom-0 p-3 sm:p-4 flex flex-col items-start text-left">
-                          <span className="text-base sm:text-lg mb-1">{map.flag}</span>
                           <span className={`font-display font-black tracking-wider uppercase text-sm sm:text-base ${
                             isActive ? 'text-[#A3E635]' : 'text-white'
                           }`}>
                             {map.name}
-                          </span>
-                          <span className="text-[10px] text-slate-400 font-mono tracking-wider uppercase">
-                            {map.country}
                           </span>
                         </div>
                       </div>
