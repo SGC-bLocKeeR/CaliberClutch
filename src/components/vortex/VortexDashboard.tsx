@@ -3482,7 +3482,7 @@ export const VortexDashboard: React.FC<VortexDashboardProps> = ({
                       </span>
                     </div>
                     <p className="text-xs text-[#94A3B8] mt-1">
-                      Official competitive leaderboard of registered players on our platform • Rank #3: <strong className="text-white">{currentGamerTag}</strong> (Click any player to view full profile)
+                      Official competitive leaderboard of registered players on our platform • Your Standing: <strong className="text-white">{platformRankingPlayers.find(p => p.isUser)?.rank || '#--'} ({currentUserElo.toLocaleString()} ELO)</strong> (Click any player to view full profile)
                     </p>
                   </div>
                   <button
