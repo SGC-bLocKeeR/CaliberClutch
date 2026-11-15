@@ -139,39 +139,6 @@ export function App() {
           </div>
         </div>
       )}
-
-      {/* Floating State Preview Switcher in Bottom-Right Corner */}
-      <div className="fixed bottom-4 right-4 z-50 flex items-center gap-2 bg-[#0E1017]/95 backdrop-blur-md border border-[#232738] p-1.5 rounded-full shadow-2xl">
-        {!isLoggedIn && (
-          <button
-            onClick={() => {
-              sound.playClick();
-              setLandingMode(landingMode === 'pure-html' ? 'image-reference' : 'pure-html');
-            }}
-            className="px-3 py-1.5 rounded-full bg-[#141721] hover:bg-[#1E2333] border border-white/10 text-xs font-mono text-slate-200 hover:text-white transition flex items-center gap-1.5 cursor-pointer shadow-sm"
-            title="Toggle between Pure HTML edition and Image Reference"
-          >
-            <span>{landingMode === 'pure-html' ? '⚡ 100% Pure HTML' : '🖼️ Reference Image'}</span>
-          </button>
-        )}
-
-        <button
-          onClick={() => {
-            sound.playClick();
-            if (isLoggedIn) {
-              handleLogout();
-            } else {
-              setIsLoggedIn(true);
-              localStorage.setItem('vortex_steam_auth', 'true');
-            }
-          }}
-          className="px-3.5 py-1.5 rounded-full bg-[#18210C] hover:bg-[#253314] border border-[#A3E635]/40 text-xs font-mono text-[#A3E635] hover:text-white transition flex items-center gap-2 cursor-pointer shadow-sm outline-none focus:outline-none"
-          title="Toggle between Landing Page and Dashboard view"
-        >
-          <span className="w-2 h-2 rounded-full bg-[#A3E635] animate-pulse" />
-          <span>{isLoggedIn ? '👁️ View Landing (Logout)' : '👁️ Quick Demo Dashboard'}</span>
-        </button>
-      </div>
     </div>
   );
 }
