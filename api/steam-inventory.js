@@ -136,7 +136,7 @@ const BASE_CATALOG = [
     skinName: 'Firebreathing',
     fullName: 'Desert Eagle | Firebreathing (Well-Worn)',
     type: 'pistol',
-    rarity: 'restricted',
+    rarity: 'mil-spec',
     wear: 'Well-Worn',
     wearShort: 'WW',
     floatValue: 0.412,
@@ -511,7 +511,7 @@ export default async function handler(req, res) {
                 ? 'covert'
                 : (rarityName.includes('classified') || rarityName.includes('legendary') || (fullName.includes('P250') && fullName.includes('Asiimov')))
                 ? 'classified'
-                : (rarityName.includes('restricted') || rarityName.includes('mythical') || fullName.includes('Firebreathing'))
+                : (rarityName.includes('restricted') || rarityName.includes('mythical'))
                 ? 'restricted'
                 : 'mil-spec';
 

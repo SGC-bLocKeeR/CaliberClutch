@@ -239,7 +239,7 @@ export const HellcasePayBySkinsModal: React.FC<HellcasePayBySkinsModalProps> = (
         skinName: 'Firebreathing',
         fullName: 'Desert Eagle | Firebreathing (Well-Worn)',
         type: 'pistol',
-        rarity: 'restricted',
+        rarity: 'mil-spec',
         wear: 'Well-Worn',
         wearShort: 'WW',
         floatValue: 0.412,
@@ -565,9 +565,9 @@ export const HellcasePayBySkinsModal: React.FC<HellcasePayBySkinsModalProps> = (
           : filter === 'classified'
           ? (r === 'classified' || r.includes('classified') || r.includes('legendary') || (s.fullName.includes('P250') && s.fullName.includes('Asiimov')))
           : filter === 'restricted'
-          ? (r === 'restricted' || r.includes('restricted') || r.includes('mythical') || s.fullName.includes('Firebreathing'))
+          ? (r === 'restricted' || r.includes('restricted') || r.includes('mythical'))
           : filter === 'mil-spec'
-          ? (r === 'mil-spec' || r.includes('mil-spec') || r === 'industrial' || r === 'consumer')
+          ? (r === 'mil-spec' || r.includes('mil-spec') || r === 'industrial' || r === 'consumer' || s.fullName.includes('Firebreathing') || s.fullName.includes('Tilted') || s.fullName.includes('Alpine') || s.fullName.includes('Baroque') || s.fullName.includes('Wash me plz'))
           : r === filter);
 
       return matchSearch && matchRarity;
@@ -882,7 +882,7 @@ export const HellcasePayBySkinsModal: React.FC<HellcasePayBySkinsModalProps> = (
                         backgroundColor: RARITY_OPTIONS.find(r => r.id === selectedRarity)?.color || '#b0c3d9' 
                       }} 
                     />
-                    <span className="capitalize">
+                    <span>
                       {RARITY_OPTIONS.find(r => r.id === selectedRarity)?.label || 'All'}
                     </span>
                     {rarityDropdownOpen ? (
