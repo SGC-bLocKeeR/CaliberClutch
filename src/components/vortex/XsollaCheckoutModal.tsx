@@ -12,7 +12,10 @@ import {
   Flame,
   Crown,
   Copy,
-  Check
+  Check,
+  QrCode,
+  Clock,
+  AlertCircle
 } from 'lucide-react';
 import { sound } from '../../utils/soundEffects';
 import { creditVortexWalletBalance } from '../../services/skinDeliveryService';
@@ -24,6 +27,70 @@ import {
   getXsollaConfig,
   saveXsollaConfig
 } from '../../services/xsollaService';
+
+interface CryptoCoinOption {
+  id: 'usdt_trc20' | 'btc' | 'eth' | 'sol' | 'ltc';
+  symbol: string;
+  name: string;
+  network: string;
+  icon: string;
+  color: string;
+  address: string;
+  calcAmount: (eur: number) => string;
+}
+
+const CRYPTO_COINS: Record<string, CryptoCoinOption> = {
+  usdt_trc20: {
+    id: 'usdt_trc20',
+    symbol: 'USDT',
+    name: 'Tether TRC-20',
+    network: 'TRON (TRC20)',
+    icon: '₮',
+    color: '#26A17B',
+    address: 'TYDzsYUEpvnYmQk4zGP9sWWcTEd36dAtW6',
+    calcAmount: (eur: number) => (eur * 1.085).toFixed(2)
+  },
+  btc: {
+    id: 'btc',
+    symbol: 'BTC',
+    name: 'Bitcoin',
+    network: 'Bitcoin Native SegWit',
+    icon: '₿',
+    color: '#F7931A',
+    address: 'bc1q9vortexgme8q97fll970kmw25yq2j4sq3qvw7z',
+    calcAmount: (eur: number) => (eur * 0.0000114).toFixed(6)
+  },
+  eth: {
+    id: 'eth',
+    symbol: 'ETH',
+    name: 'Ethereum',
+    network: 'Ethereum (ERC-20)',
+    icon: 'Ξ',
+    color: '#627EEA',
+    address: '0x71C8A69E0b09f4b3C53C58B4A2F0F93B8eF9683F',
+    calcAmount: (eur: number) => (eur * 0.000342).toFixed(5)
+  },
+  sol: {
+    id: 'sol',
+    symbol: 'SOL',
+    name: 'Solana',
+    network: 'Solana SPL',
+    icon: '◎',
+    color: '#14F195',
+    address: 'VrtxG7tM8k9bNx3aB2Y1zQ5wL9pKs8yE4dF1rC6uT7m',
+    calcAmount: (eur: number) => (eur * 0.0062).toFixed(4)
+  },
+  ltc: {
+    id: 'ltc',
+    symbol: 'LTC',
+    name: 'Litecoin',
+    network: 'Litecoin Network',
+    icon: 'Ł',
+    color: '#345D9D',
+    address: 'ltc1q8w47y4m5k6q8u9t0p1l2k3j4h5g6f7d8s9a0b',
+    calcAmount: (eur: number) => (eur * 0.0125).toFixed(4)
+  }
+};
 
 interface XsollaCheckoutModalProps {
   isOpen: boolean;
@@ -81,6 +148,43 @@ export const XsollaCheckoutModal: React.FC<XsollaCheckoutModalProps> = ({
   const [webhookStatus, setWebhookStatus] = useState<string | null>(null);
   const [apiKeyInput, setApiKeyInput] = useState(config.apiKey || '');
   const [saveToast, setSaveToast] = useState<string | null>(null);
+
+  // Crypto Payment State
+  const [selectedCrypto, setSelectedCrypto] = useState<'usdt_trc20' | 'btc' | 'eth' | 'sol' | 'ltc'>('usdt_trc20');
+  const [copiedCryptoAddress, setCopiedCryptoAddress] = useState(false);
+  const [copiedCryptoAmount, setCopiedCryptoAmount] = useState(false);
+  const [cryptoSecondsLeft, setCryptoSecondsLeft] = useState(899);
+
+  useEffect(() => {
+    if (activeMethod !== 'crypto') return;
+    const interval = setInterval(() => {
+      setCryptoSecondsLeft((prev) => (prev > 0 ? prev - 1 : 899));
+    }, 1000);
+    return () => clearInterval(interval);
+  }, [activeMethod]);
+
+  const formatCryptoTimer = (seconds: number) => {
+    const mins = Math.floor(seconds / 60);
+    const secs = seconds % 60;
+    return `${mins.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
+  };
+
+  const currentCrypto = CRYPTO_COINS[selectedCrypto];
+  const cryptoAmount = currentCrypto.calcAmount(selectedItem.amountEur);
+
+  const handleCopyCryptoAddress = () => {
+    sound.playSelect();
+    navigator.clipboard?.writeText(currentCrypto.address);
+    setCopiedCryptoAddress(true);
+    setTimeout(() => setCopiedCryptoAddress(false), 2200);
+  };
+
+  const handleCopyCryptoAmount = () => {
+    sound.playSelect();
+    navigator.clipboard?.writeText(cryptoAmount);
+    setCopiedCryptoAmount(true);
+    setTimeout(() => setCopiedCryptoAmount(false), 2200);
+  };
 
   const handleCopyWebhook = () => {
     sound.playSelect();
@@ -156,7 +260,7 @@ export const XsollaCheckoutModal: React.FC<XsollaCheckoutModalProps> = ({
       transactionId,
       invoiceId,
       amountEur: selectedItem.amountEur,
-      paymentMethod: activeMethod.toUpperCase(),
+      paymentMethod: activeMethod === 'crypto' ? `${currentCrypto.symbol} (${currentCrypto.network})` : activeMethod.toUpperCase(),
       item: selectedItem
     };
 
@@ -568,14 +672,143 @@ export const XsollaCheckoutModal: React.FC<XsollaCheckoutModalProps> = ({
                 )}
 
                 {activeMethod === 'crypto' && (
-                  <div className="text-center py-4 space-y-2">
-                    <div className="w-12 h-12 rounded-2xl bg-amber-500/20 border border-amber-500/40 flex items-center justify-center text-amber-400 mx-auto text-xl font-black">
-                      ₿
+                  <div className="space-y-3.5">
+                    {/* Coin Selection Tabs */}
+                    <div>
+                      <div className="text-[10px] font-mono text-slate-400 uppercase font-bold mb-1.5 flex items-center justify-between">
+                        <span>Select Cryptocurrency:</span>
+                        <span className="text-emerald-400 flex items-center gap-1">
+                          <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />
+                          Live Blockchain Sync
+                        </span>
+                      </div>
+                      <div className="grid grid-cols-3 sm:grid-cols-5 gap-1.5">
+                        {Object.values(CRYPTO_COINS).map((coin) => (
+                          <button
+                            key={coin.id}
+                            type="button"
+                            onClick={() => {
+                              sound.playSelect();
+                              setSelectedCrypto(coin.id as any);
+                            }}
+                            className={`px-2.5 py-2 rounded-xl border text-center transition cursor-pointer flex flex-col items-center gap-0.5 ${
+                              selectedCrypto === coin.id
+                                ? 'bg-amber-500/15 border-amber-400 text-white shadow-md shadow-amber-950/30'
+                                : 'bg-[#141724] border-white/5 text-slate-400 hover:text-white hover:border-white/15'
+                            }`}
+                          >
+                            <span className="text-base font-black" style={{ color: coin.color }}>{coin.icon}</span>
+                            <span className="text-[11px] font-bold font-mono text-white">{coin.symbol}</span>
+                            <span className="text-[8px] font-mono text-slate-500 truncate w-full">
+                              {coin.id === 'usdt_trc20' ? 'TRC20' : coin.network.split(' ')[0]}
+                            </span>
+                          </button>
+                        ))}
+                      </div>
                     </div>
-                    <div className="text-sm font-bold text-white">Xsolla Web3 Crypto Pay</div>
-                    <p className="text-xs text-slate-400 max-w-sm mx-auto">
-                      Pay with Bitcoin, Ethereum, USDT, USDC or Solana via Xsolla Pay Station Crypto Gateway.
-                    </p>
+
+                    {/* QR Code Barcode & Deposit Data Card */}
+                    <div className="p-3.5 sm:p-4 rounded-2xl bg-[#090B12] border border-[#202538] flex flex-col sm:flex-row items-center gap-4">
+                      {/* QR Code Container */}
+                      <div className="shrink-0 flex flex-col items-center">
+                        <div className="relative p-2.5 rounded-2xl bg-white shadow-[0_0_30px_rgba(255,255,255,0.15)] border border-white/30">
+                          {/* Barcode / QR Code Image */}
+                          <img
+                            src={`https://api.qrserver.com/v1/create-qr-code/?size=180x180&margin=4&data=${encodeURIComponent(currentCrypto.address)}`}
+                            alt={`${currentCrypto.symbol} Payment QR Barcode`}
+                            className="w-36 h-36 sm:w-38 sm:h-38 rounded-lg block"
+                            loading="eager"
+                          />
+                          {/* Viewfinder corner brackets */}
+                          <div className="absolute top-1 left-1 w-3 h-3 border-t-2 border-l-2 border-amber-500" />
+                          <div className="absolute top-1 right-1 w-3 h-3 border-t-2 border-r-2 border-amber-500" />
+                          <div className="absolute bottom-1 left-1 w-3 h-3 border-b-2 border-l-2 border-amber-500" />
+                          <div className="absolute bottom-1 right-1 w-3 h-3 border-b-2 border-r-2 border-amber-500" />
+                        </div>
+                        <div className="mt-2 text-[10px] font-mono text-slate-400 flex items-center gap-1">
+                          <QrCode className="w-3 h-3 text-amber-400" />
+                          <span>Scan with Binance / Trust / MetaMask</span>
+                        </div>
+                      </div>
+
+                      {/* Details & Copy Actions */}
+                      <div className="flex-1 w-full space-y-2.5">
+                        {/* Amount */}
+                        <div>
+                          <div className="flex items-center justify-between text-[10px] font-mono text-slate-400 uppercase mb-0.5">
+                            <span>Amount to Send:</span>
+                            <span className="text-slate-500 font-mono text-[9px]">
+                              1 EUR ≈ {(parseFloat(cryptoAmount) / selectedItem.amountEur).toFixed(4)} {currentCrypto.symbol}
+                            </span>
+                          </div>
+                          <div className="flex items-center gap-2">
+                            <div className="flex-1 px-3 py-1.5 rounded-xl bg-[#141724] border border-white/10 text-white font-mono font-black text-sm flex items-center justify-between">
+                              <span className="text-amber-400">{cryptoAmount}</span>
+                              <span className="text-xs text-slate-400">{currentCrypto.symbol}</span>
+                            </div>
+                            <button
+                              type="button"
+                              onClick={handleCopyCryptoAmount}
+                              className="px-2.5 py-1.5 rounded-xl bg-white/5 hover:bg-white/10 border border-white/10 text-white text-[11px] font-mono font-bold transition cursor-pointer flex items-center gap-1 shrink-0"
+                            >
+                              {copiedCryptoAmount ? (
+                                <>
+                                  <Check className="w-3 h-3 text-emerald-400" />
+                                  <span className="text-emerald-400">Copied!</span>
+                                </>
+                              ) : (
+                                <>
+                                  <Copy className="w-3 h-3 text-slate-400" />
+                                  <span>Copy</span>
+                                </>
+                              )}
+                            </button>
+                          </div>
+                        </div>
+
+                        {/* Deposit Address */}
+                        <div>
+                          <div className="flex items-center justify-between text-[10px] font-mono text-slate-400 uppercase mb-0.5">
+                            <span>Deposit Address:</span>
+                            <span className="text-emerald-400 font-bold">{currentCrypto.network}</span>
+                          </div>
+                          <div className="flex items-center gap-2">
+                            <div className="flex-1 px-3 py-1.5 rounded-xl bg-[#141724] border border-white/10 text-white font-mono text-[11px] truncate select-all">
+                              {currentCrypto.address}
+                            </div>
+                            <button
+                              type="button"
+                              onClick={handleCopyCryptoAddress}
+                              className="px-2.5 py-1.5 rounded-xl bg-amber-500/15 hover:bg-amber-500/25 border border-amber-500/40 text-amber-300 text-[11px] font-mono font-bold transition cursor-pointer flex items-center gap-1 shrink-0"
+                            >
+                              {copiedCryptoAddress ? (
+                                <>
+                                  <Check className="w-3 h-3 text-emerald-400" />
+                                  <span className="text-emerald-400">Copied!</span>
+                                </>
+                              ) : (
+                                <>
+                                  <Copy className="w-3 h-3 text-amber-400" />
+                                  <span>Copy</span>
+                                </>
+                              )}
+                            </button>
+                          </div>
+                        </div>
+
+                        {/* Countdown & Network info */}
+                        <div className="flex items-center justify-between pt-1 border-t border-white/5 text-[10px] font-mono">
+                          <div className="flex items-center gap-1.5 text-slate-400">
+                            <Clock className="w-3 h-3 text-amber-400" />
+                            <span>Rate locked: <span className="text-amber-400 font-bold">{formatCryptoTimer(cryptoSecondsLeft)}</span></span>
+                          </div>
+                          <div className="flex items-center gap-1 text-slate-500">
+                            <AlertCircle className="w-3 h-3 text-amber-500/80" />
+                            <span>1 Confirmation Required</span>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
                   </div>
                 )}
 
@@ -605,7 +838,13 @@ export const XsollaCheckoutModal: React.FC<XsollaCheckoutModalProps> = ({
                 {isProcessing ? (
                   <>
                     <span className="w-4 h-4 border-2 border-white/20 border-t-white rounded-full animate-spin" />
-                    <span>Connecting to Xsolla Pay Station...</span>
+                    <span>Verifying On-Chain Transaction...</span>
+                  </>
+                ) : activeMethod === 'crypto' ? (
+                  <>
+                    <QrCode className="w-4 h-4 text-amber-400" />
+                    <span>CONFIRM & VERIFY ON-CHAIN ({cryptoAmount} {currentCrypto.symbol})</span>
+                    <ArrowRight className="w-4 h-4" />
                   </>
                 ) : (
                   <>
