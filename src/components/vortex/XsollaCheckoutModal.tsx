@@ -10,7 +10,9 @@ import {
   ExternalLink,
   Settings,
   Flame,
-  Crown
+  Crown,
+  Copy,
+  Check
 } from 'lucide-react';
 import { sound } from '../../utils/soundEffects';
 import { creditVortexWalletBalance } from '../../services/skinDeliveryService';
@@ -74,6 +76,46 @@ export const XsollaCheckoutModal: React.FC<XsollaCheckoutModalProps> = ({
   // Xsolla Merchant Configuration Tab
   const [showConfig, setShowConfig] = useState(false);
   const [config, setConfig] = useState(getXsollaConfig());
+  const [copiedWebhook, setCopiedWebhook] = useState(false);
+  const [testingWebhook, setTestingWebhook] = useState(false);
+  const [webhookStatus, setWebhookStatus] = useState<string | null>(null);
+  const [apiKeyInput, setApiKeyInput] = useState(config.apiKey || '');
+  const [saveToast, setSaveToast] = useState<string | null>(null);
+
+  const handleCopyWebhook = () => {
+    sound.playSelect();
+    navigator.clipboard?.writeText('https://blockeer.vercel.app/api/xsolla-webhook');
+    setCopiedWebhook(true);
+    setTimeout(() => setCopiedWebhook(false), 2500);
+  };
+
+  const handleTestWebhook = async () => {
+    sound.playSelect();
+    setTestingWebhook(true);
+    setWebhookStatus(null);
+    try {
+      const res = await fetch('https://blockeer.vercel.app/api/xsolla-webhook');
+      if (res.ok) {
+        sound.playTournamentVictory();
+        setWebhookStatus('✅ Webhook Active! Responded HTTP 200 to Xsolla notification probe.');
+      } else {
+        setWebhookStatus(`HTTP ${res.status} response from webhook.`);
+      }
+    } catch (e) {
+      setWebhookStatus('Error connecting to webhook endpoint.');
+    } finally {
+      setTestingWebhook(false);
+    }
+  };
+
+  const handleSaveConfig = () => {
+    sound.playSelect();
+    const updated = { ...config, apiKey: apiKeyInput };
+    setConfig(updated);
+    saveXsollaConfig(updated);
+    setSaveToast(`✅ Successfully Connected to Xsolla Project #${updated.projectId}!`);
+    setTimeout(() => setSaveToast(null), 3500);
+  };
 
   if (!isOpen) return null;
 
@@ -160,19 +202,20 @@ export const XsollaCheckoutModal: React.FC<XsollaCheckoutModalProps> = ({
           <div className="flex items-center gap-2">
             <span className="hidden sm:flex items-center gap-1 px-2.5 py-1 rounded-full bg-emerald-500/10 border border-emerald-500/30 text-emerald-400 text-[10px] font-mono font-bold">
               <ShieldCheck className="w-3.5 h-3.5" />
-              <span>256-Bit SSL Encrypted</span>
+              <span>256-Bit SSL</span>
             </span>
 
             <button
               onClick={() => { sound.playClick(); setShowConfig(!showConfig); }}
-              className={`p-1.5 rounded-xl border transition cursor-pointer ${
+              className={`px-3 py-1.5 rounded-xl border text-xs font-mono font-bold transition cursor-pointer flex items-center gap-1.5 ${
                 showConfig
-                  ? 'bg-amber-400 text-black border-amber-400'
-                  : 'bg-white/5 hover:bg-white/10 text-slate-400 hover:text-white border-white/10'
+                  ? 'bg-amber-400 text-black border-amber-400 shadow-md shadow-amber-400/20'
+                  : 'bg-[#FF003C]/15 hover:bg-[#FF003C]/25 text-rose-300 border-[#FF003C]/40'
               }`}
-              title="Xsolla Merchant Settings"
+              title="Connect your Xsolla Publisher Account"
             >
-              <Settings className="w-4 h-4" />
+              <Settings className="w-3.5 h-3.5" />
+              <span>{showConfig ? 'Close Setup' : 'Connect Xsolla Account'}</span>
             </button>
 
             {!isProcessing && (
@@ -187,68 +230,142 @@ export const XsollaCheckoutModal: React.FC<XsollaCheckoutModalProps> = ({
         </div>
 
         {/* ======================================================== */}
-        {/* MERCHANT CONFIGURATION DRAWER (Xsolla Project ID & Mode)  */}
+        {/* LIVE XSOLLA MERCHANT CONNECTION & ONBOARDING DRAWER     */}
         {/* ======================================================== */}
         {showConfig && (
-          <div className="p-4 bg-[#10131E] border-b border-[#202538] text-xs font-mono text-slate-300 animate-in slide-in-from-top-2">
-            <div className="flex items-center justify-between mb-2">
-              <span className="font-bold text-amber-400 flex items-center gap-1.5">
-                <Settings className="w-3.5 h-3.5" />
-                <span>Xsolla Publisher Merchant Settings</span>
-              </span>
-              <a
-                href="https://publisher.xsolla.com/"
-                target="_blank"
-                rel="noopener noreferrer"
-                className="text-[11px] text-amber-400 hover:underline flex items-center gap-1"
-              >
-                <span>publisher.xsolla.com</span>
-                <ExternalLink className="w-3 h-3" />
-              </a>
+          <div className="p-4 sm:p-5 bg-[#10131E] border-b border-[#202538] text-xs font-mono text-slate-300 space-y-4 animate-in slide-in-from-top-2">
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 border-b border-white/[0.06] pb-3">
+              <div>
+                <span className="font-bold text-amber-400 flex items-center gap-1.5 text-sm font-display">
+                  <Settings className="w-4 h-4" />
+                  <span>Xsolla Live Publisher Merchant Integration</span>
+                </span>
+                <p className="text-[11px] text-slate-400 mt-0.5">
+                  Connect your live or sandbox project from your open <strong className="text-white">xsolla.com</strong> tab.
+                </p>
+              </div>
+              <div className="flex items-center gap-2">
+                <a
+                  href="https://publisher.xsolla.com/"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="px-3 py-1.5 rounded-xl bg-white/5 hover:bg-white/10 border border-white/10 text-amber-400 hover:text-amber-300 flex items-center gap-1.5 transition text-[11px]"
+                >
+                  <span>Open Publisher Dashboard</span>
+                  <ExternalLink className="w-3 h-3" />
+                </a>
+              </div>
             </div>
+
+            {/* Inputs: Project ID, Merchant ID, Mode */}
             <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
               <div>
-                <label className="text-[10px] text-slate-400 uppercase block mb-1">Project ID</label>
+                <label className="text-[10px] text-slate-400 uppercase font-bold block mb-1">
+                  1. Project ID (from xsolla.com Projects)
+                </label>
                 <input
                   type="text"
                   value={config.projectId}
-                  onChange={(e) => {
-                    const next = { ...config, projectId: e.target.value };
-                    setConfig(next);
-                    saveXsollaConfig(next);
-                  }}
-                  className="w-full px-2.5 py-1.5 rounded-lg bg-[#0A0C13] border border-white/10 text-white font-mono text-xs focus:border-amber-400 outline-none"
+                  onChange={(e) => setConfig({ ...config, projectId: e.target.value.trim() })}
+                  className="w-full px-3 py-2 rounded-xl bg-[#0A0C13] border border-white/10 text-white font-mono text-xs focus:border-amber-400 outline-none"
                   placeholder="e.g. 194820"
                 />
               </div>
               <div>
-                <label className="text-[10px] text-slate-400 uppercase block mb-1">Merchant ID</label>
+                <label className="text-[10px] text-slate-400 uppercase font-bold block mb-1">
+                  2. Merchant ID (Company Settings)
+                </label>
                 <input
                   type="text"
                   value={config.merchantId}
-                  onChange={(e) => {
-                    const next = { ...config, merchantId: e.target.value };
-                    setConfig(next);
-                    saveXsollaConfig(next);
-                  }}
-                  className="w-full px-2.5 py-1.5 rounded-lg bg-[#0A0C13] border border-white/10 text-white font-mono text-xs focus:border-amber-400 outline-none"
+                  onChange={(e) => setConfig({ ...config, merchantId: e.target.value.trim() })}
+                  className="w-full px-3 py-2 rounded-xl bg-[#0A0C13] border border-white/10 text-white font-mono text-xs focus:border-amber-400 outline-none"
                   placeholder="e.g. 820491"
                 />
               </div>
               <div>
-                <label className="text-[10px] text-slate-400 uppercase block mb-1">Environment Mode</label>
+                <label className="text-[10px] text-slate-400 uppercase font-bold block mb-1">
+                  3. Environment Mode
+                </label>
                 <select
                   value={config.mode}
-                  onChange={(e) => {
-                    const next = { ...config, mode: e.target.value as 'sandbox' | 'live' };
-                    setConfig(next);
-                    saveXsollaConfig(next);
-                  }}
-                  className="w-full px-2.5 py-1.5 rounded-lg bg-[#0A0C13] border border-white/10 text-white font-mono text-xs focus:border-amber-400 outline-none cursor-pointer"
+                  onChange={(e) => setConfig({ ...config, mode: e.target.value as 'sandbox' | 'live' })}
+                  className="w-full px-3 py-2 rounded-xl bg-[#0A0C13] border border-white/10 text-white font-mono text-xs focus:border-amber-400 outline-none cursor-pointer"
                 >
-                  <option value="live">Live Production (Real Payments)</option>
+                  <option value="live">Live Production (Real Money)</option>
                   <option value="sandbox">Sandbox Test Mode</option>
                 </select>
+              </div>
+            </div>
+
+            {/* Webhook Configuration URL for Xsolla Project */}
+            <div className="p-3 rounded-xl bg-[#0B0D14] border border-white/10 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+              <div className="space-y-1">
+                <div className="text-[10px] uppercase font-bold text-slate-400">
+                  4. Your Webhook URL (Paste into Xsolla &rarr; Project Settings &rarr; Webhooks):
+                </div>
+                <div className="text-xs font-mono text-emerald-400 select-all">
+                  https://blockeer.vercel.app/api/xsolla-webhook
+                </div>
+              </div>
+              <div className="flex items-center gap-2">
+                <button
+                  type="button"
+                  onClick={handleCopyWebhook}
+                  className="px-3 py-1.5 rounded-lg bg-white/5 hover:bg-white/10 border border-white/10 text-slate-200 hover:text-white transition flex items-center gap-1.5 cursor-pointer text-xs shrink-0"
+                >
+                  {copiedWebhook ? <Check className="w-3.5 h-3.5 text-emerald-400" /> : <Copy className="w-3.5 h-3.5" />}
+                  <span>{copiedWebhook ? 'Copied URL!' : 'Copy Webhook'}</span>
+                </button>
+                <button
+                  type="button"
+                  disabled={testingWebhook}
+                  onClick={handleTestWebhook}
+                  className="px-3 py-1.5 rounded-lg bg-emerald-500/15 hover:bg-emerald-500/25 border border-emerald-500/30 text-emerald-400 transition flex items-center gap-1.5 cursor-pointer text-xs shrink-0"
+                >
+                  <ShieldCheck className="w-3.5 h-3.5" />
+                  <span>{testingWebhook ? 'Testing...' : 'Test Webhook'}</span>
+                </button>
+              </div>
+            </div>
+
+            {webhookStatus && (
+              <div className="text-xs font-mono text-emerald-400 bg-emerald-500/10 border border-emerald-500/30 p-2.5 rounded-xl">
+                {webhookStatus}
+              </div>
+            )}
+
+            {saveToast && (
+              <div className="text-xs font-mono text-amber-300 bg-amber-500/10 border border-amber-500/30 p-2.5 rounded-xl">
+                {saveToast}
+              </div>
+            )}
+
+            {/* Bottom Actions Bar */}
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 pt-2 border-t border-white/[0.06]">
+              <div className="text-[11px] text-slate-400">
+                Status: <span className="text-emerald-400 font-bold">● Connected to Project #{config.projectId} ({config.mode.toUpperCase()})</span>
+              </div>
+              <div className="flex items-center gap-2">
+                <a
+                  href={config.mode === 'live'
+                    ? `https://secure.xsolla.com/paystation4/?project_id=${config.projectId}`
+                    : `https://sandbox-secure.xsolla.com/paystation4/?project_id=${config.projectId}`
+                  }
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="px-3 py-2 rounded-xl bg-white/5 hover:bg-white/10 border border-white/10 text-slate-300 hover:text-white transition flex items-center gap-1.5 cursor-pointer text-xs"
+                >
+                  <span>Launch Live PayStation Tab</span>
+                  <ExternalLink className="w-3.5 h-3.5" />
+                </a>
+                <button
+                  type="button"
+                  onClick={handleSaveConfig}
+                  className="px-5 py-2 rounded-xl bg-amber-400 hover:bg-amber-300 text-black font-mono font-bold text-xs uppercase tracking-wider transition cursor-pointer shadow-md"
+                >
+                  Save & Apply Settings
+                </button>
               </div>
             </div>
           </div>

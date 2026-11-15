@@ -1820,12 +1820,12 @@ export const VortexDashboard: React.FC<VortexDashboardProps> = ({
   ];
 
   return (
-    <div className="w-full min-h-screen bg-[#07080B] text-[#F1F5F9] font-sans flex flex-col justify-start items-center selection:bg-lime-500/30 selection:text-white">
+    <div className="w-full min-h-screen bg-[#07080B] text-[#F1F5F9] font-sans flex flex-col justify-start items-start selection:bg-lime-500/30 selection:text-white">
       
       {/* ======================================================== */}
       {/* UNIFIED PERSISTENT LAYOUT (SIDEBAR + MAIN CONTENT AREA)  */}
       {/* ======================================================== */}
-      <div className="w-full max-w-[1780px] mx-auto flex flex-col lg:flex-row gap-6 p-4 sm:p-6 pr-68 xl:pr-72 min-h-[92vh]">
+      <div className="w-full flex flex-col lg:flex-row gap-4 sm:gap-6 py-3 sm:py-4 pl-1 sm:pl-2 lg:pl-2.5 pr-68 xl:pr-72 min-h-[92vh]">
         
         {/* ==================== LEFT SIDEBAR ==================== */}
         <aside className={`bg-[#0E1017] border border-[#202536] rounded-3xl flex flex-col justify-between shrink-0 shadow-xl transition-all duration-300 ease-in-out ${
