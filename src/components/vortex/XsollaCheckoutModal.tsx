@@ -783,8 +783,16 @@ export const XsollaCheckoutModal: React.FC<XsollaCheckoutModalProps> = ({
                             <span className="text-emerald-400 font-bold">{currentCrypto.network}</span>
                           </div>
                           <div className="flex items-center gap-2">
-                            <div className="flex-1 px-3 py-1.5 rounded-xl bg-[#141724] border border-white/10 text-white font-mono text-[11px] truncate select-all">
-                              {currentCrypto.address}
+                            <div className="flex-1 px-3 py-1.5 rounded-xl bg-[#141724] border border-white/10 font-mono text-[11px] truncate select-all">
+                              {currentCrypto.address.length > 12 ? (
+                                <>
+                                  <span className="text-amber-400 font-bold">{currentCrypto.address.slice(0, 6)}</span>
+                                  <span className="text-slate-200">{currentCrypto.address.slice(6, -6)}</span>
+                                  <span className="text-amber-400 font-bold">{currentCrypto.address.slice(-6)}</span>
+                                </>
+                              ) : (
+                                <span className="text-white">{currentCrypto.address}</span>
+                              )}
                             </div>
                             <button
                               type="button"
