@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { X, ExternalLink, Check, Copy, AlertCircle, ArrowUpRight, ShieldCheck, RefreshCw, Sparkles, CheckCircle2 } from 'lucide-react';
 import { sound } from '../../utils/soundEffects';
+import { KARAMBIT_LORE_IMAGE } from '../../assets/images/karambitLoreBase64';
 import { 
   CS2Skin, 
   getVortexWalletBalance, 
@@ -456,9 +457,10 @@ export const VortexWithdrawModal: React.FC<VortexWithdrawModalProps> = ({
                           <div className="relative py-2 flex items-center justify-center">
                             <img
                               src={skin.image}
-                              alt={skin.name}
+                              alt=""
+                              aria-hidden="true"
                               onError={(e) => {
-                                (e.target as HTMLImageElement).src = '/images/karambit_lore.png';
+                                (e.target as HTMLImageElement).src = KARAMBIT_LORE_IMAGE;
                               }}
                               className="w-28 h-20 object-contain drop-shadow-[0_8px_16px_rgba(0,0,0,0.8)] group-hover:scale-110 transition-transform duration-300"
                             />
@@ -528,9 +530,10 @@ export const VortexWithdrawModal: React.FC<VortexWithdrawModalProps> = ({
                           <div className="relative py-2 flex items-center justify-center">
                             <img
                               src={skin.image}
-                              alt={skin.name}
+                              alt=""
+                              aria-hidden="true"
                               onError={(e) => {
-                                (e.target as HTMLImageElement).src = '/images/karambit_lore.png';
+                                (e.target as HTMLImageElement).src = KARAMBIT_LORE_IMAGE;
                               }}
                               className="w-28 h-20 object-contain drop-shadow-[0_8px_16px_rgba(0,0,0,0.8)] group-hover:scale-110 transition-transform duration-300"
                             />
@@ -763,7 +766,15 @@ export const VortexWithdrawModal: React.FC<VortexWithdrawModalProps> = ({
                         <div className="w-10 h-10 rounded-xl bg-black/60 border border-white/10 flex items-center justify-center shrink-0">
                           {item.type === 'skin' ? (
                             item.skinImage ? (
-                              <img src={item.skinImage} alt={item.title} className="w-8 h-8 object-contain" />
+                              <img 
+                                src={item.skinImage} 
+                                alt="" 
+                                aria-hidden="true"
+                                onError={(e) => {
+                                  (e.target as HTMLImageElement).src = KARAMBIT_LORE_IMAGE;
+                                }}
+                                className="w-8 h-8 object-contain" 
+                              />
                             ) : (
                               <span>🎁</span>
                             )

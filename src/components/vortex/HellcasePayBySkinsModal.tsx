@@ -15,6 +15,7 @@ import {
 } from 'lucide-react';
 import confetti from 'canvas-confetti';
 import { sound } from '../../utils/soundEffects';
+import { KARAMBIT_LORE_IMAGE } from '../../assets/images/karambitLoreBase64';
 import { 
   getVortexWalletBalance, 
   creditVortexWalletBalance,
@@ -199,7 +200,7 @@ export const HellcasePayBySkinsModal: React.FC<HellcasePayBySkinsModalProps> = (
         marketPriceEur: 840.00,
         bonusPercent: 5,
         payoutEur: 882.00,
-        image: '/images/karambit_lore.png'
+        image: KARAMBIT_LORE_IMAGE
       },
       {
         id: 'skin-2',
@@ -573,33 +574,25 @@ export const HellcasePayBySkinsModal: React.FC<HellcasePayBySkinsModalProps> = (
               {/* Grid of Methods (Matching Screenshot from Hellcase) */}
               <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-3.5">
 
-                {/* 1. TOP VISA / MASTERCARD / DISCOVER (100+ MORE) */}
+                {/* 1. VISA / MASTERCARD / DISCOVER (100+ MORE) */}
                 <button
                   type="button"
                   onClick={() => {
                     sound.playSelect();
                     setActiveView('cards');
                   }}
-                  className="relative p-5 rounded-2xl bg-[#141724] hover:bg-[#181D2E] border-2 border-amber-500/50 hover:border-amber-400 text-left transition cursor-pointer group flex flex-col justify-between h-32 overflow-hidden shadow-lg"
+                  className="p-5 rounded-2xl bg-[#141724] hover:bg-[#181D2E] border border-white/10 hover:border-white/20 text-left transition cursor-pointer group flex flex-col justify-between h-32 shadow-lg"
                 >
-                  {/* Top Ribbon */}
-                  <div className="absolute top-0 left-0 bg-gradient-to-r from-orange-500 to-amber-500 text-slate-950 font-black text-[9px] font-mono px-3 py-0.5 rounded-br-lg shadow">
-                    TOP
-                  </div>
-                  <div className="absolute top-2 right-2 text-[9px] font-mono text-slate-500">
-                    V1
-                  </div>
-
-                  <div className="pt-2">
+                  <div>
                     <div className="text-xl font-black font-display text-white tracking-wider">
-                      VISA <span className="text-amber-400">Mastercard</span>
+                      VISA <span className="text-white">Mastercard</span>
                     </div>
-                    <div className="text-[10px] font-mono text-slate-400 mt-0.5">DISCOVER • 100+ more</div>
+                    <div className="text-[10px] font-mono text-slate-400 mt-1">DISCOVER • 100+ more</div>
                   </div>
 
-                  <div className="flex items-center justify-between text-[11px] font-mono text-amber-400 font-bold">
+                  <div className="flex items-center justify-between text-[11px] font-mono text-slate-300">
                     <span>Card Payments</span>
-                    <Check className="w-4 h-4 text-amber-400" />
+                    <Check className="w-4 h-4 text-emerald-400" />
                   </div>
                 </button>
 
@@ -642,21 +635,23 @@ export const HellcasePayBySkinsModal: React.FC<HellcasePayBySkinsModalProps> = (
                     sound.playSelect();
                     setActiveView('skins');
                   }}
-                  className="relative p-3.5 sm:p-4 rounded-2xl bg-[#0E121D] hover:bg-[#131826] border-2 border-amber-400/80 hover:border-amber-400 text-left transition cursor-pointer group flex items-center justify-between h-32 shadow-[0_0_24px_rgba(245,158,11,0.22)] overflow-hidden scale-[1.02]"
+                  className="relative p-3.5 sm:p-4 rounded-2xl bg-[#141724] hover:bg-[#181D2E] border border-white/10 hover:border-white/20 text-left transition cursor-pointer group flex items-center justify-between h-32 shadow-lg overflow-hidden"
                 >
                   {/* Bonus Tag (Top-Right) */}
                   <div className="absolute top-2.5 right-3 z-10">
-                    <span className="text-[10px] font-mono font-black text-emerald-400 bg-emerald-500/15 border border-emerald-500/30 px-2 py-0.5 rounded-full shadow-sm">
+                    <span className="text-[10px] font-mono font-bold text-emerald-400 bg-emerald-500/10 border border-emerald-500/30 px-2 py-0.5 rounded-full shadow-sm">
                       +5% BONUS
                     </span>
                   </div>
 
                   {/* Left: Authentic Gold Karambit Lore Knife matching Photo 1 */}
-                  <div className="relative w-36 h-28 shrink-0 flex items-center justify-center -ml-2">
+                  <div className="relative w-36 h-28 shrink-0 flex items-center justify-center -ml-2 select-none pointer-events-none">
                     <img 
-                      src="/images/karambit_lore.png" 
-                      alt="★ Karambit | Lore" 
-                      className="w-full h-full object-contain drop-shadow-[0_6px_20px_rgba(245,158,11,0.35)] group-hover:scale-105 group-hover:rotate-1 transition-transform duration-300"
+                      src={KARAMBIT_LORE_IMAGE} 
+                      alt="" 
+                      aria-hidden="true"
+                      draggable={false}
+                      className="w-full h-full object-contain drop-shadow-[0_4px_16px_rgba(0,0,0,0.6)] group-hover:scale-105 group-hover:rotate-1 transition-transform duration-300"
                     />
                   </div>
 
@@ -665,7 +660,7 @@ export const HellcasePayBySkinsModal: React.FC<HellcasePayBySkinsModalProps> = (
                     <span className="text-sm font-sans font-bold text-[#EAB308] tracking-widest leading-none mb-1 uppercase">
                       PAY BY
                     </span>
-                    <span className="text-3xl font-display font-black text-[#FACC15] tracking-wider leading-none drop-shadow-[0_2px_10px_rgba(250,204,21,0.35)] uppercase">
+                    <span className="text-3xl font-display font-black text-[#FACC15] tracking-wider leading-none uppercase">
                       SKINS
                     </span>
                   </div>
@@ -946,9 +941,10 @@ export const HellcasePayBySkinsModal: React.FC<HellcasePayBySkinsModalProps> = (
                         <div className="my-2 h-20 flex items-center justify-center">
                           <img
                             src={s.image}
-                            alt={s.fullName}
+                            alt=""
+                            aria-hidden="true"
                             onError={(e) => {
-                              (e.target as HTMLImageElement).src = '/images/karambit_lore.png';
+                              (e.target as HTMLImageElement).src = KARAMBIT_LORE_IMAGE;
                             }}
                             className="max-h-full max-w-full object-contain group-hover:scale-105 transition-transform duration-200 drop-shadow"
                             loading="lazy"
