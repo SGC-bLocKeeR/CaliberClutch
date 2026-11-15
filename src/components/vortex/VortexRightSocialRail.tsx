@@ -626,18 +626,18 @@ export const VortexRightSocialRail: React.FC<VortexRightSocialRailProps> = ({
               </div>
             </div>
 
-            {/* REFILL +5% Button matching Hellcase Screenshot */}
+            {/* REFILL +5% Button matching Hellcase Screenshot (Compact & Refined) */}
             <button
               type="button"
               onClick={() => {
                 sound.playSelect();
                 setShowHellcaseModal(true);
               }}
-              className="px-2 py-1 rounded-xl bg-gradient-to-r from-emerald-500 to-teal-400 hover:from-emerald-400 hover:to-teal-300 text-slate-950 font-mono font-black text-[11px] leading-none transition cursor-pointer shadow-[0_0_12px_rgba(16,185,129,0.35)] flex items-center gap-1 shrink-0 hover:scale-105 active:scale-95"
+              className="px-1.5 py-0.5 rounded-lg bg-gradient-to-r from-emerald-500 to-teal-400 hover:from-emerald-400 hover:to-teal-300 text-slate-950 font-mono font-black text-[10px] leading-none transition cursor-pointer shadow-[0_0_10px_rgba(16,185,129,0.3)] flex items-center gap-1 shrink-0 hover:scale-105 active:scale-95"
               title="Filling up the balance • Pay by Skins, Crypto & Cards"
             >
-              <span>REFILL</span>
-              <span className="text-[9px] font-black text-white bg-black/40 px-1 py-0.5 rounded leading-none">+5%</span>
+              <span className="tracking-tight">REFILL</span>
+              <span className="text-[8px] font-black text-white bg-black/45 px-1 py-[1.5px] rounded leading-none">+5%</span>
             </button>
           </div>
 
