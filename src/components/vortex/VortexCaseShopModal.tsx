@@ -390,15 +390,27 @@ export const VortexCaseShopModal: React.FC<VortexCaseShopModalProps> = ({ isOpen
     }
   };
 
-  // Sell Skin for Balance
+  // Sell Skin(s) for Balance - Instant Hellcase / CSGORoll style (no browser alert popup)
   const handleSellSkin = () => {
-    if (!wonSkin) return;
-    sound.playClick();
-    const sellValue = parseFloat((wonSkin.priceEur * 0.85).toFixed(2));
+    if (!wonSkin && (!wonSkins || wonSkins.length === 0)) return;
+    try {
+      sound.playBuyWeapon();
+    } catch (_) {
+      sound.playClick();
+    }
+
+    const totalRaw = wonSkins && wonSkins.length > 1
+      ? wonSkins.reduce((acc, s) => acc + s.priceEur, 0)
+      : (wonSkin?.priceEur ?? 0);
+
+    const sellValue = parseFloat((totalRaw * 0.85).toFixed(2));
     creditVortexWalletBalance(sellValue);
-    alert(`Sapo shitët [${wonSkin.name}] për ${sellValue.toFixed(2)} €! Bilanci juaj u përditësua.`);
+
+    // Instant reset without any annoying alert popup
     setWonSkin(null);
+    setWonSkins([]);
     setDeliveryResult(null);
+    setDeliveryProgress(null);
   };
 
   // Direct Buy Skin From DMarket
@@ -1220,7 +1232,11 @@ export const VortexCaseShopModal: React.FC<VortexCaseShopModalProps> = ({ isOpen
                             className="w-full sm:flex-1 py-3.5 rounded-xl bg-white/10 hover:bg-white/15 text-white font-display font-bold text-xs uppercase tracking-wider transition cursor-pointer flex items-center justify-center gap-1.5"
                           >
                             <Coins className="w-4 h-4 text-amber-400" />
-                            <span>Shit për {(wonSkin.priceEur * 0.85).toFixed(2)} €</span>
+                            <span>
+                              {wonSkins && wonSkins.length > 1
+                                ? `Shit të Gjitha për ${(wonSkins.reduce((acc, s) => acc + s.priceEur, 0) * 0.85).toFixed(2)} €`
+                                : `Shit për ${((wonSkin?.priceEur ?? 0) * 0.85).toFixed(2)} €`}
+                            </span>
                           </button>
                         </div>
                       ) : (
