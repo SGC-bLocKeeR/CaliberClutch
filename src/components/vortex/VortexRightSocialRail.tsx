@@ -150,6 +150,18 @@ export const VortexRightSocialRail: React.FC<VortexRightSocialRailProps> = ({
   const [copiedCode, setCopiedCode] = useState(false);
   const [spectateToast, setSpectateToast] = useState<string | null>(null);
 
+  // Mobile Collapsible Rail State (Vetem per telefon/mobile)
+  const [mobileCollapsed, setMobileCollapsed] = useState(false);
+  const [isMobile, setIsMobile] = useState<boolean>(() => typeof window !== 'undefined' ? window.innerWidth < 1024 : false);
+
+  useEffect(() => {
+    const handleResize = () => {
+      setIsMobile(window.innerWidth < 1024);
+    };
+    window.addEventListener('resize', handleResize);
+    return () => window.removeEventListener('resize', handleResize);
+  }, []);
+
   const handleCopyPartnerCode = () => {
     sound.playSelect();
     navigator.clipboard.writeText('VORTEX');
@@ -563,19 +575,30 @@ export const VortexRightSocialRail: React.FC<VortexRightSocialRailProps> = ({
   return (
     <>
       {/* ======================================================== */}
-      {/* 1. PERSISTENT RIGHT SIDEBAR (MATCHING USER SNIPPET WIDTH) */}
+      {/* 1. RIGHT SIDEBAR (PERSISTENT ON DESKTOP, COLLAPSIBLE ON MOBILE) */}
       {/* ======================================================== */}
-      <aside className="fixed right-0 top-0 bottom-0 w-64 bg-[#08090D] border-l border-[#191C26] z-[80] flex flex-col justify-between p-3 select-none shadow-2xl">
+      <aside className={`
+        fixed z-[80] select-none shadow-2xl transition-all duration-300 ease-in-out
+        ${mobileCollapsed 
+          ? 'right-2 top-2 w-[calc(100vw-1rem)] sm:w-64 max-h-[50px] rounded-2xl border border-[#191C26] bg-[#08090D]/95 backdrop-blur-md p-2 bottom-auto overflow-hidden shadow-emerald-500/5' 
+          : 'right-0 top-0 bottom-0 w-72 sm:w-64 bg-[#08090D] border-l border-[#191C26] p-3 flex flex-col justify-between'
+        }
+        lg:right-0 lg:top-0 lg:bottom-0 lg:w-64 lg:bg-[#08090D] lg:border-l lg:border-[#191C26] lg:border-t-0 lg:border-r-0 lg:border-b-0 lg:rounded-none lg:p-3 lg:max-h-none lg:bottom-0 lg:flex lg:flex-col lg:justify-between lg:overflow-visible
+      `}>
         
         {/* TOP SECTION: User Profile Row - Exact 1:1 match to uploaded snippet */}
-        <div className="w-full pb-3 border-b border-[#1A1D27]">
+        <div className={`w-full ${mobileCollapsed ? 'pb-0 border-b-0' : 'pb-3 border-b border-[#1A1D27]'} lg:pb-3 lg:border-b lg:border-[#1A1D27] transition-all`}>
           <button
             onClick={() => {
               sound.playClick();
-              setActiveDrawer(prev => prev === 'profile' ? 'none' : 'profile');
+              if (isMobile) {
+                setMobileCollapsed(prev => !prev);
+              } else {
+                setActiveDrawer(prev => prev === 'profile' ? 'none' : 'profile');
+              }
             }}
             className="w-full flex items-center justify-between p-1.5 rounded-xl hover:bg-white/[0.05] transition cursor-pointer group"
-            title="Player Profile"
+            title={isMobile ? (mobileCollapsed ? "Shfaq panelin e plotë (Expand)" : "Palo lart panelin që mos ta zë pamjen (Collapse)") : "Player Profile"}
           >
             <div className="flex items-center gap-2 min-w-0">
               <div className="relative w-8 h-8 shrink-0">
@@ -595,12 +618,18 @@ export const VortexRightSocialRail: React.FC<VortexRightSocialRailProps> = ({
               <FaceitVerificationBadge type={currentVerification} size="sm" />
               <CountryFlag code={currentCountry.code} name={currentCountry.name} size="xs" />
             </div>
-            <ChevronDown className={`w-4 h-4 text-slate-400 group-hover:text-white transition-transform duration-200 shrink-0 ml-1 ${activeDrawer === 'profile' ? 'rotate-180 text-[#A3E635]' : ''}`} />
+            <div className="p-1 rounded-lg hover:bg-white/10 text-slate-400 group-hover:text-white transition">
+              <ChevronDown className={`w-4 h-4 transition-transform duration-300 shrink-0 ${
+                (isMobile ? mobileCollapsed : activeDrawer === 'profile') 
+                  ? 'rotate-180 text-[#A3E635]' 
+                  : 'rotate-0 text-slate-400'
+              }`} />
+            </div>
           </button>
         </div>
 
         {/* MIDDLE SECTION: Notifications • Social • Party Capsule */}
-        <div className="flex flex-col gap-3 w-full flex-1 pt-3 overflow-y-auto">
+        <div className={`flex-col gap-3 w-full flex-1 pt-3 overflow-y-auto ${mobileCollapsed ? 'hidden' : 'flex'} lg:flex`}>
           
           {/* HELLCASE AUTHENTIC BALANCE & REFILL BAR (PLACED DIRECTLY ABOVE NOTIFICATIONS) */}
           <div className="w-full px-2 py-1.5 rounded-2xl bg-gradient-to-r from-[#0C101A] via-[#121726] to-[#0C101A] border border-emerald-500/35 hover:border-emerald-400/50 shadow-[0_4px_20px_rgba(16,185,129,0.12)] flex items-center justify-between gap-1.5 transition select-none">
@@ -887,26 +916,10 @@ export const VortexRightSocialRail: React.FC<VortexRightSocialRailProps> = ({
             </div>
           </div>
 
-          {/* ======================================================== */}
-          {/* 4. SERVER LATENCY STATUS STRIP                           */}
-          {/* ======================================================== */}
-          <div className="px-1 py-1 flex items-center justify-between text-[10px] font-mono text-slate-500">
-            <div className="flex items-center gap-1">
-              <span className="w-1.5 h-1.5 rounded-full bg-emerald-400" />
-              <span className="text-slate-400">Vienna:</span>
-              <span className="text-slate-300 font-bold">14ms</span>
-            </div>
-            <div className="flex items-center gap-1">
-              <span className="w-1.5 h-1.5 rounded-full bg-emerald-400" />
-              <span className="text-slate-400">Frankfurt:</span>
-              <span className="text-slate-300 font-bold">18ms</span>
-            </div>
-          </div>
-
         </div>
 
         {/* BOTTOM SECTION: Profile Settings & Vortex Wolf Badge */}
-        <div className="w-full pt-3 border-t border-[#1A1D27] flex items-center justify-between">
+        <div className={`w-full pt-3 border-t border-[#1A1D27] items-center justify-between ${mobileCollapsed ? 'hidden' : 'flex'} lg:flex`}>
           <button
             onClick={() => {
               sound.playSelect();

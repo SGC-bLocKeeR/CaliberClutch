@@ -1998,7 +1998,7 @@ export const VortexDashboard: React.FC<VortexDashboardProps> = ({
       {/* ======================================================== */}
       {/* UNIFIED PERSISTENT LAYOUT (SIDEBAR + MAIN CONTENT AREA)  */}
       {/* ======================================================== */}
-      <div className="w-full flex flex-col lg:flex-row gap-4 sm:gap-6 py-3 sm:py-4 pl-1 sm:pl-2 lg:pl-2.5 pr-68 xl:pr-72 min-h-[92vh]">
+      <div className="w-full flex flex-col lg:flex-row gap-4 sm:gap-6 py-2 sm:py-4 px-2 sm:px-4 lg:pl-2.5 lg:pr-68 xl:pr-72 min-h-[92vh]">
         
         {/* ==================== LEFT SIDEBAR ==================== */}
         <aside className={`bg-[#0E1017] border border-[#202536] rounded-3xl flex flex-col justify-between shrink-0 shadow-xl transition-all duration-300 ease-in-out ${
