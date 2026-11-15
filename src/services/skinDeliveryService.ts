@@ -416,7 +416,7 @@ export const VORTEX_CASE_CATALOG: CS2Case[] = [
         "floatValue": "0.2240",
         "priceEur": 120.0,
         "dropChancePercent": 0.32,
-        "image": "https://imgproxy.dmarket.com/insecure/rs:fit:360:260:0/g:ce/aHR0cHM6Ly9jb21tdW5pdHkuYWthbWFpLnN0ZWFtc3RhdGljLmNvbS9lY29ub215L2ltYWdlL2kwQ29aODFVaTBtLTlLd2xCWTFMXzE4bXl1R3VxMXdmaFdTYVpnTXR0eVZmUGFFUlNSMFdxbXU3TEFvY0dJR3ozVXFsWE9McnhNLXZNR21XOFZOeHU1RHg2MG5vVHlMd2lZYmZfRFZMME9hclpiUm9NdldYTVd1Wnh1WmlfdU02U1huZ3hSNS1zbVRYdzR1Z0lpNlJiVmNwWHNOMUVMVUR0eFBya3RPeU5MN2g0ZzJQMnRwYmpYS3BLSWJqYkQ0.webp"
+        "image": "https://community.akamai.steamstatic.com/economy/image/i0CoZ81Ui0m-9KwlBY1L_18myuGuq1wfhWSaZgMttyVfPaERSR0Wqmu7LAocGIGz3UqlXOLrxM-vMGmW8VNxu5Dx60noTyLwiYbf_DVL0OarZbRoMvWXMWuZxuZi_uM6SXngxR5-smTXw4ugIi6RbVcpXsN1ELUDtxPrktOyNL7h4g2P2tpbjXKpKIbjbD4"
       },
       {
         "id": "skin-82dc98e09ba6",

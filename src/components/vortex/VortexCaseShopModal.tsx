@@ -54,10 +54,10 @@ import {
 
 const RECENT_LUCKY_DROPS = [
   { weapon: 'Butterfly Knife', skin: 'Slaughter', wear: 'FN', price: 1480.00, mult: 'x800.0', rarityColor: '#FFD700', image: 'https://community.akamai.steamstatic.com/economy/image/i0CoZ81Ui0m-9KwlBY1L_18myuGuq1wfhWSaZgMttyVfPaERSR0Wqmu7LAocGIGz3UqlXOLrxM-vMGmW8VNxu5Dx60noTyL6kJ_m-B1Z-ua6bbZrLOmsD2qv2-t0ouBWQyC0nQlp4G_dmdauIC_DPQBzDpclRLINsEXsx92yP7jq7gXd2t1NzCT3iCwc6TErvbhfNpboFw' },
-  { weapon: 'AWP', skin: 'Chrome Cannon', wear: 'FN', price: 120.00, mult: 'x48.9', rarityColor: '#EB4B4B', image: 'https://imgproxy.dmarket.com/insecure/rs:fit:360:260:0/g:ce/aHR0cHM6Ly9jb21tdW5pdHkuYWthbWFpLnN0ZWFtc3RhdGljLmNvbS9lY29ub215L2ltYWdlL2kwQ29aODFVaTBtLTlLd2xCWTFMXzE4bXl1R3VxMXdmaFdTYVpnTXR0eVZmUGFFUlNSMFdxbXU3TEFvY0dJR3ozVXFsWE9McnhNLXZNR21XOFZOeHU1RHg2MG5vVHlMd2lZYmZfRFZMME9hclpiUm9NdldYTVd1Wnh1WmlfdU02U1huZ3hSNS1zbVRYdzR1Z0lpNlJiVmNwWHNOMUVMVUR0eFBya3RPeU5MN2g0ZzJQMnRwYmpYS3BLSWJqYkQ0.webp' },
+  { weapon: 'AWP', skin: 'Chrome Cannon', wear: 'FN', price: 120.00, mult: 'x48.9', rarityColor: '#EB4B4B', image: 'https://community.akamai.steamstatic.com/economy/image/i0CoZ81Ui0m-9KwlBY1L_18myuGuq1wfhWSaZgMttyVfPaERSR0Wqmu7LAocGIGz3UqlXOLrxM-vMGmW8VNxu5Dx60noTyLwiYbf_DVL0OarZbRoMvWXMWuZxuZi_uM6SXngxR5-smTXw4ugIi6RbVcpXsN1ELUDtxPrktOyNL7h4g2P2tpbjXKpKIbjbD4' },
   { weapon: 'AK-47', skin: 'Nightwish', wear: 'MW', price: 58.00, mult: 'x31.3', rarityColor: '#EB4B4B', image: 'https://community.akamai.steamstatic.com/economy/image/i0CoZ81Ui0m-9KwlBY1L_18myuGuq1wfhWSaZgMttyVfPaERSR0Wqmu7LAocGIGz3UqlXOLrxM-vMGmW8VNxu5Dx60noTyL8ypexwiVI0P_6afBSJf2DC3Wf09F6ueZhW2exwBh_6m3dnt36InjDPQ4oXJt1TbJeshW_mtfjN-vrsgaKiokWy333kGoXuRj4z9Nd' },
   { weapon: 'Desert Eagle', skin: 'Printstream', wear: 'FT', price: 55.00, mult: 'x57.8', rarityColor: '#EB4B4B', image: 'https://community.akamai.steamstatic.com/economy/image/i0CoZ81Ui0m-9KwlBY1L_18myuGuq1wfhWSaZgMttyVfPaERSR0Wqmu7LAocGIGz3UqlXOLrxM-vMGmW8VNxu5Dx60noTyL1m5fn8Sdk7OeRbKFsJ8-DHG6e1f1iouRoQha_nBovp3OGmdeqInyVP1V0XsYlRbEI50a5wNyzZr605AyI3t5MmCSohylAuC89_a9cBoMY9UkV' },
-  { weapon: 'M4A4', skin: 'Temukau', wear: 'FT', price: 75.00, mult: 'x38.4', rarityColor: '#EB4B4B', image: 'https://imgproxy.dmarket.com/insecure/rs:fit:360:260:0/g:ce/aHR0cHM6Ly9jb21tdW5pdHkuYWthbWFpLnN0ZWFtc3RhdGljLmNvbS9lY29ub215L2ltYWdlL2kwQ29aODFVaTBtLTlLd2xCWTFMXzE4bXl1R3VxMXdmaFdTYVpnTXR0eVZmUGFFUlNSMFdxbXU3TEFvY0dJR3ozVXFsWE9McnhNLXZNR21XOFZOeHU1RHg2MG5vVHlMOHlwZXh3aUZPMFBfNmFmQlNOUFdlRzJ5UjFORjZ1ZVpoVzJld2xCdHg1VzZBbVl2OUpTNlhhQVYxQ0pFbVRlVUw0VVRweE56alpPM2p0Z2FJak45RXhDdXNrR29YdVJueVJoQkE=.webp' },
+  { weapon: 'M4A4', skin: 'Temukau', wear: 'FT', price: 75.00, mult: 'x38.4', rarityColor: '#EB4B4B', image: 'https://community.akamai.steamstatic.com/economy/image/i0CoZ81Ui0m-9KwlBY1L_18myuGuq1wfhWSaZgMttyVfPaERSR0Wqmu7LAocGIGz3UqlXOLrxM-vMGmW8VNxu5Dx60noTyL8ypexwiFO0P_6afBSNPWeG2yR1NF6ueZhW2ewlBtx5W6AmYv9JS6XaAV1CJEmTeUL4UTpxNzjZO3jtgaIjN9ExCuskGoXuRnyRhBA' },
   { weapon: 'Skeleton Knife', skin: 'Case Hardened', wear: 'FT', price: 560.00, mult: 'x589.4', rarityColor: '#FFD700', image: 'https://community.akamai.steamstatic.com/economy/image/i0CoZ81Ui0m-9KwlBY1L_18myuGuq1wfhWSaZgMttyVfPaERSR0Wqmu7LAocGIGz3UqlXOLrxM-vMGmW8VNxu5Dx60noTyL6kJ_m-B1I5PeibbBiLs-SH1ifyOJztN5lRi67gVMj6m3Rnt2sdnOUZwIgWJAkTLUJ4xbrx9buYuywsgCLjItBmC79jiNN8G81tGbdgHHm' }
 ];
 
@@ -212,7 +212,9 @@ export const VortexCaseShopModal: React.FC<VortexCaseShopModalProps> = ({ isOpen
       try {
         const match = currentSrc.match(/\/g:ce\/([^.]+)/);
         if (match && match[1]) {
-          const b64 = match[1].replace(/-/g, '+').replace(/_/g, '/');
+          let b64 = match[1].replace(/-/g, '+').replace(/_/g, '/');
+          const pad = b64.length % 4;
+          if (pad) b64 += '='.repeat(4 - pad);
           const decoded = atob(b64);
           if (decoded.startsWith('http')) {
             img.src = decoded;
@@ -223,7 +225,10 @@ export const VortexCaseShopModal: React.FC<VortexCaseShopModalProps> = ({ isOpen
         // Fallback error, continue
       }
     }
-    img.onerror = null;
+    // Prevent ugly broken image placeholder
+    img.onerror = () => {
+      img.style.display = 'none';
+    };
   };
 
   if (!isOpen) return null;
@@ -882,7 +887,12 @@ export const VortexCaseShopModal: React.FC<VortexCaseShopModalProps> = ({ isOpen
                                 alt={drop.skin} 
                                 referrerPolicy="no-referrer"
                                 loading="eager"
-                                onError={handleImageFallback}
+                                onError={(e) => {
+                                  handleImageFallback(e);
+                                  e.currentTarget.onerror = () => {
+                                    e.currentTarget.style.display = 'none';
+                                  };
+                                }}
                                 className="w-16 h-12 object-contain my-1 group-hover:scale-110 transition-transform duration-300 drop-shadow-sm" 
                               />
                               <div className="text-[10px] font-mono text-slate-400 truncate w-full">{drop.weapon}</div>
