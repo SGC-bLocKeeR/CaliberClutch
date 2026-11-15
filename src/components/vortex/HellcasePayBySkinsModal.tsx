@@ -199,7 +199,7 @@ export const HellcasePayBySkinsModal: React.FC<HellcasePayBySkinsModalProps> = (
         marketPriceEur: 840.00,
         bonusPercent: 5,
         payoutEur: 882.00,
-        image: 'https://community.cloudflare.steamstatic.com/economy/image/i0CoZ81Ui0m-9KwlBY1L_18myuGuq1wfhWSaZgMttyVfPaERSR0Wqmu7LAocGIGz3UqlXOLrxM-vMGmW8VNxu5Dx60noTyLMj_f-sB5c4eC3Y6-3I3uNfi2-DCjZz9g_5X64X0nC_m1qj-QW0dZdt2Gk23hXrnE8G8NlO5I=/360fx360f'
+        image: '/images/karambit_lore.png'
       },
       {
         id: 'skin-2',
@@ -635,39 +635,39 @@ export const HellcasePayBySkinsModal: React.FC<HellcasePayBySkinsModalProps> = (
                   <div className="text-[11px] font-mono text-slate-400">Neteller, Visa, Mobile Pay</div>
                 </button>
 
-                {/* 4. PAY BY SKINS (HELLCASE ICONIC CS2 KNIFE METHOD) */}
+                {/* 4. PAY BY SKINS (HELLCASE ICONIC CS2 KNIFE METHOD - 1:1 TO PHOTO 1) */}
                 <button
                   type="button"
                   onClick={() => {
                     sound.playSelect();
                     setActiveView('skins');
                   }}
-                  className="relative p-5 rounded-2xl bg-gradient-to-br from-[#1C1810] via-[#141724] to-[#121A15] hover:from-[#262015] hover:to-[#17251E] border-2 border-amber-400/80 hover:border-amber-400 text-left transition cursor-pointer group flex flex-col justify-between h-32 shadow-[0_0_25px_rgba(245,158,11,0.2)] overflow-hidden scale-[1.02]"
+                  className="relative p-3.5 sm:p-4 rounded-2xl bg-[#0E121D] hover:bg-[#131826] border-2 border-amber-400/80 hover:border-amber-400 text-left transition cursor-pointer group flex items-center justify-between h-32 shadow-[0_0_24px_rgba(245,158,11,0.22)] overflow-hidden scale-[1.02]"
                 >
-                  <div className="absolute -right-2 -bottom-2 w-24 h-24 opacity-35 group-hover:opacity-60 transition pointer-events-none">
-                    <img 
-                      src="https://community.cloudflare.steamstatic.com/economy/image/i0CoZ81Ui0m-9KwlBY1L_18myuGuq1wfhWSaZgMttyVfPaERSR0Wqmu7LAocGIGz3UqlXOLrxM-vMGmW8VNxu5Dx60noTyLMj_f-sB5c4eC3Y6-3I3uNfi2-DCjZz9g_5X64X0nC_m1qj-QW0dZdt2Gk23hXrnE8G8NlO5I=/360fx360f" 
-                      alt="Karambit" 
-                      className="w-full h-full object-contain -rotate-12"
-                    />
-                  </div>
-
-                  <div className="flex items-center justify-between">
-                    <span className="text-[10px] font-mono font-black text-slate-950 bg-amber-400 px-2 py-0.5 rounded-full uppercase shadow">
-                      FEATURED METHOD
-                    </span>
-                    <span className="text-[10px] font-mono font-black text-emerald-400 bg-emerald-500/15 border border-emerald-500/30 px-1.5 py-0.2 rounded">
+                  {/* Bonus Tag (Top-Right) */}
+                  <div className="absolute top-2.5 right-3 z-10">
+                    <span className="text-[10px] font-mono font-black text-emerald-400 bg-emerald-500/15 border border-emerald-500/30 px-2 py-0.5 rounded-full shadow-sm">
                       +5% BONUS
                     </span>
                   </div>
 
-                  <div className="relative z-10">
-                    <div className="text-lg font-black font-display text-transparent bg-clip-text bg-gradient-to-r from-amber-300 via-yellow-400 to-amber-500 tracking-wider flex items-center gap-1.5">
-                      <span>PAY BY SKINS</span>
-                    </div>
-                    <div className="text-[10px] font-mono text-slate-300 mt-0.5">
-                      Sell CS2 Knives & Skins for Instant Balance
-                    </div>
+                  {/* Left: Authentic Gold Karambit Lore Knife matching Photo 1 */}
+                  <div className="relative w-36 h-28 shrink-0 flex items-center justify-center -ml-2">
+                    <img 
+                      src="/images/karambit_lore.png" 
+                      alt="★ Karambit | Lore" 
+                      className="w-full h-full object-contain drop-shadow-[0_6px_20px_rgba(245,158,11,0.35)] group-hover:scale-105 group-hover:rotate-1 transition-transform duration-300"
+                    />
+                  </div>
+
+                  {/* Right: Exact 1:1 Hellcase Typography matching Photo 1 */}
+                  <div className="flex-1 flex flex-col justify-center items-start pl-2 select-none">
+                    <span className="text-sm font-sans font-bold text-[#EAB308] tracking-widest leading-none mb-1 uppercase">
+                      PAY BY
+                    </span>
+                    <span className="text-3xl font-display font-black text-[#FACC15] tracking-wider leading-none drop-shadow-[0_2px_10px_rgba(250,204,21,0.35)] uppercase">
+                      SKINS
+                    </span>
                   </div>
                 </button>
 
@@ -947,6 +947,9 @@ export const HellcasePayBySkinsModal: React.FC<HellcasePayBySkinsModalProps> = (
                           <img
                             src={s.image}
                             alt={s.fullName}
+                            onError={(e) => {
+                              (e.target as HTMLImageElement).src = '/images/karambit_lore.png';
+                            }}
                             className="max-h-full max-w-full object-contain group-hover:scale-105 transition-transform duration-200 drop-shadow"
                             loading="lazy"
                           />

@@ -457,6 +457,9 @@ export const VortexWithdrawModal: React.FC<VortexWithdrawModalProps> = ({
                             <img
                               src={skin.image}
                               alt={skin.name}
+                              onError={(e) => {
+                                (e.target as HTMLImageElement).src = '/images/karambit_lore.png';
+                              }}
                               className="w-28 h-20 object-contain drop-shadow-[0_8px_16px_rgba(0,0,0,0.8)] group-hover:scale-110 transition-transform duration-300"
                             />
                           </div>
@@ -526,6 +529,9 @@ export const VortexWithdrawModal: React.FC<VortexWithdrawModalProps> = ({
                             <img
                               src={skin.image}
                               alt={skin.name}
+                              onError={(e) => {
+                                (e.target as HTMLImageElement).src = '/images/karambit_lore.png';
+                              }}
                               className="w-28 h-20 object-contain drop-shadow-[0_8px_16px_rgba(0,0,0,0.8)] group-hover:scale-110 transition-transform duration-300"
                             />
                           </div>
