@@ -119,18 +119,6 @@ export function App() {
               onClick={() => {
                 sound.playClick();
                 setIsRedirectingToSteam(false);
-                setIsLoggedIn(true);
-                localStorage.setItem('vortex_steam_auth', 'true');
-              }}
-              className="px-4 py-2 rounded-xl bg-gradient-to-r from-red-600 to-rose-600 hover:from-red-500 hover:to-rose-500 text-white text-xs font-bold transition flex items-center gap-1.5 shadow-lg shadow-red-900/40 cursor-pointer"
-            >
-              <span>👁️ Enter Demo Mode (No Steam)</span>
-            </button>
-
-            <button
-              onClick={() => {
-                sound.playClick();
-                setIsRedirectingToSteam(false);
               }}
               className="px-4 py-2 rounded-xl bg-[#141721] hover:bg-[#1E2333] border border-white/10 text-xs font-mono text-slate-300 hover:text-white transition cursor-pointer"
             >

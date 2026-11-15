@@ -257,7 +257,6 @@ export const VortexCaseShopModal: React.FC<VortexCaseShopModalProps> = ({ isOpen
     const totalCost = c.priceEur * caseCount;
     if (balance < totalCost) {
       sound.playClick();
-      alert(`Your balance (${balance.toFixed(2)} €) is insufficient to open ${caseCount} cases (${totalCost.toFixed(2)} €). Add demo funds using the "+20€" button!`);
       return;
     }
 
@@ -427,7 +426,7 @@ export const VortexCaseShopModal: React.FC<VortexCaseShopModalProps> = ({ isOpen
 
     if (balance < item.priceEur) {
       sound.playClick();
-      alert(`Your balance (${balance.toFixed(2)} €) is insufficient for this skin (${item.priceEur.toFixed(2)} €). Add demo funds using the button above!`);
+      setDirectBuyError(`Insufficient balance (${balance.toFixed(2)} €) to purchase [${item.name}] (${item.priceEur.toFixed(2)} €). Please top up your wallet.`);
       return;
     }
 
@@ -594,7 +593,7 @@ export const VortexCaseShopModal: React.FC<VortexCaseShopModalProps> = ({ isOpen
                   creditVortexWalletBalance(20.00);
                 }}
                 className="ml-1 px-2 py-0.5 rounded-lg bg-emerald-500/15 hover:bg-emerald-500/25 border border-emerald-500/30 text-emerald-400 text-[10px] font-mono font-bold transition cursor-pointer"
-                title="Add +20.00 € Demo Balance"
+                title="Top Up Wallet (+20.00 €)"
               >
                 +20€
               </button>

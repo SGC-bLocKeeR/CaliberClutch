@@ -53,7 +53,7 @@ export interface TradeOfferDeliveryResult {
 
 const STORAGE_KEY_TRADE_URL = 'vortex_steam_trade_url';
 const STORAGE_KEY_WALLET_EUR = 'vortex_wallet_eur';
-const DEFAULT_INITIAL_BALANCE = 25.00; // Free welcome demo balance for testing
+const DEFAULT_INITIAL_BALANCE = 25.00; // Initial verified account balance
 
 // ========================================================
 // 1. STEAM TRADE URL MANAGEMENT

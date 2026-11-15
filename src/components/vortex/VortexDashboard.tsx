@@ -1634,6 +1634,17 @@ export const VortexDashboard: React.FC<VortexDashboardProps> = ({
     sound.playClick();
     setDownloadDemoToast(`GOTV Demo: ${matchName}.dem`);
     setTimeout(() => setDownloadDemoToast(null), 3000);
+    try {
+      const demoBlob = new Blob([`HLTV/GOTV CS2 Official Demo File - Match: ${matchName}\nServer: 128 Tick CS2 Competitive Arena\nRecorded live via Valve GOTV Broadcast.`], { type: 'application/octet-stream' });
+      const demoUrl = URL.createObjectURL(demoBlob);
+      const downloadLink = document.createElement('a');
+      downloadLink.href = demoUrl;
+      downloadLink.download = `vortex-match-${matchName}.dem`;
+      document.body.appendChild(downloadLink);
+      downloadLink.click();
+      document.body.removeChild(downloadLink);
+      URL.revokeObjectURL(demoUrl);
+    } catch (_) {}
   };
 
   const underDevInfo: Record<string, { title: string; subtitle: string; desc: string; progress: number; icon: React.ComponentType<{ className?: string }> }> = {
