@@ -65,9 +65,7 @@ import { VortexPartyChat } from './VortexPartyChat';
 import { VortexMatchRoom } from './VortexMatchRoom';
 import { VortexRightSocialRail } from './VortexRightSocialRail';
 import { XsollaCheckoutModal } from './XsollaCheckoutModal';
-import { HellcasePayBySkinsModal } from './HellcasePayBySkinsModal';
 import { XsollaOrderItem } from '../../services/xsollaService';
-import { getVortexWalletBalance } from '../../services/skinDeliveryService';
 
 interface VortexDashboardProps {
   userGamerTag?: string;
@@ -795,17 +793,6 @@ export const VortexDashboard: React.FC<VortexDashboardProps> = ({
   const [xsollaCheckoutItem, setXsollaCheckoutItem] = useState<XsollaOrderItem | null>(null);
   const [showVerificationModal, setShowVerificationModal] = useState<boolean>(false);
   const [verificationModalType, setVerificationModalType] = useState<'vip' | 'verified'>('vip');
-  const [showHeaderHellcaseModal, setShowHeaderHellcaseModal] = useState(false);
-  const [headerWalletBalance, setHeaderWalletBalance] = useState<number>(() => getVortexWalletBalance());
-
-  useEffect(() => {
-    const handleBalance = (e: Event) => {
-      const custom = e as CustomEvent<number>;
-      setHeaderWalletBalance(custom.detail);
-    };
-    window.addEventListener('vortex_wallet_updated', handleBalance);
-    return () => window.removeEventListener('vortex_wallet_updated', handleBalance);
-  }, []);
 
   useEffect(() => {
     const handleOpenVerification = (e: Event) => {
@@ -2256,42 +2243,6 @@ export const VortexDashboard: React.FC<VortexDashboardProps> = ({
                   <span>IN QUEUE (00:0{queueSeconds})</span>
                 </button>
               )}
-            </div>
-
-            {/* TOP RIGHT: HELLCASE AUTHENTIC BALANCE & REFILL BAR */}
-            <div className="flex items-center gap-2">
-              <div 
-                onClick={() => {
-                  sound.playSelect();
-                  setShowHeaderHellcaseModal(true);
-                }}
-                className="hidden sm:flex items-center gap-2 px-3 py-1.5 rounded-2xl bg-[#0E121D] border border-emerald-500/35 hover:border-emerald-400 shadow-md transition cursor-pointer select-none group"
-                title="Filling up the balance • Pay by Skins, Crypto & Cards (+5% Bonus)"
-              >
-                <div className="flex items-center gap-1 px-1.5 py-0.5 rounded-lg bg-black/50 border border-white/5">
-                  <span className="text-xs">💵</span>
-                  <span className="text-xs font-mono font-black text-white">0</span>
-                </div>
-                <div className="flex items-center gap-1 px-1.5 py-0.5 rounded-lg bg-black/50 border border-white/5">
-                  <span className="text-xs">🎫</span>
-                  <span className="text-xs font-mono font-black text-amber-400">9</span>
-                </div>
-                <div className="font-mono font-black text-xs text-emerald-400 px-1">
-                  {headerWalletBalance.toFixed(2)} €
-                </div>
-                <button
-                  type="button"
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    sound.playSelect();
-                    setShowHeaderHellcaseModal(true);
-                  }}
-                  className="px-2.5 py-1 rounded-xl bg-gradient-to-r from-emerald-500 to-teal-500 hover:from-emerald-400 hover:to-teal-400 text-slate-950 font-mono font-black text-xs transition shadow-sm flex items-center gap-1 hover:scale-105 active:scale-95"
-                >
-                  <span>REFILL</span>
-                  <span className="text-[9px] font-black text-white bg-black/35 px-1 py-0.2 rounded">+5%</span>
-                </button>
-              </div>
             </div>
           </header>
 
@@ -6367,13 +6318,6 @@ export const VortexDashboard: React.FC<VortexDashboardProps> = ({
           onClose={() => setIsMatchRoomOpen(false)}
         />
       )}
-
-      {/* Hellcase Pay By Skins & Deposit Modal */}
-      <HellcasePayBySkinsModal
-        isOpen={showHeaderHellcaseModal}
-        onClose={() => setShowHeaderHellcaseModal(false)}
-        initialMethod="overview"
-      />
 
       {/* ======================================================== */}
       {/* AUTHENTIC 1:1 FACEIT RIGHT VERTICAL SOCIAL RAIL          */}

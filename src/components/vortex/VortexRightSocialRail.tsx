@@ -603,25 +603,25 @@ export const VortexRightSocialRail: React.FC<VortexRightSocialRailProps> = ({
         <div className="flex flex-col gap-3 w-full flex-1 pt-3 overflow-y-auto">
           
           {/* HELLCASE AUTHENTIC BALANCE & REFILL BAR (PLACED DIRECTLY ABOVE NOTIFICATIONS) */}
-          <div className="w-full p-2 rounded-2xl bg-gradient-to-r from-[#0C101A] via-[#121726] to-[#0C101A] border border-emerald-500/35 hover:border-emerald-400/50 shadow-[0_4px_20px_rgba(16,185,129,0.12)] flex items-center justify-between gap-1.5 transition select-none">
-            {/* Balance Chips matching Hellcase Screenshot */}
+          <div className="w-full px-2 py-1.5 rounded-2xl bg-gradient-to-r from-[#0C101A] via-[#121726] to-[#0C101A] border border-emerald-500/35 hover:border-emerald-400/50 shadow-[0_4px_20px_rgba(16,185,129,0.12)] flex items-center justify-between gap-1.5 transition select-none">
+            {/* Balance Chips & Amount - Always Straight on One Line */}
             <div 
               onClick={() => {
                 sound.playSelect();
                 setShowHellcaseModal(true);
               }}
-              className="flex items-center gap-1.5 min-w-0 cursor-pointer"
-              title="Click to view balance or fill up"
+              className="flex items-center gap-1 shrink-0 cursor-pointer"
+              title="Click to view balance or fill up (+5% Bonus)"
             >
-              <div className="flex items-center gap-1 px-1.5 py-1 rounded-lg bg-black/60 border border-white/5">
-                <span className="text-xs">💵</span>
-                <span className="text-xs font-mono font-black text-white">0</span>
+              <div className="flex items-center gap-0.5 px-1.5 py-0.5 rounded-lg bg-black/60 border border-white/5 shrink-0">
+                <span className="text-[11px] leading-none">💵</span>
+                <span className="text-[11px] font-mono font-bold text-white leading-none">0</span>
               </div>
-              <div className="flex items-center gap-1 px-1.5 py-1 rounded-lg bg-black/60 border border-white/5">
-                <span className="text-xs">🎫</span>
-                <span className="text-xs font-mono font-black text-amber-400">9</span>
+              <div className="flex items-center gap-0.5 px-1.5 py-0.5 rounded-lg bg-black/60 border border-white/5 shrink-0">
+                <span className="text-[11px] leading-none">🎫</span>
+                <span className="text-[11px] font-mono font-bold text-amber-400 leading-none">9</span>
               </div>
-              <div className="flex items-center pl-1 font-mono font-black text-xs text-emerald-400 tracking-tight">
+              <div className="font-mono font-black text-xs text-emerald-400 tracking-tight whitespace-nowrap shrink-0 pl-1">
                 {vortexBalance.toFixed(2)} €
               </div>
             </div>
@@ -633,11 +633,11 @@ export const VortexRightSocialRail: React.FC<VortexRightSocialRailProps> = ({
                 sound.playSelect();
                 setShowHellcaseModal(true);
               }}
-              className="px-2.5 py-1.5 rounded-xl bg-gradient-to-r from-emerald-500 to-teal-500 hover:from-emerald-400 hover:to-teal-400 text-slate-950 font-mono font-black text-xs transition cursor-pointer shadow-[0_0_12px_rgba(16,185,129,0.35)] flex items-center gap-1 shrink-0 hover:scale-105 active:scale-95"
+              className="px-2 py-1 rounded-xl bg-gradient-to-r from-emerald-500 to-teal-400 hover:from-emerald-400 hover:to-teal-300 text-slate-950 font-mono font-black text-[11px] leading-none transition cursor-pointer shadow-[0_0_12px_rgba(16,185,129,0.35)] flex items-center gap-1 shrink-0 hover:scale-105 active:scale-95"
               title="Filling up the balance • Pay by Skins, Crypto & Cards"
             >
               <span>REFILL</span>
-              <span className="text-[9px] font-black text-white bg-black/35 px-1 py-0.2 rounded">+5%</span>
+              <span className="text-[9px] font-black text-white bg-black/40 px-1 py-0.5 rounded leading-none">+5%</span>
             </button>
           </div>
 
