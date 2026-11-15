@@ -215,8 +215,10 @@ export const FaceitVerificationBadge: React.FC<FaceitVerificationBadgeProps> = (
       )}
 
       {/* FACEIT AUTHENTIC TOOLTIP WITH ZERO-GAP HOVER BRIDGE & INTERACTIVE BUTTON */}
-      <span className="absolute left-1/2 -translate-x-1/2 bottom-full pb-2.5 hidden group-hover/vbadge:flex flex-col z-[100] pointer-events-auto min-w-[220px] text-left animate-in fade-in duration-150">
-        <span className="p-3 rounded-2xl bg-[#141722] border border-white/15 shadow-[0_16px_40px_rgba(0,0,0,0.95)] backdrop-blur-md flex flex-col">
+      <span className="absolute left-1/2 -translate-x-1/2 bottom-full pb-1 pt-4 hidden group-hover/vbadge:flex flex-col z-[100] pointer-events-auto min-w-[230px] text-left animate-in fade-in duration-150 cursor-default">
+        {/* Invisible hit bridge covering the entire space between badge and tooltip */}
+        <span className="absolute -bottom-3 left-0 right-0 h-6 pointer-events-auto" />
+        <span className="p-3 rounded-2xl bg-[#141722] border border-white/15 shadow-[0_16px_40px_rgba(0,0,0,0.95)] backdrop-blur-md flex flex-col relative pointer-events-auto">
           <span className="flex items-center gap-2">
             {isVip ? (
               <svg viewBox="0 0 24 24" className="w-4 h-4 shrink-0" fill="none">
