@@ -34,7 +34,8 @@ import {
   Copy,
   Check,
   ExternalLink,
-  Edit3
+  Edit3,
+  ArrowUpRight
 } from 'lucide-react';
 import confetti from 'canvas-confetti';
 import { sound } from '../../utils/soundEffects';
@@ -43,6 +44,7 @@ import { FaceitVerificationBadge } from './VortexDashboard';
 import { VortexCaseShopModal } from './VortexCaseShopModal';
 import { XsollaCheckoutModal } from './XsollaCheckoutModal';
 import { HellcasePayBySkinsModal } from './HellcasePayBySkinsModal';
+import { VortexWithdrawModal } from './VortexWithdrawModal';
 import { getVortexWalletBalance } from '../../services/skinDeliveryService';
 
 export interface SocialFriend {
@@ -134,6 +136,7 @@ export const VortexRightSocialRail: React.FC<VortexRightSocialRailProps> = ({
   const [showCaseShopModal, setShowCaseShopModal] = useState(false);
   const [showXsollaTopUp, setShowXsollaTopUp] = useState(false);
   const [showHellcaseModal, setShowHellcaseModal] = useState(false);
+  const [showWithdrawModal, setShowWithdrawModal] = useState(false);
   const [vortexBalance, setVortexBalance] = useState<number>(() => getVortexWalletBalance());
 
   useEffect(() => {
@@ -141,8 +144,14 @@ export const VortexRightSocialRail: React.FC<VortexRightSocialRailProps> = ({
       const custom = e as CustomEvent<number>;
       setVortexBalance(custom.detail);
     };
+    const handleOpenWithdraw = () => setShowWithdrawModal(true);
+
     window.addEventListener('vortex_wallet_updated', handleBalance);
-    return () => window.removeEventListener('vortex_wallet_updated', handleBalance);
+    window.addEventListener('vortex_open_withdraw_modal', handleOpenWithdraw);
+    return () => {
+      window.removeEventListener('vortex_wallet_updated', handleBalance);
+      window.removeEventListener('vortex_open_withdraw_modal', handleOpenWithdraw);
+    };
   }, []);
 
   // CS2 Cases & Skins Affiliate / Partner State
@@ -842,32 +851,46 @@ export const VortexRightSocialRail: React.FC<VortexRightSocialRailProps> = ({
               Open official crates & win CS2 knives and rare skins. Instant automated Steam Bot delivery.
             </p>
 
-            {/* Wallet Balance & Open Store Button */}
-            <div className="flex items-center justify-between gap-2 pt-0.5">
+            {/* Wallet Balance & Action Buttons */}
+            <div className="flex items-center justify-between gap-1.5 pt-0.5">
               <div 
                 onClick={() => {
                   sound.playSelect();
                   setShowHellcaseModal(true);
                 }}
-                className="flex items-center gap-1.5 text-[11px] font-mono font-bold text-slate-200 bg-white/[0.04] hover:bg-white/[0.08] px-2 py-1 rounded-lg border border-white/5 hover:border-amber-400/40 cursor-pointer transition select-none"
+                className="flex items-center gap-1 text-[11px] font-mono font-bold text-slate-200 bg-white/[0.04] hover:bg-white/[0.08] px-2 py-1.5 rounded-xl border border-white/5 hover:border-amber-400/40 cursor-pointer transition select-none"
                 title="Filling up the balance • Pay by Skins, Crypto & Cards"
               >
                 <Coins className="w-3.5 h-3.5 text-amber-400" />
                 <span className="text-emerald-400">{vortexBalance.toFixed(2)} €</span>
-                <span className="text-[8px] text-[#FF003C] font-black uppercase bg-[#FF003C]/10 px-1 py-0.2 rounded border border-[#FF003C]/30">+TOP UP</span>
+                <span className="text-[8px] text-emerald-400 font-black uppercase bg-emerald-500/10 px-1 py-0.2 rounded border border-emerald-500/30">+TOP UP</span>
               </div>
 
-              <button
-                onClick={() => {
-                  sound.playSelect();
-                  setShowCaseShopModal(true);
-                }}
-                className="flex items-center gap-1 text-[11px] font-mono font-black text-black bg-gradient-to-r from-amber-400 to-yellow-500 hover:from-amber-300 hover:to-yellow-400 px-3 py-1.5 rounded-xl transition cursor-pointer shadow-[0_0_15px_rgba(245,158,11,0.3)] hover:scale-105 active:scale-95"
-                title="Open Vortex CS2 Case Shop"
-              >
-                <span>Open Cases</span>
-                <ChevronRight className="w-3.5 h-3.5" />
-              </button>
+              <div className="flex items-center gap-1">
+                <button
+                  onClick={() => {
+                    sound.playSelect();
+                    setShowWithdrawModal(true);
+                  }}
+                  className="px-2 py-1.5 rounded-xl bg-amber-500/15 hover:bg-amber-500/25 border border-amber-500/35 text-amber-400 font-mono text-[10px] font-bold transition cursor-pointer flex items-center gap-1 hover:scale-105 active:scale-95"
+                  title="Withdraw won CS2 skins to Steam or Cashout to Crypto"
+                >
+                  <span>WITHDRAW</span>
+                  <ArrowUpRight className="w-3 h-3" />
+                </button>
+
+                <button
+                  onClick={() => {
+                    sound.playSelect();
+                    setShowCaseShopModal(true);
+                  }}
+                  className="flex items-center gap-1 text-[11px] font-mono font-black text-black bg-gradient-to-r from-amber-400 to-yellow-500 hover:from-amber-300 hover:to-yellow-400 px-2.5 py-1.5 rounded-xl transition cursor-pointer shadow-[0_0_15px_rgba(245,158,11,0.3)] hover:scale-105 active:scale-95"
+                  title="Open Vortex CS2 Case Shop"
+                >
+                  <span>Cases</span>
+                  <ChevronRight className="w-3.5 h-3.5" />
+                </button>
+              </div>
             </div>
           </div>
 
@@ -2017,6 +2040,22 @@ export const VortexRightSocialRail: React.FC<VortexRightSocialRailProps> = ({
                   <span className="text-[10px] font-mono text-[#A3E635] uppercase font-bold tracking-wider">EDIT →</span>
                 </button>
 
+                {/* WITHDRAW & CASHOUT ACTION BUTTON */}
+                <button
+                  onClick={() => {
+                    sound.playSelect();
+                    setActiveDrawer('none');
+                    setShowWithdrawModal(true);
+                  }}
+                  className="w-full flex items-center justify-between px-3.5 py-2.5 text-xs font-mono font-bold text-white bg-gradient-to-r from-amber-500/15 via-orange-500/10 to-[#12141C] hover:from-amber-500/25 border border-amber-500/40 rounded-xl transition cursor-pointer shadow-sm group"
+                >
+                  <div className="flex items-center gap-2 text-amber-400">
+                    <ArrowUpRight className="w-4 h-4 group-hover:scale-110 transition-transform" />
+                    <span>Withdraw Skins & Crypto</span>
+                  </div>
+                  <span className="text-[10px] font-mono text-amber-400 uppercase font-bold tracking-wider">CASHOUT →</span>
+                </button>
+
                 <button
                   onClick={() => {
                     sound.playSelect();
@@ -2244,6 +2283,15 @@ export const VortexRightSocialRail: React.FC<VortexRightSocialRailProps> = ({
         isOpen={showHellcaseModal}
         onClose={() => setShowHellcaseModal(false)}
         initialMethod="overview"
+      />
+
+      {/* ======================================================== */}
+      {/* 8.5 VORTEX STEAM TRADE OFFER & CRYPTO WITHDRAWAL MODAL    */}
+      {/* ======================================================== */}
+      <VortexWithdrawModal
+        isOpen={showWithdrawModal}
+        onClose={() => setShowWithdrawModal(false)}
+        initialTab="skins"
       />
 
       {/* ======================================================== */}

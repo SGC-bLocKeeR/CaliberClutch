@@ -4206,6 +4206,26 @@ export const VortexDashboard: React.FC<VortexDashboardProps> = ({
                         </div>
                       )}
 
+                      {/* Instant Skin & Crypto Cashout */}
+                      <div className="p-3 rounded-xl bg-gradient-to-r from-amber-500/10 via-orange-500/5 to-transparent border border-amber-500/30 flex items-center justify-between">
+                        <div className="flex items-center gap-2">
+                          <span className="text-base">🎁</span>
+                          <div>
+                            <div className="text-xs font-bold text-white font-mono">CS2 Skin Vault & Crypto Cashout</div>
+                            <div className="text-[10px] text-slate-400 font-sans">Withdraw unboxed skins to Steam or cash out to USDT</div>
+                          </div>
+                        </div>
+                        <button
+                          onClick={() => {
+                            sound.playSelect();
+                            window.dispatchEvent(new CustomEvent('vortex_open_withdraw_modal'));
+                          }}
+                          className="px-3 py-1.5 rounded-lg bg-gradient-to-r from-amber-500 to-orange-500 hover:from-amber-400 hover:to-orange-400 text-slate-950 font-mono font-black text-xs transition cursor-pointer shadow-sm hover:scale-105 active:scale-95"
+                        >
+                          Withdraw
+                        </button>
+                      </div>
+
                       {/* Hardware & Sens */}
                       <div className="p-3 rounded-xl bg-[#12141C] border border-white/5 flex items-center justify-between">
                         <span className="text-slate-400">Sensitivity & Res:</span>

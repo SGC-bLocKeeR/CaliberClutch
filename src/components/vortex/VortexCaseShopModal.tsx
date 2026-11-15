@@ -24,12 +24,14 @@ import {
   Lock,
   TrendingUp,
   Tag,
-  Filter
+  Filter,
+  ArrowUpRight
 } from 'lucide-react';
 import confetti from 'canvas-confetti';
 import { sound } from '../../utils/soundEffects';
 import { XsollaCheckoutModal } from './XsollaCheckoutModal';
 import { HellcasePayBySkinsModal } from './HellcasePayBySkinsModal';
+import { addUserSkinToInventory, removeUserSkinFromInventory } from '../../services/withdrawalService';
 import { 
   CS2Case, 
   CS2Skin, 
@@ -291,6 +293,7 @@ export const VortexCaseShopModal: React.FC<VortexCaseShopModalProps> = ({ isOpen
         setIsSpinning(false);
         setWonSkin(primaryWinner);
         setWonSkins(rolledWinners);
+        rolledWinners.forEach(s => addUserSkinToInventory(s));
 
         const hasGold = rolledWinners.some(w => w.rarity === 'extraordinary');
         const hasCovert = rolledWinners.some(w => w.rarity === 'covert');
@@ -350,6 +353,7 @@ export const VortexCaseShopModal: React.FC<VortexCaseShopModalProps> = ({ isOpen
       setIsSpinning(false);
       setWonSkin(primaryWinner);
       setWonSkins(rolledWinners);
+      rolledWinners.forEach(s => addUserSkinToInventory(s));
 
       const hasGold = rolledWinners.some(w => w.rarity === 'extraordinary');
       const hasCovert = rolledWinners.some(w => w.rarity === 'covert');
@@ -414,6 +418,12 @@ export const VortexCaseShopModal: React.FC<VortexCaseShopModalProps> = ({ isOpen
 
     const sellValue = parseFloat((totalRaw * 0.85).toFixed(2));
     creditVortexWalletBalance(sellValue);
+
+    if (wonSkins && wonSkins.length > 0) {
+      wonSkins.forEach(s => removeUserSkinFromInventory(s.id));
+    } else if (wonSkin) {
+      removeUserSkinFromInventory(wonSkin.id);
+    }
 
     // Instant reset without any annoying alert popup
     setWonSkin(null);
@@ -603,6 +613,18 @@ export const VortexCaseShopModal: React.FC<VortexCaseShopModalProps> = ({ isOpen
               >
                 <span>REFILL</span>
                 <span className="text-[8px] font-black text-white bg-black/35 px-1 py-0.2 rounded">+5%</span>
+              </button>
+
+              <button
+                onClick={() => {
+                  sound.playSelect();
+                  window.dispatchEvent(new CustomEvent('vortex_open_withdraw_modal'));
+                }}
+                className="px-2.5 py-1 rounded-lg bg-gradient-to-r from-amber-500/20 to-orange-500/20 hover:from-amber-500/35 hover:to-orange-500/35 border border-amber-500/50 text-amber-300 text-[10px] font-mono font-black transition cursor-pointer flex items-center gap-1 shadow-sm"
+                title="Withdraw won CS2 skins to Steam or Cashout to Crypto"
+              >
+                <span>WITHDRAW</span>
+                <ArrowUpRight className="w-3 h-3" />
               </button>
             </div>
 
