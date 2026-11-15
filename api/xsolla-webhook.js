@@ -21,6 +21,8 @@ export default async function handler(req, res) {
     return res.status(200).json({
       status: 'active',
       service: 'VORTEX Gaming Xsolla Webhook Gateway',
+      projectId: '321543',
+      merchantId: '870122',
       endpoints: {
         webhookUrl: 'https://blockeer.vercel.app/api/xsolla-webhook',
         tokenUrl: 'https://blockeer.vercel.app/api/xsolla-token'

@@ -20,14 +20,19 @@ export default async function handler(req, res) {
   // Simulated authenticated token for Xsolla Pay Station 4
   const mockToken = `xsolla_token_${Buffer.from(`${transactionId}:${orderAmount}:${currency}`).toString('base64url')}`;
 
+  const projectId = '321543';
+  const merchantId = '870122';
+
   return res.status(200).json({
     success: true,
     token: mockToken,
     transactionId,
+    projectId,
+    merchantId,
     amount: orderAmount,
     currency,
     description: description || `Vortex Gaming ${itemType === 'wallet' ? 'Wallet Top-Up' : 'Membership Upgrade'}`,
-    payStationUrl: `https://secure.xsolla.com/paystation4/?token=${mockToken}`,
-    sandboxUrl: `https://sandbox-secure.xsolla.com/paystation4/?token=${mockToken}`
+    payStationUrl: `https://secure.xsolla.com/paystation4/?project_id=${projectId}&token=${mockToken}`,
+    sandboxUrl: `https://sandbox-secure.xsolla.com/paystation4/?project_id=${projectId}&token=${mockToken}`
   });
 }

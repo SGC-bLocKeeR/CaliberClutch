@@ -193,7 +193,7 @@ export const XsollaCheckoutModal: React.FC<XsollaCheckoutModalProps> = ({
                   </span>
                 </div>
                 <div className="text-[10px] font-mono text-slate-400 mt-0.5">
-                  Official Merchant Gateway • Project #{config.projectId}
+                  Nexus Esports (Merchant #{config.merchantId}) • VORTEX Gaming #{config.projectId}
                 </div>
               </div>
             </div>
@@ -268,7 +268,7 @@ export const XsollaCheckoutModal: React.FC<XsollaCheckoutModalProps> = ({
                   value={config.projectId}
                   onChange={(e) => setConfig({ ...config, projectId: e.target.value.trim() })}
                   className="w-full px-3 py-2 rounded-xl bg-[#0A0C13] border border-white/10 text-white font-mono text-xs focus:border-amber-400 outline-none"
-                  placeholder="e.g. 194820"
+                  placeholder="e.g. 321543"
                 />
               </div>
               <div>
@@ -280,7 +280,7 @@ export const XsollaCheckoutModal: React.FC<XsollaCheckoutModalProps> = ({
                   value={config.merchantId}
                   onChange={(e) => setConfig({ ...config, merchantId: e.target.value.trim() })}
                   className="w-full px-3 py-2 rounded-xl bg-[#0A0C13] border border-white/10 text-white font-mono text-xs focus:border-amber-400 outline-none"
-                  placeholder="e.g. 820491"
+                  placeholder="e.g. 870122"
                 />
               </div>
               <div>

@@ -9,6 +9,7 @@ export interface XsollaConfig {
   merchantId: string;
   mode: 'sandbox' | 'live';
   apiKey?: string;
+  secretKey?: string;
 }
 
 export interface XsollaOrderItem {
@@ -35,11 +36,14 @@ const STORAGE_XSOLLA_PROJECT_ID = 'vortex_xsolla_project_id';
 const STORAGE_XSOLLA_MERCHANT_ID = 'vortex_xsolla_merchant_id';
 const STORAGE_XSOLLA_MODE = 'vortex_xsolla_mode';
 const STORAGE_XSOLLA_API_KEY = 'vortex_xsolla_api_key';
+const STORAGE_XSOLLA_SECRET_KEY = 'vortex_xsolla_secret_key';
 
 export const DEFAULT_XSOLLA_CONFIG: XsollaConfig = {
-  projectId: '194820', // Vortex Official Project ID on Xsolla Publisher
-  merchantId: '820491',
-  mode: 'live',
+  projectId: '321543', // Official VORTEX Gaming Project ID on Xsolla Publisher
+  merchantId: '870122', // Official Nexus Esports Merchant ID
+  mode: 'sandbox', // Starts in sandbox for testing, toggleable to live
+  apiKey: 'c067e12d8b1829007277de34c5f3ed9ab446aafc',
+  secretKey: 'zK17ILbblZfq35s8ggkz44j-olQBn_B35XgEhhKUsrg',
 };
 
 export const getXsollaConfig = (): XsollaConfig => {
@@ -48,7 +52,8 @@ export const getXsollaConfig = (): XsollaConfig => {
     projectId: localStorage.getItem(STORAGE_XSOLLA_PROJECT_ID) || DEFAULT_XSOLLA_CONFIG.projectId,
     merchantId: localStorage.getItem(STORAGE_XSOLLA_MERCHANT_ID) || DEFAULT_XSOLLA_CONFIG.merchantId,
     mode: (localStorage.getItem(STORAGE_XSOLLA_MODE) as 'sandbox' | 'live') || DEFAULT_XSOLLA_CONFIG.mode,
-    apiKey: localStorage.getItem(STORAGE_XSOLLA_API_KEY) || undefined,
+    apiKey: localStorage.getItem(STORAGE_XSOLLA_API_KEY) || DEFAULT_XSOLLA_CONFIG.apiKey,
+    secretKey: localStorage.getItem(STORAGE_XSOLLA_SECRET_KEY) || DEFAULT_XSOLLA_CONFIG.secretKey,
   };
 };
 
@@ -58,6 +63,7 @@ export const saveXsollaConfig = (config: Partial<XsollaConfig>) => {
   if (config.merchantId !== undefined) localStorage.setItem(STORAGE_XSOLLA_MERCHANT_ID, config.merchantId);
   if (config.mode !== undefined) localStorage.setItem(STORAGE_XSOLLA_MODE, config.mode);
   if (config.apiKey !== undefined) localStorage.setItem(STORAGE_XSOLLA_API_KEY, config.apiKey);
+  if (config.secretKey !== undefined) localStorage.setItem(STORAGE_XSOLLA_SECRET_KEY, config.secretKey);
   window.dispatchEvent(new CustomEvent('vortex_xsolla_config_updated'));
 };
 
