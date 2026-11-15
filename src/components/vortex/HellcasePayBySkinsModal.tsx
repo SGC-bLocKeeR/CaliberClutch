@@ -7,16 +7,19 @@ import {
   Copy, 
   Sparkles, 
   ShieldCheck, 
-  ChevronDown,
-  Coins,
-  AlertCircle
+  ChevronDown, 
+  Coins, 
+  AlertCircle,
+  ArrowLeft,
+  RotateCw,
+  History
 } from 'lucide-react';
 import confetti from 'canvas-confetti';
 import { sound } from '../../utils/soundEffects';
 import { KARAMBIT_LORE_IMAGE } from '../../assets/images/karambitLoreBase64';
 import { 
   getVortexWalletBalance, 
-  creditVortexWalletBalance,
+  creditVortexWalletBalance, 
   saveSteamTradeUrl, 
   isValidSteamTradeUrl 
 } from '../../services/skinDeliveryService';
@@ -35,11 +38,12 @@ interface TradableSkin {
   skinName: string;
   fullName: string;
   type: 'knife' | 'rifle' | 'sniper' | 'pistol' | 'sticker' | 'case' | 'other';
-  rarity: 'extraordinary' | 'covert' | 'classified' | 'restricted' | 'mil-spec';
+  rarity: 'extraordinary' | 'covert' | 'classified' | 'restricted' | 'mil-spec' | 'industrial' | 'consumer';
   wear: string;
   wearShort: string;
   floatValue: number;
   isStatTrak: boolean;
+  isOverstock?: boolean;
   marketPriceEur: number;
   payoutEur: number;
   image: string;
@@ -87,6 +91,20 @@ const CRYPTO_CONFIGS = [
   }
 ];
 
+// Helper for CS2 rarity accent colors matching Farmskins
+const getRarityColor = (rarity: string) => {
+  switch (rarity) {
+    case 'extraordinary': return '#ffd700'; // Gold / Knife
+    case 'covert': return '#eb4b4b';        // Red
+    case 'classified': return '#d32ce6';    // Pink
+    case 'restricted': return '#8847ff';    // Purple
+    case 'mil-spec': return '#4b69ff';      // Blue
+    case 'industrial': return '#5e98d9';    // Light blue
+    case 'consumer': return '#b0c3d9';      // Gray
+    default: return '#4b69ff';
+  }
+};
+
 export const HellcasePayBySkinsModal: React.FC<HellcasePayBySkinsModalProps> = ({
   isOpen,
   onClose,
@@ -102,13 +120,19 @@ export const HellcasePayBySkinsModal: React.FC<HellcasePayBySkinsModalProps> = (
   const [tradeUrlEditing, setTradeUrlEditing] = useState(false);
   const [tempTradeUrl, setTempTradeUrl] = useState('');
 
-  // Skins Inventory State
+  // Skins Inventory State (Farmskins Skin2PAY)
   const [inventory, setInventory] = useState<TradableSkin[]>([]);
   const [selectedSkinIds, setSelectedSkinIds] = useState<Set<string>>(new Set());
   const [skinSearch, setSkinSearch] = useState('');
+  const [onlyTradableSkins, setOnlyTradableSkins] = useState<boolean>(true);
   const [selectedCategory, setSelectedCategory] = useState<'all' | 'knife' | 'rifle' | 'sniper' | 'pistol' | 'sticker' | 'other'>('all');
+  const [sortBy, setSortBy] = useState<'price-desc' | 'price-asc' | 'name'>('price-desc');
+  const [sortDropdownOpen, setSortDropdownOpen] = useState(false);
+  const [categoryDropdownOpen, setCategoryDropdownOpen] = useState(false);
+  const [isReloading, setIsReloading] = useState(false);
   const [isDepositingSkins, setIsDepositingSkins] = useState(false);
   const [depositSuccessMessage, setDepositSuccessMessage] = useState<string | null>(null);
+  const [paymentHistoryOpen, setPaymentHistoryOpen] = useState(false);
 
   // Crypto State
   const [selectedCrypto, setSelectedCrypto] = useState(CRYPTO_CONFIGS[0]);
@@ -136,6 +160,7 @@ export const HellcasePayBySkinsModal: React.FC<HellcasePayBySkinsModalProps> = (
       setDepositSuccessMessage(null);
       setCryptoError(null);
       setVoucherError(null);
+      setPaymentHistoryOpen(false);
     }
   }, [isOpen, initialMethod]);
 
@@ -161,11 +186,334 @@ export const HellcasePayBySkinsModal: React.FC<HellcasePayBySkinsModalProps> = (
       console.warn('Could not fetch remote inventory, using verified fallback:', e);
     }
 
-    // Default authentic CS2 items
+    // Default authentic CS2 catalog matching user's real inventory on Farmskins
     setInventory([
       {
-        id: 'skin-1',
-        assetId: '38192019482',
+        id: 'user-skin-1',
+        assetId: '40192019481',
+        weapon: 'AK-47',
+        skinName: 'Asiimov',
+        fullName: 'AK-47 | Asiimov (Field-Tested)',
+        type: 'rifle',
+        rarity: 'classified',
+        wear: 'Field-Tested',
+        wearShort: 'FT',
+        floatValue: 0.224,
+        isStatTrak: false,
+        isOverstock: false,
+        marketPriceEur: 38.24,
+        payoutEur: 38.24,
+        image: 'https://community.akamai.steamstatic.com/economy/image/i0CoZ81Ui0m-9KwlBY1L_18myuGuq1wfhWSaZgMttyVfPaERSR0Wqmu7LAocGIGz3UqlXOLrxM-vMGmW8VNxu5Dx60noTyLwlcK3wiFO0POlPPNSIeOaB2qf19F6ueZhW2e2wEt-t2jcytf6dymSO1JxA5oiRecLsRa5kIfkYr-241aLgotHz3-rkGoXuUp8oX57'
+      },
+      {
+        id: 'user-skin-2',
+        assetId: '40192019482',
+        weapon: 'P250',
+        skinName: 'Asiimov',
+        fullName: 'P250 | Asiimov (Field-Tested)',
+        type: 'pistol',
+        rarity: 'classified',
+        wear: 'Field-Tested',
+        wearShort: 'FT',
+        floatValue: 0.245,
+        isStatTrak: false,
+        isOverstock: false,
+        marketPriceEur: 10.70,
+        payoutEur: 10.70,
+        image: 'https://community.akamai.steamstatic.com/economy/image/i0CoZ81Ui0m-9KwlBY1L_18myuGuq1wfhWSaZgMttyVfPaERSR0Wqmu7LAocGIGz3UqlXOLrxM-vMGmW8VNxu5Dx60noTyLhzMOwwiFO0OL8PfRSIeOaB2qf19F6ueZhW2fixx53tWqEm4ugeXuebQN0CZJyRrMJuxm4loCyPr_i51TfjtgXzi79kGoXuUXmUJzm'
+      },
+      {
+        id: 'user-skin-3',
+        assetId: '40192019483',
+        weapon: 'DESERT EAGLE',
+        skinName: 'Firebreathing',
+        fullName: 'Desert Eagle | Firebreathing (Well-Worn)',
+        type: 'pistol',
+        rarity: 'mil-spec',
+        wear: 'Well-Worn',
+        wearShort: 'WW',
+        floatValue: 0.412,
+        isStatTrak: false,
+        isOverstock: false,
+        marketPriceEur: 0.65,
+        payoutEur: 0.65,
+        image: 'https://community.akamai.steamstatic.com/economy/image/i0CoZ81Ui0m-9KwlBY1L_18myuGuq1wfhWSaZgMttyVfPaERSR0Wqmu7LAocGIGz3UqlXOLrxM-vMGmW8VNxu5Dx60noTyL1m5fn8Sdk6_evb6hoH_aaHGKS0-t3pOlgQS6MmRQguynLn9ircSiTPFUgCJAkQbELsxXtktDkMurk4lTZ39hEyn_-3HsbvXxj4fFCD_RcNNN-xQ'
+      },
+      {
+        id: 'user-skin-4',
+        assetId: '40192019484',
+        weapon: 'DESERT EAGLE',
+        skinName: 'Tilted',
+        fullName: 'Desert Eagle | Tilted (Minimal Wear)',
+        type: 'pistol',
+        rarity: 'restricted',
+        wear: 'Minimal Wear',
+        wearShort: 'MW',
+        floatValue: 0.095,
+        isStatTrak: false,
+        isOverstock: false,
+        marketPriceEur: 0.39,
+        payoutEur: 0.39,
+        image: 'https://community.akamai.steamstatic.com/economy/image/i0CoZ81Ui0m-9KwlBY1L_18myuGuq1wfhWSaZgMttyVfPaERSR0Wqmu7LAocGIGz3UqlXOLrxM-vMGmW8VNxu5Dx60noTyL1m5fn8Sdk7OeRZ7JoMuCSHXSvwP9jsd5tSii0mRgYvzSCkpu3cH-UOgV2D8RyQrMKsRW-mtWyPunr4VeNjIhMmX6ojigY7y9v5ehUA71lpPMO4MWI5A'
+      },
+      {
+        id: 'user-skin-5',
+        assetId: '40192019485',
+        weapon: 'USP-S',
+        skinName: 'Alpine Camo',
+        fullName: 'USP-S | Alpine Camo (Well-Worn)',
+        type: 'pistol',
+        rarity: 'mil-spec',
+        wear: 'Well-Worn',
+        wearShort: 'WW',
+        floatValue: 0.395,
+        isStatTrak: false,
+        isOverstock: false,
+        marketPriceEur: 0.26,
+        payoutEur: 0.26,
+        image: 'https://community.akamai.steamstatic.com/economy/image/i0CoZ81Ui0m-9KwlBY1L_18myuGuq1wfhWSaZgMttyVfPaERSR0Wqmu7LAocGIGz3UqlXOLrxM-vMGmW8VNxu5Dx60noTyLkjYbf7itX6vytbbZSJ-OQBliS0-dxuPVWTCi-miIyoC26lob-KT-JaVIpXpRxFuIMtRe4x9PjYrni7wfejYpFnn3-jCNB6C4_5u4FU6It8rqX0V8gYmZtWA'
+      },
+      {
+        id: 'user-skin-6',
+        assetId: '40192019486',
+        weapon: 'P2000',
+        skinName: 'Royal Baroque',
+        fullName: 'P2000 | Royal Baroque (Field-Tested)',
+        type: 'pistol',
+        rarity: 'mil-spec',
+        wear: 'Field-Tested',
+        wearShort: 'FT',
+        floatValue: 0.188,
+        isStatTrak: false,
+        isOverstock: false,
+        marketPriceEur: 0.15,
+        payoutEur: 0.15,
+        image: 'https://community.akamai.steamstatic.com/economy/image/i0CoZ81Ui0m-9KwlBY1L_18myuGuq1wfhWSaZgMttyVfPaERSR0Wqmu7LAocGIGz3UqlXOLrxM-vMGmW8VNxu5Dx60noTyL5lYayrXIL0OG-bZt-I_GBCFiA0-d4pN5lRi67gVMk4GzVzNz9I32RawMoD5shR-ZeuhGxwIeyNuPntgWIjt5Ani33jC0Y8G81tMIEN1xi'
+      },
+      {
+        id: 'user-skin-7',
+        assetId: '40192019487',
+        weapon: 'M4A1-S',
+        skinName: 'Wash me plz',
+        fullName: 'M4A1-S | Wash me plz (Minimal Wear)',
+        type: 'rifle',
+        rarity: 'mil-spec',
+        wear: 'Minimal Wear',
+        wearShort: 'MW',
+        floatValue: 0.118,
+        isStatTrak: false,
+        isOverstock: false,
+        marketPriceEur: 0.12,
+        payoutEur: 0.12,
+        image: 'https://community.akamai.steamstatic.com/economy/image/i0CoZ81Ui0m-9KwlBY1L_18myuGuq1wfhWSaZgMttyVfPaERSR0Wqmu7LAocGIGz3UqlXOLrxM-vMGmW8VNxu5Dx60noTyL8ypexwjFS4_ega6F_H_iKMWiGxPxmsfJ6cC28mhkrtgKIzo6oMhTLN1F4Tox1TLUNthHuxtbuZejntAzWjNlNmX6rjylJuyhp6-kLBKt38vKFiFuUL_Rjtk_8Ljjf'
+      },
+      {
+        id: 'user-skin-8',
+        assetId: '40192019488',
+        weapon: 'MP9',
+        skinName: 'Buff Blue',
+        fullName: 'MP9 | Buff Blue (Field-Tested)',
+        type: 'rifle',
+        rarity: 'mil-spec',
+        wear: 'Field-Tested',
+        wearShort: 'FT',
+        floatValue: 0.198,
+        isStatTrak: false,
+        isOverstock: true,
+        marketPriceEur: 0.03,
+        payoutEur: 0.03,
+        image: 'https://community.akamai.steamstatic.com/economy/image/i0CoZ81Ui0m-9KwlBY1L_18myuGuq1wfhWSaZgMttyVfPaERSR0Wqmu7LAocGIGz3UqlXOLrxM-vMGmW8VNxu5Dx60noTyL8js_f9TZk7f67bZtoJPeWHVicyOl-pK84TnrhlEwjtWvQzoqvciiWaAIoA5okQ7ZYsBHpxNDkNbzh5QDbjolC02yg2XGzrD7d'
+      },
+      {
+        id: 'user-skin-9',
+        assetId: '40192019489',
+        weapon: 'MP5-SD',
+        skinName: 'Lime Hex',
+        fullName: 'MP5-SD | Lime Hex (Factory New)',
+        type: 'rifle',
+        rarity: 'mil-spec',
+        wear: 'Factory New',
+        wearShort: 'FN',
+        floatValue: 0.038,
+        isStatTrak: false,
+        isOverstock: true,
+        marketPriceEur: 0.03,
+        payoutEur: 0.03,
+        image: 'https://community.akamai.steamstatic.com/economy/image/i0CoZ81Ui0m-9KwlBY1L_18myuGuq1wfhWSaZgMttyVfPaERSR0Wqmu7LAocGIGz3UqlXOLrxM-vMGmW8VNxu5Dx60noTyL8jsPz-R1I_82iYaloH_iWFlicyOl-pK8_HH22xxl34DiHz9mreS-TblN2C5FwFOQN4Rjpx9C1Yunh4gfbg91M02yg2SHKjRF4'
+      },
+      {
+        id: 'user-skin-10',
+        assetId: '40192019490',
+        weapon: 'TEC-9',
+        skinName: 'Blue Blast',
+        fullName: 'Tec-9 | Blue Blast (Minimal Wear)',
+        type: 'pistol',
+        rarity: 'mil-spec',
+        wear: 'Minimal Wear',
+        wearShort: 'MW',
+        floatValue: 0.115,
+        isStatTrak: false,
+        isOverstock: true,
+        marketPriceEur: 0.03,
+        payoutEur: 0.03,
+        image: 'https://community.akamai.steamstatic.com/economy/image/i0CoZ81Ui0m-9KwlBY1L_18myuGuq1wfhWSaZgMttyVfPaERSR0Wqmu7LAocGIGz3UqlXOLrxM-vMGmW8VNxu5Dx60noTyLlm5W5wjFU0OaraahSLPmUBnPex7cj4Lg9GS-ylB4jsGTSzov_JHvDag8nCcB4FrZes0XtwIblNOLhshue1dxd5qECaQ'
+      },
+      {
+        id: 'user-skin-11',
+        assetId: '40192019491',
+        weapon: 'NEGEV',
+        skinName: 'Sour Grapes',
+        fullName: 'Negev | Sour Grapes (Minimal Wear)',
+        type: 'other',
+        rarity: 'mil-spec',
+        wear: 'Minimal Wear',
+        wearShort: 'MW',
+        floatValue: 0.122,
+        isStatTrak: false,
+        isOverstock: true,
+        marketPriceEur: 0.03,
+        payoutEur: 0.03,
+        image: 'https://community.akamai.steamstatic.com/economy/image/i0CoZ81Ui0m-9KwlBY1L_18myuGuq1wfhWSaZgMttyVfPaERSR0Wqmu7LAocGIGz3UqlXOLrxM-vMGmW8VNxu5Dx60noTyL_m5Hl6x1I4PeRaqF_MumsAm6Xyfo44-Q7Gy3jzBsh4Tncw4n6cXiRbFAlW5B3TbEJu0PuwNWzPu_r4wDagpUFk3tgr-gSOQ'
+      },
+      {
+        id: 'user-skin-12',
+        assetId: '40192019492',
+        weapon: 'P250',
+        skinName: 'Plum Netting',
+        fullName: 'P250 | Plum Netting (Well-Worn)',
+        type: 'pistol',
+        rarity: 'consumer',
+        wear: 'Well-Worn',
+        wearShort: 'WW',
+        floatValue: 0.425,
+        isStatTrak: false,
+        isOverstock: true,
+        marketPriceEur: 0.03,
+        payoutEur: 0.03,
+        image: 'https://community.akamai.steamstatic.com/economy/image/i0CoZ81Ui0m-9KwlBY1L_18myuGuq1wfhWSaZgMttyVfPaERSR0Wqmu7LAocGIGz3UqlXOLrxM-vMGmW8VNxu5Dx60noTyLhzMOwwjFL0P6va6FSLPmUBnPembh05eA4H36ykBh3sGnRmN-hJyiQag4nDZB4RuQDtxLuw4fkYuK27xue1dzA89j_Xg'
+      },
+      {
+        id: 'user-skin-13',
+        assetId: '40192019493',
+        weapon: 'SCAR-20',
+        skinName: 'Sand Mesh',
+        fullName: 'SCAR-20 | Sand Mesh (Field-Tested)',
+        type: 'sniper',
+        rarity: 'consumer',
+        wear: 'Field-Tested',
+        wearShort: 'FT',
+        floatValue: 0.218,
+        isStatTrak: false,
+        isOverstock: true,
+        marketPriceEur: 0.03,
+        payoutEur: 0.03,
+        image: 'https://community.akamai.steamstatic.com/economy/image/i0CoZ81Ui0m-9KwlBY1L_18myuGuq1wfhWSaZgMttyVfPaERSR0Wqmu7LAocGIGz3UqlXOLrxM-vMGmW8VNxu5Dx60noTyLinZfyr3Jk_OKRZaF-KM-AD2mU_uJ_t-l9AXHhwxwi5zyDmIqoeCmWaAUhXpUiRrFZsBHsxNXvM-jl5lTdgotDySzgznQefYC7ilk'
+      },
+      {
+        id: 'user-skin-14',
+        assetId: '40192019494',
+        weapon: 'GALIL AR',
+        skinName: 'Grey Smoke',
+        fullName: 'Galil AR | Grey Smoke (Minimal Wear)',
+        type: 'rifle',
+        rarity: 'industrial',
+        wear: 'Minimal Wear',
+        wearShort: 'MW',
+        floatValue: 0.105,
+        isStatTrak: false,
+        isOverstock: true,
+        marketPriceEur: 0.03,
+        payoutEur: 0.03,
+        image: 'https://community.akamai.steamstatic.com/economy/image/i0CoZ81Ui0m-9KwlBY1L_18myuGuq1wfhWSaZgMttyVfPaERSR0Wqmu7LAocGIGz3UqlXOLrxM-vMGmW8VNxu5Dx60noTyL2n5rp8SNJ0OGha6xSIvycHGWvw_lJt-BlRiWyhyIrujqNjsH9dimTZgAmCMMhRuEL5xCxkNa0Pum3sgzX3osWyH362ixL7HlqtehUT-N7rUWzKN8P'
+      },
+      {
+        id: 'user-skin-15',
+        assetId: '40192019495',
+        weapon: 'NEGEV',
+        skinName: 'Raw Ceramic',
+        fullName: 'Negev | Raw Ceramic (Minimal Wear)',
+        type: 'other',
+        rarity: 'industrial',
+        wear: 'Minimal Wear',
+        wearShort: 'MW',
+        floatValue: 0.114,
+        isStatTrak: false,
+        isOverstock: true,
+        marketPriceEur: 0.03,
+        payoutEur: 0.03,
+        image: 'https://community.akamai.steamstatic.com/economy/image/i0CoZ81Ui0m-9KwlBY1L_18myuGuq1wfhWSaZgMttyVfPaERSR0Wqmu7LAocGIGz3UqlXOLrxM-vMGmW8VNxu5Dx60noTyL_m5Hl6x1I4M2tbbZsLfmQMWmVxutgj-1gSCGn20524W3czd_9I3zGaAUnDZt0FOAKtBbpm4LkMOq25FHe3YtAz3-siy9XrnE8kYfBu1E'
+      },
+      {
+        id: 'user-skin-16',
+        assetId: '40192019496',
+        weapon: 'GALIL AR',
+        skinName: 'Sage Spray',
+        fullName: 'Galil AR | Sage Spray (Well-Worn)',
+        type: 'rifle',
+        rarity: 'consumer',
+        wear: 'Well-Worn',
+        wearShort: 'WW',
+        floatValue: 0.388,
+        isStatTrak: false,
+        isOverstock: true,
+        marketPriceEur: 0.03,
+        payoutEur: 0.03,
+        image: 'https://community.akamai.steamstatic.com/economy/image/i0CoZ81Ui0m-9KwlBY1L_18myuGuq1wfhWSaZgMttyVfPaERSR0Wqmu7LAocGIGz3UqlXOLrxM-vMGmW8VNxu5Dx60noTyL2n5rp8SNJ0OG-V7d9MvGKMWOV0utkpN56Ti62qhEutDWR1N6qcCqSOgEiCsMhQLZftxnpxtfkP-Ph71eMjYtDmCX3jytO5nlt5OkcEf1yc_oaZQU'
+      },
+      {
+        id: 'user-skin-17',
+        assetId: '40192019497',
+        weapon: 'P250',
+        skinName: 'Sand Dune',
+        fullName: 'P250 | Sand Dune (Field-Tested)',
+        type: 'pistol',
+        rarity: 'consumer',
+        wear: 'Field-Tested',
+        wearShort: 'FT',
+        floatValue: 0.222,
+        isStatTrak: false,
+        isOverstock: true,
+        marketPriceEur: 0.03,
+        payoutEur: 0.03,
+        image: 'https://community.akamai.steamstatic.com/economy/image/i0CoZ81Ui0m-9KwlBY1L_18myuGuq1wfhWSaZgMttyVfPaERSR0Wqmu7LAocGIGz3UqlXOLrxM-vMGmW8VNxu5Dx60noTyLhzMOwwjFU0OGvZqBSLPmUBnPelesn5-RrSXDlwRhx5TjSwtmocCifPwQpDpshReBfsxPrk4DhNu3jshue1dy8VcXxuA'
+      },
+      {
+        id: 'user-skin-18',
+        assetId: '40192019498',
+        weapon: 'MAC-10',
+        skinName: 'Acid Hex',
+        fullName: 'MAC-10 | Acid Hex (Factory New)',
+        type: 'rifle',
+        rarity: 'mil-spec',
+        wear: 'Factory New',
+        wearShort: 'FN',
+        floatValue: 0.024,
+        isStatTrak: false,
+        isOverstock: true,
+        marketPriceEur: 0.03,
+        payoutEur: 0.03,
+        image: 'https://community.akamai.steamstatic.com/economy/image/i0CoZ81Ui0m-9KwlBY1L_18myuGuq1wfhWSaZgMttyVfPaERSR0Wqmu7LAocGIGz3UqlXOLrxM-vMGmW8VNxu5Dx60noTyL8n5WxrR1T9veRb7ZoJf6sDWadztF6ueZhW2fhw09_6mjSw9r4cy6RPVV1DZZwE7UI4xDsl9CyNuvi4gHf2o1NnH7-kGoXuXqvgvHX'
+      },
+      {
+        id: 'user-skin-19',
+        assetId: '40192019499',
+        weapon: 'FIVE-SEVEN',
+        skinName: 'Scrawl',
+        fullName: 'StatTrak™ Five-SeveN | Scrawl (Well-Worn)',
+        type: 'pistol',
+        rarity: 'mil-spec',
+        wear: 'Well-Worn',
+        wearShort: 'WW',
+        floatValue: 0.405,
+        isStatTrak: true,
+        isOverstock: true,
+        marketPriceEur: 0.25,
+        payoutEur: 0.25,
+        image: 'https://community.akamai.steamstatic.com/economy/image/i0CoZ81Ui0m-9KwlBY1L_18myuGuq1wfhWSaZgMttyVfPaERSR0Wqmu7LAocGIGz3UqlXOLrxM-vMGmW8VNxu5Dx60noTyL3l4Dl7idN6vyRa7FSJvmFC3SV1-t4j-BlXyGyqhIqtjqEpYPwJiPTcAInA5J0FO9csBSww4bhZruzswLcjIsXmCusjCsbuno_57tXUqB386HJz1aW2pI_m5Q'
+      },
+      {
+        id: 'user-skin-20',
+        assetId: '40192019500',
         weapon: 'Karambit',
         skinName: 'Lore',
         fullName: '★ Karambit | Lore (Field-Tested)',
@@ -175,128 +523,22 @@ export const HellcasePayBySkinsModal: React.FC<HellcasePayBySkinsModalProps> = (
         wearShort: 'FT',
         floatValue: 0.184,
         isStatTrak: false,
-        marketPriceEur: 840.00,
-        payoutEur: 840.00,
+        isOverstock: false,
+        marketPriceEur: 516.51,
+        payoutEur: 516.51,
         image: KARAMBIT_LORE_IMAGE
-      },
-      {
-        id: 'skin-2',
-        assetId: '38192019483',
-        weapon: 'AWP',
-        skinName: 'Asiimov',
-        fullName: 'AWP | Asiimov (Field-Tested)',
-        type: 'sniper',
-        rarity: 'covert',
-        wear: 'Field-Tested',
-        wearShort: 'FT',
-        floatValue: 0.245,
-        isStatTrak: false,
-        marketPriceEur: 115.00,
-        payoutEur: 115.00,
-        image: 'https://community.cloudflare.steamstatic.com/economy/image/i0CoZ81Ui0m-9KwlBY1L_18myuGuq1wfhWSaZgMttyVfPaERSR0Wqmu7LAocGIGz3UqlXOLrxM-vMGmW8VNxu5Dx60noTyLMj_f-rF5f5-O3Za-0I3mNfi2-DCjZz9g_5X64X0nC_m1qj-QW0dZdt2Gk23hXrnE8G8NlO5I=/360fx360f'
-      },
-      {
-        id: 'skin-3',
-        assetId: '38192019484',
-        weapon: 'AK-47',
-        skinName: 'Vulcan',
-        fullName: 'AK-47 | Vulcan (Minimal Wear)',
-        type: 'rifle',
-        rarity: 'covert',
-        wear: 'Minimal Wear',
-        wearShort: 'MW',
-        floatValue: 0.098,
-        isStatTrak: false,
-        marketPriceEur: 185.00,
-        payoutEur: 185.00,
-        image: 'https://community.cloudflare.steamstatic.com/economy/image/i0CoZ81Ui0m-9KwlBY1L_18myuGuq1wfhWSaZgMttyVfPaERSR0Wqmu7LAocGIGz3UqlXOLrxM-vMGmW8VNxu5Dx60noTyLMj_f-v1Nc5-O3bqi4IHqNfi2-DCjZz9g_5X64X0nC_m1qj-QW0dZdt2Gk23hXrnE8G8NlO5I=/360fx360f'
-      },
-      {
-        id: 'skin-4',
-        assetId: '38192019485',
-        weapon: 'M4A4',
-        skinName: 'The Emperor',
-        fullName: 'M4A4 | The Emperor (Minimal Wear)',
-        type: 'rifle',
-        rarity: 'covert',
-        wear: 'Minimal Wear',
-        wearShort: 'MW',
-        floatValue: 0.112,
-        isStatTrak: false,
-        marketPriceEur: 38.50,
-        payoutEur: 38.50,
-        image: 'https://community.cloudflare.steamstatic.com/economy/image/i0CoZ81Ui0m-9KwlBY1L_18myuGuq1wfhWSaZgMttyVfPaERSR0Wqmu7LAocGIGz3UqlXOLrxM-vMGmW8VNxu5Dx60noTyLMj_f-sRhY4O23Za-wI3mNfi2-DCjZz9g_5X64X0nC_m1qj-QW0dZdt2Gk23hXrnE8G8NlO5I=/360fx360f'
-      },
-      {
-        id: 'skin-5',
-        assetId: '38192019486',
-        weapon: 'USP-S',
-        skinName: 'Printstream',
-        fullName: 'USP-S | Printstream (Field-Tested)',
-        type: 'pistol',
-        rarity: 'covert',
-        wear: 'Field-Tested',
-        wearShort: 'FT',
-        floatValue: 0.198,
-        isStatTrak: false,
-        marketPriceEur: 44.00,
-        payoutEur: 44.00,
-        image: 'https://community.cloudflare.steamstatic.com/economy/image/i0CoZ81Ui0m-9KwlBY1L_18myuGuq1wfhWSaZgMttyVfPaERSR0Wqmu7LAocGIGz3UqlXOLrxM-vMGmW8VNxu5Dx60noTyLMj_f-tBha4-C3YK-xI3qNfi2-DCjZz9g_5X64X0nC_m1qj-QW0dZdt2Gk23hXrnE8G8NlO5I=/360fx360f'
-      },
-      {
-        id: 'skin-6',
-        assetId: '38192019487',
-        weapon: 'Desert Eagle',
-        skinName: 'Printstream',
-        fullName: 'Desert Eagle | Printstream (Field-Tested)',
-        type: 'pistol',
-        rarity: 'covert',
-        wear: 'Field-Tested',
-        wearShort: 'FT',
-        floatValue: 0.215,
-        isStatTrak: false,
-        marketPriceEur: 42.00,
-        payoutEur: 42.00,
-        image: 'https://community.cloudflare.steamstatic.com/economy/image/i0CoZ81Ui0m-9KwlBY1L_18myuGuq1wfhWSaZgMttyVfPaERSR0Wqmu7LAocGIGz3UqlXOLrxM-vMGmW8VNxu5Dx60noTyLMj_f-uR5e5OC3Za-zI3qNfi2-DCjZz9g_5X64X0nC_m1qj-QW0dZdt2Gk23hXrnE8G8NlO5I=/360fx360f'
-      },
-      {
-        id: 'skin-7',
-        assetId: '38192019488',
-        weapon: 'AK-47',
-        skinName: 'Redline',
-        fullName: 'StatTrak™ AK-47 | Redline (Field-Tested)',
-        type: 'rifle',
-        rarity: 'classified',
-        wear: 'Field-Tested',
-        wearShort: 'FT',
-        floatValue: 0.165,
-        isStatTrak: true,
-        marketPriceEur: 32.50,
-        payoutEur: 32.50,
-        image: 'https://community.cloudflare.steamstatic.com/economy/image/i0CoZ81Ui0m-9KwlBY1L_18myuGuq1wfhWSaZgMttyVfPaERSR0Wqmu7LAocGIGz3UqlXOLrxM-vMGmW8VNxu5Dx60noTyLMj_f-u1Zd4-C3YK-wI3qNfi2-DCjZz9g_5X64X0nC_m1qj-QW0dZdt2Gk23hXrnE8G8NlO5I=/360fx360f'
-      },
-      {
-        id: 'skin-8',
-        assetId: '38192019489',
-        weapon: 'Glock-18',
-        skinName: 'Water Elemental',
-        fullName: 'Glock-18 | Water Elemental (Factory New)',
-        type: 'pistol',
-        rarity: 'classified',
-        wear: 'Factory New',
-        wearShort: 'FN',
-        floatValue: 0.035,
-        isStatTrak: false,
-        marketPriceEur: 14.80,
-        payoutEur: 14.80,
-        image: 'https://community.cloudflare.steamstatic.com/economy/image/i0CoZ81Ui0m-9KwlBY1L_18myuGuq1wfhWSaZgMttyVfPaERSR0Wqmu7LAocGIGz3UqlXOLrxM-vMGmW8VNxu5Dx60noTyLMj_f-sRhY4-C3bqi2I3mNfi2-DCjZz9g_5X64X0nC_m1qj-QW0dZdt2Gk23hXrnE8G8NlO5I=/360fx360f'
       }
     ]);
   };
 
-  // Filtered skins
+  // Filtered and sorted skins matching Farmskins Skin2PAY exactly
   const filteredSkins = useMemo(() => {
-    return inventory.filter(s => {
+    const list = inventory.filter(s => {
+      // If "Only Tradable skins" is checked, hide overstocked items
+      if (onlyTradableSkins && s.isOverstock) {
+        return false;
+      }
+      
       const matchSearch = !skinSearch.trim() || 
         s.fullName.toLowerCase().includes(skinSearch.toLowerCase()) ||
         s.weapon.toLowerCase().includes(skinSearch.toLowerCase()) ||
@@ -305,7 +547,20 @@ export const HellcasePayBySkinsModal: React.FC<HellcasePayBySkinsModalProps> = (
       const matchCategory = selectedCategory === 'all' || s.type === selectedCategory;
       return matchSearch && matchCategory;
     });
-  }, [inventory, skinSearch, selectedCategory]);
+
+    return [...list].sort((a, b) => {
+      if (sortBy === 'price-desc') {
+        return b.marketPriceEur - a.marketPriceEur;
+      }
+      if (sortBy === 'price-asc') {
+        return a.marketPriceEur - b.marketPriceEur;
+      }
+      if (sortBy === 'name') {
+        return a.weapon.localeCompare(b.weapon);
+      }
+      return 0;
+    });
+  }, [inventory, onlyTradableSkins, skinSearch, selectedCategory, sortBy]);
 
   const selectedSkins = useMemo(() => {
     return inventory.filter(s => selectedSkinIds.has(s.id));
@@ -320,20 +575,22 @@ export const HellcasePayBySkinsModal: React.FC<HellcasePayBySkinsModalProps> = (
   }, [baseTotalEur]);
 
   const toggleSelectSkin = (id: string) => {
+    const item = inventory.find(s => s.id === id);
+    if (item?.isOverstock) {
+      sound.playClick();
+      return;
+    }
     sound.playSelect();
     setSelectedSkinIds(prev => {
       const next = new Set(prev);
       if (next.has(id)) next.delete(id);
-      else next.add(id);
-      return next;
-    });
-  };
-
-  const selectAllFiltered = () => {
-    sound.playSelect();
-    setSelectedSkinIds(prev => {
-      const next = new Set(prev);
-      filteredSkins.forEach(s => next.add(s.id));
+      else {
+        if (next.size >= 30) {
+          alert('Maximum 30 items can be selected at once.');
+          return prev;
+        }
+        next.add(id);
+      }
       return next;
     });
   };
@@ -343,8 +600,18 @@ export const HellcasePayBySkinsModal: React.FC<HellcasePayBySkinsModalProps> = (
     setSelectedSkinIds(new Set());
   };
 
+  const handleReloadInventory = async () => {
+    sound.playClick();
+    setIsReloading(true);
+    await loadUserInventory();
+    setTimeout(() => {
+      setIsReloading(false);
+      sound.playSelect();
+    }, 600);
+  };
+
   const handleDepositSkins = () => {
-    if (selectedSkins.length === 0) return;
+    if (selectedSkins.length === 0 || totalPayoutEur < 1.0) return;
     setIsDepositingSkins(true);
     sound.playSelect();
 
@@ -378,20 +645,18 @@ export const HellcasePayBySkinsModal: React.FC<HellcasePayBySkinsModalProps> = (
 
   const handleVerifyCryptoTxid = () => {
     if (!cryptoTxid || cryptoTxid.trim().length < 10) {
+      setCryptoError('Please enter a valid Transaction Hash / TxID');
       sound.playClick();
-      setCryptoError('Please enter a valid Transaction Hash (TXID) from Binance or your wallet.');
       return;
     }
-
     setCryptoVerifying(true);
     setCryptoError(null);
     sound.playSelect();
 
     setTimeout(() => {
       setCryptoVerifying(false);
-      const depositVal = 25.00;
+      const depositVal = 50.00;
       creditVortexWalletBalance(depositVal);
-
       sound.playTournamentVictory();
       confetti({ particleCount: 100, spread: 70, origin: { y: 0.6 } });
       setDepositSuccessMessage(`✓ Blockchain Deposit Confirmed on ${selectedCrypto.network}! +${depositVal.toFixed(2)} € credited to your wallet.`);
@@ -403,7 +668,7 @@ export const HellcasePayBySkinsModal: React.FC<HellcasePayBySkinsModalProps> = (
   if (!isOpen) return null;
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-4 md:p-6 bg-black/85 backdrop-blur-md animate-in fade-in duration-200">
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-2 sm:p-4 md:p-6 bg-black/85 backdrop-blur-md animate-in fade-in duration-200">
       <div 
         className="fixed inset-0"
         onClick={() => {
@@ -412,38 +677,9 @@ export const HellcasePayBySkinsModal: React.FC<HellcasePayBySkinsModalProps> = (
         }}
       />
 
-      {/* Main Modal Window - Hellcase Split Screen Architecture */}
-      <div className="relative w-full max-w-6xl xl:max-w-7xl rounded-3xl bg-[#0D1017] border border-[#222838] shadow-[0_25px_80px_rgba(0,0,0,0.95)] z-10 flex flex-col overflow-hidden max-h-[92vh]">
+      {/* Main Modal Window */}
+      <div className="relative w-full max-w-6xl xl:max-w-7xl rounded-3xl bg-[#141722] border border-[#222838] shadow-[0_25px_80px_rgba(0,0,0,0.95)] z-10 flex flex-col overflow-hidden max-h-[94vh]">
         
-        {/* Top Header Bar */}
-        <div className="px-6 py-4 bg-[#101420] border-b border-white/[0.08] flex items-center justify-between gap-4 shrink-0">
-          <div className="flex items-center gap-2.5">
-            <div className="w-5 h-5 rounded-md bg-emerald-500/20 border border-emerald-500/40 flex items-center justify-center text-emerald-400">
-              <span className="text-xs">📁</span>
-            </div>
-            <h2 className="text-base sm:text-lg font-black font-display text-white tracking-tight">
-              Filling up the balance
-            </h2>
-          </div>
-
-          <div className="flex items-center gap-3">
-            <div className="flex items-center gap-1.5 px-3 py-1 rounded-xl bg-black/40 border border-white/10 text-xs font-mono">
-              <span className="text-slate-400">Current Balance:</span>
-              <span className="font-bold text-emerald-400">{getVortexWalletBalance().toFixed(2)} €</span>
-            </div>
-
-            <button
-              onClick={() => {
-                sound.playClick();
-                onClose();
-              }}
-              className="w-8 h-8 rounded-xl bg-white/5 hover:bg-white/10 text-slate-400 hover:text-white flex items-center justify-center transition cursor-pointer"
-            >
-              <X className="w-4 h-4" />
-            </button>
-          </div>
-        </div>
-
         {/* Global Toast Success */}
         {depositSuccessMessage && (
           <div className="mx-6 mt-3 p-3.5 rounded-2xl bg-emerald-500/15 border border-emerald-500/40 text-emerald-300 text-xs font-mono flex items-center justify-between gap-3 animate-in fade-in duration-200 shrink-0">
@@ -460,773 +696,938 @@ export const HellcasePayBySkinsModal: React.FC<HellcasePayBySkinsModalProps> = (
           </div>
         )}
 
-        {/* Split Screen Body: Left Methods Grid + Right Special Action Pane */}
-        <div className="flex-1 flex flex-col lg:flex-row overflow-hidden min-h-0">
-          
-          {/* ======================================================== */}
-          {/* LEFT PANE: 10 PAYMENT METHODS GRID                       */}
-          {/* ======================================================== */}
-          <div className="w-full lg:w-[460px] xl:w-[490px] shrink-0 border-b lg:border-b-0 lg:border-r border-white/10 p-5 overflow-y-auto space-y-4 flex flex-col justify-between bg-[#0E121D]/70">
-            <div className="space-y-3.5">
-              {/* Select Country */}
-              <div className="space-y-1">
-                <label className="text-[11px] font-mono font-bold text-slate-400 block">
-                  Select your country
-                </label>
+        {/* ======================================================== */}
+        {/* VIEW 1: DEDICATED FARMSKINS Skin2PAY TRADING DESK        */}
+        {/* ======================================================== */}
+        {activeView === 'skins' ? (
+          <div className="flex-1 flex flex-col min-h-0 bg-[#141722] overflow-hidden">
+            
+            {/* Top Navigation Bar: Back, Skin2PAY, Payment History, Close */}
+            <div className="px-6 py-4 flex items-center justify-between border-b border-[#22293e] shrink-0">
+              <button
+                type="button"
+                onClick={() => {
+                  sound.playSelect();
+                  setActiveView('cards');
+                }}
+                className="flex items-center gap-2 px-3.5 py-1.5 rounded-xl bg-white/5 hover:bg-white/10 text-slate-300 hover:text-white transition cursor-pointer text-sm font-sans"
+              >
+                <ArrowLeft className="w-4 h-4" />
+                <span>Back</span>
+              </button>
+
+              <h1 className="text-2xl font-black font-display text-white tracking-wide">
+                Skin2PAY
+              </h1>
+
+              <div className="flex items-center gap-4">
+                <button
+                  type="button"
+                  onClick={() => {
+                    sound.playSelect();
+                    setPaymentHistoryOpen(prev => !prev);
+                  }}
+                  className="text-sm font-sans text-slate-400 hover:text-white transition cursor-pointer flex items-center gap-1.5"
+                >
+                  <History className="w-4 h-4" />
+                  <span>Payment history</span>
+                </button>
+
+                <button
+                  type="button"
+                  onClick={() => {
+                    sound.playClick();
+                    onClose();
+                  }}
+                  className="w-8 h-8 rounded-xl bg-white/5 hover:bg-white/10 text-slate-400 hover:text-white flex items-center justify-center transition cursor-pointer"
+                >
+                  <X className="w-4 h-4" />
+                </button>
+              </div>
+            </div>
+
+            {/* Filter & Action Toolbar */}
+            <div className="px-6 py-3 flex flex-wrap items-end justify-between gap-3 border-b border-[#22293e]/60 bg-[#171b29]/60 shrink-0">
+              <div className="flex flex-wrap items-end gap-3">
+                {/* Search Input */}
+                <div className="space-y-1">
+                  <label className="text-[11px] font-sans text-slate-400 block font-medium">
+                    Search for items
+                  </label>
+                  <div className="relative">
+                    <input
+                      type="text"
+                      value={skinSearch}
+                      onChange={(e) => setSkinSearch(e.target.value)}
+                      placeholder="For example, Talon Knife Slaughter"
+                      className="w-56 sm:w-64 px-3 py-2 pr-9 rounded-xl bg-[#1c2234] border border-[#2b354e] text-xs font-sans text-white placeholder-slate-500 outline-none focus:border-[#695be8] transition"
+                    />
+                    <Search className="w-3.5 h-3.5 text-slate-400 absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none" />
+                  </div>
+                </div>
+
+                {/* Checkbox: Only Tradable skins */}
+                <button
+                  type="button"
+                  onClick={() => {
+                    sound.playSelect();
+                    setOnlyTradableSkins(prev => !prev);
+                  }}
+                  className={`h-9 px-3.5 rounded-xl border flex items-center gap-2.5 transition cursor-pointer select-none ${
+                    onlyTradableSkins
+                      ? 'bg-[#1c2234] border-[#eab308]/70 text-white'
+                      : 'bg-[#1c2234] border-[#2b354e] text-slate-400 hover:text-slate-200'
+                  }`}
+                >
+                  <div className={`w-4 h-4 rounded flex items-center justify-center transition ${
+                    onlyTradableSkins ? 'bg-[#eab308] text-slate-950 font-black' : 'border border-slate-600'
+                  }`}>
+                    {onlyTradableSkins && <Check className="w-3 h-3 stroke-[3]" />}
+                  </div>
+                  <span className="text-xs font-bold font-sans">Only Tradable skins</span>
+                </button>
+
+                {/* Sort: = Price */}
                 <div className="relative">
                   <button
                     type="button"
-                    onClick={() => setCountryDropdownOpen(prev => !prev)}
-                    className="w-full px-3.5 py-2 rounded-xl bg-[#141724] border border-white/10 hover:border-white/20 text-white text-xs font-mono flex items-center justify-between cursor-pointer transition"
+                    onClick={() => {
+                      sound.playSelect();
+                      setSortDropdownOpen(prev => !prev);
+                      setCategoryDropdownOpen(false);
+                    }}
+                    className="h-9 px-3.5 rounded-xl bg-[#1c2234] border border-[#2b354e] hover:border-slate-500 text-xs font-bold font-sans text-white flex items-center gap-2 cursor-pointer transition select-none"
                   >
-                    <span className="flex items-center gap-2">
-                      <span className="text-base">{selectedCountry.flag}</span>
-                      <span className="font-bold">{selectedCountry.label}</span>
+                    <span className="font-mono text-sm leading-none">=</span>
+                    <span>
+                      {sortBy === 'price-desc' ? 'Price (High to Low)' : sortBy === 'price-asc' ? 'Price (Low to High)' : 'Price'}
                     </span>
-                    <ChevronDown className={`w-4 h-4 text-slate-400 transition-transform ${countryDropdownOpen ? 'rotate-180' : ''}`} />
                   </button>
 
-                  {countryDropdownOpen && (
-                    <div className="absolute left-0 right-0 top-full mt-1.5 rounded-xl bg-[#141724] border border-white/15 shadow-2xl z-50 max-h-52 overflow-y-auto p-1 space-y-0.5">
-                      {COUNTRIES.map(c => (
+                  {sortDropdownOpen && (
+                    <div className="absolute left-0 top-full mt-1.5 w-44 rounded-xl bg-[#1c2234] border border-[#2b354e] shadow-2xl z-50 p-1 space-y-0.5">
+                      {[
+                        { id: 'price-desc', label: 'Price: High to Low' },
+                        { id: 'price-asc', label: 'Price: Low to High' },
+                        { id: 'name', label: 'Name: A to Z' }
+                      ].map(opt => (
                         <button
-                          key={c.code}
+                          key={opt.id}
                           type="button"
                           onClick={() => {
-                            setSelectedCountry(c);
-                            setCountryDropdownOpen(false);
+                            setSortBy(opt.id as any);
+                            setSortDropdownOpen(false);
                             sound.playSelect();
                           }}
-                          className={`w-full px-3 py-2 rounded-lg text-left text-xs font-mono flex items-center justify-between transition cursor-pointer ${
-                            selectedCountry.code === c.code ? 'bg-emerald-500/20 text-emerald-400' : 'text-slate-300 hover:bg-white/5 hover:text-white'
+                          className={`w-full px-3 py-1.5 rounded-lg text-left text-xs font-sans transition cursor-pointer flex items-center justify-between ${
+                            sortBy === opt.id ? 'bg-[#695be8] text-white font-bold' : 'text-slate-300 hover:bg-white/5'
                           }`}
                         >
-                          <span className="flex items-center gap-2">
-                            <span>{c.flag}</span>
-                            <span>{c.label}</span>
-                          </span>
-                          {selectedCountry.code === c.code && <Check className="w-3.5 h-3.5 text-emerald-400" />}
+                          <span>{opt.label}</span>
+                          {sortBy === opt.id && <Check className="w-3 h-3" />}
                         </button>
                       ))}
                     </div>
                   )}
                 </div>
-              </div>
 
-              {/* 10 Methods Grid (3 columns x 4 rows) */}
-              <div className="grid grid-cols-2 sm:grid-cols-3 gap-2.5">
-
-                {/* 1. TOP VISA / MASTERCARD / DISCOVER */}
-                <button
-                  type="button"
-                  onClick={() => {
-                    sound.playSelect();
-                    setActiveView('cards');
-                  }}
-                  className={`relative p-3 rounded-2xl bg-[#141724] hover:bg-[#181D2E] text-left transition cursor-pointer group flex flex-col justify-between h-28 shadow-lg overflow-hidden ${
-                    activeView === 'cards'
-                      ? 'border-2 border-emerald-500/80 shadow-[0_0_15px_rgba(16,185,129,0.25)]'
-                      : 'border border-white/10 hover:border-white/20'
-                  }`}
-                >
-                  <div className="absolute top-0 left-0 bg-gradient-to-r from-orange-500 to-amber-500 text-slate-950 font-black text-[8px] font-mono px-2 py-0.5 rounded-br shadow">
-                    TOP
-                  </div>
-                  <div className="absolute top-1.5 right-2 text-[8px] font-mono text-slate-500">
-                    V1
-                  </div>
-
-                  <div className="pt-2">
-                    <div className="text-xs font-black font-display text-white tracking-wider flex items-center gap-1">
-                      <span>VISA</span>
-                      <span className="text-red-500 font-sans">●</span>
-                      <span className="text-amber-500 font-sans -ml-1">●</span>
-                    </div>
-                    <div className="text-[8px] font-mono text-slate-400 mt-0.5">DISCOVER • 100+ more</div>
-                  </div>
-
-                  <div className="flex items-center justify-between text-[9px] font-mono text-slate-400">
-                    <span>Card Payments</span>
-                    {activeView === 'cards' && <Check className="w-3.5 h-3.5 text-emerald-400" />}
-                  </div>
-                </button>
-
-                {/* 2. VISA / MASTERCARD (DIRECT) */}
-                <button
-                  type="button"
-                  onClick={() => {
-                    sound.playSelect();
-                    setActiveView('cards');
-                  }}
-                  className="p-3 rounded-2xl bg-[#141724] hover:bg-[#181D2E] border border-white/10 hover:border-white/20 text-left transition cursor-pointer group flex flex-col justify-between h-28 shadow-lg"
-                >
-                  <div className="text-sm font-black font-display text-white tracking-wider flex items-center gap-1 pt-1">
-                    <span>VISA</span>
-                    <span className="text-red-500 font-sans">●</span>
-                    <span className="text-amber-500 font-sans -ml-1">●</span>
-                  </div>
-                  <div className="text-[9px] font-mono text-slate-400">Instant Debit & Credit</div>
-                </button>
-
-                {/* 3. DIGITAL WALLETS (APPLE PAY, GPAY, SKRILL) */}
-                <button
-                  type="button"
-                  onClick={() => {
-                    sound.playSelect();
-                    setActiveView('cards');
-                  }}
-                  className="p-3 rounded-2xl bg-[#141724] hover:bg-[#181D2E] border border-white/10 hover:border-white/20 text-left transition cursor-pointer group flex flex-col justify-between h-28 shadow-lg"
-                >
-                  <div className="flex flex-wrap items-center gap-1 text-[9px] font-mono font-bold text-slate-300">
-                    <span className="px-1 py-0.2 bg-black/40 rounded border border-white/5">Pay</span>
-                    <span className="px-1 py-0.2 bg-black/40 rounded border border-white/5">GPay</span>
-                    <span className="px-1 py-0.2 bg-black/40 rounded border border-white/5 text-[#811e68]">Skrill</span>
-                  </div>
-                  <div className="text-[8px] font-mono text-slate-400">Neteller, Visa, Mobile</div>
-                </button>
-
-                {/* 4. PAY BY SKINS (ACTIVE HELLCASE KNIFE METHOD) */}
-                <button
-                  type="button"
-                  onClick={() => {
-                    sound.playSelect();
-                    setActiveView('skins');
-                  }}
-                  className={`relative p-2.5 rounded-2xl bg-[#141724] hover:bg-[#181D2E] text-left transition cursor-pointer group flex items-center justify-between h-28 shadow-lg overflow-hidden ${
-                    activeView === 'skins'
-                      ? 'border-2 border-emerald-500/80 shadow-[0_0_15px_rgba(16,185,129,0.25)]'
-                      : 'border border-white/10 hover:border-white/20'
-                  }`}
-                >
-                  {/* Left: Authentic Gold Karambit Lore Knife */}
-                  <div className="relative w-14 sm:w-16 h-14 sm:h-16 shrink-0 flex items-center justify-center select-none pointer-events-none">
-                    <img 
-                      src={KARAMBIT_LORE_IMAGE} 
-                      alt="" 
-                      aria-hidden="true"
-                      draggable={false}
-                      className="w-full h-full object-contain drop-shadow-[0_4px_16px_rgba(0,0,0,0.6)] group-hover:scale-105 group-hover:rotate-1 transition-transform duration-300"
-                    />
-                  </div>
-
-                  {/* Right: Exact 1:1 Hellcase Typography */}
-                  <div className="flex-1 flex flex-col justify-center items-start pl-2 select-none min-w-0">
-                    <span className="text-[10px] font-sans font-bold text-[#EAB308] tracking-widest leading-none mb-1 uppercase whitespace-nowrap">
-                      PAY BY
+                {/* Category: ● All */}
+                <div className="relative">
+                  <button
+                    type="button"
+                    onClick={() => {
+                      sound.playSelect();
+                      setCategoryDropdownOpen(prev => !prev);
+                      setSortDropdownOpen(false);
+                    }}
+                    className="h-9 px-3.5 rounded-xl bg-[#1c2234] border border-[#2b354e] hover:border-slate-500 text-xs font-bold font-sans text-white flex items-center gap-2 cursor-pointer transition select-none"
+                  >
+                    <span className="text-[#695be8] text-xs">●</span>
+                    <span className="capitalize">
+                      {selectedCategory === 'all' ? 'All' : selectedCategory}
                     </span>
-                    <span className="text-lg font-display font-black text-[#FACC15] tracking-wider leading-none uppercase whitespace-nowrap">
-                      SKINS
-                    </span>
-                  </div>
+                    <ChevronDown className="w-3.5 h-3.5 text-slate-400" />
+                  </button>
 
-                  {/* Active Indicator Checkmark */}
-                  {activeView === 'skins' && (
-                    <Check className="w-3.5 h-3.5 text-emerald-400 absolute bottom-2 right-2" />
-                  )}
-                </button>
-
-                {/* 5. CRYPTO */}
-                <button
-                  type="button"
-                  onClick={() => {
-                    sound.playSelect();
-                    setActiveView('crypto');
-                  }}
-                  className={`relative p-3 rounded-2xl bg-[#141724] hover:bg-[#181D2E] text-left transition cursor-pointer group flex flex-col justify-between h-28 shadow-lg overflow-hidden ${
-                    activeView === 'crypto'
-                      ? 'border-2 border-emerald-500/80 shadow-[0_0_15px_rgba(16,185,129,0.25)]'
-                      : 'border border-white/10 hover:border-white/20'
-                  }`}
-                >
-                  <div className="flex items-center gap-1 text-xs font-black font-display text-white">
-                    <span className="text-amber-400">₿</span>
-                    <span>CRYPTO</span>
-                  </div>
-
-                  <div className="flex flex-wrap items-center gap-1 text-[9px]">
-                    <span className="text-amber-400">BTC</span>
-                    <span className="text-blue-400">ETH</span>
-                    <span className="text-emerald-400 font-bold">USDT</span>
-                    <span className="text-purple-400">SOL</span>
-                  </div>
-
-                  <div className="flex items-center justify-between text-[9px] font-mono text-slate-400">
-                    <span>Instant On-Chain</span>
-                    {activeView === 'crypto' && <Check className="w-3.5 h-3.5 text-emerald-400" />}
-                  </div>
-                </button>
-
-                {/* 6. KINGUIN */}
-                <button
-                  type="button"
-                  onClick={() => {
-                    sound.playSelect();
-                    setActiveView('giftcards');
-                  }}
-                  className="p-3 rounded-2xl bg-[#141724] hover:bg-[#181D2E] border border-white/10 hover:border-white/20 text-left transition cursor-pointer group flex flex-col justify-between h-28 shadow-lg"
-                >
-                  <div className="flex items-center gap-1.5">
-                    <span className="text-lg">👑</span>
-                    <span className="font-display font-black text-xs text-white">KINGUIN</span>
-                  </div>
-                  <div className="text-[9px] font-mono text-slate-400">Wallet card</div>
-                </button>
-
-                {/* 7. ENEBA */}
-                <button
-                  type="button"
-                  onClick={() => {
-                    sound.playSelect();
-                    setActiveView('giftcards');
-                  }}
-                  className="p-3 rounded-2xl bg-[#141724] hover:bg-[#181D2E] border border-white/10 hover:border-white/20 text-left transition cursor-pointer group flex flex-col justify-between h-28 shadow-lg"
-                >
-                  <div className="flex items-center gap-1.5">
-                    <span className="text-lg">🎮</span>
-                    <span className="font-display font-black text-xs text-[#FF5500]">eneba</span>
-                  </div>
-                  <div className="text-[9px] font-mono text-slate-400">Wallet card</div>
-                </button>
-
-                {/* 8. SWAPPED */}
-                <button
-                  type="button"
-                  onClick={() => {
-                    sound.playSelect();
-                    setActiveView('cards');
-                  }}
-                  className="p-3 rounded-2xl bg-[#141724] hover:bg-[#181D2E] border border-white/10 hover:border-white/20 text-left transition cursor-pointer group flex flex-col justify-between h-28 shadow-lg"
-                >
-                  <div className="flex items-center gap-1">
-                    <span className="text-[9px] font-mono font-black text-white bg-white/10 px-1 py-0.2 rounded">SWAPPED</span>
-                  </div>
-                  <div className="text-[8px] font-mono text-slate-400 leading-tight">paysafecard • Revolut • 30+ more</div>
-                </button>
-
-                {/* 9. DIGITAL GIFTCARDS */}
-                <button
-                  type="button"
-                  onClick={() => {
-                    sound.playSelect();
-                    setActiveView('giftcards');
-                  }}
-                  className="p-3 rounded-2xl bg-[#141724] hover:bg-[#181D2E] border border-white/10 hover:border-white/20 text-left transition cursor-pointer group flex flex-col justify-between h-28 shadow-lg"
-                >
-                  <div className="flex items-center gap-1.5">
-                    <span className="text-sm">🎁</span>
-                    <span className="font-display font-black text-[10px] text-white">GIFTCARDS</span>
-                  </div>
-                  <div className="text-[9px] font-mono text-sky-400 font-bold">PayPal Supported</div>
-                </button>
-
-                {/* 10. PREMIUM */}
-                <button
-                  type="button"
-                  onClick={() => {
-                    sound.playSelect();
-                    setActiveView('cards');
-                  }}
-                  className="p-3 rounded-2xl bg-[#141724] hover:bg-[#181D2E] border border-white/10 hover:border-white/20 text-left transition cursor-pointer group flex flex-col justify-between h-28 shadow-lg"
-                >
-                  <div className="flex items-center gap-1.5">
-                    <span className="text-sm">💎</span>
-                    <span className="font-display font-black text-xs text-purple-400">PREMIUM</span>
-                  </div>
-                  <div className="text-[9px] font-mono text-slate-400">VIP Status</div>
-                </button>
-
-              </div>
-            </div>
-
-            <p className="text-[10px] font-mono text-slate-500 pt-3 border-t border-white/5">
-              All payment methods available in the selected country are listed.
-            </p>
-          </div>
-
-          {/* ======================================================== */}
-          {/* RIGHT PANE: SPECIAL VORTEX ENGINE (INSTANT - NO 8-DAY HOLD)*/}
-          {/* ======================================================== */}
-          <div className="flex-1 p-5 sm:p-6 overflow-y-auto bg-[#080B12]/80 flex flex-col justify-between min-h-0">
-            
-            {/* VIEW: PAY BY SKINS (VORTEX FAST-TRACK STEAM BOT - 0 DAYS HOLD) */}
-            {activeView === 'skins' && (
-              <div className="space-y-4 flex-1 flex flex-col justify-between min-h-0">
-                <div className="space-y-4 overflow-y-auto pr-1">
-                  
-                  {/* Top Special Banner: 0-Day Instant Deposit */}
-                  <div className="p-4 rounded-2xl bg-gradient-to-r from-[#111728] via-[#151D33] to-[#111728] border border-emerald-500/30 flex flex-col sm:flex-row sm:items-center justify-between gap-3 shadow-lg">
-                    <div className="space-y-1">
-                      <div className="flex items-center gap-2 flex-wrap">
-                        <span className="text-[9px] font-mono font-black text-slate-950 bg-emerald-400 px-2 py-0.5 rounded-full uppercase flex items-center gap-1 shadow">
-                          <span className="w-1.5 h-1.5 rounded-full bg-slate-950 animate-pulse" />
-                          VORTEX FAST-TRACK BOT • 0-DAY HOLD
-                        </span>
-                        <span className="text-[10px] font-mono text-emerald-400">P2P Escrow</span>
-                        <span className="text-[9px] font-mono text-amber-400 bg-amber-400/10 border border-amber-400/20 px-2 py-0.5 rounded-full flex items-center gap-1 font-bold">
-                          <span className="w-1.5 h-1.5 rounded-full bg-amber-400" />
-                          LIVE CS2 MARKET PRICES (EUR)
-                        </span>
-                      </div>
-                      <h3 className="text-base font-black font-display text-white tracking-tight">
-                        Deposit CS2 Skins to Balance Instantly
-                      </h3>
-                      <p className="text-xs font-mono text-slate-400">
-                        Skip the 8-day hold — automated Vortex Steam Bots verify trade offers and credit your wallet in seconds at real-time CS2 market rates.
-                      </p>
-                    </div>
-
-                    <div className="shrink-0 flex items-center gap-2">
-                      <span className="px-3 py-1 rounded-xl bg-emerald-500/10 border border-emerald-500/30 text-emerald-400 text-xs font-mono font-bold flex items-center gap-1.5">
-                        <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse" />
-                        STEAM BOT LIVE
-                      </span>
-                    </div>
-                  </div>
-
-                  {/* Trade URL input strip */}
-                  <div className="p-3 rounded-xl bg-[#141724] border border-white/10 flex flex-col sm:flex-row sm:items-center justify-between gap-2.5">
-                    <div className="flex items-center gap-2 flex-1 min-w-0">
-                      <span className="text-xs font-mono font-bold text-white shrink-0">Trade URL:</span>
-                      {!tradeUrlEditing ? (
-                        <span className="text-[11px] font-mono text-slate-400 truncate">
-                          {tradeUrl || 'https://steamcommunity.com/tradeoffer/new/?partner=38291029&token=vortex_live'}
-                        </span>
-                      ) : (
-                        <input
-                          type="url"
-                          value={tempTradeUrl}
-                          onChange={(e) => setTempTradeUrl(e.target.value)}
-                          placeholder="https://steamcommunity.com/tradeoffer/new/?partner=..."
-                          className="px-2.5 py-1 rounded-lg bg-black/50 border border-white/15 text-xs font-mono text-white flex-1 outline-none focus:border-amber-400"
-                        />
-                      )}
-                    </div>
-
-                    <div className="flex items-center gap-2 shrink-0">
-                      {!tradeUrlEditing ? (
-                        <button
-                          type="button"
-                          onClick={() => {
-                            setTempTradeUrl(tradeUrl || 'https://steamcommunity.com/tradeoffer/new/?partner=38291029&token=vortex_live');
-                            setTradeUrlEditing(true);
-                          }}
-                          className="px-2.5 py-1 rounded-lg bg-white/5 hover:bg-white/10 text-slate-300 text-xs font-mono cursor-pointer transition border border-white/10"
-                        >
-                          Change
-                        </button>
-                      ) : (
-                        <button
-                          type="button"
-                          onClick={() => {
-                            if (isValidSteamTradeUrl(tempTradeUrl)) {
-                              saveSteamTradeUrl(tempTradeUrl);
-                              setTradeUrl(tempTradeUrl);
-                              setTradeUrlEditing(false);
-                              sound.playSelect();
-                            } else {
-                              alert('Please enter a valid Steam Trade Offer URL');
-                            }
-                          }}
-                          className="px-2.5 py-1 rounded-lg bg-emerald-500 text-slate-950 text-xs font-mono font-bold cursor-pointer"
-                        >
-                          Save
-                        </button>
-                      )}
-
-                      <a
-                        href="https://steamcommunity.com/my/tradeoffers/privacy#trade_offer_access_url"
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="px-2.5 py-1 rounded-lg bg-white/5 hover:bg-white/10 text-slate-300 text-xs font-mono flex items-center gap-1 cursor-pointer transition border border-white/10"
-                      >
-                        <span>Get URL</span>
-                        <ExternalLink className="w-3 h-3" />
-                      </a>
-                    </div>
-                  </div>
-
-                  {/* Filter Tabs & Search */}
-                  <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2.5">
-                    <div className="flex flex-wrap items-center gap-1.5">
+                  {categoryDropdownOpen && (
+                    <div className="absolute left-0 top-full mt-1.5 w-36 rounded-xl bg-[#1c2234] border border-[#2b354e] shadow-2xl z-50 p-1 space-y-0.5">
                       {[
-                        { id: 'all', label: `All Skins (${inventory.length})` },
+                        { id: 'all', label: 'All' },
                         { id: 'knife', label: 'Knives' },
                         { id: 'rifle', label: 'Rifles' },
                         { id: 'sniper', label: 'Snipers' },
                         { id: 'pistol', label: 'Pistols' },
                         { id: 'sticker', label: 'Stickers' }
-                      ].map(tab => (
+                      ].map(cat => (
                         <button
-                          key={tab.id}
+                          key={cat.id}
                           type="button"
                           onClick={() => {
+                            setSelectedCategory(cat.id as any);
+                            setCategoryDropdownOpen(false);
                             sound.playSelect();
-                            setSelectedCategory(tab.id as any);
                           }}
-                          className={`px-2.5 py-1 rounded-xl text-xs font-mono transition cursor-pointer ${
-                            selectedCategory === tab.id
-                              ? 'bg-amber-400 text-slate-950 font-black shadow-md'
-                              : 'bg-[#141724] text-slate-400 hover:text-white border border-white/5'
+                          className={`w-full px-3 py-1.5 rounded-lg text-left text-xs font-sans transition cursor-pointer flex items-center justify-between ${
+                            selectedCategory === cat.id ? 'bg-[#695be8] text-white font-bold' : 'text-slate-300 hover:bg-white/5'
                           }`}
                         >
-                          {tab.label}
+                          <span>{cat.label}</span>
+                          {selectedCategory === cat.id && <Check className="w-3 h-3" />}
                         </button>
                       ))}
                     </div>
+                  )}
+                </div>
+              </div>
 
-                    <div className="flex items-center gap-2">
-                      <div className="relative">
-                        <Search className="w-3.5 h-3.5 text-slate-400 absolute left-3 top-1/2 -translate-y-1/2" />
-                        <input
-                          type="text"
-                          value={skinSearch}
-                          onChange={(e) => setSkinSearch(e.target.value)}
-                          placeholder="Search weapon..."
-                          className="pl-8 pr-3 py-1 rounded-xl bg-black/40 border border-white/10 text-xs font-mono text-white outline-none focus:border-amber-400 w-36 sm:w-44"
-                        />
-                      </div>
+              {/* RELOAD Button */}
+              <button
+                type="button"
+                disabled={isReloading}
+                onClick={handleReloadInventory}
+                className="h-9 px-4 rounded-xl bg-[#695be8] hover:bg-[#5b4cd8] active:scale-95 text-white text-xs font-black font-sans uppercase flex items-center gap-2 shadow-lg transition cursor-pointer"
+              >
+                <RotateCw className={`w-3.5 h-3.5 ${isReloading ? 'animate-spin' : ''}`} />
+                <span>RELOAD</span>
+              </button>
+            </div>
 
-                      <button
-                        type="button"
-                        onClick={selectAllFiltered}
-                        className="px-2 py-1 rounded-xl bg-white/5 hover:bg-white/10 border border-white/10 text-slate-300 text-xs font-mono cursor-pointer transition"
-                      >
-                        All
-                      </button>
-                      {selectedSkinIds.size > 0 && (
+            {/* Payment History Dialog */}
+            {paymentHistoryOpen && (
+              <div className="mx-6 mt-3 p-4 rounded-2xl bg-[#1c2234] border border-[#2b354e] shadow-2xl flex flex-col gap-2 shrink-0 animate-in fade-in">
+                <div className="flex items-center justify-between border-b border-white/5 pb-2">
+                  <div className="flex items-center gap-2 text-xs font-bold text-white font-sans">
+                    <History className="w-4 h-4 text-[#695be8]" />
+                    <span>Recent Skin Deposits & History</span>
+                  </div>
+                  <button onClick={() => setPaymentHistoryOpen(false)} className="text-slate-400 hover:text-white text-xs">
+                    Close
+                  </button>
+                </div>
+                <div className="text-xs font-mono text-slate-300 space-y-1.5 max-h-36 overflow-y-auto pr-1">
+                  <div className="p-2 rounded-lg bg-black/30 flex items-center justify-between">
+                    <div>
+                      <span className="text-emerald-400 font-bold">Fast-Track Deposit</span>
+                      <div className="text-[10px] text-slate-500">Verified via Steam Bot P2P Escrow</div>
+                    </div>
+                    <span className="text-emerald-400 font-bold font-mono">+38.24 €</span>
+                  </div>
+                  <div className="p-2 rounded-lg bg-black/30 flex items-center justify-between">
+                    <div>
+                      <span className="text-slate-300 font-bold">Automatic Bot Hold Bypass</span>
+                      <div className="text-[10px] text-slate-500">0-Day Hold Confirmed</div>
+                    </div>
+                    <span className="text-emerald-400 font-bold font-mono">+10.70 €</span>
+                  </div>
+                </div>
+              </div>
+            )}
+
+            {/* Main Trading Area: YOUR INVENTORY & SELECTED ITEMS */}
+            <div className="flex-1 p-5 overflow-y-auto flex flex-col lg:flex-row gap-5 min-h-0">
+              
+              {/* Left Column: YOUR INVENTORY */}
+              <div className="flex-1 bg-[#171b29]/90 border border-[#22293e] rounded-2xl p-4 flex flex-col min-h-0 overflow-hidden shadow-lg">
+                <div className="flex items-center justify-between mb-3 shrink-0">
+                  <h2 className="text-base font-black font-display text-white tracking-wider uppercase">
+                    YOUR INVENTORY
+                  </h2>
+                  <span className="text-xs font-mono text-slate-400">
+                    {filteredSkins.length} items
+                  </span>
+                </div>
+
+                <div className="flex-1 overflow-y-auto pr-1">
+                  {filteredSkins.length === 0 ? (
+                    <div className="h-64 flex flex-col items-center justify-center text-center text-slate-500 font-mono text-xs">
+                      <p>No skins matching your filter.</p>
+                      {onlyTradableSkins && (
                         <button
-                          type="button"
-                          onClick={clearSelection}
-                          className="px-2 py-1 rounded-xl bg-red-500/10 hover:bg-red-500/20 text-red-400 text-xs font-mono cursor-pointer transition border border-red-500/20"
+                          onClick={() => setOnlyTradableSkins(false)}
+                          className="mt-2 text-xs text-[#695be8] hover:underline cursor-pointer"
                         >
-                          Clear
+                          Uncheck "Only Tradable skins" to see overstocked items
                         </button>
                       )}
                     </div>
-                  </div>
+                  ) : (
+                    <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-2.5">
+                      {filteredSkins.map(item => {
+                        const isSelected = selectedSkinIds.has(item.id);
+                        const isOverstocked = !!item.isOverstock;
 
-                  {/* Skins Grid */}
-                  <div className="grid grid-cols-2 sm:grid-cols-3 xl:grid-cols-4 gap-2.5">
-                    {filteredSkins.map(s => {
-                      const isSelected = selectedSkinIds.has(s.id);
-                      return (
-                        <div
-                          key={s.id}
-                          onClick={() => toggleSelectSkin(s.id)}
-                          className={`relative p-3 rounded-2xl transition cursor-pointer group flex flex-col justify-between border ${
-                            isSelected
-                              ? 'bg-emerald-500/15 border-emerald-500/80 shadow-[0_0_15px_rgba(16,185,129,0.2)] scale-[1.02]'
-                              : 'bg-[#141724] border-white/10 hover:border-white/25'
-                          }`}
-                        >
-                          <div className="flex items-center justify-between">
-                            <div className={`w-4 h-4 rounded-md border flex items-center justify-center transition ${
-                              isSelected ? 'bg-emerald-500 border-emerald-500 text-slate-950' : 'border-white/20 bg-black/40'
-                            }`}>
-                              {isSelected && <Check className="w-3 h-3 stroke-[3]" />}
-                            </div>
-                            <span className="text-[9px] font-mono text-slate-400 uppercase">{s.wearShort}</span>
-                          </div>
+                        return (
+                          <div
+                            key={item.id}
+                            onClick={() => {
+                              if (isOverstocked) {
+                                sound.playClick();
+                                return;
+                              }
+                              toggleSelectSkin(item.id);
+                            }}
+                            className={`relative p-2.5 rounded-xl transition flex flex-col justify-between h-40 select-none group border ${
+                              isOverstocked
+                                ? 'bg-[#1b2030]/60 border-[#252d43]/50 opacity-70 cursor-not-allowed'
+                                : isSelected
+                                ? 'bg-[#252e46] border-[#695be8] ring-2 ring-[#695be8]/50 shadow-[0_0_15px_rgba(105,91,232,0.3)] cursor-pointer'
+                                : 'bg-[#1c2234] hover:bg-[#22283c] border-[#27314a] hover:border-[#3d496c] cursor-pointer'
+                            }`}
+                          >
+                            {/* Top Row: Price in Gold or OVERSTOCK & Wear */}
+                            <div className="flex items-center justify-between shrink-0">
+                              {isOverstocked ? (
+                                <span className="text-[10px] font-mono font-bold text-slate-500 flex items-center gap-1">
+                                  <span>⊘</span>
+                                  <span>OVERSTOCK</span>
+                                </span>
+                              ) : (
+                                <span className="text-xs font-mono font-bold text-[#f6b100]">
+                                  $ {item.marketPriceEur.toFixed(2)}
+                                </span>
+                              )}
 
-                          <div className="my-2 h-16 flex items-center justify-center select-none">
-                            <img
-                              src={s.image}
-                              alt=""
-                              aria-hidden="true"
-                              onError={(e) => {
-                                (e.target as HTMLImageElement).src = KARAMBIT_LORE_IMAGE;
-                              }}
-                              className="max-h-full max-w-full object-contain group-hover:scale-105 transition-transform duration-200 drop-shadow"
-                              loading="lazy"
-                            />
-                          </div>
-
-                          <div>
-                            <div className="text-[11px] font-bold text-white truncate font-sans">{s.weapon}</div>
-                            <div className="text-[10px] text-slate-400 truncate">{s.skinName}</div>
-                            <div className="mt-1.5 pt-1.5 border-t border-white/[0.06] flex items-center justify-between">
-                              <span className="text-xs font-mono font-black text-white">
-                                {s.marketPriceEur.toFixed(2)} €
+                              <span className="text-[10px] font-mono text-slate-400 uppercase font-medium">
+                                {item.wearShort}
                               </span>
                             </div>
+
+                            {/* Center: Weapon Image */}
+                            <div className="my-1 h-16 flex items-center justify-center">
+                              <img
+                                src={item.image}
+                                alt={item.fullName}
+                                className="max-h-full max-w-full object-contain group-hover:scale-105 transition-transform duration-200 drop-shadow"
+                                loading="lazy"
+                                onError={(e) => {
+                                  (e.target as HTMLImageElement).src = KARAMBIT_LORE_IMAGE;
+                                }}
+                              />
+                            </div>
+
+                            {/* Bottom Row: Rarity accent, Weapon, Skin Title */}
+                            <div className="shrink-0">
+                              <div className="flex items-center gap-1.5 text-xs font-black uppercase text-white tracking-wide truncate">
+                                <span
+                                  className="w-1 h-3 rounded-full shrink-0"
+                                  style={{ backgroundColor: getRarityColor(item.rarity) }}
+                                />
+                                {item.isStatTrak && (
+                                  <span className="text-amber-500 font-mono text-[10px] font-black mr-0.5">
+                                    ST
+                                  </span>
+                                )}
+                                <span className="truncate">{item.weapon}</span>
+                              </div>
+                              <div className="text-[11px] text-slate-400 truncate pl-2.5">
+                                {item.skinName}
+                              </div>
+                            </div>
                           </div>
-                        </div>
-                      );
-                    })}
-                  </div>
+                        );
+                      })}
+                    </div>
+                  )}
+                </div>
+              </div>
+
+              {/* Right Column: SELECTED ITEMS (0/30) */}
+              <div className="w-full lg:w-80 xl:w-96 shrink-0 bg-[#171b29]/90 border border-[#22293e] rounded-2xl p-5 flex flex-col justify-between shadow-lg">
+                <div className="shrink-0 flex items-center justify-between pb-3 border-b border-white/5">
+                  <h2 className="text-sm font-bold font-display text-[#f6b100] tracking-wider uppercase">
+                    SELECTED ITEMS ({selectedSkins.length}/30)
+                  </h2>
+                  {selectedSkins.length > 0 && (
+                    <button
+                      type="button"
+                      onClick={clearSelection}
+                      className="text-[11px] font-mono text-slate-400 hover:text-red-400 cursor-pointer transition"
+                    >
+                      Clear all
+                    </button>
+                  )}
                 </div>
 
-                {/* Bottom Payout Summary Bar */}
-                <div className="mt-3 p-3.5 rounded-2xl bg-gradient-to-r from-[#171B28] via-[#1A2030] to-[#171B28] border border-emerald-500/30 flex flex-col sm:flex-row sm:items-center justify-between gap-3 shadow-xl shrink-0">
-                  <div className="flex items-center gap-4">
-                    <div className="space-y-0.5">
-                      <div className="text-[10px] font-mono uppercase text-slate-400 font-bold">
-                        Selected Items: <strong className="text-white">{selectedSkins.length}</strong>
-                      </div>
-                      <div className="text-xs font-mono text-slate-300">
-                        Total Value: <strong className="text-white">{baseTotalEur.toFixed(2)} €</strong>
-                      </div>
+                {/* Selected Items Scroll Area / Empty State */}
+                <div className="flex-1 overflow-y-auto my-3 min-h-[180px] max-h-96 flex flex-col justify-center">
+                  {selectedSkins.length === 0 ? (
+                    <div className="text-center p-6 space-y-1">
+                      <p className="text-xs font-mono text-slate-400">
+                        Select items from your inventory
+                      </p>
                     </div>
+                  ) : (
+                    <div className="space-y-2 overflow-y-auto pr-1">
+                      {selectedSkins.map(skin => (
+                        <div
+                          key={skin.id}
+                          className="p-2.5 rounded-xl bg-[#1c2234] border border-[#27314a] flex items-center justify-between gap-3 group"
+                        >
+                          <img src={skin.image} alt="" className="w-10 h-8 object-contain shrink-0" />
+                          <div className="flex-1 min-w-0">
+                            <div className="text-[11px] font-bold text-white truncate font-sans">
+                              {skin.weapon}
+                            </div>
+                            <div className="text-[10px] text-slate-400 truncate">
+                              {skin.skinName}
+                            </div>
+                          </div>
+                          <div className="text-right shrink-0">
+                            <div className="text-xs font-mono font-bold text-[#f6b100]">
+                              $ {skin.marketPriceEur.toFixed(2)}
+                            </div>
+                            <button
+                              type="button"
+                              onClick={() => toggleSelectSkin(skin.id)}
+                              className="text-[10px] text-slate-400 hover:text-red-400 transition cursor-pointer"
+                            >
+                              Remove
+                            </button>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  )}
+                </div>
 
-                    <div className="pl-4 border-l border-white/10">
-                      <div className="text-[10px] font-mono text-emerald-400 uppercase font-black">
-                        Instant Wallet Payout:
-                      </div>
-                      <div className="text-xl font-black font-display text-emerald-400">
-                        {totalPayoutEur.toFixed(2)} €
-                      </div>
-                    </div>
-                  </div>
+                {/* Footer Area: Minimum $1 & Big SELL ITEMS Button */}
+                <div className="shrink-0 pt-3 border-t border-white/5 space-y-2.5">
+                  <p className="text-[11px] font-mono text-slate-400 text-center">
+                    Minimum $1 in skins required
+                  </p>
 
                   <button
                     type="button"
-                    disabled={selectedSkins.length === 0 || isDepositingSkins}
+                    disabled={selectedSkins.length === 0 || totalPayoutEur < 1.0 || isDepositingSkins}
                     onClick={handleDepositSkins}
-                    className={`px-5 py-2.5 rounded-xl font-mono font-black text-xs uppercase tracking-wider transition cursor-pointer flex items-center justify-center gap-2 shadow-lg ${
-                      selectedSkins.length > 0 && !isDepositingSkins
-                        ? 'bg-gradient-to-r from-emerald-500 to-teal-500 hover:from-emerald-400 hover:to-teal-400 text-slate-950 shadow-emerald-500/30 hover:scale-105 active:scale-95'
-                        : 'bg-white/5 text-slate-600 border border-white/5 cursor-not-allowed'
+                    className={`w-full py-3.5 rounded-xl font-black text-sm tracking-wide uppercase transition duration-200 shadow-xl flex items-center justify-center gap-2 ${
+                      selectedSkins.length > 0 && totalPayoutEur >= 1.0 && !isDepositingSkins
+                        ? 'bg-[#695be8] hover:bg-[#5b4cd8] text-white shadow-[0_0_25px_rgba(105,91,232,0.4)] cursor-pointer active:scale-[0.98]'
+                        : 'bg-[#22283a] text-slate-500 cursor-not-allowed'
                     }`}
                   >
                     {isDepositingSkins ? (
                       <>
-                        <div className="w-3.5 h-3.5 border-2 border-slate-950 border-t-transparent rounded-full animate-spin" />
-                        <span>Processing Steam Trade Bot...</span>
+                        <span className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
+                        <span>Processing Trade...</span>
                       </>
+                    ) : selectedSkins.length > 0 && totalPayoutEur >= 1.0 ? (
+                      <span>SELL ITEMS ($ {totalPayoutEur.toFixed(2)})</span>
                     ) : (
-                      <>
-                        <Sparkles className="w-4 h-4" />
-                        <span>Deposit Skins & Get Instant Balance</span>
-                      </>
+                      <span>SELL ITEMS</span>
                     )}
                   </button>
                 </div>
               </div>
-            )}
-
-            {/* VIEW: CRYPTO */}
-            {activeView === 'crypto' && (
-              <div className="space-y-5 flex-1 flex flex-col justify-between">
-                <div className="space-y-4">
-                  <div className="flex flex-wrap items-center gap-2">
-                    {CRYPTO_CONFIGS.map(coin => (
-                      <button
-                        key={coin.symbol}
-                        type="button"
-                        onClick={() => {
-                          sound.playSelect();
-                          setSelectedCrypto(coin);
-                          setCryptoCopied(false);
-                          setCryptoError(null);
-                        }}
-                        className={`px-3 py-2 rounded-xl font-mono text-xs font-bold transition cursor-pointer flex items-center gap-2 border ${
-                          selectedCrypto.symbol === coin.symbol
-                            ? 'bg-white/10 text-white border-white/30 shadow-md'
-                            : 'bg-[#141724] text-slate-400 hover:text-white border-white/5'
-                        }`}
-                      >
-                        <span className="w-2.5 h-2.5 rounded-full" style={{ backgroundColor: coin.color }} />
-                        <span>{coin.symbol}</span>
-                        <span className="text-[10px] text-slate-500">({coin.network})</span>
-                      </button>
-                    ))}
-                  </div>
-
-                  <div className="p-5 rounded-2xl bg-[#141724] border border-white/10 space-y-4">
-                    <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-white/[0.08] pb-3">
-                      <div>
-                        <h3 className="text-base font-black font-display text-white">
-                          Deposit {selectedCrypto.name}
-                        </h3>
-                        <p className="text-xs font-mono text-slate-400 mt-0.5">
-                          Network: <strong className="text-emerald-400">{selectedCrypto.network}</strong>
-                        </p>
-                      </div>
-                      <span className="px-2.5 py-0.5 rounded-lg bg-emerald-500/10 border border-emerald-500/30 text-emerald-400 text-xs font-mono font-bold">
-                        Automated Hot Wallet
-                      </span>
-                    </div>
-
-                    <div className="flex flex-col sm:flex-row sm:items-center gap-4">
-                      <div className="w-32 h-32 p-2 rounded-xl bg-white flex items-center justify-center shrink-0 shadow-md">
-                        <img
-                          src={`https://api.qrserver.com/v1/create-qr-code/?size=180x180&data=${encodeURIComponent(selectedCrypto.address)}`}
-                          alt="Deposit QR"
-                          className="w-full h-full object-contain"
-                        />
-                      </div>
-
-                      <div className="flex-1 space-y-2.5 min-w-0">
-                        <div>
-                          <label className="text-[10px] font-mono text-slate-400 uppercase font-bold block mb-1">
-                            Deposit Address ({selectedCrypto.network})
-                          </label>
-                          <div className="flex items-center gap-2">
-                            <div className="px-3 py-2 rounded-xl bg-black/60 border border-white/10 text-white font-mono text-xs select-all break-all flex-1">
-                              {selectedCrypto.address}
-                            </div>
-                            <button
-                              type="button"
-                              onClick={handleCopyCrypto}
-                              className="px-3 py-2 rounded-xl bg-emerald-500 hover:bg-emerald-400 text-slate-950 font-mono font-black text-xs transition cursor-pointer flex items-center gap-1 shrink-0"
-                            >
-                              {cryptoCopied ? <Check className="w-3.5 h-3.5" /> : <Copy className="w-3.5 h-3.5" />}
-                              <span>{cryptoCopied ? 'Copied' : 'Copy'}</span>
-                            </button>
-                          </div>
-                        </div>
-
-                        <div className="pt-2 border-t border-white/[0.06] space-y-1.5">
-                          <label className="text-[10px] font-mono text-slate-400 uppercase font-bold block">
-                            Verify Transaction (TXID)
-                          </label>
-                          <div className="flex items-center gap-2">
-                            <input
-                              type="text"
-                              value={cryptoTxid}
-                              onChange={(e) => setCryptoTxid(e.target.value)}
-                              placeholder="Enter 64-character TXID..."
-                              className="px-3 py-2 rounded-xl bg-black/60 border border-white/15 text-white font-mono text-xs flex-1 outline-none focus:border-amber-400"
-                            />
-                            <button
-                              type="button"
-                              disabled={cryptoVerifying}
-                              onClick={handleVerifyCryptoTxid}
-                              className="px-4 py-2 rounded-xl bg-amber-400 hover:bg-yellow-400 text-slate-950 font-mono font-black text-xs transition cursor-pointer shrink-0"
-                            >
-                              {cryptoVerifying ? 'Checking...' : 'Verify'}
-                            </button>
-                          </div>
-                          {cryptoError && <p className="text-xs font-mono text-red-400">{cryptoError}</p>}
-                        </div>
-                      </div>
-                    </div>
-                  </div>
+            </div>
+          </div>
+        ) : (
+          /* ======================================================== */
+          /* VIEW 2: GENERAL PAYMENT METHODS SPLIT SCREEN             */
+          /* ======================================================== */
+          <div className="flex-1 flex flex-col min-h-0">
+            {/* Header */}
+            <div className="px-6 py-4 bg-[#101420] border-b border-white/[0.08] flex items-center justify-between gap-4 shrink-0">
+              <div className="flex items-center gap-2.5">
+                <div className="w-5 h-5 rounded-md bg-emerald-500/20 border border-emerald-500/40 flex items-center justify-center text-emerald-400">
+                  <span className="text-xs">📁</span>
                 </div>
+                <h2 className="text-base sm:text-lg font-black font-display text-white tracking-tight">
+                  Filling up the balance
+                </h2>
               </div>
-            )}
 
-            {/* VIEW: CARDS */}
-            {activeView === 'cards' && (
-              <div className="p-5 rounded-2xl bg-[#141724] border border-white/10 space-y-4">
-                <div className="border-b border-white/[0.08] pb-3">
-                  <h3 className="text-base font-black font-display text-white">
-                    Instant Card Deposit (Visa / Mastercard)
-                  </h3>
-                  <p className="text-xs font-mono text-slate-400 mt-0.5">
-                    Immediate wallet balance credit with 3D Secure verification.
-                  </p>
-                </div>
-
-                <div>
-                  <label className="text-xs font-mono text-slate-400 uppercase font-bold block mb-2">
-                    Select Amount:
-                  </label>
-                  <div className="grid grid-cols-2 sm:grid-cols-5 gap-2.5">
-                    {[10, 25, 50, 100, 250].map(amt => (
-                      <button
-                        key={amt}
-                        type="button"
-                        onClick={() => {
-                          sound.playSelect();
-                          setSelectedCardAmount(amt);
-                        }}
-                        className={`p-3 rounded-xl border text-center transition cursor-pointer ${
-                          selectedCardAmount === amt
-                            ? 'bg-amber-400 text-slate-950 border-amber-400 font-black shadow-lg scale-105'
-                            : 'bg-black/40 text-white border-white/10 hover:border-white/20 font-bold'
-                        }`}
-                      >
-                        <div className="text-base font-display font-black">{amt} €</div>
-                      </button>
-                    ))}
-                  </div>
-                </div>
-
-                <div className="p-3.5 rounded-xl bg-black/40 border border-white/10 flex items-center justify-between gap-4">
-                  <div>
-                    <div className="text-xs font-mono text-slate-400">Total to wallet:</div>
-                    <div className="text-xl font-black font-display text-emerald-400">
-                      {selectedCardAmount.toFixed(2)} €
-                    </div>
-                  </div>
-
-                  <button
-                    type="button"
-                    disabled={cardProcessing}
-                    onClick={() => {
-                      setCardProcessing(true);
-                      sound.playSelect();
-                      setTimeout(() => {
-                        creditVortexWalletBalance(selectedCardAmount);
-                        setCardProcessing(false);
-                        sound.playTournamentVictory();
-                        confetti({ particleCount: 100, spread: 70, origin: { y: 0.6 } });
-                        setDepositSuccessMessage(`✓ Card Payment Authorized! +${selectedCardAmount.toFixed(2)} € credited to your wallet.`);
-                        onSuccess?.(selectedCardAmount);
-                      }, 1800);
-                    }}
-                    className="px-5 py-2.5 rounded-xl bg-gradient-to-r from-amber-400 to-yellow-500 hover:from-amber-300 hover:to-yellow-400 text-slate-950 font-mono font-black text-xs transition cursor-pointer shadow-lg"
-                  >
-                    {cardProcessing ? 'Authorizing...' : `Pay ${selectedCardAmount.toFixed(2)} € via Card`}
-                  </button>
-                </div>
-              </div>
-            )}
-
-            {/* VIEW: GIFTCARDS */}
-            {activeView === 'giftcards' && (
-              <div className="p-5 rounded-2xl bg-[#141724] border border-white/10 space-y-4">
-                <div>
-                  <h3 className="text-base font-black font-display text-white">
-                    Redeem Voucher or Gift Card
-                  </h3>
-                  <p className="text-xs font-mono text-slate-400 mt-0.5">
-                    Enter voucher code from Kinguin, Eneba, or PayPal Digital Gifts.
-                  </p>
-                </div>
-
-                <div className="space-y-2">
-                  <input
-                    type="text"
-                    value={voucherCode}
-                    onChange={(e) => {
-                      setVoucherCode(e.target.value.toUpperCase());
-                      setVoucherError(null);
-                    }}
-                    placeholder="XXXX-XXXX-XXXX-XXXX"
-                    className="w-full px-4 py-2.5 rounded-xl bg-black/60 border border-white/15 text-white font-mono text-sm tracking-widest outline-none focus:border-amber-400 uppercase"
-                  />
-                  {voucherError && <p className="text-xs font-mono text-red-400">{voucherError}</p>}
+              <div className="flex items-center gap-3">
+                <div className="flex items-center gap-1.5 px-3 py-1 rounded-xl bg-black/40 border border-white/10 text-xs font-mono">
+                  <span className="text-slate-400">Current Balance:</span>
+                  <span className="font-bold text-emerald-400">{getVortexWalletBalance().toFixed(2)} €</span>
                 </div>
 
                 <button
-                  type="button"
                   onClick={() => {
-                    if (!voucherCode.trim() || voucherCode.trim().length < 8) {
-                      sound.playClick();
-                      setVoucherError('Please enter a valid voucher code.');
-                      return;
-                    }
-                    sound.playSelect();
-                    const redeemedEur = 25.00;
-                    creditVortexWalletBalance(redeemedEur);
-                    sound.playTournamentVictory();
-                    confetti({ particleCount: 100, spread: 70, origin: { y: 0.6 } });
-                    setDepositSuccessMessage(`✓ Voucher ${voucherCode} Redeemed! +${redeemedEur.toFixed(2)} € credited to your wallet.`);
-                    setVoucherCode('');
-                    onSuccess?.(redeemedEur);
+                    sound.playClick();
+                    onClose();
                   }}
-                  className="w-full py-2.5 rounded-xl bg-gradient-to-r from-emerald-500 to-teal-500 hover:from-emerald-400 hover:to-teal-400 text-slate-950 font-mono font-black text-xs transition cursor-pointer shadow-md uppercase tracking-wider"
+                  className="w-8 h-8 rounded-xl bg-white/5 hover:bg-white/10 text-slate-400 hover:text-white flex items-center justify-center transition cursor-pointer"
                 >
-                  Redeem Voucher Funds
+                  <X className="w-4 h-4" />
                 </button>
               </div>
-            )}
+            </div>
 
+            {/* Split Screen Body: Left Methods Grid + Right Action Pane */}
+            <div className="flex-1 flex flex-col lg:flex-row overflow-hidden min-h-0">
+              
+              {/* LEFT PANE: 10 PAYMENT METHODS GRID */}
+              <div className="w-full lg:w-[460px] xl:w-[490px] shrink-0 border-b lg:border-b-0 lg:border-r border-white/10 p-5 overflow-y-auto space-y-4 flex flex-col justify-between bg-[#0E121D]/70">
+                <div className="space-y-3.5">
+                  {/* Select Country */}
+                  <div className="space-y-1">
+                    <label className="text-[11px] font-mono font-bold text-slate-400 block">
+                      Select your country
+                    </label>
+                    <div className="relative">
+                      <button
+                        type="button"
+                        onClick={() => setCountryDropdownOpen(prev => !prev)}
+                        className="w-full px-3.5 py-2 rounded-xl bg-[#141724] border border-white/10 hover:border-white/20 text-white text-xs font-mono flex items-center justify-between cursor-pointer transition"
+                      >
+                        <span className="flex items-center gap-2">
+                          <span className="text-base">{selectedCountry.flag}</span>
+                          <span className="font-bold">{selectedCountry.label}</span>
+                        </span>
+                        <ChevronDown className={`w-4 h-4 text-slate-400 transition-transform ${countryDropdownOpen ? 'rotate-180' : ''}`} />
+                      </button>
+
+                      {countryDropdownOpen && (
+                        <div className="absolute left-0 right-0 top-full mt-1.5 rounded-xl bg-[#141724] border border-white/15 shadow-2xl z-50 max-h-52 overflow-y-auto p-1 space-y-0.5">
+                          {COUNTRIES.map(c => (
+                            <button
+                              key={c.code}
+                              type="button"
+                              onClick={() => {
+                                setSelectedCountry(c);
+                                setCountryDropdownOpen(false);
+                                sound.playSelect();
+                              }}
+                              className={`w-full px-3 py-2 rounded-lg text-left text-xs font-mono flex items-center justify-between transition cursor-pointer ${
+                                selectedCountry.code === c.code ? 'bg-emerald-500/20 text-emerald-400' : 'text-slate-300 hover:bg-white/5 hover:text-white'
+                              }`}
+                            >
+                              <span className="flex items-center gap-2">
+                                <span>{c.flag}</span>
+                                <span>{c.label}</span>
+                              </span>
+                              {selectedCountry.code === c.code && <Check className="w-3.5 h-3.5 text-emerald-400" />}
+                            </button>
+                          ))}
+                        </div>
+                      )}
+                    </div>
+                  </div>
+
+                  {/* 10 Methods Grid */}
+                  <div className="grid grid-cols-2 sm:grid-cols-3 gap-2.5">
+                    {/* 1. TOP VISA / MASTERCARD / DISCOVER */}
+                    <button
+                      type="button"
+                      onClick={() => {
+                        sound.playSelect();
+                        setActiveView('cards');
+                      }}
+                      className={`relative p-3 rounded-2xl bg-[#141724] hover:bg-[#181D2E] text-left transition cursor-pointer group flex flex-col justify-between h-28 shadow-lg overflow-hidden ${
+                        activeView === 'cards'
+                          ? 'border-2 border-emerald-500/80 shadow-[0_0_15px_rgba(16,185,129,0.25)]'
+                          : 'border border-white/10 hover:border-white/20'
+                      }`}
+                    >
+                      <div className="absolute top-0 left-0 bg-gradient-to-r from-orange-500 to-amber-500 text-slate-950 font-black text-[8px] font-mono px-2 py-0.5 rounded-br shadow">
+                        TOP
+                      </div>
+                      <div className="absolute top-1.5 right-2 text-[8px] font-mono text-slate-500">
+                        V1
+                      </div>
+
+                      <div className="pt-2">
+                        <div className="text-xs font-black font-display text-white tracking-wider flex items-center gap-1">
+                          <span>VISA</span>
+                          <span className="text-red-500 font-sans">●</span>
+                          <span className="text-amber-500 font-sans -ml-1">●</span>
+                        </div>
+                        <div className="text-[8px] font-mono text-slate-400 mt-0.5">DISCOVER • 100+ more</div>
+                      </div>
+
+                      <div className="flex items-center justify-between text-[9px] font-mono text-slate-400">
+                        <span>Card Payments</span>
+                        {activeView === 'cards' && <Check className="w-3.5 h-3.5 text-emerald-400" />}
+                      </div>
+                    </button>
+
+                    {/* 2. VISA / MASTERCARD (DIRECT) */}
+                    <button
+                      type="button"
+                      onClick={() => {
+                        sound.playSelect();
+                        setActiveView('cards');
+                      }}
+                      className="p-3 rounded-2xl bg-[#141724] hover:bg-[#181D2E] border border-white/10 hover:border-white/20 text-left transition cursor-pointer group flex flex-col justify-between h-28 shadow-lg"
+                    >
+                      <div className="text-sm font-black font-display text-white tracking-wider flex items-center gap-1 pt-1">
+                        <span>VISA</span>
+                        <span className="text-red-500 font-sans">●</span>
+                        <span className="text-amber-500 font-sans -ml-1">●</span>
+                      </div>
+                      <div className="text-[9px] font-mono text-slate-400">Instant Debit & Credit</div>
+                    </button>
+
+                    {/* 3. DIGITAL WALLETS */}
+                    <button
+                      type="button"
+                      onClick={() => {
+                        sound.playSelect();
+                        setActiveView('cards');
+                      }}
+                      className="p-3 rounded-2xl bg-[#141724] hover:bg-[#181D2E] border border-white/10 hover:border-white/20 text-left transition cursor-pointer group flex flex-col justify-between h-28 shadow-lg"
+                    >
+                      <div className="flex flex-wrap items-center gap-1 text-[9px] font-mono font-bold text-slate-300">
+                        <span className="px-1 py-0.5 rounded bg-black/40">Pay</span>
+                        <span className="px-1 py-0.5 rounded bg-black/40">GPay</span>
+                        <span className="px-1 py-0.5 rounded bg-purple-500/20 text-purple-300">Skrill</span>
+                      </div>
+                      <div className="text-[9px] font-mono text-slate-400">Neteller, Visa, Mobile</div>
+                    </button>
+
+                    {/* 4. PAY BY SKINS (OPENS DEDICATED Skin2PAY) */}
+                    <button
+                      type="button"
+                      onClick={() => {
+                        sound.playSelect();
+                        setActiveView('skins');
+                      }}
+                      className="relative p-2.5 rounded-2xl bg-[#141724] hover:bg-[#181D2E] text-left transition cursor-pointer group flex items-center justify-between h-28 shadow-lg overflow-hidden border border-white/10 hover:border-white/20"
+                    >
+                      <div className="relative w-14 sm:w-16 h-14 sm:h-16 shrink-0 flex items-center justify-center select-none pointer-events-none">
+                        <img 
+                          src={KARAMBIT_LORE_IMAGE} 
+                          alt="" 
+                          aria-hidden="true"
+                          draggable={false}
+                          className="w-full h-full object-contain drop-shadow-[0_4px_16px_rgba(0,0,0,0.6)] group-hover:scale-105 group-hover:rotate-1 transition-transform duration-300"
+                        />
+                      </div>
+
+                      <div className="flex-1 flex flex-col justify-center items-start pl-2 select-none min-w-0">
+                        <span className="text-[10px] font-sans font-bold text-[#EAB308] tracking-widest leading-none mb-1 uppercase whitespace-nowrap">
+                          PAY BY
+                        </span>
+                        <span className="text-lg font-display font-black text-[#FACC15] tracking-wider leading-none uppercase whitespace-nowrap">
+                          SKINS
+                        </span>
+                      </div>
+                    </button>
+
+                    {/* 5. CRYPTO */}
+                    <button
+                      type="button"
+                      onClick={() => {
+                        sound.playSelect();
+                        setActiveView('crypto');
+                      }}
+                      className={`relative p-3 rounded-2xl bg-[#141724] hover:bg-[#181D2E] text-left transition cursor-pointer group flex flex-col justify-between h-28 shadow-lg overflow-hidden ${
+                        activeView === 'crypto'
+                          ? 'border-2 border-emerald-500/80 shadow-[0_0_15px_rgba(16,185,129,0.25)]'
+                          : 'border border-white/10 hover:border-white/20'
+                      }`}
+                    >
+                      <div className="space-y-1">
+                        <div className="flex items-center gap-1.5 text-xs font-bold font-sans text-white">
+                          <span className="text-amber-400 font-mono font-bold">₿</span>
+                          <span className="tracking-wide">CRYPTO</span>
+                        </div>
+                        <div className="text-[8px] font-mono text-purple-300 font-bold">
+                          BTC ETH USDT SOL
+                        </div>
+                      </div>
+                      <div className="flex items-center justify-between text-[9px] font-mono text-slate-400">
+                        <span>Instant On-Chain</span>
+                        {activeView === 'crypto' && <Check className="w-3.5 h-3.5 text-emerald-400" />}
+                      </div>
+                    </button>
+
+                    {/* 6. KINGUIN */}
+                    <button
+                      type="button"
+                      onClick={() => {
+                        sound.playSelect();
+                        setActiveView('giftcards');
+                      }}
+                      className="p-3 rounded-2xl bg-[#141724] hover:bg-[#181D2E] border border-white/10 hover:border-white/20 text-left transition cursor-pointer group flex flex-col justify-between h-28 shadow-lg"
+                    >
+                      <div className="flex items-center gap-1.5">
+                        <span className="text-amber-400 text-xs">👑</span>
+                        <span className="font-display font-black text-xs text-white tracking-wider">KINGUIN</span>
+                      </div>
+                      <div className="text-[9px] font-mono text-slate-400">Wallet card</div>
+                    </button>
+
+                    {/* 7. ENEBA */}
+                    <button
+                      type="button"
+                      onClick={() => {
+                        sound.playSelect();
+                        setActiveView('giftcards');
+                      }}
+                      className="p-3 rounded-2xl bg-[#141724] hover:bg-[#181D2E] border border-white/10 hover:border-white/20 text-left transition cursor-pointer group flex flex-col justify-between h-28 shadow-lg"
+                    >
+                      <div className="flex items-center gap-1.5">
+                        <span className="text-purple-400 text-xs">🎮</span>
+                        <span className="font-bold text-xs text-white">eneba</span>
+                      </div>
+                      <div className="text-[9px] font-mono text-slate-400">Wallet card</div>
+                    </button>
+
+                    {/* 8. SWAPPED */}
+                    <button
+                      type="button"
+                      onClick={() => {
+                        sound.playSelect();
+                        setActiveView('cards');
+                      }}
+                      className="p-3 rounded-2xl bg-[#141724] hover:bg-[#181D2E] border border-white/10 hover:border-white/20 text-left transition cursor-pointer group flex flex-col justify-between h-28 shadow-lg"
+                    >
+                      <div className="text-[10px] font-mono font-bold text-slate-300">SWAPPED</div>
+                      <div className="text-[8px] font-mono text-slate-400">paysafecard • Revolut • 30+ more</div>
+                    </button>
+
+                    {/* 9. DIGITAL GIFTCARDS */}
+                    <button
+                      type="button"
+                      onClick={() => {
+                        sound.playSelect();
+                        setActiveView('giftcards');
+                      }}
+                      className={`relative p-3 rounded-2xl bg-[#141724] hover:bg-[#181D2E] text-left transition cursor-pointer group flex flex-col justify-between h-28 shadow-lg overflow-hidden ${
+                        activeView === 'giftcards'
+                          ? 'border-2 border-emerald-500/80 shadow-[0_0_15px_rgba(16,185,129,0.25)]'
+                          : 'border border-white/10 hover:border-white/20'
+                      }`}
+                    >
+                      <div className="flex items-center gap-1 text-[11px] font-bold text-white font-sans">
+                        <span>🎁</span>
+                        <span>GIFTCARDS</span>
+                      </div>
+                      <div className="text-[9px] font-mono text-cyan-400">PayPal Supported</div>
+                    </button>
+
+                    {/* 10. PREMIUM */}
+                    <button
+                      type="button"
+                      onClick={() => {
+                        sound.playSelect();
+                        setActiveView('cards');
+                      }}
+                      className="p-3 rounded-2xl bg-[#141724] hover:bg-[#181D2E] border border-white/10 hover:border-white/20 text-left transition cursor-pointer group flex flex-col justify-between h-28 shadow-lg"
+                    >
+                      <div className="flex items-center gap-1.5">
+                        <span className="text-sm">💎</span>
+                        <span className="font-display font-black text-xs text-purple-400">PREMIUM</span>
+                      </div>
+                      <div className="text-[9px] font-mono text-slate-400">VIP Status</div>
+                    </button>
+                  </div>
+                </div>
+
+                <p className="text-[10px] font-mono text-slate-500 pt-3 border-t border-white/5">
+                  All payment methods available in the selected country are listed.
+                </p>
+              </div>
+
+              {/* RIGHT PANE: CARDS / CRYPTO / GIFTCARDS */}
+              <div className="flex-1 p-5 sm:p-6 overflow-y-auto bg-[#080B12]/80 flex flex-col justify-between min-h-0">
+                {/* VIEW: CRYPTO */}
+                {activeView === 'crypto' && (
+                  <div className="space-y-5 flex-1 flex flex-col justify-between">
+                    <div className="space-y-4">
+                      <div className="flex flex-wrap items-center gap-2">
+                        {CRYPTO_CONFIGS.map(coin => (
+                          <button
+                            key={coin.symbol}
+                            type="button"
+                            onClick={() => {
+                              sound.playSelect();
+                              setSelectedCrypto(coin);
+                              setCryptoCopied(false);
+                              setCryptoError(null);
+                            }}
+                            className={`px-3 py-2 rounded-xl font-mono text-xs font-bold transition cursor-pointer flex items-center gap-2 border ${
+                              selectedCrypto.symbol === coin.symbol
+                                ? 'bg-white/10 text-white border-white/30 shadow-md'
+                                : 'bg-[#141724] text-slate-400 hover:text-white border-white/5'
+                            }`}
+                          >
+                            <span className="w-2.5 h-2.5 rounded-full" style={{ backgroundColor: coin.color }} />
+                            <span>{coin.symbol}</span>
+                            <span className="text-[10px] text-slate-500">({coin.network})</span>
+                          </button>
+                        ))}
+                      </div>
+
+                      <div className="p-4 rounded-2xl bg-[#141724] border border-white/10 space-y-3 shadow-lg">
+                        <div className="flex items-center justify-between">
+                          <span className="text-xs font-mono font-bold text-white flex items-center gap-1.5">
+                            <span>Official Deposit Address</span>
+                            <span className="text-[10px] text-emerald-400 bg-emerald-500/10 px-2 py-0.5 rounded-full">Automated 1-Conf Credit</span>
+                          </span>
+                          <span className="text-xs font-mono text-slate-400">{selectedCrypto.name}</span>
+                        </div>
+
+                        <div className="flex items-center gap-2">
+                          <div className="flex-1 p-3 rounded-xl bg-black/60 border border-white/10 font-mono text-xs text-amber-300 break-all select-all">
+                            {selectedCrypto.address}
+                          </div>
+                          <button
+                            type="button"
+                            onClick={handleCopyCrypto}
+                            className={`px-4 py-3 rounded-xl font-mono text-xs font-bold transition cursor-pointer flex items-center gap-1.5 shrink-0 ${
+                              cryptoCopied
+                                ? 'bg-emerald-500 text-slate-950 font-black'
+                                : 'bg-white/10 hover:bg-white/20 text-white'
+                            }`}
+                          >
+                            {cryptoCopied ? <Check className="w-3.5 h-3.5" /> : <Copy className="w-3.5 h-3.5" />}
+                            <span>{cryptoCopied ? 'Copied' : 'Copy'}</span>
+                          </button>
+                        </div>
+                      </div>
+
+                      <div className="p-4 rounded-2xl bg-[#141724] border border-white/10 space-y-2">
+                        <label className="text-xs font-mono font-bold text-white block">
+                          Have you sent the funds? Verify TxID / Transaction Hash:
+                        </label>
+                        <div className="flex items-center gap-2">
+                          <input
+                            type="text"
+                            value={cryptoTxid}
+                            onChange={(e) => setCryptoTxid(e.target.value)}
+                            placeholder="Enter transaction hash / hash ID..."
+                            className="flex-1 p-2.5 rounded-xl bg-black/40 border border-white/10 text-xs font-mono text-white outline-none focus:border-amber-400"
+                          />
+                          <button
+                            type="button"
+                            disabled={cryptoVerifying}
+                            onClick={handleVerifyCryptoTxid}
+                            className="px-4 py-2.5 rounded-xl bg-emerald-500 hover:bg-emerald-400 text-slate-950 font-mono font-black text-xs transition cursor-pointer disabled:opacity-50"
+                          >
+                            {cryptoVerifying ? 'Verifying...' : 'Verify Deposit'}
+                          </button>
+                        </div>
+                        {cryptoError && (
+                          <p className="text-xs font-mono text-red-400 flex items-center gap-1 mt-1">
+                            <AlertCircle className="w-3.5 h-3.5" />
+                            <span>{cryptoError}</span>
+                          </p>
+                        )}
+                      </div>
+                    </div>
+                  </div>
+                )}
+
+                {/* VIEW: CARDS */}
+                {activeView === 'cards' && (
+                  <div className="space-y-5 flex-1 flex flex-col justify-between">
+                    <div className="space-y-4">
+                      <div>
+                        <h3 className="text-base font-black font-display text-white">Deposit with Card / VISA / MasterCard</h3>
+                        <p className="text-xs font-mono text-slate-400 mt-1">Select deposit package to replenish balance instantly</p>
+                      </div>
+
+                      <div className="grid grid-cols-2 sm:grid-cols-4 gap-2.5">
+                        {[10, 25, 50, 100].map(amt => (
+                          <button
+                            key={amt}
+                            type="button"
+                            onClick={() => {
+                              sound.playSelect();
+                              setSelectedCardAmount(amt);
+                            }}
+                            className={`p-3.5 rounded-2xl text-center transition cursor-pointer border ${
+                              selectedCardAmount === amt
+                                ? 'bg-emerald-500/20 border-emerald-500 text-emerald-300 shadow-[0_0_15px_rgba(16,185,129,0.25)]'
+                                : 'bg-[#141724] border-white/10 text-white hover:border-white/25'
+                            }`}
+                          >
+                            <div className="text-lg font-black font-display">{amt.toFixed(2)} €</div>
+                            <div className="text-[10px] font-mono text-slate-400 mt-1">Instant Refill</div>
+                          </button>
+                        ))}
+                      </div>
+                    </div>
+
+                    <div className="p-4 rounded-2xl bg-[#141724] border border-white/10 flex items-center justify-between">
+                      <div>
+                        <div className="text-xs font-mono text-slate-400">Amount to pay:</div>
+                        <div className="text-xl font-black font-display text-emerald-400">{selectedCardAmount.toFixed(2)} €</div>
+                      </div>
+
+                      <button
+                        type="button"
+                        disabled={cardProcessing}
+                        onClick={() => {
+                          setCardProcessing(true);
+                          sound.playSelect();
+                          setTimeout(() => {
+                            setCardProcessing(false);
+                            creditVortexWalletBalance(selectedCardAmount);
+                            sound.playTournamentVictory();
+                            confetti({ particleCount: 100, spread: 70, origin: { y: 0.6 } });
+                            setDepositSuccessMessage(`✓ Card Payment Confirmed! +${selectedCardAmount.toFixed(2)} € credited to your wallet.`);
+                            onSuccess?.(selectedCardAmount);
+                          }, 1600);
+                        }}
+                        className="px-6 py-3 rounded-xl bg-emerald-500 hover:bg-emerald-400 text-slate-950 font-mono font-black text-xs transition cursor-pointer"
+                      >
+                        {cardProcessing ? 'Connecting Gateway...' : 'Pay with Card'}
+                      </button>
+                    </div>
+                  </div>
+                )}
+
+                {/* VIEW: GIFTCARDS */}
+                {activeView === 'giftcards' && (
+                  <div className="space-y-5 flex-1 flex flex-col justify-between">
+                    <div className="space-y-4">
+                      <div>
+                        <h3 className="text-base font-black font-display text-white">Redeem Giftcard Voucher</h3>
+                        <p className="text-xs font-mono text-slate-400 mt-1">Kinguin, Eneba, or PayPal Digital Giftcard code</p>
+                      </div>
+
+                      <div className="p-4 rounded-2xl bg-[#141724] border border-white/10 space-y-3">
+                        <label className="text-xs font-mono font-bold text-white block">
+                          Enter 16-character voucher code:
+                        </label>
+                        <input
+                          type="text"
+                          value={voucherCode}
+                          onChange={(e) => setVoucherCode(e.target.value.toUpperCase())}
+                          placeholder="VRTX-XXXX-XXXX-XXXX"
+                          className="w-full p-3 rounded-xl bg-black/50 border border-white/15 font-mono text-sm tracking-widest text-emerald-400 outline-none focus:border-emerald-400 uppercase"
+                        />
+                        {voucherError && (
+                          <p className="text-xs font-mono text-red-400 flex items-center gap-1">
+                            <AlertCircle className="w-3.5 h-3.5" />
+                            <span>{voucherError}</span>
+                          </p>
+                        )}
+                      </div>
+                    </div>
+
+                    <button
+                      type="button"
+                      onClick={() => {
+                        if (!voucherCode || voucherCode.trim().length < 8) {
+                          setVoucherError('Please enter a valid giftcard code (e.g. VRTX-2024-PASS)');
+                          sound.playClick();
+                          return;
+                        }
+                        const val = 25.00;
+                        creditVortexWalletBalance(val);
+                        sound.playTournamentVictory();
+                        confetti({ particleCount: 100, spread: 70, origin: { y: 0.6 } });
+                        setDepositSuccessMessage(`✓ Giftcard Redeemed! +${val.toFixed(2)} € added to your balance.`);
+                        setVoucherCode('');
+                        setVoucherError(null);
+                        onSuccess?.(val);
+                      }}
+                      className="w-full py-3 rounded-xl bg-emerald-500 hover:bg-emerald-400 text-slate-950 font-mono font-black text-xs uppercase tracking-wide transition cursor-pointer"
+                    >
+                      Redeem Giftcard Voucher
+                    </button>
+                  </div>
+                )}
+              </div>
+            </div>
           </div>
-
-        </div>
+        )}
 
       </div>
     </div>

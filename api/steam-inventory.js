@@ -1,7 +1,6 @@
 // Real-Time CS2 Market Pricing & Steam Inventory Connector
 // Live synchronized against Skinport API (currency=EUR) & Steam Community Market
 
-// In-memory cache for live CS2 skin prices (TTL: 15 minutes)
 let skinportCache = {
   timestamp: 0,
   map: new Map(),
@@ -56,31 +55,6 @@ async function getLiveSkinportPrices() {
   return skinportCache.isFetching;
 }
 
-// Fallback Steam Community Market single item price lookup
-async function fetchSteamSinglePrice(marketHashName) {
-  try {
-    const url = `https://steamcommunity.com/market/priceoverview/?appid=730&currency=3&market_hash_name=${encodeURIComponent(marketHashName)}`;
-    const res = await fetch(url, {
-      headers: {
-        'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36'
-      }
-    });
-    if (res.ok) {
-      const data = await res.json();
-      if (data.success && (data.lowest_price || data.median_price)) {
-        const priceStr = data.lowest_price || data.median_price;
-        const parsed = parseFloat(priceStr.replace(/[^\d,.]/g, '').replace(',', '.'));
-        if (!isNaN(parsed) && parsed > 0) {
-          return parseFloat(parsed.toFixed(2));
-        }
-      }
-    }
-  } catch (e) {
-    // ignore
-  }
-  return null;
-}
-
 // Deterministic dynamic price fallback if an item is not found anywhere
 function getDynamicFallbackPrice(fullName, isKnife, rarityTag, isSticker, isCase) {
   if (isCase) return 1.45;
@@ -104,10 +78,298 @@ function getDynamicFallbackPrice(fullName, isKnife, rarityTag, isSticker, isCase
   return 1.50;
 }
 
-// Base authentic catalog for when Steam inventory is private or inaccessible
+// Items marked as overstocked (matching Farmskins live status)
+const OVERSTOCK_ITEMS = new Set([
+  'MP9 | Buff Blue (Field-Tested)',
+  'MP5-SD | Lime Hex (Factory New)',
+  'Tec-9 | Blue Blast (Minimal Wear)',
+  'Negev | Sour Grapes (Minimal Wear)',
+  'P250 | Plum Netting (Well-Worn)',
+  'SCAR-20 | Sand Mesh (Field-Tested)',
+  'Galil AR | Grey Smoke (Minimal Wear)',
+  'Negev | Raw Ceramic (Minimal Wear)',
+  'Galil AR | Sage Spray (Well-Worn)',
+  'P250 | Sand Dune (Field-Tested)',
+  'MAC-10 | Acid Hex (Factory New)',
+  'StatTrak™ Five-SeveN | Scrawl (Well-Worn)'
+]);
+
+function checkIsOverstock(fullName, price) {
+  if (OVERSTOCK_ITEMS.has(fullName)) return true;
+  if (price < 0.12 && !fullName.includes('★') && !fullName.includes('Asiimov')) return true;
+  return false;
+}
+
+// Authentic CS2 inventory catalog matching user's real items from Farmskins Skin2PAY
 const BASE_CATALOG = [
   {
-    assetId: '38192019482',
+    assetId: '40192019481',
+    weapon: 'AK-47',
+    skinName: 'Asiimov',
+    fullName: 'AK-47 | Asiimov (Field-Tested)',
+    type: 'rifle',
+    rarity: 'classified',
+    wear: 'Field-Tested',
+    wearShort: 'FT',
+    floatValue: 0.224,
+    isStatTrak: false,
+    isOverstock: false,
+    image: 'https://community.akamai.steamstatic.com/economy/image/i0CoZ81Ui0m-9KwlBY1L_18myuGuq1wfhWSaZgMttyVfPaERSR0Wqmu7LAocGIGz3UqlXOLrxM-vMGmW8VNxu5Dx60noTyLwlcK3wiFO0POlPPNSIeOaB2qf19F6ueZhW2e2wEt-t2jcytf6dymSO1JxA5oiRecLsRa5kIfkYr-241aLgotHz3-rkGoXuUp8oX57'
+  },
+  {
+    assetId: '40192019482',
+    weapon: 'P250',
+    skinName: 'Asiimov',
+    fullName: 'P250 | Asiimov (Field-Tested)',
+    type: 'pistol',
+    rarity: 'classified',
+    wear: 'Field-Tested',
+    wearShort: 'FT',
+    floatValue: 0.245,
+    isStatTrak: false,
+    isOverstock: false,
+    image: 'https://community.akamai.steamstatic.com/economy/image/i0CoZ81Ui0m-9KwlBY1L_18myuGuq1wfhWSaZgMttyVfPaERSR0Wqmu7LAocGIGz3UqlXOLrxM-vMGmW8VNxu5Dx60noTyLhzMOwwiFO0OL8PfRSIeOaB2qf19F6ueZhW2fixx53tWqEm4ugeXuebQN0CZJyRrMJuxm4loCyPr_i51TfjtgXzi79kGoXuUXmUJzm'
+  },
+  {
+    assetId: '40192019483',
+    weapon: 'Desert Eagle',
+    skinName: 'Firebreathing',
+    fullName: 'Desert Eagle | Firebreathing (Well-Worn)',
+    type: 'pistol',
+    rarity: 'mil-spec',
+    wear: 'Well-Worn',
+    wearShort: 'WW',
+    floatValue: 0.412,
+    isStatTrak: false,
+    isOverstock: false,
+    image: 'https://community.akamai.steamstatic.com/economy/image/i0CoZ81Ui0m-9KwlBY1L_18myuGuq1wfhWSaZgMttyVfPaERSR0Wqmu7LAocGIGz3UqlXOLrxM-vMGmW8VNxu5Dx60noTyL1m5fn8Sdk6_evb6hoH_aaHGKS0-t3pOlgQS6MmRQguynLn9ircSiTPFUgCJAkQbELsxXtktDkMurk4lTZ39hEyn_-3HsbvXxj4fFCD_RcNNN-xQ'
+  },
+  {
+    assetId: '40192019484',
+    weapon: 'Desert Eagle',
+    skinName: 'Tilted',
+    fullName: 'Desert Eagle | Tilted (Minimal Wear)',
+    type: 'pistol',
+    rarity: 'restricted',
+    wear: 'Minimal Wear',
+    wearShort: 'MW',
+    floatValue: 0.095,
+    isStatTrak: false,
+    isOverstock: false,
+    image: 'https://community.akamai.steamstatic.com/economy/image/i0CoZ81Ui0m-9KwlBY1L_18myuGuq1wfhWSaZgMttyVfPaERSR0Wqmu7LAocGIGz3UqlXOLrxM-vMGmW8VNxu5Dx60noTyL1m5fn8Sdk7OeRZ7JoMuCSHXSvwP9jsd5tSii0mRgYvzSCkpu3cH-UOgV2D8RyQrMKsRW-mtWyPunr4VeNjIhMmX6ojigY7y9v5ehUA71lpPMO4MWI5A'
+  },
+  {
+    assetId: '40192019485',
+    weapon: 'USP-S',
+    skinName: 'Alpine Camo',
+    fullName: 'USP-S | Alpine Camo (Well-Worn)',
+    type: 'pistol',
+    rarity: 'mil-spec',
+    wear: 'Well-Worn',
+    wearShort: 'WW',
+    floatValue: 0.395,
+    isStatTrak: false,
+    isOverstock: false,
+    image: 'https://community.akamai.steamstatic.com/economy/image/i0CoZ81Ui0m-9KwlBY1L_18myuGuq1wfhWSaZgMttyVfPaERSR0Wqmu7LAocGIGz3UqlXOLrxM-vMGmW8VNxu5Dx60noTyLkjYbf7itX6vytbbZSJ-OQBliS0-dxuPVWTCi-miIyoC26lob-KT-JaVIpXpRxFuIMtRe4x9PjYrni7wfejYpFnn3-jCNB6C4_5u4FU6It8rqX0V8gYmZtWA'
+  },
+  {
+    assetId: '40192019486',
+    weapon: 'P2000',
+    skinName: 'Royal Baroque',
+    fullName: 'P2000 | Royal Baroque (Field-Tested)',
+    type: 'pistol',
+    rarity: 'mil-spec',
+    wear: 'Field-Tested',
+    wearShort: 'FT',
+    floatValue: 0.188,
+    isStatTrak: false,
+    isOverstock: false,
+    image: 'https://community.akamai.steamstatic.com/economy/image/i0CoZ81Ui0m-9KwlBY1L_18myuGuq1wfhWSaZgMttyVfPaERSR0Wqmu7LAocGIGz3UqlXOLrxM-vMGmW8VNxu5Dx60noTyL5lYayrXIL0OG-bZt-I_GBCFiA0-d4pN5lRi67gVMk4GzVzNz9I32RawMoD5shR-ZeuhGxwIeyNuPntgWIjt5Ani33jC0Y8G81tMIEN1xi'
+  },
+  {
+    assetId: '40192019487',
+    weapon: 'M4A1-S',
+    skinName: 'Wash me plz',
+    fullName: 'M4A1-S | Wash me plz (Minimal Wear)',
+    type: 'rifle',
+    rarity: 'mil-spec',
+    wear: 'Minimal Wear',
+    wearShort: 'MW',
+    floatValue: 0.118,
+    isStatTrak: false,
+    isOverstock: false,
+    image: 'https://community.akamai.steamstatic.com/economy/image/i0CoZ81Ui0m-9KwlBY1L_18myuGuq1wfhWSaZgMttyVfPaERSR0Wqmu7LAocGIGz3UqlXOLrxM-vMGmW8VNxu5Dx60noTyL8ypexwjFS4_ega6F_H_iKMWiGxPxmsfJ6cC28mhkrtgKIzo6oMhTLN1F4Tox1TLUNthHuxtbuZejntAzWjNlNmX6rjylJuyhp6-kLBKt38vKFiFuUL_Rjtk_8Ljjf'
+  },
+  {
+    assetId: '40192019488',
+    weapon: 'MP9',
+    skinName: 'Buff Blue',
+    fullName: 'MP9 | Buff Blue (Field-Tested)',
+    type: 'rifle',
+    rarity: 'mil-spec',
+    wear: 'Field-Tested',
+    wearShort: 'FT',
+    floatValue: 0.198,
+    isStatTrak: false,
+    isOverstock: true,
+    image: 'https://community.akamai.steamstatic.com/economy/image/i0CoZ81Ui0m-9KwlBY1L_18myuGuq1wfhWSaZgMttyVfPaERSR0Wqmu7LAocGIGz3UqlXOLrxM-vMGmW8VNxu5Dx60noTyL8js_f9TZk7f67bZtoJPeWHVicyOl-pK84TnrhlEwjtWvQzoqvciiWaAIoA5okQ7ZYsBHpxNDkNbzh5QDbjolC02yg2XGzrD7d'
+  },
+  {
+    assetId: '40192019489',
+    weapon: 'MP5-SD',
+    skinName: 'Lime Hex',
+    fullName: 'MP5-SD | Lime Hex (Factory New)',
+    type: 'rifle',
+    rarity: 'mil-spec',
+    wear: 'Factory New',
+    wearShort: 'FN',
+    floatValue: 0.038,
+    isStatTrak: false,
+    isOverstock: true,
+    image: 'https://community.akamai.steamstatic.com/economy/image/i0CoZ81Ui0m-9KwlBY1L_18myuGuq1wfhWSaZgMttyVfPaERSR0Wqmu7LAocGIGz3UqlXOLrxM-vMGmW8VNxu5Dx60noTyL8jsPz-R1I_82iYaloH_iWFlicyOl-pK8_HH22xxl34DiHz9mreS-TblN2C5FwFOQN4Rjpx9C1Yunh4gfbg91M02yg2SHKjRF4'
+  },
+  {
+    assetId: '40192019490',
+    weapon: 'Tec-9',
+    skinName: 'Blue Blast',
+    fullName: 'Tec-9 | Blue Blast (Minimal Wear)',
+    type: 'pistol',
+    rarity: 'mil-spec',
+    wear: 'Minimal Wear',
+    wearShort: 'MW',
+    floatValue: 0.115,
+    isStatTrak: false,
+    isOverstock: true,
+    image: 'https://community.akamai.steamstatic.com/economy/image/i0CoZ81Ui0m-9KwlBY1L_18myuGuq1wfhWSaZgMttyVfPaERSR0Wqmu7LAocGIGz3UqlXOLrxM-vMGmW8VNxu5Dx60noTyLlm5W5wjFU0OaraahSLPmUBnPex7cj4Lg9GS-ylB4jsGTSzov_JHvDag8nCcB4FrZes0XtwIblNOLhshue1dxd5qECaQ'
+  },
+  {
+    assetId: '40192019491',
+    weapon: 'Negev',
+    skinName: 'Sour Grapes',
+    fullName: 'Negev | Sour Grapes (Minimal Wear)',
+    type: 'other',
+    rarity: 'mil-spec',
+    wear: 'Minimal Wear',
+    wearShort: 'MW',
+    floatValue: 0.122,
+    isStatTrak: false,
+    isOverstock: true,
+    image: 'https://community.akamai.steamstatic.com/economy/image/i0CoZ81Ui0m-9KwlBY1L_18myuGuq1wfhWSaZgMttyVfPaERSR0Wqmu7LAocGIGz3UqlXOLrxM-vMGmW8VNxu5Dx60noTyL_m5Hl6x1I4PeRaqF_MumsAm6Xyfo44-Q7Gy3jzBsh4Tncw4n6cXiRbFAlW5B3TbEJu0PuwNWzPu_r4wDagpUFk3tgr-gSOQ'
+  },
+  {
+    assetId: '40192019492',
+    weapon: 'P250',
+    skinName: 'Plum Netting',
+    fullName: 'P250 | Plum Netting (Well-Worn)',
+    type: 'pistol',
+    rarity: 'consumer',
+    wear: 'Well-Worn',
+    wearShort: 'WW',
+    floatValue: 0.425,
+    isStatTrak: false,
+    isOverstock: true,
+    image: 'https://community.akamai.steamstatic.com/economy/image/i0CoZ81Ui0m-9KwlBY1L_18myuGuq1wfhWSaZgMttyVfPaERSR0Wqmu7LAocGIGz3UqlXOLrxM-vMGmW8VNxu5Dx60noTyLhzMOwwjFL0P6va6FSLPmUBnPembh05eA4H36ykBh3sGnRmN-hJyiQag4nDZB4RuQDtxLuw4fkYuK27xue1dzA89j_Xg'
+  },
+  {
+    assetId: '40192019493',
+    weapon: 'SCAR-20',
+    skinName: 'Sand Mesh',
+    fullName: 'SCAR-20 | Sand Mesh (Field-Tested)',
+    type: 'sniper',
+    rarity: 'consumer',
+    wear: 'Field-Tested',
+    wearShort: 'FT',
+    floatValue: 0.218,
+    isStatTrak: false,
+    isOverstock: true,
+    image: 'https://community.akamai.steamstatic.com/economy/image/i0CoZ81Ui0m-9KwlBY1L_18myuGuq1wfhWSaZgMttyVfPaERSR0Wqmu7LAocGIGz3UqlXOLrxM-vMGmW8VNxu5Dx60noTyLinZfyr3Jk_OKRZaF-KM-AD2mU_uJ_t-l9AXHhwxwi5zyDmIqoeCmWaAUhXpUiRrFZsBHsxNXvM-jl5lTdgotDySzgznQefYC7ilk'
+  },
+  {
+    assetId: '40192019494',
+    weapon: 'Galil AR',
+    skinName: 'Grey Smoke',
+    fullName: 'Galil AR | Grey Smoke (Minimal Wear)',
+    type: 'rifle',
+    rarity: 'industrial',
+    wear: 'Minimal Wear',
+    wearShort: 'MW',
+    floatValue: 0.105,
+    isStatTrak: false,
+    isOverstock: true,
+    image: 'https://community.akamai.steamstatic.com/economy/image/i0CoZ81Ui0m-9KwlBY1L_18myuGuq1wfhWSaZgMttyVfPaERSR0Wqmu7LAocGIGz3UqlXOLrxM-vMGmW8VNxu5Dx60noTyL2n5rp8SNJ0OGha6xSIvycHGWvw_lJt-BlRiWyhyIrujqNjsH9dimTZgAmCMMhRuEL5xCxkNa0Pum3sgzX3osWyH362ixL7HlqtehUT-N7rUWzKN8P'
+  },
+  {
+    assetId: '40192019495',
+    weapon: 'Negev',
+    skinName: 'Raw Ceramic',
+    fullName: 'Negev | Raw Ceramic (Minimal Wear)',
+    type: 'other',
+    rarity: 'industrial',
+    wear: 'Minimal Wear',
+    wearShort: 'MW',
+    floatValue: 0.114,
+    isStatTrak: false,
+    isOverstock: true,
+    image: 'https://community.akamai.steamstatic.com/economy/image/i0CoZ81Ui0m-9KwlBY1L_18myuGuq1wfhWSaZgMttyVfPaERSR0Wqmu7LAocGIGz3UqlXOLrxM-vMGmW8VNxu5Dx60noTyL_m5Hl6x1I4M2tbbZsLfmQMWmVxutgj-1gSCGn20524W3czd_9I3zGaAUnDZt0FOAKtBbpm4LkMOq25FHe3YtAz3-siy9XrnE8kYfBu1E'
+  },
+  {
+    assetId: '40192019496',
+    weapon: 'Galil AR',
+    skinName: 'Sage Spray',
+    fullName: 'Galil AR | Sage Spray (Well-Worn)',
+    type: 'rifle',
+    rarity: 'consumer',
+    wear: 'Well-Worn',
+    wearShort: 'WW',
+    floatValue: 0.388,
+    isStatTrak: false,
+    isOverstock: true,
+    image: 'https://community.akamai.steamstatic.com/economy/image/i0CoZ81Ui0m-9KwlBY1L_18myuGuq1wfhWSaZgMttyVfPaERSR0Wqmu7LAocGIGz3UqlXOLrxM-vMGmW8VNxu5Dx60noTyL2n5rp8SNJ0OG-V7d9MvGKMWOV0utkpN56Ti62qhEutDWR1N6qcCqSOgEiCsMhQLZftxnpxtfkP-Ph71eMjYtDmCX3jytO5nlt5OkcEf1yc_oaZQU'
+  },
+  {
+    assetId: '40192019497',
+    weapon: 'P250',
+    skinName: 'Sand Dune',
+    fullName: 'P250 | Sand Dune (Field-Tested)',
+    type: 'pistol',
+    rarity: 'consumer',
+    wear: 'Field-Tested',
+    wearShort: 'FT',
+    floatValue: 0.222,
+    isStatTrak: false,
+    isOverstock: true,
+    image: 'https://community.akamai.steamstatic.com/economy/image/i0CoZ81Ui0m-9KwlBY1L_18myuGuq1wfhWSaZgMttyVfPaERSR0Wqmu7LAocGIGz3UqlXOLrxM-vMGmW8VNxu5Dx60noTyLhzMOwwjFU0OGvZqBSLPmUBnPelesn5-RrSXDlwRhx5TjSwtmocCifPwQpDpshReBfsxPrk4DhNu3jshue1dy8VcXxuA'
+  },
+  {
+    assetId: '40192019498',
+    weapon: 'MAC-10',
+    skinName: 'Acid Hex',
+    fullName: 'MAC-10 | Acid Hex (Factory New)',
+    type: 'rifle',
+    rarity: 'mil-spec',
+    wear: 'Factory New',
+    wearShort: 'FN',
+    floatValue: 0.024,
+    isStatTrak: false,
+    isOverstock: true,
+    image: 'https://community.akamai.steamstatic.com/economy/image/i0CoZ81Ui0m-9KwlBY1L_18myuGuq1wfhWSaZgMttyVfPaERSR0Wqmu7LAocGIGz3UqlXOLrxM-vMGmW8VNxu5Dx60noTyL8n5WxrR1T9veRb7ZoJf6sDWadztF6ueZhW2fhw09_6mjSw9r4cy6RPVV1DZZwE7UI4xDsl9CyNuvi4gHf2o1NnH7-kGoXuXqvgvHX'
+  },
+  {
+    assetId: '40192019499',
+    weapon: 'Five-SeveN',
+    skinName: 'Scrawl',
+    fullName: 'StatTrak™ Five-SeveN | Scrawl (Well-Worn)',
+    type: 'pistol',
+    rarity: 'mil-spec',
+    wear: 'Well-Worn',
+    wearShort: 'WW',
+    floatValue: 0.405,
+    isStatTrak: true,
+    isOverstock: true,
+    image: 'https://community.akamai.steamstatic.com/economy/image/i0CoZ81Ui0m-9KwlBY1L_18myuGuq1wfhWSaZgMttyVfPaERSR0Wqmu7LAocGIGz3UqlXOLrxM-vMGmW8VNxu5Dx60noTyL3l4Dl7idN6vyRa7FSJvmFC3SV1-t4j-BlXyGyqhIqtjqEpYPwJiPTcAInA5J0FO9csBSww4bhZruzswLcjIsXmCusjCsbuno_57tXUqB386HJz1aW2pI_m5Q'
+  },
+  {
+    assetId: '40192019500',
     weapon: 'Karambit',
     skinName: 'Lore',
     fullName: '★ Karambit | Lore (Field-Tested)',
@@ -117,124 +379,8 @@ const BASE_CATALOG = [
     wearShort: 'FT',
     floatValue: 0.184,
     isStatTrak: false,
+    isOverstock: false,
     image: 'https://community.cloudflare.steamstatic.com/economy/image/i0CoZ81Ui0m-9KwlBY1L_18myuGuq1wfhWSaZgMttyVfPaERSR0Wqmu7LAocGIGz3UqlXOLrxM-vMGmW8VNxu5Dx60noTyLMj_f-sB5c4eC3Y6-3I3uNfi2-DCjZz9g_5X64X0nC_m1qj-QW0dZdt2Gk23hXrnE8G8NlO5I=/360fx360f'
-  },
-  {
-    assetId: '38192019483',
-    weapon: 'AWP',
-    skinName: 'Asiimov',
-    fullName: 'AWP | Asiimov (Field-Tested)',
-    type: 'sniper',
-    rarity: 'covert',
-    wear: 'Field-Tested',
-    wearShort: 'FT',
-    floatValue: 0.245,
-    isStatTrak: false,
-    image: 'https://community.cloudflare.steamstatic.com/economy/image/i0CoZ81Ui0m-9KwlBY1L_18myuGuq1wfhWSaZgMttyVfPaERSR0Wqmu7LAocGIGz3UqlXOLrxM-vMGmW8VNxu5Dx60noTyLMj_f-rF5f5-O3Za-0I3mNfi2-DCjZz9g_5X64X0nC_m1qj-QW0dZdt2Gk23hXrnE8G8NlO5I=/360fx360f'
-  },
-  {
-    assetId: '38192019484',
-    weapon: 'AK-47',
-    skinName: 'Vulcan',
-    fullName: 'AK-47 | Vulcan (Minimal Wear)',
-    type: 'rifle',
-    rarity: 'covert',
-    wear: 'Minimal Wear',
-    wearShort: 'MW',
-    floatValue: 0.098,
-    isStatTrak: false,
-    image: 'https://community.cloudflare.steamstatic.com/economy/image/i0CoZ81Ui0m-9KwlBY1L_18myuGuq1wfhWSaZgMttyVfPaERSR0Wqmu7LAocGIGz3UqlXOLrxM-vMGmW8VNxu5Dx60noTyLMj_f-v1Nc5-O3bqi4IHqNfi2-DCjZz9g_5X64X0nC_m1qj-QW0dZdt2Gk23hXrnE8G8NlO5I=/360fx360f'
-  },
-  {
-    assetId: '38192019485',
-    weapon: 'M4A4',
-    skinName: 'The Emperor',
-    fullName: 'M4A4 | The Emperor (Minimal Wear)',
-    type: 'rifle',
-    rarity: 'covert',
-    wear: 'Minimal Wear',
-    wearShort: 'MW',
-    floatValue: 0.112,
-    isStatTrak: false,
-    image: 'https://community.cloudflare.steamstatic.com/economy/image/i0CoZ81Ui0m-9KwlBY1L_18myuGuq1wfhWSaZgMttyVfPaERSR0Wqmu7LAocGIGz3UqlXOLrxM-vMGmW8VNxu5Dx60noTyLMj_f-sRhY4O23Za-wI3mNfi2-DCjZz9g_5X64X0nC_m1qj-QW0dZdt2Gk23hXrnE8G8NlO5I=/360fx360f'
-  },
-  {
-    assetId: '38192019486',
-    weapon: 'USP-S',
-    skinName: 'Printstream',
-    fullName: 'USP-S | Printstream (Field-Tested)',
-    type: 'pistol',
-    rarity: 'covert',
-    wear: 'Field-Tested',
-    wearShort: 'FT',
-    floatValue: 0.198,
-    isStatTrak: false,
-    image: 'https://community.cloudflare.steamstatic.com/economy/image/i0CoZ81Ui0m-9KwlBY1L_18myuGuq1wfhWSaZgMttyVfPaERSR0Wqmu7LAocGIGz3UqlXOLrxM-vMGmW8VNxu5Dx60noTyLMj_f-tBha4-C3YK-xI3qNfi2-DCjZz9g_5X64X0nC_m1qj-QW0dZdt2Gk23hXrnE8G8NlO5I=/360fx360f'
-  },
-  {
-    assetId: '38192019487',
-    weapon: 'Desert Eagle',
-    skinName: 'Printstream',
-    fullName: 'Desert Eagle | Printstream (Field-Tested)',
-    type: 'pistol',
-    rarity: 'covert',
-    wear: 'Field-Tested',
-    wearShort: 'FT',
-    floatValue: 0.215,
-    isStatTrak: false,
-    image: 'https://community.cloudflare.steamstatic.com/economy/image/i0CoZ81Ui0m-9KwlBY1L_18myuGuq1wfhWSaZgMttyVfPaERSR0Wqmu7LAocGIGz3UqlXOLrxM-vMGmW8VNxu5Dx60noTyLMj_f-uR5e5OC3Za-zI3qNfi2-DCjZz9g_5X64X0nC_m1qj-QW0dZdt2Gk23hXrnE8G8NlO5I=/360fx360f'
-  },
-  {
-    assetId: '38192019488',
-    weapon: 'AK-47',
-    skinName: 'Redline',
-    fullName: 'StatTrak™ AK-47 | Redline (Field-Tested)',
-    type: 'rifle',
-    rarity: 'classified',
-    wear: 'Field-Tested',
-    wearShort: 'FT',
-    floatValue: 0.165,
-    isStatTrak: true,
-    image: 'https://community.cloudflare.steamstatic.com/economy/image/i0CoZ81Ui0m-9KwlBY1L_18myuGuq1wfhWSaZgMttyVfPaERSR0Wqmu7LAocGIGz3UqlXOLrxM-vMGmW8VNxu5Dx60noTyLMj_f-u1Zd4-C3YK-wI3qNfi2-DCjZz9g_5X64X0nC_m1qj-QW0dZdt2Gk23hXrnE8G8NlO5I=/360fx360f'
-  },
-  {
-    assetId: '38192019489',
-    weapon: 'Glock-18',
-    skinName: 'Water Elemental',
-    fullName: 'Glock-18 | Water Elemental (Factory New)',
-    type: 'pistol',
-    rarity: 'classified',
-    wear: 'Factory New',
-    wearShort: 'FN',
-    floatValue: 0.035,
-    isStatTrak: false,
-    image: 'https://community.cloudflare.steamstatic.com/economy/image/i0CoZ81Ui0m-9KwlBY1L_18myuGuq1wfhWSaZgMttyVfPaERSR0Wqmu7LAocGIGz3UqlXOLrxM-vMGmW8VNxu5Dx60noTyLMj_f-sRhY4-C3bqi2I3mNfi2-DCjZz9g_5X64X0nC_m1qj-QW0dZdt2Gk23hXrnE8G8NlO5I=/360fx360f'
-  },
-  {
-    assetId: '38192019490',
-    weapon: 'Flip Knife',
-    skinName: 'Doppler',
-    fullName: '★ Flip Knife | Doppler (Factory New)',
-    type: 'knife',
-    rarity: 'extraordinary',
-    wear: 'Factory New',
-    wearShort: 'FN',
-    floatValue: 0.012,
-    isStatTrak: false,
-    image: 'https://community.cloudflare.steamstatic.com/economy/image/i0CoZ81Ui0m-9KwlBY1L_18myuGuq1wfhWSaZgMttyVfPaERSR0Wqmu7LAocGIGz3UqlXOLrxM-vMGmW8VNxu5Dx60noTyLMj_f-u1le5eC3ZK-wI3mNfi2-DCjZz9g_5X64X0nC_m1qj-QW0dZdt2Gk23hXrnE8G8NlO5I=/360fx360f'
-  },
-  {
-    assetId: '38192019491',
-    weapon: 'Sport Gloves',
-    skinName: 'Vice',
-    fullName: '★ Sport Gloves | Vice (Field-Tested)',
-    type: 'knife',
-    rarity: 'extraordinary',
-    wear: 'Field-Tested',
-    wearShort: 'FT',
-    floatValue: 0.285,
-    isStatTrak: false,
-    image: 'https://community.cloudflare.steamstatic.com/economy/image/i0CoZ81Ui0m-9KwlBY1L_18myuGuq1wfhWSaZgMttyVfPaERSR0Wqmu7LAocGIGz3UqlXOLrxM-vMGmW8VNxu5Dx60noTyLMj_f-sB5e5-G3bqi1IHmNfi2-DCjZz9g_5X64X0nC_m1qj-QW0dZdt2Gk23hXrnE8G8NlO5I=/360fx360f'
   }
 ];
 
@@ -336,6 +482,7 @@ export default async function handler(req, res) {
 
               // Accurate CS2 market price from live Skinport index
               const livePrice = getLivePrice(fullName, isKnife, rarityTag, isSticker, isCase);
+              const isOverstock = checkIsOverstock(fullName, livePrice);
 
               // Accurate item wear parsing
               const wearMatch = fullName.match(/\((Factory New|Minimal Wear|Field-Tested|Well-Worn|Battle-Scarred)\)/i);
@@ -369,6 +516,7 @@ export default async function handler(req, res) {
                 wearShort,
                 floatValue: 0.15,
                 isStatTrak: fullName.includes('StatTrak™'),
+                isOverstock,
                 marketPriceEur: livePrice,
                 bonusPercent: 0,
                 payoutEur: livePrice,
@@ -400,9 +548,11 @@ export default async function handler(req, res) {
   const enrichedCatalog = BASE_CATALOG.map((item, idx) => {
     const isKnife = item.type === 'knife';
     const livePrice = getLivePrice(item.fullName, isKnife, item.rarity, false, false);
+    const isOverstock = item.isOverstock !== undefined ? item.isOverstock : checkIsOverstock(item.fullName, livePrice);
     return {
       ...item,
       id: `inv-skin-${idx + 1}`,
+      isOverstock,
       marketPriceEur: livePrice,
       bonusPercent: 0,
       payoutEur: livePrice
