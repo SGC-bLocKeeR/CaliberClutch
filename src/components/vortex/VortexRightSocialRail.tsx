@@ -46,18 +46,26 @@ import { XsollaCheckoutModal } from './XsollaCheckoutModal';
 import { HellcasePayBySkinsModal } from './HellcasePayBySkinsModal';
 import { VortexWithdrawModal } from './VortexWithdrawModal';
 import { getVortexWalletBalance } from '../../services/skinDeliveryService';
+import {
+  RegisteredPlayer,
+  SocialFriend,
+  FriendRequest,
+  DMMessage,
+  PLATFORM_REGISTERED_PLAYERS,
+  registerPlatformPlayer,
+  searchRegisteredPlayers,
+  getUserFriends,
+  saveUserFriends,
+  getUserFriendRequests,
+  sendFriendRequest,
+  acceptFriendRequest,
+  declineFriendRequest,
+  removeFriend,
+  getDirectMessagesHistory,
+  appendDirectMessage
+} from '../../services/friendService';
 
-export interface SocialFriend {
-  id: string;
-  name: string;
-  avatar: string;
-  status: 'playing' | 'online' | 'offline';
-  gameStatus?: string;
-  hasPriority?: boolean;
-  code?: string;
-  countryName?: string;
-  verification?: 'vip' | 'verified' | 'none';
-}
+export type { SocialFriend };
 
 interface VortexRightSocialRailProps {
   currentGamerTag: string;
@@ -221,73 +229,75 @@ export const VortexRightSocialRail: React.FC<VortexRightSocialRailProps> = ({
   const dmFileInputRef = useRef<HTMLInputElement>(null);
   const dmEndRef = useRef<HTMLDivElement>(null);
 
-  // Exact 1:1 Direct Messages from User Reference Screenshot (uploaded_media_1794674870290.png)
-  const dmsList = [
-    {
-      id: 'dm-edd1',
-      name: 'edd1-',
-      avatar: '/avatars/edd1.png',
-      lastMessage: 'let me know when to send it',
-      date: '9 Nov',
-      verification: 'verified' as const,
-      code: 'XK',
-      countryName: 'Kosovo'
-    },
-    {
-      id: 'dm-blackbars1',
-      name: 'blackbars1',
-      avatar: 'https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?auto=format&fit=crop&w=150&q=80',
-      lastMessage: 'are you playing now?',
-      date: '9 Nov',
-      verification: 'none' as const,
-      code: 'AL',
-      countryName: 'Albania'
-    },
-    {
-      id: 'dm-toxi',
-      name: 'toxi---',
-      avatar: 'https://images.unsplash.com/photo-1570295999919-56ceb5ecca61?auto=format&fit=crop&w=150&q=80',
-      lastMessage: 'ready',
-      date: '31 Oct',
-      verification: 'none' as const,
-      code: 'XK',
-      countryName: 'Kosovo'
-    },
-    {
-      id: 'dm-n19',
-      name: 'N19',
-      avatar: 'https://images.unsplash.com/photo-1566492031773-4f4e44671857?auto=format&fit=crop&w=150&q=80',
-      badge: '★',
-      lastMessage: 'gg',
-      date: '24 Oct',
-      verification: 'vip' as const,
-      code: 'DE',
-      countryName: 'Germany'
-    },
-    {
-      id: 'dm-diva',
-      name: 'DIVA-',
-      avatar: 'https://images.unsplash.com/photo-1494790108377-be9c29b29330?auto=format&fit=crop&w=150&q=80',
-      badge: '★',
-      lastMessage: "let's queue up and win some games",
-      date: '18 Oct',
-      verification: 'vip' as const,
-      code: 'XK',
-      countryName: 'Kosovo'
-    },
-    {
-      id: 'dm-amatuero',
-      name: 'amatuero',
-      avatar: 'https://images.unsplash.com/photo-1579546929518-9e396f3cc809?auto=format&fit=crop&w=150&q=80',
-      lastMessage: 'OK',
-      date: '12 Apr',
-      verification: 'none' as const,
-      code: 'XK',
-      countryName: 'Kosovo'
-    }
-  ];
+  // Real-Time Friends, Requests & DMs State (Pure real-time, no fake demo profiles)
+  const [friendsList, setFriendsList] = useState<SocialFriend[]>(() => getUserFriends(currentGamerTag));
+  const [friendRequests, setFriendRequests] = useState<{ incoming: FriendRequest[]; outgoing: FriendRequest[] }>(() => getUserFriendRequests(currentGamerTag));
+  const [registeredPlayerSearch, setRegisteredPlayerSearch] = useState('');
+  const [socialToast, setSocialToast] = useState<string | null>(null);
 
-  // Exact 1:1 Conversation Stream from uploaded_media_1794675192796.png
+  // Register current user into the platform directory
+  useEffect(() => {
+    if (currentGamerTag) {
+      registerPlatformPlayer({
+        id: `u-${currentGamerTag.toLowerCase()}`,
+        gamerTag: currentGamerTag,
+        avatar: currentAvatarUrl || '/images/blockeerz_avatar.png',
+        level: 10,
+        elo: 1850,
+        verification: currentVerification || 'verified',
+        countryCode: currentCountry?.code || 'XK',
+        countryName: currentCountry?.name || 'Kosovo',
+        role: 'CS2 Competitor',
+        isRegistered: true
+      });
+    }
+  }, [currentGamerTag, currentAvatarUrl, currentVerification, currentCountry]);
+
+  // Real-time synchronization for friends, requests, and DMs
+  useEffect(() => {
+    const handleSync = () => {
+      setFriendsList(getUserFriends(currentGamerTag));
+      setFriendRequests(getUserFriendRequests(currentGamerTag));
+    };
+    const handleDms = () => {
+      if (activeDmUser) {
+        const history = getDirectMessagesHistory(currentGamerTag, activeDmUser.name);
+        setDmHistory(prev => ({
+          ...prev,
+          [activeDmUser.name]: history
+        }));
+      }
+      setFriendsList(getUserFriends(currentGamerTag));
+    };
+    window.addEventListener('vortex_friends_updated', handleSync);
+    window.addEventListener('vortex_friend_requests_updated', handleSync);
+    window.addEventListener('vortex_dms_updated', handleDms);
+    window.addEventListener('vortex_players_updated', handleSync);
+    return () => {
+      window.removeEventListener('vortex_friends_updated', handleSync);
+      window.removeEventListener('vortex_friend_requests_updated', handleSync);
+      window.removeEventListener('vortex_dms_updated', handleDms);
+      window.removeEventListener('vortex_players_updated', handleSync);
+    };
+  }, [currentGamerTag, activeDmUser]);
+
+  // Dynamic DMs list derived from real friends and DM histories
+  const dmsList = friendsList.map(friend => {
+    const history = getDirectMessagesHistory(currentGamerTag, friend.name);
+    const last = history.length > 0 ? history[history.length - 1] : null;
+    return {
+      id: `dm-${friend.id}`,
+      name: friend.name,
+      avatar: friend.avatar,
+      lastMessage: last?.text || (last?.imageUrl ? '📷 Image sent' : 'Click to start direct message...'),
+      date: last?.timestamp || 'Just now',
+      verification: friend.verification || 'verified' as const,
+      code: friend.code || 'XK',
+      countryName: friend.countryName || 'Kosovo',
+      badge: friend.hasPriority ? '★' : undefined
+    };
+  });
+
   const [dmHistory, setDmHistory] = useState<Record<string, Array<{
     id: string;
     sender: string;
@@ -295,59 +305,19 @@ export const VortexRightSocialRail: React.FC<VortexRightSocialRailProps> = ({
     text?: string;
     imageUrl?: string;
     timestamp: string;
-  }>>>({
-    'edd1-': [
-      {
-        id: '1',
-        sender: currentGamerTag,
-        avatar: currentAvatarUrl || '/images/blockeerz_avatar.png',
-        text: 'wait up bro\nif you start the match now I get banned',
-        timestamp: '09:27 pm'
-      },
-      {
-        id: '2',
-        sender: 'edd1-',
-        avatar: '/avatars/edd1.png',
-        text: 'hahaha no worries we will not start without you',
-        timestamp: '09:27 pm'
-      },
-      {
-        id: '3',
-        sender: currentGamerTag,
-        avatar: currentAvatarUrl || '/images/blockeerz_avatar.png',
-        text: 'ok\nwait',
-        timestamp: '09:28 pm'
-      },
-      {
-        id: '4',
-        sender: 'edd1-',
-        avatar: '/avatars/edd1.png',
-        text: 'ok\nlet me know when to send it',
-        timestamp: '09:28 pm'
-      }
-    ],
-    'blackbars1': [
-      { id: '1', sender: 'blackbars1', avatar: 'https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?auto=format&fit=crop&w=150&q=80', text: 'are you playing now?', timestamp: '09:05 pm' }
-    ],
-    'toxi---': [
-      { id: '1', sender: 'toxi---', avatar: 'https://images.unsplash.com/photo-1570295999919-56ceb5ecca61?auto=format&fit=crop&w=150&q=80', text: 'ready', timestamp: '02:12 pm' }
-    ],
-    'N19': [
-      { id: '1', sender: 'N19', avatar: 'https://images.unsplash.com/photo-1566492031773-4f4e44671857?auto=format&fit=crop&w=150&q=80', text: 'gg', timestamp: '11:40 pm' }
-    ],
-    'DIVA-': [
-      { id: '1', sender: 'DIVA-', avatar: 'https://images.unsplash.com/photo-1494790108377-be9c29b29330?auto=format&fit=crop&w=150&q=80', text: "let's queue up and win some games", timestamp: '07:15 pm' }
-    ],
-    'amatuero': [
-      { id: '1', sender: 'amatuero', avatar: 'https://images.unsplash.com/photo-1579546929518-9e396f3cc809?auto=format&fit=crop&w=150&q=80', text: 'OK', timestamp: '04:02 pm' }
-    ]
-  });
+  }>>>({});
 
+  // When active DM user changes or messages update, load thread history
   useEffect(() => {
     if (activeDmUser) {
+      const history = getDirectMessagesHistory(currentGamerTag, activeDmUser.name);
+      setDmHistory(prev => ({
+        ...prev,
+        [activeDmUser.name]: history
+      }));
       dmEndRef.current?.scrollIntoView({ behavior: 'smooth' });
     }
-  }, [activeDmUser, dmHistory]);
+  }, [activeDmUser, currentGamerTag]);
 
   const openChatWithUser = (user: {
     id: string;
@@ -370,19 +340,25 @@ export const VortexRightSocialRail: React.FC<VortexRightSocialRailProps> = ({
       code: user.code || currentCountry?.code || 'XK',
       countryName: user.countryName || currentCountry?.name || 'Kosovo'
     });
+    const history = getDirectMessagesHistory(currentGamerTag, user.name);
+    setDmHistory(prev => ({
+      ...prev,
+      [user.name]: history
+    }));
   };
 
   const handleSendDm = (e?: React.FormEvent) => {
     e?.preventDefault();
     if (!dmInput.trim() || !activeDmUser) return;
     sound.playClick();
-    const newMsg = {
+    const newMsg: DMMessage = {
       id: `dm-msg-${Date.now()}`,
       sender: currentGamerTag,
       avatar: currentAvatarUrl || '/images/blockeerz_avatar.png',
       text: dmInput.trim(),
       timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', hour12: true }).toLowerCase()
     };
+    appendDirectMessage(currentGamerTag, activeDmUser.name, newMsg);
     setDmHistory(prev => ({
       ...prev,
       [activeDmUser.name]: [...(prev[activeDmUser.name] || []), newMsg]
@@ -397,7 +373,7 @@ export const VortexRightSocialRail: React.FC<VortexRightSocialRailProps> = ({
     reader.onload = (event) => {
       const dataUrl = event.target?.result as string;
       if (!dataUrl) return;
-      const newMsg = {
+      const newMsg: DMMessage = {
         id: `dm-img-${Date.now()}`,
         sender: currentGamerTag,
         avatar: currentAvatarUrl || '/images/blockeerz_avatar.png',
@@ -405,6 +381,7 @@ export const VortexRightSocialRail: React.FC<VortexRightSocialRailProps> = ({
         imageUrl: dataUrl,
         timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', hour12: true }).toLowerCase()
       };
+      appendDirectMessage(currentGamerTag, activeDmUser.name, newMsg);
       setDmHistory(prev => ({
         ...prev,
         [activeDmUser.name]: [...(prev[activeDmUser.name] || []), newMsg]
@@ -416,130 +393,47 @@ export const VortexRightSocialRail: React.FC<VortexRightSocialRailProps> = ({
     e.target.value = '';
   };
 
-  // Exact 1:1 Friends List from User Reference Screenshot
-  const friendsList: SocialFriend[] = [
-    // Playing (1)
-    {
-      id: 'f-icy',
-      name: 'Icykilleer',
-      avatar: 'https://images.unsplash.com/photo-1566492031773-4f4e44671857?auto=format&fit=crop&w=150&q=80',
-      status: 'playing',
-      gameStatus: 'Playing • CS2 MM (12m 45s)',
-      verification: 'verified',
-      code: 'XK',
-      countryName: 'Kosovo'
-    },
-    // Online (5)
-    {
-      id: 'f-ama',
-      name: 'amatuero',
-      avatar: 'https://images.unsplash.com/photo-1579546929518-9e396f3cc809?auto=format&fit=crop&w=150&q=80',
-      status: 'online',
-      verification: 'none',
-      code: 'XK',
-      countryName: 'Kosovo'
-    },
-    {
-      id: 'f-black',
-      name: 'blackbars1',
-      avatar: 'https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?auto=format&fit=crop&w=150&q=80',
-      status: 'online',
-      verification: 'none',
-      code: 'AL',
-      countryName: 'Albania'
-    },
-    {
-      id: 'f-diva',
-      name: 'DIVA-',
-      avatar: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=150&q=80',
-      status: 'online',
-      hasPriority: true,
-      verification: 'vip',
-      code: 'XK',
-      countryName: 'Kosovo'
-    },
-    {
-      id: 'f-feim',
-      name: 'Feimmih',
-      avatar: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?auto=format&fit=crop&w=150&q=80',
-      status: 'online',
-      hasPriority: true,
-      verification: 'vip',
-      code: 'XK',
-      countryName: 'Kosovo'
-    },
-    {
-      id: 'f-ndyw',
-      name: 'ndyw',
-      avatar: 'https://images.unsplash.com/photo-1500648767791-00dcc994a43e?auto=format&fit=crop&w=150&q=80',
-      status: 'online',
-      hasPriority: true,
-      verification: 'vip',
-      code: 'XK',
-      countryName: 'Kosovo'
-    },
-    // Offline (49)
-    {
-      id: 'f-edd1',
-      name: 'edd1-',
-      avatar: '/avatars/edd1.png',
-      status: 'offline',
-      verification: 'verified',
-      code: 'XK',
-      countryName: 'Kosovo'
-    },
-    {
-      id: 'f-rud',
-      name: 'RudeusX',
-      avatar: 'https://images.unsplash.com/photo-1517841905240-472988babdf9?auto=format&fit=crop&w=150&q=80',
-      status: 'offline',
-      verification: 'none',
-      code: 'XK',
-      countryName: 'Kosovo'
-    },
-    {
-      id: 'f-dion',
-      name: 'dionitt2h-',
-      avatar: 'https://images.unsplash.com/photo-1506794778202-cad84cf45f1d?auto=format&fit=crop&w=150&q=80',
-      status: 'offline'
-    },
-    {
-      id: 'f-zoz',
-      name: 'Zozio',
-      avatar: 'https://images.unsplash.com/photo-1494790108377-be9c29b29330?auto=format&fit=crop&w=150&q=80',
-      status: 'offline'
-    },
-    {
-      id: 'f-ork',
-      name: 'orkzz',
-      avatar: 'https://images.unsplash.com/photo-1501196354995-cbb51c65aaea?auto=format&fit=crop&w=150&q=80',
-      status: 'offline'
-    },
-    {
-      id: 'f-shush',
-      name: 'ShushALKO6',
-      avatar: 'https://images.unsplash.com/photo-1519085360753-af0119f7cbe7?auto=format&fit=crop&w=150&q=80',
-      status: 'offline'
-    },
-    {
-      id: 'f-qlira',
-      name: 'QliraZ',
-      avatar: 'https://images.unsplash.com/photo-1524504388940-b1c1722653e1?auto=format&fit=crop&w=150&q=80',
-      status: 'offline'
-    },
-    {
-      id: 'f-nissa',
-      name: 'nissaS',
-      avatar: 'https://images.unsplash.com/photo-1517841905240-472988babdf9?auto=format&fit=crop&w=150&q=80',
-      status: 'offline'
-    },
-    {
-      id: 'f-ana',
-      name: 'Anastassiaa-',
-      avatar: 'https://images.unsplash.com/photo-1494790108377-be9c29b29330?auto=format&fit=crop&w=150&q=80',
-      status: 'offline'
-    }
-  ];
+  const handleSendFriendRequest = (player: RegisteredPlayer) => {
+    sound.playSelect();
+    sendFriendRequest(
+      {
+        gamerTag: currentGamerTag,
+        avatar: currentAvatarUrl,
+        verification: currentVerification,
+        countryCode: currentCountry?.code,
+        countryName: currentCountry?.name
+      },
+      player
+    );
+    setSocialToast(`Friend request sent to ${player.gamerTag}!`);
+    setTimeout(() => setSocialToast(null), 3000);
+  };
+
+  const handleAcceptRequest = (req: FriendRequest) => {
+    sound.playQuestClaim();
+    acceptFriendRequest(currentGamerTag, req.id, {
+      avatar: currentAvatarUrl,
+      verification: currentVerification,
+      countryCode: currentCountry?.code,
+      countryName: currentCountry?.name,
+      level: 10,
+      elo: 1850
+    });
+    setSocialToast(`You and ${req.fromGamerTag} are now friends!`);
+    setTimeout(() => setSocialToast(null), 3000);
+  };
+
+  const handleDeclineRequest = (reqId: string) => {
+    sound.playClick();
+    declineFriendRequest(currentGamerTag, reqId);
+  };
+
+  const handleRemoveFriend = (friendId: string, friendName: string) => {
+    sound.playClick();
+    removeFriend(currentGamerTag, friendId);
+    setSocialToast(`Removed ${friendName} from friends.`);
+    setTimeout(() => setSocialToast(null), 3000);
+  };
 
   const handleSendPartyMessage = (e?: React.FormEvent) => {
     e?.preventDefault();
@@ -763,7 +657,10 @@ export const VortexRightSocialRail: React.FC<VortexRightSocialRailProps> = ({
               </div>
               <span className="px-2 py-0.5 rounded-full bg-emerald-400/20 text-emerald-400 border border-emerald-400/30 font-mono font-black text-[10px] flex items-center gap-1">
                 <span className="w-1.5 h-1.5 rounded-full bg-emerald-400" />
-                6 Online
+                {onlineFriends.length + playingFriends.length > 0 
+                  ? `${onlineFriends.length + playingFriends.length} Online`
+                  : `${friendsList.length} Friends`
+                }
               </span>
             </button>
           </div>
@@ -1203,59 +1100,304 @@ export const VortexRightSocialRail: React.FC<VortexRightSocialRailProps> = ({
                 {/* 1. FRIENDS LIST SUB-TAB */}
                 {socialSubTab === 'friends' && (
                   <div className="flex-1 overflow-y-auto p-3 space-y-4">
-                    
-                    {/* Playing Section */}
-                    {playingFriends.length > 0 && (
-                      <div>
-                        <div className="text-[11px] font-mono font-bold text-slate-400 mb-2 px-1 flex items-center justify-between">
-                          <span>Playing • {playingFriends.length}</span>
-                        </div>
-                        <div className="space-y-1">
-                          {playingFriends.map(friend => (
-                            <div 
-                              key={friend.id}
-                              onClick={() => openChatWithUser(friend)}
-                              className="p-2 rounded-xl hover:bg-white/[0.04] transition flex items-center justify-between gap-2.5 cursor-pointer group relative"
-                            >
-                              <div className="flex items-center gap-2.5 min-w-0">
-                                <div className="relative w-8 h-8 shrink-0">
-                                  <img src={friend.avatar} alt={friend.name} className="w-full h-full rounded-full object-cover border border-white/10" />
-                                  <span className="absolute bottom-0 right-0 w-2.5 h-2.5 rounded-full bg-[#A3E635] border-2 border-[#0B0D13]" />
-                                </div>
-                                <div className="min-w-0">
-                                  <div className="text-xs font-bold text-white group-hover:text-[#A3E635] transition truncate">{friend.name}</div>
-                                  <div className="text-[10px] text-slate-400 font-mono truncate">{friend.gameStatus}</div>
-                                </div>
-                              </div>
+                    {socialToast && (
+                      <div className="p-2.5 rounded-xl bg-[#A3E635]/15 border border-[#A3E635]/30 text-[#A3E635] text-xs font-mono font-bold flex items-center gap-2 animate-in fade-in">
+                        <CheckCircle2 className="w-4 h-4 shrink-0" />
+                        <span>{socialToast}</span>
+                      </div>
+                    )}
 
-                              {/* Hover Action Buttons: Open Chat & Invite */}
-                              <div className="opacity-0 group-hover:opacity-100 transition-opacity flex items-center gap-1 shrink-0">
-                                <div className="relative group/chat">
-                                  <button
-                                    onClick={(e) => {
-                                      e.stopPropagation();
-                                      openChatWithUser(friend);
-                                    }}
-                                    className="p-1.5 rounded-lg bg-white/10 hover:bg-white/20 text-slate-200 hover:text-white transition cursor-pointer"
-                                    title="Open chat"
-                                  >
-                                    <MessageSquare className="w-4 h-4" />
-                                  </button>
-                                  <div className="absolute right-0 bottom-full mb-1.5 px-2 py-0.5 rounded bg-[#12141C] border border-[#222533] text-white text-[10px] font-mono font-bold shadow-xl pointer-events-none opacity-0 group-hover/chat:opacity-100 transition whitespace-nowrap z-50">
-                                    Open chat
+                    {friendsList.length === 0 ? (
+                      /* Zero Demo Friends - Real Platform Empty State */
+                      <div className="h-full min-h-[320px] flex flex-col items-center justify-center p-6 text-center space-y-3 select-none">
+                        <div className="w-14 h-14 rounded-2xl bg-[#121520] border border-[#222838] flex items-center justify-center text-slate-500 shadow-inner">
+                          <Users className="w-7 h-7 text-slate-400" />
+                        </div>
+                        <div className="text-sm font-mono font-black text-slate-200">No Friends Added Yet</div>
+                        <p className="text-xs text-slate-400 max-w-[240px] leading-relaxed">
+                          Only registered players on VORTEX appear here. Find players and send friend requests to play together!
+                        </p>
+                        <button
+                          onClick={() => {
+                            sound.playClick();
+                            setSocialSubTab('requests');
+                          }}
+                          className="mt-2 px-4 py-2 rounded-xl bg-[#A3E635] hover:bg-[#86efac] text-slate-950 font-mono text-xs font-black transition cursor-pointer flex items-center gap-2 shadow-[0_0_15px_rgba(163,230,53,0.3)] active:scale-95"
+                        >
+                          <UserPlus className="w-4 h-4" />
+                          <span>Search & Add Friends</span>
+                        </button>
+                      </div>
+                    ) : filteredFriends.length === 0 ? (
+                      <div className="p-6 text-center text-slate-500 text-xs font-mono">
+                        No friends found matching "{socialSearch}"
+                      </div>
+                    ) : (
+                      <>
+                        {/* Playing Section */}
+                        {playingFriends.length > 0 && (
+                          <div>
+                            <div className="text-[11px] font-mono font-bold text-slate-400 mb-2 px-1 flex items-center justify-between">
+                              <span>Playing • {playingFriends.length}</span>
+                            </div>
+                            <div className="space-y-1">
+                              {playingFriends.map(friend => (
+                                <div 
+                                  key={friend.id}
+                                  onClick={() => openChatWithUser(friend)}
+                                  className="p-2 rounded-xl hover:bg-white/[0.04] transition flex items-center justify-between gap-2.5 cursor-pointer group relative"
+                                >
+                                  <div className="flex items-center gap-2.5 min-w-0">
+                                    <div className="relative w-8 h-8 shrink-0">
+                                      <img src={friend.avatar} alt={friend.name} className="w-full h-full rounded-full object-cover border border-white/10" />
+                                      <span className="absolute bottom-0 right-0 w-2.5 h-2.5 rounded-full bg-[#A3E635] border-2 border-[#0B0D13]" />
+                                    </div>
+                                    <div className="min-w-0">
+                                      <div className="flex items-center gap-1.5">
+                                        <span className="text-xs font-bold text-white group-hover:text-[#A3E635] transition truncate">{friend.name}</span>
+                                        <CountryFlag code={friend.code || 'XK'} name={friend.countryName || 'Kosovo'} size="xs" />
+                                      </div>
+                                      <div className="text-[10px] text-slate-400 font-mono truncate">{friend.gameStatus}</div>
+                                    </div>
+                                  </div>
+
+                                  {/* Hover Action Buttons */}
+                                  <div className="opacity-0 group-hover:opacity-100 transition-opacity flex items-center gap-1 shrink-0">
+                                    <button
+                                      onClick={(e) => {
+                                        e.stopPropagation();
+                                        openChatWithUser(friend);
+                                      }}
+                                      className="p-1.5 rounded-lg bg-white/10 hover:bg-white/20 text-slate-200 hover:text-white transition cursor-pointer"
+                                      title="Open chat"
+                                    >
+                                      <MessageSquare className="w-4 h-4" />
+                                    </button>
+                                    <button
+                                      onClick={(e) => {
+                                        e.stopPropagation();
+                                        sound.playClick();
+                                        onOpenInviteModal?.();
+                                      }}
+                                      className="p-1.5 rounded-lg hover:bg-white/10 text-slate-400 hover:text-white transition cursor-pointer"
+                                      title="Invite to party"
+                                    >
+                                      <Plus className="w-4 h-4" />
+                                    </button>
                                   </div>
                                 </div>
+                              ))}
+                            </div>
+                          </div>
+                        )}
 
-                                <button
-                                  onClick={(e) => {
-                                    e.stopPropagation();
-                                    sound.playClick();
-                                    onOpenInviteModal?.();
-                                  }}
-                                  className="p-1.5 rounded-lg hover:bg-white/10 text-slate-400 hover:text-white transition cursor-pointer"
-                                  title="Invite to party"
+                        {/* Online Section */}
+                        {onlineFriends.length > 0 && (
+                          <div>
+                            <div className="text-[11px] font-mono font-bold text-slate-400 mb-2 px-1 flex items-center justify-between">
+                              <span>Online • {onlineFriends.length}</span>
+                            </div>
+                            <div className="space-y-1">
+                              {onlineFriends.map(friend => (
+                                <div 
+                                  key={friend.id}
+                                  onClick={() => openChatWithUser(friend)}
+                                  className="p-2 rounded-xl hover:bg-white/[0.04] transition flex items-center justify-between gap-2.5 cursor-pointer group relative"
                                 >
-                                  <Plus className="w-4 h-4" />
+                                  <div className="flex items-center gap-2.5 min-w-0">
+                                    <div className="relative w-8 h-8 shrink-0">
+                                      <img src={friend.avatar} alt={friend.name} className="w-full h-full rounded-full object-cover border border-white/10" />
+                                      <span className="absolute bottom-0 right-0 w-2.5 h-2.5 rounded-full bg-emerald-400 border-2 border-[#0B0D13]" />
+                                    </div>
+                                    <div className="flex items-center gap-1.5 truncate">
+                                      <span className="text-xs font-bold text-white group-hover:text-[#A3E635] transition truncate">{friend.name}</span>
+                                      <CountryFlag code={friend.code || 'XK'} name={friend.countryName || 'Kosovo'} size="xs" />
+                                      {friend.hasPriority && (
+                                        <span className="w-3.5 h-3.5 rounded bg-[#A3E635] text-black text-[8px] font-black flex items-center justify-center">★</span>
+                                      )}
+                                    </div>
+                                  </div>
+
+                                  {/* Hover Action Buttons */}
+                                  <div className="opacity-0 group-hover:opacity-100 transition-opacity flex items-center gap-1 shrink-0">
+                                    <button
+                                      onClick={(e) => {
+                                        e.stopPropagation();
+                                        openChatWithUser(friend);
+                                      }}
+                                      className="p-1.5 rounded-lg bg-white/10 hover:bg-white/20 text-slate-200 hover:text-white transition cursor-pointer"
+                                      title="Open chat"
+                                    >
+                                      <MessageSquare className="w-4 h-4" />
+                                    </button>
+                                    <button
+                                      onClick={(e) => {
+                                        e.stopPropagation();
+                                        sound.playClick();
+                                        onOpenInviteModal?.();
+                                      }}
+                                      className="p-1.5 rounded-lg hover:bg-white/10 text-slate-400 hover:text-white transition cursor-pointer"
+                                      title="Invite to party"
+                                    >
+                                      <Plus className="w-4 h-4" />
+                                    </button>
+                                    <button
+                                      onClick={(e) => {
+                                        e.stopPropagation();
+                                        handleRemoveFriend(friend.id, friend.name);
+                                      }}
+                                      className="p-1.5 rounded-lg hover:bg-red-500/20 text-slate-500 hover:text-red-400 transition cursor-pointer"
+                                      title="Remove friend"
+                                    >
+                                      <X className="w-3.5 h-3.5" />
+                                    </button>
+                                  </div>
+                                </div>
+                              ))}
+                            </div>
+                          </div>
+                        )}
+
+                        {/* Offline Section */}
+                        {offlineFriends.length > 0 && (
+                          <div>
+                            <div className="text-[11px] font-mono font-bold text-slate-500 mb-2 px-1 flex items-center justify-between">
+                              <span>Offline • {offlineFriends.length}</span>
+                            </div>
+                            <div className="space-y-1">
+                              {offlineFriends.map(friend => (
+                                <div 
+                                  key={friend.id}
+                                  onClick={() => openChatWithUser(friend)}
+                                  className="p-2 rounded-xl hover:bg-white/[0.03] transition flex items-center justify-between gap-2.5 cursor-pointer opacity-70 hover:opacity-100 group relative"
+                                >
+                                  <div className="flex items-center gap-2.5 min-w-0">
+                                    <div className="relative w-8 h-8 shrink-0">
+                                      <img src={friend.avatar} alt={friend.name} className="w-full h-full rounded-full object-cover border border-white/10 grayscale" />
+                                      <span className="absolute bottom-0 right-0 w-2.5 h-2.5 rounded-full bg-slate-600 border-2 border-[#0B0D13]" />
+                                    </div>
+                                    <div className="flex items-center gap-1.5 truncate">
+                                      <span className="text-xs font-semibold text-slate-400 group-hover:text-white transition truncate">{friend.name}</span>
+                                      <CountryFlag code={friend.code || 'XK'} name={friend.countryName || 'Kosovo'} size="xs" />
+                                    </div>
+                                  </div>
+
+                                  {/* Hover Action Buttons */}
+                                  <div className="opacity-0 group-hover:opacity-100 transition-opacity flex items-center gap-1 shrink-0">
+                                    <button
+                                      onClick={(e) => {
+                                        e.stopPropagation();
+                                        openChatWithUser(friend);
+                                      }}
+                                      className="p-1.5 rounded-lg bg-white/10 hover:bg-white/20 text-slate-200 hover:text-white transition cursor-pointer"
+                                      title="Open chat"
+                                    >
+                                      <MessageSquare className="w-4 h-4" />
+                                    </button>
+                                  </div>
+                                </div>
+                              ))}
+                            </div>
+                          </div>
+                        )}
+                      </>
+                    )}
+
+                  </div>
+                )}
+
+                {/* 2. DIRECT MESSAGES SUB-TAB */}
+                {socialSubTab === 'dms' && (
+                  <div className="flex-1 overflow-y-auto p-2 space-y-1">
+                    {dmsList.length === 0 ? (
+                      <div className="h-full min-h-[300px] flex flex-col items-center justify-center p-6 text-center space-y-3 select-none">
+                        <div className="w-14 h-14 rounded-2xl bg-[#121520] border border-[#222838] flex items-center justify-center text-slate-500 shadow-inner">
+                          <MessageSquare className="w-7 h-7 text-slate-400" />
+                        </div>
+                        <div className="text-sm font-mono font-black text-slate-200">No Messages Yet</div>
+                        <p className="text-xs text-slate-400 max-w-[230px] leading-relaxed">
+                          Your conversations will appear here once you message a friend or teammate on VORTEX.
+                        </p>
+                      </div>
+                    ) : (
+                      dmsList
+                        .filter(dm => dm.name.toLowerCase().includes(socialSearch.toLowerCase()))
+                        .map(dm => (
+                          <div
+                            key={dm.id}
+                            onClick={() => openChatWithUser(dm)}
+                            className="p-2.5 rounded-xl hover:bg-white/[0.05] transition flex items-center justify-between gap-3 cursor-pointer group"
+                          >
+                            <div className="flex items-center gap-2.5 min-w-0">
+                              <div className="relative w-9 h-9 shrink-0">
+                                <img src={dm.avatar} alt={dm.name} className="w-full h-full rounded-full object-cover border border-white/10" />
+                              </div>
+                              <div className="min-w-0">
+                                <div className="flex items-center gap-1.5">
+                                  <span className="text-xs font-bold text-white group-hover:text-[#A3E635] transition truncate">{dm.name}</span>
+                                  <CountryFlag code={dm.code || 'XK'} name={dm.countryName || 'Kosovo'} size="xs" />
+                                  {dm.badge && (
+                                    <span className="w-3.5 h-3.5 rounded bg-[#A3E635] text-black text-[8px] font-black flex items-center justify-center">
+                                      {dm.badge}
+                                    </span>
+                                  )}
+                                </div>
+                                <div className="text-[11px] text-slate-400 font-sans truncate">{dm.lastMessage}</div>
+                              </div>
+                            </div>
+                            <span className="text-[10px] font-mono text-slate-500 shrink-0">{dm.date}</span>
+                          </div>
+                        ))
+                    )}
+                  </div>
+                )}
+
+                {/* 3. FRIEND REQUESTS & REGISTERED PLAYERS DIRECTORY */}
+                {socialSubTab === 'requests' && (
+                  <div className="flex-1 overflow-y-auto p-3 space-y-4">
+                    {socialToast && (
+                      <div className="p-2.5 rounded-xl bg-[#A3E635]/15 border border-[#A3E635]/30 text-[#A3E635] text-xs font-mono font-bold flex items-center gap-2 animate-in fade-in">
+                        <CheckCircle2 className="w-4 h-4 shrink-0" />
+                        <span>{socialToast}</span>
+                      </div>
+                    )}
+
+                    {/* Pending Incoming Friend Requests */}
+                    {friendRequests.incoming.length > 0 && (
+                      <div className="space-y-2">
+                        <div className="text-[11px] font-mono font-bold text-[#A3E635] px-1 flex items-center justify-between">
+                          <span>Incoming Requests ({friendRequests.incoming.length})</span>
+                        </div>
+                        <div className="space-y-1.5">
+                          {friendRequests.incoming.map(req => (
+                            <div 
+                              key={req.id} 
+                              className="p-2.5 rounded-xl bg-[#121520] border border-[#222838] flex items-center justify-between gap-2"
+                            >
+                              <div className="flex items-center gap-2.5 min-w-0">
+                                <img src={req.fromAvatar} alt={req.fromGamerTag} className="w-8 h-8 rounded-full object-cover border border-white/10 shrink-0" />
+                                <div className="min-w-0">
+                                  <div className="flex items-center gap-1.5">
+                                    <span className="text-xs font-bold text-white truncate">{req.fromGamerTag}</span>
+                                    <CountryFlag code={req.fromCountryCode} name={req.fromCountryName} size="xs" />
+                                  </div>
+                                  <div className="text-[10px] font-mono text-slate-400">Level {req.fromLevel} • {req.fromElo} ELO</div>
+                                </div>
+                              </div>
+                              <div className="flex items-center gap-1.5 shrink-0">
+                                <button
+                                  onClick={() => handleAcceptRequest(req)}
+                                  className="px-2 py-1 rounded-lg bg-[#A3E635] hover:bg-[#86efac] text-slate-950 font-mono font-black text-[10px] transition cursor-pointer active:scale-95"
+                                  title="Accept"
+                                >
+                                  Accept
+                                </button>
+                                <button
+                                  onClick={() => handleDeclineRequest(req.id)}
+                                  className="px-2 py-1 rounded-lg bg-white/10 hover:bg-white/20 text-slate-300 font-mono font-bold text-[10px] transition cursor-pointer"
+                                  title="Decline"
+                                >
+                                  Decline
                                 </button>
                               </div>
                             </div>
@@ -1264,151 +1406,99 @@ export const VortexRightSocialRail: React.FC<VortexRightSocialRailProps> = ({
                       </div>
                     )}
 
-                    {/* Online Section */}
-                    <div>
-                      <div className="text-[11px] font-mono font-bold text-slate-400 mb-2 px-1 flex items-center justify-between">
-                        <span>Online • {onlineFriends.length}</span>
-                      </div>
-                      <div className="space-y-1">
-                        {onlineFriends.map(friend => (
-                          <div 
-                            key={friend.id}
-                            onClick={() => openChatWithUser(friend)}
-                            className="p-2 rounded-xl hover:bg-white/[0.04] transition flex items-center justify-between gap-2.5 cursor-pointer group relative"
-                          >
-                            <div className="flex items-center gap-2.5 min-w-0">
-                              <div className="relative w-8 h-8 shrink-0">
-                                <img src={friend.avatar} alt={friend.name} className="w-full h-full rounded-full object-cover border border-white/10" />
-                                <span className="absolute bottom-0 right-0 w-2.5 h-2.5 rounded-full bg-emerald-400 border-2 border-[#0B0D13]" />
-                              </div>
-                              <div className="flex items-center gap-1.5 truncate">
-                                <span className="text-xs font-bold text-white group-hover:text-[#A3E635] transition truncate">{friend.name}</span>
-                                {friend.hasPriority && (
-                                  <span className="w-3.5 h-3.5 rounded bg-[#A3E635] text-black text-[8px] font-black flex items-center justify-center">★</span>
-                                )}
-                              </div>
-                            </div>
-
-                            {/* Hover Action Buttons: Open Chat & Invite */}
-                            <div className="opacity-0 group-hover:opacity-100 transition-opacity flex items-center gap-1 shrink-0">
-                              <div className="relative group/chat">
-                                <button
-                                  onClick={(e) => {
-                                    e.stopPropagation();
-                                    openChatWithUser(friend);
-                                  }}
-                                  className="p-1.5 rounded-lg bg-white/10 hover:bg-white/20 text-slate-200 hover:text-white transition cursor-pointer"
-                                  title="Open chat"
-                                >
-                                  <MessageSquare className="w-4 h-4" />
-                                </button>
-                                <div className="absolute right-0 bottom-full mb-1.5 px-2 py-0.5 rounded bg-[#12141C] border border-[#222533] text-white text-[10px] font-mono font-bold shadow-xl pointer-events-none opacity-0 group-hover/chat:opacity-100 transition whitespace-nowrap z-50">
-                                  Open chat
-                                </div>
-                              </div>
-
-                              <button
-                                onClick={(e) => {
-                                  e.stopPropagation();
-                                  sound.playClick();
-                                  onOpenInviteModal?.();
-                                }}
-                                className="p-1.5 rounded-lg hover:bg-white/10 text-slate-400 hover:text-white transition cursor-pointer"
-                                title="Invite to party"
-                              >
-                                <Plus className="w-4 h-4" />
-                              </button>
-                            </div>
-                          </div>
-                        ))}
-                      </div>
-                    </div>
-
-                    {/* Offline Section */}
-                    <div>
-                      <div className="text-[11px] font-mono font-bold text-slate-500 mb-2 px-1 flex items-center justify-between">
-                        <span>Offline • {offlineFriends.length}</span>
-                      </div>
-                      <div className="space-y-1">
-                        {offlineFriends.map(friend => (
-                          <div 
-                            key={friend.id}
-                            onClick={() => openChatWithUser(friend)}
-                            className="p-2 rounded-xl hover:bg-white/[0.03] transition flex items-center justify-between gap-2.5 cursor-pointer opacity-70 hover:opacity-100 group relative"
-                          >
-                            <div className="flex items-center gap-2.5 min-w-0">
-                              <div className="relative w-8 h-8 shrink-0">
-                                <img src={friend.avatar} alt={friend.name} className="w-full h-full rounded-full object-cover border border-white/10 grayscale" />
-                                <span className="absolute bottom-0 right-0 w-2.5 h-2.5 rounded-full bg-slate-600 border-2 border-[#0B0D13]" />
-                              </div>
-                              <span className="text-xs font-semibold text-slate-400 group-hover:text-white transition truncate">{friend.name}</span>
-                            </div>
-
-                            {/* Hover Action Buttons */}
-                            <div className="opacity-0 group-hover:opacity-100 transition-opacity flex items-center gap-1 shrink-0">
-                              <div className="relative group/chat">
-                                <button
-                                  onClick={(e) => {
-                                    e.stopPropagation();
-                                    openChatWithUser(friend);
-                                  }}
-                                  className="p-1.5 rounded-lg bg-white/10 hover:bg-white/20 text-slate-200 hover:text-white transition cursor-pointer"
-                                  title="Open chat"
-                                >
-                                  <MessageSquare className="w-4 h-4" />
-                                </button>
-                                <div className="absolute right-0 bottom-full mb-1.5 px-2 py-0.5 rounded bg-[#12141C] border border-[#222533] text-white text-[10px] font-mono font-bold shadow-xl pointer-events-none opacity-0 group-hover/chat:opacity-100 transition whitespace-nowrap z-50">
-                                  Open chat
-                                </div>
-                              </div>
-                            </div>
-                          </div>
-                        ))}
-                      </div>
-                    </div>
-
-                  </div>
-                )}
-
-                {/* 2. DIRECT MESSAGES SUB-TAB (LIST VIEW - EXACT MATCH TO uploaded_media_1794674870290.png) */}
-                {socialSubTab === 'dms' && (
-                  <div className="flex-1 overflow-y-auto p-2 space-y-1">
-                    {dmsList
-                      .filter(dm => dm.name.toLowerCase().includes(socialSearch.toLowerCase()))
-                      .map(dm => (
-                        <div
-                          key={dm.id}
-                          onClick={() => openChatWithUser(dm)}
-                          className="p-2.5 rounded-xl hover:bg-white/[0.05] transition flex items-center justify-between gap-3 cursor-pointer group"
-                        >
-                          <div className="flex items-center gap-2.5 min-w-0">
-                            <div className="relative w-9 h-9 shrink-0">
-                              <img src={dm.avatar} alt={dm.name} className="w-full h-full rounded-full object-cover border border-white/10" />
-                            </div>
-                            <div className="min-w-0">
-                              <div className="flex items-center gap-1.5">
-                                <span className="text-xs font-bold text-white group-hover:text-[#A3E635] transition truncate">{dm.name}</span>
-                                {dm.badge && (
-                                  <span className="w-3.5 h-3.5 rounded bg-[#A3E635] text-black text-[8px] font-black flex items-center justify-center">
-                                    {dm.badge}
-                                  </span>
-                                )}
-                              </div>
-                              <div className="text-[11px] text-slate-400 font-sans truncate">{dm.lastMessage}</div>
-                            </div>
-                          </div>
-                          <span className="text-[10px] font-mono text-slate-500 shrink-0">{dm.date}</span>
+                    {/* Pending Outgoing Requests */}
+                    {friendRequests.outgoing.length > 0 && (
+                      <div className="space-y-1.5">
+                        <div className="text-[11px] font-mono font-bold text-amber-400/90 px-1">
+                          Outgoing Pending ({friendRequests.outgoing.length})
                         </div>
-                      ))}
-                  </div>
-                )}
+                        {friendRequests.outgoing.map(req => (
+                          <div key={req.id} className="p-2 rounded-xl bg-white/[0.03] border border-white/5 flex items-center justify-between text-xs">
+                            <span className="font-bold text-slate-300 truncate">{req.toGamerTag}</span>
+                            <span className="text-[10px] font-mono text-amber-400 bg-amber-500/10 border border-amber-500/20 px-2 py-0.5 rounded">
+                              Pending ⏳
+                            </span>
+                          </div>
+                        ))}
+                      </div>
+                    )}
 
-                {/* 3. FRIEND REQUESTS SUB-TAB */}
-                {socialSubTab === 'requests' && (
-                  <div className="flex-1 p-6 flex flex-col items-center justify-center text-center space-y-3 text-slate-400">
-                    <UserPlus className="w-10 h-10 text-slate-600" />
-                    <div className="text-xs font-mono font-bold text-slate-300">No Pending Requests</div>
-                    <p className="text-[11px] text-slate-500 max-w-[200px]">When other players add you on Vortex, their friend requests will appear here.</p>
+                    {/* Registered Players Discovery Header & Search */}
+                    <div className="space-y-2 pt-2 border-t border-[#181B26]">
+                      <div className="px-1 flex items-center justify-between">
+                        <span className="text-[11px] font-mono font-bold text-slate-300">
+                          Registered Players on VORTEX
+                        </span>
+                        <span className="text-[10px] font-mono text-emerald-400 bg-emerald-500/10 border border-emerald-500/20 px-1.5 py-0.5 rounded">
+                          REAL-TIME
+                        </span>
+                      </div>
+
+                      <div className="relative">
+                        <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-slate-500" />
+                        <input
+                          type="text"
+                          value={registeredPlayerSearch}
+                          onChange={(e) => setRegisteredPlayerSearch(e.target.value)}
+                          placeholder="Search players by gamerTag, role or country..."
+                          className="w-full h-8 pl-8 pr-3 rounded-lg bg-[#0F1118] border border-[#202535] text-xs text-white placeholder-slate-500 focus:outline-none focus:border-[#A3E635]/60 transition font-sans"
+                        />
+                      </div>
+
+                      {/* Players List */}
+                      <div className="space-y-1.5 pt-1">
+                        {searchRegisteredPlayers(registeredPlayerSearch, currentGamerTag).map(player => {
+                          const isAlreadyFriend = friendsList.some(f => f.name.toLowerCase() === player.gamerTag.toLowerCase());
+                          const isPendingOutgoing = friendRequests.outgoing.some(r => r.toGamerTag.toLowerCase() === player.gamerTag.toLowerCase());
+
+                          return (
+                            <div 
+                              key={player.id}
+                              className="p-2.5 rounded-xl bg-[#11131C] hover:bg-[#141722] border border-[#1E2333] transition flex items-center justify-between gap-2.5"
+                            >
+                              <div className="flex items-center gap-2.5 min-w-0">
+                                <div className="relative w-8 h-8 shrink-0">
+                                  <img src={player.avatar} alt={player.gamerTag} className="w-full h-full rounded-full object-cover border border-white/10" />
+                                  <span className="absolute bottom-0 right-0 w-2 h-2 rounded-full bg-emerald-400 border border-[#0B0D13]" />
+                                </div>
+                                <div className="min-w-0">
+                                  <div className="flex items-center gap-1.5">
+                                    <span className="text-xs font-bold text-white truncate">{player.gamerTag}</span>
+                                    <CountryFlag code={player.countryCode} name={player.countryName} size="xs" />
+                                  </div>
+                                  <div className="text-[10px] text-slate-400 font-mono truncate">
+                                    {player.role} • {player.elo} ELO
+                                  </div>
+                                </div>
+                              </div>
+
+                              <div className="shrink-0">
+                                {isAlreadyFriend ? (
+                                  <span className="px-2 py-1 rounded-lg bg-[#A3E635]/15 border border-[#A3E635]/30 text-[#A3E635] font-mono text-[10px] font-bold flex items-center gap-1">
+                                    <Check className="w-3 h-3" /> Friends
+                                  </span>
+                                ) : isPendingOutgoing ? (
+                                  <span className="px-2 py-1 rounded-lg bg-amber-500/15 border border-amber-500/30 text-amber-400 font-mono text-[10px] font-bold">
+                                    Pending ⏳
+                                  </span>
+                                ) : (
+                                  <button
+                                    onClick={() => handleSendFriendRequest(player)}
+                                    className="px-2.5 py-1 rounded-lg bg-[#A3E635] hover:bg-[#86efac] text-slate-950 font-mono font-black text-[10px] transition cursor-pointer flex items-center gap-1 active:scale-95 shadow-[0_0_10px_rgba(163,230,53,0.2)]"
+                                    title={`Send friend request to ${player.gamerTag}`}
+                                  >
+                                    <UserPlus className="w-3 h-3" />
+                                    <span>Add</span>
+                                  </button>
+                                )}
+                              </div>
+                            </div>
+                          );
+                        })}
+                      </div>
+
+                    </div>
+
                   </div>
                 )}
               </>
@@ -1418,7 +1508,6 @@ export const VortexRightSocialRail: React.FC<VortexRightSocialRailProps> = ({
         </>
       )}
 
-      {/* ======================================================== */}
       {/* 2.5 SLIDING DRAWER: NOTIFICATIONS (1:1 FACEIT DRAWER)      */}
       {/* ======================================================== */}
       {activeDrawer === 'notifications' && (

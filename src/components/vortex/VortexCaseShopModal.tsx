@@ -119,12 +119,23 @@ const getSkinWearBreakdown = (item: CS2Skin): SkinWearBreakdown[] => {
 interface VortexCaseShopModalProps {
   isOpen: boolean;
   onClose: () => void;
+  initialCaseId?: string;
 }
 
-export const VortexCaseShopModal: React.FC<VortexCaseShopModalProps> = ({ isOpen, onClose }) => {
+export const VortexCaseShopModal: React.FC<VortexCaseShopModalProps> = ({ isOpen, onClose, initialCaseId }) => {
   // Navigation & Tabs
   const [activeTab, setActiveTab] = useState<'cases' | 'market' | 'dmarket-api'>('cases');
   const [activeCase, setActiveCase] = useState<CS2Case | null>(null);
+
+  useEffect(() => {
+    if (isOpen && initialCaseId) {
+      const found = VORTEX_CASE_CATALOG.find(c => c.id === initialCaseId);
+      if (found) {
+        setActiveCase(found);
+        setActiveTab('cases');
+      }
+    }
+  }, [isOpen, initialCaseId]);
   const [balance, setBalance] = useState<number>(() => getVortexWalletBalance());
   const [tradeUrl, setTradeUrl] = useState<string>(() => getSavedSteamTradeUrl());
   const [showTradeUrlDialog, setShowTradeUrlDialog] = useState<boolean>(false);

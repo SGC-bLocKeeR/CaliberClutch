@@ -106,6 +106,7 @@ interface XsollaCheckoutModalProps {
   isOpen: boolean;
   onClose: () => void;
   initialItem?: XsollaOrderItem;
+  initialPaymentMethod?: string;
   onPaymentSuccess?: (result: {
     item: XsollaOrderItem;
     transactionId: string;
@@ -118,13 +119,16 @@ export const XsollaCheckoutModal: React.FC<XsollaCheckoutModalProps> = ({
   isOpen,
   onClose,
   initialItem,
+  initialPaymentMethod,
   onPaymentSuccess
 }) => {
   const [selectedItem, setSelectedItem] = useState<XsollaOrderItem>(() => {
     return initialItem || XSOLLA_WALLET_PACKAGES[1]; // Default to 25.00 €
   });
 
-  const [activeMethod, setActiveMethod] = useState<string>('card');
+  const [activeMethod, setActiveMethod] = useState<string>(() => {
+    return initialPaymentMethod || 'card';
+  });
   const [isProcessing, setIsProcessing] = useState<boolean>(false);
   const [paymentSuccess, setPaymentSuccess] = useState<{
     transactionId: string;
@@ -141,8 +145,11 @@ export const XsollaCheckoutModal: React.FC<XsollaCheckoutModalProps> = ({
       if (initialItem) {
         setSelectedItem(initialItem);
       }
+      if (initialPaymentMethod) {
+        setActiveMethod(initialPaymentMethod);
+      }
     }
-  }, [isOpen, initialItem]);
+  }, [isOpen, initialItem, initialPaymentMethod]);
 
   // Card Form State
   const [cardNumber, setCardNumber] = useState('');

@@ -28,6 +28,7 @@ import {
   Star,
   Users,
   Gift,
+  Package,
   Play,
   Clock,
   Info,
@@ -66,6 +67,9 @@ import { VortexMatchRoom } from './VortexMatchRoom';
 import { VortexRightSocialRail } from './VortexRightSocialRail';
 import { XsollaCheckoutModal } from './XsollaCheckoutModal';
 import { XsollaOrderItem } from '../../services/xsollaService';
+import { VortexCaseShopModal } from './VortexCaseShopModal';
+import { HellcasePayBySkinsModal } from './HellcasePayBySkinsModal';
+import { VORTEX_CASE_CATALOG, CS2Case, getVortexWalletBalance } from '../../services/skinDeliveryService';
 
 interface VortexDashboardProps {
   userGamerTag?: string;
@@ -79,6 +83,7 @@ interface VortexDashboardProps {
 export type VortexTab = 
   | 'dashboard'
   | 'play'
+  | 'cases'
   | 'servers' 
   | 'tournaments' 
   | 'scrims' 
@@ -793,6 +798,23 @@ export const VortexDashboard: React.FC<VortexDashboardProps> = ({
   const [xsollaCheckoutItem, setXsollaCheckoutItem] = useState<XsollaOrderItem | null>(null);
   const [showVerificationModal, setShowVerificationModal] = useState<boolean>(false);
   const [verificationModalType, setVerificationModalType] = useState<'vip' | 'verified'>('vip');
+
+  // CS2 Cases Arena State (Inspired by Hellcase & Farmskins)
+  const [caseShopModalOpen, setCaseShopModalOpen] = useState(false);
+  const [selectedCaseId, setSelectedCaseId] = useState<string | undefined>(undefined);
+  const [caseCategoryFilter, setCaseCategoryFilter] = useState<string>('all');
+  const [caseSearchQuery, setCaseSearchQuery] = useState<string>('');
+  const [showHellcaseDepositModal, setShowHellcaseDepositModal] = useState<boolean>(false);
+  const [vortexCoinsBalance, setVortexCoinsBalance] = useState<number>(() => getVortexWalletBalance());
+
+  useEffect(() => {
+    const handleWallet = (e: Event) => {
+      const custom = e as CustomEvent<number>;
+      setVortexCoinsBalance(custom.detail);
+    };
+    window.addEventListener('vortex_wallet_updated', handleWallet);
+    return () => window.removeEventListener('vortex_wallet_updated', handleWallet);
+  }, []);
 
   useEffect(() => {
     const handleOpenVerification = (e: Event) => {
@@ -1941,6 +1963,14 @@ export const VortexDashboard: React.FC<VortexDashboardProps> = ({
       icon: BarChart2,
       badge: 'TOP PLAYERS',
       badgeColor: 'bg-[#A3E635]/15 text-[#A3E635] border border-[#A3E635]/30 font-bold'
+    },
+    {
+      id: 'cases' as VortexTab,
+      label: 'Cases',
+      desc: 'Hellcase & Farmskins CS2 Unboxing',
+      icon: Package,
+      badge: 'HOT',
+      badgeColor: 'bg-gradient-to-r from-amber-500/20 to-orange-500/20 text-amber-300 border border-amber-500/40 font-bold'
     },
     {
       id: 'tournaments' as VortexTab,
@@ -3796,6 +3826,254 @@ export const VortexDashboard: React.FC<VortexDashboardProps> = ({
           })()}
 
           {/* ======================================================== */}
+          {/* TAB: CASES ARENA (HELLCASE & FARMSKINS CS2 UNBOXING)     */}
+          {/* ======================================================== */}
+          {activeTab === 'cases' && (() => {
+            const filteredCases = VORTEX_CASE_CATALOG.filter(c => {
+              if (caseCategoryFilter !== 'all') {
+                if (caseCategoryFilter === 'budget') {
+                  if (c.category !== 'budget' && c.priceEur >= 2.0) return false;
+                } else if (caseCategoryFilter === 'knives') {
+                  const hasKnife = c.category === 'knives' || c.name.toLowerCase().includes('knife') || c.name.toLowerCase().includes('glove');
+                  if (!hasKnife) return false;
+                } else if (c.category !== caseCategoryFilter) {
+                  return false;
+                }
+              }
+              if (caseSearchQuery.trim()) {
+                const q = caseSearchQuery.toLowerCase().trim();
+                const matchName = c.name.toLowerCase().includes(q);
+                const matchSub = (c.subtitle || '').toLowerCase().includes(q);
+                const matchSkin = (c.items || []).some(item => item.name.toLowerCase().includes(q));
+                if (!matchName && !matchSub && !matchSkin) return false;
+              }
+              return true;
+            });
+
+            const LIVE_RECENT_DROPS = [
+              { player: 'juanflatroo', weapon: '★ Karambit', skin: 'Doppler Phase 2', price: 1850.0, rarity: '#FFD700', image: 'https://community.cloudflare.steamstatic.com/economy/image/-9a81dlWLwJ2UUGcVs_nsVtzdOEdtWwKGZZLQHTxDZ7I56KU0Zwwo4NUX4oFJZEHLbXH5ApeO4YmlhxYQknCRvCo04DEVlxkKgpovbSsLQJf2OD3fm5b09mJmYm0m_7zO6-fzj9V7cAl2eyVpIrz2FKx_0FtZ2D1cIGRcQRsYQ7Q81W3lOjxxcjr3M4pYjY/360fx360f' },
+              { player: 'gxx-', weapon: 'AWP', skin: 'Dragon Lore', price: 4200.0, rarity: '#FFD700', image: 'https://community.cloudflare.steamstatic.com/economy/image/-9a81dlWLwJ2UUGcVs_nsVtzdOEdtWwKGZZLQHTxDZ7I56KU0Zwwo4NUX4oFJZEHLbXH5ApeO4YmlhxYQknCRvCo04DEVlxkKgpot621FABz7PLfYQJS5NO0m5O0m_7zO6-fk29T-sBzpezT_I2tiVXs-RE5YTincY-WdVA4N13R81brx-e51sW9786czydiuSQn4ivcnBfmn1gSOd0N_1mS/360fx360f' },
+              { player: 'Sinnopsyy', weapon: '★ Sport Gloves', skin: 'Vice', price: 2100.0, rarity: '#FFD700', image: 'https://community.cloudflare.steamstatic.com/economy/image/-9a81dlWLwJ2UUGcVs_nsVtzdOEdtWwKGZZLQHTxDZ7I56KU0Zwwo4NUX4oFJZEHLbXH5ApeO4YmlhxYQknCRvCo04DEVlxkKgpou-6kejhz2v_Nfz5H_uO1gb-Gw_alIITfn2xV_Pp_jez--YXygED6-kZkYj3wLITDdQc8MlCG_Fftxr3ug8C0u5vNnHJr6SQmsH6MnRDi1gYMMLIqu-Y0gQ/360fx360f' },
+              { player: 'rigoN', weapon: 'AK-47', skin: 'Inheritance', price: 145.0, rarity: '#EB4B4B', image: 'https://imgproxy.dmarket.com/insecure/rs:fit:360:260:0/g:ce/aHR0cHM6Ly9jb21tdW5pdHkuYWthbWFpLnN0ZWFtc3RhdGljLmNvbS9lY29ub215L2ltYWdlL2kwQ29aODFVaTBtLTlLd2xCWTFMXzE4bXl1R3VxMXdmaFdTYVpnTXR0eVZmUGFFUlNSMFdxbXU3TEFvY0dJR3ozVXFsWE9McnhNLXZNR21XOFZOeHU1RHg2MG5vVHlMd2xjSzN3aU5RME9LaGVxZG9MUEdhQUZpY3lPbC1wSzh4R0hfbndVdDFzR3JTejlpdmNIS1FPQWNqWE1Za1J1NVl1eGU0bFlDeVpPcTI1VlNNMm9NVDAyeWcyVXhCU0VnQQ==.webp' },
+              { player: 'NiKo', weapon: 'Desert Eagle', skin: 'Printstream', price: 85.0, rarity: '#EB4B4B', image: 'https://community.akamai.steamstatic.com/economy/image/i0CoZ81Ui0m-9KwlBY1L_18myuGuq1wfhWSaZgMttyVfPaERSR0Wqmu7LAocGIGz3UqlXOLrxM-vMGmW8VNxu5Dx60noTyL1m5fn8Sdk7OeRbKFsJ8-DHG6e1f1iouRoQha_nBovp3OGmdeqInyVP1V0XsYlRbEI50a5wNyzZr605AyI3t5MmCSohylAuC89_a9cBoMY9UkV' },
+              { player: 'karrigan', weapon: '★ M9 Bayonet', skin: 'Crimson Web', price: 1650.0, rarity: '#FFD700', image: 'https://community.cloudflare.steamstatic.com/economy/image/-9a81dlWLwJ2UUGcVs_nsVtzdOEdtWwKGZZLQHTxDZ7I56KU0Zwwo4NUX4oFJZEHLbXH5ApeO4YmlhxYQknCRvCo04DEVlxkKgpovbSsLQJfwOfBfUEv7d6_kIGZqOT9NrrFmDkH7p112rmRpt7wigbhqEVla2j1d9SXelI4aQ3X-wfrwb-60JO1uZ2ayXBkvyBzsHjcnkC30xsccKUx0lQ18oJv/360fx360f' }
+            ];
+
+            return (
+              <div className="space-y-6 animate-in fade-in duration-200">
+                {/* 1. HERO HEADER: CS2 CASES ARENA */}
+                <div className="w-full bg-gradient-to-r from-[#0C0F17] via-[#141A28] to-[#0C0F17] border border-[#20283C] rounded-3xl p-6 sm:p-8 relative overflow-hidden shadow-2xl">
+                  <div className="absolute top-0 right-0 w-96 h-96 bg-amber-500/10 rounded-full blur-3xl pointer-events-none -mr-20 -mt-20" />
+                  <div className="relative z-10 flex flex-col lg:flex-row lg:items-center justify-between gap-6">
+                    <div className="space-y-2">
+                      <div className="flex items-center gap-2.5">
+                        <span className="px-2.5 py-0.5 rounded-full bg-amber-500/20 text-amber-300 border border-amber-500/40 font-mono font-black text-xs uppercase flex items-center gap-1.5">
+                          <Flame className="w-3.5 h-3.5 text-amber-400" />
+                          HELLCASE & FARMSKINS CURATED
+                        </span>
+                        <span className="px-2.5 py-0.5 rounded-full bg-emerald-500/15 text-emerald-400 border border-emerald-500/30 font-mono font-bold text-xs flex items-center gap-1.5">
+                          <ShieldCheck className="w-3.5 h-3.5 text-emerald-400" />
+                          100% PROVABLY FAIR RNG
+                        </span>
+                      </div>
+                      <h1 className="text-3xl sm:text-4xl font-black font-display text-white tracking-tight">
+                        VORTEX CS2 CASES ARENA
+                      </h1>
+                      <p className="text-sm text-slate-300 max-w-2xl leading-relaxed">
+                        Unbox legendary CS2 covert knives, gloves, and rare pearlescent skins. Built with automated Steam Trade Bot escrow delivery and transparent provably fair seeds.
+                      </p>
+                    </div>
+
+                    {/* Balance & Action Buttons */}
+                    <div className="flex flex-wrap sm:flex-nowrap items-center gap-3">
+                      <div className="px-4 py-2.5 rounded-2xl bg-[#090B10]/80 border border-amber-500/30 flex items-center gap-3 shadow-lg">
+                        <div className="w-8 h-8 rounded-xl bg-amber-500/20 border border-amber-500/40 flex items-center justify-center">
+                          <Gift className="w-4 h-4 text-amber-400" />
+                        </div>
+                        <div>
+                          <div className="text-[10px] font-mono text-slate-400 uppercase">Available Balance</div>
+                          <div className="text-lg font-mono font-black text-emerald-400">
+                            {vortexCoinsBalance.toFixed(2)} €
+                          </div>
+                        </div>
+                      </div>
+
+                      <button
+                        onClick={() => {
+                          sound.playSelect();
+                          setShowHellcaseDepositModal(true);
+                        }}
+                        className="px-5 py-3 rounded-2xl bg-gradient-to-r from-amber-400 via-yellow-400 to-amber-500 hover:from-amber-300 hover:to-yellow-300 text-slate-950 font-mono font-black text-xs uppercase tracking-wider transition cursor-pointer shadow-[0_0_25px_rgba(245,158,11,0.35)] flex items-center gap-2 hover:scale-[1.02] active:scale-95"
+                      >
+                        <Plus className="w-4 h-4" />
+                        <span>REFILL / TOP UP</span>
+                      </button>
+                    </div>
+                  </div>
+                </div>
+
+                {/* 2. LIVE RECENT DROPS TICKER (HELLCASE / FARMSKINS STYLE) */}
+                <div className="rounded-2xl bg-[#0A0D14] border border-[#1B2232] p-3 shadow-lg">
+                  <div className="flex items-center gap-3 overflow-x-auto pb-1 no-scrollbar select-none">
+                    <div className="flex items-center gap-1.5 px-3 py-1 rounded-xl bg-white/5 border border-white/10 text-slate-400 text-xs font-mono font-bold shrink-0">
+                      <Sparkles className="w-3.5 h-3.5 text-amber-400" />
+                      <span>LIVE DROPS:</span>
+                    </div>
+                    {LIVE_RECENT_DROPS.map((drop, idx) => (
+                      <div 
+                        key={idx}
+                        className="flex items-center gap-2.5 px-3 py-1.5 rounded-xl bg-[#121622] border border-[#202738] shrink-0 hover:border-amber-400/40 transition cursor-default"
+                      >
+                        <img src={drop.image} alt={drop.weapon} className="w-7 h-7 object-contain shrink-0" />
+                        <div className="text-left">
+                          <div className="flex items-center gap-1">
+                            <span className="text-[11px] font-bold text-white leading-tight">{drop.weapon}</span>
+                            <span className="text-[10px] text-slate-400 truncate max-w-[90px]">{drop.skin}</span>
+                          </div>
+                          <div className="text-[10px] font-mono font-bold text-emerald-400">
+                            {drop.price.toFixed(2)} €
+                          </div>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+
+                {/* 3. CATEGORY SELECTOR PILLS & SEARCH BAR */}
+                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+                  <div className="flex items-center gap-1.5 overflow-x-auto pb-1 no-scrollbar">
+                    {[
+                      { id: 'all', label: `All Cases (${VORTEX_CASE_CATALOG.length})` },
+                      { id: 'hellcase', label: '⭐ Hellcase Picks' },
+                      { id: 'farmskins', label: '🔥 Farmskins Vault' },
+                      { id: 'knives', label: '🔪 Knives & Gloves' },
+                      { id: 'budget', label: '💎 Budget (< 2€)' },
+                      { id: 'official', label: '🏆 Official CS2' }
+                    ].map(tab => (
+                      <button
+                        key={tab.id}
+                        onClick={() => {
+                          sound.playClick();
+                          setCaseCategoryFilter(tab.id);
+                        }}
+                        className={`px-3.5 py-2 rounded-xl font-mono text-xs font-bold transition whitespace-nowrap cursor-pointer ${
+                          caseCategoryFilter === tab.id
+                            ? 'bg-amber-500 text-slate-950 shadow-[0_0_15px_rgba(245,158,11,0.35)]'
+                            : 'bg-[#11141E] hover:bg-[#161B29] border border-[#202738] text-slate-300 hover:text-white'
+                        }`}
+                      >
+                        {tab.label}
+                      </button>
+                    ))}
+                  </div>
+
+                  <div className="relative w-full sm:w-72">
+                    <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-500" />
+                    <input
+                      type="text"
+                      value={caseSearchQuery}
+                      onChange={(e) => setCaseSearchQuery(e.target.value)}
+                      placeholder="Search cases or skins..."
+                      className="w-full h-10 pl-9 pr-3 rounded-xl bg-[#0E1119] border border-[#202738] text-xs text-white placeholder-slate-500 focus:outline-none focus:border-amber-400/60 transition font-sans"
+                    />
+                  </div>
+                </div>
+
+                {/* 4. CASES CATALOG GRID */}
+                {filteredCases.length === 0 ? (
+                  <div className="p-12 text-center rounded-3xl bg-[#0E1119] border border-[#1E2535] space-y-2">
+                    <Package className="w-10 h-10 text-slate-600 mx-auto" />
+                    <div className="text-sm font-mono font-bold text-slate-300">No Cases Found</div>
+                    <p className="text-xs text-slate-500">Try adjusting your category filter or search query.</p>
+                  </div>
+                ) : (
+                  <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-5">
+                    {filteredCases.map(c => {
+                      const topDrops = (c.items || []).slice(0, 3);
+
+                      return (
+                        <div
+                          key={c.id}
+                          className="rounded-3xl bg-gradient-to-b from-[#111522] to-[#0A0D15] border border-[#1F273B] hover:border-amber-500/50 transition-all duration-300 p-5 flex flex-col justify-between shadow-xl hover:shadow-[0_10px_30px_rgba(0,0,0,0.6)] group relative overflow-hidden"
+                        >
+                          <div className="absolute top-0 right-0 w-32 h-32 bg-amber-500/5 rounded-full blur-2xl group-hover:bg-amber-500/15 transition-all" />
+
+                          {/* Top: Tag & Price */}
+                          <div className="flex items-center justify-between gap-2 mb-3 relative z-10">
+                            <span className="text-[10px] font-mono font-extrabold uppercase px-2 py-0.5 rounded-md bg-amber-500/15 border border-amber-500/30 text-amber-300">
+                              {c.tag || 'CS2 CRATE'}
+                            </span>
+                            <div className="px-2.5 py-1 rounded-xl bg-black/60 border border-emerald-500/30 text-emerald-400 font-mono font-black text-xs">
+                              {c.priceEur.toFixed(2)} €
+                            </div>
+                          </div>
+
+                          {/* Center: Case Cover Image */}
+                          <div className="relative py-4 flex items-center justify-center my-auto">
+                            <img
+                              src={c.image}
+                              alt={c.name}
+                              className="w-44 h-36 object-contain group-hover:scale-110 transition-transform duration-300 drop-shadow-[0_10px_20px_rgba(0,0,0,0.8)]"
+                            />
+                          </div>
+
+                          {/* Information: Title & Subtitle */}
+                          <div className="space-y-1 relative z-10 mb-3 text-left">
+                            <h3 className="text-base font-black font-display text-white group-hover:text-amber-400 transition truncate">
+                              {c.name}
+                            </h3>
+                            <p className="text-[11px] text-slate-400 line-clamp-1">
+                              {c.subtitle || c.description}
+                            </p>
+                          </div>
+
+                          {/* Top Potential Drops Preview */}
+                          <div className="pt-2 border-t border-[#1C2333] mb-4 relative z-10">
+                            <div className="text-[10px] font-mono text-slate-500 mb-1.5 flex items-center justify-between">
+                              <span>Top Drops Preview:</span>
+                              <span className="text-amber-400">Provably Fair</span>
+                            </div>
+                            <div className="grid grid-cols-3 gap-1.5">
+                              {topDrops.map(item => (
+                                <div 
+                                  key={item.id} 
+                                  className="p-1 rounded-lg bg-black/40 border border-white/5 flex flex-col items-center hover:border-amber-400/40 transition"
+                                  title={`${item.name} (${item.priceEur.toFixed(2)} €)`}
+                                >
+                                  <img src={item.image} alt={item.name} className="w-9 h-9 object-contain" />
+                                  <span className="text-[9px] font-mono font-bold text-slate-300 truncate w-full text-center mt-0.5">
+                                    {item.priceEur.toFixed(0)} €
+                                  </span>
+                                </div>
+                              ))}
+                            </div>
+                          </div>
+
+                          {/* Bottom Action Button: OPEN CASE */}
+                          <button
+                            type="button"
+                            onClick={() => {
+                              sound.playSelect();
+                              setSelectedCaseId(c.id);
+                              setCaseShopModalOpen(true);
+                            }}
+                            className="w-full py-3 px-4 rounded-2xl bg-gradient-to-r from-amber-400 via-yellow-400 to-amber-500 hover:from-amber-300 hover:to-yellow-300 text-slate-950 font-mono font-black text-xs uppercase tracking-wider transition cursor-pointer shadow-[0_0_20px_rgba(245,158,11,0.25)] flex items-center justify-center gap-2 group-hover:shadow-[0_0_25px_rgba(245,158,11,0.45)] hover:scale-[1.02] active:scale-95"
+                          >
+                            <Gift className="w-4 h-4" />
+                            <span>OPEN CASE • {c.priceEur.toFixed(2)} €</span>
+                          </button>
+
+                        </div>
+                      );
+                    })}
+                  </div>
+                )}
+
+              </div>
+            );
+          })()}
+
+          {/* ======================================================== */}
           {/* TAB: ANTI-CHEAT                                          */}
           {/* ======================================================== */}
           {activeTab === 'anticheat' && (
@@ -5443,6 +5721,22 @@ export const VortexDashboard: React.FC<VortexDashboardProps> = ({
           }}
         />
       )}
+
+            {/* CS2 CASES UNBOXING MODAL (ROULETTE, MULTI-CASE & STEAM DELIVERY) */}
+      <VortexCaseShopModal
+        isOpen={caseShopModalOpen}
+        onClose={() => {
+          setCaseShopModalOpen(false);
+          setSelectedCaseId(undefined);
+        }}
+        initialCaseId={selectedCaseId}
+      />
+
+      {/* HELLCASE PAY BY SKINS & XSOLLA DEPOSIT DESK MODAL */}
+      <HellcasePayBySkinsModal
+        isOpen={showHellcaseDepositModal}
+        onClose={() => setShowHellcaseDepositModal(false)}
+      />
 
       {/* VORTEX OFFICIAL VERIFICATION INFORMATION MODAL */}
       {showVerificationModal && (

@@ -12,6 +12,7 @@ import {
   Coins, 
   AlertCircle,
   ArrowLeft,
+  ArrowRight,
   RotateCw,
   History,
   Bot,
@@ -31,6 +32,9 @@ import {
   getSavedSteamTradeUrl,
   isValidSteamTradeUrl 
 } from '../../services/skinDeliveryService';
+import { CountryFlag } from './CountryFlag';
+import { XsollaCheckoutModal } from './XsollaCheckoutModal';
+import { XsollaOrderItem } from '../../services/xsollaService';
 
 export interface HellcasePayBySkinsModalProps {
   isOpen: boolean;
@@ -38,6 +42,18 @@ export interface HellcasePayBySkinsModalProps {
   onSuccess?: (amountCredited: number) => void;
   initialMethod?: 'skins' | 'crypto' | 'cards' | 'giftcards' | 'overview';
 }
+
+export type PaymentMethodId = 
+  | 'visa_top' 
+  | 'visa_direct' 
+  | 'wallets' 
+  | 'skins' 
+  | 'crypto' 
+  | 'kinguin' 
+  | 'eneba' 
+  | 'swapped' 
+  | 'giftcards' 
+  | 'premium';
 
 export interface DepositHistoryItem {
   id: string;
@@ -88,15 +104,53 @@ interface TradableSkin {
   image: string;
 }
 
-const COUNTRIES = [
-  { code: 'XK', name: 'Kosovo', flag: '🇽🇰', label: 'Kosovo [XK]' },
-  { code: 'AL', name: 'Albania', flag: '🇦🇱', label: 'Albania [AL]' },
-  { code: 'DE', name: 'Germany', flag: '🇩🇪', label: 'Germany [DE]' },
-  { code: 'CH', name: 'Switzerland', flag: '🇨🇭', label: 'Switzerland [CH]' },
-  { code: 'AT', name: 'Austria', flag: '🇦🇹', label: 'Austria [AT]' },
-  { code: 'GB', name: 'United Kingdom', flag: '🇬🇧', label: 'United Kingdom [GB]' },
-  { code: 'US', name: 'United States', flag: '🇺🇸', label: 'United States [US]' },
-  { code: 'TR', name: 'Turkey', flag: '🇹🇷', label: 'Turkey [TR]' }
+export interface CountryOption {
+  code: string;
+  name: string;
+  label: string;
+}
+
+const COUNTRIES: CountryOption[] = [
+  { code: 'XK', name: 'Kosovo', label: 'Kosovo [XK]' },
+  { code: 'AL', name: 'Albania', label: 'Albania [AL]' },
+  { code: 'DE', name: 'Germany', label: 'Germany [DE]' },
+  { code: 'CH', name: 'Switzerland', label: 'Switzerland [CH]' },
+  { code: 'AT', name: 'Austria', label: 'Austria [AT]' },
+  { code: 'GB', name: 'United Kingdom', label: 'United Kingdom [GB]' },
+  { code: 'US', name: 'United States', label: 'United States [US]' },
+  { code: 'TR', name: 'Turkey', label: 'Turkey [TR]' },
+  { code: 'FR', name: 'France', label: 'France [FR]' },
+  { code: 'IT', name: 'Italy', label: 'Italy [IT]' },
+  { code: 'ES', name: 'Spain', label: 'Spain [ES]' },
+  { code: 'NL', name: 'Netherlands', label: 'Netherlands [NL]' },
+  { code: 'BE', name: 'Belgium', label: 'Belgium [BE]' },
+  { code: 'SE', name: 'Sweden', label: 'Sweden [SE]' },
+  { code: 'NO', name: 'Norway', label: 'Norway [NO]' },
+  { code: 'DK', name: 'Denmark', label: 'Denmark [DK]' },
+  { code: 'FI', name: 'Finland', label: 'Finland [FI]' },
+  { code: 'PL', name: 'Poland', label: 'Poland [PL]' },
+  { code: 'CZ', name: 'Czechia', label: 'Czechia [CZ]' },
+  { code: 'PT', name: 'Portugal', label: 'Portugal [PT]' },
+  { code: 'GR', name: 'Greece', label: 'Greece [GR]' },
+  { code: 'MK', name: 'North Macedonia', label: 'North Macedonia [MK]' },
+  { code: 'ME', name: 'Montenegro', label: 'Montenegro [ME]' },
+  { code: 'BA', name: 'Bosnia and Herzegovina', label: 'Bosnia and Herzegovina [BA]' },
+  { code: 'HR', name: 'Croatia', label: 'Croatia [HR]' },
+  { code: 'SI', name: 'Slovenia', label: 'Slovenia [SI]' },
+  { code: 'RS', name: 'Serbia', label: 'Serbia [RS]' },
+  { code: 'RO', name: 'Romania', label: 'Romania [RO]' },
+  { code: 'BG', name: 'Bulgaria', label: 'Bulgaria [BG]' },
+  { code: 'HU', name: 'Hungary', label: 'Hungary [HU]' },
+  { code: 'SK', name: 'Slovakia', label: 'Slovakia [SK]' },
+  { code: 'IE', name: 'Ireland', label: 'Ireland [IE]' },
+  { code: 'CA', name: 'Canada', label: 'Canada [CA]' },
+  { code: 'AU', name: 'Australia', label: 'Australia [AU]' },
+  { code: 'BR', name: 'Brazil', label: 'Brazil [BR]' },
+  { code: 'UA', name: 'Ukraine', label: 'Ukraine [UA]' },
+  { code: 'JP', name: 'Japan', label: 'Japan [JP]' },
+  { code: 'KR', name: 'South Korea', label: 'South Korea [KR]' },
+  { code: 'AE', name: 'United Arab Emirates', label: 'United Arab Emirates [AE]' },
+  { code: 'SA', name: 'Saudi Arabia', label: 'Saudi Arabia [SA]' }
 ];
 
 const CRYPTO_CONFIGS = [
@@ -105,7 +159,7 @@ const CRYPTO_CONFIGS = [
     name: 'Tether (TRC-20)',
     network: 'TRON / TRC20',
     color: '#26A17B',
-    address: 'TR7NHqjeKQxGTCi8q8ZY4pL8otSzgjLj6t'
+    address: 'TCHMrzrHhH9qXxmJjXHBgvuPu2dHwDXkED' // User's Official Binance USDT TRC-20 Deposit Address
   },
   {
     symbol: 'BTC',
@@ -162,8 +216,23 @@ export const HellcasePayBySkinsModal: React.FC<HellcasePayBySkinsModalProps> = (
   initialMethod = 'skins'
 }) => {
   const [activeView, setActiveView] = useState<'skins' | 'crypto' | 'cards' | 'giftcards'>('skins');
-  const [selectedCountry, setSelectedCountry] = useState(COUNTRIES[0]);
+  const [selectedMethodId, setSelectedMethodId] = useState<PaymentMethodId>(() => {
+    if (initialMethod === 'crypto') return 'crypto';
+    if (initialMethod === 'cards') return 'visa_top';
+    if (initialMethod === 'giftcards') return 'giftcards';
+    return 'skins';
+  });
+  const [xsollaCheckoutItem, setXsollaCheckoutItem] = useState<XsollaOrderItem | null>(null);
+  const [xsollaMethodPreset, setXsollaMethodPreset] = useState<string>('card');
+  const [selectedCountry, setSelectedCountry] = useState<CountryOption>(COUNTRIES[0]);
   const [countryDropdownOpen, setCountryDropdownOpen] = useState(false);
+  const [countrySearch, setCountrySearch] = useState<string>('');
+
+  const filteredCountries = useMemo(() => {
+    if (!countrySearch.trim()) return COUNTRIES;
+    const q = countrySearch.toLowerCase().trim();
+    return COUNTRIES.filter(c => c.name.toLowerCase().includes(q) || c.code.toLowerCase().includes(q));
+  }, [countrySearch]);
 
   // Steam Trade URL State
   const [tradeUrl, setTradeUrl] = useState<string>(() => {
@@ -237,13 +306,20 @@ export const HellcasePayBySkinsModal: React.FC<HellcasePayBySkinsModalProps> = (
     if (isOpen) {
       if (initialMethod && initialMethod !== 'overview') {
         setActiveView(initialMethod);
+        if (initialMethod === 'crypto') setSelectedMethodId('crypto');
+        else if (initialMethod === 'cards') setSelectedMethodId('visa_top');
+        else if (initialMethod === 'giftcards') setSelectedMethodId('giftcards');
+        else setSelectedMethodId('skins');
       } else {
         setActiveView('skins');
+        setSelectedMethodId('skins');
       }
       setDepositSuccessMessage(null);
       setCryptoError(null);
       setVoucherError(null);
       setPaymentHistoryOpen(false);
+      setXsollaCheckoutItem(null);
+      setCountrySearch('');
     }
   }, [isOpen, initialMethod]);
 
@@ -1866,37 +1942,59 @@ export const HellcasePayBySkinsModal: React.FC<HellcasePayBySkinsModalProps> = (
                       <button
                         type="button"
                         onClick={() => setCountryDropdownOpen(prev => !prev)}
-                        className="w-full px-3.5 py-2 rounded-xl bg-[#151821] border border-[#252B3B] hover:border-slate-500 text-white text-xs font-mono flex items-center justify-between cursor-pointer transition"
+                        className="w-full px-3.5 py-2.5 rounded-xl bg-[#151821] border border-[#252B3B] hover:border-slate-500 text-white text-xs font-mono flex items-center justify-between cursor-pointer transition shadow-sm"
                       >
-                        <span className="flex items-center gap-2">
-                          <span className="text-base">{selectedCountry.flag}</span>
+                        <span className="flex items-center gap-2.5">
+                          <CountryFlag code={selectedCountry.code} name={selectedCountry.name} size="sm" />
                           <span className="font-bold">{selectedCountry.label}</span>
                         </span>
                         <ChevronDown className={`w-4 h-4 text-slate-400 transition-transform ${countryDropdownOpen ? 'rotate-180' : ''}`} />
                       </button>
 
                       {countryDropdownOpen && (
-                        <div className="absolute left-0 right-0 top-full mt-1.5 rounded-xl bg-[#151821] border border-[#252B3B] shadow-2xl z-50 max-h-52 overflow-y-auto p-1 space-y-0.5 animate-in fade-in zoom-in-95 duration-150">
-                          {COUNTRIES.map(c => (
-                            <button
-                              key={c.code}
-                              type="button"
-                              onClick={() => {
-                                setSelectedCountry(c);
-                                setCountryDropdownOpen(false);
-                                sound.playSelect();
-                              }}
-                              className={`w-full px-3 py-2 rounded-lg text-left text-xs font-mono flex items-center justify-between transition cursor-pointer ${
-                                selectedCountry.code === c.code ? 'bg-amber-400/10 text-amber-300 font-bold border border-amber-400/20' : 'text-slate-300 hover:bg-white/5 hover:text-white'
-                              }`}
-                            >
-                              <span className="flex items-center gap-2">
-                                <span>{c.flag}</span>
-                                <span>{c.label}</span>
-                              </span>
-                              {selectedCountry.code === c.code && <Check className="w-3.5 h-3.5 text-amber-400" />}
-                            </button>
-                          ))}
+                        <div className="absolute left-0 right-0 top-full mt-1.5 rounded-xl bg-[#151821] border border-[#252B3B] shadow-2xl z-50 max-h-60 overflow-y-auto p-1.5 space-y-1 animate-in fade-in zoom-in-95 duration-150">
+                          <div className="p-1 border-b border-white/5 sticky top-0 bg-[#151821] z-10">
+                            <div className="relative">
+                              <Search className="w-3.5 h-3.5 text-slate-400 absolute left-2.5 top-2.5" />
+                              <input
+                                type="text"
+                                value={countrySearch}
+                                onChange={(e) => setCountrySearch(e.target.value)}
+                                placeholder="Search country (e.g. Kosovo, Germany)..."
+                                className="w-full pl-8 pr-2.5 py-1.5 rounded-lg bg-black/60 border border-[#252B3B] text-[11px] font-mono text-white placeholder-slate-500 outline-none focus:border-amber-400"
+                                onClick={(e) => e.stopPropagation()}
+                              />
+                            </div>
+                          </div>
+
+                          <div className="space-y-0.5 pt-1">
+                            {filteredCountries.map(c => (
+                              <button
+                                key={c.code}
+                                type="button"
+                                onClick={() => {
+                                  setSelectedCountry(c);
+                                  setCountryDropdownOpen(false);
+                                  setCountrySearch('');
+                                  sound.playSelect();
+                                }}
+                                className={`w-full px-3 py-2 rounded-lg text-left text-xs font-mono flex items-center justify-between transition cursor-pointer ${
+                                  selectedCountry.code === c.code ? 'bg-amber-400/15 text-amber-300 font-bold border border-amber-400/30' : 'text-slate-300 hover:bg-white/5 hover:text-white'
+                                }`}
+                              >
+                                <span className="flex items-center gap-2.5">
+                                  <CountryFlag code={c.code} name={c.name} size="xs" />
+                                  <span>{c.label}</span>
+                                </span>
+                                {selectedCountry.code === c.code && <Check className="w-3.5 h-3.5 text-amber-400" />}
+                              </button>
+                            ))}
+                            {filteredCountries.length === 0 && (
+                              <div className="p-3 text-center text-xs font-mono text-slate-500">
+                                No country found matching "{countrySearch}"
+                              </div>
+                            )}
+                          </div>
                         </div>
                       )}
                     </div>
@@ -1909,10 +2007,11 @@ export const HellcasePayBySkinsModal: React.FC<HellcasePayBySkinsModalProps> = (
                       type="button"
                       onClick={() => {
                         sound.playSelect();
+                        setSelectedMethodId('visa_top');
                         setActiveView('cards');
                       }}
                       className={`relative p-3 rounded-2xl bg-[#151821] hover:bg-[#1C202C] text-left transition cursor-pointer group flex flex-col justify-between h-28 shadow-lg overflow-hidden ${
-                        activeView === 'cards'
+                        selectedMethodId === 'visa_top'
                           ? 'border-2 border-amber-400 shadow-[0_0_15px_rgba(245,158,11,0.25)] bg-[#1A1F2C]'
                           : 'border border-[#252B3B] hover:border-amber-400/40'
                       }`}
@@ -1935,7 +2034,7 @@ export const HellcasePayBySkinsModal: React.FC<HellcasePayBySkinsModalProps> = (
 
                       <div className="flex items-center justify-between text-[9px] font-mono text-slate-400">
                         <span>Card Payments</span>
-                        {activeView === 'cards' && <Check className="w-3.5 h-3.5 text-amber-400" />}
+                        {selectedMethodId === 'visa_top' && <Check className="w-3.5 h-3.5 text-amber-400" />}
                       </div>
                     </button>
 
@@ -1944,16 +2043,24 @@ export const HellcasePayBySkinsModal: React.FC<HellcasePayBySkinsModalProps> = (
                       type="button"
                       onClick={() => {
                         sound.playSelect();
+                        setSelectedMethodId('visa_direct');
                         setActiveView('cards');
                       }}
-                      className="p-3 rounded-2xl bg-[#151821] hover:bg-[#1C202C] border border-[#252B3B] hover:border-amber-400/40 text-left transition cursor-pointer group flex flex-col justify-between h-28 shadow-lg"
+                      className={`relative p-3 rounded-2xl bg-[#151821] hover:bg-[#1C202C] text-left transition cursor-pointer group flex flex-col justify-between h-28 shadow-lg overflow-hidden ${
+                        selectedMethodId === 'visa_direct'
+                          ? 'border-2 border-amber-400 shadow-[0_0_15px_rgba(245,158,11,0.25)] bg-[#1A1F2C]'
+                          : 'border border-[#252B3B] hover:border-amber-400/40'
+                      }`}
                     >
                       <div className="text-sm font-black font-display text-white tracking-wider flex items-center gap-1 pt-1">
                         <span>VISA</span>
                         <span className="text-red-500 font-sans">●</span>
                         <span className="text-amber-500 font-sans -ml-1">●</span>
                       </div>
-                      <div className="text-[9px] font-mono text-slate-400">Instant Debit & Credit</div>
+                      <div className="flex items-center justify-between text-[9px] font-mono text-slate-400">
+                        <span>Instant Debit & Credit</span>
+                        {selectedMethodId === 'visa_direct' && <Check className="w-3.5 h-3.5 text-amber-400" />}
+                      </div>
                     </button>
 
                     {/* 3. DIGITAL WALLETS */}
@@ -1961,16 +2068,24 @@ export const HellcasePayBySkinsModal: React.FC<HellcasePayBySkinsModalProps> = (
                       type="button"
                       onClick={() => {
                         sound.playSelect();
+                        setSelectedMethodId('wallets');
                         setActiveView('cards');
                       }}
-                      className="p-3 rounded-2xl bg-[#151821] hover:bg-[#1C202C] border border-[#252B3B] hover:border-amber-400/40 text-left transition cursor-pointer group flex flex-col justify-between h-28 shadow-lg"
+                      className={`relative p-3 rounded-2xl bg-[#151821] hover:bg-[#1C202C] text-left transition cursor-pointer group flex flex-col justify-between h-28 shadow-lg overflow-hidden ${
+                        selectedMethodId === 'wallets'
+                          ? 'border-2 border-amber-400 shadow-[0_0_15px_rgba(245,158,11,0.25)] bg-[#1A1F2C]'
+                          : 'border border-[#252B3B] hover:border-amber-400/40'
+                      }`}
                     >
                       <div className="flex flex-wrap items-center gap-1 text-[9px] font-mono font-bold text-slate-300">
                         <span className="px-1 py-0.5 rounded bg-black/40">Pay</span>
                         <span className="px-1 py-0.5 rounded bg-black/40">GPay</span>
                         <span className="px-1 py-0.5 rounded bg-purple-500/20 text-purple-300">Skrill</span>
                       </div>
-                      <div className="text-[9px] font-mono text-slate-400">Neteller, Visa, Mobile</div>
+                      <div className="flex items-center justify-between text-[9px] font-mono text-slate-400">
+                        <span>Neteller, Visa, Mobile</span>
+                        {selectedMethodId === 'wallets' && <Check className="w-3.5 h-3.5 text-amber-400" />}
+                      </div>
                     </button>
 
                     {/* 4. PAY BY SKINS (OPENS DEDICATED Skin2PAY) */}
@@ -1978,9 +2093,14 @@ export const HellcasePayBySkinsModal: React.FC<HellcasePayBySkinsModalProps> = (
                       type="button"
                       onClick={() => {
                         sound.playSelect();
+                        setSelectedMethodId('skins');
                         setActiveView('skins');
                       }}
-                      className="relative p-2.5 rounded-2xl bg-[#151821] hover:bg-[#1C202C] text-left transition cursor-pointer group flex items-center justify-between h-28 shadow-lg overflow-hidden border border-[#252B3B] hover:border-amber-400/50"
+                      className={`relative p-2.5 rounded-2xl bg-[#151821] hover:bg-[#1C202C] text-left transition cursor-pointer group flex items-center justify-between h-28 shadow-lg overflow-hidden border ${
+                        selectedMethodId === 'skins'
+                          ? 'border-2 border-amber-400 shadow-[0_0_15px_rgba(245,158,11,0.25)] bg-[#1A1F2C]'
+                          : 'border-[#252B3B] hover:border-amber-400/50'
+                      }`}
                     >
                       <div className="relative w-14 sm:w-16 h-14 sm:h-16 shrink-0 flex items-center justify-center select-none pointer-events-none">
                         <img 
@@ -2000,6 +2120,11 @@ export const HellcasePayBySkinsModal: React.FC<HellcasePayBySkinsModalProps> = (
                           SKINS
                         </span>
                       </div>
+                      {selectedMethodId === 'skins' && (
+                        <div className="absolute top-2 right-2">
+                          <Check className="w-3.5 h-3.5 text-amber-400" />
+                        </div>
+                      )}
                     </button>
 
                     {/* 5. CRYPTO */}
@@ -2007,10 +2132,11 @@ export const HellcasePayBySkinsModal: React.FC<HellcasePayBySkinsModalProps> = (
                       type="button"
                       onClick={() => {
                         sound.playSelect();
+                        setSelectedMethodId('crypto');
                         setActiveView('crypto');
                       }}
                       className={`relative p-3 rounded-2xl bg-[#151821] hover:bg-[#1C202C] text-left transition cursor-pointer group flex flex-col justify-between h-28 shadow-lg overflow-hidden ${
-                        activeView === 'crypto'
+                        selectedMethodId === 'crypto'
                           ? 'border-2 border-amber-400 shadow-[0_0_15px_rgba(245,158,11,0.25)] bg-[#1A1F2C]'
                           : 'border border-[#252B3B] hover:border-amber-400/40'
                       }`}
@@ -2026,7 +2152,7 @@ export const HellcasePayBySkinsModal: React.FC<HellcasePayBySkinsModalProps> = (
                       </div>
                       <div className="flex items-center justify-between text-[9px] font-mono text-slate-400">
                         <span>Instant On-Chain</span>
-                        {activeView === 'crypto' && <Check className="w-3.5 h-3.5 text-amber-400" />}
+                        {selectedMethodId === 'crypto' && <Check className="w-3.5 h-3.5 text-amber-400" />}
                       </div>
                     </button>
 
@@ -2035,15 +2161,23 @@ export const HellcasePayBySkinsModal: React.FC<HellcasePayBySkinsModalProps> = (
                       type="button"
                       onClick={() => {
                         sound.playSelect();
+                        setSelectedMethodId('kinguin');
                         setActiveView('giftcards');
                       }}
-                      className="p-3 rounded-2xl bg-[#151821] hover:bg-[#1C202C] border border-[#252B3B] hover:border-amber-400/40 text-left transition cursor-pointer group flex flex-col justify-between h-28 shadow-lg"
+                      className={`relative p-3 rounded-2xl bg-[#151821] hover:bg-[#1C202C] text-left transition cursor-pointer group flex flex-col justify-between h-28 shadow-lg overflow-hidden ${
+                        selectedMethodId === 'kinguin'
+                          ? 'border-2 border-amber-400 shadow-[0_0_15px_rgba(245,158,11,0.25)] bg-[#1A1F2C]'
+                          : 'border border-[#252B3B] hover:border-amber-400/40'
+                      }`}
                     >
                       <div className="flex items-center gap-1.5">
                         <span className="text-amber-400 text-xs">👑</span>
                         <span className="font-display font-black text-xs text-white tracking-wider">KINGUIN</span>
                       </div>
-                      <div className="text-[9px] font-mono text-slate-400">Wallet card</div>
+                      <div className="flex items-center justify-between text-[9px] font-mono text-slate-400">
+                        <span>Wallet card</span>
+                        {selectedMethodId === 'kinguin' && <Check className="w-3.5 h-3.5 text-amber-400" />}
+                      </div>
                     </button>
 
                     {/* 7. ENEBA */}
@@ -2051,15 +2185,23 @@ export const HellcasePayBySkinsModal: React.FC<HellcasePayBySkinsModalProps> = (
                       type="button"
                       onClick={() => {
                         sound.playSelect();
+                        setSelectedMethodId('eneba');
                         setActiveView('giftcards');
                       }}
-                      className="p-3 rounded-2xl bg-[#151821] hover:bg-[#1C202C] border border-[#252B3B] hover:border-amber-400/40 text-left transition cursor-pointer group flex flex-col justify-between h-28 shadow-lg"
+                      className={`relative p-3 rounded-2xl bg-[#151821] hover:bg-[#1C202C] text-left transition cursor-pointer group flex flex-col justify-between h-28 shadow-lg overflow-hidden ${
+                        selectedMethodId === 'eneba'
+                          ? 'border-2 border-amber-400 shadow-[0_0_15px_rgba(245,158,11,0.25)] bg-[#1A1F2C]'
+                          : 'border border-[#252B3B] hover:border-amber-400/40'
+                      }`}
                     >
                       <div className="flex items-center gap-1.5">
                         <span className="text-purple-400 text-xs">🎮</span>
                         <span className="font-bold text-xs text-white">eneba</span>
                       </div>
-                      <div className="text-[9px] font-mono text-slate-400">Wallet card</div>
+                      <div className="flex items-center justify-between text-[9px] font-mono text-slate-400">
+                        <span>Wallet card</span>
+                        {selectedMethodId === 'eneba' && <Check className="w-3.5 h-3.5 text-amber-400" />}
+                      </div>
                     </button>
 
                     {/* 8. SWAPPED */}
@@ -2067,12 +2209,23 @@ export const HellcasePayBySkinsModal: React.FC<HellcasePayBySkinsModalProps> = (
                       type="button"
                       onClick={() => {
                         sound.playSelect();
+                        setSelectedMethodId('swapped');
                         setActiveView('cards');
                       }}
-                      className="p-3 rounded-2xl bg-[#151821] hover:bg-[#1C202C] border border-[#252B3B] hover:border-amber-400/40 text-left transition cursor-pointer group flex flex-col justify-between h-28 shadow-lg"
+                      className={`relative p-3 rounded-2xl bg-[#151821] hover:bg-[#1C202C] text-left transition cursor-pointer group flex flex-col justify-between h-28 shadow-lg overflow-hidden ${
+                        selectedMethodId === 'swapped'
+                          ? 'border-2 border-amber-400 shadow-[0_0_15px_rgba(245,158,11,0.25)] bg-[#1A1F2C]'
+                          : 'border border-[#252B3B] hover:border-amber-400/40'
+                      }`}
                     >
-                      <div className="text-[10px] font-mono font-bold text-slate-300">SWAPPED</div>
-                      <div className="text-[8px] font-mono text-slate-400">paysafecard • Revolut • 30+ more</div>
+                      <div>
+                        <div className="text-[10px] font-mono font-bold text-slate-300">SWAPPED</div>
+                        <div className="text-[8px] font-mono text-slate-400">paysafecard • Revolut • 30+ more</div>
+                      </div>
+                      <div className="flex items-center justify-between text-[9px] font-mono text-slate-400">
+                        <span>Multi-Pay</span>
+                        {selectedMethodId === 'swapped' && <Check className="w-3.5 h-3.5 text-amber-400" />}
+                      </div>
                     </button>
 
                     {/* 9. DIGITAL GIFTCARDS */}
@@ -2080,10 +2233,11 @@ export const HellcasePayBySkinsModal: React.FC<HellcasePayBySkinsModalProps> = (
                       type="button"
                       onClick={() => {
                         sound.playSelect();
+                        setSelectedMethodId('giftcards');
                         setActiveView('giftcards');
                       }}
                       className={`relative p-3 rounded-2xl bg-[#151821] hover:bg-[#1C202C] text-left transition cursor-pointer group flex flex-col justify-between h-28 shadow-lg overflow-hidden ${
-                        activeView === 'giftcards'
+                        selectedMethodId === 'giftcards'
                           ? 'border-2 border-amber-400 shadow-[0_0_15px_rgba(245,158,11,0.25)] bg-[#1A1F2C]'
                           : 'border border-[#252B3B] hover:border-amber-400/40'
                       }`}
@@ -2092,7 +2246,10 @@ export const HellcasePayBySkinsModal: React.FC<HellcasePayBySkinsModalProps> = (
                         <span>🎁</span>
                         <span>GIFTCARDS</span>
                       </div>
-                      <div className="text-[9px] font-mono text-amber-300">PayPal Supported</div>
+                      <div className="flex items-center justify-between text-[9px] font-mono text-amber-300">
+                        <span>PayPal Supported</span>
+                        {selectedMethodId === 'giftcards' && <Check className="w-3.5 h-3.5 text-amber-400" />}
+                      </div>
                     </button>
 
                     {/* 10. PREMIUM */}
@@ -2100,15 +2257,23 @@ export const HellcasePayBySkinsModal: React.FC<HellcasePayBySkinsModalProps> = (
                       type="button"
                       onClick={() => {
                         sound.playSelect();
+                        setSelectedMethodId('premium');
                         setActiveView('cards');
                       }}
-                      className="p-3 rounded-2xl bg-[#151821] hover:bg-[#1C202C] border border-[#252B3B] hover:border-amber-400/40 text-left transition cursor-pointer group flex flex-col justify-between h-28 shadow-lg"
+                      className={`relative p-3 rounded-2xl bg-[#151821] hover:bg-[#1C202C] text-left transition cursor-pointer group flex flex-col justify-between h-28 shadow-lg overflow-hidden ${
+                        selectedMethodId === 'premium'
+                          ? 'border-2 border-amber-400 shadow-[0_0_15px_rgba(245,158,11,0.25)] bg-[#1A1F2C]'
+                          : 'border border-[#252B3B] hover:border-amber-400/40'
+                      }`}
                     >
                       <div className="flex items-center gap-1.5">
                         <span className="text-sm">💎</span>
                         <span className="font-display font-black text-xs text-amber-400">PREMIUM</span>
                       </div>
-                      <div className="text-[9px] font-mono text-slate-400">VIP Status</div>
+                      <div className="flex items-center justify-between text-[9px] font-mono text-slate-400">
+                        <span>VIP Status</span>
+                        {selectedMethodId === 'premium' && <Check className="w-3.5 h-3.5 text-amber-400" />}
+                      </div>
                     </button>
                   </div>
                 </div>
@@ -2118,10 +2283,10 @@ export const HellcasePayBySkinsModal: React.FC<HellcasePayBySkinsModalProps> = (
                 </p>
               </div>
 
-              {/* RIGHT PANE: CARDS / CRYPTO / GIFTCARDS */}
+              {/* RIGHT PANE: TAILORED ACTION VIEW PER METHOD */}
               <div className="flex-1 p-3.5 sm:p-6 overflow-y-auto bg-[#0A0B0E] flex flex-col justify-between min-h-0">
-                {/* VIEW: CRYPTO */}
-                {activeView === 'crypto' && (
+                {/* 1. CRYPTO VIEW */}
+                {selectedMethodId === 'crypto' && (
                   <div className="space-y-5 flex-1 flex flex-col justify-between">
                     <div className="space-y-4">
                       <div className="flex flex-wrap items-center gap-2">
@@ -2205,16 +2370,46 @@ export const HellcasePayBySkinsModal: React.FC<HellcasePayBySkinsModalProps> = (
                         )}
                       </div>
                     </div>
+
+                    <button
+                      type="button"
+                      onClick={() => {
+                        sound.playSelect();
+                        setXsollaMethodPreset('crypto');
+                        setXsollaCheckoutItem({
+                          id: `crypto-topup-${Date.now()}`,
+                          sku: 'VTX-CRYPTO-TOPUP',
+                          title: `${selectedCardAmount.toFixed(2)} € Web3 Crypto Top-Up`,
+                          description: 'Instant automated cryptocurrency deposit via Xsolla Web3 Payment Gateway',
+                          amountEur: selectedCardAmount,
+                          type: 'wallet_topup'
+                        });
+                      }}
+                      className="w-full py-3 rounded-xl bg-purple-500/15 hover:bg-purple-500/25 border border-purple-500/30 text-purple-300 font-mono text-xs font-bold transition flex items-center justify-center gap-2 cursor-pointer shadow-sm"
+                    >
+                      <Sparkles className="w-4 h-4 text-purple-400" />
+                      <span>Or Checkout via Xsolla Web3 Crypto Gateway</span>
+                      <ArrowRight className="w-4 h-4" />
+                    </button>
                   </div>
                 )}
 
-                {/* VIEW: CARDS */}
-                {activeView === 'cards' && (
+                {/* 2. CARD VIEW (VISA TOP & VISA DIRECT) */}
+                {(selectedMethodId === 'visa_top' || selectedMethodId === 'visa_direct') && (
                   <div className="space-y-5 flex-1 flex flex-col justify-between">
                     <div className="space-y-4">
                       <div>
-                        <h3 className="text-base font-black font-display text-white">Deposit with Card / VISA / MasterCard</h3>
-                        <p className="text-xs font-mono text-slate-400 mt-1">Select deposit package to replenish balance instantly</p>
+                        <div className="flex items-center gap-2">
+                          <h3 className="text-base font-black font-display text-white">
+                            {selectedMethodId === 'visa_top' ? 'Card Payments (VISA / MasterCard / Discover)' : 'Direct Debit & Credit Card'}
+                          </h3>
+                          <span className="px-2 py-0.5 rounded bg-emerald-500/15 text-emerald-400 border border-emerald-500/30 font-mono text-[9px] font-black uppercase">
+                            POWERED BY XSOLLA
+                          </span>
+                        </div>
+                        <p className="text-xs font-mono text-slate-400 mt-1">
+                          Official Xsolla Pay Station 4 Gateway • Instant settlement & 100+ European banks supported
+                        </p>
                       </div>
 
                       <div className="grid grid-cols-2 sm:grid-cols-4 gap-2.5">
@@ -2237,6 +2432,24 @@ export const HellcasePayBySkinsModal: React.FC<HellcasePayBySkinsModalProps> = (
                           </button>
                         ))}
                       </div>
+
+                      <div className="p-4 rounded-2xl bg-[#151821] border border-[#252B3B] space-y-2">
+                        <div className="flex items-center justify-between text-xs font-mono">
+                          <span className="text-slate-400">Payment Processor:</span>
+                          <span className="text-amber-400 font-bold">Xsolla (USA) Inc. • Pay Station 4</span>
+                        </div>
+                        <div className="flex items-center justify-between text-xs font-mono">
+                          <span className="text-slate-400">Security Standard:</span>
+                          <span className="text-white font-bold flex items-center gap-1">
+                            <ShieldCheck className="w-3.5 h-3.5 text-emerald-400" />
+                            PCI-DSS Level 1 & 3D Secure 2.0
+                          </span>
+                        </div>
+                        <div className="flex items-center justify-between text-xs font-mono">
+                          <span className="text-slate-400">Processing Fee:</span>
+                          <span className="text-emerald-400 font-bold">0% (Fee Covered by Platform)</span>
+                        </div>
+                      </div>
                     </div>
 
                     <div className="p-4 rounded-2xl bg-[#151821] border border-[#252B3B] flex items-center justify-between">
@@ -2247,39 +2460,223 @@ export const HellcasePayBySkinsModal: React.FC<HellcasePayBySkinsModalProps> = (
 
                       <button
                         type="button"
-                        disabled={cardProcessing}
                         onClick={() => {
-                          setCardProcessing(true);
                           sound.playSelect();
-                          setTimeout(() => {
-                            setCardProcessing(false);
-                            creditVortexWalletBalance(selectedCardAmount);
-                            sound.playTournamentVictory();
-                            confetti({ particleCount: 100, spread: 70, origin: { y: 0.6 } });
-                            setDepositSuccessMessage(`✓ Card Payment Confirmed! +${selectedCardAmount.toFixed(2)} € credited to your wallet.`);
-                            onSuccess?.(selectedCardAmount);
-                          }, 1600);
+                          setXsollaMethodPreset('card');
+                          setXsollaCheckoutItem({
+                            id: `card-topup-${selectedCardAmount}-${Date.now()}`,
+                            sku: `VTX-CARD-${selectedCardAmount}`,
+                            title: `${selectedCardAmount.toFixed(2)} € Vortex Wallet Funds`,
+                            description: 'Instant credit for official CS2 cases and weapon market withdrawals.',
+                            amountEur: selectedCardAmount,
+                            type: 'wallet_topup'
+                          });
                         }}
-                        className="px-6 py-3 rounded-xl bg-gradient-to-r from-amber-400 via-amber-500 to-yellow-500 hover:from-amber-300 hover:to-yellow-400 text-slate-950 font-mono font-black text-xs transition cursor-pointer shadow-[0_0_20px_rgba(245,158,11,0.3)]"
+                        className="px-6 py-3 rounded-xl bg-gradient-to-r from-amber-400 via-amber-500 to-yellow-500 hover:from-amber-300 hover:to-yellow-400 text-slate-950 font-mono font-black text-xs transition cursor-pointer shadow-[0_0_20px_rgba(245,158,11,0.3)] flex items-center gap-2"
                       >
-                        {cardProcessing ? 'Connecting Gateway...' : 'Pay with Card'}
+                        <span>PAY {selectedCardAmount.toFixed(2)} € VIA XSOLLA</span>
+                        <ArrowRight className="w-4 h-4" />
                       </button>
                     </div>
                   </div>
                 )}
 
-                {/* VIEW: GIFTCARDS */}
-                {activeView === 'giftcards' && (
+                {/* 3. DIGITAL WALLETS (Apple Pay / GPay / Skrill / Neteller) */}
+                {selectedMethodId === 'wallets' && (
                   <div className="space-y-5 flex-1 flex flex-col justify-between">
                     <div className="space-y-4">
                       <div>
-                        <h3 className="text-base font-black font-display text-white">Redeem Giftcard Voucher</h3>
-                        <p className="text-xs font-mono text-slate-400 mt-1">Kinguin, Eneba, or PayPal Digital Giftcard code</p>
+                        <div className="flex items-center gap-2">
+                          <h3 className="text-base font-black font-display text-white">Apple Pay, Google Pay & Skrill</h3>
+                          <span className="px-2 py-0.5 rounded bg-purple-500/15 text-purple-300 border border-purple-500/30 font-mono text-[9px] font-black uppercase">
+                            MOBILE BIOMETRIC
+                          </span>
+                        </div>
+                        <p className="text-xs font-mono text-slate-400 mt-1">
+                          1-touch biometric deposit via Apple TouchID / FaceID, Google Pay or Skrill wallet
+                        </p>
+                      </div>
+
+                      <div className="grid grid-cols-2 sm:grid-cols-4 gap-2.5">
+                        {[10, 25, 50, 100].map(amt => (
+                          <button
+                            key={amt}
+                            type="button"
+                            onClick={() => {
+                              sound.playSelect();
+                              setSelectedCardAmount(amt);
+                            }}
+                            className={`p-3.5 rounded-2xl text-center transition cursor-pointer border ${
+                              selectedCardAmount === amt
+                                ? 'bg-amber-500/20 border-2 border-amber-400 text-amber-300 shadow-[0_0_15px_rgba(245,158,11,0.25)]'
+                                : 'bg-[#151821] border-[#252B3B] text-white hover:border-slate-500'
+                            }`}
+                          >
+                            <div className="text-lg font-black font-display">{amt.toFixed(2)} €</div>
+                            <div className="text-[10px] font-mono text-slate-400 mt-1">Instant Refill</div>
+                          </button>
+                        ))}
+                      </div>
+
+                      <div className="p-4 rounded-2xl bg-[#151821] border border-[#252B3B] flex items-center justify-between">
+                        <div className="flex items-center gap-3">
+                          <span className="px-2 py-1 rounded bg-black/60 text-white font-mono text-xs font-bold">Apple Pay</span>
+                          <span className="px-2 py-1 rounded bg-black/60 text-white font-mono text-xs font-bold">Google Pay</span>
+                          <span className="px-2 py-1 rounded bg-purple-500/20 text-purple-300 font-mono text-xs font-bold">Skrill</span>
+                        </div>
+                        <span className="text-[11px] font-mono text-slate-400">Powered by Xsolla</span>
+                      </div>
+                    </div>
+
+                    <div className="p-4 rounded-2xl bg-[#151821] border border-[#252B3B] flex items-center justify-between">
+                      <div>
+                        <div className="text-xs font-mono text-slate-400">Amount to pay:</div>
+                        <div className="text-xl font-black font-display text-amber-400">{selectedCardAmount.toFixed(2)} €</div>
+                      </div>
+
+                      <button
+                        type="button"
+                        onClick={() => {
+                          sound.playSelect();
+                          setXsollaMethodPreset('apple_pay');
+                          setXsollaCheckoutItem({
+                            id: `wallet-topup-${selectedCardAmount}-${Date.now()}`,
+                            sku: `VTX-MOB-${selectedCardAmount}`,
+                            title: `${selectedCardAmount.toFixed(2)} € Mobile Wallet Credit`,
+                            description: 'Instant mobile biometric deposit via Apple Pay / GPay / Skrill on Xsolla.',
+                            amountEur: selectedCardAmount,
+                            type: 'wallet_topup'
+                          });
+                        }}
+                        className="px-6 py-3 rounded-xl bg-gradient-to-r from-amber-400 via-amber-500 to-yellow-500 hover:from-amber-300 hover:to-yellow-400 text-slate-950 font-mono font-black text-xs transition cursor-pointer shadow-[0_0_20px_rgba(245,158,11,0.3)] flex items-center gap-2"
+                      >
+                        <span>PAY {selectedCardAmount.toFixed(2)} € WITH E-WALLETS</span>
+                        <ArrowRight className="w-4 h-4" />
+                      </button>
+                    </div>
+                  </div>
+                )}
+
+                {/* 4. SWAPPED VIEW (Paysafecard / Revolut / Regional) */}
+                {selectedMethodId === 'swapped' && (
+                  <div className="space-y-5 flex-1 flex flex-col justify-between">
+                    <div className="space-y-4">
+                      <div>
+                        <div className="flex items-center gap-2">
+                          <h3 className="text-base font-black font-display text-white">Paysafecard, Revolut & Multi-Pay</h3>
+                          <span className="px-2 py-0.5 rounded bg-blue-500/15 text-blue-400 border border-blue-500/30 font-mono text-[9px] font-black uppercase">
+                            CASH & REVOLUT
+                          </span>
+                        </div>
+                        <p className="text-xs font-mono text-slate-400 mt-1">
+                          Deposit using Paysafecard 16-digit voucher PIN, Revolut Pay, Sofort, or iDEAL via Xsolla
+                        </p>
+                      </div>
+
+                      <div className="grid grid-cols-2 sm:grid-cols-4 gap-2.5">
+                        {[10, 25, 50, 100].map(amt => (
+                          <button
+                            key={amt}
+                            type="button"
+                            onClick={() => {
+                              sound.playSelect();
+                              setSelectedCardAmount(amt);
+                            }}
+                            className={`p-3.5 rounded-2xl text-center transition cursor-pointer border ${
+                              selectedCardAmount === amt
+                                ? 'bg-amber-500/20 border-2 border-amber-400 text-amber-300 shadow-[0_0_15px_rgba(245,158,11,0.25)]'
+                                : 'bg-[#151821] border-[#252B3B] text-white hover:border-slate-500'
+                            }`}
+                          >
+                            <div className="text-lg font-black font-display">{amt.toFixed(2)} €</div>
+                            <div className="text-[10px] font-mono text-slate-400 mt-1">Instant PIN</div>
+                          </button>
+                        ))}
+                      </div>
+
+                      <div className="p-4 rounded-2xl bg-[#151821] border border-[#252B3B] space-y-2">
+                        <div className="flex items-center justify-between text-xs font-mono text-slate-300">
+                          <span>Supported Networks:</span>
+                          <span className="text-amber-400 font-bold">Paysafecard, Revolut Pay, Sofort, iDeal</span>
+                        </div>
+                        <p className="text-[11px] font-mono text-slate-400">
+                          No credit card required. Safe cash voucher and European regional bank deposit.
+                        </p>
+                      </div>
+                    </div>
+
+                    <div className="p-4 rounded-2xl bg-[#151821] border border-[#252B3B] flex items-center justify-between">
+                      <div>
+                        <div className="text-xs font-mono text-slate-400">Amount to pay:</div>
+                        <div className="text-xl font-black font-display text-amber-400">{selectedCardAmount.toFixed(2)} €</div>
+                      </div>
+
+                      <button
+                        type="button"
+                        onClick={() => {
+                          sound.playSelect();
+                          setXsollaMethodPreset('paysafecard');
+                          setXsollaCheckoutItem({
+                            id: `swapped-topup-${selectedCardAmount}-${Date.now()}`,
+                            sku: `VTX-SWAP-${selectedCardAmount}`,
+                            title: `${selectedCardAmount.toFixed(2)} € Paysafecard / Multi-Pay`,
+                            description: 'Prepaid voucher & Revolut deposit via Xsolla Pay Station.',
+                            amountEur: selectedCardAmount,
+                            type: 'wallet_topup'
+                          });
+                        }}
+                        className="px-6 py-3 rounded-xl bg-gradient-to-r from-amber-400 via-amber-500 to-yellow-500 hover:from-amber-300 hover:to-yellow-400 text-slate-950 font-mono font-black text-xs transition cursor-pointer shadow-[0_0_20px_rgba(245,158,11,0.3)] flex items-center gap-2"
+                      >
+                        <span>PAY {selectedCardAmount.toFixed(2)} € VIA XSOLLA</span>
+                        <ArrowRight className="w-4 h-4" />
+                      </button>
+                    </div>
+                  </div>
+                )}
+
+                {/* 5. GIFTCARDS & PAYPAL VIEW */}
+                {selectedMethodId === 'giftcards' && (
+                  <div className="space-y-5 flex-1 flex flex-col justify-between">
+                    <div className="space-y-4">
+                      <div>
+                        <div className="flex items-center gap-2">
+                          <h3 className="text-base font-black font-display text-white">PayPal Checkout & Giftcard Codes</h3>
+                          <span className="px-2 py-0.5 rounded bg-blue-500/15 text-blue-400 border border-blue-500/30 font-mono text-[9px] font-black uppercase">
+                            PAYPAL / CODE
+                          </span>
+                        </div>
+                        <p className="text-xs font-mono text-slate-400 mt-1">Pay with verified PayPal or redeem 16-character digital giftcard code</p>
+                      </div>
+
+                      <div className="p-4 rounded-2xl bg-[#151821] border border-[#252B3B] space-y-3">
+                        <div className="flex items-center justify-between">
+                          <span className="text-xs font-mono font-bold text-white">Option A: Pay with PayPal</span>
+                          <span className="text-amber-400 text-xs font-mono font-bold">{selectedCardAmount.toFixed(2)} €</span>
+                        </div>
+                        <button
+                          type="button"
+                          onClick={() => {
+                            sound.playSelect();
+                            setXsollaMethodPreset('paypal');
+                            setXsollaCheckoutItem({
+                              id: `paypal-topup-${selectedCardAmount}-${Date.now()}`,
+                              sku: `VTX-PAYPAL-${selectedCardAmount}`,
+                              title: `${selectedCardAmount.toFixed(2)} € PayPal Top-Up`,
+                              description: 'Instant PayPal deposit via Xsolla Pay Station.',
+                              amountEur: selectedCardAmount,
+                              type: 'wallet_topup'
+                            });
+                          }}
+                          className="w-full py-3 rounded-xl bg-gradient-to-r from-blue-600 via-indigo-600 to-blue-700 hover:from-blue-500 hover:to-indigo-500 text-white font-mono font-black text-xs transition cursor-pointer shadow-lg flex items-center justify-center gap-2"
+                        >
+                          <span>PAY {selectedCardAmount.toFixed(2)} € VIA XSOLLA PAYPAL</span>
+                          <ArrowRight className="w-4 h-4" />
+                        </button>
                       </div>
 
                       <div className="p-4 rounded-2xl bg-[#151821] border border-[#252B3B] space-y-3">
                         <label className="text-xs font-mono font-bold text-white block">
-                          Enter 16-character voucher code:
+                          Option B: Enter 16-character voucher code:
                         </label>
                         <input
                           type="text"
@@ -2294,35 +2691,265 @@ export const HellcasePayBySkinsModal: React.FC<HellcasePayBySkinsModalProps> = (
                             <span>{voucherError}</span>
                           </p>
                         )}
+                        <button
+                          type="button"
+                          onClick={() => {
+                            if (!voucherCode || voucherCode.trim().length < 8) {
+                              setVoucherError('Please enter a valid giftcard code (e.g. VRTX-2024-PASS)');
+                              sound.playClick();
+                              return;
+                            }
+                            const val = 25.00;
+                            creditVortexWalletBalance(val);
+                            sound.playTournamentVictory();
+                            confetti({ particleCount: 100, spread: 70, origin: { y: 0.6 } });
+                            setDepositSuccessMessage(`✓ Giftcard Redeemed! +${val.toFixed(2)} € added to your balance.`);
+                            setVoucherCode('');
+                            setVoucherError(null);
+                            onSuccess?.(val);
+                          }}
+                          className="w-full py-2.5 rounded-xl bg-amber-400/20 hover:bg-amber-400/30 border border-amber-400/40 text-amber-300 font-mono font-bold text-xs uppercase tracking-wide transition cursor-pointer"
+                        >
+                          Redeem Voucher Code
+                        </button>
+                      </div>
+                    </div>
+                  </div>
+                )}
+
+                {/* 6. KINGUIN VIEW */}
+                {selectedMethodId === 'kinguin' && (
+                  <div className="space-y-5 flex-1 flex flex-col justify-between">
+                    <div className="space-y-4">
+                      <div>
+                        <div className="flex items-center gap-2">
+                          <h3 className="text-base font-black font-display text-white">Kinguin Wallet Card</h3>
+                          <span className="px-2 py-0.5 rounded bg-amber-500/15 text-amber-300 border border-amber-500/30 font-mono text-[9px] font-black uppercase">
+                            OFFICIAL PARTNER
+                          </span>
+                        </div>
+                        <p className="text-xs font-mono text-slate-400 mt-1">Redeem your Kinguin CS2 gift card code or purchase instantly on Kinguin.net</p>
+                      </div>
+
+                      <div className="p-4 rounded-2xl bg-[#151821] border border-[#252B3B] space-y-3">
+                        <label className="text-xs font-mono font-bold text-white block">
+                          Enter your 16-character Kinguin code:
+                        </label>
+                        <input
+                          type="text"
+                          value={voucherCode}
+                          onChange={(e) => setVoucherCode(e.target.value.toUpperCase())}
+                          placeholder="KING-XXXX-XXXX-XXXX"
+                          className="w-full p-3 rounded-xl bg-black/50 border border-[#252B3B] font-mono text-sm tracking-widest text-amber-300 outline-none focus:border-amber-400 uppercase"
+                        />
+                        {voucherError && (
+                          <p className="text-xs font-mono text-red-400 flex items-center gap-1">
+                            <AlertCircle className="w-3.5 h-3.5" />
+                            <span>{voucherError}</span>
+                          </p>
+                        )}
+                        <button
+                          type="button"
+                          onClick={() => {
+                            if (!voucherCode || voucherCode.trim().length < 8) {
+                              setVoucherError('Please enter a valid Kinguin code (e.g. KING-2024-VRTX)');
+                              sound.playClick();
+                              return;
+                            }
+                            const val = 25.00;
+                            creditVortexWalletBalance(val);
+                            sound.playTournamentVictory();
+                            confetti({ particleCount: 100, spread: 70, origin: { y: 0.6 } });
+                            setDepositSuccessMessage(`✓ Kinguin Card Redeemed! +${val.toFixed(2)} € added to your balance.`);
+                            setVoucherCode('');
+                            setVoucherError(null);
+                            onSuccess?.(val);
+                          }}
+                          className="w-full py-3 rounded-xl bg-gradient-to-r from-amber-400 via-amber-500 to-yellow-500 hover:from-amber-300 hover:to-yellow-400 text-slate-950 font-mono font-black text-xs uppercase tracking-wide transition cursor-pointer shadow-lg"
+                        >
+                          Redeem Kinguin Card
+                        </button>
+                      </div>
+
+                      <div className="p-4 rounded-2xl bg-[#151821] border border-[#252B3B] flex items-center justify-between">
+                        <div>
+                          <div className="text-xs font-bold text-white">Don't have a Kinguin code yet?</div>
+                          <div className="text-[10px] font-mono text-slate-400">Buy Vortex CS2 giftcards directly with PayPal, cards, or crypto.</div>
+                        </div>
+                        <a
+                          href="https://www.kinguin.net"
+                          target="_blank"
+                          rel="noreferrer"
+                          className="px-4 py-2.5 rounded-xl bg-white/10 hover:bg-white/20 text-white font-mono text-xs font-bold transition flex items-center gap-1.5"
+                        >
+                          <span>Buy on Kinguin</span>
+                          <ExternalLink className="w-3.5 h-3.5" />
+                        </a>
+                      </div>
+                    </div>
+                  </div>
+                )}
+
+                {/* 7. ENEBA VIEW */}
+                {selectedMethodId === 'eneba' && (
+                  <div className="space-y-5 flex-1 flex flex-col justify-between">
+                    <div className="space-y-4">
+                      <div>
+                        <div className="flex items-center gap-2">
+                          <h3 className="text-base font-black font-display text-white">Eneba Wallet Card</h3>
+                          <span className="px-2 py-0.5 rounded bg-purple-500/15 text-purple-300 border border-purple-500/30 font-mono text-[9px] font-black uppercase">
+                            OFFICIAL PARTNER
+                          </span>
+                        </div>
+                        <p className="text-xs font-mono text-slate-400 mt-1">Redeem your Eneba gift card voucher code or buy instantly on Eneba.com</p>
+                      </div>
+
+                      <div className="p-4 rounded-2xl bg-[#151821] border border-[#252B3B] space-y-3">
+                        <label className="text-xs font-mono font-bold text-white block">
+                          Enter your 16-character Eneba code:
+                        </label>
+                        <input
+                          type="text"
+                          value={voucherCode}
+                          onChange={(e) => setVoucherCode(e.target.value.toUpperCase())}
+                          placeholder="ENEB-XXXX-XXXX-XXXX"
+                          className="w-full p-3 rounded-xl bg-black/50 border border-[#252B3B] font-mono text-sm tracking-widest text-purple-300 outline-none focus:border-purple-400 uppercase"
+                        />
+                        {voucherError && (
+                          <p className="text-xs font-mono text-red-400 flex items-center gap-1">
+                            <AlertCircle className="w-3.5 h-3.5" />
+                            <span>{voucherError}</span>
+                          </p>
+                        )}
+                        <button
+                          type="button"
+                          onClick={() => {
+                            if (!voucherCode || voucherCode.trim().length < 8) {
+                              setVoucherError('Please enter a valid Eneba code (e.g. ENEB-2024-VRTX)');
+                              sound.playClick();
+                              return;
+                            }
+                            const val = 25.00;
+                            creditVortexWalletBalance(val);
+                            sound.playTournamentVictory();
+                            confetti({ particleCount: 100, spread: 70, origin: { y: 0.6 } });
+                            setDepositSuccessMessage(`✓ Eneba Card Redeemed! +${val.toFixed(2)} € added to your balance.`);
+                            setVoucherCode('');
+                            setVoucherError(null);
+                            onSuccess?.(val);
+                          }}
+                          className="w-full py-3 rounded-xl bg-gradient-to-r from-purple-500 via-indigo-600 to-purple-600 hover:from-purple-400 hover:to-indigo-500 text-white font-mono font-black text-xs uppercase tracking-wide transition cursor-pointer shadow-lg"
+                        >
+                          Redeem Eneba Card
+                        </button>
+                      </div>
+
+                      <div className="p-4 rounded-2xl bg-[#151821] border border-[#252B3B] flex items-center justify-between">
+                        <div>
+                          <div className="text-xs font-bold text-white">Don't have an Eneba code yet?</div>
+                          <div className="text-[10px] font-mono text-slate-400">Buy Vortex CS2 giftcards directly with 0% fee on Eneba.com.</div>
+                        </div>
+                        <a
+                          href="https://www.eneba.com"
+                          target="_blank"
+                          rel="noreferrer"
+                          className="px-4 py-2.5 rounded-xl bg-white/10 hover:bg-white/20 text-white font-mono text-xs font-bold transition flex items-center gap-1.5"
+                        >
+                          <span>Buy on Eneba</span>
+                          <ExternalLink className="w-3.5 h-3.5" />
+                        </a>
+                      </div>
+                    </div>
+                  </div>
+                )}
+
+                {/* 8. PREMIUM / VIP VIEW */}
+                {selectedMethodId === 'premium' && (
+                  <div className="space-y-5 flex-1 flex flex-col justify-between">
+                    <div className="space-y-4">
+                      <div>
+                        <div className="flex items-center gap-2">
+                          <h3 className="text-base font-black font-display text-white">VORTEX VIP ELITE & PRO PASS</h3>
+                          <span className="px-2 py-0.5 rounded bg-amber-500/20 text-amber-400 border border-amber-500/40 font-mono text-[9px] font-black uppercase">
+                            POWERED BY XSOLLA
+                          </span>
+                        </div>
+                        <p className="text-xs font-mono text-slate-400 mt-1">Unlock highest status, zero trade fees, and daily case rewards</p>
+                      </div>
+
+                      <div className="p-4 rounded-2xl bg-gradient-to-br from-amber-500/10 via-[#151821] to-[#12141C] border border-amber-500/30 space-y-3">
+                        <div className="text-xs font-mono font-bold text-amber-300 uppercase tracking-wider">
+                          VIP ELITE BENEFITS:
+                        </div>
+                        <div className="space-y-2 text-xs font-mono text-slate-300">
+                          <div className="flex items-center gap-2">
+                            <Check className="w-3.5 h-3.5 text-amber-400 shrink-0" />
+                            <span><strong>0% fee</strong> on all weapon market sales & skin deliveries</span>
+                          </div>
+                          <div className="flex items-center gap-2">
+                            <Check className="w-3.5 h-3.5 text-amber-400 shrink-0" />
+                            <span><strong>+5% complimentary bonus</strong> automatically on all deposits</span>
+                          </div>
+                          <div className="flex items-center gap-2">
+                            <Check className="w-3.5 h-3.5 text-amber-400 shrink-0" />
+                            <span><strong>Daily Free Case spin</strong> every 24 hours</span>
+                          </div>
+                          <div className="flex items-center gap-2">
+                            <Check className="w-3.5 h-3.5 text-amber-400 shrink-0" />
+                            <span>Golden VIP badge on leaderboard and profile</span>
+                          </div>
+                        </div>
                       </div>
                     </div>
 
-                    <button
-                      type="button"
-                      onClick={() => {
-                        if (!voucherCode || voucherCode.trim().length < 8) {
-                          setVoucherError('Please enter a valid giftcard code (e.g. VRTX-2024-PASS)');
-                          sound.playClick();
-                          return;
-                        }
-                        const val = 25.00;
-                        creditVortexWalletBalance(val);
-                        sound.playTournamentVictory();
-                        confetti({ particleCount: 100, spread: 70, origin: { y: 0.6 } });
-                        setDepositSuccessMessage(`✓ Giftcard Redeemed! +${val.toFixed(2)} € added to your balance.`);
-                        setVoucherCode('');
-                        setVoucherError(null);
-                        onSuccess?.(val);
-                      }}
-                      className="w-full py-3.5 rounded-xl bg-gradient-to-r from-amber-400 via-amber-500 to-yellow-500 hover:from-amber-300 hover:to-yellow-400 text-slate-950 font-mono font-black text-xs uppercase tracking-wide transition cursor-pointer shadow-[0_0_20px_rgba(245,158,11,0.3)]"
-                    >
-                      Redeem Giftcard Voucher
-                    </button>
+                    <div className="p-4 rounded-2xl bg-[#151821] border border-[#252B3B] flex items-center justify-between">
+                      <div>
+                        <div className="text-xs font-mono text-slate-400">Monthly Subscription:</div>
+                        <div className="text-xl font-black font-display text-amber-400">14.99 € <span className="text-xs font-mono text-slate-400">/ month</span></div>
+                      </div>
+
+                      <button
+                        type="button"
+                        onClick={() => {
+                          sound.playSelect();
+                          setXsollaMethodPreset('card');
+                          setXsollaCheckoutItem({
+                            id: 'sub-vip-elite-monthly',
+                            sku: 'VTX-SUB-VIP',
+                            title: 'VORTEX VIP ELITE Monthly Pass',
+                            description: 'Full competitive privileges: 0% trade fees, +5% deposit bonus, daily free cases.',
+                            amountEur: 14.99,
+                            type: 'membership_vip'
+                          });
+                        }}
+                        className="px-6 py-3 rounded-xl bg-gradient-to-r from-amber-400 via-amber-500 to-yellow-500 hover:from-amber-300 hover:to-yellow-400 text-slate-950 font-mono font-black text-xs transition cursor-pointer shadow-[0_0_20px_rgba(245,158,11,0.3)] flex items-center gap-2"
+                      >
+                        <span>GET VIP VIA XSOLLA</span>
+                        <ArrowRight className="w-4 h-4" />
+                      </button>
+                    </div>
                   </div>
                 )}
               </div>
             </div>
           </div>
+        )}
+
+        {/* OFFICIAL XSOLLA PAY STATION 4 GATEWAY CHECKOUT DIALOG */}
+        {xsollaCheckoutItem && (
+          <XsollaCheckoutModal
+            isOpen={Boolean(xsollaCheckoutItem)}
+            onClose={() => setXsollaCheckoutItem(null)}
+            initialItem={xsollaCheckoutItem}
+            initialPaymentMethod={xsollaMethodPreset}
+            onPaymentSuccess={(res) => {
+              sound.playTournamentVictory();
+              confetti({ particleCount: 100, spread: 70, origin: { y: 0.6 } });
+              setDepositSuccessMessage(`✓ Payment Confirmed via Xsolla (${res.paymentMethod})! +${res.amountEur.toFixed(2)} € credited to your wallet.`);
+              onSuccess?.(res.amountEur);
+              setXsollaCheckoutItem(null);
+            }}
+          />
         )}
 
       </div>
