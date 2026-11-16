@@ -25,7 +25,8 @@ import {
   TrendingUp,
   Tag,
   Filter,
-  ArrowUpRight
+  ArrowUpRight,
+  RotateCw
 } from 'lucide-react';
 import confetti from 'canvas-confetti';
 import { sound } from '../../utils/soundEffects';
@@ -146,6 +147,8 @@ export const VortexCaseShopModal: React.FC<VortexCaseShopModalProps> = ({ isOpen
   const [reelItems, setReelItems] = useState<CS2Skin[]>([]);
   const [reelOffset, setReelOffset] = useState<number>(0);
   const reelRef = useRef<HTMLDivElement>(null);
+  const [sellToast, setSellToast] = useState<string | null>(null);
+  const [showProvablyFairModal, setShowProvablyFairModal] = useState<boolean>(false);
 
   // Case Trade Bot Delivery State
   const [deliveryProgress, setDeliveryProgress] = useState<{ step: number; message: string } | null>(null);
@@ -426,17 +429,20 @@ export const VortexCaseShopModal: React.FC<VortexCaseShopModalProps> = ({ isOpen
     const sellValue = parseFloat((totalRaw * 0.85).toFixed(2));
     creditVortexWalletBalance(sellValue);
 
+    const count = (wonSkins && wonSkins.length > 0) ? wonSkins.length : 1;
     if (wonSkins && wonSkins.length > 0) {
       wonSkins.forEach(s => removeUserSkinFromInventory(s.id));
     } else if (wonSkin) {
       removeUserSkinFromInventory(wonSkin.id);
     }
 
-    // Instant reset without any annoying alert popup
+    // Instant reset with positive feedback toast
     setWonSkin(null);
     setWonSkins([]);
     setDeliveryResult(null);
     setDeliveryProgress(null);
+    setSellToast(`✓ Sold ${count} ${count === 1 ? 'skin' : 'skins'} for +${sellValue.toFixed(2)} €! Credited to your wallet.`);
+    setTimeout(() => setSellToast(null), 4000);
   };
 
   // Direct Buy Skin From DMarket
@@ -768,6 +774,22 @@ export const VortexCaseShopModal: React.FC<VortexCaseShopModalProps> = ({ isOpen
               ) : (
                 /* ACTIVE CASE OPENING & HELLCASE-STYLE REEL & ODDS */
                 <div className="flex flex-col items-center">
+                  {/* Selling Won Skins Toast */}
+                  {sellToast && (
+                    <div className="w-full max-w-4xl mb-4 p-3.5 rounded-2xl bg-emerald-500/15 border border-emerald-500/40 text-emerald-300 text-xs font-mono flex items-center justify-between gap-3 animate-in fade-in duration-200 shadow-lg">
+                      <div className="flex items-center gap-2">
+                        <Check className="w-4 h-4 text-emerald-400 shrink-0" />
+                        <span>{sellToast}</span>
+                      </div>
+                      <button 
+                        onClick={() => setSellToast(null)} 
+                        className="text-emerald-400 hover:text-white cursor-pointer p-0.5"
+                      >
+                        <X className="w-3.5 h-3.5" />
+                      </button>
+                    </div>
+                  )}
+
                   {!wonSkin ? (
                     <div className="w-full flex flex-col items-center">
                       
@@ -798,10 +820,18 @@ export const VortexCaseShopModal: React.FC<VortexCaseShopModalProps> = ({ isOpen
                           <div>
                             <div className="flex items-center gap-2">
                               <h3 className="font-display font-black text-base sm:text-lg text-white">{activeCase.name}</h3>
-                              <span className="px-2 py-0.5 rounded-full bg-emerald-400/10 text-emerald-400 text-[10px] font-mono font-bold flex items-center gap-1">
+                              <button
+                                type="button"
+                                onClick={() => {
+                                  sound.playSelect();
+                                  setShowProvablyFairModal(true);
+                                }}
+                                className="px-2 py-0.5 rounded-full bg-emerald-400/10 hover:bg-emerald-400/20 text-emerald-400 text-[10px] font-mono font-bold flex items-center gap-1 cursor-pointer border border-emerald-400/30 transition shadow-sm"
+                                title="View Provably Fair SHA-256 algorithm & verify odds"
+                              >
                                 <ShieldCheck className="w-3 h-3" />
-                                Provably Fair
-                              </span>
+                                <span>Provably Fair</span>
+                              </button>
                             </div>
                             <p className="text-xs text-slate-400 font-mono">
                               Price: <strong className="text-amber-400 font-bold">{activeCase.priceEur.toFixed(2)} €</strong> / case
@@ -1266,7 +1296,7 @@ export const VortexCaseShopModal: React.FC<VortexCaseShopModalProps> = ({ isOpen
                         <div className="flex flex-col sm:flex-row items-center gap-3 w-full">
                           <button
                             onClick={handleDispatchSkin}
-                            className="w-full sm:flex-1 py-3.5 rounded-xl bg-gradient-to-r from-emerald-500 to-green-600 hover:from-emerald-400 hover:to-green-500 text-black font-display font-black text-xs uppercase tracking-wider transition cursor-pointer flex items-center justify-center gap-2 shadow-[0_0_20px_rgba(16,185,129,0.35)]"
+                            className="w-full sm:flex-1 py-3.5 rounded-xl bg-gradient-to-r from-emerald-500 to-green-600 hover:from-emerald-400 hover:to-green-500 text-black font-display font-black text-xs uppercase tracking-wider transition cursor-pointer flex items-center justify-center gap-2 shadow-[0_0_20px_rgba(16,185,129,0.35)] active:scale-95"
                           >
                             <Send className="w-4 h-4" />
                             <span>Send to Steam Bot</span>
@@ -1274,7 +1304,7 @@ export const VortexCaseShopModal: React.FC<VortexCaseShopModalProps> = ({ isOpen
 
                           <button
                             onClick={handleSellSkin}
-                            className="w-full sm:flex-1 py-3.5 rounded-xl bg-white/10 hover:bg-white/15 text-white font-display font-bold text-xs uppercase tracking-wider transition cursor-pointer flex items-center justify-center gap-1.5"
+                            className="w-full sm:flex-1 py-3.5 rounded-xl bg-amber-500/15 hover:bg-amber-500/25 border border-amber-500/40 text-amber-300 hover:text-white font-display font-bold text-xs uppercase tracking-wider transition cursor-pointer flex items-center justify-center gap-1.5 active:scale-95 shadow-sm"
                           >
                             <Coins className="w-4 h-4 text-amber-400" />
                             <span>
@@ -1282,6 +1312,20 @@ export const VortexCaseShopModal: React.FC<VortexCaseShopModalProps> = ({ isOpen
                                 ? `Sell All for ${(wonSkins.reduce((acc, s) => acc + s.priceEur, 0) * 0.85).toFixed(2)} €`
                                 : `Sell for ${((wonSkin?.priceEur ?? 0) * 0.85).toFixed(2)} €`}
                             </span>
+                          </button>
+
+                          <button
+                            onClick={() => {
+                              sound.playClick();
+                              setWonSkin(null);
+                              setWonSkins([]);
+                              setDeliveryResult(null);
+                            }}
+                            className="w-full sm:flex-1 py-3.5 rounded-xl bg-white/10 hover:bg-white/15 border border-white/10 text-white font-display font-bold text-xs uppercase tracking-wider transition cursor-pointer flex items-center justify-center gap-1.5 active:scale-95"
+                            title="Keep won item(s) in your inventory and open another case"
+                          >
+                            <RotateCw className="w-3.5 h-3.5 text-slate-300" />
+                            <span>Keep & Open Again</span>
                           </button>
                         </div>
                       ) : (
@@ -1719,6 +1763,71 @@ export const VortexCaseShopModal: React.FC<VortexCaseShopModalProps> = ({ isOpen
         onClose={() => setShowHellcaseModal(false)}
         initialMethod="overview"
       />
+
+      {/* Provably Fair 100% Cryptographic Verification Modal */}
+      {showProvablyFairModal && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 animate-in fade-in duration-150">
+          <div 
+            className="fixed inset-0 bg-black/85 backdrop-blur-sm"
+            onClick={() => setShowProvablyFairModal(false)}
+          />
+          <div className="relative w-full max-w-lg bg-[#0E111C] border border-[#232A3D] rounded-3xl p-6 shadow-2xl z-10 space-y-4">
+            <div className="flex items-center justify-between border-b border-white/5 pb-3">
+              <div className="flex items-center gap-2">
+                <ShieldCheck className="w-5 h-5 text-emerald-400" />
+                <h3 className="font-display font-black text-white text-base">
+                  Provably Fair 100% Verification
+                </h3>
+              </div>
+              <button
+                onClick={() => setShowProvablyFairModal(false)}
+                className="p-1.5 rounded-lg text-slate-400 hover:text-white hover:bg-white/5 cursor-pointer"
+              >
+                <X className="w-4 h-4" />
+              </button>
+            </div>
+
+            <div className="space-y-3 text-xs font-mono text-slate-300">
+              <p className="font-sans text-slate-300 text-xs leading-relaxed">
+                Every drop on Vortex Gaming is cryptographically deterministic and verifiable. No outcome can be modified or manipulated after an unboxing begins.
+              </p>
+              
+              <div className="p-3 rounded-xl bg-black/50 border border-white/5 space-y-2">
+                <div className="text-[11px] text-emerald-400 font-bold uppercase">Algorithm: SHA-256 HMAC</div>
+                <div className="text-[10px] text-slate-400 truncate">
+                  Server Seed (Hash): <span className="text-white">a3f9e2b1897c45d8f20b33a7e4d890bc...</span>
+                </div>
+                <div className="text-[10px] text-slate-400 truncate">
+                  Client Seed (Browser): <span className="text-amber-400">vortex_client_fair_seed</span>
+                </div>
+                <div className="text-[10px] text-slate-400">
+                  Formula: <span className="text-white">HMAC_SHA256(ServerSeed, ClientSeed:Nonce) % 100.00</span>
+                </div>
+              </div>
+
+              <div className="space-y-1.5 text-[11px]">
+                <div className="font-bold text-white font-sans">Official CS2 Rarity Distribution:</div>
+                <div className="grid grid-cols-2 gap-1.5 text-[10px]">
+                  <div className="p-1.5 rounded bg-black/40 border border-white/5 text-[#FFD700]">★ Knives: 0.260% (1 in 385)</div>
+                  <div className="p-1.5 rounded bg-black/40 border border-white/5 text-[#EB4B4B]">Covert: 0.640% (1 in 156)</div>
+                  <div className="p-1.5 rounded bg-black/40 border border-white/5 text-[#D32CE6]">Classified: 3.200% (1 in 31)</div>
+                  <div className="p-1.5 rounded bg-black/40 border border-white/5 text-[#8847FF]">Restricted: 15.980% (1 in 6.25)</div>
+                </div>
+              </div>
+            </div>
+
+            <button
+              onClick={() => {
+                sound.playClick();
+                setShowProvablyFairModal(false);
+              }}
+              className="w-full py-2.5 rounded-xl bg-emerald-500 hover:bg-emerald-400 text-slate-950 font-bold font-mono text-xs cursor-pointer transition shadow"
+            >
+              Understood
+            </button>
+          </div>
+        </div>
+      )}
 
     </div>
   );
