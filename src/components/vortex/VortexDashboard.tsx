@@ -110,6 +110,75 @@ interface PartySlotMember {
   countryName?: string;
 }
 
+const COMING_SOON_TABS: Record<string, {
+  title: string;
+  subtitle: string;
+  desc: string;
+  progress: number;
+  icon: React.ComponentType<{ className?: string }>;
+  color: string;
+  features: string[];
+}> = {
+  tournaments: {
+    title: 'CS2 Tournaments Circuit',
+    subtitle: 'Automated Brackets & Esports Skin Prize Pools',
+    desc: 'Official European competitive tournament circuit featuring single and double elimination brackets, cash prize pools, and guaranteed CS2 skin drops powered by DMarket B2B Steam Bot delivery.',
+    progress: 88,
+    icon: Trophy,
+    color: '#F59E0B',
+    features: [
+      'Automated 32-team single & double elimination brackets',
+      'Dual Prize Pools: Real Cash + Guaranteed Covert Skins',
+      'Instant Steam Bot delivery via DMarket B2B API',
+      '100% Skill-based esports legal compliance'
+    ]
+  },
+  scrims: {
+    title: 'Scrims Hub Arena',
+    subtitle: 'Team Matchmaking & 5v5 Practice Lobbies',
+    desc: 'Automated team scrim finder for organized CS2 rosters. Schedule pracc matches on official 128-tick servers with automated vetoes and GOTV demo recording.',
+    progress: 82,
+    icon: Swords,
+    color: '#A3E635',
+    features: [
+      '5v5 Team-vs-Team scrim queue with ELO balancing',
+      'Automated map veto & side pick system',
+      'Dedicated 128-tick private server deployment',
+      'Instant post-match GOTV demo download'
+    ]
+  },
+  aim: {
+    title: '1v1 Aim Arena',
+    subtitle: 'High-Stakes Dual Aim Duels',
+    desc: 'Fast-paced 1v1 duels on calibrated aim maps. Prove your raw aim, tracking, and reaction times with dedicated 1v1 ELO leaderboards.',
+    progress: 78,
+    icon: Crosshair,
+    color: '#EF4444',
+    features: [
+      'First-to-16 rounds 1v1 aim duel ladders',
+      'Custom aim map pool (Aim Botz, Redline, Mirage Mid)',
+      'Sub-tick hit registration and anti-peek advantages',
+      'Separate 1v1 platform ranking ladder'
+    ]
+  },
+  lineups: {
+    title: 'CS2 Lineups Hub',
+    subtitle: 'Interactive Tactical Radar & Utility Guide',
+    desc: 'Master professional smoke, flashbang, molotov, and HE grenade lineups for Mirage, Inferno, Nuke, Dust II, Anubis, and Ancient with interactive video clips and crosshair positioning markers.',
+    progress: 90,
+    icon: Compass,
+    color: '#3B82F6',
+    features: [
+      '60 FPS high-res lineup video clips & tick-rate guides',
+      'Interactive 2D/3D map radar with throw locations',
+      'Jumpthrow, run-throw, and walk-throw keybind setups',
+      'Mirage, Inferno, Nuke, Dust II, and Anubis coverage'
+    ]
+  }
+};
+
+const SHOW_TOURNAMENTS_LIVE = false; // Kept under development per user instruction until ready to launch
+
 export interface PlatformRankingPlayer {
   rank: string;
   rankNum: number;
@@ -1900,58 +1969,6 @@ export const VortexDashboard: React.FC<VortexDashboardProps> = ({
     } catch (_) {}
   };
 
-  const underDevInfo: Record<string, { title: string; subtitle: string; desc: string; progress: number; icon: React.ComponentType<{ className?: string }> }> = {
-    tournaments: {
-      title: 'VORTEX CS2 Tournaments',
-      subtitle: 'Official Tournament Circuit & Cash Prizes',
-      desc: 'Automated bracket progression, live GOTV spectator relays, and instant prize pool distribution are undergoing final security verification.',
-      progress: 82,
-      icon: Trophy
-    },
-    scrims: {
-      title: 'Scrims Hub (5v5 Practice)',
-      subtitle: 'Team Scrimmage & Matchmaking Arena',
-      desc: 'Instant 5v5 team practice matchmaking with automated server reservations, captain vetoes, and tactical demo recording is being optimized.',
-      progress: 90,
-      icon: Swords
-    },
-    aim: {
-      title: '1v1 Aim Arena',
-      subtitle: 'Duels & Primary Weapon Ladders',
-      desc: 'High-tickrate 1v1 duel arenas featuring AK-47, AWP, and Desert Eagle ladders with real-time reaction telemetry and Aim Rating.',
-      progress: 85,
-      icon: Crosshair
-    },
-    lineups: {
-      title: 'CS2 Grenade Lineups 2D Radar',
-      subtitle: 'Interactive Utility & Trajectory Playbook',
-      desc: 'Comprehensive 2D interactive radar with verified pro lineups for smokes, flashbangs, and molotovs across all official competitive maps.',
-      progress: 78,
-      icon: Compass
-    },
-    rankings: {
-      title: 'Global Rankings & Hall of Fame',
-      subtitle: 'Worldwide ELO Competitive Ladder',
-      desc: 'Global ELO leaderboard tracking competitive rankings across Europe, Americas, and Asia-Pacific with verified pro tiers and division brackets.',
-      progress: 92,
-      icon: Award
-    },
-    anticheat: {
-      title: 'VORTEX Kernel Anti-Cheat',
-      subtitle: 'Ring-0 Hardware Driver Protection',
-      desc: 'Kernel-level anti-cheat driver with Secure Boot and TPM 2.0 integrity verification ensuring 100% fair matchmaking for all competitive modes.',
-      progress: 95,
-      icon: ShieldCheck
-    },
-    profile: {
-      title: 'Player Profile & Digital Passport',
-      subtitle: 'Career Analytics & Achievements',
-      desc: 'Enhanced player career passport featuring match history, weapon mastery analytics, badges, and team management is getting final touches.',
-      progress: 86,
-      icon: User
-    }
-  };
-
   const navItems = [
     {
       id: 'play' as VortexTab,
@@ -1982,10 +1999,10 @@ export const VortexDashboard: React.FC<VortexDashboardProps> = ({
     {
       id: 'tournaments' as VortexTab,
       label: 'Tournaments',
-      desc: 'Skins & Cash Pools • DMarket B2B',
+      desc: 'Under Development • Opening Soon',
       icon: Trophy,
-      badge: 'SKIN PRIZES',
-      badgeColor: 'bg-emerald-500/20 text-emerald-300 border border-emerald-500/40 font-bold'
+      badge: 'COMING SOON',
+      badgeColor: 'bg-amber-500/15 text-amber-400 border border-amber-500/30 font-bold'
     },
     {
       id: 'scrims' as VortexTab,
@@ -3457,9 +3474,154 @@ export const VortexDashboard: React.FC<VortexDashboardProps> = ({
           )}
 
           {/* ======================================================== */}
+          {/* TAB: COMING SOON (Tournaments, Scrims Hub, 1v1 Aim, Lineups) */}
+          {/* ======================================================== */}
+          {(activeTab in COMING_SOON_TABS && !(activeTab === 'tournaments' && SHOW_TOURNAMENTS_LIVE)) && (() => {
+            const devInfo = COMING_SOON_TABS[activeTab];
+            const Icon = devInfo.icon;
+            return (
+              <div className="bg-[#0E1017] border border-[#202536] rounded-3xl p-6 md:p-8 shadow-xl space-y-6">
+                <div className="flex flex-col sm:flex-row sm:items-center justify-between pb-4 border-b border-[#1E2333] gap-4">
+                  <div className="flex items-center gap-3">
+                    <div
+                      className="w-12 h-12 rounded-2xl flex items-center justify-center border shadow-inner shrink-0"
+                      style={{
+                        backgroundColor: `${devInfo.color}15`,
+                        borderColor: `${devInfo.color}40`,
+                        color: devInfo.color
+                      }}
+                    >
+                      <Icon className="w-6 h-6" />
+                    </div>
+                    <div>
+                      <div className="flex items-center gap-2.5 flex-wrap">
+                        <h2 className="text-2xl font-black font-display text-white">{devInfo.title}</h2>
+                        <span className="px-2.5 py-0.5 rounded-full bg-amber-500/15 border border-amber-500/30 text-amber-400 font-mono text-[10px] font-bold uppercase tracking-wider">
+                          COMING SOON
+                        </span>
+                      </div>
+                      <p className="text-xs text-[#94A3B8] mt-0.5 font-mono">
+                        {devInfo.subtitle}
+                      </p>
+                    </div>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    {activeTab === 'tournaments' && (
+                      <button
+                        onClick={() => {
+                          sound.playClick();
+                          setShowPartnersModal(true);
+                        }}
+                        className="px-3.5 py-2 rounded-xl bg-[#171C2B] hover:bg-[#1F263A] border border-amber-400/30 text-xs font-mono font-bold text-amber-300 transition flex items-center gap-1.5 cursor-pointer shadow-sm"
+                      >
+                        <Award className="w-3.5 h-3.5 text-amber-400" />
+                        <span>Official Partners (HLTV)</span>
+                      </button>
+                    )}
+                    <button
+                      onClick={() => setActiveTab('play')}
+                      className="px-4 py-2 rounded-xl bg-[#141722] hover:bg-[#1A202E] border border-[#252C3D] text-xs font-mono text-slate-300 hover:text-white cursor-pointer transition"
+                    >
+                      ← Back to Play
+                    </button>
+                  </div>
+                </div>
+
+                {/* Main Hero Card */}
+                <div className="relative overflow-hidden rounded-3xl bg-gradient-to-b from-[#131722] to-[#0A0C10] border border-[#202536] p-8 sm:p-12 text-center space-y-6">
+                  {/* Subtle Background Glow */}
+                  <div
+                    className="absolute -top-24 left-1/2 -translate-x-1/2 w-96 h-96 rounded-full blur-3xl pointer-events-none opacity-20"
+                    style={{ backgroundColor: devInfo.color }}
+                  />
+
+                  <div className="relative z-10 max-w-2xl mx-auto space-y-5">
+                    <div
+                      className="w-20 h-20 rounded-3xl flex items-center justify-center mx-auto border-2 shadow-[0_0_40px_rgba(0,0,0,0.5)]"
+                      style={{
+                        backgroundColor: `${devInfo.color}15`,
+                        borderColor: `${devInfo.color}50`,
+                        color: devInfo.color
+                      }}
+                    >
+                      <Icon className="w-10 h-10" />
+                    </div>
+
+                    <div className="space-y-2">
+                      <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-black/50 border border-white/10 text-xs font-mono text-slate-300">
+                        <Sparkles className="w-3.5 h-3.5 text-amber-400" />
+                        <span>Platform Engine v2.4 • In Active Engineering</span>
+                      </div>
+                      <h3 className="text-2xl sm:text-3xl font-black font-display text-white">
+                        {devInfo.title} is Under Development
+                      </h3>
+                      <p className="text-sm text-slate-400 leading-relaxed">
+                        {devInfo.desc}
+                      </p>
+                    </div>
+
+                    {/* Progress Bar */}
+                    <div className="pt-2 max-w-md mx-auto space-y-2">
+                      <div className="flex items-center justify-between text-xs font-mono">
+                        <span className="text-slate-400 uppercase tracking-wider">Engineering Milestone</span>
+                        <span className="font-bold text-white">{devInfo.progress}% Complete</span>
+                      </div>
+                      <div className="w-full h-3 rounded-full bg-[#1A1F2C] border border-[#2B3448] overflow-hidden p-0.5">
+                        <div
+                          className="h-full rounded-full transition-all duration-1000 ease-out"
+                          style={{
+                            width: `${devInfo.progress}%`,
+                            background: `linear-gradient(90deg, ${devInfo.color}88 0%, ${devInfo.color} 100%)`,
+                            boxShadow: `0 0 12px ${devInfo.color}80`
+                          }}
+                        />
+                      </div>
+                    </div>
+
+                    {/* Features checklist */}
+                    <div className="pt-4 grid grid-cols-1 sm:grid-cols-2 gap-3 text-left">
+                      {devInfo.features.map((feat, idx) => (
+                        <div
+                          key={idx}
+                          className="flex items-start gap-2.5 p-3 rounded-xl bg-white/[0.03] border border-white/5 text-xs text-slate-300 font-mono"
+                        >
+                          <CheckCircle2 className="w-4 h-4 shrink-0 text-emerald-400 mt-0.5" />
+                          <span>{feat}</span>
+                        </div>
+                      ))}
+                    </div>
+
+                    {/* Interactive Action Button */}
+                    <div className="pt-6 flex flex-wrap items-center justify-center gap-3">
+                      <button
+                        onClick={() => {
+                          sound.playTournamentVictory();
+                          confetti({ particleCount: 60, spread: 50, origin: { y: 0.6 } });
+                          setDashboardToast(`✓ Alert Activated! You will receive priority early access to ${devInfo.title}.`);
+                          setTimeout(() => setDashboardToast(null), 4000);
+                        }}
+                        className="px-6 py-3 rounded-2xl bg-gradient-to-r from-amber-500 to-orange-500 hover:brightness-110 text-slate-950 font-display font-black text-xs uppercase tracking-wider transition shadow-lg shadow-amber-500/20 cursor-pointer flex items-center gap-2 active:scale-95"
+                      >
+                        <Bell className="w-4 h-4" />
+                        <span>Notify Me When Live</span>
+                      </button>
+                      <button
+                        onClick={() => setActiveTab('play')}
+                        className="px-6 py-3 rounded-2xl bg-[#141722] hover:bg-[#1C2232] border border-[#283044] text-slate-300 hover:text-white font-mono text-xs font-bold transition cursor-pointer"
+                      >
+                        Return to Ranked 5v5
+                      </button>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            );
+          })()}
+
+          {/* ======================================================== */}
           {/* TAB: TOURNAMENTS (ESPORTS SKINS & CASH PRIZE POOLS)      */}
           {/* ======================================================== */}
-          {activeTab === 'tournaments' && (
+          {activeTab === 'tournaments' && SHOW_TOURNAMENTS_LIVE && (
             <div className="bg-[#0E1017] border border-[#202536] rounded-3xl p-6 md:p-8 shadow-xl space-y-6">
               <div className="flex flex-col sm:flex-row sm:items-center justify-between pb-4 border-b border-[#1E2333] gap-4">
                 <div>
@@ -5197,80 +5359,7 @@ export const VortexDashboard: React.FC<VortexDashboardProps> = ({
             );
           })()}
 
-          {/* ======================================================== */}
-          {/* TAB: SCRIMS / AIM / LINEUPS ARENA                        */}
-          {/* ======================================================== */}
-          {(activeTab === 'scrims' || activeTab === 'aim' || activeTab === 'lineups') && (
-            <div className="bg-[#0E1017] border border-[#202536] rounded-3xl p-6 md:p-8 shadow-xl space-y-6">
-              <div className="flex items-center justify-between pb-4 border-b border-[#1E2333]">
-                <div>
-                  <h2 className="text-2xl font-black font-display text-white capitalize">{activeTab} Arena</h2>
-                  <p className="text-xs text-[#94A3B8]">Automated 128-tick matchmaking lobby</p>
-                </div>
-                <button
-                  onClick={() => setActiveTab('play')}
-                  className="px-4 py-2 rounded-xl bg-[#141722] border border-[#252C3D] text-xs font-mono hover:text-white cursor-pointer"
-                >
-                  ← Back to Play
-                </button>
-              </div>
 
-              <div className="p-8 rounded-3xl bg-[#12141C] border border-[#23293B] text-center space-y-4">
-                <div className="w-16 h-16 rounded-full bg-lime-500/10 border border-[#A3E635]/30 flex items-center justify-center mx-auto text-[#A3E635]">
-                  <Swords className="w-8 h-8" />
-                </div>
-                <h3 className="text-xl font-bold text-white">Live Matchmaking Queue Open</h3>
-                <p className="text-xs text-[#94A3B8] max-w-md mx-auto">
-                  Searching for balanced 128-tick CS2 lobbies based on your verified Level {currentUserLevel} ELO ({currentUserElo.toLocaleString()}).
-                </p>
-
-                {!isAntiCheatActive && showAcPrompt && (
-                  <div className="pt-2 flex justify-center animate-in fade-in zoom-in-95 duration-200">
-                    <div className="inline-flex items-center gap-3 sm:gap-4 px-4 sm:px-5 py-2 sm:py-2.5 rounded-xl bg-[#090B0F] border border-[#FF5500] shadow-[0_0_25px_rgba(255,85,0,0.3)] text-xs font-mono">
-                      <div className="flex items-center gap-2 text-slate-200">
-                        <ShieldAlert className="w-4 h-4 text-[#FF5500] shrink-0" />
-                        <span className="font-semibold text-slate-100 tracking-wide">Please run Anti-Cheat</span>
-                      </div>
-                      <a
-                        href="https://www.faceit.com/en/anti-cheat"
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="text-[#FF5500] hover:text-[#FFAA00] font-bold text-xs uppercase tracking-wider transition hover:underline"
-                      >
-                        DOWNLOAD
-                      </a>
-                      <a
-                        href="faceitac://"
-                        onClick={() => {
-                          handleLaunchAntiCheat();
-                        }}
-                        className="px-4 py-1.5 rounded-lg bg-[#FF5500] hover:bg-[#FF6611] text-white font-black text-xs uppercase tracking-wider transition cursor-pointer shadow-md shadow-orange-500/30 hover:scale-105 active:scale-95 inline-flex items-center"
-                        title="Click to launch Anti-Cheat"
-                      >
-                        LAUNCH
-                      </a>
-                      <button
-                        onClick={() => setShowAcPrompt(false)}
-                        className="text-slate-500 hover:text-white transition cursor-pointer p-0.5 ml-0.5"
-                        title="Dismiss warning"
-                      >
-                        <X className="w-3.5 h-3.5" />
-                      </button>
-                    </div>
-                  </div>
-                )}
-
-                <div className="pt-4">
-                  <button
-                    onClick={() => handleConnectServer('194.163.159.231:27015', 'Quick Scrim Arena')}
-                    className="px-8 py-3 rounded-full bg-[#A3E635] hover:bg-[#BEF264] text-black font-black font-display text-xs uppercase tracking-wider transition shadow-[0_0_20px_rgba(163,230,53,0.4)] cursor-pointer"
-                  >
-                    Connect to Server Now
-                  </button>
-                </div>
-              </div>
-            </div>
-          )}
 
         </main>
       </div>
