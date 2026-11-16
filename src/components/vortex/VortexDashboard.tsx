@@ -2031,10 +2031,12 @@ export const VortexDashboard: React.FC<VortexDashboardProps> = ({
     {
       id: 'anticheat' as VortexTab,
       label: 'Anti-Cheat',
-      desc: 'Under Development • Opening Soon',
+      desc: isAntiCheatActive ? 'Ring-0 Kernel Protected' : 'Driver Offline • Ready to Launch',
       icon: ShieldCheck,
-      badge: 'COMING SOON',
-      badgeColor: 'bg-amber-500/15 text-amber-400 border border-amber-500/30 font-bold'
+      badge: isAntiCheatActive ? 'ACTIVE' : 'READY',
+      badgeColor: isAntiCheatActive 
+        ? 'bg-emerald-500/15 text-emerald-400 border border-emerald-500/30 font-bold'
+        : 'bg-amber-500/15 text-amber-400 border border-amber-500/30 font-bold'
     },
     {
       id: 'profile' as VortexTab,
