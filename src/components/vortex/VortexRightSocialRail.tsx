@@ -677,29 +677,25 @@ export const VortexRightSocialRail: React.FC<VortexRightSocialRailProps> = ({
         {/* MIDDLE SECTION: Notifications • Social • Party Capsule */}
         <div className={`flex-col gap-3 w-full flex-1 pt-3 overflow-y-auto ${mobileCollapsed ? 'hidden' : 'flex'} lg:flex`}>
           
-          {/* HELLCASE AUTHENTIC BALANCE & REFILL BAR (PLACED DIRECTLY ABOVE NOTIFICATIONS) */}
+          {/* AUTHENTIC VORTEX COIN BALANCE & REFILL BAR (PLACED DIRECTLY ABOVE NOTIFICATIONS) */}
           <div className="w-full px-2 py-1.5 rounded-2xl bg-gradient-to-r from-[#0C101A] via-[#121726] to-[#0C101A] border border-emerald-500/35 hover:border-emerald-400/50 shadow-[0_4px_20px_rgba(16,185,129,0.12)] flex items-center justify-between gap-1.5 transition select-none">
-            {/* Balance Chips & Amount - Always Straight on One Line */}
-            <div 
+            {/* Clickable Single Vortex Coin Balance Pill */}
+            <button
+              type="button"
               onClick={() => {
                 sound.playSelect();
                 setShowHellcaseModal(true);
               }}
-              className="flex items-center gap-1 shrink-0 cursor-pointer"
-              title="Click to view balance or fill up"
+              className="flex items-center gap-1.5 px-2 py-1 rounded-xl bg-black/60 hover:bg-black/90 border border-amber-500/30 hover:border-amber-400/60 shadow-[0_0_10px_rgba(245,158,11,0.12)] transition cursor-pointer group active:scale-95 shrink-0"
+              title="VORTEX Balance • Click to top up / refill"
             >
-              <div className="flex items-center gap-0.5 px-1.5 py-0.5 rounded-lg bg-black/60 border border-white/5 shrink-0">
-                <span className="text-[11px] leading-none">💵</span>
-                <span className="text-[11px] font-mono font-bold text-white leading-none">0</span>
+              <div className="w-4 h-4 rounded-full bg-amber-500/20 border border-amber-500/40 flex items-center justify-center shrink-0">
+                <Coins className="w-2.5 h-2.5 text-amber-400 group-hover:scale-110 transition-transform drop-shadow-[0_0_4px_rgba(245,158,11,0.5)]" />
               </div>
-              <div className="flex items-center gap-0.5 px-1.5 py-0.5 rounded-lg bg-black/60 border border-white/5 shrink-0">
-                <span className="text-[11px] leading-none">🎫</span>
-                <span className="text-[11px] font-mono font-bold text-amber-400 leading-none">9</span>
-              </div>
-              <div className="font-mono font-black text-xs text-emerald-400 tracking-tight whitespace-nowrap shrink-0 pl-1">
+              <span className="font-mono font-black text-xs text-emerald-400 group-hover:text-emerald-300 tracking-tight whitespace-nowrap">
                 {vortexBalance.toFixed(2)} €
-              </div>
-            </div>
+              </span>
+            </button>
 
             {/* REFILL Button matching Hellcase Screenshot (Compact & Clean) */}
             <button
@@ -708,7 +704,7 @@ export const VortexRightSocialRail: React.FC<VortexRightSocialRailProps> = ({
                 sound.playSelect();
                 setShowHellcaseModal(true);
               }}
-              className="px-2 py-1 rounded-lg bg-gradient-to-r from-emerald-500 to-teal-400 hover:from-emerald-400 hover:to-teal-300 text-slate-950 font-mono font-black text-[10px] leading-none transition cursor-pointer shadow-[0_0_10px_rgba(16,185,129,0.3)] flex items-center justify-center shrink-0 hover:scale-105 active:scale-95"
+              className="px-2.5 py-1 rounded-lg bg-gradient-to-r from-emerald-500 to-teal-400 hover:from-emerald-400 hover:to-teal-300 text-slate-950 font-mono font-black text-[10px] leading-none transition cursor-pointer shadow-[0_0_10px_rgba(16,185,129,0.3)] flex items-center justify-center shrink-0 hover:scale-105 active:scale-95"
               title="Filling up the balance • Pay by Skins, Crypto & Cards"
             >
               <span className="tracking-tight">REFILL</span>
