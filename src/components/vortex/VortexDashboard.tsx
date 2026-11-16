@@ -70,6 +70,8 @@ import { XsollaOrderItem } from '../../services/xsollaService';
 import { VortexCaseShopModal } from './VortexCaseShopModal';
 import { HellcasePayBySkinsModal } from './HellcasePayBySkinsModal';
 import { VortexPartnersModal } from './VortexPartnersModal';
+import { VortexAdBanner } from './VortexAdBanner';
+import { VortexTopSponsorRibbon, VortexComingSoonDeals } from './VortexSponsorRibbon';
 import { VORTEX_CASE_CATALOG, CS2Case, getVortexWalletBalance, creditVortexWalletBalance } from '../../services/skinDeliveryService';
 
 interface VortexDashboardProps {
@@ -2340,6 +2342,9 @@ export const VortexDashboard: React.FC<VortexDashboardProps> = ({
             </div>
           </header>
 
+          {/* TOP GLOBAL SPONSOR RIBBON (100% ENGLISH // LIVE MONETIZATION) */}
+          <VortexTopSponsorRibbon onOpenPartnersModal={() => setShowPartnersModal(true)} />
+
           {/* ========================================================================= */}
           {/* TAB: "PLAY" -> THE COMPLETE MATCHMAKING HUB AS SHOWN IN THE PHOTO!       */}
           {/* ========================================================================= */}
@@ -3663,6 +3668,9 @@ export const VortexDashboard: React.FC<VortexDashboardProps> = ({
                     </div>
                   </div>
                 </div>
+
+                {/* OFFICIAL CS2 PARTNER OFFERS & LIVE AADS AD BANNER (100% ENGLISH) */}
+                <VortexComingSoonDeals onOpenPartnersModal={() => setShowPartnersModal(true)} />
               </div>
             );
           })()}

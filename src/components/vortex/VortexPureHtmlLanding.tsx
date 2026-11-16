@@ -29,6 +29,7 @@ import {
 } from 'lucide-react';
 import { sound } from '../../utils/soundEffects';
 import { CyberGridOverlay } from './CyberGridOverlay';
+import { VortexAdBanner } from './VortexAdBanner';
 
 interface VortexPureHtmlLandingProps {
   onLoginWithSteam: (openUpgrade?: boolean) => void;
@@ -134,6 +135,33 @@ export const VortexPureHtmlLanding: React.FC<VortexPureHtmlLandingProps> = ({
   return (
     <div className="w-full min-h-screen bg-[#07080B] text-[#F1F5F9] font-sans flex flex-col justify-start items-center selection:bg-[#A3E635]/30 selection:text-white overflow-x-hidden">
       
+      {/* ======================================================== */}
+      {/* 0. GLOBAL SPONSOR RIBBON (100% ENGLISH // LIVE MONETIZATION) */}
+      {/* ======================================================== */}
+      <div className="w-full bg-gradient-to-r from-[#0B0F1A] via-[#141A28] to-[#0B0F1A] border-b border-amber-400/20 px-4 py-2 select-none">
+        <div className="max-w-[1720px] mx-auto flex flex-col sm:flex-row items-center justify-between gap-2 text-xs font-mono">
+          <div className="flex items-center gap-2">
+            <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse shadow-[0_0_8px_#34D399]" />
+            <span className="text-amber-400 font-bold uppercase tracking-wider">OFFICIAL CS2 SPONSOR:</span>
+            <span className="text-slate-200">
+              Use Creator Code <strong className="text-amber-400">VORTEX</strong> on Hellcase & DMarket for <strong className="text-emerald-400">+10% Extra Deposit Bonus & Free Daily Case</strong>!
+            </span>
+          </div>
+          <div className="flex items-center gap-3 shrink-0">
+            <a
+              href="https://hellcase.com/f/vortex"
+              target="_blank"
+              rel="noopener noreferrer"
+              onClick={() => sound.playSelect()}
+              className="px-3 py-1 rounded-full bg-gradient-to-r from-amber-500 to-orange-500 hover:brightness-110 text-slate-950 font-display font-black text-[11px] uppercase tracking-wider transition flex items-center gap-1 shadow-sm"
+            >
+              <span>Claim Free Crate</span>
+              <ExternalLink className="w-3 h-3" />
+            </a>
+          </div>
+        </div>
+      </div>
+
       {/* ======================================================== */}
       {/* 1. TOP NAVIGATION BAR (100% Real HTML & Responsive)      */}
       {/* ======================================================== */}
@@ -1110,6 +1138,13 @@ export const VortexPureHtmlLanding: React.FC<VortexPureHtmlLandingProps> = ({
           </div>
         </div>
       )}
+
+      {/* ======================================================== */}
+      {/* 6.5 OFFICIAL ADVERTISER & SPONSOR SHOWCASE (100% ENGLISH) */}
+      {/* ======================================================== */}
+      <section className="w-full max-w-[1720px] mx-auto px-4 sm:px-8 lg:px-12 py-8">
+        <VortexAdBanner placement="footer" />
+      </section>
 
       {/* ======================================================== */}
       {/* 7. FOOTER                                                */}
