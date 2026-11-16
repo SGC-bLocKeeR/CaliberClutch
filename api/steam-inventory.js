@@ -136,7 +136,7 @@ const BASE_CATALOG = [
     skinName: 'Firebreathing',
     fullName: 'Desert Eagle | Firebreathing (Well-Worn)',
     type: 'pistol',
-    rarity: 'mil-spec',
+    rarity: 'restricted',
     wear: 'Well-Worn',
     wearShort: 'WW',
     floatValue: 0.412,
@@ -150,7 +150,7 @@ const BASE_CATALOG = [
     skinName: 'Tilted',
     fullName: 'Desert Eagle | Tilted (Minimal Wear)',
     type: 'pistol',
-    rarity: 'mil-spec',
+    rarity: 'industrial',
     wear: 'Minimal Wear',
     wearShort: 'MW',
     floatValue: 0.095,
@@ -192,13 +192,27 @@ const BASE_CATALOG = [
     skinName: 'Wash me plz',
     fullName: 'M4A1-S | Wash me plz (Minimal Wear)',
     type: 'rifle',
-    rarity: 'mil-spec',
+    rarity: 'industrial',
     wear: 'Minimal Wear',
     wearShort: 'MW',
     floatValue: 0.118,
     isStatTrak: false,
     isOverstock: false,
     image: 'https://community.akamai.steamstatic.com/economy/image/i0CoZ81Ui0m-9KwlBY1L_18myuGuq1wfhWSaZgMttyVfPaERSR0Wqmu7LAocGIGz3UqlXOLrxM-vMGmW8VNxu5Dx60noTyL8ypexwjFS4_ega6F_H_iKMWiGxPxmsfJ6cC28mhkrtgKIzo6oMhTLN1F4Tox1TLUNthHuxtbuZejntAzWjNlNmX6rjylJuyhp6-kLBKt38vKFiFuUL_Rjtk_8Ljjf'
+  },
+  {
+    assetId: '40192019501',
+    weapon: 'MP7',
+    skinName: 'Prey',
+    fullName: 'MP7 | Prey (Factory New)',
+    type: 'rifle',
+    rarity: 'consumer',
+    wear: 'Factory New',
+    wearShort: 'FN',
+    floatValue: 0.035,
+    isStatTrak: false,
+    isOverstock: false,
+    image: 'https://community.akamai.steamstatic.com/economy/image/i0CoZ81Ui0m-9KwlBY1L_18myuGuq1wfhWSaZgMttyVfPaERSR0Wqmu7LAocGIGz3UqlXOLrxM-vMGmW8VNxu5Dx60noTyL8kY_n4ClK4P-qYLdtLv2QHG6Xyelu5-FqGnu3mkIitTqF3N6meHfAblRwWZV3ErZauUW4x9PkMezi41eM3YxMmCW4jSgU6yl4vu0b'
   },
   {
     assetId: '40192019488',
@@ -276,7 +290,7 @@ const BASE_CATALOG = [
     skinName: 'Sand Mesh',
     fullName: 'SCAR-20 | Sand Mesh (Field-Tested)',
     type: 'sniper',
-    rarity: 'mil-spec',
+    rarity: 'consumer',
     wear: 'Field-Tested',
     wearShort: 'FT',
     floatValue: 0.218,
@@ -290,7 +304,7 @@ const BASE_CATALOG = [
     skinName: 'Grey Smoke',
     fullName: 'Galil AR | Grey Smoke (Minimal Wear)',
     type: 'rifle',
-    rarity: 'mil-spec',
+    rarity: 'industrial',
     wear: 'Minimal Wear',
     wearShort: 'MW',
     floatValue: 0.105,
@@ -318,7 +332,7 @@ const BASE_CATALOG = [
     skinName: 'Sage Spray',
     fullName: 'Galil AR | Sage Spray (Well-Worn)',
     type: 'rifle',
-    rarity: 'mil-spec',
+    rarity: 'consumer',
     wear: 'Well-Worn',
     wearShort: 'WW',
     floatValue: 0.388,
@@ -332,7 +346,7 @@ const BASE_CATALOG = [
     skinName: 'Sand Dune',
     fullName: 'P250 | Sand Dune (Field-Tested)',
     type: 'pistol',
-    rarity: 'mil-spec',
+    rarity: 'consumer',
     wear: 'Field-Tested',
     wearShort: 'FT',
     floatValue: 0.222,
@@ -511,9 +525,15 @@ export default async function handler(req, res) {
                 ? 'covert'
                 : (rarityName.includes('classified') || rarityName.includes('legendary') || (fullName.includes('P250') && fullName.includes('Asiimov')))
                 ? 'classified'
-                : (rarityName.includes('restricted') || rarityName.includes('mythical'))
+                : (rarityName.includes('restricted') || rarityName.includes('mythical') || fullName.includes('Firebreathing'))
                 ? 'restricted'
-                : 'mil-spec';
+                : (fullName.includes('Wash me plz') || fullName.includes('Tilted') || fullName.includes('Grey Smoke') || rarityName.includes('industrial') || rarityName.includes('uncommon'))
+                ? 'industrial'
+                : (fullName.includes('Prey') || fullName.includes('Sand Dune') || fullName.includes('Sage Spray') || fullName.includes('Sand Mesh') || rarityName.includes('consumer') || rarityName.includes('common'))
+                ? 'consumer'
+                : (rarityName.includes('mil-spec') || rarityName.includes('rarity_rare') || fullName.includes('Alpine') || fullName.includes('Royal Baroque'))
+                ? 'mil-spec'
+                : 'consumer';
 
               parsedItems.push({
                 id: `steam-${a.assetid}`,

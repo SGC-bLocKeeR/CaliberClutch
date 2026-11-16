@@ -95,7 +95,7 @@ const CRYPTO_CONFIGS = [
 // Farmskins Skin2PAY Rarity Filter Tiers (1:1 with live platform)
 const RARITY_OPTIONS = [
   { id: 'all', label: 'All', color: '#b0c3d9' },
-  { id: 'mil-spec', label: 'Mil-Spec', color: '#4b69ff' },
+  { id: 'mil-spec', label: 'Mil-spec', color: '#4b69ff' },
   { id: 'restricted', label: 'Restricted', color: '#8847ff' },
   { id: 'classified', label: 'Classified', color: '#d32ce6' },
   { id: 'covert', label: 'Covert', color: '#eb4b4b' },
@@ -111,8 +111,10 @@ const getRarityColor = (rarity: string) => {
   if (r === 'covert' || r.includes('covert') || r.includes('ancient')) return '#eb4b4b'; // Red Covert
   if (r === 'classified' || r.includes('classified') || r.includes('legendary')) return '#d32ce6'; // Pink Classified
   if (r === 'restricted' || r.includes('restricted') || r.includes('mythical')) return '#8847ff'; // Purple Restricted
-  if (r === 'mil-spec' || r.includes('mil-spec') || r === 'industrial' || r === 'consumer') return '#4b69ff'; // Blue Mil-Spec
-  return '#4b69ff';
+  if (r === 'mil-spec' || r.includes('mil-spec')) return '#4b69ff'; // Blue Mil-Spec
+  if (r === 'industrial' || r.includes('industrial') || r.includes('uncommon')) return '#5e98d9'; // Light Blue Industrial
+  if (r === 'consumer' || r.includes('consumer') || r.includes('common')) return '#b0c3d9'; // Grey Consumer
+  return '#b0c3d9';
 };
 
 export const HellcasePayBySkinsModal: React.FC<HellcasePayBySkinsModalProps> = ({
@@ -239,7 +241,7 @@ export const HellcasePayBySkinsModal: React.FC<HellcasePayBySkinsModalProps> = (
         skinName: 'Firebreathing',
         fullName: 'Desert Eagle | Firebreathing (Well-Worn)',
         type: 'pistol',
-        rarity: 'mil-spec',
+        rarity: 'restricted',
         wear: 'Well-Worn',
         wearShort: 'WW',
         floatValue: 0.412,
@@ -256,7 +258,7 @@ export const HellcasePayBySkinsModal: React.FC<HellcasePayBySkinsModalProps> = (
         skinName: 'Tilted',
         fullName: 'Desert Eagle | Tilted (Minimal Wear)',
         type: 'pistol',
-        rarity: 'mil-spec',
+        rarity: 'industrial',
         wear: 'Minimal Wear',
         wearShort: 'MW',
         floatValue: 0.095,
@@ -307,7 +309,7 @@ export const HellcasePayBySkinsModal: React.FC<HellcasePayBySkinsModalProps> = (
         skinName: 'Wash me plz',
         fullName: 'M4A1-S | Wash me plz (Minimal Wear)',
         type: 'rifle',
-        rarity: 'mil-spec',
+        rarity: 'industrial',
         wear: 'Minimal Wear',
         wearShort: 'MW',
         floatValue: 0.118,
@@ -316,6 +318,23 @@ export const HellcasePayBySkinsModal: React.FC<HellcasePayBySkinsModalProps> = (
         marketPriceEur: 0.12,
         payoutEur: 0.12,
         image: 'https://community.akamai.steamstatic.com/economy/image/i0CoZ81Ui0m-9KwlBY1L_18myuGuq1wfhWSaZgMttyVfPaERSR0Wqmu7LAocGIGz3UqlXOLrxM-vMGmW8VNxu5Dx60noTyL8ypexwjFS4_ega6F_H_iKMWiGxPxmsfJ6cC28mhkrtgKIzo6oMhTLN1F4Tox1TLUNthHuxtbuZejntAzWjNlNmX6rjylJuyhp6-kLBKt38vKFiFuUL_Rjtk_8Ljjf'
+      },
+      {
+        id: 'user-skin-7b',
+        assetId: '40192019501',
+        weapon: 'MP7',
+        skinName: 'Prey',
+        fullName: 'MP7 | Prey (Factory New)',
+        type: 'rifle',
+        rarity: 'consumer',
+        wear: 'Factory New',
+        wearShort: 'FN',
+        floatValue: 0.035,
+        isStatTrak: false,
+        isOverstock: false,
+        marketPriceEur: 0.13,
+        payoutEur: 0.13,
+        image: 'https://community.akamai.steamstatic.com/economy/image/i0CoZ81Ui0m-9KwlBY1L_18myuGuq1wfhWSaZgMttyVfPaERSR0Wqmu7LAocGIGz3UqlXOLrxM-vMGmW8VNxu5Dx60noTyL8kY_n4ClK4P-qYLdtLv2QHG6Xyelu5-FqGnu3mkIitTqF3N6meHfAblRwWZV3ErZauUW4x9PkMezi41eM3YxMmCW4jSgU6yl4vu0b'
       },
       {
         id: 'user-skin-8',
@@ -409,7 +428,7 @@ export const HellcasePayBySkinsModal: React.FC<HellcasePayBySkinsModalProps> = (
         skinName: 'Sand Mesh',
         fullName: 'SCAR-20 | Sand Mesh (Field-Tested)',
         type: 'sniper',
-        rarity: 'mil-spec',
+        rarity: 'consumer',
         wear: 'Field-Tested',
         wearShort: 'FT',
         floatValue: 0.218,
@@ -426,7 +445,7 @@ export const HellcasePayBySkinsModal: React.FC<HellcasePayBySkinsModalProps> = (
         skinName: 'Grey Smoke',
         fullName: 'Galil AR | Grey Smoke (Minimal Wear)',
         type: 'rifle',
-        rarity: 'mil-spec',
+        rarity: 'industrial',
         wear: 'Minimal Wear',
         wearShort: 'MW',
         floatValue: 0.105,
@@ -460,7 +479,7 @@ export const HellcasePayBySkinsModal: React.FC<HellcasePayBySkinsModalProps> = (
         skinName: 'Sage Spray',
         fullName: 'Galil AR | Sage Spray (Well-Worn)',
         type: 'rifle',
-        rarity: 'mil-spec',
+        rarity: 'consumer',
         wear: 'Well-Worn',
         wearShort: 'WW',
         floatValue: 0.388,
@@ -477,7 +496,7 @@ export const HellcasePayBySkinsModal: React.FC<HellcasePayBySkinsModalProps> = (
         skinName: 'Sand Dune',
         fullName: 'P250 | Sand Dune (Field-Tested)',
         type: 'pistol',
-        rarity: 'mil-spec',
+        rarity: 'consumer',
         wear: 'Field-Tested',
         wearShort: 'FT',
         floatValue: 0.222,
@@ -565,9 +584,21 @@ export const HellcasePayBySkinsModal: React.FC<HellcasePayBySkinsModalProps> = (
           : filter === 'classified'
           ? (r === 'classified' || r.includes('classified') || r.includes('legendary') || (s.fullName.includes('P250') && s.fullName.includes('Asiimov')))
           : filter === 'restricted'
-          ? (r === 'restricted' || r.includes('restricted') || r.includes('mythical'))
+          ? (r === 'restricted' || r.includes('restricted') || r.includes('mythical') || s.fullName.includes('Firebreathing'))
           : filter === 'mil-spec'
-          ? (r === 'mil-spec' || r.includes('mil-spec') || r === 'industrial' || r === 'consumer' || s.fullName.includes('Firebreathing') || s.fullName.includes('Tilted') || s.fullName.includes('Alpine') || s.fullName.includes('Baroque') || s.fullName.includes('Wash me plz'))
+          ? (
+              (r === 'mil-spec' || r.includes('mil-spec')) &&
+              !r.includes('industrial') &&
+              !r.includes('consumer') &&
+              !s.fullName.includes('Prey') &&
+              !s.fullName.includes('Wash me plz') &&
+              !s.fullName.includes('Tilted') &&
+              !s.fullName.includes('Firebreathing') &&
+              !s.fullName.includes('Sand Dune') &&
+              !s.fullName.includes('Sage Spray') &&
+              !s.fullName.includes('Sand Mesh') &&
+              !s.fullName.includes('Grey Smoke')
+            )
           : r === filter);
 
       return matchSearch && matchRarity;
