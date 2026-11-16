@@ -195,6 +195,19 @@ export const searchRegisteredPlayers = (query: string, currentGamerTag: string):
   );
 };
 
+const LEGACY_DEMO_NAMES = new Set([
+  'icykilleer', 'amatuero', 'feimmih', 'rudeusx', 'dionitt2h-',
+  'zozio', 'orkzz', 'shushalko6', 'blackbars1', 'diva-', 'ndyw', 'edd1-'
+]);
+
+// Automatically purge legacy demo keys from older app builds
+if (typeof window !== 'undefined') {
+  try {
+    localStorage.removeItem('vortex_social_friends');
+    localStorage.removeItem('vortex_demo_friends');
+  } catch {}
+}
+
 /**
  * Gets real friends list for current user (Strictly returns empty [] if none added)
  */
@@ -205,7 +218,13 @@ export const getUserFriends = (gamerTag: string): SocialFriend[] => {
   if (!raw) return [];
   try {
     const list: SocialFriend[] = JSON.parse(raw);
-    return Array.isArray(list) ? list : [];
+    if (!Array.isArray(list)) return [];
+    // Strictly purge any legacy demo names
+    const cleaned = list.filter(f => !LEGACY_DEMO_NAMES.has((f.name || '').toLowerCase()));
+    if (cleaned.length !== list.length) {
+      localStorage.setItem(key, JSON.stringify(cleaned));
+    }
+    return cleaned;
   } catch {
     return [];
   }
