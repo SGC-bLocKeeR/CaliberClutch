@@ -9,7 +9,7 @@ let skinportCache = {
 
 const CACHE_TTL_MS = 15 * 60 * 1000; // 15 minutes
 
-async function getLiveSkinportPrices() {
+export async function getLiveSkinportPrices() {
   const now = Date.now();
   if (skinportCache.map.size > 0 && (now - skinportCache.timestamp) < CACHE_TTL_MS) {
     return skinportCache.map;
