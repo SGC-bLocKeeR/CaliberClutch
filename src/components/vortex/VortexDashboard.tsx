@@ -110,69 +110,91 @@ interface PartySlotMember {
   countryName?: string;
 }
 
-const COMING_SOON_TABS: Record<string, {
+interface ComingSoonData {
   title: string;
+  badge: string;
   subtitle: string;
+  announcement: string;
   desc: string;
   progress: number;
+  phase: string;
   icon: React.ComponentType<{ className?: string }>;
   color: string;
-  features: string[];
-}> = {
+  accentRgb: string;
+  highlights: { title: string; desc: string }[];
+}
+
+const COMING_SOON_TABS: Record<string, ComingSoonData> = {
   tournaments: {
-    title: 'CS2 Tournaments Circuit',
-    subtitle: 'Automated Brackets & Esports Skin Prize Pools',
-    desc: 'Official European competitive tournament circuit featuring single and double elimination brackets, cash prize pools, and guaranteed CS2 skin drops powered by DMarket B2B Steam Bot delivery.',
+    title: 'Rikthimi i Qarkut të Turneve CS2',
+    badge: 'RI-HAPJA SË SHPEJTI • Q2 2026',
+    subtitle: 'Kampionate Zyrtare & Shpërblime Reale me Skin-e dhe Cash',
+    announcement: 'Ky tab po ri-ndërtohet plotësisht me standardet më të larta të skenës ndërkombëtare esports. Rikthimi i turneve do të sjellë kllapa automatike 32-ekipesh, fonde çmimesh të garantuara në para dhe shpërblime me skin-e CS2 (Covert & Thika) të dorëzuara menjëherë në Steam nëpërmjet DMarket B2B Steam Bot. Po kryhen auditimet finale të sigurisë dhe drejtësisë sportive me anti-cheat për të siguruar përvojë madhështore konkurruese.',
+    desc: 'Turnetë zyrtare po kalojnë fazën finale të testimit të sigurisë para hapjes së regjistrimeve për kampionatin e madh ballkanik dhe evropian.',
     progress: 88,
+    phase: 'Faza 4/5: Kalibrimi i Çmimeve & Auditimi Final',
     icon: Trophy,
     color: '#F59E0B',
-    features: [
-      'Automated 32-team single & double elimination brackets',
-      'Dual Prize Pools: Real Cash + Guaranteed Covert Skins',
-      'Instant Steam Bot delivery via DMarket B2B API',
-      '100% Skill-based esports legal compliance'
+    accentRgb: '245, 158, 11',
+    highlights: [
+      { title: 'Kllapa Automatikë 32-Ekipesh', desc: 'Sistem eliminimi direkt dhe dyfish (Single & Double Elimination).' },
+      { title: 'Shpërblime me Skin-e & Para', desc: 'Fonde çmimesh të garantuara me shpërndarje direkte në llogari.' },
+      { title: 'DMarket B2B Steam Bot', desc: 'Dërgim i menjëhershëm i armëve pa trade hold dhe pa pritje.' },
+      { title: 'Mbrojtje e Plotë me Anti-Cheat', desc: '100% garanci kundër lojtarëve të dyshimtë dhe smurfs.' }
     ]
   },
   scrims: {
-    title: 'Scrims Hub Arena',
-    subtitle: 'Team Matchmaking & 5v5 Practice Lobbies',
-    desc: 'Automated team scrim finder for organized CS2 rosters. Schedule pracc matches on official 128-tick servers with automated vetoes and GOTV demo recording.',
+    title: 'Rikthimi i Arenës Scrims Hub (5v5)',
+    badge: 'RI-HAPJA SË SHPEJTI • PRACC LOBBIES',
+    subtitle: 'Ndeshje Stërvitore & Matchmaking midis Skuadrave',
+    announcement: 'Arena e Scrims Hub po përgatitet për rikthimin e saj të fuqishëm për të gjitha skuadrat dhe klanet e organizuara. Po vendosen servera privatë 128-tick me ping ultra të ulët (Frankfurt, Stockholm, London), sistem i plotë vetoje hartash dhe kapitenësh, si dhe regjistrim automatik i GOTV demove pas çdo ndeshjeje për analiza taktike. Dyert do të hapen shumë shpejt!',
+    desc: 'Hapësira e dedikuar për pracc dhe stërvitje taktike midis 5v5 skuadrave të organizuara është në përgatitjet finale.',
     progress: 82,
+    phase: 'Faza 4/5: Testimi i Serverave 128-Tick',
     icon: Swords,
     color: '#A3E635',
-    features: [
-      '5v5 Team-vs-Team scrim queue with ELO balancing',
-      'Automated map veto & side pick system',
-      'Dedicated 128-tick private server deployment',
-      'Instant post-match GOTV demo download'
+    accentRgb: '163, 230, 53',
+    highlights: [
+      { title: 'Lobi i Dedikuar midis Skuadrave', desc: 'Gjetje e balancuar e kundërshtarëve sipas nivelit ELO të ekipit.' },
+      { title: 'Sistem Vetoje për Kapitenët', desc: 'Zgjedhje zyrtare hartash dhe anësh (CT/T side knife round).' },
+      { title: 'Servera Privatë 128-Tick', desc: 'Performancë maksimale me sub-tick routing pa humbje paketash.' },
+      { title: 'Shkarkim GOTV Demo', desc: 'Qasje e menjëhershme në skedarët .dem për analizë raundi pas raundi.' }
     ]
   },
   aim: {
-    title: '1v1 Aim Arena',
-    subtitle: 'High-Stakes Dual Aim Duels',
-    desc: 'Fast-paced 1v1 duels on calibrated aim maps. Prove your raw aim, tracking, and reaction times with dedicated 1v1 ELO leaderboards.',
+    title: 'Rikthimi i 1v1 Aim Duel Arena',
+    badge: 'RI-HAPJA SË SHPEJTI • 1V1 DUELS',
+    subtitle: 'Beteja Kokë-më-Kokë & Renditje e Veçantë ELO',
+    announcement: 'Përballjet 1v1 për të dëshmuar saktësinë e pastër të shënjestrimit, kohën e reagimit dhe zotërimin e armëve po rikthehen! Po kalibrohen hartat më të famshme të duelit (Aim Botz, Redline, AWP Arena) me llogaritje precize të sub-tick hit registration dhe tabelë të veçantë pikësh 1v1 ELO. Përgatituni për të sfiduar miqtë tuaj në duele të zjarrta!',
+    desc: 'Arena e duelit individual po përsoset për të garantuar saktësi absolute dhe barazi të plotë teknike.',
     progress: 78,
+    phase: 'Faza 3/5: Kalibrimi i Hit-Reg & Anti-Peek',
     icon: Crosshair,
     color: '#EF4444',
-    features: [
-      'First-to-16 rounds 1v1 aim duel ladders',
-      'Custom aim map pool (Aim Botz, Redline, Mirage Mid)',
-      'Sub-tick hit registration and anti-peek advantages',
-      'Separate 1v1 platform ranking ladder'
+    accentRgb: '239, 68, 68',
+    highlights: [
+      { title: 'Duele të Shpejta First-to-16', desc: 'Beteja dinamike me AK-47, M4A1-S, AWP dhe Desert Eagle.' },
+      { title: 'Harta të Kalibruara për Aim', desc: 'Ambiente të optimizuara pa vonesa për duele të drejtpërdrejta.' },
+      { title: 'Sub-Tick Hit Registration', desc: 'Regjistrim milimetrik i plumbave në kokë me zero devijim.' },
+      { title: 'Renditje e Pavarur 1v1 ELO', desc: 'Ngrituni në krye të tabelës së duelistëve më të mirë.' }
     ]
   },
   lineups: {
-    title: 'CS2 Lineups Hub',
-    subtitle: 'Interactive Tactical Radar & Utility Guide',
-    desc: 'Master professional smoke, flashbang, molotov, and HE grenade lineups for Mirage, Inferno, Nuke, Dust II, Anubis, and Ancient with interactive video clips and crosshair positioning markers.',
+    title: 'Rikthimi i CS2 Lineups & Tactical Radar',
+    badge: 'RI-HAPJA SË SHPEJTI • TACTICAL RADAR',
+    subtitle: 'Playbook Interaktiv 2D me Video 60 FPS',
+    announcement: 'Guida taktike dhe radari interaktiv për hedhjen e granatave (smokes, flashbangs, molotovs, HE) po pasurohet me të gjitha zbulimet më të fundit nga skena pro. Çdo hedhje po regjistrohet në 60 FPS me pamje nga këndvështrimi i parë, tregues të saktë të krosherit dhe pozicionim me koordinata 2D për të gjitha hartat zyrtare të Valve. Rikthehemi së shpejti me librarinë më të pasur taktike!',
+    desc: 'Libraria profesionale e granatave dhe pozicioneve taktike po merr prekjet përfundimtare për sezonin e ri.',
     progress: 90,
+    phase: 'Faza 4/5: Përfundimi i Regjistrimit të Videove',
     icon: Compass,
     color: '#3B82F6',
-    features: [
-      '60 FPS high-res lineup video clips & tick-rate guides',
-      'Interactive 2D/3D map radar with throw locations',
-      'Jumpthrow, run-throw, and walk-throw keybind setups',
-      'Mirage, Inferno, Nuke, Dust II, and Anubis coverage'
+    accentRgb: '59, 130, 246',
+    highlights: [
+      { title: 'Video të Kristalta 60 FPS', desc: 'Udhëzues vizual të shpejtë për çdo tymosje kyçe në secilën hartë.' },
+      { title: 'Radar Interaktiv 2D/3D', desc: 'Klikoni mbi zonë për të parë ku bie granata dhe nga ku hidhet.' },
+      { title: 'Konfigurim Jumpthrow & Run-throw', desc: 'Bind-e të unifikuara për hedhje 100% konsistente në çdo raund.' },
+      { title: 'Mirage, Inferno, Nuke, Dust II, Anubis', desc: 'Mbulim i plotë i të gjitha hartave të Active Duty pool.' }
     ]
   }
 };
@@ -1999,33 +2021,33 @@ export const VortexDashboard: React.FC<VortexDashboardProps> = ({
     {
       id: 'tournaments' as VortexTab,
       label: 'Tournaments',
-      desc: 'Under Development • Opening Soon',
+      desc: 'Rikthehet Së Shpejti • Under Dev',
       icon: Trophy,
-      badge: 'COMING SOON',
+      badge: 'LOCKED',
       badgeColor: 'bg-amber-500/15 text-amber-400 border border-amber-500/30 font-bold'
     },
     {
       id: 'scrims' as VortexTab,
       label: 'Scrims Hub',
-      desc: 'Under Development • Opening Soon',
+      desc: 'Rikthehet Së Shpejti • Under Dev',
       icon: Swords,
-      badge: 'COMING SOON',
+      badge: 'LOCKED',
       badgeColor: 'bg-amber-500/15 text-amber-400 border border-amber-500/30 font-bold'
     },
     {
       id: 'aim' as VortexTab,
       label: '1v1 Aim Arena',
-      desc: 'Under Development • Opening Soon',
+      desc: 'Rikthehet Së Shpejti • Under Dev',
       icon: Crosshair,
-      badge: 'COMING SOON',
+      badge: 'LOCKED',
       badgeColor: 'bg-amber-500/15 text-amber-400 border border-amber-500/30 font-bold'
     },
     {
       id: 'lineups' as VortexTab,
       label: 'CS2 Lineups',
-      desc: 'Under Development • Opening Soon',
+      desc: 'Rikthehet Së Shpejti • Under Dev',
       icon: Compass,
-      badge: 'COMING SOON',
+      badge: 'LOCKED',
       badgeColor: 'bg-amber-500/15 text-amber-400 border border-amber-500/30 font-bold'
     },
     {
@@ -3478,11 +3500,12 @@ export const VortexDashboard: React.FC<VortexDashboardProps> = ({
           {/* ======================================================== */}
           {/* TAB: COMING SOON (Tournaments, Scrims Hub, 1v1 Aim, Lineups) */}
           {/* ======================================================== */}
-          {(activeTab in COMING_SOON_TABS && !(activeTab === 'tournaments' && SHOW_TOURNAMENTS_LIVE)) && (() => {
+          {(Boolean(COMING_SOON_TABS[activeTab]) && !(activeTab === 'tournaments' && SHOW_TOURNAMENTS_LIVE)) && (() => {
             const devInfo = COMING_SOON_TABS[activeTab];
             const Icon = devInfo.icon;
             return (
-              <div className="bg-[#0E1017] border border-[#202536] rounded-3xl p-6 md:p-8 shadow-xl space-y-6">
+              <div className="bg-[#0E1017] border border-[#202536] rounded-3xl p-6 md:p-8 shadow-xl space-y-6 animate-in fade-in duration-200">
+                {/* Top Control Bar */}
                 <div className="flex flex-col sm:flex-row sm:items-center justify-between pb-4 border-b border-[#1E2333] gap-4">
                   <div className="flex items-center gap-3">
                     <div
@@ -3498,8 +3521,9 @@ export const VortexDashboard: React.FC<VortexDashboardProps> = ({
                     <div>
                       <div className="flex items-center gap-2.5 flex-wrap">
                         <h2 className="text-2xl font-black font-display text-white">{devInfo.title}</h2>
-                        <span className="px-2.5 py-0.5 rounded-full bg-amber-500/15 border border-amber-500/30 text-amber-400 font-mono text-[10px] font-bold uppercase tracking-wider">
-                          COMING SOON
+                        <span className="px-2.5 py-0.5 rounded-full bg-amber-500/15 border border-amber-500/30 text-amber-400 font-mono text-[10px] font-bold uppercase tracking-wider flex items-center gap-1.5">
+                          <Lock className="w-3 h-3 text-amber-400" />
+                          <span>{devInfo.badge}</span>
                         </span>
                       </div>
                       <p className="text-xs text-[#94A3B8] mt-0.5 font-mono">
@@ -3522,51 +3546,69 @@ export const VortexDashboard: React.FC<VortexDashboardProps> = ({
                     )}
                     <button
                       onClick={() => setActiveTab('play')}
-                      className="px-4 py-2 rounded-xl bg-[#141722] hover:bg-[#1A202E] border border-[#252C3D] text-xs font-mono text-slate-300 hover:text-white cursor-pointer transition"
+                      className="px-4 py-2 rounded-xl bg-[#141722] hover:bg-[#1A202E] border border-[#252C3D] text-xs font-mono text-slate-300 hover:text-white cursor-pointer transition flex items-center gap-1.5"
                     >
-                      ← Back to Play
+                      <ArrowLeft className="w-3.5 h-3.5" />
+                      <span>Kthehu te Play (5v5)</span>
                     </button>
                   </div>
                 </div>
 
-                {/* Main Hero Card */}
-                <div className="relative overflow-hidden rounded-3xl bg-gradient-to-b from-[#131722] to-[#0A0C10] border border-[#202536] p-8 sm:p-12 text-center space-y-6">
-                  {/* Subtle Background Glow */}
+                {/* Main Hero Presentation Card */}
+                <div className="relative overflow-hidden rounded-3xl bg-gradient-to-b from-[#131722] via-[#0D1017] to-[#080A0E] border border-[#202536] p-6 sm:p-10 text-center space-y-6">
+                  {/* Atmospheric Glow */}
                   <div
-                    className="absolute -top-24 left-1/2 -translate-x-1/2 w-96 h-96 rounded-full blur-3xl pointer-events-none opacity-20"
+                    className="absolute -top-32 left-1/2 -translate-x-1/2 w-[500px] h-[500px] rounded-full blur-3xl pointer-events-none opacity-15"
                     style={{ backgroundColor: devInfo.color }}
                   />
 
-                  <div className="relative z-10 max-w-2xl mx-auto space-y-5">
+                  <div className="relative z-10 max-w-3xl mx-auto space-y-6">
+                    {/* Glowing Cyber Icon Badge */}
                     <div
-                      className="w-20 h-20 rounded-3xl flex items-center justify-center mx-auto border-2 shadow-[0_0_40px_rgba(0,0,0,0.5)]"
+                      className="w-20 h-20 rounded-3xl flex items-center justify-center mx-auto border-2 shadow-[0_0_50px_rgba(0,0,0,0.6)]"
                       style={{
                         backgroundColor: `${devInfo.color}15`,
-                        borderColor: `${devInfo.color}50`,
+                        borderColor: `${devInfo.color}60`,
                         color: devInfo.color
                       }}
                     >
                       <Icon className="w-10 h-10" />
                     </div>
 
+                    {/* Status Pill */}
+                    <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-black/60 border border-amber-500/30 text-xs font-mono text-amber-300 shadow-md">
+                      <Lock className="w-3.5 h-3.5 text-amber-400" />
+                      <span className="font-bold tracking-wide">TAB I BLLOKUAR PËRKOHËSISHT • RI-KALIBRIM STRUKTUROR</span>
+                    </div>
+
                     <div className="space-y-2">
-                      <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-black/50 border border-white/10 text-xs font-mono text-slate-300">
-                        <Sparkles className="w-3.5 h-3.5 text-amber-400" />
-                        <span>Platform Engine v2.4 • In Active Engineering</span>
-                      </div>
                       <h3 className="text-2xl sm:text-3xl font-black font-display text-white">
-                        {devInfo.title} is Under Development
+                        {devInfo.title}
                       </h3>
-                      <p className="text-sm text-slate-400 leading-relaxed">
+                      <p className="text-xs sm:text-sm font-mono text-slate-400">
                         {devInfo.desc}
                       </p>
                     </div>
 
-                    {/* Progress Bar */}
-                    <div className="pt-2 max-w-md mx-auto space-y-2">
+                    {/* Dedicated Official Return Announcement Box */}
+                    <div className="p-5 sm:p-6 rounded-2xl bg-[#090B10]/80 border border-white/10 text-left space-y-2.5 backdrop-blur-sm shadow-xl">
+                      <div className="flex items-center gap-2 text-xs font-mono font-bold text-amber-400 uppercase tracking-wider">
+                        <Sparkles className="w-4 h-4 text-amber-400" />
+                        <span>Njoftim Zyrtar mbi Rikthimin e Tabit</span>
+                      </div>
+                      <p className="text-sm sm:text-base text-slate-200 leading-relaxed font-sans">
+                        {devInfo.announcement}
+                      </p>
+                    </div>
+
+                    {/* Engineering Milestone Progress */}
+                    <div className="max-w-xl mx-auto space-y-2 pt-2">
                       <div className="flex items-center justify-between text-xs font-mono">
-                        <span className="text-slate-400 uppercase tracking-wider">Engineering Milestone</span>
-                        <span className="font-bold text-white">{devInfo.progress}% Complete</span>
+                        <span className="text-slate-400 flex items-center gap-1.5">
+                          <Activity className="w-3.5 h-3.5 text-emerald-400" />
+                          <span>{devInfo.phase}</span>
+                        </span>
+                        <span className="font-bold text-white">{devInfo.progress}% e Përfunduar</span>
                       </div>
                       <div className="w-full h-3 rounded-full bg-[#1A1F2C] border border-[#2B3448] overflow-hidden p-0.5">
                         <div
@@ -3574,44 +3616,49 @@ export const VortexDashboard: React.FC<VortexDashboardProps> = ({
                           style={{
                             width: `${devInfo.progress}%`,
                             background: `linear-gradient(90deg, ${devInfo.color}88 0%, ${devInfo.color} 100%)`,
-                            boxShadow: `0 0 12px ${devInfo.color}80`
+                            boxShadow: `0 0 15px ${devInfo.color}80`
                           }}
                         />
                       </div>
                     </div>
 
-                    {/* Features checklist */}
-                    <div className="pt-4 grid grid-cols-1 sm:grid-cols-2 gap-3 text-left">
-                      {devInfo.features.map((feat, idx) => (
+                    {/* 4 Feature Highlights Grid */}
+                    <div className="pt-2 grid grid-cols-1 sm:grid-cols-2 gap-3 text-left">
+                      {devInfo.highlights.map((h, idx) => (
                         <div
                           key={idx}
-                          className="flex items-start gap-2.5 p-3 rounded-xl bg-white/[0.03] border border-white/5 text-xs text-slate-300 font-mono"
+                          className="p-3.5 rounded-xl bg-white/[0.03] border border-white/5 space-y-1 hover:border-white/10 transition"
                         >
-                          <CheckCircle2 className="w-4 h-4 shrink-0 text-emerald-400 mt-0.5" />
-                          <span>{feat}</span>
+                          <div className="flex items-center gap-2 text-xs font-mono font-bold text-white">
+                            <CheckCircle2 className="w-3.5 h-3.5 text-emerald-400 shrink-0" />
+                            <span>{h.title}</span>
+                          </div>
+                          <p className="text-[11px] text-slate-400 font-sans pl-5.5 leading-normal">
+                            {h.desc}
+                          </p>
                         </div>
                       ))}
                     </div>
 
-                    {/* Interactive Action Button */}
-                    <div className="pt-6 flex flex-wrap items-center justify-center gap-3">
+                    {/* Action Buttons */}
+                    <div className="pt-4 flex flex-wrap items-center justify-center gap-3">
                       <button
                         onClick={() => {
                           sound.playTournamentVictory();
-                          confetti({ particleCount: 60, spread: 50, origin: { y: 0.6 } });
-                          setDashboardToast(`✓ Alert Activated! You will receive priority early access to ${devInfo.title}.`);
-                          setTimeout(() => setDashboardToast(null), 4000);
+                          confetti({ particleCount: 70, spread: 60, origin: { y: 0.6 } });
+                          setDashboardToast(`✓ Njoftimi u aktivizua! Do të lajmëroheni i pari sapo të rikthehet ${devInfo.title}.`);
+                          setTimeout(() => setDashboardToast(null), 4500);
                         }}
-                        className="px-6 py-3 rounded-2xl bg-gradient-to-r from-amber-500 to-orange-500 hover:brightness-110 text-slate-950 font-display font-black text-xs uppercase tracking-wider transition shadow-lg shadow-amber-500/20 cursor-pointer flex items-center gap-2 active:scale-95"
+                        className="px-6 py-3 rounded-2xl bg-gradient-to-r from-amber-500 to-orange-500 hover:brightness-110 text-slate-950 font-display font-black text-xs uppercase tracking-wider transition shadow-lg shadow-amber-500/25 cursor-pointer flex items-center gap-2 active:scale-95"
                       >
                         <Bell className="w-4 h-4" />
-                        <span>Notify Me When Live</span>
+                        <span>Më njofto sapo të rikthehet tab-i</span>
                       </button>
                       <button
                         onClick={() => setActiveTab('play')}
                         className="px-6 py-3 rounded-2xl bg-[#141722] hover:bg-[#1C2232] border border-[#283044] text-slate-300 hover:text-white font-mono text-xs font-bold transition cursor-pointer"
                       >
-                        Return to Ranked 5v5
+                        ← Kthehu te Play (Ranked 5v5)
                       </button>
                     </div>
                   </div>
