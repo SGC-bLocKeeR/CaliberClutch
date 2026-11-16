@@ -325,8 +325,15 @@ export const VortexCaseShopModal: React.FC<VortexCaseShopModalProps> = ({ isOpen
     setReelItems(generatedReel);
     setReelOffset(0);
 
-    const cardWidth = 140; // width of each card + margin
-    const targetOffset = 36 * cardWidth - 280 + Math.floor(Math.random() * 40) - 20;
+    // Calculate dynamic pixel-perfect offset so the winning skin stops dead center on any device (mobile, tablet, desktop)
+    const containerEl = reelRef.current?.parentElement;
+    const containerWidth = containerEl ? containerEl.clientWidth : (typeof window !== 'undefined' ? Math.min(window.innerWidth - 32, 896) : 600);
+    const cardWidth = 128; // Tailwind w-32 = 128px
+    const cardGap = 8;     // Tailwind gap-2 = 8px
+    const pl = 16;         // Tailwind pl-4 = 16px
+    const winnerCenter = pl + (36 * (cardWidth + cardGap)) + (cardWidth / 2); // Center of card #36
+    const jitter = Math.floor(Math.random() * 30) - 15; // Organic slight offset (+/- 15px within card)
+    const targetOffset = Math.max(0, winnerCenter - (containerWidth / 2) + jitter);
 
     const startTime = Date.now();
     const duration = 5200; // 5.2 seconds spin
@@ -803,7 +810,7 @@ export const VortexCaseShopModal: React.FC<VortexCaseShopModalProps> = ({ isOpen
                         </div>
 
                         {/* Center: Case Multiplier Selector [1] [2] [3] [4] [5] [10] */}
-                        <div className="flex items-center gap-1 bg-[#06070B] p-1 rounded-xl border border-white/10">
+                        <div className="flex items-center gap-1 bg-[#06070B] p-1 rounded-xl border border-white/10 max-w-full overflow-x-auto shrink-0">
                           {[1, 2, 3, 4, 5, 10].map((num) => (
                             <button
                               key={num}

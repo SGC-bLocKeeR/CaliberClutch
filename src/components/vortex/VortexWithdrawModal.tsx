@@ -185,55 +185,56 @@ export const VortexWithdrawModal: React.FC<VortexWithdrawModalProps> = ({
       <div className="relative w-full max-w-4xl max-h-[92vh] bg-[#0A0D14] border border-[#202738] rounded-3xl shadow-[0_20px_60px_rgba(0,0,0,0.85)] flex flex-col overflow-hidden z-10">
         
         {/* Top Header */}
-        <div className="px-5 py-4 border-b border-white/5 bg-[#0F1420]/80 flex items-center justify-between gap-3 shrink-0">
-          <div className="flex items-center gap-3">
-            <div className="w-10 h-10 rounded-2xl bg-gradient-to-br from-amber-500/20 to-emerald-500/10 border border-amber-500/30 flex items-center justify-center shadow-[0_0_15px_rgba(245,158,11,0.2)]">
-              <ArrowUpRight className="w-5 h-5 text-amber-400" />
+        <div className="px-3.5 sm:px-5 py-3 sm:py-4 border-b border-white/5 bg-[#0F1420]/80 flex items-center justify-between gap-3 shrink-0">
+          <div className="flex items-center gap-2.5 sm:gap-3 min-w-0">
+            <div className="w-9 sm:w-10 h-9 sm:h-10 rounded-2xl bg-gradient-to-br from-amber-500/20 to-emerald-500/10 border border-amber-500/30 flex items-center justify-center shadow-[0_0_15px_rgba(245,158,11,0.2)] shrink-0">
+              <ArrowUpRight className="w-4 sm:w-5 h-4 sm:h-5 text-amber-400" />
             </div>
-            <div>
-              <div className="flex items-center gap-2">
-                <h2 className="font-display font-black text-lg text-white tracking-wide">
-                  VORTEX WITHDRAW & CASHOUT
+            <div className="min-w-0">
+              <div className="flex items-center gap-1.5 sm:gap-2">
+                <h2 className="font-display font-black text-sm sm:text-lg text-white tracking-wide truncate">
+                  VORTEX WITHDRAW
                 </h2>
-                <span className="px-2 py-0.5 rounded-full bg-emerald-500/15 border border-emerald-500/30 text-emerald-400 font-mono text-[10px] font-bold">
+                <span className="px-2 py-0.5 rounded-full bg-emerald-500/15 border border-emerald-500/30 text-emerald-400 font-mono text-[9px] sm:text-[10px] font-bold">
                   LIVE
                 </span>
               </div>
-              <p className="text-xs text-slate-400 font-sans">
-                Withdraw CS2 skins directly to Steam or cash out EUR balance to Crypto.
+              <p className="text-[11px] sm:text-xs text-slate-400 font-sans truncate">
+                Withdraw skins to Steam or balance to Crypto.
               </p>
             </div>
           </div>
 
-          <div className="flex items-center gap-3">
+          <div className="flex items-center gap-2 sm:gap-3 shrink-0">
             {/* Wallet Balance Badge */}
-            <div className="hidden sm:flex items-center gap-2 px-3 py-1.5 rounded-xl bg-black/60 border border-emerald-500/30 font-mono">
-              <span className="text-xs text-slate-400">Available:</span>
-              <span className="text-sm font-black text-emerald-400">{walletBalance.toFixed(2)} €</span>
+            <div className="flex items-center gap-1 sm:gap-2 px-2.5 sm:px-3 py-1 sm:py-1.5 rounded-xl bg-black/60 border border-emerald-500/30 font-mono">
+              <span className="hidden xs:inline text-[11px] sm:text-xs text-slate-400">Available:</span>
+              <span className="text-xs sm:text-sm font-black text-emerald-400">{walletBalance.toFixed(2)} €</span>
             </div>
 
             <button
               onClick={() => { sound.playClick(); onClose(); }}
-              className="p-2 rounded-xl bg-white/5 hover:bg-white/10 text-slate-400 hover:text-white transition cursor-pointer"
+              className="p-1.5 sm:p-2 rounded-xl bg-white/5 hover:bg-white/10 text-slate-400 hover:text-white transition cursor-pointer"
             >
-              <X className="w-5 h-5" />
+              <X className="w-4 sm:w-5 h-4 sm:h-5" />
             </button>
           </div>
         </div>
 
         {/* Tab Selection Navigation */}
-        <div className="px-5 pt-3 pb-2 bg-[#0C101A] border-b border-white/5 flex items-center justify-between gap-2 shrink-0">
-          <div className="flex items-center gap-2">
+        <div className="px-3 sm:px-5 pt-2.5 pb-2 bg-[#0C101A] border-b border-white/5 flex items-center justify-between gap-2 shrink-0 overflow-x-auto scrollbar-none">
+          <div className="flex items-center gap-1.5 sm:gap-2 shrink-0">
             <button
               onClick={() => { sound.playClick(); setActiveTab('skins'); }}
-              className={`px-4 py-2 rounded-xl font-mono text-xs font-bold transition cursor-pointer flex items-center gap-2 ${
+              className={`px-3 sm:px-4 py-2 rounded-xl font-mono text-xs font-bold transition cursor-pointer flex items-center gap-1.5 sm:gap-2 shrink-0 ${
                 activeTab === 'skins'
                   ? 'bg-gradient-to-r from-amber-500/20 to-orange-500/20 border border-amber-500/50 text-amber-400 shadow-sm'
                   : 'text-slate-400 hover:text-white hover:bg-white/5 border border-transparent'
               }`}
             >
               <span>🎁</span>
-              <span>CS2 Skins (Steam Trade)</span>
+              <span className="hidden sm:inline">CS2 Skins (Steam Trade)</span>
+              <span className="sm:hidden">CS2 Skins</span>
               {userSkins.length > 0 && (
                 <span className="px-1.5 py-0.2 rounded-full bg-amber-500 text-slate-950 font-black text-[10px]">
                   {userSkins.length}
@@ -243,26 +244,28 @@ export const VortexWithdrawModal: React.FC<VortexWithdrawModalProps> = ({
 
             <button
               onClick={() => { sound.playClick(); setActiveTab('crypto'); }}
-              className={`px-4 py-2 rounded-xl font-mono text-xs font-bold transition cursor-pointer flex items-center gap-2 ${
+              className={`px-3 sm:px-4 py-2 rounded-xl font-mono text-xs font-bold transition cursor-pointer flex items-center gap-1.5 sm:gap-2 shrink-0 ${
                 activeTab === 'crypto'
                   ? 'bg-gradient-to-r from-emerald-500/20 to-teal-500/20 border border-emerald-500/50 text-emerald-400 shadow-sm'
                   : 'text-slate-400 hover:text-white hover:bg-white/5 border border-transparent'
               }`}
             >
               <span>⚡</span>
-              <span>Crypto Cashout (USDT / BTC / ETH)</span>
+              <span className="hidden sm:inline">Crypto Cashout (USDT / BTC / ETH)</span>
+              <span className="sm:hidden">Crypto</span>
             </button>
 
             <button
               onClick={() => { sound.playClick(); setActiveTab('history'); }}
-              className={`px-4 py-2 rounded-xl font-mono text-xs font-bold transition cursor-pointer flex items-center gap-2 ${
+              className={`px-3 sm:px-4 py-2 rounded-xl font-mono text-xs font-bold transition cursor-pointer flex items-center gap-1.5 sm:gap-2 shrink-0 ${
                 activeTab === 'history'
                   ? 'bg-white/10 border border-white/20 text-white'
                   : 'text-slate-400 hover:text-white hover:bg-white/5 border border-transparent'
               }`}
             >
               <span>📜</span>
-              <span>Withdrawal History</span>
+              <span className="hidden sm:inline">Withdrawal History</span>
+              <span className="sm:hidden">History</span>
               {history.length > 0 && (
                 <span className="px-1.5 py-0.2 rounded-full bg-white/20 text-white font-mono text-[10px]">
                   {history.length}
@@ -279,7 +282,7 @@ export const VortexWithdrawModal: React.FC<VortexWithdrawModalProps> = ({
         </div>
 
         {/* Modal Scrollable Body */}
-        <div className="p-5 flex-1 overflow-y-auto space-y-5">
+        <div className="p-3.5 sm:p-5 flex-1 overflow-y-auto space-y-4 sm:space-y-5">
           
           {/* ========================================================= */}
           {/* TAB 1: CS2 SKINS WITHDRAWAL (STEAM TRADE OFFER)           */}

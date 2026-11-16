@@ -160,12 +160,18 @@ export const VortexRightSocialRail: React.FC<VortexRightSocialRailProps> = ({
   const [spectateToast, setSpectateToast] = useState<string | null>(null);
 
   // Mobile Collapsible Rail State (Vetem per telefon/mobile)
-  const [mobileCollapsed, setMobileCollapsed] = useState(false);
+  const [mobileCollapsed, setMobileCollapsed] = useState<boolean>(() => 
+    typeof window !== 'undefined' ? window.innerWidth < 1024 : false
+  );
   const [isMobile, setIsMobile] = useState<boolean>(() => typeof window !== 'undefined' ? window.innerWidth < 1024 : false);
 
   useEffect(() => {
     const handleResize = () => {
-      setIsMobile(window.innerWidth < 1024);
+      const mobile = window.innerWidth < 1024;
+      setIsMobile(mobile);
+      if (!mobile) {
+        setMobileCollapsed(false);
+      }
     };
     window.addEventListener('resize', handleResize);
     return () => window.removeEventListener('resize', handleResize);
@@ -583,58 +589,89 @@ export const VortexRightSocialRail: React.FC<VortexRightSocialRailProps> = ({
 
   return (
     <>
+      {/* Mobile backdrop when rail is expanded */}
+      {isMobile && !mobileCollapsed && (
+        <div 
+          className="fixed inset-0 bg-black/70 backdrop-blur-sm z-[75] lg:hidden transition-opacity"
+          onClick={() => {
+            sound.playClick();
+            setMobileCollapsed(true);
+          }}
+        />
+      )}
+
       {/* ======================================================== */}
       {/* 1. RIGHT SIDEBAR (PERSISTENT ON DESKTOP, COLLAPSIBLE ON MOBILE) */}
       {/* ======================================================== */}
       <aside className={`
         fixed z-[80] select-none shadow-2xl transition-all duration-300 ease-in-out
         ${mobileCollapsed 
-          ? 'right-2 top-2 w-[calc(100vw-1rem)] sm:w-64 max-h-[50px] rounded-2xl border border-[#191C26] bg-[#08090D]/95 backdrop-blur-md p-2 bottom-auto overflow-hidden shadow-emerald-500/5' 
-          : 'right-0 top-0 bottom-0 w-72 sm:w-64 bg-[#08090D] border-l border-[#191C26] p-3 flex flex-col justify-between'
+          ? 'right-3 top-3 w-auto max-w-[220px] rounded-2xl border border-[#191C26] bg-[#08090D]/95 backdrop-blur-md px-2.5 py-1.5 bottom-auto overflow-hidden shadow-[0_4px_20px_rgba(0,0,0,0.6)] hover:border-[#A3E635]/40' 
+          : 'right-0 top-0 bottom-0 w-80 max-w-[85vw] bg-[#08090D] border-l border-[#191C26] p-3 flex flex-col justify-between'
         }
-        lg:right-0 lg:top-0 lg:bottom-0 lg:w-64 lg:bg-[#08090D] lg:border-l lg:border-[#191C26] lg:border-t-0 lg:border-r-0 lg:border-b-0 lg:rounded-none lg:p-3 lg:max-h-none lg:bottom-0 lg:flex lg:flex-col lg:justify-between lg:overflow-visible
+        lg:right-0 lg:top-0 lg:bottom-0 lg:w-64 lg:max-w-none lg:bg-[#08090D] lg:border-l lg:border-[#191C26] lg:border-t-0 lg:border-r-0 lg:border-b-0 lg:rounded-none lg:p-3 lg:max-h-none lg:bottom-0 lg:flex lg:flex-col lg:justify-between lg:overflow-visible
       `}>
         
         {/* TOP SECTION: User Profile Row - Exact 1:1 match to uploaded snippet */}
         <div className={`w-full ${mobileCollapsed ? 'pb-0 border-b-0' : 'pb-3 border-b border-[#1A1D27]'} lg:pb-3 lg:border-b lg:border-[#1A1D27] transition-all`}>
-          <button
-            onClick={() => {
-              sound.playClick();
-              if (isMobile) {
-                setMobileCollapsed(prev => !prev);
-              } else {
-                setActiveDrawer(prev => prev === 'profile' ? 'none' : 'profile');
-              }
-            }}
-            className="w-full flex items-center justify-between p-1.5 rounded-xl hover:bg-white/[0.05] transition cursor-pointer group"
-            title={isMobile ? (mobileCollapsed ? "Shfaq panelin e plotë (Expand)" : "Palo lart panelin që mos ta zë pamjen (Collapse)") : "Player Profile"}
-          >
-            <div className="flex items-center gap-2 min-w-0">
-              <div className="relative w-8 h-8 shrink-0">
-                <img 
-                  src={currentAvatarUrl} 
-                  alt={currentGamerTag} 
-                  className="w-full h-full rounded-full object-cover border-2 border-[#A3E635] shadow-[0_0_10px_rgba(163,230,53,0.3)] block"
-                  onError={(e) => {
-                    (e.target as HTMLImageElement).src = '/images/blockeerz_avatar.png';
-                  }}
-                />
-                <span className="absolute bottom-0 right-0 w-2.5 h-2.5 rounded-full bg-emerald-400 border-2 border-[#08090D]" />
+          <div className="w-full flex items-center justify-between">
+            <button
+              onClick={() => {
+                sound.playClick();
+                if (isMobile) {
+                  if (mobileCollapsed) {
+                    setMobileCollapsed(false);
+                  } else {
+                    setActiveDrawer(prev => prev === 'profile' ? 'none' : 'profile');
+                  }
+                } else {
+                  setActiveDrawer(prev => prev === 'profile' ? 'none' : 'profile');
+                }
+              }}
+              className="flex-1 min-w-0 flex items-center justify-between p-1.5 rounded-xl hover:bg-white/[0.05] transition cursor-pointer group"
+              title={isMobile ? (mobileCollapsed ? "Shfaq panelin e plotë (Expand)" : "Player Profile") : "Player Profile"}
+            >
+              <div className="flex items-center gap-2 min-w-0">
+                <div className="relative w-8 h-8 shrink-0">
+                  <img 
+                    src={currentAvatarUrl} 
+                    alt={currentGamerTag} 
+                    className="w-full h-full rounded-full object-cover border-2 border-[#A3E635] shadow-[0_0_10px_rgba(163,230,53,0.3)] block"
+                    onError={(e) => {
+                      (e.target as HTMLImageElement).src = '/images/blockeerz_avatar.png';
+                    }}
+                  />
+                  <span className="absolute bottom-0 right-0 w-2.5 h-2.5 rounded-full bg-emerald-400 border-2 border-[#08090D]" />
+                </div>
+                <span className="font-display font-black text-sm text-white group-hover:text-[#A3E635] transition tracking-tight truncate">
+                  {currentGamerTag}
+                </span>
+                <FaceitVerificationBadge type={currentVerification} size="sm" />
+                <CountryFlag code={currentCountry.code} name={currentCountry.name} size="xs" />
               </div>
-              <span className="font-display font-black text-sm text-white group-hover:text-[#A3E635] transition tracking-tight truncate">
-                {currentGamerTag}
-              </span>
-              <FaceitVerificationBadge type={currentVerification} size="sm" />
-              <CountryFlag code={currentCountry.code} name={currentCountry.name} size="xs" />
-            </div>
-            <div className="p-1 rounded-lg hover:bg-white/10 text-slate-400 group-hover:text-white transition">
-              <ChevronDown className={`w-4 h-4 transition-transform duration-300 shrink-0 ${
-                (isMobile ? mobileCollapsed : activeDrawer === 'profile') 
-                  ? 'rotate-180 text-[#A3E635]' 
-                  : 'rotate-0 text-slate-400'
-              }`} />
-            </div>
-          </button>
+              <div className="p-1 rounded-lg hover:bg-white/10 text-slate-400 group-hover:text-white transition">
+                <ChevronDown className={`w-4 h-4 transition-transform duration-300 shrink-0 ${
+                  (!isMobile && activeDrawer === 'profile') 
+                    ? 'rotate-180 text-[#A3E635]' 
+                    : 'rotate-0 text-slate-400'
+                }`} />
+              </div>
+            </button>
+
+            {/* Mobile Close Button when drawer is open */}
+            {isMobile && !mobileCollapsed && (
+              <button
+                onClick={() => {
+                  sound.playClick();
+                  setMobileCollapsed(true);
+                }}
+                className="ml-1 p-1.5 rounded-xl bg-white/5 hover:bg-white/10 text-slate-400 hover:text-white transition cursor-pointer shrink-0"
+                title="Mbyll panelin"
+              >
+                <X className="w-4 h-4" />
+              </button>
+            )}
+          </div>
         </div>
 
         {/* MIDDLE SECTION: Notifications • Social • Party Capsule */}
@@ -934,11 +971,11 @@ export const VortexRightSocialRail: React.FC<VortexRightSocialRailProps> = ({
         <>
           {/* Backdrop for outside click */}
           <div 
-            className="fixed inset-0 z-40 bg-black/40 backdrop-blur-[1px]" 
+            className="fixed inset-0 z-[85] bg-black/60 backdrop-blur-[2px]" 
             onClick={() => setActiveDrawer('none')} 
           />
 
-          <div className="fixed right-64 top-0 bottom-0 w-80 bg-[#0B0D13] border-l border-[#1A1D27] z-50 flex flex-col shadow-2xl animate-in slide-in-from-right duration-200 select-none">
+          <div className="fixed right-0 lg:right-64 top-0 bottom-0 w-full sm:w-80 bg-[#0B0D13] border-l border-[#1A1D27] z-[90] flex flex-col shadow-2xl animate-in slide-in-from-right duration-200 select-none">
             
             {activeDmUser ? (
               /* ==================================================== */
@@ -1391,11 +1428,11 @@ export const VortexRightSocialRail: React.FC<VortexRightSocialRailProps> = ({
       {activeDrawer === 'notifications' && (
         <>
           <div 
-            className="fixed inset-0 z-40 bg-black/40 backdrop-blur-[1px]" 
+            className="fixed inset-0 z-[85] bg-black/60 backdrop-blur-[2px]" 
             onClick={() => setActiveDrawer('none')} 
           />
 
-          <div className="fixed right-64 top-0 bottom-0 w-80 bg-[#0B0D13] border-l border-[#1A1D27] z-50 flex flex-col shadow-2xl animate-in slide-in-from-right duration-200 select-none">
+          <div className="fixed right-0 lg:right-64 top-0 bottom-0 w-full sm:w-80 bg-[#0B0D13] border-l border-[#1A1D27] z-[90] flex flex-col shadow-2xl animate-in slide-in-from-right duration-200 select-none">
             {/* Header: Notifications + Close ✕ */}
             <div className="p-4 border-b border-[#181B26] flex items-center justify-between">
               <h2 className="font-display font-extrabold text-white text-base tracking-wide">
@@ -1623,11 +1660,11 @@ export const VortexRightSocialRail: React.FC<VortexRightSocialRailProps> = ({
       {activeDrawer === 'party' && (
         <>
           <div 
-            className="fixed inset-0 z-40 bg-black/40 backdrop-blur-[1px]" 
+            className="fixed inset-0 z-[85] bg-black/60 backdrop-blur-[2px]" 
             onClick={() => setActiveDrawer('none')} 
           />
 
-          <div className="fixed right-64 top-0 bottom-0 w-80 bg-[#0B0D13] border-l border-[#1A1D27] z-50 flex flex-col shadow-2xl animate-in slide-in-from-right duration-200 select-none">
+          <div className="fixed right-0 lg:right-64 top-0 bottom-0 w-full sm:w-80 bg-[#0B0D13] border-l border-[#1A1D27] z-[90] flex flex-col shadow-2xl animate-in slide-in-from-right duration-200 select-none">
             
             {/* Header: team_bLocKeeRz + Close ✕ */}
             <div className="p-4 border-b border-[#181B26] flex items-center justify-between">
@@ -1885,11 +1922,11 @@ export const VortexRightSocialRail: React.FC<VortexRightSocialRailProps> = ({
       {activeDrawer === 'profile' && (
         <>
           <div 
-            className="fixed inset-0 z-40 bg-black/40 backdrop-blur-[1px]" 
+            className="fixed inset-0 z-[85] bg-black/60 backdrop-blur-[2px]" 
             onClick={() => setActiveDrawer('none')} 
           />
 
-          <div className="fixed right-64 top-0 bottom-0 w-84 max-w-[calc(100vw-1rem)] bg-[#12141C] border-l border-[#252B3B] z-50 p-5 flex flex-col justify-between shadow-[0_20px_50px_rgba(0,0,0,0.85)] animate-in slide-in-from-right duration-200 select-none overflow-y-auto space-y-4 text-center">
+          <div className="fixed right-0 lg:right-64 top-0 bottom-0 w-full sm:w-84 max-w-full sm:max-w-md bg-[#12141C] border-l border-[#252B3B] z-[90] p-5 flex flex-col justify-between shadow-[0_20px_50px_rgba(0,0,0,0.85)] animate-in slide-in-from-right duration-200 select-none overflow-y-auto space-y-4 text-center">
             
             <div className="space-y-4">
               {/* Close Button */}
