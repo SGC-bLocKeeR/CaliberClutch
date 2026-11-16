@@ -137,7 +137,27 @@ export const executeSkinWithdrawal = async (
   onProgress?.(3, 'Dispatching automated Steam Trade Offer to your Steam client...');
   await new Promise(r => setTimeout(r, 800));
 
-  const tradeOfferId = `${Math.floor(6100000000 + Math.random() * 2900000000)}`;
+  let tradeOfferId = `${Math.floor(6100000000 + Math.random() * 2900000000)}`;
+
+  try {
+    const res = await fetch('/api/trade-withdraw', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        tradeUrl,
+        skin,
+        steamId64: localStorage.getItem('vortex_steam_id64') || '76561198089448834'
+      })
+    });
+    if (res.ok) {
+      const data = await res.json();
+      if (data.order && data.order.tradeOfferId) {
+        tradeOfferId = data.order.tradeOfferId;
+      }
+    }
+  } catch (e) {
+    console.warn('[VORTEX Withdraw] Remote withdraw dispatch warning:', e);
+  }
 
   // Remove skin from user vault
   removeUserSkinFromInventory(skin.id);

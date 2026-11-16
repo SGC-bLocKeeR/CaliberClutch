@@ -14,6 +14,7 @@ function devApiEndpointsPlugin() {
           '/api/steam-inventory': './api/steam-inventory.js',
           '/api/cs2-prices': './api/cs2-prices.js',
           '/api/trade-deposit': './api/trade-deposit.js',
+          '/api/trade-withdraw': './api/trade-withdraw.js',
           '/api/trade-status': './api/trade-status.js',
           '/api/steam-profile': './api/steam-profile.js'
         };
