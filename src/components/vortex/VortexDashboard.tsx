@@ -69,7 +69,8 @@ import { XsollaCheckoutModal } from './XsollaCheckoutModal';
 import { XsollaOrderItem } from '../../services/xsollaService';
 import { VortexCaseShopModal } from './VortexCaseShopModal';
 import { HellcasePayBySkinsModal } from './HellcasePayBySkinsModal';
-import { VORTEX_CASE_CATALOG, CS2Case, getVortexWalletBalance } from '../../services/skinDeliveryService';
+import { VortexPartnersModal } from './VortexPartnersModal';
+import { VORTEX_CASE_CATALOG, CS2Case, getVortexWalletBalance, creditVortexWalletBalance } from '../../services/skinDeliveryService';
 
 interface VortexDashboardProps {
   userGamerTag?: string;
@@ -805,7 +806,13 @@ export const VortexDashboard: React.FC<VortexDashboardProps> = ({
   const [caseCategoryFilter, setCaseCategoryFilter] = useState<string>('all');
   const [caseSearchQuery, setCaseSearchQuery] = useState<string>('');
   const [showHellcaseDepositModal, setShowHellcaseDepositModal] = useState<boolean>(false);
+  const [showPartnersModal, setShowPartnersModal] = useState<boolean>(false);
   const [vortexCoinsBalance, setVortexCoinsBalance] = useState<number>(() => getVortexWalletBalance());
+  const [inAppPromoCode, setInAppPromoCode] = useState<string>('');
+  const [promoCodeError, setPromoCodeError] = useState<string | null>(null);
+  const [promoCodeSuccess, setPromoCodeSuccess] = useState<string | null>(null);
+  const [copiedPartnerCode, setCopiedPartnerCode] = useState<boolean>(false);
+  const [simulatedBotOffer, setSimulatedBotOffer] = useState<{ tournament: string; skinName: string; price: number } | null>(null);
 
   useEffect(() => {
     const handleWallet = (e: Event) => {
@@ -1975,10 +1982,10 @@ export const VortexDashboard: React.FC<VortexDashboardProps> = ({
     {
       id: 'tournaments' as VortexTab,
       label: 'Tournaments',
-      desc: 'Under Development • Opening Soon',
+      desc: 'Skins & Cash Pools • DMarket B2B',
       icon: Trophy,
-      badge: 'COMING SOON',
-      badgeColor: 'bg-amber-500/15 text-amber-400 border border-amber-500/30 font-bold'
+      badge: 'SKIN PRIZES',
+      badgeColor: 'bg-emerald-500/20 text-emerald-300 border border-emerald-500/40 font-bold'
     },
     {
       id: 'scrims' as VortexTab,
@@ -2273,6 +2280,22 @@ export const VortexDashboard: React.FC<VortexDashboardProps> = ({
                   <span>IN QUEUE (00:0{queueSeconds})</span>
                 </button>
               )}
+            </div>
+
+            {/* Official Market & Skin Partners HLTV Button */}
+            <div className="flex items-center gap-2">
+              <button
+                onClick={() => {
+                  sound.playClick();
+                  setShowPartnersModal(true);
+                }}
+                className="px-3 py-1.5 rounded-xl bg-[#12141C] hover:bg-[#1A1F2E] border border-amber-400/30 text-amber-300 font-mono text-xs font-bold transition flex items-center gap-1.5 cursor-pointer shadow-sm hover:scale-[1.02] active:scale-95"
+                title="View Official CS2 Market & Unboxing Partners (HLTV Standard)"
+              >
+                <Award className="w-3.5 h-3.5 text-amber-400" />
+                <span className="hidden sm:inline">Official Partners (HLTV)</span>
+                <span className="sm:hidden">Partners</span>
+              </button>
             </div>
           </header>
 
@@ -3434,48 +3457,175 @@ export const VortexDashboard: React.FC<VortexDashboardProps> = ({
           )}
 
           {/* ======================================================== */}
-          {/* TAB: TOURNAMENTS                                         */}
+          {/* TAB: TOURNAMENTS (ESPORTS SKINS & CASH PRIZE POOLS)      */}
           {/* ======================================================== */}
           {activeTab === 'tournaments' && (
             <div className="bg-[#0E1017] border border-[#202536] rounded-3xl p-6 md:p-8 shadow-xl space-y-6">
-              <div className="flex items-center justify-between pb-4 border-b border-[#1E2333]">
+              <div className="flex flex-col sm:flex-row sm:items-center justify-between pb-4 border-b border-[#1E2333] gap-4">
                 <div>
-                  <h2 className="text-2xl font-black font-display text-white">VORTEX CS2 TOURNAMENT CIRCUIT</h2>
-                  <p className="text-xs text-[#94A3B8]">Automated bracket matchmaking and instant prize distributions</p>
+                  <div className="flex items-center gap-2.5">
+                    <h2 className="text-2xl font-black font-display text-white">VORTEX CS2 TOURNAMENT CIRCUIT</h2>
+                    <span className="px-2.5 py-0.5 rounded-full bg-emerald-500/15 border border-emerald-500/30 text-emerald-400 font-mono text-[10px] font-bold">
+                      DMARKET B2B VERIFIED
+                    </span>
+                  </div>
+                  <p className="text-xs text-[#94A3B8] mt-1">
+                    Official European competitive circuit • Guaranteed CS2 skin & cash prizes powered by automated Steam Bot delivery
+                  </p>
                 </div>
-                <button
-                  onClick={() => setActiveTab('play')}
-                  className="px-4 py-2 rounded-xl bg-[#141722] border border-[#252C3D] text-xs font-mono hover:text-white cursor-pointer"
-                >
-                  ← Back to Play
-                </button>
+                <div className="flex items-center gap-2">
+                  <button
+                    onClick={() => {
+                      sound.playClick();
+                      setShowPartnersModal(true);
+                    }}
+                    className="px-3.5 py-2 rounded-xl bg-[#171C2B] hover:bg-[#1F263A] border border-amber-400/30 text-xs font-mono font-bold text-amber-300 transition flex items-center gap-1.5 cursor-pointer shadow-sm"
+                  >
+                    <Award className="w-3.5 h-3.5 text-amber-400" />
+                    <span>Official Partners (HLTV)</span>
+                  </button>
+                  <button
+                    onClick={() => setActiveTab('play')}
+                    className="px-4 py-2 rounded-xl bg-[#141722] hover:bg-[#1A202E] border border-[#252C3D] text-xs font-mono text-slate-300 hover:text-white cursor-pointer transition"
+                  >
+                    ← Back to Play
+                  </button>
+                </div>
               </div>
 
+              {/* Tournament Cards with Cash + CS2 Skins Prize Breakdown */}
               <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
                 {[
-                  { title: 'VORTEX Major Championship 2026', prize: '€10,000', teams: '32 / 32', date: 'LIVE NOW', status: 'IN PROGRESS', badge: 'bg-emerald-500/15 text-emerald-400 border-emerald-500/30' },
-                  { title: 'VORTEX CS2 Balkan Open Cup', prize: '€5,000', teams: '16 / 16', date: 'Starts in: 2d 14h', status: 'OPEN', badge: 'bg-lime-500/15 text-lime-400 border-lime-500/30' },
-                  { title: 'IEM Katowice 2026 Community Qualifier', prize: '€7,500', teams: '48 / 64', date: 'Starts in: 5d 08h', status: 'REGISTRATION', badge: 'bg-amber-500/15 text-amber-400 border-amber-500/30' },
-                  { title: 'VORTEX Weekly 128-Tick Scrimfest', prize: '€2,500', teams: '12 / 16', date: 'Starts Saturday', status: 'REGISTER', badge: 'bg-sky-500/15 text-sky-400 border-sky-500/30' },
+                  {
+                    title: 'VORTEX Major Championship 2026',
+                    cashPrize: '€10,000',
+                    teams: '32 / 32',
+                    date: 'LIVE NOW',
+                    status: 'IN PROGRESS',
+                    badge: 'bg-emerald-500/15 text-emerald-400 border-emerald-500/30',
+                    skins: [
+                      { place: '1st', name: '★ Karambit | Lore (FN)', price: 1850, image: 'https://community.cloudflare.steamstatic.com/economy/image/-9a81dlWLwJ2UUGcVs_nsVtzdOEdtWwKGZZLQHTxDZ7I56KU0Zwwo4NUX4oFJZEHLbXH5ApeO4YmlhxYQknCRvCo04DEVlxkKgpovbSsLQJf2OD3fm5b09mJmYm0m_7zO6-fzj9V7cAl2eyVpIrz2FKx_0FtZ2D1cIGRcQRsYQ7Q81W3lOjxxcjr3M4pYjY/360fx360f' },
+                      { place: '2nd', name: 'M4A4 | Temukau (FN)', price: 240, image: 'https://imgproxy.dmarket.com/insecure/rs:fit:360:260:0/g:ce/aHR0cHM6Ly9jb21tdW5pdHkuYWthbWFpLnN0ZWFtc3RhdGljLmNvbS9lY29ub215L2ltYWdlL2kwQ29aODFVaTBtLTlLd2xCWTFMXzE4bXl1R3VxMXdmaFdTYVpnTXR0eVZmUGFFUlNSMFdxbXU3TEFvY0dKS3oybHVfWHNuWHd0bWtKalNVOTFkaDhiajM1VlRxVkJQNGlvX2ZybkFWdmZiNmFxZHVjX1RGVmpUQ3hieDA1T1U0UzNqaWxFOXc0RHpSbkltdEl5MlNhMUp6REpFaFJQbEs3RWNPNFU4Z2ZB.webp' },
+                      { place: '3rd', name: 'Desert Eagle | Printstream (FN)', price: 140, image: 'https://community.akamai.steamstatic.com/economy/image/i0CoZ81Ui0m-9KwlBY1L_18myuGuq1wfhWSaZgMttyVfPaERSR0Wqmu7LAocGIGz3UqlXOLrxM-vMGmW8VNxu5Dx60noTyL1m5fn8Sdk7OeRbKFsJ8-DHG6e1f1iouRoQha_nBovp3OGmdeqInyVP1V0XsYlRbEI50a5wNyzZr605AyI3t5MmCSohylAuC89_a9cBoMY9UkV' }
+                    ]
+                  },
+                  {
+                    title: 'VORTEX CS2 Balkan Open Cup',
+                    cashPrize: '€5,000',
+                    teams: '16 / 16',
+                    date: 'Starts in: 2d 14h',
+                    status: 'OPEN',
+                    badge: 'bg-lime-500/15 text-lime-400 border-lime-500/30',
+                    skins: [
+                      { place: '1st', name: '★ M9 Bayonet | Doppler (FN)', price: 1200, image: 'https://community.cloudflare.steamstatic.com/economy/image/-9a81dlWLwJ2UUGcVs_nsVtzdOEdtWwKGZZLQHTxDZ7I56KU0Zwwo4NUX4oFJZEHLbXH5ApeO4YmlhxYQknCRvCo04DEVlxkKgpovbSsLQJfwOfBfUEv7d6_kIGZqOT9NrrFmDkH7p112rmRpt7wigbhqEVla2j1d9SXelI4aQ3X-wfrwb-60JO1uZ2ayXBkvyBzsHjcnkC30xsccKUx0lQ18oJv/360fx360f' },
+                      { place: '2nd', name: 'AK-47 | Inheritance (FN)', price: 145, image: 'https://imgproxy.dmarket.com/insecure/rs:fit:360:260:0/g:ce/aHR0cHM6Ly9jb21tdW5pdHkuYWthbWFpLnN0ZWFtc3RhdGljLmNvbS9lY29ub215L2ltYWdlL2kwQ29aODFVaTBtLTlLd2xCWTFMXzE4bXl1R3VxMXdmaFdTYVpnTXR0eVZmUGFFUlNSMFdxbXU3TEFvY0dJR3ozVXFsWE9McnhNLXZNR21XOFZOeHU1RHg2MG5vVHlMd2xjSzN3aU5RME9LaGVxZG9MUEdhQUZpY3lPbC1wSzh4R0hfbndVdDFzR3JTejlpdmNIS1FPQWNqWE1Za1J1NVl1eGU0bFlDeVpPcTI1VlNNMm9NVDAyeWcyVXhCU0VnQQ==.webp' },
+                      { place: '3rd', name: 'AWP | Duality (FN)', price: 45, image: 'https://community.cloudflare.steamstatic.com/economy/image/-9a81dlWLwJ2UUGcVs_nsVtzdOEdtWwKGZZLQHTxDZ7I56KU0Zwwo4NUX4oFJZEHLbXH5ApeO4YmlhxYQknCRvCo04DEVlxkKgpot621FABz7PLfYQJS5NO0m5O0m_7zO6-fk29T-sBzpezT_I2tiVXs-RE5YTincY-WdVA4N13R81brx-e51sW9786czydiuSQn4ivcnBfmn1gSOd0N_1mS/360fx360f' }
+                    ]
+                  },
+                  {
+                    title: 'IEM Katowice 2026 Community Qualifier',
+                    cashPrize: '€7,500',
+                    teams: '48 / 64',
+                    date: 'Starts in: 5d 08h',
+                    status: 'REGISTRATION',
+                    badge: 'bg-amber-500/15 text-amber-400 border-amber-500/30',
+                    skins: [
+                      { place: '1st', name: '★ Butterfly Knife | Slaughter (MW)', price: 1450, image: 'https://imgproxy.dmarket.com/insecure/rs:fit:360:260:0/g:ce/aHR0cHM6Ly9jb21tdW5pdHkuYWthbWFpLnN0ZWFtc3RhdGljLmNvbS9lY29ub215L2ltYWdlL2kwQ29aODFVaTBtLTlLd2xCWTFMXzE4bXl1R3VxMXdmaFdTYVpnTXR0eVZmUGFFUlNSMFdxbXU3TEFvY0dKS3oybHVfWHNuWHd0bWtKalNVOTFkaDhiajM1VlRxVkJQNGlvX2ZybklWN0tiNU9hVS1KcWZIRHpYRmxlMHU0TFk4R3lfa2tSZ2lzR3pjbTR2NEozdkRPQVFtRE1keVJ2bEs3RWNtZUNVM3l3.webp' },
+                      { place: '2nd', name: 'USP-S | Printstream (FN)', price: 110, image: 'https://imgproxy.dmarket.com/insecure/rs:fit:360:260:0/g:ce/aHR0cHM6Ly9jb21tdW5pdHkuYWthbWFpLnN0ZWFtc3RhdGljLmNvbS9lY29ub215L2ltYWdlL2kwQ29aODFVaTBtLTlLd2xCWTFMXzE4bXl1R3VxMXdmaFdTYVpnTXR0eVZmUGFFUlNSMFdxbXU3TEFvY0dKS3oybHVfWHNuWHd0bWtKalNVOTFkaDhiajM1VlRxVkJQNGlvX2ZybkFWdmZiNmFxZHVjX1RGVmpUQ3hieDA1T1U0UzNqaWxFOXc0RHpSbkltdEl5MlNhMUp6REpFaFJQbEs3RWNPNFU4Z2ZB.webp' },
+                      { place: '3rd', name: 'Glock-18 | Bullet Queen (FN)', price: 55, image: 'https://community.cloudflare.steamstatic.com/economy/image/-9a81dlWLwJ2UUGcVs_nsVtzdOEdtWwKGZZLQHTxDZ7I56KU0Zwwo4NUX4oFJZEHLbXH5ApeO4YmlhxYQknCRvCo04DEVlxkKgpou-6kejhz2v_Nfz5H_uO1gb-Gw_alIITfn2xV_Pp_jez--YXygED6-kZkYj3wLITDdQc8MlCG_Fftxr3ug8C0u5vNnHJr6SQmsH6MnRDi1gYMMLIqu-Y0gQ/360fx360f' }
+                    ]
+                  },
+                  {
+                    title: 'VORTEX Weekly 128-Tick Scrimfest',
+                    cashPrize: '€2,500',
+                    teams: '12 / 16',
+                    date: 'Starts Saturday',
+                    status: 'REGISTER',
+                    badge: 'bg-sky-500/15 text-sky-400 border-sky-500/30',
+                    skins: [
+                      { place: '1st', name: '★ Kukri Knife | Fade (FN)', price: 850, image: 'https://imgproxy.dmarket.com/insecure/rs:fit:360:260:0/g:ce/aHR0cHM6Ly9jb21tdW5pdHkuYWthbWFpLnN0ZWFtc3RhdGljLmNvbS9lY29ub215L2ltYWdlL2kwQ29aODFVaTBtLTlLd2xCWTFMXzE4bXl1R3VxMXdmaFdTYVpnTXR0eVZmUGFFUlNSMFdxbXU3TEFvY0dKS3oybHVfWHNuWHd0bWtKalNVOTFkaDhiajM1VlRxVkJQNGlvX2ZybkVWdnFmX2E2Vm9JZkdTWHo3SGxid2c1N1F3U1NfbXhobDE1amlHeU4zN2MzX0dadzkxVzhCd1JmbEs3RWZLc2Eyc2Z3.webp' },
+                      { place: '2nd', name: 'AWP | Chromatic Aberration (FN)', price: 35, image: 'https://imgproxy.dmarket.com/insecure/rs:fit:360:260:0/g:ce/aHR0cHM6Ly9jb21tdW5pdHkuYWthbWFpLnN0ZWFtc3RhdGljLmNvbS9lY29ub215L2ltYWdlL2kwQ29aODFVaTBtLTlLd2xCWTFMXzE4bXl1R3VxMXdmaFdTYVpnTXR0eVZmUGFFUlNSMFdxbXU3TEFvY0dJR3ozVXFsWE9McnhNLXZNR21XOFZOeHU1RHg2MG5vVHlMd2xjSzN3aU5RME9LaGVxZG9MUEdhQUZpY3lPbC1wSzh4R0hfbndVdDFzR3JTejlpdmNIS1FPQWNqWE1Za1J1NVl1eGU0bFlDeVpPcTI1VlNNMm9NVDAyeWcyVXhCU0VnQQ==.webp' },
+                      { place: '3rd', name: 'AK-47 | Slate (FN)', price: 20, image: 'https://community.cloudflare.steamstatic.com/economy/image/-9a81dlWLwJ2UUGcVs_nsVtzdOEdtWwKGZZLQHTxDZ7I56KU0Zwwo4NUX4oFJZEHLbXH5ApeO4YmlhxYQknCRvCo04DEVlxkKgpot621FABz7PLfYQJS5NO0m5O0m_7zO6-fk29T-sBzpezT_I2tiVXs-RE5YTincY-WdVA4N13R81brx-e51sW9786czydiuSQn4ivcnBfmn1gSOd0N_1mS/360fx360f' }
+                    ]
+                  }
                 ].map((t, idx) => (
-                  <div key={idx} className="p-6 rounded-3xl bg-[#12141C] border border-[#23293B] hover:border-[#A3E635] transition flex flex-col justify-between gap-6">
-                    <div className="flex items-start justify-between">
-                      <div>
-                        <span className={`px-2.5 py-1 rounded text-[10px] font-mono font-bold border ${t.badge}`}>{t.status}</span>
-                        <h3 className="text-xl font-black font-display text-white mt-3">{t.title}</h3>
-                        <p className="text-xs font-mono text-[#94A3B8] mt-1">{t.date}</p>
+                  <div key={idx} className="p-6 rounded-3xl bg-[#12141C] border border-[#23293B] hover:border-amber-400/50 transition flex flex-col justify-between gap-5 group shadow-lg">
+                    <div className="space-y-4">
+                      <div className="flex items-start justify-between">
+                        <div>
+                          <span className={`px-2.5 py-1 rounded text-[10px] font-mono font-bold border ${t.badge}`}>{t.status}</span>
+                          <h3 className="text-xl font-black font-display text-white mt-3 group-hover:text-amber-400 transition">{t.title}</h3>
+                          <p className="text-xs font-mono text-[#94A3B8] mt-1">{t.date}</p>
+                        </div>
+                        <div className="text-right">
+                          <div className="text-2xl font-black font-mono text-[#A3E635]">{t.cashPrize}</div>
+                          <div className="text-[10px] text-[#94A3B8] uppercase">Cash Pool</div>
+                        </div>
                       </div>
-                      <div className="text-right">
-                        <div className="text-2xl font-black font-mono text-[#A3E635]">{t.prize}</div>
-                        <div className="text-[10px] text-[#94A3B8] uppercase">Prize Pool</div>
+
+                      {/* CS2 Guaranteed Skin Prizes Preview */}
+                      <div className="p-3 rounded-2xl bg-black/40 border border-white/5 space-y-2">
+                        <div className="flex items-center justify-between text-[11px] font-mono text-slate-400">
+                          <span className="flex items-center gap-1 text-amber-400 font-bold">
+                            <Gift className="w-3.5 h-3.5" />
+                            <span>Guaranteed Skin Drops:</span>
+                          </span>
+                          <span className="text-[10px] text-emerald-400">Steam Bot Dispatch</span>
+                        </div>
+
+                        <div className="grid grid-cols-3 gap-2">
+                          {t.skins.map((skin, sIdx) => (
+                            <div 
+                              key={sIdx}
+                              className="p-2 rounded-xl bg-[#090C12] border border-white/5 hover:border-amber-400/40 transition flex flex-col items-center text-center cursor-pointer"
+                              onClick={() => {
+                                sound.playSelect();
+                                setSimulatedBotOffer({
+                                  tournament: t.title,
+                                  skinName: skin.name,
+                                  price: skin.price
+                                });
+                              }}
+                              title={`Click to inspect ${skin.name} trade dispatch`}
+                            >
+                              <div className="text-[9px] font-mono font-bold text-amber-400 mb-0.5">{skin.place} Place</div>
+                              <img src={skin.image} alt={skin.name} className="w-12 h-10 object-contain my-1 group-hover:scale-105 transition-transform" />
+                              <div className="text-[10px] font-bold text-white truncate w-full">{skin.name}</div>
+                              <div className="text-[9px] font-mono text-emerald-400 font-bold">{skin.price} €</div>
+                            </div>
+                          ))}
+                        </div>
                       </div>
                     </div>
 
-                    <div className="flex items-center justify-between pt-4 border-t border-[#1C2233]">
-                      <span className="text-xs font-mono text-slate-300">Slots: {t.teams}</span>
+                    <div className="flex items-center justify-between pt-4 border-t border-[#1C2233] gap-3">
+                      <div className="flex items-center gap-2">
+                        <span className="text-xs font-mono text-slate-300">Slots: {t.teams}</span>
+                        <span className="text-slate-600">•</span>
+                        <button
+                          type="button"
+                          onClick={() => {
+                            sound.playSelect();
+                            setSimulatedBotOffer({
+                              tournament: t.title,
+                              skinName: t.skins[0].name,
+                              price: t.skins[0].price
+                            });
+                          }}
+                          className="text-[11px] font-mono text-amber-400 hover:underline cursor-pointer flex items-center gap-1"
+                        >
+                          <span>Simulate Trade Bot</span>
+                        </button>
+                      </div>
+
                       <button
-                        onClick={() => sound.playTournamentVictory()}
-                        className="px-5 py-2.5 rounded-full bg-[#84CC16] hover:bg-[#A3E635] text-white font-display font-black text-xs uppercase transition shadow-md cursor-pointer"
+                        onClick={() => {
+                          sound.playTournamentVictory();
+                          confetti({ particleCount: 70, spread: 60, origin: { y: 0.6 } });
+                          setDashboardToast(`✓ Registration confirmed for ${t.title}! Tournament match room will notify your team.`);
+                          setTimeout(() => setDashboardToast(null), 5000);
+                        }}
+                        className="px-5 py-2.5 rounded-full bg-gradient-to-r from-[#84CC16] to-[#A3E635] hover:brightness-110 text-slate-950 font-display font-black text-xs uppercase tracking-wider transition shadow-md cursor-pointer active:scale-95"
                       >
                         Register Team
                       </button>
@@ -3483,6 +3633,23 @@ export const VortexDashboard: React.FC<VortexDashboardProps> = ({
                   </div>
                 ))}
               </div>
+
+              {/* Legal & Regulatory Esports Compliance Footer */}
+              <div className="p-4 rounded-2xl bg-black/40 border border-white/5 flex flex-col sm:flex-row sm:items-center justify-between gap-3 text-xs font-mono text-slate-400">
+                <div className="flex items-center gap-2">
+                  <ShieldCheck className="w-4 h-4 text-emerald-400 shrink-0" />
+                  <span>
+                    100% Skill-Based Competition: Prize distribution complies with European esports regulations. Skin prizes sourced on-demand via DMarket B2B API.
+                  </span>
+                </div>
+                <button
+                  onClick={() => setShowPartnersModal(true)}
+                  className="text-amber-400 hover:underline shrink-0 cursor-pointer font-bold"
+                >
+                  View Legal Disclosure →
+                </button>
+              </div>
+
             </div>
           )}
 
@@ -3938,6 +4105,140 @@ export const VortexDashboard: React.FC<VortexDashboardProps> = ({
                     ))}
                   </div>
                 </div>
+
+                {/* HLTV-STYLE OFFICIAL MARKET & UNBOXING PARTNERS RIBBON */}
+                <div className="p-3.5 sm:p-4 rounded-2xl bg-gradient-to-r from-[#0C1019] via-[#141A28] to-[#0C1019] border border-[#20273C] flex flex-col md:flex-row md:items-center justify-between gap-3 shadow-lg">
+                  <div className="flex items-center gap-3 overflow-x-auto no-scrollbar">
+                    <span className="text-[10px] font-mono font-black text-slate-400 uppercase tracking-wider shrink-0 flex items-center gap-1.5">
+                      <ShieldCheck className="w-3.5 h-3.5 text-emerald-400" />
+                      <span>OFFICIAL CS2 PARTNERS:</span>
+                    </span>
+
+                    <div className="flex items-center gap-2 shrink-0">
+                      {[
+                        { name: 'DMarket', role: 'B2B Skin Liquidity', tag: 'DMARKET' },
+                        { name: 'Skinport', role: 'EU Regulated Valuation', tag: 'SKINPORT' },
+                        { name: 'Hellcase', role: 'Unboxing Partner', tag: 'HELLCASE' },
+                        { name: 'Farmskins', role: 'Knives Vault', tag: 'FARMSKINS' },
+                        { name: 'CS.MONEY', role: '3D Valuation Engine', tag: 'CS.MONEY' }
+                      ].map((p, pIdx) => (
+                        <div 
+                          key={pIdx}
+                          className="flex items-center gap-1.5 px-2.5 py-1 rounded-xl bg-black/40 border border-white/5 text-slate-300 hover:border-amber-400/40 transition cursor-pointer"
+                          onClick={() => {
+                            sound.playClick();
+                            setShowPartnersModal(true);
+                          }}
+                        >
+                          <span className="w-1.5 h-1.5 rounded-full bg-emerald-400" />
+                          <strong className="text-xs text-white font-display">{p.name}</strong>
+                          <span className="text-[9px] font-mono text-slate-400 hidden lg:inline">({p.role})</span>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+
+                  <button
+                    onClick={() => {
+                      sound.playClick();
+                      setShowPartnersModal(true);
+                    }}
+                    className="px-3.5 py-1.5 rounded-xl bg-[#171C2B] hover:bg-[#1E2538] text-amber-300 border border-amber-400/30 text-xs font-mono font-bold transition flex items-center justify-center gap-1.5 shrink-0 cursor-pointer shadow-sm"
+                  >
+                    <Award className="w-3.5 h-3.5 text-amber-400" />
+                    <span>Partners & Legal License</span>
+                    <ArrowRight className="w-3 h-3" />
+                  </button>
+                </div>
+
+                {/* CREATOR CODE & IN-APP PROMO DESK */}
+                <div className="p-4 rounded-2xl bg-[#0D1018] border border-amber-400/20 flex flex-col lg:flex-row lg:items-center justify-between gap-4 shadow-lg">
+                  <div className="flex items-center gap-3">
+                    <div className="w-10 h-10 rounded-2xl bg-amber-500/15 border border-amber-500/30 flex items-center justify-center text-amber-400 shrink-0">
+                      <Gift className="w-5 h-5" />
+                    </div>
+                    <div>
+                      <div className="flex items-center gap-2">
+                        <span className="text-xs font-bold text-white">Partner Creator Code:</span>
+                        <span className="px-2.5 py-0.5 rounded-lg bg-black/60 border border-amber-400/50 text-amber-400 font-mono font-black text-xs tracking-wider">
+                          VORTEX
+                        </span>
+                        <button
+                          type="button"
+                          onClick={() => {
+                            sound.playSelect();
+                            navigator.clipboard.writeText('VORTEX');
+                            setCopiedPartnerCode(true);
+                            confetti({ particleCount: 40, spread: 50, origin: { y: 0.6 } });
+                            setTimeout(() => setCopiedPartnerCode(false), 2500);
+                          }}
+                          className="px-2.5 py-1 rounded-lg bg-white/10 hover:bg-white/20 text-white font-mono text-[10px] font-bold transition flex items-center gap-1 cursor-pointer"
+                        >
+                          {copiedPartnerCode ? <Check className="w-3 h-3 text-emerald-400" /> : <Copy className="w-3 h-3" />}
+                          <span>{copiedPartnerCode ? 'Copied' : 'Copy'}</span>
+                        </button>
+                      </div>
+                      <p className="text-[11px] font-mono text-slate-400 mt-0.5">
+                        Get +10% deposit bonus on DMarket, Hellcase, & Farmskins or redeem in-app vouchers below.
+                      </p>
+                    </div>
+                  </div>
+
+                  {/* Redeem In-App Code Box */}
+                  <form 
+                    onSubmit={(e) => {
+                      e.preventDefault();
+                      const code = inAppPromoCode.trim().toUpperCase();
+                      if (!code) return;
+                      if (code === 'VORTEX' || code === 'HELLCASE2026' || code === 'FARMSKINS10' || code === 'DMARKETVIP' || code === 'SKINPORTVIP') {
+                        const val = 10.00;
+                        creditVortexWalletBalance(val);
+                        sound.playTournamentVictory();
+                        confetti({ particleCount: 90, spread: 70, origin: { y: 0.6 } });
+                        setPromoCodeSuccess(`✓ Code ${code} Verified! +${val.toFixed(2)} € added to your wallet.`);
+                        setPromoCodeError(null);
+                        setInAppPromoCode('');
+                        setTimeout(() => setPromoCodeSuccess(null), 5000);
+                      } else {
+                        sound.playClick();
+                        setPromoCodeError('Invalid or expired code. Try VORTEX, HELLCASE2026, or DMARKETVIP.');
+                        setPromoCodeSuccess(null);
+                      }
+                    }}
+                    className="flex flex-col sm:flex-row sm:items-center gap-2"
+                  >
+                    <div className="relative">
+                      <input
+                        type="text"
+                        value={inAppPromoCode}
+                        onChange={(e) => setInAppPromoCode(e.target.value)}
+                        placeholder="Enter Promo Code (e.g. VORTEX)..."
+                        className="h-9 px-3 rounded-xl bg-black/60 border border-[#252C3E] text-xs text-white placeholder-slate-500 font-mono focus:outline-none focus:border-amber-400/50 w-full sm:w-64"
+                      />
+                    </div>
+                    <button
+                      type="submit"
+                      className="h-9 px-4 rounded-xl bg-gradient-to-r from-amber-400 to-yellow-400 hover:from-amber-300 hover:to-yellow-300 text-slate-950 font-mono font-black text-xs uppercase tracking-wider transition cursor-pointer shadow-md flex items-center justify-center gap-1 active:scale-95"
+                    >
+                      <Sparkles className="w-3.5 h-3.5" />
+                      <span>Redeem</span>
+                    </button>
+                  </form>
+                </div>
+
+                {promoCodeSuccess && (
+                  <div className="p-3 rounded-xl bg-emerald-500/10 border border-emerald-500/30 text-emerald-400 font-mono text-xs flex items-center justify-between animate-in fade-in">
+                    <span>{promoCodeSuccess}</span>
+                    <button onClick={() => setPromoCodeSuccess(null)} className="text-slate-400 hover:text-white">✕</button>
+                  </div>
+                )}
+
+                {promoCodeError && (
+                  <div className="p-3 rounded-xl bg-rose-500/10 border border-rose-500/30 text-rose-400 font-mono text-xs flex items-center justify-between animate-in fade-in">
+                    <span>{promoCodeError}</span>
+                    <button onClick={() => setPromoCodeError(null)} className="text-slate-400 hover:text-white">✕</button>
+                  </div>
+                )}
 
                 {/* 3. CATEGORY SELECTOR PILLS & SEARCH BAR */}
                 <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
@@ -5737,6 +6038,74 @@ export const VortexDashboard: React.FC<VortexDashboardProps> = ({
         isOpen={showHellcaseDepositModal}
         onClose={() => setShowHellcaseDepositModal(false)}
       />
+
+      {/* VORTEX OFFICIAL PARTNERS & SPONSORSHIPS MODAL (HLTV STANDARD) */}
+      <VortexPartnersModal
+        isOpen={showPartnersModal}
+        onClose={() => setShowPartnersModal(false)}
+      />
+
+      {/* TOURNAMENT PRIZE STEAM BOT DISPATCH SIMULATOR MODAL */}
+      {simulatedBotOffer && (
+        <div className="fixed inset-0 z-[130] bg-black/85 backdrop-blur-md flex items-center justify-center p-4 animate-in fade-in duration-200">
+          <div className="w-full max-w-md bg-[#0C1019] border border-[#252E42] rounded-3xl p-6 shadow-2xl space-y-4 relative overflow-hidden">
+            <div className="flex items-center justify-between border-b border-[#1E2638] pb-3">
+              <div className="flex items-center gap-2.5">
+                <div className="w-8 h-8 rounded-xl bg-emerald-500/20 border border-emerald-500/40 flex items-center justify-center text-emerald-400">
+                  <ShieldCheck className="w-4 h-4" />
+                </div>
+                <div>
+                  <h3 className="text-sm font-black font-display text-white">DMarket B2B Steam Bot #04</h3>
+                  <p className="text-[10px] font-mono text-emerald-400">Automated Instant Prize Trade Dispatch</p>
+                </div>
+              </div>
+              <button 
+                onClick={() => setSimulatedBotOffer(null)}
+                className="w-7 h-7 rounded-lg bg-white/5 hover:bg-white/10 text-slate-400 hover:text-white flex items-center justify-center transition cursor-pointer"
+              >
+                ✕
+              </button>
+            </div>
+
+            <div className="p-4 rounded-2xl bg-black/50 border border-white/5 space-y-2 text-center">
+              <span className="text-[10px] font-mono text-slate-400 uppercase">{simulatedBotOffer.tournament}</span>
+              <div className="text-base font-black font-display text-amber-400">{simulatedBotOffer.skinName}</div>
+              <div className="text-xs font-mono font-bold text-emerald-400">Estimated Market Value: {simulatedBotOffer.price.toFixed(2)} €</div>
+            </div>
+
+            <div className="space-y-1.5 text-xs font-mono text-slate-300">
+              <div className="flex justify-between">
+                <span className="text-slate-400">Recipient Trade URL:</span>
+                <span className="text-white">Connected ✓</span>
+              </div>
+              <div className="flex justify-between">
+                <span className="text-slate-400">Trade Hold / Escrow:</span>
+                <span className="text-emerald-400 font-bold">0 Days (Instant)</span>
+              </div>
+              <div className="flex justify-between">
+                <span className="text-slate-400">Delivery Status:</span>
+                <span className="text-emerald-400 font-bold flex items-center gap-1">
+                  <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse" />
+                  Ready on Steam
+                </span>
+              </div>
+            </div>
+
+            <button
+              onClick={() => {
+                sound.playSelect();
+                const currentSkin = simulatedBotOffer.skinName;
+                setSimulatedBotOffer(null);
+                setDashboardToast(`✓ Verified! Steam trade offer simulated successfully for ${currentSkin}.`);
+                setTimeout(() => setDashboardToast(null), 4000);
+              }}
+              className="w-full py-2.5 rounded-xl bg-gradient-to-r from-emerald-400 to-green-500 hover:from-emerald-300 hover:to-green-400 text-slate-950 font-mono font-black text-xs uppercase tracking-wider transition cursor-pointer shadow-lg"
+            >
+              Confirm Steam Trade Verification
+            </button>
+          </div>
+        </div>
+      )}
 
       {/* VORTEX OFFICIAL VERIFICATION INFORMATION MODAL */}
       {showVerificationModal && (
