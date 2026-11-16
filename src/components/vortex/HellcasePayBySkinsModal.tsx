@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useMemo } from 'react';
+import React, { useState, useEffect, useMemo, useRef } from 'react';
 import { 
   X, 
   ExternalLink, 
@@ -13,7 +13,13 @@ import {
   AlertCircle,
   ArrowLeft,
   RotateCw,
-  History
+  History,
+  Bot,
+  Clock,
+  CheckCircle2,
+  Trash2,
+  HelpCircle,
+  Edit3
 } from 'lucide-react';
 import confetti from 'canvas-confetti';
 import { sound } from '../../utils/soundEffects';
@@ -22,6 +28,7 @@ import {
   getVortexWalletBalance, 
   creditVortexWalletBalance, 
   saveSteamTradeUrl, 
+  getSavedSteamTradeUrl,
   isValidSteamTradeUrl 
 } from '../../services/skinDeliveryService';
 
@@ -31,6 +38,37 @@ export interface HellcasePayBySkinsModalProps {
   onSuccess?: (amountCredited: number) => void;
   initialMethod?: 'skins' | 'crypto' | 'cards' | 'giftcards' | 'overview';
 }
+
+export interface DepositHistoryItem {
+  id: string;
+  date: string;
+  itemsCount: number;
+  itemNames: string[];
+  totalEur: number;
+  botName: string;
+  status: string;
+}
+
+const DEFAULT_DEPOSIT_HISTORY: DepositHistoryItem[] = [
+  {
+    id: 'dep-init-1',
+    date: '2026-11-15 22:45',
+    itemsCount: 1,
+    itemNames: ['AK-47 | Asiimov (Field-Tested)'],
+    totalEur: 38.24,
+    botName: 'VORTEX Fast-Track Bot #07',
+    status: 'Verified via Steam Bot P2P Escrow'
+  },
+  {
+    id: 'dep-init-2',
+    date: '2026-11-15 21:10',
+    itemsCount: 1,
+    itemNames: ['P250 | Asiimov (Field-Tested)'],
+    totalEur: 10.70,
+    botName: 'VORTEX Fast-Track Bot #03',
+    status: '0-Day Hold Confirmed'
+  }
+];
 
 interface TradableSkin {
   id: string;
@@ -128,9 +166,12 @@ export const HellcasePayBySkinsModal: React.FC<HellcasePayBySkinsModalProps> = (
   const [countryDropdownOpen, setCountryDropdownOpen] = useState(false);
 
   // Steam Trade URL State
-  const [tradeUrl, setTradeUrl] = useState('');
+  const [tradeUrl, setTradeUrl] = useState<string>(() => {
+    return getSavedSteamTradeUrl() || 'https://steamcommunity.com/tradeoffer/new/?partner=129183106&token=A8kL9xQ2';
+  });
   const [tradeUrlEditing, setTradeUrlEditing] = useState(false);
-  const [tempTradeUrl, setTempTradeUrl] = useState('');
+  const [tempTradeUrl, setTempTradeUrl] = useState(tradeUrl);
+  const [tradeUrlError, setTradeUrlError] = useState<string | null>(null);
 
   // Skins Inventory State (Farmskins Skin2PAY)
   const [inventory, setInventory] = useState<TradableSkin[]>([]);
@@ -144,7 +185,35 @@ export const HellcasePayBySkinsModal: React.FC<HellcasePayBySkinsModalProps> = (
   const [isReloading, setIsReloading] = useState(false);
   const [isDepositingSkins, setIsDepositingSkins] = useState(false);
   const [depositSuccessMessage, setDepositSuccessMessage] = useState<string | null>(null);
+  const [overstockNotice, setOverstockNotice] = useState<string | null>(null);
   const [paymentHistoryOpen, setPaymentHistoryOpen] = useState(false);
+  
+  // Interactive Trade Bot Modal State
+  const [tradeModalOpen, setTradeModalOpen] = useState(false);
+  const [tradePhase, setTradePhase] = useState<'dispatching' | 'offer_sent' | 'completed'>('dispatching');
+  const [securityCode, setSecurityCode] = useState('');
+  const [tradeCountdown, setTradeCountdown] = useState(600);
+  const [isConfirmingTrade, setIsConfirmingTrade] = useState(false);
+  const [lastDepositedAmount, setLastDepositedAmount] = useState(0);
+
+  // Persistent Payment History State
+  const [paymentHistory, setPaymentHistory] = useState<DepositHistoryItem[]>(() => {
+    if (typeof window !== 'undefined') {
+      const saved = localStorage.getItem('vortex_skin_deposit_history');
+      if (saved) {
+        try {
+          return JSON.parse(saved);
+        } catch (e) {
+          return DEFAULT_DEPOSIT_HISTORY;
+        }
+      }
+    }
+    return DEFAULT_DEPOSIT_HISTORY;
+  });
+
+  // Dropdown click-outside refs
+  const sortDropdownRef = useRef<HTMLDivElement>(null);
+  const rarityDropdownRef = useRef<HTMLDivElement>(null);
 
   // Crypto State
   const [selectedCrypto, setSelectedCrypto] = useState(CRYPTO_CONFIGS[0]);
@@ -560,6 +629,102 @@ export const HellcasePayBySkinsModal: React.FC<HellcasePayBySkinsModalProps> = (
     ]);
   };
 
+  // Dynamic count of skins per rarity tier based on active 'onlyTradableSkins' filter
+  const rarityCounts = useMemo(() => {
+    const counts: Record<string, number> = {
+      all: 0,
+      'mil-spec': 0,
+      restricted: 0,
+      classified: 0,
+      covert: 0,
+      rare: 0
+    };
+
+    inventory.forEach(s => {
+      if (onlyTradableSkins && s.isOverstock) return;
+      counts.all += 1;
+
+      const r = (s.rarity || '').toLowerCase();
+      if (r === 'extraordinary' || r === 'rare' || s.type === 'knife' || s.fullName.includes('★')) {
+        counts.rare += 1;
+      } else if (r === 'covert' || r.includes('covert') || r.includes('ancient') || (s.fullName.includes('AK-47') && s.fullName.includes('Asiimov'))) {
+        counts.covert += 1;
+      } else if (r === 'classified' || r.includes('classified') || r.includes('legendary') || (s.fullName.includes('P250') && s.fullName.includes('Asiimov'))) {
+        counts.classified += 1;
+      } else if (r === 'restricted' || r.includes('restricted') || r.includes('mythical') || s.fullName.includes('Firebreathing')) {
+        counts.restricted += 1;
+      } else if (
+        (r === 'mil-spec' || r.includes('mil-spec')) &&
+        !r.includes('industrial') &&
+        !r.includes('consumer') &&
+        !s.fullName.includes('Prey') &&
+        !s.fullName.includes('Wash me plz') &&
+        !s.fullName.includes('Tilted') &&
+        !s.fullName.includes('Firebreathing') &&
+        !s.fullName.includes('Sand Dune') &&
+        !s.fullName.includes('Sage Spray') &&
+        !s.fullName.includes('Sand Mesh') &&
+        !s.fullName.includes('Grey Smoke')
+      ) {
+        counts['mil-spec'] += 1;
+      }
+    });
+
+    return counts;
+  }, [inventory, onlyTradableSkins]);
+
+  // Close dropdowns on outside click
+  useEffect(() => {
+    const handleClickOutside = (e: MouseEvent) => {
+      if (sortDropdownRef.current && !sortDropdownRef.current.contains(e.target as Node)) {
+        setSortDropdownOpen(false);
+      }
+      if (rarityDropdownRef.current && !rarityDropdownRef.current.contains(e.target as Node)) {
+        setRarityDropdownOpen(false);
+      }
+    };
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
+  }, []);
+
+  // Trade offer 10-minute timer countdown
+  useEffect(() => {
+    if (tradeModalOpen && tradePhase === 'offer_sent') {
+      const interval = setInterval(() => {
+        setTradeCountdown(prev => (prev > 0 ? prev - 1 : 0));
+      }, 1000);
+      return () => clearInterval(interval);
+    }
+  }, [tradeModalOpen, tradePhase]);
+
+  // Auto-dismiss overstock notice after 3.5s
+  useEffect(() => {
+    if (overstockNotice) {
+      const timer = setTimeout(() => setOverstockNotice(null), 3500);
+      return () => clearTimeout(timer);
+    }
+  }, [overstockNotice]);
+
+  const formatTimer = (secs: number) => {
+    const m = Math.floor(secs / 60).toString().padStart(2, '0');
+    const s = (secs % 60).toString().padStart(2, '0');
+    return `${m}:${s}`;
+  };
+
+  const handleSaveTradeUrl = () => {
+    const trimmed = tempTradeUrl.trim();
+    if (isValidSteamTradeUrl(trimmed)) {
+      saveSteamTradeUrl(trimmed);
+      setTradeUrl(trimmed);
+      setTradeUrlEditing(false);
+      setTradeUrlError(null);
+      sound.playSelect();
+    } else {
+      setTradeUrlError('Please enter a valid Steam Trade URL format (e.g. https://steamcommunity.com/tradeoffer/new/?partner=...&token=...)');
+      sound.playClick();
+    }
+  };
+
   // Filtered and sorted skins matching Farmskins Skin2PAY exactly
   const filteredSkins = useMemo(() => {
     const list = inventory.filter(s => {
@@ -634,6 +799,7 @@ export const HellcasePayBySkinsModal: React.FC<HellcasePayBySkinsModalProps> = (
     const item = inventory.find(s => s.id === id);
     if (item?.isOverstock) {
       sound.playClick();
+      setOverstockNotice(`⊘ ${item.fullName} is currently overstocked in VORTEX vaults. Overstocked items cannot be deposited at this time.`);
       return;
     }
     sound.playSelect();
@@ -668,14 +834,56 @@ export const HellcasePayBySkinsModal: React.FC<HellcasePayBySkinsModalProps> = (
 
   const handleDepositSkins = () => {
     if (selectedSkins.length === 0 || totalPayoutEur < 1.0) return;
-    setIsDepositingSkins(true);
+
+    if (!tradeUrl || !isValidSteamTradeUrl(tradeUrl.trim())) {
+      setTradeUrlEditing(true);
+      setTradeUrlError('Please set and save a valid Steam Trade URL before continuing.');
+      sound.playClick();
+      return;
+    }
+
+    sound.playSelect();
+    const token = Math.random().toString(36).substring(2, 6).toUpperCase();
+    setSecurityCode(token);
+    setTradeCountdown(600);
+    setTradePhase('dispatching');
+    setTradeModalOpen(true);
+
+    setTimeout(() => {
+      setTradePhase('offer_sent');
+      sound.playSelect();
+    }, 1500);
+  };
+
+  const handleConfirmTradeReceived = () => {
+    setIsConfirmingTrade(true);
     sound.playSelect();
 
     setTimeout(() => {
-      creditVortexWalletBalance(totalPayoutEur);
-      setInventory(prev => prev.filter(s => !selectedSkinIds.has(s.id)));
+      const credited = creditVortexWalletBalance(totalPayoutEur);
+      const depositedIds = new Set(selectedSkinIds);
+      setInventory(prev => prev.filter(s => !depositedIds.has(s.id)));
+      setLastDepositedAmount(totalPayoutEur);
+
+      const newHistoryItem: DepositHistoryItem = {
+        id: 'dep-' + Date.now(),
+        date: new Date().toLocaleString(),
+        itemsCount: selectedSkins.length,
+        itemNames: selectedSkins.map(s => s.fullName),
+        totalEur: totalPayoutEur,
+        botName: 'VORTEX Fast-Track Bot #07',
+        status: 'Completed (Instant 0-Day Hold)'
+      };
+
+      const updatedHistory = [newHistoryItem, ...paymentHistory];
+      setPaymentHistory(updatedHistory);
+      if (typeof window !== 'undefined') {
+        localStorage.setItem('vortex_skin_deposit_history', JSON.stringify(updatedHistory));
+      }
+
       setSelectedSkinIds(new Set());
-      setIsDepositingSkins(false);
+      setIsConfirmingTrade(false);
+      setTradePhase('completed');
 
       sound.playTournamentVictory();
       confetti({
@@ -689,7 +897,15 @@ export const HellcasePayBySkinsModal: React.FC<HellcasePayBySkinsModalProps> = (
       );
 
       onSuccess?.(totalPayoutEur);
-    }, 1800);
+    }, 1200);
+  };
+
+  const handleClearHistory = () => {
+    setPaymentHistory([]);
+    if (typeof window !== 'undefined') {
+      localStorage.removeItem('vortex_skin_deposit_history');
+    }
+    sound.playClick();
   };
 
   const handleCopyCrypto = () => {
@@ -807,6 +1023,101 @@ export const HellcasePayBySkinsModal: React.FC<HellcasePayBySkinsModalProps> = (
               </div>
             </div>
 
+            {/* Steam Trade URL Verification Bar */}
+            <div className="px-6 py-2.5 bg-[#0B0D13] border-b border-[#252B3B] flex flex-wrap items-center justify-between gap-3 text-xs shrink-0">
+              <div className="flex items-center gap-2.5 flex-1 min-w-[280px]">
+                <div className="flex items-center gap-1.5 text-slate-400 font-sans font-medium text-[11px] shrink-0">
+                  <ShieldCheck className="w-3.5 h-3.5 text-amber-400 shrink-0" />
+                  <span>Steam Trade URL:</span>
+                </div>
+
+                {tradeUrlEditing ? (
+                  <div className="flex items-center gap-1.5 flex-1 max-w-xl">
+                    <input
+                      type="text"
+                      value={tempTradeUrl}
+                      onChange={(e) => setTempTradeUrl(e.target.value)}
+                      placeholder="https://steamcommunity.com/tradeoffer/new/?partner=...&token=..."
+                      className="flex-1 px-3 py-1.5 rounded-xl bg-[#151821] border border-amber-400/60 text-xs font-mono text-white placeholder-slate-500 outline-none focus:ring-1 focus:ring-amber-400"
+                    />
+                    <button
+                      type="button"
+                      onClick={handleSaveTradeUrl}
+                      className="px-3 py-1.5 rounded-xl bg-amber-400 hover:bg-amber-300 text-slate-950 font-bold text-xs cursor-pointer transition shadow"
+                    >
+                      Save
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setTempTradeUrl(tradeUrl);
+                        setTradeUrlEditing(false);
+                        setTradeUrlError(null);
+                        sound.playClick();
+                      }}
+                      className="px-2.5 py-1.5 rounded-xl bg-[#151821] hover:bg-[#1C202C] border border-[#252B3B] text-slate-400 hover:text-white text-xs cursor-pointer transition"
+                    >
+                      Cancel
+                    </button>
+                  </div>
+                ) : (
+                  <div className="flex items-center gap-2 flex-1 min-w-0">
+                    <span className="font-mono text-amber-300 text-xs truncate max-w-xs sm:max-w-md bg-black/40 px-2.5 py-1 rounded-lg border border-white/5">
+                      {tradeUrl || 'No Steam Trade URL linked'}
+                    </span>
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setTempTradeUrl(tradeUrl);
+                        setTradeUrlEditing(true);
+                        sound.playClick();
+                      }}
+                      className="text-xs font-sans text-amber-400 hover:text-amber-300 hover:underline flex items-center gap-1 cursor-pointer shrink-0 ml-1"
+                    >
+                      <Edit3 className="w-3 h-3" />
+                      <span>Change</span>
+                    </button>
+                  </div>
+                )}
+              </div>
+
+              <a
+                href="https://steamcommunity.com/id/me/tradeoffers/privacy#trade_offer_access_url"
+                target="_blank"
+                rel="noreferrer"
+                className="text-[11px] font-sans text-slate-400 hover:text-amber-400 transition flex items-center gap-1 cursor-pointer shrink-0"
+              >
+                <span>Find your Trade URL</span>
+                <ExternalLink className="w-3 h-3" />
+              </a>
+            </div>
+
+            {/* Trade URL Error Alert */}
+            {tradeUrlError && (
+              <div className="mx-6 mt-2 p-2.5 rounded-xl bg-red-500/15 border border-red-500/30 text-red-300 text-xs font-mono flex items-center justify-between gap-2 shrink-0 animate-in fade-in">
+                <div className="flex items-center gap-2">
+                  <AlertCircle className="w-4 h-4 text-red-400 shrink-0" />
+                  <span>{tradeUrlError}</span>
+                </div>
+                <button onClick={() => setTradeUrlError(null)} className="text-red-400 hover:text-white cursor-pointer">
+                  <X className="w-3.5 h-3.5" />
+                </button>
+              </div>
+            )}
+
+            {/* Overstock Warning Toast */}
+            {overstockNotice && (
+              <div className="mx-6 mt-2 p-2.5 rounded-xl bg-amber-500/15 border border-amber-500/40 text-amber-300 text-xs font-mono flex items-center justify-between gap-2 shrink-0 animate-in fade-in">
+                <div className="flex items-center gap-2">
+                  <AlertCircle className="w-4 h-4 text-amber-400 shrink-0" />
+                  <span>{overstockNotice}</span>
+                </div>
+                <button onClick={() => setOverstockNotice(null)} className="text-amber-400 hover:text-white cursor-pointer">
+                  <X className="w-3.5 h-3.5" />
+                </button>
+              </div>
+            )}
+
             {/* Filter & Action Toolbar */}
             <div className="px-6 py-3 flex flex-wrap items-end justify-between gap-3 border-b border-[#252B3B] bg-[#101217] shrink-0">
               <div className="flex flex-wrap items-end gap-3">
@@ -823,7 +1134,20 @@ export const HellcasePayBySkinsModal: React.FC<HellcasePayBySkinsModalProps> = (
                       placeholder="For example, Talon Knife Slaughter"
                       className="w-56 sm:w-64 px-3 py-2 pr-9 rounded-xl bg-[#151821] border border-[#252B3B] text-xs font-sans text-white placeholder-slate-500 outline-none focus:border-amber-400 transition"
                     />
-                    <Search className="w-3.5 h-3.5 text-slate-400 absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none" />
+                    {skinSearch ? (
+                      <button
+                        type="button"
+                        onClick={() => {
+                          setSkinSearch('');
+                          sound.playClick();
+                        }}
+                        className="text-slate-400 hover:text-white absolute right-2.5 top-1/2 -translate-y-1/2 cursor-pointer p-0.5"
+                      >
+                        <X className="w-3.5 h-3.5" />
+                      </button>
+                    ) : (
+                      <Search className="w-3.5 h-3.5 text-slate-400 absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none" />
+                    )}
                   </div>
                 </div>
 
@@ -849,7 +1173,7 @@ export const HellcasePayBySkinsModal: React.FC<HellcasePayBySkinsModalProps> = (
                 </button>
 
                 {/* Sort: = Price */}
-                <div className="relative">
+                <div className="relative" ref={sortDropdownRef}>
                   <button
                     type="button"
                     onClick={() => {
@@ -861,7 +1185,7 @@ export const HellcasePayBySkinsModal: React.FC<HellcasePayBySkinsModalProps> = (
                   >
                     <span className="font-mono text-sm leading-none">=</span>
                     <span>
-                      {sortBy === 'price-desc' ? 'Price (High to Low)' : sortBy === 'price-asc' ? 'Price (Low to High)' : 'Price'}
+                      {sortBy === 'price-desc' ? 'Price (High to Low)' : sortBy === 'price-asc' ? 'Price (Low to High)' : 'Name (A to Z)'}
                     </span>
                   </button>
 
@@ -892,8 +1216,8 @@ export const HellcasePayBySkinsModal: React.FC<HellcasePayBySkinsModalProps> = (
                   )}
                 </div>
 
-                {/* CS2 Rarity Dropdown: ● All (1:1 with live screenshot) */}
-                <div className="relative">
+                {/* CS2 Rarity Dropdown: ● All with count (1:1 with live screenshot) */}
+                <div className="relative" ref={rarityDropdownRef}>
                   <button
                     type="button"
                     onClick={() => {
@@ -914,7 +1238,7 @@ export const HellcasePayBySkinsModal: React.FC<HellcasePayBySkinsModalProps> = (
                       }} 
                     />
                     <span>
-                      {RARITY_OPTIONS.find(r => r.id === selectedRarity)?.label || 'All'}
+                      {RARITY_OPTIONS.find(r => r.id === selectedRarity)?.label || 'All'} ({rarityCounts[selectedRarity] ?? 0})
                     </span>
                     {rarityDropdownOpen ? (
                       <ChevronUp className="w-3.5 h-3.5 text-amber-400" />
@@ -924,7 +1248,7 @@ export const HellcasePayBySkinsModal: React.FC<HellcasePayBySkinsModalProps> = (
                   </button>
 
                   {rarityDropdownOpen && (
-                    <div className="absolute left-0 top-full mt-1.5 w-40 rounded-xl bg-[#151821] border border-[#252B3B] shadow-2xl z-50 p-1.5 space-y-0.5 animate-in fade-in zoom-in-95 duration-150">
+                    <div className="absolute left-0 top-full mt-1.5 w-44 rounded-xl bg-[#151821] border border-[#252B3B] shadow-2xl z-50 p-1.5 space-y-0.5 animate-in fade-in zoom-in-95 duration-150">
                       {RARITY_OPTIONS.map(r => (
                         <button
                           key={r.id}
@@ -946,6 +1270,9 @@ export const HellcasePayBySkinsModal: React.FC<HellcasePayBySkinsModalProps> = (
                               style={{ backgroundColor: r.color }} 
                             />
                             <span>{r.label}</span>
+                            <span className="text-[10px] font-mono text-slate-400">
+                              ({rarityCounts[r.id] ?? 0})
+                            </span>
                           </span>
                           {selectedRarity === r.id && <Check className="w-3 h-3 text-amber-400" />}
                         </button>
@@ -975,25 +1302,47 @@ export const HellcasePayBySkinsModal: React.FC<HellcasePayBySkinsModalProps> = (
                     <History className="w-4 h-4 text-amber-400" />
                     <span>Recent Skin Deposits & History</span>
                   </div>
-                  <button onClick={() => setPaymentHistoryOpen(false)} className="text-slate-400 hover:text-white text-xs cursor-pointer">
-                    Close
-                  </button>
+                  <div className="flex items-center gap-3">
+                    {paymentHistory.length > 0 && (
+                      <button 
+                        onClick={handleClearHistory} 
+                        className="text-slate-400 hover:text-red-400 text-xs flex items-center gap-1 cursor-pointer transition"
+                      >
+                        <Trash2 className="w-3 h-3" />
+                        <span>Clear History</span>
+                      </button>
+                    )}
+                    <button onClick={() => setPaymentHistoryOpen(false)} className="text-slate-400 hover:text-white text-xs cursor-pointer">
+                      Close
+                    </button>
+                  </div>
                 </div>
-                <div className="text-xs font-mono text-slate-300 space-y-1.5 max-h-36 overflow-y-auto pr-1">
-                  <div className="p-2 rounded-lg bg-black/40 border border-white/5 flex items-center justify-between">
-                    <div>
-                      <span className="text-amber-400 font-bold">Fast-Track Deposit</span>
-                      <div className="text-[10px] text-slate-500">Verified via Steam Bot P2P Escrow</div>
+                <div className="text-xs font-mono text-slate-300 space-y-1.5 max-h-44 overflow-y-auto pr-1">
+                  {paymentHistory.length === 0 ? (
+                    <div className="text-center py-4 text-slate-500 text-xs">
+                      No deposit records in history yet.
                     </div>
-                    <span className="text-amber-400 font-bold font-mono">+38.24 €</span>
-                  </div>
-                  <div className="p-2 rounded-lg bg-black/40 border border-white/5 flex items-center justify-between">
-                    <div>
-                      <span className="text-slate-300 font-bold">Automatic Bot Hold Bypass</span>
-                      <div className="text-[10px] text-slate-500">0-Day Hold Confirmed</div>
-                    </div>
-                    <span className="text-amber-400 font-bold font-mono">+10.70 €</span>
-                  </div>
+                  ) : (
+                    paymentHistory.map(item => (
+                      <div key={item.id} className="p-2.5 rounded-xl bg-black/40 border border-white/5 flex items-center justify-between gap-3">
+                        <div className="min-w-0 flex-1">
+                          <div className="flex items-center gap-2">
+                            <span className="text-amber-400 font-bold">{item.botName}</span>
+                            <span className="text-[10px] text-slate-500">{item.date}</span>
+                          </div>
+                          <div className="text-[11px] text-slate-300 truncate mt-0.5">
+                            {item.itemNames?.join(', ') || `${item.itemsCount} skins`}
+                          </div>
+                          <div className="text-[10px] text-emerald-400 font-sans mt-0.5">
+                            ✓ {item.status}
+                          </div>
+                        </div>
+                        <span className="text-amber-400 font-bold font-mono text-sm shrink-0">
+                          +{item.totalEur.toFixed(2)} €
+                        </span>
+                      </div>
+                    ))
+                  )}
                 </div>
               </div>
             )}
@@ -1195,6 +1544,185 @@ export const HellcasePayBySkinsModal: React.FC<HellcasePayBySkinsModalProps> = (
                 </div>
               </div>
             </div>
+
+            {/* VORTEX Fast-Track Bot Trade Offer Modal */}
+            {tradeModalOpen && (
+              <div className="absolute inset-0 bg-black/90 backdrop-blur-md z-50 flex items-center justify-center p-3 sm:p-5 animate-in fade-in duration-200">
+                <div className="w-full max-w-xl bg-[#0E1117] border border-[#252B3B] rounded-3xl p-5 sm:p-6 shadow-2xl flex flex-col gap-4 relative overflow-hidden">
+                  
+                  {/* Glow accent */}
+                  <div className="absolute -top-24 -left-24 w-60 h-60 bg-amber-500/10 rounded-full blur-3xl pointer-events-none" />
+                  
+                  {/* Header */}
+                  <div className="flex items-center justify-between border-b border-[#252B3B] pb-3.5">
+                    <div className="flex items-center gap-3">
+                      <div className="w-10 h-10 rounded-2xl bg-amber-400/15 border border-amber-400/30 flex items-center justify-center text-amber-400 shrink-0">
+                        <Bot className="w-5 h-5" />
+                      </div>
+                      <div>
+                        <h3 className="text-base font-black font-display text-white tracking-wide">
+                          VORTEX Fast-Track Bot #07
+                        </h3>
+                        <div className="flex items-center gap-2 text-[11px] font-mono text-emerald-400">
+                          <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse shrink-0" />
+                          <span>Steam Level 150 • Escrow 0-Day Hold Verified</span>
+                        </div>
+                      </div>
+                    </div>
+
+                    {tradePhase !== 'dispatching' && (
+                      <button
+                        onClick={() => setTradeModalOpen(false)}
+                        className="w-8 h-8 rounded-xl bg-[#151821] hover:bg-[#1C202C] text-slate-400 hover:text-white flex items-center justify-center cursor-pointer transition"
+                      >
+                        <X className="w-4 h-4" />
+                      </button>
+                    )}
+                  </div>
+
+                  {/* PHASE 1: DISPATCHING */}
+                  {tradePhase === 'dispatching' && (
+                    <div className="py-12 flex flex-col items-center justify-center text-center space-y-4">
+                      <div className="relative">
+                        <div className="w-16 h-16 rounded-full border-4 border-amber-400/20 border-t-amber-400 animate-spin" />
+                        <Bot className="w-7 h-7 text-amber-400 absolute inset-0 m-auto" />
+                      </div>
+                      <div>
+                        <p className="text-sm font-bold text-white font-sans">
+                          Dispatching Steam Trade Offer...
+                        </p>
+                        <p className="text-xs text-slate-400 font-mono mt-1">
+                          Connecting to Steam P2P Network for {selectedSkins.length} items
+                        </p>
+                      </div>
+                    </div>
+                  )}
+
+                  {/* PHASE 2: OFFER SENT - AWAITING USER CONFIRMATION */}
+                  {tradePhase === 'offer_sent' && (
+                    <div className="space-y-4">
+                      {/* Security Code Banner */}
+                      <div className="p-3.5 rounded-2xl bg-amber-500/10 border border-amber-500/30 flex items-center justify-between">
+                        <div>
+                          <div className="text-[11px] text-amber-400 font-bold uppercase tracking-wider font-mono">
+                            Security Token (Anti-Phishing)
+                          </div>
+                          <div className="text-xs text-slate-300 font-sans mt-0.5">
+                            Verify this 4-character code in your Steam trade offer message:
+                          </div>
+                        </div>
+                        <div className="px-3.5 py-1.5 rounded-xl bg-amber-400 text-slate-950 font-black font-mono text-base tracking-widest shadow">
+                          {securityCode}
+                        </div>
+                      </div>
+
+                      {/* Items Summary & Total Payout */}
+                      <div className="p-3.5 rounded-2xl bg-[#151821] border border-[#252B3B] space-y-2.5">
+                        <div className="flex items-center justify-between text-xs font-mono text-slate-400 pb-1 border-b border-white/5">
+                          <span>Deposit Items ({selectedSkins.length}):</span>
+                          <span className="text-amber-400 font-bold">Total Credit: $ {totalPayoutEur.toFixed(2)}</span>
+                        </div>
+                        <div className="max-h-36 overflow-y-auto space-y-1.5 pr-1">
+                          {selectedSkins.map(s => (
+                            <div key={s.id} className="p-2 rounded-xl bg-black/40 border border-white/5 flex items-center justify-between text-xs font-sans">
+                              <div className="flex items-center gap-2 min-w-0">
+                                <img src={s.image} alt="" className="w-8 h-6 object-contain shrink-0" />
+                                <span className="text-white truncate font-medium">{s.fullName}</span>
+                              </div>
+                              <span className="text-amber-400 font-mono font-bold shrink-0">$ {s.marketPriceEur.toFixed(2)}</span>
+                            </div>
+                          ))}
+                        </div>
+                      </div>
+
+                      {/* Countdown timer */}
+                      <div className="flex items-center justify-between text-xs font-mono text-slate-400 px-1">
+                        <div className="flex items-center gap-1.5">
+                          <Clock className="w-3.5 h-3.5 text-amber-400" />
+                          <span>Offer expires in:</span>
+                        </div>
+                        <span className="text-amber-400 font-bold">{formatTimer(tradeCountdown)}</span>
+                      </div>
+
+                      {/* Action Buttons */}
+                      <div className="flex flex-col sm:flex-row gap-3 pt-1">
+                        <button
+                          type="button"
+                          onClick={() => {
+                            sound.playSelect();
+                            window.open('https://steamcommunity.com/tradeoffer/new/', '_blank');
+                          }}
+                          className="flex-1 py-3 rounded-xl bg-[#1C202C] hover:bg-[#252B3B] border border-[#252B3B] text-slate-200 hover:text-white font-bold text-xs uppercase flex items-center justify-center gap-2 cursor-pointer transition"
+                        >
+                          <span>Open in Steam</span>
+                          <ExternalLink className="w-3.5 h-3.5" />
+                        </button>
+
+                        <button
+                          type="button"
+                          disabled={isConfirmingTrade}
+                          onClick={handleConfirmTradeReceived}
+                          className="flex-1 py-3 rounded-xl bg-gradient-to-r from-amber-400 via-amber-500 to-yellow-500 hover:from-amber-300 hover:to-yellow-400 text-slate-950 font-black text-xs uppercase font-display tracking-wider shadow-[0_0_20px_rgba(245,158,11,0.3)] flex items-center justify-center gap-2 cursor-pointer transition active:scale-[0.98]"
+                        >
+                          {isConfirmingTrade ? (
+                            <>
+                              <RotateCw className="w-3.5 h-3.5 animate-spin" />
+                              <span>Verifying Escrow...</span>
+                            </>
+                          ) : (
+                            <>
+                              <CheckCircle2 className="w-4 h-4" />
+                              <span>I Accepted the Trade (+{totalPayoutEur.toFixed(2)} €)</span>
+                            </>
+                          )}
+                        </button>
+                      </div>
+                    </div>
+                  )}
+
+                  {/* PHASE 3: COMPLETED */}
+                  {tradePhase === 'completed' && (
+                    <div className="py-6 flex flex-col items-center justify-center text-center space-y-4">
+                      <div className="w-16 h-16 rounded-full bg-emerald-500/15 border-2 border-emerald-400 flex items-center justify-center text-emerald-400 shadow-[0_0_30px_rgba(52,211,153,0.3)]">
+                        <Check className="w-8 h-8 stroke-[3]" />
+                      </div>
+                      <div>
+                        <h4 className="text-lg font-black text-white font-display">
+                          Trade Successfully Completed!
+                        </h4>
+                        <p className="text-xs text-slate-400 font-mono mt-1">
+                          +{lastDepositedAmount.toFixed(2)} € has been credited to your VORTEX wallet with 0-day hold.
+                        </p>
+                        <div className="mt-3 px-4 py-2 rounded-xl bg-black/60 border border-amber-400/30 inline-flex items-center gap-2 text-xs font-mono">
+                          <span className="text-slate-400">Current Balance:</span>
+                          <span className="font-bold text-amber-400">{getVortexWalletBalance().toFixed(2)} €</span>
+                        </div>
+                      </div>
+                      <div className="flex items-center gap-3 w-full pt-2">
+                        <button
+                          type="button"
+                          onClick={() => setTradeModalOpen(false)}
+                          className="flex-1 py-3 rounded-xl bg-amber-400 hover:bg-amber-300 text-slate-950 font-black text-xs uppercase tracking-wider font-display cursor-pointer transition shadow-lg"
+                        >
+                          Deposit More Skins
+                        </button>
+                        <button
+                          type="button"
+                          onClick={() => {
+                            setTradeModalOpen(false);
+                            onClose();
+                          }}
+                          className="px-5 py-3 rounded-xl bg-[#151821] hover:bg-[#1C202C] border border-[#252B3B] text-slate-300 hover:text-white font-bold text-xs uppercase cursor-pointer transition"
+                        >
+                          Close
+                        </button>
+                      </div>
+                    </div>
+                  )}
+
+                </div>
+              </div>
+            )}
           </div>
         ) : (
           /* ======================================================== */
