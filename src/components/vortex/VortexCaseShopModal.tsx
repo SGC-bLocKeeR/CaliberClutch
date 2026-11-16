@@ -146,7 +146,10 @@ export const VortexCaseShopModal: React.FC<VortexCaseShopModalProps> = ({ isOpen
   const [fastMode, setFastMode] = useState<boolean>(false);
   const [reelItems, setReelItems] = useState<CS2Skin[]>([]);
   const [reelOffset, setReelOffset] = useState<number>(0);
+  const [isReelAnimating, setIsReelAnimating] = useState<boolean>(false);
+  const [spinKey, setSpinKey] = useState<number>(() => Date.now());
   const reelRef = useRef<HTMLDivElement>(null);
+  const tickTimerRef = useRef<ReturnType<typeof setInterval> | null>(null);
   const [sellToast, setSellToast] = useState<string | null>(null);
   const [showProvablyFairModal, setShowProvablyFairModal] = useState<boolean>(false);
 
@@ -191,10 +194,26 @@ export const VortexCaseShopModal: React.FC<VortexCaseShopModalProps> = ({ isOpen
     };
   }, []);
 
+  // Cleanup tick audio interval on unmount
+  useEffect(() => {
+    return () => {
+      if (tickTimerRef.current) {
+        clearInterval(tickTimerRef.current);
+        tickTimerRef.current = null;
+      }
+    };
+  }, []);
+
   // When activeCase changes, immediately reset and pre-populate an authentic reel from this exact case
   useEffect(() => {
+    if (tickTimerRef.current) {
+      clearInterval(tickTimerRef.current);
+      tickTimerRef.current = null;
+    }
     if (activeCase) {
       setReelOffset(0);
+      setIsReelAnimating(false);
+      setIsSpinning(false);
       setWonSkin(null);
       setWonSkins([]);
       setDeliveryResult(null);
@@ -205,10 +224,14 @@ export const VortexCaseShopModal: React.FC<VortexCaseShopModalProps> = ({ isOpen
       const placeholderWinner = rollProvablyFairSkin(activeCase.items);
       const initialReel = generateRealisticReel(activeCase.items, placeholderWinner, 36, 48);
       setReelItems(initialReel);
+      setSpinKey(Date.now());
     } else {
       setReelItems([]);
       setWonSkin(null);
       setWonSkins([]);
+      setReelOffset(0);
+      setIsReelAnimating(false);
+      setIsSpinning(false);
     }
   }, [activeCase]);
 
@@ -325,8 +348,13 @@ export const VortexCaseShopModal: React.FC<VortexCaseShopModalProps> = ({ isOpen
 
     // Build authentic reel strip landing on primaryWinner at index 36
     const generatedReel = generateRealisticReel(c.items, primaryWinner, 36, 48);
-    setReelItems(generatedReel);
+    const newSpinKey = Date.now();
+
+    setIsSpinning(true);
+    setIsReelAnimating(false);
     setReelOffset(0);
+    setSpinKey(newSpinKey);
+    setReelItems(generatedReel);
 
     // Calculate dynamic pixel-perfect offset so the winning skin stops dead center on any device (mobile, tablet, desktop)
     const containerEl = reelRef.current?.parentElement;
@@ -338,13 +366,15 @@ export const VortexCaseShopModal: React.FC<VortexCaseShopModalProps> = ({ isOpen
     const jitter = Math.floor(Math.random() * 30) - 15; // Organic slight offset (+/- 15px within card)
     const targetOffset = Math.max(0, winnerCenter - (containerWidth / 2) + jitter);
 
+    // Ticks sound interval
+    if (tickTimerRef.current) clearInterval(tickTimerRef.current);
     const startTime = Date.now();
     const duration = 5200; // 5.2 seconds spin
     let tickCount = 0;
-    const tickInterval = setInterval(() => {
+    tickTimerRef.current = setInterval(() => {
       const elapsed = Date.now() - startTime;
       if (elapsed >= duration) {
-        clearInterval(tickInterval);
+        if (tickTimerRef.current) clearInterval(tickTimerRef.current);
       } else {
         const pace = Math.sin((elapsed / duration) * (Math.PI / 2));
         if (Math.random() > pace * 0.7) {
@@ -354,13 +384,19 @@ export const VortexCaseShopModal: React.FC<VortexCaseShopModalProps> = ({ isOpen
       }
     }, 90);
 
-    setTimeout(() => {
-      setReelOffset(targetOffset);
-    }, 50);
+    // Double requestAnimationFrame guarantees the browser has painted translateX(0px) with NO transition first, then kicks off the 5.2s animation
+    requestAnimationFrame(() => {
+      requestAnimationFrame(() => {
+        setIsReelAnimating(true);
+        setReelOffset(targetOffset);
+      });
+    });
 
     // Finished spinning
     setTimeout(() => {
+      if (tickTimerRef.current) clearInterval(tickTimerRef.current);
       setIsSpinning(false);
+      setIsReelAnimating(false);
       setWonSkin(primaryWinner);
       setWonSkins(rolledWinners);
       rolledWinners.forEach(s => addUserSkinToInventory(s));
@@ -413,6 +449,28 @@ export const VortexCaseShopModal: React.FC<VortexCaseShopModalProps> = ({ isOpen
     }
   };
 
+  // Clean reset to case opening desk (resets offset, animation, and generates resting reel)
+  const handleResetToCaseDesk = () => {
+    setWonSkin(null);
+    setWonSkins([]);
+    setDeliveryResult(null);
+    setDeliveryProgress(null);
+    setDeliveryError(null);
+    setReelOffset(0);
+    setIsReelAnimating(false);
+    setIsSpinning(false);
+    if (tickTimerRef.current) {
+      clearInterval(tickTimerRef.current);
+      tickTimerRef.current = null;
+    }
+    if (activeCase) {
+      const placeholderWinner = rollProvablyFairSkin(activeCase.items);
+      const initialReel = generateRealisticReel(activeCase.items, placeholderWinner, 36, 48);
+      setReelItems(initialReel);
+      setSpinKey(Date.now());
+    }
+  };
+
   // Sell Skin(s) for Balance - Instant Hellcase / CSGORoll style (no browser alert popup)
   const handleSellSkin = () => {
     if (!wonSkin && (!wonSkins || wonSkins.length === 0)) return;
@@ -436,11 +494,8 @@ export const VortexCaseShopModal: React.FC<VortexCaseShopModalProps> = ({ isOpen
       removeUserSkinFromInventory(wonSkin.id);
     }
 
-    // Instant reset with positive feedback toast
-    setWonSkin(null);
-    setWonSkins([]);
-    setDeliveryResult(null);
-    setDeliveryProgress(null);
+    // Instant clean reset to case opening desk
+    handleResetToCaseDesk();
     setSellToast(`✓ Sold ${count} ${count === 1 ? 'skin' : 'skins'} for +${sellValue.toFixed(2)} €! Credited to your wallet.`);
     setTimeout(() => setSellToast(null), 4000);
   };
@@ -981,12 +1036,14 @@ export const VortexCaseShopModal: React.FC<VortexCaseShopModalProps> = ({ isOpen
                         {/* Moving Strip of Skins */}
                         {reelItems.length > 0 && (
                           <div 
+                            key={spinKey}
                             ref={reelRef}
-                            className="flex items-center gap-2 pl-4 transition-transform ease-out"
+                            className="flex items-center gap-2 pl-4 will-change-transform"
                             style={{
                               transform: `translateX(-${reelOffset}px)`,
-                              transitionDuration: isSpinning ? '5200ms' : '0ms',
-                              transitionTimingFunction: 'cubic-bezier(0.12, 0.8, 0.25, 1)'
+                              transition: isReelAnimating 
+                                ? 'transform 5200ms cubic-bezier(0.12, 0.8, 0.25, 1)' 
+                                : 'none'
                             }}
                           >
                             {reelItems.map((item, idx) => (
@@ -1317,9 +1374,7 @@ export const VortexCaseShopModal: React.FC<VortexCaseShopModalProps> = ({ isOpen
                           <button
                             onClick={() => {
                               sound.playClick();
-                              setWonSkin(null);
-                              setWonSkins([]);
-                              setDeliveryResult(null);
+                              handleResetToCaseDesk();
                             }}
                             className="w-full sm:flex-1 py-3.5 rounded-xl bg-white/10 hover:bg-white/15 border border-white/10 text-white font-display font-bold text-xs uppercase tracking-wider transition cursor-pointer flex items-center justify-center gap-1.5 active:scale-95"
                             title="Keep won item(s) in your inventory and open another case"
@@ -1333,9 +1388,7 @@ export const VortexCaseShopModal: React.FC<VortexCaseShopModalProps> = ({ isOpen
                           <button
                             onClick={() => {
                               sound.playClick();
-                              setWonSkin(null);
-                              setWonSkins([]);
-                              setDeliveryResult(null);
+                              handleResetToCaseDesk();
                             }}
                             className="w-full py-3.5 rounded-xl bg-[#A3E635] hover:bg-[#84cc16] text-black font-display font-black text-sm uppercase tracking-wider transition cursor-pointer shadow-lg"
                           >
