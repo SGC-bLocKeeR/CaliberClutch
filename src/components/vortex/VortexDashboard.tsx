@@ -3573,7 +3573,7 @@ export const VortexDashboard: React.FC<VortexDashboardProps> = ({
           })()}
 
           {/* ======================================================== */}
-          {/* TAB: TOURNAMENTS (ESPORTS SKINS & CASH PRIZE POOLS)      */}
+          {/* TAB: TOURNAMENTS (ESPORTS CASH PRIZE POOLS)              */}
           {/* ======================================================== */}
           {activeTab === 'tournaments' && SHOW_TOURNAMENTS_LIVE && (
             <div className="bg-[#0E1017] border border-[#202536] rounded-3xl p-6 md:p-8 shadow-xl space-y-6">
@@ -3756,7 +3756,7 @@ export const VortexDashboard: React.FC<VortexDashboardProps> = ({
                           </div>
                         </div>
 
-                        {/* 3. Pure 100% Cash Prize Distribution (Zero Skins) */}
+                        {/* 3. Pure 100% Cash Prize Distribution */}
                         {(() => {
                           const numericPrize = parseFloat(newTourneyCashPrize.replace(/[^0-9.]/g, '')) || 3000;
                           const firstPrize = Math.round(numericPrize * 0.70);
@@ -3768,7 +3768,7 @@ export const VortexDashboard: React.FC<VortexDashboardProps> = ({
                               <div className="flex items-center justify-between text-xs font-mono">
                                 <span className="text-[#A3E635] font-bold flex items-center gap-1.5">
                                   <Trophy className="w-4 h-4 text-[#A3E635]" />
-                                  <span>Official Pure Cash Prize Distribution (100% Cash • Zero Skins):</span>
+                                  <span>Official Cash Prize Distribution (100% Pure Cash Pool):</span>
                                 </span>
                                 <span className="text-emerald-400 text-[11px] font-bold">Instant Balance Payout</span>
                               </div>
@@ -4108,7 +4108,7 @@ export const VortexDashboard: React.FC<VortexDashboardProps> = ({
                         <div className="p-4 rounded-2xl bg-black/40 border border-white/5 space-y-2 hover:border-amber-400/30 transition">
                           <div className="flex items-center gap-2 text-white font-bold">
                             <Coins className="w-4 h-4 text-amber-400 shrink-0" />
-                            <span>6. 100% Cash Prize Pool (Zero Skins) & Escrow Guarantee</span>
+                            <span>6. 100% Cash Prize Pool & Escrow Guarantee</span>
                           </div>
                           <p className="text-[11px] text-slate-400 pl-6 leading-relaxed">
                             Prize pools are paid out exclusively in real cash (100% Pure Cash): 70% 1st Place, 20% 2nd Place, 10% 3rd Place. Funds are held in CaliberClutch Escrow and disbursed immediately to the winners' balances upon Grand Final conclusion.
@@ -4203,7 +4203,7 @@ export const VortexDashboard: React.FC<VortexDashboardProps> = ({
                 </div>
               </div>
 
-              {/* Tournament Cards with Cash + CS2 Skins Prize Breakdown */}
+              {/* Tournament Cards with 100% Pure Cash Prize Breakdown */}
               <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
                 {[
                   ...customTournaments,
