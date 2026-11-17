@@ -12,7 +12,7 @@ export function App() {
 
   const [landingMode] = useState<'pure-html' | 'image-reference'>('pure-html');
   const [userGamerTag, setUserGamerTag] = useState<string>(() => {
-    return localStorage.getItem('vortex_user_gamertag') || 'bLocKeeRz';
+    return localStorage.getItem('vortex_user_gamertag') || 'M14';
   });
   const [avatarUrl, setAvatarUrl] = useState<string>(() => {
     return localStorage.getItem('vortex_user_avatar') || 'https://distribution.faceit-cdn.net/images/ac453a50-dbca-4d42-a740-dac12bdc74c0.jpeg';
@@ -34,8 +34,14 @@ export function App() {
           setUserGamerTag(profile.personaName);
           localStorage.setItem('vortex_user_gamertag', profile.personaName);
 
-          // If a new player / nephew logs in with Steam, ensure they start unverified with starter level
-          if (profile.personaName !== 'bLocKeeRz') {
+          // Strictly and exclusively ONLY M14 has administrator access
+          const nameLower = (profile.personaName || '').toLowerCase();
+          const isOwnerAdmin = nameLower.includes('m14');
+          if (isOwnerAdmin) {
+            localStorage.setItem('vortex_is_admin', 'true');
+            localStorage.setItem('vortex_user_verification', 'vip');
+          } else {
+            localStorage.removeItem('vortex_is_admin');
             const hasLinkedFaceit = localStorage.getItem('vortex_faceit_connected') === 'true';
             if (!hasLinkedFaceit) {
               localStorage.setItem('vortex_user_level', '1');

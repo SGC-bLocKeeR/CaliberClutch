@@ -86,6 +86,7 @@ interface VortexDashboardProps {
 
 export type VortexTab = 
   | 'dashboard'
+  | 'home'
   | 'play'
   | 'cases'
   | 'servers' 
@@ -597,8 +598,14 @@ const CS2_ROLES = [
   'Anchor / Site Defender'
 ];
 
+export const isUserAdminOrFounder = (tagName?: string | null): boolean => {
+  const t = (tagName || '').toLowerCase().trim();
+  // Strictly and exclusively ONLY M14 has administrator access
+  return t.includes('m14');
+};
+
 export const VortexDashboard: React.FC<VortexDashboardProps> = ({
-  userGamerTag = 'bLocKeeRz',
+  userGamerTag = 'M14',
   avatarUrl = '/images/blockeerz_avatar.png',
   onNavigateTab,
   onLogout,
@@ -612,15 +619,11 @@ export const VortexDashboard: React.FC<VortexDashboardProps> = ({
     return localStorage.getItem('vortex_user_avatar') || avatarUrl;
   });
 
-  // Project Administrator Status (Founder & Admin Access)
+  // Project Administrator Status (EXCLUSIVELY FOR M14)
   const isProjectAdmin = (() => {
     const tag = (currentGamerTag || userGamerTag || '').toLowerCase().trim();
-    if (tag === 'm14' || tag === 'blockeerz' || tag === 'admin' || tag === 'blockeer') return true;
-    if (typeof window !== 'undefined') {
-      if (localStorage.getItem('vortex_is_admin') === 'true') return true;
-      if (window.location.search.includes('admin=true')) return true;
-    }
-    return false;
+    if (tag.includes('blockeer')) return false;
+    return isUserAdminOrFounder(tag);
   })();
 
   const [adminBypassComingSoon, setAdminBypassComingSoon] = useState<boolean>(() => {
@@ -634,7 +637,7 @@ export const VortexDashboard: React.FC<VortexDashboardProps> = ({
   useEffect(() => {
     if (userGamerTag) {
       setCurrentGamerTag(userGamerTag);
-      const isFounder = userGamerTag === 'bLocKeeRz';
+      const isFounder = isUserAdminOrFounder(userGamerTag) || isUserAdminOrFounder(currentGamerTag);
       const hasFaceit = localStorage.getItem('vortex_faceit_connected') === 'true';
 
       if (!isFounder && !hasFaceit) {
@@ -699,7 +702,7 @@ export const VortexDashboard: React.FC<VortexDashboardProps> = ({
       if (!isNaN(parsed) && parsed > 0) return parsed;
     }
     const tag = localStorage.getItem('vortex_user_gamertag') || userGamerTag;
-    return tag === 'bLocKeeRz' ? 1407 : 800; // bLocKeeRz is Level 7/1407; others start at Level 1 (800 ELO)
+    return isUserAdminOrFounder(tag) ? 1407 : 800; // Founder/Admin is Level 7/1407; others start at Level 1 (800 ELO)
   });
 
   const [currentUserLevel, setCurrentUserLevel] = useState<number>(() => {
@@ -709,7 +712,7 @@ export const VortexDashboard: React.FC<VortexDashboardProps> = ({
       if (!isNaN(parsed) && parsed >= 1 && parsed <= 10) return parsed;
     }
     const tag = localStorage.getItem('vortex_user_gamertag') || userGamerTag;
-    return tag === 'bLocKeeRz' ? 7 : 1;
+    return isUserAdminOrFounder(tag) ? 7 : 1;
   });
 
   const [faceitNickname, setFaceitNickname] = useState<string>(() => {
@@ -722,7 +725,8 @@ export const VortexDashboard: React.FC<VortexDashboardProps> = ({
 
   const [currentVerification, setCurrentVerification] = useState<VerificationType>(() => {
     const tag = localStorage.getItem('vortex_user_gamertag') || userGamerTag;
-    const isFounder = tag === 'bLocKeeRz';
+    const isFounder = isUserAdminOrFounder(tag);
+    if (isFounder) return 'vip';
     const saved = localStorage.getItem('vortex_user_verification');
     if (saved === 'verified' || saved === 'none') {
       return saved as VerificationType;
@@ -904,8 +908,8 @@ export const VortexDashboard: React.FC<VortexDashboardProps> = ({
   const [selectedMatchTier, setSelectedMatchTier] = useState<'free' | 'premium' | 'vip'>('free');
   // Selected server country locations (default 4 matching screenshot: Netherlands, Germany, Sweden, Finland)
   const [selectedServers, setSelectedServers] = useState<string[]>(['netherlands', 'germany', 'sweden', 'finland']);
-  // Default tab is Play (5v5 competitive queue)
-  const [activeTab, setActiveTab] = useState<VortexTab>('play');
+  // Default tab is Home (Overview & Season 1 Hub triggered by Caliber Clutch logo)
+  const [activeTab, setActiveTab] = useState<VortexTab>('home');
   const [profileDropdownOpen, setProfileDropdownOpen] = useState(false);
   const [notificationsOpen, setNotificationsOpen] = useState(false);
   const [showPremiumModal, setShowPremiumModal] = useState(initialOpenPremium);
@@ -1884,17 +1888,17 @@ export const VortexDashboard: React.FC<VortexDashboardProps> = ({
             }`}>
               {!sidebarCollapsed ? (
                 <div 
-                  onClick={() => { sound.playClick(); setActiveTab('dashboard'); }}
+                  onClick={() => { sound.playClick(); setActiveTab('home'); }}
                   className="flex items-center gap-3 cursor-pointer group transition hover:scale-105"
-                  title="Caliber Clutch Dashboard"
+                  title="Caliber Clutch Home"
                 >
                   <VortexBrandLogo />
                 </div>
               ) : (
                 <div 
-                  onClick={() => { sound.playClick(); setActiveTab('dashboard'); }}
+                  onClick={() => { sound.playClick(); setActiveTab('home'); }}
                   className="cursor-pointer transition hover:scale-110"
-                  title="Caliber Clutch Dashboard"
+                  title="Caliber Clutch Home"
                 >
                   <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-[#18210C] to-[#12141C] border border-[#A3E635]/50 flex items-center justify-center text-[#A3E635] font-black font-display text-xs shadow-[0_0_15px_rgba(163,230,53,0.25)]">
                     CC
@@ -2273,8 +2277,102 @@ export const VortexDashboard: React.FC<VortexDashboardProps> = ({
             </div>
           ) : (
             <>
-              {/* TAB: PLAY (OR DASHBOARD FOR ADMIN) */}
-              {(activeTab === 'play' || activeTab === 'dashboard') && (
+              {/* TAB: HOME (OVERVIEW & PLATFORM HUB - TRIGGERED BY OFFICIAL CALIBER CLUTCH LOGO) */}
+              {(activeTab === 'home' || activeTab === 'dashboard') && (
+                <div className="space-y-6 animate-in fade-in duration-200">
+                  <div className="w-full bg-[#0B0D12] border border-[#202535] rounded-3xl p-6 sm:p-10 relative overflow-hidden shadow-2xl text-left space-y-8">
+                    {/* Subtle Glows */}
+                    <div className="absolute top-0 right-1/4 w-[500px] h-[500px] bg-lime-500/[0.04] rounded-full blur-3xl pointer-events-none" />
+                    <div className="absolute bottom-0 left-1/4 w-[500px] h-[500px] bg-amber-500/[0.04] rounded-full blur-3xl pointer-events-none" />
+
+                    {/* Top Header */}
+                    <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-6 border-b border-white/[0.08] pb-6">
+                      <div className="space-y-3">
+                        <div className="flex flex-wrap items-center gap-2.5">
+                          <span className="px-3.5 py-1 rounded-full text-xs font-mono font-black uppercase tracking-wider text-[#A3E635] bg-[#A3E635]/15 border border-[#A3E635]/40 flex items-center gap-2 shadow-[0_0_15px_rgba(163,230,53,0.25)]">
+                            <span className="relative flex h-2.5 w-2.5">
+                              <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-[#A3E635] opacity-80" />
+                              <span className="relative inline-flex rounded-full h-2.5 w-2.5 bg-[#A3E635]" />
+                            </span>
+                            <span>SEASON 1 HUB</span>
+                          </span>
+                          <span className="px-3 py-1 rounded-full text-xs font-mono font-bold text-amber-400 bg-amber-500/10 border border-amber-500/30">
+                            CALIBER CLUTCH ARENA
+                          </span>
+                        </div>
+
+                        <div className="space-y-2">
+                          <h1 className="text-3xl sm:text-5xl font-black font-display text-white tracking-tight uppercase leading-tight">
+                            CALIBER CLUTCH // HOME
+                          </h1>
+                          <p className="text-sm font-mono text-slate-300 max-w-2xl">
+                            Competitive Counter-Strike 2 arena with dedicated European 128-tick servers, tournament prize pools, and automated weapon skin cases.
+                          </p>
+                        </div>
+                      </div>
+
+                      <button
+                        onClick={() => { sound.playSelect(); setActiveTab('play'); }}
+                        className="shrink-0 px-6 py-4 rounded-2xl bg-[#A3E635] hover:bg-[#B4F046] text-slate-950 font-display font-black text-sm uppercase tracking-wider transition cursor-pointer shadow-xl shadow-lime-500/25 flex items-center gap-3 hover:scale-105 active:scale-95 group"
+                      >
+                        <Play className="w-5 h-5 fill-slate-950 group-hover:scale-110 transition-transform" />
+                        <span>ENTER 5V5 PLAY QUEUE</span>
+                        <ArrowRight className="w-4 h-4" />
+                      </button>
+                    </div>
+
+                    {/* Quick Launch Cards */}
+                    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+                      <div 
+                        onClick={() => { sound.playSelect(); setActiveTab('play'); }}
+                        className="p-5 rounded-2xl bg-gradient-to-br from-[#121622] to-[#0A0D14] border border-[#262E44] hover:border-[#A3E635]/60 transition cursor-pointer group shadow-lg hover:-translate-y-1"
+                      >
+                        <div className="w-10 h-10 rounded-xl bg-[#A3E635]/15 border border-[#A3E635]/30 flex items-center justify-center text-[#A3E635] mb-3 group-hover:scale-110 transition">
+                          <Play className="w-5 h-5 fill-[#A3E635]" />
+                        </div>
+                        <h4 className="text-sm font-black font-display text-white uppercase tracking-wider">Play 5v5 Matchmaking</h4>
+                        <p className="text-xs text-slate-400 mt-1">128-tick dedicated Europe queue.</p>
+                      </div>
+
+                      <div 
+                        onClick={() => { sound.playSelect(); setActiveTab('cases'); }}
+                        className="p-5 rounded-2xl bg-gradient-to-br from-[#121622] to-[#0A0D14] border border-[#262E44] hover:border-amber-500/60 transition cursor-pointer group shadow-lg hover:-translate-y-1"
+                      >
+                        <div className="w-10 h-10 rounded-xl bg-amber-500/15 border border-amber-500/30 flex items-center justify-center text-amber-400 mb-3 group-hover:scale-110 transition">
+                          <Package className="w-5 h-5" />
+                        </div>
+                        <h4 className="text-sm font-black font-display text-white uppercase tracking-wider">Cases Arena</h4>
+                        <p className="text-xs text-slate-400 mt-1">Unbox covert CS2 knives and gloves.</p>
+                      </div>
+
+                      <div 
+                        onClick={() => { sound.playSelect(); setActiveTab('tournaments'); }}
+                        className="p-5 rounded-2xl bg-gradient-to-br from-[#121622] to-[#0A0D14] border border-[#262E44] hover:border-yellow-500/60 transition cursor-pointer group shadow-lg hover:-translate-y-1"
+                      >
+                        <div className="w-10 h-10 rounded-xl bg-yellow-500/15 border border-yellow-500/30 flex items-center justify-center text-yellow-400 mb-3 group-hover:scale-110 transition">
+                          <Trophy className="w-5 h-5" />
+                        </div>
+                        <h4 className="text-sm font-black font-display text-white uppercase tracking-wider">Tournaments</h4>
+                        <p className="text-xs text-slate-400 mt-1">Cash prize cups and brackets.</p>
+                      </div>
+
+                      <div 
+                        onClick={() => { sound.playSelect(); setActiveTab('rankings'); }}
+                        className="p-5 rounded-2xl bg-gradient-to-br from-[#121622] to-[#0A0D14] border border-[#262E44] hover:border-cyan-500/60 transition cursor-pointer group shadow-lg hover:-translate-y-1"
+                      >
+                        <div className="w-10 h-10 rounded-xl bg-cyan-500/15 border border-cyan-500/30 flex items-center justify-center text-cyan-400 mb-3 group-hover:scale-110 transition">
+                          <BarChart2 className="w-5 h-5" />
+                        </div>
+                        <h4 className="text-sm font-black font-display text-white uppercase tracking-wider">Leaderboards</h4>
+                        <p className="text-xs text-slate-400 mt-1">Platform rankings and ELO stats.</p>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              )}
+
+              {/* TAB: PLAY */}
+              {activeTab === 'play' && (
                 <div className="space-y-6 animate-in fade-in duration-200">
                   {/* HERO MODULE: 5v5 CS2 MATCHMAKING LOBBY (1:1 FACEIT REPLICA) */}
                   <div className="w-full bg-[#0B0D12] border border-[#202535] rounded-3xl p-6 sm:p-8 relative overflow-hidden shadow-2xl">
