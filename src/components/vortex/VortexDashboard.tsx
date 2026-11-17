@@ -3709,16 +3709,16 @@ export const VortexDashboard: React.FC<VortexDashboardProps> = ({
 
                           <div>
                             <label className="text-[11px] text-slate-300 uppercase tracking-wider block mb-1.5 font-bold">
-                              Struktura e Kllapave (Bracket Structure)
+                              Skema e Ndeshjeve (Sistemi i Garimit / Bracket)
                             </label>
                             <select
                               value={newTourneyStructure}
                               onChange={(e) => setNewTourneyStructure(e.target.value)}
                               className="w-full px-4 py-3 rounded-xl bg-[#141722] border border-[#252C3D] text-white font-bold focus:outline-none focus:border-[#A3E635] cursor-pointer text-sm"
                             >
-                              <option value="Single Elimination">5v5 Single Elimination (Knockout)</option>
-                              <option value="Double Elimination">5v5 Double Elimination (Upper & Lower)</option>
-                              <option value="GSL Group Stage + Single Elim">GSL Group Stage + Single Elim</option>
+                              <option value="Single Elimination">5v5 Single Elimination (Eliminim Direkt / Knockout)</option>
+                              <option value="Double Elimination">5v5 Double Elimination (Me Shans të Dytë / Upper & Lower)</option>
+                              <option value="GSL Group Stage + Single Elim">GSL Group Stage + Playoffs (Grupe + Finale)</option>
                             </select>
                           </div>
                         </div>
