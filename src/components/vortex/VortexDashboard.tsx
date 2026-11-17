@@ -2183,32 +2183,36 @@ export const VortexDashboard: React.FC<VortexDashboardProps> = ({
                 <div className="absolute top-0 right-1/4 w-[500px] h-[500px] bg-lime-500/[0.04] rounded-full blur-3xl pointer-events-none" />
                 <div className="absolute bottom-0 left-1/4 w-[500px] h-[500px] bg-amber-500/[0.04] rounded-full blur-3xl pointer-events-none" />
 
-                {/* Top Header Section */}
-                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-white/[0.08] pb-6">
-                  <div className="space-y-2">
-                    <div className="flex items-center gap-2.5">
-                      <span className="px-3 py-1 rounded-full text-[10px] font-mono font-bold uppercase tracking-wider text-[#A3E635] bg-[#A3E635]/10 border border-[#A3E635]/30 flex items-center gap-1.5 shadow-sm">
-                        <span className="w-2 h-2 rounded-full bg-[#A3E635] animate-pulse" />
-                        <span>SEASON 1 CALIBRATION • UNDER DEV</span>
+                {/* Top Header Section with PROMINENT COMING SOON BANNER */}
+                <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-6 border-b border-white/[0.08] pb-6">
+                  <div className="space-y-3">
+                    <div className="flex flex-wrap items-center gap-2.5">
+                      <span className="px-3.5 py-1 rounded-full text-xs font-mono font-black uppercase tracking-wider text-amber-400 bg-amber-500/15 border border-amber-500/40 flex items-center gap-2 shadow-[0_0_15px_rgba(245,158,11,0.25)]">
+                        <span className="w-2.5 h-2.5 rounded-full bg-amber-400 animate-ping" />
+                        <span>COMING SOON</span>
                       </span>
-                      <span className="px-2.5 py-0.5 rounded-full text-[10px] font-mono font-bold text-amber-400 bg-amber-500/10 border border-amber-500/25">
-                        COMING SOON
+                      <span className="px-3 py-1 rounded-full text-xs font-mono font-bold text-[#A3E635] bg-[#A3E635]/10 border border-[#A3E635]/30">
+                        SEASON 1 CALIBRATION
                       </span>
                     </div>
 
-                    <h1 className="text-3xl sm:text-4xl font-black font-display text-white tracking-tight uppercase">
-                      CALIBER CLUTCH PLATFORM
-                    </h1>
-                    <p className="text-sm font-mono text-slate-400 max-w-3xl">
-                      Hold your angles and save your AWPs! The next generation of competitive Counter-Strike 2 is almost ready.
-                    </p>
+                    <div className="space-y-1">
+                      <h1 className="text-4xl sm:text-5xl lg:text-6xl font-black font-display tracking-tight uppercase">
+                        <span className="text-amber-400 drop-shadow-[0_0_30px_rgba(245,158,11,0.5)]">COMING SOON</span>
+                        <span className="text-slate-500 mx-2 font-mono font-normal">//</span>
+                        <span className="text-white">CALIBER CLUTCH</span>
+                      </h1>
+                      <p className="text-sm font-mono text-slate-300 max-w-3xl">
+                        Hold your angles and save your AWPs! The next generation of competitive Counter-Strike 2 is almost ready.
+                      </p>
+                    </div>
                   </div>
 
                   {/* Progress & Launch Pill */}
-                  <div className="sm:text-right shrink-0">
+                  <div className="lg:text-right shrink-0 bg-[#121622]/80 border border-white/5 rounded-2xl p-4 sm:p-5 shadow-lg">
                     <div className="text-[11px] font-mono text-slate-400 uppercase tracking-wider">DEPLOYMENT PROGRESS</div>
-                    <div className="text-2xl font-black font-display text-[#A3E635]">60% COMPLETED</div>
-                    <div className="text-[10px] font-mono text-slate-500">Phase 3/5: Matchmaking & Server Calibration</div>
+                    <div className="text-3xl font-black font-display text-[#A3E635] drop-shadow-[0_0_15px_rgba(163,230,53,0.4)]">60% COMPLETED</div>
+                    <div className="text-xs font-mono text-slate-400 mt-0.5">Phase 3/5: Matchmaking & Server Calibration</div>
                   </div>
                 </div>
 
@@ -2219,8 +2223,9 @@ export const VortexDashboard: React.FC<VortexDashboardProps> = ({
                   <div className="relative z-10 space-y-4">
                     <div className="flex items-center gap-2">
                       <Sparkles className="w-5 h-5 text-amber-400" />
-                      <h3 className="text-lg font-black font-display text-white uppercase tracking-wide">
-                        Official Competitive Notice for CS2 Players
+                      <h3 className="text-xl font-black font-display text-white uppercase tracking-wide flex items-center gap-2">
+                        <span className="text-amber-400">COMING SOON:</span>
+                        <span>OFFICIAL CS2 COMPETITIVE NOTICE</span>
                       </h3>
                     </div>
 
