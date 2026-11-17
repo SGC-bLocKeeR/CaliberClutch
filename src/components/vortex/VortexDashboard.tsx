@@ -13,6 +13,7 @@ import {
   UserPlus,
   Home,
   Crown, 
+  Eye, 
   ArrowRight,
   ArrowLeft,
   Menu,
@@ -609,6 +610,25 @@ export const VortexDashboard: React.FC<VortexDashboardProps> = ({
   });
   const [currentAvatarUrl, setCurrentAvatarUrl] = useState<string>(() => {
     return localStorage.getItem('vortex_user_avatar') || avatarUrl;
+  });
+
+  // Project Administrator Status (Founder & Admin Access)
+  const isProjectAdmin = (() => {
+    const tag = (currentGamerTag || userGamerTag || '').toLowerCase().trim();
+    if (tag === 'm14' || tag === 'blockeerz' || tag === 'admin' || tag === 'blockeer') return true;
+    if (typeof window !== 'undefined') {
+      if (localStorage.getItem('vortex_is_admin') === 'true') return true;
+      if (window.location.search.includes('admin=true')) return true;
+    }
+    return false;
+  })();
+
+  const [adminBypassComingSoon, setAdminBypassComingSoon] = useState<boolean>(() => {
+    if (typeof window !== 'undefined') {
+      const saved = localStorage.getItem('vortex_admin_bypass_coming_soon');
+      if (saved !== null) return saved === 'true';
+    }
+    return true;
   });
 
   useEffect(() => {
@@ -1392,86 +1412,8 @@ export const VortexDashboard: React.FC<VortexDashboardProps> = ({
     {
       rank: '#1',
       rankNum: 1,
-      tag: 'juanflatroo',
-      clanTag: 'GUILD',
-      avatar: 'https://images.unsplash.com/photo-1566492031773-4f4e44671857?auto=format&fit=crop&w=120&q=80',
-      country: 'Kosovo',
-      flag: '🇽🇰',
-      code: 'XK',
-      level: 'Level 10',
-      levelNum: 10,
-      elo: 3890,
-      matches: 428,
-      winrate: '69.4%',
-      kd: '1.48',
-      hs: '74.2%',
-      verification: 'vip',
-      isUser: false,
-      bio: 'Professional CS2 Player for GUILD / Bad News Eagles. Aggressive entry fragger and space creator on Mirage & Inferno.',
-      role: 'Entry Fragger / Pro',
-      crosshairCode: 'CSGO-fl4tr-00BNE-xK999-ENTRY',
-      steamId: 'STEAM_0:1:19823411',
-      sens: '800 DPI • 1.25 Sens • 1280x960 4:3',
-      bestMap: 'Mirage',
-      bestMapWin: 76
-    },
-    {
-      rank: '#2',
-      rankNum: 2,
-      tag: 'gxx-',
-      clanTag: 'BNE',
-      avatar: 'https://images.unsplash.com/photo-1570295999919-56ceb5ecca61?auto=format&fit=crop&w=120&q=80',
-      country: 'Kosovo',
-      flag: '🇽🇰',
-      code: 'XK',
-      level: 'Level 10',
-      levelNum: 10,
-      elo: 3420,
-      matches: 382,
-      winrate: '64.2%',
-      kd: '1.35',
-      hs: '51.8%',
-      verification: 'verified',
-      isUser: false,
-      bio: 'Main AWPer for Bad News Eagles. Locking down long angles and shutting down bombsite rushes.',
-      role: 'Sniper / Main AWP',
-      crosshairCode: 'CSGO-gxx99-AWP01-SNIPR-BNE88',
-      steamId: 'STEAM_0:0:98237412',
-      sens: '400 DPI • 2.10 Sens • Zoom 1.0 • 1920x1080',
-      bestMap: 'Inferno',
-      bestMapWin: 71
-    },
-    {
-      rank: '#3',
-      rankNum: 3,
-      tag: 'bLocKeeRz',
-      clanTag: currentGamerTag === 'bLocKeeRz' ? currentClanTag : 'VTX',
-      avatar: currentGamerTag === 'bLocKeeRz' ? currentAvatarUrl : 'https://distribution.faceit-cdn.net/images/ac453a50-dbca-4d42-a740-dac12bdc74c0.jpeg',
-      country: 'Kosovo',
-      flag: '🇽🇰',
-      code: 'XK',
-      level: currentGamerTag === 'bLocKeeRz' ? `Level ${currentUserLevel}` : 'Level 7',
-      levelNum: currentGamerTag === 'bLocKeeRz' ? currentUserLevel : 7,
-      elo: currentGamerTag === 'bLocKeeRz' ? currentUserElo : 1407,
-      matches: 214,
-      winrate: '58.9%',
-      kd: '1.28',
-      hs: '64.2%',
-      verification: currentGamerTag === 'bLocKeeRz' ? currentVerification : 'vip',
-      isUser: currentGamerTag === 'bLocKeeRz',
-      bio: currentGamerTag === 'bLocKeeRz' ? currentBio : 'Pushing ELO to Level 10. Smoke lineups on point.',
-      role: currentGamerTag === 'bLocKeeRz' ? currentRole : 'AWPer / Entry',
-      crosshairCode: currentGamerTag === 'bLocKeeRz' ? currentCrosshairCode : 'CSGO-4w29A-6yvKP-6k7kF-3xK2v-d9HkQ',
-      steamId: 'STEAM_0:1:43918293',
-      sens: '800 DPI • 1.15 Sens • 1280x960 4:3 Stretched',
-      bestMap: 'Mirage',
-      bestMapWin: 64
-    },
-    ...(currentGamerTag !== 'bLocKeeRz' && currentGamerTag !== 'juanflatroo' && currentGamerTag !== 'gxx-' && currentGamerTag !== 'SENER1' && currentGamerTag !== 'shroud_al' ? [{
-      rank: '#',
-      rankNum: 99,
       tag: currentGamerTag,
-      clanTag: currentClanTag,
+      clanTag: currentClanTag || 'VTX',
       avatar: currentAvatarUrl,
       country: currentCountry.name,
       flag: currentCountry.flag,
@@ -1480,201 +1422,56 @@ export const VortexDashboard: React.FC<VortexDashboardProps> = ({
       levelNum: currentUserLevel,
       elo: currentUserElo,
       matches: faceitConnected ? 84 : 12,
-      winrate: faceitConnected ? '52.4%' : '50.0%',
-      kd: faceitConnected ? '1.12' : '1.02',
-      hs: faceitConnected ? '54.0%' : '48.0%',
+      winrate: faceitConnected ? '58.9%' : '50.0%',
+      kd: faceitConnected ? '1.28' : '1.05',
+      hs: faceitConnected ? '64.2%' : '48.0%',
       verification: currentVerification,
       isUser: true,
-      bio: currentBio,
-      role: currentRole,
-      crosshairCode: currentCrosshairCode,
+      bio: currentBio || 'Official verified player on VORTEX Gaming.',
+      role: currentRole || 'AWPer / Entry',
+      crosshairCode: currentCrosshairCode || 'CSGO-4w29A-6yvKP-6k7kF-3xK2v-d9HkQ',
       steamId: localStorage.getItem('vortex_steam_id') || 'STEAM_0:1:43918293',
       sens: '800 DPI • 1.15 Sens • 1280x960 4:3 Stretched',
       bestMap: 'Mirage',
-      bestMapWin: 52
-    }] : []),
-    {
-      rank: '#4',
-      rankNum: 4,
-      tag: 'SENER1',
-      clanTag: 'BNE',
-      avatar: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?auto=format&fit=crop&w=120&q=80',
-      country: 'Kosovo',
-      flag: '🇽🇰',
-      code: 'XK',
-      level: 'Level 9',
-      levelNum: 9,
-      elo: 1980,
-      matches: 310,
-      winrate: '57.1%',
-      kd: '1.22',
-      hs: '61.0%',
-      verification: 'verified',
-      isUser: false,
-      bio: 'Support rifler & anchor. Master of set utility smokes and clutch rounds.',
-      role: 'Support / Anchor',
-      crosshairCode: 'CSGO-SENER-1BNE0-SMOKE-99UTL',
-      steamId: 'STEAM_0:1:55418290',
-      sens: '800 DPI • 1.10 Sens • 1280x960 4:3',
-      bestMap: 'Nuke',
-      bestMapWin: 63
+      bestMapWin: 64
     },
-    {
-      rank: '#5',
-      rankNum: 5,
-      tag: 'shroud_al',
-      clanTag: 'ALB',
-      avatar: 'https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?auto=format&fit=crop&w=120&q=80',
-      country: 'Albania',
-      flag: '🇦🇱',
-      code: 'AL',
-      level: 'Level 8',
-      levelNum: 8,
-      elo: 1750,
-      matches: 195,
-      winrate: '55.4%',
-      kd: '1.18',
-      hs: '58.5%',
-      verification: 'none',
-      isUser: false,
-      bio: 'Tirana competitive grinder. High headshot percentage and crisp pistol rounds.',
-      role: 'Rifler / Lurker',
-      crosshairCode: 'CSGO-SHRUD-AL001-TIRAN-CS288',
-      steamId: 'STEAM_0:0:33419082',
-      sens: '400 DPI • 2.00 Sens • 1920x1080',
-      bestMap: 'Ancient',
-      bestMapWin: 59
-    },
-    {
-      rank: '#6',
-      rankNum: 6,
-      tag: 'redline_cs',
-      clanTag: 'RED',
-      avatar: 'https://images.unsplash.com/photo-1527980965255-d3b416303d12?auto=format&fit=crop&w=120&q=80',
-      country: 'Kosovo',
-      flag: '🇽🇰',
-      code: 'XK',
-      level: 'Level 8',
-      levelNum: 8,
-      elo: 1690,
-      matches: 182,
-      winrate: '54.0%',
-      kd: '1.15',
-      hs: '56.2%',
-      verification: 'none',
-      isUser: false,
-      bio: 'Prishtina tactical CS2 player. AK-47 first bullet precision specialist.',
-      role: 'Second Entry',
-      crosshairCode: 'CSGO-REDLN-99CS2-PRISH-TINA1',
-      steamId: 'STEAM_0:1:78129034',
-      sens: '800 DPI • 1.05 Sens • 1280x960',
-      bestMap: 'Mirage',
-      bestMapWin: 57
-    },
-    {
-      rank: '#7',
-      rankNum: 7,
-      tag: 'eagle_xk',
-      clanTag: 'KOS',
-      avatar: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=120&q=80',
-      country: 'Kosovo',
-      flag: '🇽🇰',
-      code: 'XK',
-      level: 'Level 7',
-      levelNum: 7,
-      elo: 1430,
-      matches: 160,
-      winrate: '52.8%',
-      kd: '1.11',
-      hs: '53.0%',
-      verification: 'none',
-      isUser: false,
-      bio: 'Competitive 5v5 Faceit ladder climber.',
-      role: 'Rifler',
-      crosshairCode: 'CSGO-EAGLE-XK007-FACE-IT128',
-      steamId: 'STEAM_0:0:67182903',
-      sens: '800 DPI • 1.18 Sens • 1280x960',
-      bestMap: 'Dust II',
-      bestMapWin: 55
-    },
-    {
-      rank: '#8',
-      rankNum: 8,
-      tag: 'tirana_beast',
-      clanTag: 'ALB',
-      avatar: 'https://images.unsplash.com/photo-1500648767791-00dcc994a43e?auto=format&fit=crop&w=120&q=80',
-      country: 'Albania',
-      flag: '🇦🇱',
-      code: 'AL',
-      level: 'Level 6',
-      levelNum: 6,
-      elo: 1290,
-      matches: 142,
-      winrate: '50.5%',
-      kd: '1.05',
-      hs: '49.8%',
-      verification: 'none',
-      isUser: false,
-      bio: 'Albanian CS2 community warrior. Aggressive push style.',
-      role: 'Entry / Rifler',
-      crosshairCode: 'CSGO-BEAST-TIR99-ALB01-CSGO9',
-      steamId: 'STEAM_0:1:89230129',
-      sens: '1000 DPI • 1.00 Sens • 1920x1080',
-      bestMap: 'Inferno',
-      bestMapWin: 52
-    },
-    {
-      rank: '#9',
-      rankNum: 9,
-      tag: 'vortex_striker',
-      clanTag: 'GER',
-      avatar: 'https://images.unsplash.com/photo-1566492031773-4f4e44671857?auto=format&fit=crop&w=120&q=80',
-      country: 'Germany',
-      flag: '🇩🇪',
-      code: 'DE',
-      level: 'Level 6',
-      levelNum: 6,
-      elo: 1210,
-      matches: 128,
-      winrate: '49.8%',
-      kd: '1.02',
-      hs: '48.2%',
-      verification: 'none',
-      isUser: false,
-      bio: 'Frankfurt low-ping grinder. Dedicated team player.',
-      role: 'IGL / Support',
-      crosshairCode: 'CSGO-STRKR-GER09-FRNKF-128TK',
-      steamId: 'STEAM_0:0:44192038',
-      sens: '800 DPI • 1.20 Sens • 1920x1080',
-      bestMap: 'Overpass',
-      bestMapWin: 51
-    },
-    {
-      rank: '#10',
-      rankNum: 10,
-      tag: 'bl1tz_kd',
-      clanTag: 'BNE',
-      avatar: 'https://images.unsplash.com/photo-1570295999919-56ceb5ecca61?auto=format&fit=crop&w=120&q=80',
-      country: 'Kosovo',
-      flag: '🇽🇰',
-      code: 'XK',
-      level: 'Level 5',
-      levelNum: 5,
-      elo: 1150,
-      matches: 98,
-      winrate: '48.5%',
-      kd: '0.98',
-      hs: '47.0%',
-      verification: 'none',
-      isUser: false,
-      bio: 'Young gun improving fast. Aim practice daily.',
-      role: 'Rifler',
-      crosshairCode: 'CSGO-BL1TZ-KOS05-AIM99-ROOKI',
-      steamId: 'STEAM_0:1:99120348',
-      sens: '400 DPI • 2.20 Sens • 1280x960',
-      bestMap: 'Mirage',
-      bestMapWin: 50
-    }
+    ...(() => {
+      try {
+        const raw = localStorage.getItem('vortex_platform_registered_players');
+        if (!raw) return [];
+        const stored: any[] = JSON.parse(raw);
+        return stored
+          .filter(p => p.gamerTag && p.gamerTag.toLowerCase() !== currentGamerTag.toLowerCase())
+          .map((p, idx) => ({
+            rank: `#${idx + 2}`,
+            rankNum: idx + 2,
+            tag: p.gamerTag,
+            clanTag: p.clanTag || 'VTX',
+            avatar: p.avatar || 'https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?auto=format&fit=crop&w=120&q=80',
+            country: p.countryName || 'Kosovo',
+            flag: p.flag || '🇽🇰',
+            code: p.countryCode || 'XK',
+            level: `Level ${p.level || 1}`,
+            levelNum: p.level || 1,
+            elo: p.elo || 1000,
+            matches: p.matches || 0,
+            winrate: p.winrate || '0%',
+            kd: p.kd || '1.00',
+            hs: p.hs || '0%',
+            verification: p.verification || 'none',
+            isUser: false,
+            bio: p.bio || 'Verified VORTEX registered player.',
+            role: p.role || 'Rifler',
+            crosshairCode: 'CSGO-VTX01-PLAYR-AIM00-CS288',
+            steamId: p.steamId || 'STEAM_0:1:00000000',
+            sens: '800 DPI • 1.10 Sens',
+            bestMap: 'Mirage',
+            bestMapWin: 50
+          }));
+      } catch {
+        return [];
+      }
+    })()
   ];
 
   // Dynamic ranking sorted strictly by authentic ELO
@@ -1997,12 +1794,16 @@ export const VortexDashboard: React.FC<VortexDashboardProps> = ({
     {
       id: 'play' as VortexTab,
       label: 'Play',
-      desc: 'Ranked 128-tick matchmaking',
+      desc: (isProjectAdmin && adminBypassComingSoon) ? 'Ranked 128-tick matchmaking' : 'Season 1 • Launching Soon',
       icon: Play,
-      badge: isQueuing ? 'QUEUING' : 'ACTIVE',
-      badgeColor: isQueuing
-        ? 'bg-red-500/20 text-red-400 border border-red-500/40 animate-pulse'
-        : 'bg-[#A3E635]/15 text-[#A3E635] border border-[#A3E635]/30'
+      badge: (isProjectAdmin && adminBypassComingSoon)
+        ? (isQueuing ? 'QUEUING' : 'ACTIVE')
+        : 'COMING SOON',
+      badgeColor: (isProjectAdmin && adminBypassComingSoon)
+        ? (isQueuing
+          ? 'bg-red-500/20 text-red-400 border border-red-500/40 animate-pulse'
+          : 'bg-[#A3E635]/15 text-[#A3E635] border border-[#A3E635]/30')
+        : 'bg-amber-500/15 text-amber-400 border border-amber-500/30'
     },
     {
       id: 'rankings' as VortexTab,
@@ -2351,8 +2152,172 @@ export const VortexDashboard: React.FC<VortexDashboardProps> = ({
           {activeTab === 'play' && (
             <div className="space-y-6 animate-in fade-in duration-200">
 
-              {/* HERO MODULE: 5v5 CS2 MATCHMAKING LOBBY (1:1 FACEIT REPLICA) */}
-              <div className="w-full bg-[#0B0D12] border border-[#202535] rounded-3xl p-6 sm:p-8 relative overflow-hidden shadow-2xl">
+              {/* ADMIN VIEW MODE SWITCHER (ONLY VISIBLE TO PROJECT ADMIN) */}
+              {isProjectAdmin && (
+                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 p-3.5 px-5 rounded-2xl bg-[#141A29] border border-amber-500/40 shadow-lg text-xs font-mono">
+                  <div className="flex items-center gap-2.5">
+                    <span className="w-2.5 h-2.5 rounded-full bg-amber-400 animate-pulse" />
+                    <span className="font-bold text-amber-400 uppercase tracking-wider flex items-center gap-1.5">
+                      <Crown className="w-4 h-4 text-amber-400" />
+                      <span>PROJECT ADMINISTRATOR MODE</span>
+                    </span>
+                    <span className="text-slate-400 hidden md:inline">
+                      • {adminBypassComingSoon ? 'Viewing Live Matchmaking Arena' : 'Previewing Visitor Coming Soon View'}
+                    </span>
+                  </div>
+                  <button
+                    onClick={() => {
+                      sound.playClick();
+                      const next = !adminBypassComingSoon;
+                      setAdminBypassComingSoon(next);
+                      localStorage.setItem('vortex_admin_bypass_coming_soon', String(next));
+                    }}
+                    className="px-3.5 py-1.5 rounded-xl bg-amber-500/20 hover:bg-amber-500/30 border border-amber-500/50 text-amber-200 font-bold transition flex items-center gap-2 cursor-pointer shadow-sm"
+                    title="Toggle between viewing the Live Arena and testing what normal visitors see"
+                  >
+                    <Eye className="w-3.5 h-3.5 text-amber-400" />
+                    <span>{adminBypassComingSoon ? 'Preview Visitor Coming Soon' : 'Return to Admin Live Arena'}</span>
+                  </button>
+                </div>
+              )}
+
+              {/* FOR REGULAR VISITORS: BEAUTIFUL COMING SOON VIEW (100% ENGLISH) */}
+              {(!isProjectAdmin || !adminBypassComingSoon) ? (
+                <div className="w-full bg-[#0B0D12] border border-[#202535] rounded-3xl p-6 sm:p-10 relative overflow-hidden shadow-2xl text-left space-y-8">
+                  {/* Subtle Ambient Glows */}
+                  <div className="absolute top-0 right-1/4 w-[500px] h-[500px] bg-lime-500/[0.04] rounded-full blur-3xl pointer-events-none" />
+                  <div className="absolute bottom-0 left-1/4 w-[500px] h-[500px] bg-amber-500/[0.04] rounded-full blur-3xl pointer-events-none" />
+
+                  {/* Top Header Section */}
+                  <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-white/[0.08] pb-6">
+                    <div className="space-y-2">
+                      <div className="flex items-center gap-2.5">
+                        <span className="px-3 py-1 rounded-full text-[10px] font-mono font-bold uppercase tracking-wider text-[#A3E635] bg-[#A3E635]/10 border border-[#A3E635]/30 flex items-center gap-1.5 shadow-sm">
+                          <span className="w-2 h-2 rounded-full bg-[#A3E635] animate-pulse" />
+                          <span>SEASON 1 INITIALIZING • UNDER DEV</span>
+                        </span>
+                        <span className="px-2.5 py-0.5 rounded-full text-[10px] font-mono font-bold text-amber-400 bg-amber-500/10 border border-amber-500/25">
+                          LAUNCHING SOON
+                        </span>
+                      </div>
+
+                      <h1 className="text-3xl sm:text-4xl font-black font-display text-white tracking-tight uppercase">
+                        VORTEX 5V5 COMPETITIVE ARENA
+                      </h1>
+                      <p className="text-sm font-mono text-slate-400 max-w-3xl">
+                        High-performance European CS2 infrastructure, automated captain veto systems, and verified Anti-Cheat lobbies.
+                      </p>
+                    </div>
+
+                    {/* Progress & Launch Pill */}
+                    <div className="sm:text-right shrink-0">
+                      <div className="text-[11px] font-mono text-slate-400 uppercase tracking-wider">DEPLOYMENT PROGRESS</div>
+                      <div className="text-2xl font-black font-display text-[#A3E635]">92% COMPLETED</div>
+                      <div className="text-[10px] font-mono text-slate-500">Phase 4/5: Server Stress Tests</div>
+                    </div>
+                  </div>
+
+                  {/* Main Announcement Box (Beautiful English Copy as requested) */}
+                  <div className="p-6 sm:p-8 rounded-2xl bg-gradient-to-br from-[#121622] via-[#0E121B] to-[#0A0D14] border border-[#262E44] shadow-xl relative overflow-hidden">
+                    <div className="absolute top-0 right-0 w-64 h-64 bg-[#A3E635]/5 rounded-full blur-2xl pointer-events-none" />
+
+                    <div className="relative z-10 space-y-4">
+                      <div className="flex items-center gap-2">
+                        <Sparkles className="w-5 h-5 text-amber-400" />
+                        <h3 className="text-lg font-black font-display text-white uppercase tracking-wide">
+                          Official Platform Return & Launch Announcement
+                        </h3>
+                      </div>
+
+                      <p className="text-sm text-slate-300 font-sans leading-relaxed">
+                        Welcome to <strong className="text-white font-bold">VORTEX Gaming</strong>! We are currently finalizing the deployment of our next-generation competitive CS2 arena. When our official servers go live, you will have the pleasure of experiencing ultra-smooth, sub-tick optimized matchmaking, low-latency 128-tick European game servers, and guaranteed skin drops.
+                      </p>
+
+                      <p className="text-sm text-slate-300 font-sans leading-relaxed">
+                        <span className="text-[#A3E635] font-bold">Playing solo or don’t have a team yet? No problem at all!</span> Our built-in Matchmaking Lobby and Party Finder will allow you to discover like-minded teammates, complete your roster, and form an unstoppable 5-man stack. Coordinate tactics, climb the seasonal ELO ladders, and enjoy competitive Counter-Strike at its absolute best.
+                      </p>
+
+                      <div className="pt-2 flex flex-wrap items-center gap-3">
+                        <button
+                          onClick={() => {
+                            sound.playSelect();
+                            confetti({ particleCount: 40, spread: 60, origin: { y: 0.8 } });
+                            alert("You are on the VIP priority notification list! We'll announce the official launch date soon.");
+                          }}
+                          className="px-5 py-2.5 rounded-xl bg-[#A3E635] hover:bg-[#B4F046] text-slate-950 font-mono font-bold text-xs uppercase tracking-wider transition cursor-pointer shadow-lg shadow-lime-500/20 flex items-center gap-2"
+                        >
+                          <Bell className="w-4 h-4 text-slate-950" />
+                          <span>Notify Me When Online</span>
+                        </button>
+
+                        <a
+                          href="https://uplcm.com/4/12281615"
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="px-5 py-2.5 rounded-xl bg-[#1A1F2E] hover:bg-[#252C40] text-amber-300 border border-amber-400/40 font-mono font-bold text-xs uppercase tracking-wider transition flex items-center gap-2 shadow-sm"
+                        >
+                          <Gift className="w-4 h-4 text-amber-400" />
+                          <span>Claim Free CS2 Partner Loot</span>
+                          <ExternalLink className="w-3 h-3" />
+                        </a>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* 4 Feature Highlights Grid */}
+                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+                    <div className="p-5 rounded-2xl bg-[#0E121B] border border-white/[0.06] space-y-2">
+                      <div className="w-9 h-9 rounded-xl bg-lime-500/10 border border-lime-500/20 flex items-center justify-center text-[#A3E635]">
+                        <Server className="w-5 h-5" />
+                      </div>
+                      <h4 className="text-sm font-bold font-display text-white">128-Tick Dedicated Hubs</h4>
+                      <p className="text-xs text-slate-400 font-mono leading-relaxed">
+                        Ultra-low latency routing across Frankfurt, London & Stockholm with zero loss.
+                      </p>
+                    </div>
+
+                    <div className="p-5 rounded-2xl bg-[#0E121B] border border-white/[0.06] space-y-2">
+                      <div className="w-9 h-9 rounded-xl bg-amber-500/10 border border-amber-500/20 flex items-center justify-center text-amber-400">
+                        <Users className="w-5 h-5" />
+                      </div>
+                      <h4 className="text-sm font-bold font-display text-white">Smart 5-Man Party Stack</h4>
+                      <p className="text-xs text-slate-400 font-mono leading-relaxed">
+                        Find missing roles, invite friends, and queue together with built-in comms.
+                      </p>
+                    </div>
+
+                    <div className="p-5 rounded-2xl bg-[#0E121B] border border-white/[0.06] space-y-2">
+                      <div className="w-9 h-9 rounded-xl bg-emerald-500/10 border border-emerald-500/20 flex items-center justify-center text-emerald-400">
+                        <ShieldCheck className="w-5 h-5" />
+                      </div>
+                      <h4 className="text-sm font-bold font-display text-white">Ring-0 Kernel Anti-Cheat</h4>
+                      <p className="text-xs text-slate-400 font-mono leading-relaxed">
+                        100% clean competitive integrity with hardware heartbeat checks and zero smurfs.
+                      </p>
+                    </div>
+
+                    <div className="p-5 rounded-2xl bg-[#0E121B] border border-white/[0.06] space-y-2">
+                      <div className="w-9 h-9 rounded-xl bg-purple-500/10 border border-purple-500/20 flex items-center justify-center text-purple-400">
+                        <Award className="w-5 h-5" />
+                      </div>
+                      <h4 className="text-sm font-bold font-display text-white">Weekly Drops & Skin Vault</h4>
+                      <p className="text-xs text-slate-400 font-mono leading-relaxed">
+                        Compete in seasonal ladders to win Covert knives, gloves, and instant cashouts.
+                      </p>
+                    </div>
+                  </div>
+
+                  {/* Live Sponsor Ads Banner (Generates Monetag / AADS Revenue!) */}
+                  <VortexAdBanner placement="top" showDisclaimer={true} />
+
+                  {/* Partner Deals Ribbon */}
+                  <VortexComingSoonDeals onOpenPartnersModal={() => setShowPartnersModal(true)} />
+                </div>
+              ) : (
+                /* FOR ADMINISTRATOR: FULL LIVE MATCHMAKING LOBBY */
+                <>
+                  {/* HERO MODULE: 5v5 CS2 MATCHMAKING LOBBY (1:1 FACEIT REPLICA) */}
+                  <div className="w-full bg-[#0B0D12] border border-[#202535] rounded-3xl p-6 sm:p-8 relative overflow-hidden shadow-2xl">
                 {/* Subtle Glow Accents */}
                 <div className="absolute top-0 right-1/4 w-96 h-96 bg-orange-600/5 rounded-full blur-3xl pointer-events-none" />
                 <div className="absolute bottom-0 left-1/4 w-96 h-96 bg-lime-500/5 rounded-full blur-3xl pointer-events-none" />
@@ -3283,6 +3248,8 @@ export const VortexDashboard: React.FC<VortexDashboardProps> = ({
                 </div>
 
               </div>
+              </>
+            )}
 
             </div>
           )}
@@ -3909,125 +3876,189 @@ export const VortexDashboard: React.FC<VortexDashboardProps> = ({
                   </button>
                 </div>
 
-                {/* TOP 3 PODIUM CARDS (CLICKABLE PROFILES) */}
+                {/* TOP 3 PODIUM CARDS (REAL REGISTERED PLAYERS ONLY) */}
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                  {/* #1 Card - Gold (juanflatroo) */}
-                  <div 
-                    onClick={() => handleViewPlayerProfile(platformRankingPlayers[0])}
-                    className="p-5 rounded-2xl bg-gradient-to-b from-[#1C1708] to-[#12141C] border border-amber-500/40 hover:border-amber-400 shadow-lg relative overflow-hidden cursor-pointer group transition hover:scale-[1.01]"
-                    title="Click to view juanflatroo's profile"
-                  >
-                    <div className="absolute top-2 right-2 text-2xl">🥇</div>
-                    <div className="text-[10px] font-mono font-bold uppercase tracking-wider text-amber-400">RANK #1 • PLATFORM LEADER</div>
-                    <div className="mt-3 flex items-center gap-3">
-                      <img
-                        src="https://images.unsplash.com/photo-1566492031773-4f4e44671857?auto=format&fit=crop&w=120&q=80"
-                        alt="juanflatroo"
-                        className="w-12 h-12 rounded-xl object-cover border border-amber-500/40 group-hover:border-amber-400 transition"
-                      />
-                      <div>
-                        <div className="flex items-center gap-1.5">
-                          <span className="font-display font-black text-white text-base group-hover:text-amber-400 group-hover:underline transition">juanflatroo</span>
-                          <FaceitVerificationBadge type="vip" size="sm" />
-                          <CountryFlag code="XK" name="Kosovo" size="xs" />
-                        </div>
-                        <span className="text-xs text-slate-400 font-mono flex items-center gap-1.5">
-                          <CountryFlag code="XK" name="Kosovo" size="xs" />
-                          <span>Kosovo</span>
-                        </span>
+                  {/* #1 Card - Gold */}
+                  {platformRankingPlayers[0] ? (
+                    <div 
+                      onClick={() => handleViewPlayerProfile(platformRankingPlayers[0])}
+                      className={`p-5 rounded-2xl bg-gradient-to-b from-[#1C1708] to-[#12141C] shadow-lg relative overflow-hidden cursor-pointer group transition hover:scale-[1.01] ${
+                        platformRankingPlayers[0].isUser 
+                          ? 'border-2 border-[#A3E635] shadow-[0_0_25px_rgba(163,230,53,0.25)]' 
+                          : 'border border-amber-500/40 hover:border-amber-400'
+                      }`}
+                      title={`Click to view ${platformRankingPlayers[0].tag}'s profile`}
+                    >
+                      <div className="absolute top-2 right-2 text-2xl">🥇</div>
+                      <div className="flex items-center gap-2">
+                        <span className="text-[10px] font-mono font-bold uppercase tracking-wider text-amber-400">RANK #1 • PLATFORM LEADER</span>
+                        {platformRankingPlayers[0].isUser && (
+                          <span className="px-1.5 py-0.2 rounded text-[9px] bg-[#A3E635] text-slate-950 font-black">YOU</span>
+                        )}
                       </div>
-                    </div>
-                    <div className="mt-4 pt-3 border-t border-white/[0.06] flex items-center justify-between text-xs font-mono">
-                      <span className="text-amber-400 font-bold">Level 10</span>
-                      <span className="text-white font-bold">3,890 ELO</span>
-                      <span className="text-amber-400 font-bold flex items-center gap-1 group-hover:translate-x-0.5 transition">
-                        View Profile →
-                      </span>
-                    </div>
-                  </div>
-
-                  {/* #2 Card - Silver (gxx-) */}
-                  <div 
-                    onClick={() => handleViewPlayerProfile(platformRankingPlayers[1])}
-                    className="p-5 rounded-2xl bg-gradient-to-b from-[#171922] to-[#12141C] border border-slate-400/30 hover:border-slate-300 shadow-lg relative overflow-hidden cursor-pointer group transition hover:scale-[1.01]"
-                    title="Click to view gxx-'s profile"
-                  >
-                    <div className="absolute top-2 right-2 text-2xl">🥈</div>
-                    <div className="text-[10px] font-mono font-bold uppercase tracking-wider text-slate-300">RANK #2 • PLATFORM ELITE</div>
-                    <div className="mt-3 flex items-center gap-3">
-                      <img
-                        src="https://images.unsplash.com/photo-1570295999919-56ceb5ecca61?auto=format&fit=crop&w=120&q=80"
-                        alt="gxx-"
-                        className="w-12 h-12 rounded-xl object-cover border border-slate-400/30 group-hover:border-slate-300 transition"
-                      />
-                      <div>
-                        <div className="flex items-center gap-1.5">
-                          <span className="font-display font-black text-white text-base group-hover:text-slate-200 group-hover:underline transition">gxx-</span>
-                          <FaceitVerificationBadge type="verified" size="sm" />
-                          <CountryFlag code="XK" name="Kosovo" size="xs" />
-                        </div>
-                        <span className="text-xs text-slate-400 font-mono flex items-center gap-1.5">
-                          <CountryFlag code="XK" name="Kosovo" size="xs" />
-                          <span>Kosovo</span>
-                        </span>
-                      </div>
-                    </div>
-                    <div className="mt-4 pt-3 border-t border-white/[0.06] flex items-center justify-between text-xs font-mono">
-                      <span className="text-amber-400 font-bold">Level 10</span>
-                      <span className="text-white font-bold">3,420 ELO</span>
-                      <span className="text-slate-300 font-bold flex items-center gap-1 group-hover:translate-x-0.5 transition">
-                        View Profile →
-                      </span>
-                    </div>
-                  </div>
-
-                  {/* #3 Card - Bronze (Rank #3 in Platform) */}
-                  <div 
-                    onClick={() => handleViewPlayerProfile(platformRankingPlayers[2])}
-                    className={`p-5 rounded-2xl bg-gradient-to-b from-[#18210C] via-[#141B0E] to-[#12141C] shadow-lg relative overflow-hidden cursor-pointer group transition hover:scale-[1.01] ${
-                      platformRankingPlayers[2]?.isUser 
-                        ? 'border-2 border-[#A3E635] shadow-[0_0_25px_rgba(163,230,53,0.25)]' 
-                        : 'border border-amber-700/40 hover:border-amber-600'
-                    }`}
-                    title={`Click to view ${platformRankingPlayers[2]?.tag}'s profile`}
-                  >
-                    <div className="absolute top-2 right-2 text-2xl">🥉</div>
-                    <div className="flex items-center gap-2">
-                      <span className="text-[10px] font-mono font-bold uppercase tracking-wider text-amber-500">
-                        RANK #3 • {platformRankingPlayers[2]?.tag}
-                      </span>
-                      {platformRankingPlayers[2]?.isUser && (
-                        <span className="px-1.5 py-0.2 rounded text-[9px] bg-[#A3E635] text-slate-950 font-black">YOU</span>
-                      )}
-                    </div>
-                    <div className="mt-3 flex items-center gap-3">
-                      <img
-                        src={platformRankingPlayers[2]?.avatar}
-                        alt={platformRankingPlayers[2]?.tag}
-                        className="w-12 h-12 rounded-xl object-cover border border-amber-600/40"
-                      />
-                      <div>
-                        <div className="flex items-center gap-1.5">
-                          <span className="font-display font-black text-white text-base group-hover:text-amber-400 group-hover:underline transition">
-                            {platformRankingPlayers[2]?.tag}
+                      <div className="mt-3 flex items-center gap-3">
+                        <img
+                          src={platformRankingPlayers[0].avatar}
+                          alt={platformRankingPlayers[0].tag}
+                          className="w-12 h-12 rounded-xl object-cover border border-amber-500/40 group-hover:border-amber-400 transition"
+                        />
+                        <div>
+                          <div className="flex items-center gap-1.5">
+                            <span className="font-display font-black text-white text-base group-hover:text-amber-400 group-hover:underline transition">
+                              {platformRankingPlayers[0].tag}
+                            </span>
+                            <FaceitVerificationBadge type={platformRankingPlayers[0].verification} size="sm" />
+                            <CountryFlag code={platformRankingPlayers[0].code || 'XK'} name={platformRankingPlayers[0].country || 'Kosovo'} size="xs" />
+                          </div>
+                          <span className="text-xs text-slate-400 font-mono flex items-center gap-1.5">
+                            <CountryFlag code={platformRankingPlayers[0].code || 'XK'} name={platformRankingPlayers[0].country || 'Kosovo'} size="xs" />
+                            <span>{platformRankingPlayers[0].country}</span>
                           </span>
-                          <FaceitVerificationBadge type={platformRankingPlayers[2]?.verification} size="sm" />
-                          <CountryFlag code={platformRankingPlayers[2]?.code || 'XK'} name={platformRankingPlayers[2]?.country || 'Kosovo'} size="xs" />
                         </div>
-                        <span className="text-xs text-slate-400 font-mono flex items-center gap-1.5">
-                          <CountryFlag code={platformRankingPlayers[2]?.code || 'XK'} name={platformRankingPlayers[2]?.country || 'Kosovo'} size="xs" />
-                          <span>{platformRankingPlayers[2]?.country}</span>
+                      </div>
+                      <div className="mt-4 pt-3 border-t border-white/[0.06] flex items-center justify-between text-xs font-mono">
+                        <span className="text-amber-400 font-bold">{platformRankingPlayers[0].level}</span>
+                        <span className="text-white font-bold">{platformRankingPlayers[0].elo?.toLocaleString()} ELO</span>
+                        <span className="text-amber-400 font-bold flex items-center gap-1 group-hover:translate-x-0.5 transition">
+                          View Profile →
                         </span>
                       </div>
                     </div>
-                    <div className="mt-4 pt-3 border-t border-white/[0.06] flex items-center justify-between text-xs font-mono">
-                      <span className="text-amber-400 font-bold">{platformRankingPlayers[2]?.level}</span>
-                      <span className="text-white font-bold">{platformRankingPlayers[2]?.elo?.toLocaleString()} ELO</span>
-                      <span className="text-amber-400 font-bold flex items-center gap-1 group-hover:translate-x-0.5 transition">
-                        View Profile →
-                      </span>
+                  ) : (
+                    <div className="p-5 rounded-2xl bg-[#10131B]/60 border border-dashed border-white/10 flex flex-col justify-between min-h-[170px]">
+                      <div>
+                        <div className="flex items-center justify-between">
+                          <span className="text-[10px] font-mono font-bold uppercase tracking-wider text-amber-500">RANK #1 • UNCLAIMED</span>
+                          <span className="text-xl opacity-40">🥇</span>
+                        </div>
+                        <p className="text-xs text-slate-400 font-mono mt-3">Register your profile to claim the #1 Leaderboard spot.</p>
+                      </div>
                     </div>
-                  </div>
+                  )}
+
+                  {/* #2 Card - Silver */}
+                  {platformRankingPlayers[1] ? (
+                    <div 
+                      onClick={() => handleViewPlayerProfile(platformRankingPlayers[1])}
+                      className={`p-5 rounded-2xl bg-gradient-to-b from-[#171922] to-[#12141C] shadow-lg relative overflow-hidden cursor-pointer group transition hover:scale-[1.01] ${
+                        platformRankingPlayers[1].isUser 
+                          ? 'border-2 border-[#A3E635] shadow-[0_0_25px_rgba(163,230,53,0.25)]' 
+                          : 'border border-slate-400/30 hover:border-slate-300'
+                      }`}
+                      title={`Click to view ${platformRankingPlayers[1].tag}'s profile`}
+                    >
+                      <div className="absolute top-2 right-2 text-2xl">🥈</div>
+                      <div className="flex items-center gap-2">
+                        <span className="text-[10px] font-mono font-bold uppercase tracking-wider text-slate-300">RANK #2 • PLATFORM ELITE</span>
+                        {platformRankingPlayers[1].isUser && (
+                          <span className="px-1.5 py-0.2 rounded text-[9px] bg-[#A3E635] text-slate-950 font-black">YOU</span>
+                        )}
+                      </div>
+                      <div className="mt-3 flex items-center gap-3">
+                        <img
+                          src={platformRankingPlayers[1].avatar}
+                          alt={platformRankingPlayers[1].tag}
+                          className="w-12 h-12 rounded-xl object-cover border border-slate-400/30 group-hover:border-slate-300 transition"
+                        />
+                        <div>
+                          <div className="flex items-center gap-1.5">
+                            <span className="font-display font-black text-white text-base group-hover:text-slate-200 group-hover:underline transition">
+                              {platformRankingPlayers[1].tag}
+                            </span>
+                            <FaceitVerificationBadge type={platformRankingPlayers[1].verification} size="sm" />
+                            <CountryFlag code={platformRankingPlayers[1].code || 'XK'} name={platformRankingPlayers[1].country || 'Kosovo'} size="xs" />
+                          </div>
+                          <span className="text-xs text-slate-400 font-mono flex items-center gap-1.5">
+                            <CountryFlag code={platformRankingPlayers[1].code || 'XK'} name={platformRankingPlayers[1].country || 'Kosovo'} size="xs" />
+                            <span>{platformRankingPlayers[1].country}</span>
+                          </span>
+                        </div>
+                      </div>
+                      <div className="mt-4 pt-3 border-t border-white/[0.06] flex items-center justify-between text-xs font-mono">
+                        <span className="text-amber-400 font-bold">{platformRankingPlayers[1].level}</span>
+                        <span className="text-white font-bold">{platformRankingPlayers[1].elo?.toLocaleString()} ELO</span>
+                        <span className="text-slate-300 font-bold flex items-center gap-1 group-hover:translate-x-0.5 transition">
+                          View Profile →
+                        </span>
+                      </div>
+                    </div>
+                  ) : (
+                    <div className="p-5 rounded-2xl bg-[#10131B]/60 border border-dashed border-white/10 flex flex-col justify-between min-h-[170px]">
+                      <div>
+                        <div className="flex items-center justify-between">
+                          <span className="text-[10px] font-mono font-bold uppercase tracking-wider text-slate-500">RANK #2 • UNCLAIMED SPOT</span>
+                          <span className="text-xl opacity-40">🥈</span>
+                        </div>
+                        <p className="text-xs text-slate-400 font-mono mt-3">No other registered player has claimed Rank #2 yet.</p>
+                      </div>
+                      <div className="pt-3 border-t border-white/[0.04] text-[11px] font-mono text-[#A3E635]">
+                        Share your invite link to compete →
+                      </div>
+                    </div>
+                  )}
+
+                  {/* #3 Card - Bronze */}
+                  {platformRankingPlayers[2] ? (
+                    <div 
+                      onClick={() => handleViewPlayerProfile(platformRankingPlayers[2])}
+                      className={`p-5 rounded-2xl bg-gradient-to-b from-[#18210C] via-[#141B0E] to-[#12141C] shadow-lg relative overflow-hidden cursor-pointer group transition hover:scale-[1.01] ${
+                        platformRankingPlayers[2]?.isUser 
+                          ? 'border-2 border-[#A3E635] shadow-[0_0_25px_rgba(163,230,53,0.25)]' 
+                          : 'border border-amber-700/40 hover:border-amber-600'
+                      }`}
+                      title={`Click to view ${platformRankingPlayers[2]?.tag}'s profile`}
+                    >
+                      <div className="absolute top-2 right-2 text-2xl">🥉</div>
+                      <div className="flex items-center gap-2">
+                        <span className="text-[10px] font-mono font-bold uppercase tracking-wider text-amber-500">
+                          RANK #3 • {platformRankingPlayers[2]?.tag}
+                        </span>
+                        {platformRankingPlayers[2]?.isUser && (
+                          <span className="px-1.5 py-0.2 rounded text-[9px] bg-[#A3E635] text-slate-950 font-black">YOU</span>
+                        )}
+                      </div>
+                      <div className="mt-3 flex items-center gap-3">
+                        <img
+                          src={platformRankingPlayers[2]?.avatar}
+                          alt={platformRankingPlayers[2]?.tag}
+                          className="w-12 h-12 rounded-xl object-cover border border-amber-600/40"
+                        />
+                        <div>
+                          <div className="flex items-center gap-1.5">
+                            <span className="font-display font-black text-white text-base group-hover:text-amber-400 group-hover:underline transition">
+                              {platformRankingPlayers[2]?.tag}
+                            </span>
+                            <FaceitVerificationBadge type={platformRankingPlayers[2]?.verification} size="sm" />
+                            <CountryFlag code={platformRankingPlayers[2]?.code || 'XK'} name={platformRankingPlayers[2]?.country || 'Kosovo'} size="xs" />
+                          </div>
+                          <span className="text-xs text-slate-400 font-mono flex items-center gap-1.5">
+                            <CountryFlag code={platformRankingPlayers[2]?.code || 'XK'} name={platformRankingPlayers[2]?.country || 'Kosovo'} size="xs" />
+                            <span>{platformRankingPlayers[2]?.country}</span>
+                          </span>
+                        </div>
+                      </div>
+                      <div className="mt-4 pt-3 border-t border-white/[0.06] flex items-center justify-between text-xs font-mono">
+                        <span className="text-amber-400 font-bold">{platformRankingPlayers[2]?.level}</span>
+                        <span className="text-white font-bold">{platformRankingPlayers[2]?.elo?.toLocaleString()} ELO</span>
+                        <span className="text-amber-400 font-bold flex items-center gap-1 group-hover:translate-x-0.5 transition">
+                          View Profile →
+                        </span>
+                      </div>
+                    </div>
+                  ) : (
+                    <div className="p-5 rounded-2xl bg-[#10131B]/60 border border-dashed border-white/10 flex flex-col justify-between min-h-[170px]">
+                      <div>
+                        <div className="flex items-center justify-between">
+                          <span className="text-[10px] font-mono font-bold uppercase tracking-wider text-slate-500">RANK #3 • UNCLAIMED SPOT</span>
+                          <span className="text-xl opacity-40">🥉</span>
+                        </div>
+                        <p className="text-xs text-slate-400 font-mono mt-3">Play competitive matches on VORTEX to enter Top 3.</p>
+                      </div>
+                      <div className="pt-3 border-t border-white/[0.04] text-[11px] font-mono text-amber-500">
+                        Season 1 Competitive Leaderboard →
+                      </div>
+                    </div>
+                  )}
                 </div>
 
                 {/* Current User Standing Banner (shown when user is ranked outside Top 3) */}
