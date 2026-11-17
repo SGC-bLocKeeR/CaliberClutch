@@ -2176,8 +2176,13 @@ export const VortexDashboard: React.FC<VortexDashboardProps> = ({
                     </div>
 
                     <div className="space-y-3">
-                      <div className="text-4xl sm:text-6xl lg:text-7xl font-black font-display tracking-tight uppercase text-amber-400 drop-shadow-[0_0_30px_rgba(245,158,11,0.5)] leading-tight">
-                        COMING SOON
+                      {/* HUGE COMING SOON WITH RADAR PULSING/BEATING CIRCLE IN FRONT */}
+                      <div className="flex items-center gap-3 sm:gap-4 md:gap-5 text-4xl sm:text-6xl lg:text-7xl font-black font-display tracking-tight uppercase text-amber-400 drop-shadow-[0_0_30px_rgba(245,158,11,0.5)] leading-tight select-none">
+                        <span className="relative flex h-5 w-5 sm:h-7 sm:w-7 md:h-8 md:w-8 shrink-0">
+                          <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-amber-400 opacity-85" />
+                          <span className="relative inline-flex rounded-full h-5 w-5 sm:h-7 sm:w-7 md:h-8 md:w-8 bg-amber-400 shadow-[0_0_25px_#F59E0B]" />
+                        </span>
+                        <span>COMING SOON</span>
                       </div>
                       
                       {/* Sleek horizontal divider line as requested */}
