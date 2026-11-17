@@ -981,10 +981,28 @@ export const VortexDashboard: React.FC<VortexDashboardProps> = ({
     } catch (_) {}
     return ['CALIBER CLUTCH Major Championship 2026'];
   });
+  const [customTournaments, setCustomTournaments] = useState<any[]>(() => {
+    try {
+      const saved = localStorage.getItem('vortex_custom_tournaments');
+      if (saved) return JSON.parse(saved);
+    } catch (_) {}
+    return [];
+  });
+  const [createTournamentModalOpen, setCreateTournamentModalOpen] = useState<boolean>(false);
   const [selectedBracketTourney, setSelectedBracketTourney] = useState<any | null>(null);
   const [selectedRegisterTourney, setSelectedRegisterTourney] = useState<any | null>(null);
   const [tourneyFilter, setTourneyFilter] = useState<'all' | 'live' | 'open' | 'registered'>('all');
   const [tourneySearchQuery, setTourneySearchQuery] = useState<string>('');
+
+  // Create tournament form state
+  const [newTourneyTitle, setNewTourneyTitle] = useState('CALIBER CLUTCH Community Cup #1');
+  const [newTourneyCashPrize, setNewTourneyCashPrize] = useState('€3,000');
+  const [newTourneyMaxTeams, setNewTourneyMaxTeams] = useState<number>(16);
+  const [newTourneyFormat, setNewTourneyFormat] = useState('5v5 Single Elimination MR12');
+  const [newTourneyRegion, setNewTourneyRegion] = useState('Frankfurt Node #01 (128-Tick)');
+  const [newTourneyDate, setNewTourneyDate] = useState('Starts Sunday • 19:00 CET');
+  const [newTourneySkinPrize, setNewTourneySkinPrize] = useState('★ Butterfly Knife | Doppler (FN)');
+  const [newTourneySkinValue, setNewTourneySkinValue] = useState<number>(1450);
 
   useEffect(() => {
     const handleWallet = (e: Event) => {
@@ -3541,10 +3559,20 @@ export const VortexDashboard: React.FC<VortexDashboardProps> = ({
                     Official European competitive circuit • Guaranteed CS2 skin & cash prizes powered by automated Steam Bot delivery
                   </p>
                 </div>
-                <div className="flex items-center gap-2">
+                <div className="flex flex-wrap items-center gap-2.5">
+                  <button
+                    onClick={() => {
+                      sound.playSelect();
+                      setCreateTournamentModalOpen(true);
+                    }}
+                    className="px-5 py-2.5 rounded-2xl bg-[#A3E635] hover:bg-[#B4F046] text-slate-950 font-display font-black text-xs uppercase tracking-wider transition cursor-pointer shadow-lg shadow-lime-500/25 flex items-center gap-2 hover:scale-105 active:scale-95"
+                  >
+                    <Plus className="w-4 h-4 text-slate-950 stroke-[3]" />
+                    <span>CREATE TOURNAMENT</span>
+                  </button>
                   <button
                     onClick={() => setActiveTab('play')}
-                    className="px-4 py-2 rounded-xl bg-[#141722] hover:bg-[#1A202E] border border-[#252C3D] text-xs font-mono text-slate-300 hover:text-white cursor-pointer transition"
+                    className="px-4 py-2.5 rounded-2xl bg-[#141722] hover:bg-[#1A202E] border border-[#252C3D] text-xs font-mono text-slate-300 hover:text-white cursor-pointer transition"
                   >
                     ← Back to Play
                   </button>
@@ -3578,9 +3606,9 @@ export const VortexDashboard: React.FC<VortexDashboardProps> = ({
               <div className="flex flex-wrap items-center justify-between gap-4">
                 <div className="flex flex-wrap items-center gap-2">
                   {[
-                    { id: 'all', label: 'All Tournaments (4)' },
+                    { id: 'all', label: `All Tournaments (${4 + customTournaments.length})` },
                     { id: 'live', label: '🔴 Live Now (1)' },
-                    { id: 'open', label: '⚡ Open Registration (2)' },
+                    { id: 'open', label: `⚡ Open Registration (${2 + customTournaments.length})` },
                     { id: 'registered', label: `✓ My Registered (${registeredTourneys.length})` }
                   ].map(tab => (
                     <button
@@ -3597,21 +3625,35 @@ export const VortexDashboard: React.FC<VortexDashboardProps> = ({
                   ))}
                 </div>
 
-                <div className="relative">
-                  <Search className="w-3.5 h-3.5 text-slate-400 absolute left-3 top-1/2 -translate-y-1/2" />
-                  <input
-                    type="text"
-                    value={tourneySearchQuery}
-                    onChange={(e) => setTourneySearchQuery(e.target.value)}
-                    placeholder="Search tournaments..."
-                    className="pl-8 pr-3 py-1.5 rounded-xl bg-[#12141C] border border-[#232938] text-xs font-mono text-white placeholder-slate-500 focus:outline-none focus:border-[#A3E635]"
-                  />
+                <div className="flex items-center gap-2.5">
+                  <button
+                    onClick={() => {
+                      sound.playSelect();
+                      setCreateTournamentModalOpen(true);
+                    }}
+                    className="px-3.5 py-1.5 rounded-xl bg-[#A3E635]/15 hover:bg-[#A3E635]/25 border border-[#A3E635]/40 text-[#A3E635] text-xs font-mono font-bold flex items-center gap-1.5 cursor-pointer transition hover:scale-105 active:scale-95"
+                  >
+                    <Plus className="w-3.5 h-3.5 text-[#A3E635]" />
+                    <span>+ Host Cup</span>
+                  </button>
+
+                  <div className="relative">
+                    <Search className="w-3.5 h-3.5 text-slate-400 absolute left-3 top-1/2 -translate-y-1/2" />
+                    <input
+                      type="text"
+                      value={tourneySearchQuery}
+                      onChange={(e) => setTourneySearchQuery(e.target.value)}
+                      placeholder="Search tournaments..."
+                      className="pl-8 pr-3 py-1.5 rounded-xl bg-[#12141C] border border-[#232938] text-xs font-mono text-white placeholder-slate-500 focus:outline-none focus:border-[#A3E635]"
+                    />
+                  </div>
                 </div>
               </div>
 
               {/* Tournament Cards with Cash + CS2 Skins Prize Breakdown */}
               <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
                 {[
+                  ...customTournaments,
                   {
                     id: 'major-2026',
                     title: 'CALIBER CLUTCH Major Championship 2026',
@@ -3695,8 +3737,13 @@ export const VortexDashboard: React.FC<VortexDashboardProps> = ({
                         <div className="space-y-4">
                           <div className="flex items-start justify-between">
                             <div>
-                              <div className="flex items-center gap-2">
+                              <div className="flex flex-wrap items-center gap-2">
                                 <span className={`px-2.5 py-1 rounded text-[10px] font-mono font-bold border ${t.badge}`}>{t.status}</span>
+                                {t.isCustom && (
+                                  <span className="px-2 py-0.5 rounded text-[10px] font-mono font-bold bg-amber-500/20 text-amber-300 border border-amber-500/30">
+                                    HOSTED BY {t.creator || 'M14'}
+                                  </span>
+                                )}
                                 {isRegistered && (
                                   <span className="px-2 py-0.5 rounded text-[10px] font-mono font-bold bg-emerald-500/20 text-emerald-400 border border-emerald-500/30 flex items-center gap-1">
                                     <CheckCircle2 className="w-3 h-3" />
@@ -3707,9 +3754,33 @@ export const VortexDashboard: React.FC<VortexDashboardProps> = ({
                               <h3 className="text-xl font-black font-display text-white mt-3 group-hover:text-amber-400 transition">{t.title}</h3>
                               <p className="text-xs font-mono text-[#94A3B8] mt-1">{t.date}</p>
                             </div>
-                            <div className="text-right">
-                              <div className="text-2xl font-black font-mono text-[#A3E635]">{t.cashPrize}</div>
-                              <div className="text-[10px] text-[#94A3B8] uppercase">Cash Pool</div>
+                            <div className="text-right flex items-start gap-2">
+                              <div>
+                                <div className="text-2xl font-black font-mono text-[#A3E635]">{t.cashPrize}</div>
+                                <div className="text-[10px] text-[#94A3B8] uppercase">Cash Pool</div>
+                              </div>
+                              {t.isCustom && isProjectAdmin && (
+                                <button
+                                  type="button"
+                                  title="Delete custom tournament"
+                                  onClick={(e) => {
+                                    e.stopPropagation();
+                                    sound.playClick();
+                                    setCustomTournaments(prev => {
+                                      const next = prev.filter((item: any) => item.id !== t.id);
+                                      try {
+                                        localStorage.setItem('vortex_custom_tournaments', JSON.stringify(next));
+                                      } catch (_) {}
+                                      return next;
+                                    });
+                                    setDashboardToast(`✓ Custom tournament "${t.title}" deleted.`);
+                                    setTimeout(() => setDashboardToast(null), 3000);
+                                  }}
+                                  className="p-1.5 rounded-lg bg-red-500/10 hover:bg-red-500/20 text-red-400 transition cursor-pointer"
+                                >
+                                  <Trash2 className="w-3.5 h-3.5" />
+                                </button>
+                              )}
                             </div>
                           </div>
 
@@ -3724,7 +3795,7 @@ export const VortexDashboard: React.FC<VortexDashboardProps> = ({
                             </div>
 
                             <div className="grid grid-cols-3 gap-2">
-                              {t.skins.map((skin, sIdx) => (
+                              {t.skins.map((skin: any, sIdx: number) => (
                                 <div 
                                   key={sIdx}
                                   className="p-2 rounded-xl bg-[#090C12] border border-white/5 hover:border-amber-400/40 transition flex flex-col items-center text-center cursor-pointer"
@@ -6724,6 +6795,254 @@ export const VortexDashboard: React.FC<VortexDashboardProps> = ({
                 className="px-6 py-2.5 rounded-xl bg-gradient-to-r from-[#84CC16] to-[#A3E635] hover:brightness-110 text-slate-950 font-display font-black text-xs uppercase tracking-wider transition shadow-lg cursor-pointer active:scale-95"
               >
                 Confirm & Lock Roster
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* ======================================================== */}
+      {/* MODAL: CREATE & HOST CS2 TOURNAMENT (ADMIN & ORGANIZER)  */}
+      {/* ======================================================== */}
+      {createTournamentModalOpen && (
+        <div className="fixed inset-0 z-[130] bg-black/85 backdrop-blur-md flex items-center justify-center p-4 animate-in fade-in duration-200">
+          <div className="w-full max-w-xl max-h-[90vh] overflow-y-auto bg-[#0C1019] border border-[#252E42] rounded-3xl p-6 sm:p-8 shadow-2xl space-y-5 text-left relative">
+            {/* Header */}
+            <div className="flex items-start justify-between border-b border-[#1E2638] pb-3">
+              <div className="space-y-1">
+                <div className="flex items-center gap-2">
+                  <span className="px-2.5 py-0.5 rounded text-[10px] font-mono font-bold bg-[#A3E635]/15 text-[#A3E635] border border-[#A3E635]/30 uppercase flex items-center gap-1">
+                    <Trophy className="w-3 h-3" />
+                    Official Cup Creation
+                  </span>
+                  <span className="text-xs font-mono text-amber-400 font-bold">
+                    Host: {currentGamerTag} (Founder / Admin)
+                  </span>
+                </div>
+                <h3 className="text-xl font-black font-display text-white">
+                  HOST A CS2 TOURNAMENT
+                </h3>
+                <p className="text-xs font-mono text-slate-400">
+                  Configure format, prize pool, 128-tick server allocation, and anti-cheat requirements.
+                </p>
+              </div>
+              <button 
+                onClick={() => setCreateTournamentModalOpen(false)}
+                className="w-8 h-8 rounded-xl bg-white/5 hover:bg-white/10 text-slate-400 hover:text-white flex items-center justify-center transition cursor-pointer"
+              >
+                ✕
+              </button>
+            </div>
+
+            {/* Form Fields */}
+            <div className="space-y-4 text-xs font-mono">
+              {/* Title */}
+              <div>
+                <label className="text-[10px] text-slate-400 uppercase tracking-wider block mb-1 font-bold">
+                  Tournament Title
+                </label>
+                <input
+                  type="text"
+                  value={newTourneyTitle}
+                  onChange={(e) => setNewTourneyTitle(e.target.value)}
+                  placeholder="e.g. CALIBER CLUTCH Community Series #1"
+                  className="w-full px-3.5 py-2.5 rounded-xl bg-[#141722] border border-[#252C3D] text-white font-bold focus:outline-none focus:border-[#A3E635]"
+                />
+              </div>
+
+              {/* Cash Prize & Max Teams Grid */}
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                <div>
+                  <label className="text-[10px] text-slate-400 uppercase tracking-wider block mb-1 font-bold">
+                    Cash Prize Pool (€)
+                  </label>
+                  <input
+                    type="text"
+                    value={newTourneyCashPrize}
+                    onChange={(e) => setNewTourneyCashPrize(e.target.value)}
+                    placeholder="e.g. €5,000"
+                    className="w-full px-3.5 py-2.5 rounded-xl bg-[#141722] border border-[#252C3D] text-[#A3E635] font-black focus:outline-none focus:border-[#A3E635]"
+                  />
+                </div>
+                <div>
+                  <label className="text-[10px] text-slate-400 uppercase tracking-wider block mb-1 font-bold">
+                    Max Teams (Bracket Capacity)
+                  </label>
+                  <select
+                    value={newTourneyMaxTeams}
+                    onChange={(e) => setNewTourneyMaxTeams(Number(e.target.value))}
+                    className="w-full px-3.5 py-2.5 rounded-xl bg-[#141722] border border-[#252C3D] text-white font-bold focus:outline-none focus:border-[#A3E635] cursor-pointer"
+                  >
+                    <option value={8}>8 Teams (Quarterfinals BO3)</option>
+                    <option value={16}>16 Teams (Round of 16 BO1 + BO3)</option>
+                    <option value={32}>32 Teams (Major Championship Scale)</option>
+                    <option value={64}>64 Teams (Open Community Qualifier)</option>
+                  </select>
+                </div>
+              </div>
+
+              {/* Format & Server Node */}
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                <div>
+                  <label className="text-[10px] text-slate-400 uppercase tracking-wider block mb-1 font-bold">
+                    Competitive Format
+                  </label>
+                  <select
+                    value={newTourneyFormat}
+                    onChange={(e) => setNewTourneyFormat(e.target.value)}
+                    className="w-full px-3.5 py-2.5 rounded-xl bg-[#141722] border border-[#252C3D] text-white focus:outline-none focus:border-[#A3E635] cursor-pointer"
+                  >
+                    <option value="5v5 Single Elimination MR12">5v5 Single Elimination MR12</option>
+                    <option value="5v5 Double Elimination (Upper/Lower)">5v5 Double Elimination (Upper/Lower)</option>
+                    <option value="GSL Group Stage + Single Elim">GSL Group Stage + Single Elim</option>
+                  </select>
+                </div>
+                <div>
+                  <label className="text-[10px] text-slate-400 uppercase tracking-wider block mb-1 font-bold">
+                    Dedicated Server Cluster
+                  </label>
+                  <select
+                    value={newTourneyRegion}
+                    onChange={(e) => setNewTourneyRegion(e.target.value)}
+                    className="w-full px-3.5 py-2.5 rounded-xl bg-[#141722] border border-[#252C3D] text-amber-400 font-bold focus:outline-none focus:border-[#A3E635] cursor-pointer"
+                  >
+                    <option value="Frankfurt Node #01 (128-Tick)">🇩🇪 Frankfurt Node #01 (128-Tick • 14ms)</option>
+                    <option value="Vienna Node #02 (128-Tick)">🇦🇹 Vienna Node #02 (128-Tick • 18ms)</option>
+                    <option value="Stockholm Node #03 (128-Tick)">🇸🇪 Stockholm Node #03 (128-Tick • 25ms)</option>
+                    <option value="Helsinki Node #04 (128-Tick)">🇫🇮 Helsinki Node #04 (128-Tick • 30ms)</option>
+                  </select>
+                </div>
+              </div>
+
+              {/* Schedule / Start Time */}
+              <div>
+                <label className="text-[10px] text-slate-400 uppercase tracking-wider block mb-1 font-bold">
+                  Schedule / Start Time
+                </label>
+                <input
+                  type="text"
+                  value={newTourneyDate}
+                  onChange={(e) => setNewTourneyDate(e.target.value)}
+                  placeholder="e.g. Starts Sunday • 19:00 CET"
+                  className="w-full px-3.5 py-2.5 rounded-xl bg-[#141722] border border-[#252C3D] text-white focus:outline-none focus:border-[#A3E635]"
+                />
+              </div>
+
+              {/* Guaranteed 1st Place Skin Prize */}
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                <div>
+                  <label className="text-[10px] text-slate-400 uppercase tracking-wider block mb-1 font-bold flex items-center gap-1.5">
+                    <Gift className="w-3 h-3 text-amber-400" />
+                    <span>1st Place Skin Drop</span>
+                  </label>
+                  <select
+                    value={newTourneySkinPrize}
+                    onChange={(e) => {
+                      const val = e.target.value;
+                      setNewTourneySkinPrize(val);
+                      if (val.includes('Butterfly')) setNewTourneySkinValue(1450);
+                      else if (val.includes('Karambit')) setNewTourneySkinValue(1850);
+                      else if (val.includes('M9 Bayonet')) setNewTourneySkinValue(1200);
+                      else if (val.includes('Dragon Lore')) setNewTourneySkinValue(4200);
+                      else if (val.includes('Kukri')) setNewTourneySkinValue(850);
+                    }}
+                    className="w-full px-3.5 py-2.5 rounded-xl bg-[#141722] border border-[#252C3D] text-amber-300 font-bold focus:outline-none focus:border-[#A3E635] cursor-pointer"
+                  >
+                    <option value="★ Butterfly Knife | Doppler (FN)">★ Butterfly Knife | Doppler (FN)</option>
+                    <option value="★ Karambit | Lore (FN)">★ Karambit | Lore (FN)</option>
+                    <option value="★ M9 Bayonet | Doppler (FN)">★ M9 Bayonet | Doppler (FN)</option>
+                    <option value="★ Kukri Knife | Fade (FN)">★ Kukri Knife | Fade (FN)</option>
+                    <option value="AWP | Dragon Lore (FT)">AWP | Dragon Lore (FT)</option>
+                  </select>
+                </div>
+                <div>
+                  <label className="text-[10px] text-slate-400 uppercase tracking-wider block mb-1 font-bold">
+                    Estimated Skin Market Value (€)
+                  </label>
+                  <input
+                    type="number"
+                    value={newTourneySkinValue}
+                    onChange={(e) => setNewTourneySkinValue(Number(e.target.value))}
+                    className="w-full px-3.5 py-2.5 rounded-xl bg-[#141722] border border-[#252C3D] text-emerald-400 font-bold focus:outline-none focus:border-[#A3E635]"
+                  />
+                </div>
+              </div>
+
+              {/* Integrity Checklist Box */}
+              <div className="p-3.5 rounded-2xl bg-black/40 border border-white/5 space-y-1.5 text-[11px] text-slate-300">
+                <div className="flex items-center gap-2 text-emerald-400 font-bold">
+                  <ShieldCheck className="w-4 h-4 text-emerald-400 shrink-0" />
+                  <span>Ring-0 Kernel Anti-Cheat is automatically enforced for all 5v5 rosters.</span>
+                </div>
+                <div className="flex items-center gap-2 text-slate-400">
+                  <Zap className="w-4 h-4 text-amber-400 shrink-0" />
+                  <span>Automated Steam Bot escrow will dispatch skin rewards immediately upon Grand Final match conclusion.</span>
+                </div>
+              </div>
+            </div>
+
+            {/* Modal Actions */}
+            <div className="pt-3 flex items-center justify-end gap-3 border-t border-[#1E2638]">
+              <button
+                type="button"
+                onClick={() => setCreateTournamentModalOpen(false)}
+                className="px-4 py-2.5 rounded-xl bg-white/5 hover:bg-white/10 text-xs font-mono text-slate-300 transition cursor-pointer"
+              >
+                Cancel
+              </button>
+              <button
+                type="button"
+                onClick={() => {
+                  const cleanedCash = newTourneyCashPrize.trim().startsWith('€')
+                    ? newTourneyCashPrize.trim()
+                    : `€${newTourneyCashPrize.trim()}`;
+
+                  const createdItem = {
+                    id: `custom-tourney-${Date.now()}`,
+                    title: newTourneyTitle.trim() || 'CALIBER CLUTCH Community Cup #1',
+                    cashPrize: cleanedCash || '€3,000',
+                    teams: `1 / ${newTourneyMaxTeams}`,
+                    date: newTourneyDate || 'Starts this weekend',
+                    status: 'REGISTRATION OPEN',
+                    badge: 'bg-emerald-500/15 text-emerald-400 border-emerald-500/30',
+                    isLive: false,
+                    isOpen: true,
+                    isCustom: true,
+                    creator: currentGamerTag || 'M14',
+                    skins: [
+                      { place: '1st', name: newTourneySkinPrize, price: Number(newTourneySkinValue) || 1450, image: 'https://imgproxy.dmarket.com/insecure/rs:fit:360:260:0/g:ce/aHR0cHM6Ly9jb21tdW5pdHkuYWthbWFpLnN0ZWFtc3RhdGljLmNvbS9lY29ub215L2ltYWdlL2kwQ29aODFVaTBtLTlLd2xCWTFMXzE4bXl1R3VxMXdmaFdTYVpnTXR0eVZmUGFFUlNSMFdxbXU3TEFvY0dKS3oybHVfWHNuWHd0bWtKalNVOTFkaDhiajM1VlRxVkJQNGlvX2ZybklWN0tiNU9hVS1KcWZIRHpYRmxlMHU0TFk4R3lfa2tSZ2lzR3pjbTR2NEozdkRPQVFtRE1keVJ2bEs3RWNtZUNVM3l3.webp' },
+                      { place: '2nd', name: 'M4A4 | Temukau (FN)', price: 240, image: 'https://imgproxy.dmarket.com/insecure/rs:fit:360:260:0/g:ce/aHR0cHM6Ly9jb21tdW5pdHkuYWthbWFpLnN0ZWFtc3RhdGljLmNvbS9lY29ub215L2ltYWdlL2kwQ29aODFVaTBtLTlLd2xCWTFMXzE4bXl1R3VxMXdmaFdTYVpnTXR0eVZmUGFFUlNSMFdxbXU3TEFvY0dKS3oybHVfWHNuWHd0bWtKalNVOTFkaDhiajM1VlRxVkJQNGlvX2ZybkFWdmZiNmFxZHVjX1RGVmpUQ3hieDA1T1U0UzNqaWxFOXc0RHpSbkltdEl5MlNhMUp6REpFaFJQbEs3RWNPNFU4Z2ZB.webp' },
+                      { place: '3rd', name: 'Desert Eagle | Printstream (FN)', price: 140, image: 'https://community.akamai.steamstatic.com/economy/image/i0CoZ81Ui0m-9KwlBY1L_18myuGuq1wfhWSaZgMttyVfPaERSR0Wqmu7LAocGIGz3UqlXOLrxM-vMGmW8VNxu5Dx60noTyL1m5fn8Sdk7OeRbKFsJ8-DHG6e1f1iouRoQha_nBovp3OGmdeqInyVP1V0XsYlRbEI50a5wNyzZr605AyI3t5MmCSohylAuC89_a9cBoMY9UkV' }
+                    ]
+                  };
+
+                  setCustomTournaments((prev: any[]) => {
+                    const next = [createdItem, ...prev];
+                    try {
+                      localStorage.setItem('vortex_custom_tournaments', JSON.stringify(next));
+                    } catch (_) {}
+                    return next;
+                  });
+
+                  // Automatically enroll creator's roster
+                  setRegisteredTourneys((prev: string[]) => {
+                    const next = Array.from(new Set([...prev, createdItem.title]));
+                    try {
+                      localStorage.setItem('vortex_registered_tournaments', JSON.stringify(next));
+                    } catch (_) {}
+                    return next;
+                  });
+
+                  setCreateTournamentModalOpen(false);
+                  sound.playTournamentVictory();
+                  confetti({ particleCount: 110, spread: 85, origin: { y: 0.6 } });
+                  setDashboardToast(`✓ Congratulations! Tournament "${createdItem.title}" has been published and opened for registrations!`);
+                  setTimeout(() => setDashboardToast(null), 5000);
+                }}
+                className="px-6 py-2.5 rounded-xl bg-gradient-to-r from-[#84CC16] to-[#A3E635] hover:brightness-110 text-slate-950 font-display font-black text-xs uppercase tracking-wider transition shadow-lg shadow-lime-500/20 cursor-pointer active:scale-95 flex items-center gap-2"
+              >
+                <Plus className="w-4 h-4 text-slate-950 stroke-[3]" />
+                <span>Publish & Host Tournament</span>
               </button>
             </div>
           </div>
