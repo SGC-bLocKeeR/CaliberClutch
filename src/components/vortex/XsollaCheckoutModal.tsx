@@ -214,7 +214,7 @@ export const XsollaCheckoutModal: React.FC<XsollaCheckoutModalProps> = ({
 
   const handleCopyWebhook = () => {
     sound.playSelect();
-    navigator.clipboard?.writeText('https://blockeer.vercel.app/api/xsolla-webhook');
+    navigator.clipboard?.writeText('https://caliberclutch.vercel.app/api/xsolla-webhook');
     setCopiedWebhook(true);
     setTimeout(() => setCopiedWebhook(false), 2500);
   };
@@ -224,7 +224,7 @@ export const XsollaCheckoutModal: React.FC<XsollaCheckoutModalProps> = ({
     setTestingWebhook(true);
     setWebhookStatus(null);
     try {
-      const res = await fetch('https://blockeer.vercel.app/api/xsolla-webhook');
+      const res = await fetch('https://caliberclutch.vercel.app/api/xsolla-webhook');
       if (res.ok) {
         sound.playTournamentVictory();
         setWebhookStatus('✅ Webhook Active! Responded HTTP 200 to Xsolla notification probe.');
@@ -491,7 +491,7 @@ export const XsollaCheckoutModal: React.FC<XsollaCheckoutModalProps> = ({
                   4. Your Webhook URL (Paste into Xsolla &rarr; Project Settings &rarr; Webhooks):
                 </div>
                 <div className="text-xs font-mono text-emerald-400 select-all">
-                  https://blockeer.vercel.app/api/xsolla-webhook
+                  https://caliberclutch.vercel.app/api/xsolla-webhook
                 </div>
               </div>
               <div className="flex items-center gap-2">

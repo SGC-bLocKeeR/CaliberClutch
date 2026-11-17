@@ -1,6 +1,6 @@
 /**
  * Official Xsolla Webhook Notification Handler
- * Endpoint: https://blockeer.vercel.app/api/xsolla-webhook
+ * Endpoint: https://caliberclutch.vercel.app/api/xsolla-webhook
  * 
  * Supports Xsolla PayStation events:
  * - user_validation: checks if gamer tag or steamID exists
@@ -24,8 +24,8 @@ export default async function handler(req, res) {
       projectId: '321543',
       merchantId: '870122',
       endpoints: {
-        webhookUrl: 'https://blockeer.vercel.app/api/xsolla-webhook',
-        tokenUrl: 'https://blockeer.vercel.app/api/xsolla-token'
+        webhookUrl: 'https://caliberclutch.vercel.app/api/xsolla-webhook',
+        tokenUrl: 'https://caliberclutch.vercel.app/api/xsolla-token'
       },
       supportedNotifications: ['user_validation', 'payment', 'refund']
     });
