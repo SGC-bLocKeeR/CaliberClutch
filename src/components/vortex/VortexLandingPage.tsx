@@ -35,7 +35,7 @@ const SteamIcon = ({ className = "w-4 h-4" }: { className?: string }) => (
   </svg>
 );
 
-// High-Definition VORTEX GAMING Brand Logo
+// High-Definition CALIBER CLUTCH Brand Logo
 export const VortexBrandLogo = ({ className = "h-8" }: { className?: string }) => (
   <div className={`flex items-center gap-2.5 select-none ${className}`}>
     <div className="relative flex items-center justify-center">
@@ -53,10 +53,10 @@ export const VortexBrandLogo = ({ className = "h-8" }: { className?: string }) =
     </div>
     <div className="flex items-baseline gap-1.5 leading-none">
       <span className="font-display font-black text-white text-lg sm:text-xl tracking-[0.16em] uppercase">
-        VORTEX
+        CALIBER
       </span>
-      <span className="font-mono text-[8px] sm:text-[9px] font-bold text-[#A3E635] tracking-[0.22em] uppercase">
-        GAMING
+      <span className="font-mono text-[9px] sm:text-[10px] font-bold text-[#A3E635] tracking-[0.22em] uppercase">
+        CLUTCH
       </span>
     </div>
   </div>
@@ -373,7 +373,7 @@ export const VortexLandingPage: React.FC<VortexLandingPageProps> = ({
                 <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-[#A3E635] opacity-75" />
                 <span className="relative inline-flex rounded-full h-2.5 w-2.5 bg-[#A3E635]" />
               </span>
-              <span className="text-[#A3E635] font-bold tracking-wider uppercase">// VORTEX COMPETITIVE NETWORK</span>
+              <span className="text-[#A3E635] font-bold tracking-wider uppercase">// CALIBER CLUTCH COMPETITIVE NETWORK</span>
             </div>
 
             <div className="hidden md:flex items-center gap-6 text-[#64748B]">
@@ -500,7 +500,7 @@ export const VortexLandingPage: React.FC<VortexLandingPageProps> = ({
                 <span>LEVEL UP YOUR COMPETITIVE CAREER</span>
               </div>
               <h2 className="text-3xl sm:text-5xl font-black font-display tracking-tight text-white uppercase">
-                VORTEX PREMIUM & VIP PASS
+                CALIBER CLUTCH PREMIUM & VIP PASS
               </h2>
               <p className="mt-3 text-sm text-slate-400 max-w-xl mx-auto">
                 Choose the competitive tier that fits your ambition. From free official matchmaking to private 128-tick team scrims and monthly €5,000 cash prize cups.
@@ -624,7 +624,7 @@ export const VortexLandingPage: React.FC<VortexLandingPageProps> = ({
                     <span className="text-xs font-mono text-[#A3E635] font-bold">Tier 1</span>
                   </div>
 
-                  <h3 className="text-2xl font-black font-display text-white mb-2">VORTEX PREMIUM</h3>
+                  <h3 className="text-2xl font-black font-display text-white mb-2">CALIBER PREMIUM</h3>
                   <p className="text-xs text-slate-300 mb-6">Captain privileges, AI heatmaps, and exclusive monthly cash cups.</p>
 
                   <div className="flex items-baseline gap-1.5 mb-8">
@@ -653,7 +653,7 @@ export const VortexLandingPage: React.FC<VortexLandingPageProps> = ({
                     </li>
                     <li className="flex items-center gap-3">
                       <Check className="w-4 h-4 text-[#A3E635] shrink-0" />
-                      <span>2x Vortex Coin Drops & Daily Free Weapon Case</span>
+                      <span>2x Clutch Coin Drops & Daily Free Weapon Case</span>
                     </li>
                     <li className="flex items-center gap-3">
                       <Check className="w-4 h-4 text-[#A3E635] shrink-0" />
@@ -691,7 +691,7 @@ export const VortexLandingPage: React.FC<VortexLandingPageProps> = ({
                     <span className="text-xs font-mono text-cyan-400 font-bold">Tier 2</span>
                   </div>
 
-                  <h3 className="text-2xl font-black font-display text-white mb-2">VORTEX VIP ELITE</h3>
+                  <h3 className="text-2xl font-black font-display text-white mb-2">CALIBER VIP ELITE</h3>
                   <p className="text-xs text-slate-400 mb-6">On-demand 128-tick private scrim servers and instant bank/crypto cashouts.</p>
 
                   <div className="flex items-baseline gap-1.5 mb-8">
@@ -796,7 +796,7 @@ export const VortexLandingPage: React.FC<VortexLandingPageProps> = ({
             <div className="space-y-2 text-center lg:text-left relative z-10">
               <div className="text-xs font-mono font-bold text-[#A3E635] tracking-widest uppercase flex items-center gap-2 justify-center lg:justify-start">
                 <span className="w-2 h-2 rounded-full bg-[#A3E635] animate-pulse" />
-                <span>READY TO COMPETE ON VORTEX?</span>
+                <span>READY TO COMPETE ON CALIBER CLUTCH?</span>
               </div>
               <h3 className="text-3xl font-black font-display text-white">
                 Connect your Steam Account and Enter the Arena Today
@@ -837,7 +837,7 @@ export const VortexLandingPage: React.FC<VortexLandingPageProps> = ({
             <div className="flex items-center justify-between p-4 border-b border-[#1E2436] bg-[#121520]">
               <div className="flex items-center gap-2">
                 <Play className="w-4 h-4 text-[#A3E635] fill-[#A3E635]" />
-                <span className="font-display font-black text-white text-sm">VORTEX // CS2 COMPETITIVE TRAILER</span>
+                <span className="font-display font-black text-white text-sm">CALIBER CLUTCH // CS2 COMPETITIVE TRAILER</span>
               </div>
               <button 
                 onClick={() => { sound.playClick(); setShowTrailerModal(false); }}
@@ -868,7 +868,7 @@ export const VortexLandingPage: React.FC<VortexLandingPageProps> = ({
                   }}
                   className="px-6 py-2.5 rounded-full bg-[#A3E635] hover:bg-[#BEF264] text-black font-display font-black text-xs uppercase tracking-wider transition shadow-lg shadow-lime-600/30 cursor-pointer"
                 >
-                  Join VORTEX Now
+                  Join Caliber Clutch Now
                 </button>
               </div>
             </div>
@@ -903,7 +903,7 @@ export const VortexLandingPage: React.FC<VortexLandingPageProps> = ({
               <div>
                 <span className="text-[10px] font-mono text-slate-400 uppercase tracking-wider block">Selected Tier</span>
                 <span className="text-sm font-black font-display text-white">
-                  {authRequiredModal.tier === 'vip' ? 'VORTEX VIP ELITE PASS' : 'VORTEX PREMIUM PASS'}
+                  {authRequiredModal.tier === 'vip' ? 'CALIBER VIP ELITE PASS' : 'CALIBER PREMIUM PASS'}
                 </span>
               </div>
               <span className={`px-3 py-1 rounded-full text-xs font-mono font-bold ${

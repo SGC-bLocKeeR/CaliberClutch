@@ -667,7 +667,7 @@ export const VortexDashboard: React.FC<VortexDashboardProps> = ({
     }
   }, [avatarUrl]);
   const [currentClanTag, setCurrentClanTag] = useState<string>(() => {
-    return localStorage.getItem('vortex_user_clantag') || 'VTX';
+    return localStorage.getItem('vortex_user_clantag') || 'CC';
   });
   const [currentCountry, setCurrentCountry] = useState<{ code: string; name: string; flag: string }>(() => {
     const saved = localStorage.getItem('vortex_user_country');
@@ -926,6 +926,9 @@ export const VortexDashboard: React.FC<VortexDashboardProps> = ({
   const [promoCodeSuccess, setPromoCodeSuccess] = useState<string | null>(null);
   const [copiedPartnerCode, setCopiedPartnerCode] = useState<boolean>(false);
   const [simulatedBotOffer, setSimulatedBotOffer] = useState<{ tournament: string; skinName: string; price: number } | null>(null);
+  const [isSubscribedNotify, setIsSubscribedNotify] = useState<boolean>(() => {
+    return localStorage.getItem('vortex_notified_coming_soon') === 'true';
+  });
 
   useEffect(() => {
     const handleWallet = (e: Event) => {
@@ -1907,7 +1910,7 @@ export const VortexDashboard: React.FC<VortexDashboardProps> = ({
                 <div 
                   onClick={() => { sound.playClick(); setActiveTab('dashboard'); }}
                   className="flex items-center gap-3 cursor-pointer group transition hover:scale-105"
-                  title="VORTEX Dashboard"
+                  title="Caliber Clutch Dashboard"
                 >
                   <VortexBrandLogo />
                 </div>
@@ -1915,10 +1918,10 @@ export const VortexDashboard: React.FC<VortexDashboardProps> = ({
                 <div 
                   onClick={() => { sound.playClick(); setActiveTab('dashboard'); }}
                   className="cursor-pointer transition hover:scale-110"
-                  title="VORTEX Dashboard"
+                  title="Caliber Clutch Dashboard"
                 >
                   <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-[#18210C] to-[#12141C] border border-[#A3E635]/50 flex items-center justify-center text-[#A3E635] font-black font-display text-xs shadow-[0_0_15px_rgba(163,230,53,0.25)]">
-                    VTX
+                    CC
                   </div>
                 </div>
               )}
@@ -2141,25 +2144,7 @@ export const VortexDashboard: React.FC<VortexDashboardProps> = ({
               )}
             </div>
 
-            {/* Official Market & Skin Partners HLTV Button */}
-            <div className="flex items-center gap-2">
-              <button
-                onClick={() => {
-                  sound.playClick();
-                  setShowPartnersModal(true);
-                }}
-                className="px-3 py-1.5 rounded-xl bg-[#12141C] hover:bg-[#1A1F2E] border border-amber-400/30 text-amber-300 font-mono text-xs font-bold transition flex items-center gap-1.5 cursor-pointer shadow-sm hover:scale-[1.02] active:scale-95"
-                title="View Official CS2 Market & Unboxing Partners (HLTV Standard)"
-              >
-                <Award className="w-3.5 h-3.5 text-amber-400" />
-                <span className="hidden sm:inline">Official Partners (HLTV)</span>
-                <span className="sm:hidden">Partners</span>
-              </button>
-            </div>
           </header>
-
-          {/* TOP GLOBAL SPONSOR RIBBON (100% ENGLISH // LIVE MONETIZATION) */}
-          <VortexTopSponsorRibbon onOpenPartnersModal={() => setShowPartnersModal(true)} />
 
           {/* ADMIN VIEW MODE SWITCHER (ONLY VISIBLE TO PROJECT ADMIN) */}
           {isProjectAdmin && (
@@ -2212,7 +2197,7 @@ export const VortexDashboard: React.FC<VortexDashboardProps> = ({
                     </div>
 
                     <h1 className="text-3xl sm:text-4xl font-black font-display text-white tracking-tight uppercase">
-                      VORTEX GAMING PLATFORM
+                      CALIBER CLUTCH PLATFORM
                     </h1>
                     <p className="text-sm font-mono text-slate-400 max-w-3xl">
                       Hold your angles and save your AWPs! The next generation of competitive Counter-Strike 2 is almost ready.
@@ -2240,7 +2225,7 @@ export const VortexDashboard: React.FC<VortexDashboardProps> = ({
                     </div>
 
                     <p className="text-sm text-slate-300 font-sans leading-relaxed">
-                      Welcome to <strong className="text-white font-bold">VORTEX Gaming</strong>! Before you rush B without utility or blame sub-tick for missing your AK-47 spray, our engineers are currently fine-tuning our European server infrastructure to ensure crisp hit registration, zero rubberbanding, and genuine competitive 5v5 action.
+                      Welcome to <strong className="text-white font-bold">Caliber Clutch</strong>! Before you rush B without utility or blame sub-tick for missing your AK-47 spray, our engineers are currently fine-tuning our European server infrastructure to ensure crisp hit registration, zero rubberbanding, and genuine competitive 5v5 action.
                     </p>
 
                     <p className="text-sm text-slate-300 font-sans leading-relaxed">
@@ -2251,23 +2236,40 @@ export const VortexDashboard: React.FC<VortexDashboardProps> = ({
                       Grab an energy drink, practice your smoke lineups in offline servers for a bit longer, and click <strong className="text-white">"Notify Me When Online"</strong> below. We'll sound the alarm the exact second the servers go live!
                     </p>
 
-                    <div className="pt-2 flex flex-wrap items-center gap-3">
-                      <button
-                        onClick={() => {
-                          sound.playSelect();
-                          confetti({ particleCount: 50, spread: 70, origin: { y: 0.7 } });
-                          alert("You're on the VIP priority notification list! Prepare your crosshair — launch announcement coming soon.");
-                        }}
-                        className="px-5 py-2.5 rounded-xl bg-[#A3E635] hover:bg-[#B4F046] text-slate-950 font-mono font-bold text-xs uppercase tracking-wider transition cursor-pointer shadow-lg shadow-lime-500/20 flex items-center gap-2 hover:scale-105 active:scale-95"
-                      >
-                        <Bell className="w-4 h-4 text-slate-950" />
-                        <span>Notify Me When Online</span>
-                      </button>
+                    <div className="pt-2 flex flex-col sm:flex-row sm:items-center gap-3">
+                      {isSubscribedNotify ? (
+                        <div className="px-5 py-2.5 rounded-xl bg-emerald-500/15 border border-emerald-500/35 text-emerald-400 font-mono font-bold text-xs uppercase tracking-wider flex items-center gap-2 shadow-sm animate-in fade-in">
+                          <CheckCircle2 className="w-4 h-4 text-emerald-400" />
+                          <span>✓ Subscribed to VIP Launch List</span>
+                        </div>
+                      ) : (
+                        <button
+                          onClick={() => {
+                            sound.playTournamentVictory();
+                            confetti({ particleCount: 75, spread: 80, origin: { y: 0.6 } });
+                            setIsSubscribedNotify(true);
+                            localStorage.setItem('vortex_notified_coming_soon', 'true');
+                            setDashboardToast('🎉 You are on the VIP priority notification list! Prepare your crosshair — launch announcement coming soon.');
+                            setTimeout(() => setDashboardToast(null), 6000);
+                          }}
+                          className="px-5 py-2.5 rounded-xl bg-[#A3E635] hover:bg-[#B4F046] text-slate-950 font-mono font-bold text-xs uppercase tracking-wider transition cursor-pointer shadow-lg shadow-lime-500/20 flex items-center gap-2 hover:scale-105 active:scale-95"
+                        >
+                          <Bell className="w-4 h-4 text-slate-950" />
+                          <span>Notify Me When Online</span>
+                        </button>
+                      )}
 
                       <span className="text-xs font-mono text-slate-400 italic">
                         * Remember: always buy armor on pistol round!
                       </span>
                     </div>
+
+                    {isSubscribedNotify && (
+                      <div className="p-3.5 rounded-xl bg-emerald-500/10 border border-emerald-500/25 text-emerald-300 text-xs font-mono flex items-center gap-2 animate-in fade-in">
+                        <Sparkles className="w-4 h-4 text-emerald-400 shrink-0" />
+                        <span>Je regjistruar me sukses në listën prioritare VIP! Sapo serverat e Caliber Clutch të kalibrohen plotësisht, do të njoftohesh menjëherë.</span>
+                      </div>
+                    )}
                   </div>
                 </div>
 
@@ -3030,7 +3032,7 @@ export const VortexDashboard: React.FC<VortexDashboardProps> = ({
                           </div>
                           <div className="p-2 rounded-xl bg-black/40 border border-white/5 flex items-center gap-2 text-slate-300">
                             <Sparkles className="w-3.5 h-3.5 text-amber-300 shrink-0" />
-                            <span className="truncate">2x Vortex Points</span>
+                            <span className="truncate">2x Clutch Points</span>
                           </div>
                           <div className="p-2 rounded-xl bg-black/40 border border-white/5 flex items-center gap-2 text-slate-300">
                             <Flame className="w-3.5 h-3.5 text-amber-400 shrink-0" />
@@ -3382,8 +3384,8 @@ export const VortexDashboard: React.FC<VortexDashboardProps> = ({
                   </div>
                 </div>
 
-                {/* OFFICIAL CS2 PARTNER OFFERS & LIVE AADS AD BANNER (100% ENGLISH) */}
-                <VortexComingSoonDeals onOpenPartnersModal={() => setShowPartnersModal(true)} />
+                {/* LIVE AD BANNER (MONETAG & CRYPTO AD NETWORK) */}
+                <VortexAdBanner placement="coming-soon" />
               </div>
             );
           })()}
@@ -3396,9 +3398,9 @@ export const VortexDashboard: React.FC<VortexDashboardProps> = ({
               <div className="flex flex-col sm:flex-row sm:items-center justify-between pb-4 border-b border-[#1E2333] gap-4">
                 <div>
                   <div className="flex items-center gap-2.5">
-                    <h2 className="text-2xl font-black font-display text-white">VORTEX CS2 TOURNAMENT CIRCUIT</h2>
+                    <h2 className="text-2xl font-black font-display text-white">CALIBER CLUTCH CS2 TOURNAMENT CIRCUIT</h2>
                     <span className="px-2.5 py-0.5 rounded-full bg-emerald-500/15 border border-emerald-500/30 text-emerald-400 font-mono text-[10px] font-bold">
-                      DMARKET B2B VERIFIED
+                      VERIFIED ARENA
                     </span>
                   </div>
                   <p className="text-xs text-[#94A3B8] mt-1">
@@ -3406,16 +3408,6 @@ export const VortexDashboard: React.FC<VortexDashboardProps> = ({
                   </p>
                 </div>
                 <div className="flex items-center gap-2">
-                  <button
-                    onClick={() => {
-                      sound.playClick();
-                      setShowPartnersModal(true);
-                    }}
-                    className="px-3.5 py-2 rounded-xl bg-[#171C2B] hover:bg-[#1F263A] border border-amber-400/30 text-xs font-mono font-bold text-amber-300 transition flex items-center gap-1.5 cursor-pointer shadow-sm"
-                  >
-                    <Award className="w-3.5 h-3.5 text-amber-400" />
-                    <span>Official Partners (HLTV)</span>
-                  </button>
                   <button
                     onClick={() => setActiveTab('play')}
                     className="px-4 py-2 rounded-xl bg-[#141722] hover:bg-[#1A202E] border border-[#252C3D] text-xs font-mono text-slate-300 hover:text-white cursor-pointer transition"
@@ -3429,7 +3421,7 @@ export const VortexDashboard: React.FC<VortexDashboardProps> = ({
               <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
                 {[
                   {
-                    title: 'VORTEX Major Championship 2026',
+                    title: 'CALIBER CLUTCH Major Championship 2026',
                     cashPrize: '€10,000',
                     teams: '32 / 32',
                     date: 'LIVE NOW',
@@ -3442,7 +3434,7 @@ export const VortexDashboard: React.FC<VortexDashboardProps> = ({
                     ]
                   },
                   {
-                    title: 'VORTEX CS2 Balkan Open Cup',
+                    title: 'CALIBER CLUTCH CS2 Balkan Open Cup',
                     cashPrize: '€5,000',
                     teams: '16 / 16',
                     date: 'Starts in: 2d 14h',
@@ -3468,7 +3460,7 @@ export const VortexDashboard: React.FC<VortexDashboardProps> = ({
                     ]
                   },
                   {
-                    title: 'VORTEX Weekly 128-Tick Scrimfest',
+                    title: 'CALIBER CLUTCH Weekly Scrimfest',
                     cashPrize: '€2,500',
                     teams: '12 / 16',
                     date: 'Starts Saturday',
@@ -3798,7 +3790,7 @@ export const VortexDashboard: React.FC<VortexDashboardProps> = ({
                           <span className="text-[10px] font-mono font-bold uppercase tracking-wider text-slate-500">RANK #3 • UNCLAIMED SPOT</span>
                           <span className="text-xl opacity-40">🥉</span>
                         </div>
-                        <p className="text-xs text-slate-400 font-mono mt-3">Play competitive matches on VORTEX to enter Top 3.</p>
+                        <p className="text-xs text-slate-400 font-mono mt-3">Play competitive matches on Caliber Clutch to enter Top 3.</p>
                       </div>
                       <div className="pt-3 border-t border-white/[0.04] text-[11px] font-mono text-amber-500">
                         Season 1 Competitive Leaderboard →
@@ -4040,7 +4032,7 @@ export const VortexDashboard: React.FC<VortexDashboardProps> = ({
                         </span>
                       </div>
                       <h1 className="text-3xl sm:text-4xl font-black font-display text-white tracking-tight">
-                        VORTEX CS2 CASES ARENA
+                        CALIBER CLUTCH CASES ARENA
                       </h1>
                       <p className="text-sm text-slate-300 max-w-2xl leading-relaxed">
                         Unbox legendary CS2 covert knives, gloves, and rare pearlescent skins. Built with automated Steam Trade Bot escrow delivery and transparent provably fair seeds.
@@ -4157,13 +4149,13 @@ export const VortexDashboard: React.FC<VortexDashboardProps> = ({
                       <div className="flex items-center gap-2">
                         <span className="text-xs font-bold text-white">Partner Creator Code:</span>
                         <span className="px-2.5 py-0.5 rounded-lg bg-black/60 border border-amber-400/50 text-amber-400 font-mono font-black text-xs tracking-wider">
-                          VORTEX
+                          CLUTCH
                         </span>
                         <button
                           type="button"
                           onClick={() => {
                             sound.playSelect();
-                            navigator.clipboard.writeText('VORTEX');
+                            navigator.clipboard.writeText('CLUTCH');
                             setCopiedPartnerCode(true);
                             confetti({ particleCount: 40, spread: 50, origin: { y: 0.6 } });
                             setTimeout(() => setCopiedPartnerCode(false), 2500);
@@ -4186,7 +4178,7 @@ export const VortexDashboard: React.FC<VortexDashboardProps> = ({
                       e.preventDefault();
                       const code = inAppPromoCode.trim().toUpperCase();
                       if (!code) return;
-                      if (code === 'VORTEX' || code === 'HELLCASE2026' || code === 'FARMSKINS10' || code === 'DMARKETVIP' || code === 'SKINPORTVIP') {
+                      if (code === 'CLUTCH' || code === 'CALIBER' || code === 'VORTEX' || code === 'HELLCASE2026' || code === 'FARMSKINS10' || code === 'DMARKETVIP' || code === 'SKINPORTVIP') {
                         const val = 10.00;
                         creditVortexWalletBalance(val);
                         sound.playTournamentVictory();
@@ -4197,7 +4189,7 @@ export const VortexDashboard: React.FC<VortexDashboardProps> = ({
                         setTimeout(() => setPromoCodeSuccess(null), 5000);
                       } else {
                         sound.playClick();
-                        setPromoCodeError('Invalid or expired code. Try VORTEX, HELLCASE2026, or DMARKETVIP.');
+                        setPromoCodeError('Invalid or expired code. Try CLUTCH, HELLCASE2026, or DMARKETVIP.');
                         setPromoCodeSuccess(null);
                       }
                     }}
@@ -4208,7 +4200,7 @@ export const VortexDashboard: React.FC<VortexDashboardProps> = ({
                         type="text"
                         value={inAppPromoCode}
                         onChange={(e) => setInAppPromoCode(e.target.value)}
-                        placeholder="Enter Promo Code (e.g. VORTEX)..."
+                        placeholder="Enter Promo Code (e.g. CLUTCH)..."
                         className="h-9 px-3 rounded-xl bg-black/60 border border-[#252C3E] text-xs text-white placeholder-slate-500 font-mono focus:outline-none focus:border-amber-400/50 w-full sm:w-64"
                       />
                     </div>
@@ -4377,7 +4369,7 @@ export const VortexDashboard: React.FC<VortexDashboardProps> = ({
             <div className="bg-[#0E1017] border border-[#202536] rounded-3xl p-6 md:p-8 shadow-xl space-y-6">
               <div className="flex items-center justify-between pb-4 border-b border-[#1E2333]">
                 <div>
-                  <h2 className="text-2xl font-black font-display text-white">VORTEX Kernel Anti-Cheat Protection</h2>
+                  <h2 className="text-2xl font-black font-display text-white">CALIBER CLUTCH Kernel Anti-Cheat Protection</h2>
                   <p className="text-xs text-[#94A3B8]">Ring-0 hardware enforcement and driver integrity monitor</p>
                 </div>
                 <button
@@ -4450,7 +4442,7 @@ export const VortexDashboard: React.FC<VortexDashboardProps> = ({
             const displayCountryFlag = viewedPlayer ? viewedPlayer.flag : currentCountry.flag;
             const displayCountryName = viewedPlayer ? viewedPlayer.country : currentCountry.name;
             const displayCountryCode = viewedPlayer ? (viewedPlayer.code || 'XK') : currentCountry.code;
-            const displayBio = viewedPlayer ? (viewedPlayer.bio || 'Competitive CS2 player on VORTEX gaming platform.') : currentBio;
+            const displayBio = viewedPlayer ? (viewedPlayer.bio || 'Competitive CS2 player on Caliber Clutch gaming platform.') : currentBio;
             const displayRole = viewedPlayer ? (viewedPlayer.role || 'CS2 Competitor') : currentRole;
             const displayElo = viewedPlayer ? viewedPlayer.elo : currentUserElo;
             const displayLevelNum = viewedPlayer ? viewedPlayer.levelNum : currentUserLevel;
@@ -4968,7 +4960,7 @@ export const VortexDashboard: React.FC<VortexDashboardProps> = ({
                       <div className="space-y-1">
                         <div className="text-sm font-bold text-white font-sans">No competitive matches played yet</div>
                         <p className="text-xs text-slate-400 max-w-sm font-sans">
-                          You haven't played any 5v5 competitive matches on VORTEX yet. Queue up in the Play tab to earn ELO and record your match history.
+                          You haven't played any 5v5 competitive matches on Caliber Clutch yet. Queue up in the Play tab to earn ELO and record your match history.
                         </p>
                       </div>
                       <button
@@ -5770,7 +5762,7 @@ export const VortexDashboard: React.FC<VortexDashboardProps> = ({
                   <Crown className="w-5 h-5 fill-amber-400" />
                 </div>
                 <div>
-                  <h3 className="text-lg font-black font-display text-white">CHOOSE YOUR VORTEX TIER</h3>
+                  <h3 className="text-lg font-black font-display text-white">CHOOSE YOUR CALIBER CLUTCH TIER</h3>
                   <p className="text-xs font-mono text-slate-400">Unlock strict ELO matchmaking, captain vetoes & pro cash cups</p>
                 </div>
               </div>
@@ -5793,7 +5785,7 @@ export const VortexDashboard: React.FC<VortexDashboardProps> = ({
               }`}>
                 <div className="space-y-3">
                   <div className="flex items-center justify-between">
-                    <span className="text-xs font-display font-black text-amber-400 uppercase tracking-wider">VORTEX PREMIUM</span>
+                    <span className="text-xs font-display font-black text-amber-400 uppercase tracking-wider">CALIBER PREMIUM</span>
                     <span className="text-lg font-black text-white font-mono">€5.99<span className="text-xs text-slate-400">/mo</span></span>
                   </div>
                   <p className="text-[11px] text-slate-400 font-mono">Strict competitive 5v5 queue with zero smurfs guarantee.</p>
@@ -5825,7 +5817,7 @@ export const VortexDashboard: React.FC<VortexDashboardProps> = ({
                     setXsollaCheckoutItem({
                       id: 'sub-premium',
                       sku: 'VTX-SUB-PREMIUM',
-                      title: 'Vortex Premium Membership (1 Month)',
+                      title: 'Caliber Clutch Premium Membership (1 Month)',
                       description: 'Super Match 5v5 queue, strict ±250 ELO balance, captain map veto priority.',
                       amountEur: 5.99,
                       type: 'membership_premium'
@@ -5876,7 +5868,7 @@ export const VortexDashboard: React.FC<VortexDashboardProps> = ({
                     </div>
                     <div className="flex items-center gap-2">
                       <CheckCircle2 className="w-3.5 h-3.5 text-purple-400 shrink-0" />
-                      <span>2x Vortex Points & €25,000 Major Cups</span>
+                      <span>2x Clutch Points & €25,000 Major Cups</span>
                     </div>
                   </div>
                 </div>
@@ -5888,7 +5880,7 @@ export const VortexDashboard: React.FC<VortexDashboardProps> = ({
                     setXsollaCheckoutItem({
                       id: 'sub-vip',
                       sku: 'VTX-SUB-VIP',
-                      title: 'Vortex VIP Elite Pass (1 Month)',
+                      title: 'Caliber Clutch VIP Elite Pass (1 Month)',
                       description: 'VIP Match queue, ultra-strict ±150 ELO, automated GOTV demo recording, 2x Points.',
                       amountEur: 12.99,
                       type: 'membership_vip'
@@ -6001,7 +5993,7 @@ export const VortexDashboard: React.FC<VortexDashboardProps> = ({
             if (res.item.type === 'membership_premium') {
               setUserMembershipTier('premium');
               confetti({ particleCount: 75, spread: 80, origin: { y: 0.6 } });
-              setDashboardToast('🎉 Payment Confirmed via Xsolla! Upgraded to VORTEX PREMIUM!');
+              setDashboardToast('🎉 Payment Confirmed via Xsolla! Upgraded to CALIBER PREMIUM!');
             } else if (res.item.type === 'membership_vip') {
               setUserMembershipTier('vip');
               confetti({ particleCount: 100, spread: 90, origin: { y: 0.6 } });

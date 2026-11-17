@@ -518,7 +518,7 @@ export const VortexRightSocialRail: React.FC<VortexRightSocialRailProps> = ({
               onLogout();
             }}
             className="px-3 py-1.5 rounded-xl bg-rose-500/10 hover:bg-rose-500/20 text-rose-400 hover:text-rose-300 border border-rose-500/30 text-xs font-mono font-bold transition flex items-center gap-1.5 cursor-pointer shadow-sm active:scale-95"
-            title="Log out of VORTEX"
+            title="Log out of Caliber Clutch"
           >
             <LogOut className="w-3.5 h-3.5" />
             <span>Log Out</span>
@@ -628,7 +628,7 @@ export const VortexRightSocialRail: React.FC<VortexRightSocialRailProps> = ({
                 setShowHellcaseModal(true);
               }}
               className="flex items-center gap-1.5 px-2 py-1 rounded-xl bg-black/60 hover:bg-black/90 border border-amber-500/30 hover:border-amber-400/60 shadow-[0_0_10px_rgba(245,158,11,0.12)] transition cursor-pointer group active:scale-95 shrink-0"
-              title="VORTEX Balance • Click to top up / refill"
+              title="Caliber Clutch Balance • Click to top up / refill"
             >
               <div className="w-4 h-4 rounded-full bg-amber-500/20 border border-amber-500/40 flex items-center justify-center shrink-0">
                 <Coins className="w-2.5 h-2.5 text-amber-400 group-hover:scale-110 transition-transform drop-shadow-[0_0_4px_rgba(245,158,11,0.5)]" />
@@ -815,7 +815,7 @@ export const VortexRightSocialRail: React.FC<VortexRightSocialRailProps> = ({
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-1.5 text-xs font-bold text-white font-sans">
                 <Gift className="w-3.5 h-3.5 text-amber-400 group-hover:scale-110 transition" />
-                <span>VORTEX CS2 Cases</span>
+                <span>CALIBER CLUTCH Cases</span>
               </div>
               <span className="text-[9px] font-mono font-bold bg-emerald-500/15 text-emerald-400 border border-emerald-500/30 px-1.5 py-0.5 rounded uppercase flex items-center gap-1">
                 <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />
@@ -868,7 +868,7 @@ export const VortexRightSocialRail: React.FC<VortexRightSocialRailProps> = ({
                     setShowCaseShopModal(true);
                   }}
                   className="py-2 px-2.5 rounded-xl font-mono font-black text-xs text-slate-950 bg-gradient-to-r from-amber-400 to-yellow-500 hover:from-amber-300 hover:to-yellow-400 transition cursor-pointer shadow-[0_0_15px_rgba(245,158,11,0.25)] flex items-center justify-center gap-1 hover:scale-[1.02] active:scale-95"
-                  title="Open Vortex CS2 Case Shop"
+                  title="Open Caliber Clutch CS2 Case Shop"
                 >
                   <span>Open Cases</span>
                   <ChevronRight className="w-3.5 h-3.5" />
@@ -893,12 +893,12 @@ export const VortexRightSocialRail: React.FC<VortexRightSocialRailProps> = ({
             <span className="font-sans font-semibold">Settings</span>
           </button>
 
-          {/* Vortex Wolf Shield Emblem */}
-          <div className="flex items-center gap-1.5 text-slate-400 opacity-60 hover:opacity-100 transition cursor-default" title="VORTEX GAMING">
+          {/* Caliber Clutch Wolf Shield Emblem */}
+          <div className="flex items-center gap-1.5 text-slate-400 opacity-60 hover:opacity-100 transition cursor-default" title="CALIBER CLUTCH">
             <svg className="w-4 h-4 fill-current text-white" viewBox="0 0 24 24">
               <path d="M12 2L4 5v6.09c0 5.05 3.41 9.76 8 10.91 4.59-1.15 8-5.86 8-10.91V5l-8-3zm0 2.18l6 2.25v4.66c0 4.02-2.67 7.77-6 8.8-3.33-1.03-6-4.78-6-8.8V6.43l6-2.25z" />
             </svg>
-            <span className="font-display font-black text-[10px] text-white">VORTEX</span>
+            <span className="font-display font-black text-[10px] text-white">CALIBER CLUTCH</span>
           </div>
         </div>
 

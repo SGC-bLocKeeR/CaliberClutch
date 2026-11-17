@@ -40,7 +40,7 @@ export const VortexComingSoonDeals: React.FC<VortexComingSoonDealsProps> = ({
       name: 'Hellcase',
       tagline: 'CS2 Case Opening & Upgrader',
       bonus: '+10% DEPOSIT BONUS + FREE CRATE',
-      promoCode: 'VORTEX',
+      promoCode: 'CLUTCH',
       buttonText: 'Claim Free Crate',
       url: 'https://hellcase.com/f/vortex',
       color: '#F59E0B',
@@ -52,7 +52,7 @@ export const VortexComingSoonDeals: React.FC<VortexComingSoonDealsProps> = ({
       name: 'DMarket',
       tagline: 'Instant CS2 Skin Marketplace & Cashout',
       bonus: 'LOWEST TRADING FEES + INSTANT BOT',
-      promoCode: 'VORTEX',
+      promoCode: 'CLUTCH',
       buttonText: 'Trade Skins Now',
       url: 'https://dmarket.com?ref=vortex',
       color: '#10B981',
@@ -64,7 +64,7 @@ export const VortexComingSoonDeals: React.FC<VortexComingSoonDealsProps> = ({
       name: 'Farmskins',
       tagline: 'Covert Knives & Gloves Vault',
       bonus: 'FREE $1.00 BALANCE + DAILY KNIFE SPIN',
-      promoCode: 'VORTEX',
+      promoCode: 'CLUTCH',
       buttonText: 'Get $1.00 Free',
       url: 'https://farmskins.com/ref/vortex',
       color: '#F43F5E',
@@ -73,10 +73,10 @@ export const VortexComingSoonDeals: React.FC<VortexComingSoonDealsProps> = ({
     },
     {
       id: 'vortex-smartlink',
-      name: 'Vortex Direct Loot',
+      name: 'Clutch Direct Loot',
       tagline: 'Instant CS2 Skin Rewards & Partner Offers',
       bonus: 'DAILY BONUS OFFERS + INSTANT CASHOUT',
-      promoCode: 'VORTEX',
+      promoCode: 'CLUTCH',
       buttonText: 'Claim Free Loot',
       url: 'https://uplcm.com/4/12281615',
       color: '#A855F7',
@@ -100,7 +100,7 @@ export const VortexComingSoonDeals: React.FC<VortexComingSoonDealsProps> = ({
             </span>
           </div>
           <p className="text-xs text-slate-400 font-mono mt-0.5">
-            While this tab is being recalibrated, claim exclusive CS2 skin bonuses and free crate spins with code <strong className="text-amber-400 font-mono">VORTEX</strong>.
+            While this tab is being recalibrated, claim exclusive CS2 skin bonuses and free crate spins with code <strong className="text-amber-400 font-mono">CLUTCH</strong>.
           </p>
         </div>
 
@@ -209,7 +209,7 @@ export const VortexTopSponsorRibbon: React.FC<{ onOpenPartnersModal: () => void 
 
   const handleCopyCode = () => {
     sound.playSelect();
-    navigator.clipboard.writeText('VORTEX');
+    navigator.clipboard.writeText('CLUTCH');
     setCopied(true);
     confetti({ particleCount: 30, spread: 45, origin: { y: 0.1 } });
     setTimeout(() => setCopied(false), 2500);
@@ -224,7 +224,7 @@ export const VortexTopSponsorRibbon: React.FC<{ onOpenPartnersModal: () => void 
         </span>
 
         <p className="text-xs text-slate-200 font-sans">
-          Use creator code <strong className="text-amber-400 font-mono">VORTEX</strong> on <span className="text-white font-semibold">Hellcase & DMarket</span> for <strong className="text-emerald-400">+10% Extra Deposit Balance & Free Daily Case</strong>.
+          Use creator code <strong className="text-amber-400 font-mono">CLUTCH</strong> on <span className="text-white font-semibold">Hellcase & DMarket</span> for <strong className="text-emerald-400">+10% Extra Deposit Balance & Free Daily Case</strong>.
         </p>
       </div>
 
@@ -234,7 +234,7 @@ export const VortexTopSponsorRibbon: React.FC<{ onOpenPartnersModal: () => void 
           className="px-3 py-1.5 rounded-xl bg-black/60 hover:bg-black/90 border border-amber-400/40 text-amber-300 text-xs font-mono font-bold transition flex items-center gap-1.5 cursor-pointer shadow-sm active:scale-95"
         >
           {copied ? <Check className="w-3 h-3 text-emerald-400" /> : <Copy className="w-3 h-3" />}
-          <span>{copied ? 'Code Copied!' : 'Code: VORTEX'}</span>
+          <span>{copied ? 'Code Copied!' : 'Code: CLUTCH'}</span>
         </button>
 
         <button
