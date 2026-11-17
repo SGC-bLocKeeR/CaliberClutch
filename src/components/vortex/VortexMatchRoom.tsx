@@ -322,7 +322,7 @@ const FaceitPriorityStar: React.FC<{ size?: number; className?: string }> = ({ s
 
 export const VortexMatchRoom: React.FC<VortexMatchRoomProps> = ({
   matchId = 'VTX-89421',
-  currentGamerTag = 'bLocKeeRz',
+  currentGamerTag = 'M14',
   currentAvatarUrl,
   partyMembers = [],
   onClose
@@ -426,8 +426,8 @@ export const VortexMatchRoom: React.FC<VortexMatchRoomProps> = ({
     },
     {
       id: 'tm-5',
-      sender: currentGamerTag || 'bLocKeeRz',
-      avatar: currentAvatarUrl || '/images/blockeerz_avatar.png',
+      sender: currentGamerTag || 'M14',
+      avatar: currentAvatarUrl || 'https://distribution.faceit-cdn.net/images/ac453a50-dbca-4d42-a740-dac12bdc74c0.jpeg',
       team: 'team2',
       code: 'GY',
       text: 'no',
@@ -449,8 +449,8 @@ export const VortexMatchRoom: React.FC<VortexMatchRoomProps> = ({
       if (!dataUrl) return;
       const newMsg: MatchChatMessage = {
         id: `usr-room-img-${Date.now()}`,
-        sender: currentGamerTag || 'bLocKeeRz',
-        avatar: currentAvatarUrl || '/images/blockeerz_avatar.png',
+        sender: currentGamerTag || 'M14',
+        avatar: currentAvatarUrl || 'https://distribution.faceit-cdn.net/images/ac453a50-dbca-4d42-a740-dac12bdc74c0.jpeg',
         team: 'team2',
         code: 'GY',
         text: roomInput.trim(),
@@ -474,8 +474,8 @@ export const VortexMatchRoom: React.FC<VortexMatchRoomProps> = ({
       if (!dataUrl) return;
       const newMsg: MatchChatMessage = {
         id: `usr-team-img-${Date.now()}`,
-        sender: currentGamerTag || 'bLocKeeRz',
-        avatar: currentAvatarUrl || '/images/blockeerz_avatar.png',
+        sender: currentGamerTag || 'M14',
+        avatar: currentAvatarUrl || 'https://distribution.faceit-cdn.net/images/ac453a50-dbca-4d42-a740-dac12bdc74c0.jpeg',
         team: 'team2',
         code: 'GY',
         text: teamInput.trim(),
@@ -697,8 +697,8 @@ export const VortexMatchRoom: React.FC<VortexMatchRoomProps> = ({
     },
     {
       id: 'op5',
-      name: currentGamerTag || 'bLocKeeRz',
-      avatar: currentAvatarUrl || '/images/blockeerz_avatar.png',
+      name: currentGamerTag || 'M14',
+      avatar: currentAvatarUrl || 'https://distribution.faceit-cdn.net/images/ac453a50-dbca-4d42-a740-dac12bdc74c0.jpeg',
       level: 7,
       elo: 1433,
       code: 'GY',
@@ -1230,8 +1230,8 @@ export const VortexMatchRoom: React.FC<VortexMatchRoomProps> = ({
     },
     {
       id: 's9',
-      name: currentGamerTag || 'bLocKeeRz',
-      avatar: currentAvatarUrl || '/images/blockeerz_avatar.png',
+      name: currentGamerTag || 'M14',
+      avatar: currentAvatarUrl || 'https://distribution.faceit-cdn.net/images/ac453a50-dbca-4d42-a740-dac12bdc74c0.jpeg',
       code: 'XK',
       countryName: 'Kosovo',
       rankLevel: 7,
@@ -1875,8 +1875,8 @@ export const VortexMatchRoom: React.FC<VortexMatchRoomProps> = ({
     },
     {
       id: 's9',
-      name: currentGamerTag || 'bLocKeeRz',
-      avatar: currentAvatarUrl || '/images/blockeerz_avatar.png',
+      name: currentGamerTag || 'M14',
+      avatar: currentAvatarUrl || 'https://distribution.faceit-cdn.net/images/ac453a50-dbca-4d42-a740-dac12bdc74c0.jpeg',
       code: 'XK',
       countryName: 'Kosovo',
       rankLevel: 7,
@@ -2396,8 +2396,8 @@ export const VortexMatchRoom: React.FC<VortexMatchRoomProps> = ({
     },
     {
       id: 's9',
-      name: currentGamerTag || 'bLocKeeRz',
-      avatar: currentAvatarUrl || '/images/blockeerz_avatar.png',
+      name: currentGamerTag || 'M14',
+      avatar: currentAvatarUrl || 'https://distribution.faceit-cdn.net/images/ac453a50-dbca-4d42-a740-dac12bdc74c0.jpeg',
       code: 'XK',
       countryName: 'Kosovo',
       rankLevel: 7,
@@ -2884,8 +2884,8 @@ export const VortexMatchRoom: React.FC<VortexMatchRoomProps> = ({
     sound.playChatMessage();
     const newMsg: MatchChatMessage = {
       id: `usr-team-${Date.now()}`,
-      sender: currentGamerTag || 'bLocKeeRz',
-      avatar: currentAvatarUrl || '/images/blockeerz_avatar.png',
+      sender: currentGamerTag || 'M14',
+      avatar: currentAvatarUrl || 'https://distribution.faceit-cdn.net/images/ac453a50-dbca-4d42-a740-dac12bdc74c0.jpeg',
       team: 'team2',
       code: 'GY',
       text: teamInput.trim(),
@@ -2897,7 +2897,7 @@ export const VortexMatchRoom: React.FC<VortexMatchRoomProps> = ({
 
     setTimeout(() => {
       const botReplies = [
-        { sender: 'M18', text: 'nice round bLocKeeRz!', avatar: '/images/faceit_m18_badge.png' },
+        { sender: 'M18', text: 'nice round M14!', avatar: '/images/faceit_m18_badge.png' },
         { sender: 'zimny', text: 'drop me awp next round', avatar: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=150&q=80' },
         { sender: 'Nascar777', text: 'queue next match guys?', avatar: 'https://images.unsplash.com/photo-1522075469751-3a6694fb2f61?auto=format&fit=crop&w=150&q=80' }
       ];
@@ -2924,8 +2924,8 @@ export const VortexMatchRoom: React.FC<VortexMatchRoomProps> = ({
     sound.playChatMessage();
     const newMsg: MatchChatMessage = {
       id: `usr-room-${Date.now()}`,
-      sender: currentGamerTag || 'bLocKeeRz',
-      avatar: currentAvatarUrl || '/images/blockeerz_avatar.png',
+      sender: currentGamerTag || 'M14',
+      avatar: currentAvatarUrl || 'https://distribution.faceit-cdn.net/images/ac453a50-dbca-4d42-a740-dac12bdc74c0.jpeg',
       team: 'team2',
       code: 'GY',
       text: roomInput.trim(),
@@ -3291,7 +3291,7 @@ export const VortexMatchRoom: React.FC<VortexMatchRoomProps> = ({
                 </div>
               </div>
 
-              {/* Right Team (Zalevvo / M18 / bLocKeeRz) */}
+              {/* Right Team (Zalevvo / M18 / M14) */}
               <div className="md:col-span-5 flex items-center justify-start gap-3.5 text-left">
                 <div className="relative w-14 h-14 rounded-full p-0.5 bg-gradient-to-r from-slate-600 to-slate-400 shrink-0">
                   <img 
@@ -3463,7 +3463,7 @@ export const VortexMatchRoom: React.FC<VortexMatchRoomProps> = ({
 
             </div>
 
-            {/* RIGHT COLUMN (TEAM 2 PLAYERS - INCLUDING M18 & bLocKeeRz) */}
+            {/* RIGHT COLUMN (TEAM 2 PLAYERS - INCLUDING M18 & M14) */}
             <div className="lg:col-span-4 space-y-3">
               <div className="text-xs font-mono font-bold text-slate-400 px-1">
                 Players
@@ -3832,15 +3832,15 @@ export const VortexMatchRoom: React.FC<VortexMatchRoomProps> = ({
                 </button>
               </div>
 
-              {/* Card 2: bLocKeeRz (Highlight locked) */}
+              {/* Card 2: M14 (Highlight locked) */}
               <div className="relative rounded-xl overflow-hidden border border-emerald-500/30 p-3 flex flex-col justify-between min-h-[160px] bg-[#0E1711]/60">
                 <div className="text-[10px] font-mono text-emerald-400 font-bold uppercase">
                   Highlight locked
                 </div>
                 <div className="flex items-center justify-between pt-4 border-t border-white/5">
                   <div className="flex items-center gap-1.5">
-                    <img src={currentAvatarUrl || '/images/blockeerz_avatar.png'} alt="bLocKeeRz" className="w-5 h-5 rounded-full object-cover" />
-                    <span className="text-[10px] font-mono font-bold text-white truncate max-w-[70px]">bLocKeeRz</span>
+                    <img src={currentAvatarUrl || 'https://distribution.faceit-cdn.net/images/ac453a50-dbca-4d42-a740-dac12bdc74c0.jpeg'} alt="M14" className="w-5 h-5 rounded-full object-cover" />
+                    <span className="text-[10px] font-mono font-bold text-white truncate max-w-[70px]">M14</span>
                   </div>
                   <Lock className="w-3.5 h-3.5 text-emerald-400" />
                 </div>

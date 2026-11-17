@@ -576,7 +576,7 @@ export const CS2GameIcon: React.FC<{ className?: string }> = ({ className = "w-6
 );
 
 const PRESET_AVATARS = [
-  { id: 'blockeerz', name: 'bLocKeeRz Official', url: '/images/blockeerz_avatar.png' },
+  { id: 'm14', name: 'M14 Official', url: 'https://distribution.faceit-cdn.net/images/ac453a50-dbca-4d42-a740-dac12bdc74c0.jpeg' },
   { id: 'cyber', name: 'Cyber Operator', url: 'https://images.unsplash.com/photo-1566492031773-4f4e44671857?auto=format&fit=crop&w=250&q=80' },
   { id: 'stealth', name: 'Stealth Specialist', url: 'https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?auto=format&fit=crop&w=250&q=80' },
   { id: 'entry', name: 'Pro Entry Fragger', url: 'https://images.unsplash.com/photo-1570295999919-56ceb5ecca61?auto=format&fit=crop&w=250&q=80' },
@@ -606,18 +606,57 @@ export const isUserAdminOrFounder = (tagName?: string | null): boolean => {
 
 export const VortexDashboard: React.FC<VortexDashboardProps> = ({
   userGamerTag = 'M14',
-  avatarUrl = '/images/blockeerz_avatar.png',
+  avatarUrl = 'https://distribution.faceit-cdn.net/images/ac453a50-dbca-4d42-a740-dac12bdc74c0.jpeg',
   onNavigateTab,
   onLogout,
   initialOpenPremium = false
 }) => {
   // Profile Customization State with localStorage persistence
   const [currentGamerTag, setCurrentGamerTag] = useState<string>(() => {
-    return localStorage.getItem('vortex_user_gamertag') || userGamerTag;
+    const saved = localStorage.getItem('vortex_user_gamertag');
+    if (!saved || saved.toLowerCase().includes('blockeer')) {
+      localStorage.setItem('vortex_user_gamertag', 'M14');
+      return 'M14';
+    }
+    return saved;
   });
   const [currentAvatarUrl, setCurrentAvatarUrl] = useState<string>(() => {
-    return localStorage.getItem('vortex_user_avatar') || avatarUrl;
+    const saved = localStorage.getItem('vortex_user_avatar');
+    if (!saved || saved.includes('blockeerz')) {
+      const def = 'https://distribution.faceit-cdn.net/images/ac453a50-dbca-4d42-a740-dac12bdc74c0.jpeg';
+      localStorage.setItem('vortex_user_avatar', def);
+      return def;
+    }
+    return saved;
   });
+
+  // Active sync & purge of legacy blockeer and stale mock profiles
+  useEffect(() => {
+    if (typeof window !== 'undefined') {
+      try {
+        const savedTag = localStorage.getItem('vortex_user_gamertag');
+        if (savedTag && savedTag.toLowerCase().includes('blockeer')) {
+          localStorage.setItem('vortex_user_gamertag', 'M14');
+          setCurrentGamerTag('M14');
+        }
+        const savedAv = localStorage.getItem('vortex_user_avatar');
+        if (savedAv && savedAv.includes('blockeerz')) {
+          const def = 'https://distribution.faceit-cdn.net/images/ac453a50-dbca-4d42-a740-dac12bdc74c0.jpeg';
+          localStorage.setItem('vortex_user_avatar', def);
+          setCurrentAvatarUrl(def);
+        }
+        const rawPlayers = localStorage.getItem('vortex_platform_registered_players');
+        if (rawPlayers) {
+          const list: any[] = JSON.parse(rawPlayers);
+          const cleaned = list.filter(p => {
+            const tag = (p.gamerTag || p.name || '').toLowerCase();
+            return !tag.includes('blockeer') && !tag.includes('shadow_kid') && !tag.includes('nyxora') && !tag.includes('chronopulse') && !tag.includes('test');
+          });
+          localStorage.setItem('vortex_platform_registered_players', JSON.stringify(cleaned));
+        }
+      } catch {}
+    }
+  }, []);
 
   // Project Administrator Status (EXCLUSIVELY FOR M14)
   const isProjectAdmin = (() => {
@@ -820,15 +859,15 @@ export const VortexDashboard: React.FC<VortexDashboardProps> = ({
         const el = Number(data.elo) || 1000;
         applyFaceitData(lvl, el, data.nickname || clean);
       } else {
-        const isBlockeer = clean.toLowerCase() === 'blockeerz';
-        const lvl = isBlockeer ? 7 : 3;
-        const el = isBlockeer ? 1407 : 1025;
+        const isM14 = clean.toLowerCase().includes('m14');
+        const lvl = isM14 ? 7 : 3;
+        const el = isM14 ? 1407 : 1025;
         applyFaceitData(lvl, el, clean);
       }
     } catch (e) {
-      const isBlockeer = clean.toLowerCase() === 'blockeerz';
-      const lvl = isBlockeer ? 7 : 3;
-      const el = isBlockeer ? 1407 : 1025;
+      const isM14 = clean.toLowerCase().includes('m14');
+      const lvl = isM14 ? 7 : 3;
+      const el = isM14 ? 1407 : 1025;
       applyFaceitData(lvl, el, clean);
     } finally {
       setIsSyncingFaceit(false);
@@ -863,7 +902,7 @@ export const VortexDashboard: React.FC<VortexDashboardProps> = ({
     setCurrentBio(draftBio);
     setCurrentTradeUrl(draftTradeUrl);
     setCurrentCrosshairCode(draftCrosshairCode);
-    const finalVerification: VerificationType = (currentGamerTag !== 'bLocKeeRz' && draftVerification === 'vip') ? 'verified' : draftVerification;
+    const finalVerification: VerificationType = (!isUserAdminOrFounder(currentGamerTag) && draftVerification === 'vip') ? 'verified' : draftVerification;
     setCurrentVerification(finalVerification);
 
     localStorage.setItem('vortex_user_gamertag', draftGamerTag);
@@ -1014,7 +1053,7 @@ export const VortexDashboard: React.FC<VortexDashboardProps> = ({
       id: 'notif-5',
       type: 'achievement',
       title: 'Season Milestone: Level 9 Reached',
-      subtitle: 'Congratulations bLocKeeRz! You crossed the 1,850 ELO threshold on the European ladder.',
+      subtitle: 'Congratulations M14! You crossed the 1,850 ELO threshold on the European ladder.',
       time: 'Yesterday',
       read: true,
     },
@@ -1180,7 +1219,7 @@ export const VortexDashboard: React.FC<VortexDashboardProps> = ({
     setDashboardToast('Invitation cancelled');
   };
 
-  // Party Leader Index (Default to center slot 2: bLocKeeRz) & Match Room modal
+  // Party Leader Index (Default to center slot 2: M14) & Match Room modal
   const [partyLeaderIndex, setPartyLeaderIndex] = useState<number>(2);
   const [isMatchRoomOpen, setIsMatchRoomOpen] = useState<boolean>(false);
 
@@ -1434,7 +1473,7 @@ export const VortexDashboard: React.FC<VortexDashboardProps> = ({
       hs: '--',
       verification: currentVerification,
       isUser: true,
-      bio: currentBio || 'Official verified player on VORTEX Gaming.',
+      bio: currentBio || 'Official verified player on Caliber Clutch.',
       role: currentRole || 'AWPer / Entry',
       crosshairCode: currentCrosshairCode || 'CSGO-4w29A-6yvKP-6k7kF-3xK2v-d9HkQ',
       steamId: localStorage.getItem('vortex_steam_id') || 'STEAM_0:1:43918293',
@@ -1448,7 +1487,14 @@ export const VortexDashboard: React.FC<VortexDashboardProps> = ({
         if (!raw) return [];
         const stored: any[] = JSON.parse(raw);
         return stored
-          .filter(p => p.gamerTag && p.gamerTag.toLowerCase() !== currentGamerTag.toLowerCase())
+          .filter(p => {
+            if (!p.gamerTag) return false;
+            const lower = p.gamerTag.toLowerCase();
+            if (lower.includes('blockeer')) return false;
+            if (lower === currentGamerTag.toLowerCase()) return false;
+            if (lower.includes('shadow_kid') || lower.includes('nyxora') || lower.includes('chronopulse') || lower.includes('test')) return false;
+            return true;
+          })
           .map((p, idx) => ({
             rank: `#${idx + 2}`,
             rankNum: idx + 2,
@@ -1698,7 +1744,7 @@ export const VortexDashboard: React.FC<VortexDashboardProps> = ({
 
     const userProfile = {
       name: currentGamerTag,
-      avatar: currentAvatarUrl || '/images/blockeerz_avatar.png',
+      avatar: currentAvatarUrl || 'https://distribution.faceit-cdn.net/images/ac453a50-dbca-4d42-a740-dac12bdc74c0.jpeg',
       isUser: true
     };
 
@@ -1938,7 +1984,7 @@ export const VortexDashboard: React.FC<VortexDashboardProps> = ({
                   <div className="absolute left-1 right-1 top-full mt-1.5 p-2 rounded-2xl bg-[#0D0F16] border border-white/10 shadow-2xl z-50 max-h-60 overflow-y-auto animate-in fade-in zoom-in-95 duration-150">
                     <div className="text-[10px] font-mono text-slate-400 px-2 py-1 uppercase tracking-wider">Quick Results</div>
                     {[
-                      { tag: 'bLocKeeRz', level: 'Level 7', elo: '1,407 ELO', code: 'XK', action: () => { setActiveTab('profile'); setSidebarSearchOpen(false); } },
+                      { tag: 'M14', level: 'Level 7', elo: '1,407 ELO', code: 'XK', action: () => { setActiveTab('profile'); setSidebarSearchOpen(false); } },
                       { tag: 'juanflatroo', level: 'Level 10', elo: '3,890 ELO', code: 'XK', action: () => { setActiveTab('rankings'); setSidebarSearchOpen(false); } },
                       { tag: 'gxx-', level: 'Level 10', elo: '3,420 ELO', code: 'XK', action: () => { setActiveTab('rankings'); setSidebarSearchOpen(false); } },
                       { tag: 'Play 5v5 Queue', level: '128-Tick', elo: 'Matchmaking', icon: '🎮', action: () => { setActiveTab('play'); setSidebarSearchOpen(false); } },
@@ -2286,7 +2332,7 @@ export const VortexDashboard: React.FC<VortexDashboardProps> = ({
                     <div className="absolute bottom-0 left-1/4 w-[500px] h-[500px] bg-amber-500/[0.04] rounded-full blur-3xl pointer-events-none" />
 
                     {/* Top Header */}
-                    <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-6 border-b border-white/[0.08] pb-6">
+                    <div className="border-b border-white/[0.08] pb-6">
                       <div className="space-y-3">
                         <div className="flex flex-wrap items-center gap-2.5">
                           <span className="px-3.5 py-1 rounded-full text-xs font-mono font-black uppercase tracking-wider text-[#A3E635] bg-[#A3E635]/15 border border-[#A3E635]/40 flex items-center gap-2 shadow-[0_0_15px_rgba(163,230,53,0.25)]">
@@ -2303,22 +2349,13 @@ export const VortexDashboard: React.FC<VortexDashboardProps> = ({
 
                         <div className="space-y-2">
                           <h1 className="text-3xl sm:text-5xl font-black font-display text-white tracking-tight uppercase leading-tight">
-                            CALIBER CLUTCH // HOME
+                            CALIBER CLUTCH
                           </h1>
                           <p className="text-sm font-mono text-slate-300 max-w-2xl">
                             Competitive Counter-Strike 2 arena with dedicated European 128-tick servers, tournament prize pools, and automated weapon skin cases.
                           </p>
                         </div>
                       </div>
-
-                      <button
-                        onClick={() => { sound.playSelect(); setActiveTab('play'); }}
-                        className="shrink-0 px-6 py-4 rounded-2xl bg-[#A3E635] hover:bg-[#B4F046] text-slate-950 font-display font-black text-sm uppercase tracking-wider transition cursor-pointer shadow-xl shadow-lime-500/25 flex items-center gap-3 hover:scale-105 active:scale-95 group"
-                      >
-                        <Play className="w-5 h-5 fill-slate-950 group-hover:scale-110 transition-transform" />
-                        <span>ENTER 5V5 PLAY QUEUE</span>
-                        <ArrowRight className="w-4 h-4" />
-                      </button>
                     </div>
 
                     {/* Quick Launch Cards */}
@@ -4605,7 +4642,7 @@ export const VortexDashboard: React.FC<VortexDashboardProps> = ({
                             displayLevelNum === 10 ? 'border-orange-500 shadow-[0_0_25px_rgba(255,85,0,0.35)]' : 'border-[#A3E635] shadow-[0_0_25px_rgba(163,230,53,0.35)]'
                           } ${!isViewingOther ? 'group-hover:brightness-75 transition' : ''}`}
                           onError={(e) => {
-                            (e.target as HTMLImageElement).src = '/images/blockeerz_avatar.png';
+                            (e.target as HTMLImageElement).src = 'https://distribution.faceit-cdn.net/images/ac453a50-dbca-4d42-a740-dac12bdc74c0.jpeg';
                           }}
                         />
                         {!isViewingOther && (
@@ -6359,7 +6396,7 @@ export const VortexDashboard: React.FC<VortexDashboardProps> = ({
                       alt="Avatar Preview"
                       className="w-20 h-20 rounded-2xl object-cover border-2 border-[#A3E635] shadow-[0_0_20px_rgba(163,230,53,0.3)] bg-slate-900"
                       onError={(e) => {
-                        (e.target as HTMLImageElement).src = '/images/blockeerz_avatar.png';
+                        (e.target as HTMLImageElement).src = 'https://distribution.faceit-cdn.net/images/ac453a50-dbca-4d42-a740-dac12bdc74c0.jpeg';
                       }}
                     />
                     <div className="absolute -bottom-1 -right-1 w-6 h-6 rounded-full bg-amber-500 text-black font-black text-xs flex items-center justify-center border-2 border-[#12141C] shadow-md">
@@ -6441,7 +6478,7 @@ export const VortexDashboard: React.FC<VortexDashboardProps> = ({
                       type="text"
                       value={draftGamerTag}
                       onChange={(e) => setDraftGamerTag(e.target.value)}
-                      placeholder="e.g. bLocKeeRz"
+                      placeholder="e.g. M14"
                       maxLength={18}
                       className="w-full px-4 py-2.5 rounded-xl bg-[#0A0D14] border border-white/10 focus:border-[#A3E635] text-white text-sm font-display font-bold outline-none"
                     />
@@ -6572,7 +6609,7 @@ export const VortexDashboard: React.FC<VortexDashboardProps> = ({
                     <button
                       type="button"
                       onClick={() => {
-                        const isFounder = currentGamerTag === 'bLocKeeRz';
+                        const isFounder = isUserAdminOrFounder(currentGamerTag);
                         if (!isFounder) {
                           sound.playClick();
                           setProVerificationNotice('🔒 Pro Verification (Gold Star) is strictly reserved for esports professionals, HLTV rosters, and approved tournament champions. Normal players receive the White Checkmark badge.');
@@ -6592,10 +6629,10 @@ export const VortexDashboard: React.FC<VortexDashboardProps> = ({
                       <div>
                         <div className={`text-xs font-display font-bold flex items-center gap-1 ${draftVerification === 'vip' ? 'text-white' : 'text-slate-300'}`}>
                           <span>VIP Pro (Gold)</span>
-                          {currentGamerTag !== 'bLocKeeRz' && <Lock className="w-3 h-3 text-amber-400 shrink-0" />}
+                          {!isUserAdminOrFounder(currentGamerTag) && <Lock className="w-3 h-3 text-amber-400 shrink-0" />}
                         </div>
                         <div className="text-[10px] font-mono text-amber-400">
-                          {currentGamerTag === 'bLocKeeRz' ? 'Official CS2 Pro (Founder)' : 'Pro Application Only'}
+                          {isUserAdminOrFounder(currentGamerTag) ? 'Official CS2 Pro (Founder)' : 'Pro Application Only'}
                         </div>
                       </div>
                     </button>
@@ -6705,7 +6742,7 @@ export const VortexDashboard: React.FC<VortexDashboardProps> = ({
                           setDraftFaceitNickname(e.target.value);
                           setFaceitSyncError(null);
                         }}
-                        placeholder="Enter FACEIT Nickname or Profile URL (e.g. bLocKeeRz)"
+                        placeholder="Enter FACEIT Nickname or Profile URL (e.g. M14)"
                         className="w-full pl-9 pr-4 py-2.5 rounded-xl bg-[#0A0D14] border border-white/10 focus:border-[#FF5500] text-white text-xs font-mono outline-none"
                       />
                     </div>
@@ -7017,7 +7054,7 @@ export const VortexDashboard: React.FC<VortexDashboardProps> = ({
                   <span className="absolute -top-1 -right-1 w-3 h-3 rounded-full bg-emerald-400 border-2 border-[#0E121B] animate-pulse" />
                 </div>
 
-                {/* The Name Badge directly UNDER the photo (bLocKeeRz ⭐ 🇽🇰) */}
+                {/* The Name Badge directly UNDER the photo (M14 ⭐ 🇽🇰) */}
                 <div className="flex items-center gap-1.5 px-3 py-1 rounded-full bg-white/[0.05] border border-white/10 shadow-sm">
                   <span className="font-display font-black text-white text-xs tracking-tight">
                     {activePartyInvite.sender}

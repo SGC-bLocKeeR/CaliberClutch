@@ -276,7 +276,7 @@ export const sendFriendRequest = (
   const req: FriendRequest = {
     id: `req-${Date.now()}-${Math.random().toString(36).substring(2, 7)}`,
     fromGamerTag: fromUser.gamerTag,
-    fromAvatar: fromUser.avatar || '/images/blockeerz_avatar.png',
+    fromAvatar: fromUser.avatar || 'https://distribution.faceit-cdn.net/images/ac453a50-dbca-4d42-a740-dac12bdc74c0.jpeg',
     fromLevel: fromUser.level || 1,
     fromElo: fromUser.elo || 800,
     fromVerification: fromUser.verification || 'none',
@@ -377,7 +377,7 @@ export const acceptFriendRequest = (
   const newFriendForSender: SocialFriend = {
     id: `f-${currentGamerTag.toLowerCase()}`,
     name: currentGamerTag,
-    avatar: currentUserInfo?.avatar || '/images/blockeerz_avatar.png',
+    avatar: currentUserInfo?.avatar || 'https://distribution.faceit-cdn.net/images/ac453a50-dbca-4d42-a740-dac12bdc74c0.jpeg',
     status: 'online',
     gameStatus: 'Online • In Lobby',
     verification: currentUserInfo?.verification || 'verified',

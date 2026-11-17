@@ -562,7 +562,7 @@ export const INITIAL_CONNECTED_SERVICES: ConnectedService[] = [
   {
     provider: 'faceit',
     name: 'FACEIT Pro Network',
-    accountName: 'bLocKeeRz',
+    accountName: 'M14',
     connected: true,
     verifiedElo: 1394,
     rankBadge: 'LEVEL 7 (VERIFIED)',
@@ -572,7 +572,7 @@ export const INITIAL_CONNECTED_SERVICES: ConnectedService[] = [
   {
     provider: 'riot',
     name: 'Riot Games Vanguard API',
-    accountName: 'bLocKeeRz#EUW',
+    accountName: 'M14#EUW',
     connected: true,
     verifiedElo: 1394,
     rankBadge: 'DIAMOND III (EU)',
@@ -593,12 +593,12 @@ export const INITIAL_CONNECTED_SERVICES: ConnectedService[] = [
 
 export const CURRENT_USER_PASSPORT: GamerPassport = {
   id: 'passport-user-01',
-  gamerTag: 'bLocKeeRz',
-  realName: 'bLocKeeRz',
+  gamerTag: 'M14',
+  realName: 'M14',
   avatar: 'https://distribution.faceit-cdn.net/images/ac453a50-dbca-4d42-a740-dac12bdc74c0.jpeg',
   country: 'Kosovo',
   countryFlag: '🇽🇰',
-  bio: 'Competitive CS2 Rifler & Faceit Level 7 Player from Ferizaj, Kosovo. In-game: BloodyEagle - bLocKeeR#1. Member since Dec 2019 with 840+ CS2 matches.',
+  bio: 'Competitive CS2 Rifler & Faceit Level 7 Player from Ferizaj, Kosovo. In-game: M14. Member since Dec 2019 with 840+ CS2 matches.',
   level: 28,
   membershipTier: 'pro',
   nexusRating: 1394,
@@ -680,11 +680,11 @@ export const CURRENT_USER_PASSPORT: GamerPassport = {
     monitorHz: '240Hz Esports Display'
   },
   socials: {
-    discord: 'bLocKeeRz',
+    discord: 'M14',
     steam: 'steamcommunity.com/profiles/76561198012241163',
-    riotId: 'bLocKeeRz#EUW',
-    twitch: 'twitch.tv/blockeer_csgo',
-    twitter: '@bLocKeeRz_cs'
+    riotId: 'M14#EUW',
+    twitch: 'twitch.tv/caliberclutch',
+    twitter: '@M14_cs'
   }
 };
 

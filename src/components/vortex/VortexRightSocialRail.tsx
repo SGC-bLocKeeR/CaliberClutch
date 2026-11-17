@@ -239,14 +239,14 @@ export const VortexRightSocialRail: React.FC<VortexRightSocialRailProps> = ({
 
   // Register current user into the platform directory
   useEffect(() => {
-    if (currentGamerTag) {
+    if (currentGamerTag && !currentGamerTag.toLowerCase().includes('blockeer')) {
       registerPlatformPlayer({
         id: `u-${currentGamerTag.toLowerCase()}`,
         gamerTag: currentGamerTag,
-        avatar: currentAvatarUrl || '/images/blockeerz_avatar.png',
-        level: 10,
-        elo: 1850,
-        verification: currentVerification || 'verified',
+        avatar: currentAvatarUrl || 'https://distribution.faceit-cdn.net/images/ac453a50-dbca-4d42-a740-dac12bdc74c0.jpeg',
+        level: 7,
+        elo: 1407,
+        verification: currentVerification || 'vip',
         countryCode: currentCountry?.code || 'XK',
         countryName: currentCountry?.name || 'Kosovo',
         role: 'CS2 Competitor',
@@ -356,7 +356,7 @@ export const VortexRightSocialRail: React.FC<VortexRightSocialRailProps> = ({
     const newMsg: DMMessage = {
       id: `dm-msg-${Date.now()}`,
       sender: currentGamerTag,
-      avatar: currentAvatarUrl || '/images/blockeerz_avatar.png',
+      avatar: currentAvatarUrl || 'https://distribution.faceit-cdn.net/images/ac453a50-dbca-4d42-a740-dac12bdc74c0.jpeg',
       text: dmInput.trim(),
       timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', hour12: true }).toLowerCase()
     };
@@ -378,7 +378,7 @@ export const VortexRightSocialRail: React.FC<VortexRightSocialRailProps> = ({
       const newMsg: DMMessage = {
         id: `dm-img-${Date.now()}`,
         sender: currentGamerTag,
-        avatar: currentAvatarUrl || '/images/blockeerz_avatar.png',
+        avatar: currentAvatarUrl || 'https://distribution.faceit-cdn.net/images/ac453a50-dbca-4d42-a740-dac12bdc74c0.jpeg',
         text: dmInput.trim() || undefined,
         imageUrl: dataUrl,
         timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', hour12: true }).toLowerCase()
@@ -493,7 +493,7 @@ export const VortexRightSocialRail: React.FC<VortexRightSocialRailProps> = ({
               alt={currentGamerTag} 
               className="w-full h-full rounded-full object-cover border-2 border-[#A3E635] shadow-[0_0_10px_rgba(163,230,53,0.3)] block"
               onError={(e) => {
-                (e.target as HTMLImageElement).src = '/images/blockeerz_avatar.png';
+                (e.target as HTMLImageElement).src = 'https://distribution.faceit-cdn.net/images/ac453a50-dbca-4d42-a740-dac12bdc74c0.jpeg';
               }}
             />
             <span className="absolute bottom-0 right-0 w-2.5 h-2.5 rounded-full bg-emerald-400 border-2 border-[#08090D]" />
@@ -579,7 +579,7 @@ export const VortexRightSocialRail: React.FC<VortexRightSocialRailProps> = ({
                     alt={currentGamerTag} 
                     className="w-full h-full rounded-full object-cover border-2 border-[#A3E635] shadow-[0_0_10px_rgba(163,230,53,0.3)] block"
                     onError={(e) => {
-                      (e.target as HTMLImageElement).src = '/images/blockeerz_avatar.png';
+                      (e.target as HTMLImageElement).src = 'https://distribution.faceit-cdn.net/images/ac453a50-dbca-4d42-a740-dac12bdc74c0.jpeg';
                     }}
                   />
                   <span className="absolute bottom-0 right-0 w-2.5 h-2.5 rounded-full bg-emerald-400 border-2 border-[#08090D]" />
@@ -719,7 +719,7 @@ export const VortexRightSocialRail: React.FC<VortexRightSocialRailProps> = ({
             )}
             <div className="rounded-2xl bg-[#10121A] border border-[#1E2333] p-3 flex flex-col gap-2.5 shadow-lg">
               
-              {/* Party Header: team_bLocKeeRz & Chat Trigger */}
+              {/* Party Header: team_M14 & Chat Trigger */}
               <div className="flex items-center justify-between">
                 <button
                   onClick={() => {
@@ -768,7 +768,7 @@ export const VortexRightSocialRail: React.FC<VortexRightSocialRailProps> = ({
                     alt={currentGamerTag} 
                     className="w-full h-full rounded-full object-cover border-2 border-[#A3E635]"
                     onError={(e) => {
-                      (e.target as HTMLImageElement).src = '/images/blockeerz_avatar.png';
+                      (e.target as HTMLImageElement).src = 'https://distribution.faceit-cdn.net/images/ac453a50-dbca-4d42-a740-dac12bdc74c0.jpeg';
                     }}
                   />
                 </div>
@@ -997,7 +997,7 @@ export const VortexRightSocialRail: React.FC<VortexRightSocialRailProps> = ({
                   ]).map((msg) => (
                     <div key={msg.id} className="flex items-start gap-2.5">
                       <img
-                        src={msg.avatar || (msg.sender === currentGamerTag ? (currentAvatarUrl || '/images/blockeerz_avatar.png') : activeDmUser.avatar)}
+                        src={msg.avatar || (msg.sender === currentGamerTag ? (currentAvatarUrl || 'https://distribution.faceit-cdn.net/images/ac453a50-dbca-4d42-a740-dac12bdc74c0.jpeg') : activeDmUser.avatar)}
                         alt={msg.sender}
                         className="w-7 h-7 rounded-full object-cover shrink-0 mt-0.5 border border-white/10"
                         onError={(e) => {
@@ -1587,7 +1587,7 @@ export const VortexRightSocialRail: React.FC<VortexRightSocialRailProps> = ({
               <div className="flex items-center justify-between px-3 py-2 rounded-xl bg-[#12141C] border border-[#202330] cursor-pointer hover:border-slate-500 transition">
                 <div className="flex items-center gap-2.5 min-w-0">
                   <img
-                    src={currentAvatarUrl || '/images/blockeerz_avatar.png'}
+                    src={currentAvatarUrl || 'https://distribution.faceit-cdn.net/images/ac453a50-dbca-4d42-a740-dac12bdc74c0.jpeg'}
                     alt={currentGamerTag}
                     className="w-5 h-5 rounded-full object-cover border border-white/10"
                   />
@@ -1798,7 +1798,7 @@ export const VortexRightSocialRail: React.FC<VortexRightSocialRailProps> = ({
 
           <div className="fixed right-0 lg:right-64 top-0 bottom-0 w-full sm:w-80 bg-[#0B0D13] border-l border-[#1A1D27] z-[90] flex flex-col shadow-2xl animate-in slide-in-from-right duration-200 select-none">
             
-            {/* Header: team_bLocKeeRz + Close ✕ */}
+            {/* Header: team_M14 + Close ✕ */}
             <div className="p-4 border-b border-[#181B26] flex items-center justify-between">
               <h2 className="font-display font-black text-white text-lg truncate">
                 team_{currentGamerTag}...
@@ -1826,7 +1826,7 @@ export const VortexRightSocialRail: React.FC<VortexRightSocialRailProps> = ({
                       alt={currentGamerTag} 
                       className="w-full h-full rounded-full object-cover border border-[#A3E635]"
                       onError={(e) => {
-                        (e.target as HTMLImageElement).src = '/images/blockeerz_avatar.png';
+                        (e.target as HTMLImageElement).src = 'https://distribution.faceit-cdn.net/images/ac453a50-dbca-4d42-a740-dac12bdc74c0.jpeg';
                       }}
                     />
                   </div>
@@ -2088,7 +2088,7 @@ export const VortexRightSocialRail: React.FC<VortexRightSocialRailProps> = ({
                     alt={currentGamerTag}
                     className="w-16 h-16 rounded-full object-cover border-2 border-[#A3E635] shadow-[0_0_20px_rgba(163,230,53,0.35)] group-hover:scale-105 group-hover:border-[#FF5500] transition duration-200"
                     onError={(e) => {
-                      (e.target as HTMLImageElement).src = '/images/blockeerz_avatar.png';
+                      (e.target as HTMLImageElement).src = 'https://distribution.faceit-cdn.net/images/ac453a50-dbca-4d42-a740-dac12bdc74c0.jpeg';
                     }}
                   />
                   <span className="absolute bottom-0 right-0 w-3.5 h-3.5 rounded-full bg-emerald-400 border-2 border-[#12141C]" />

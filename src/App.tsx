@@ -12,10 +12,21 @@ export function App() {
 
   const [landingMode] = useState<'pure-html' | 'image-reference'>('pure-html');
   const [userGamerTag, setUserGamerTag] = useState<string>(() => {
-    return localStorage.getItem('vortex_user_gamertag') || 'M14';
+    const saved = localStorage.getItem('vortex_user_gamertag');
+    if (!saved || saved.toLowerCase().includes('blockeer')) {
+      localStorage.setItem('vortex_user_gamertag', 'M14');
+      return 'M14';
+    }
+    return saved;
   });
   const [avatarUrl, setAvatarUrl] = useState<string>(() => {
-    return localStorage.getItem('vortex_user_avatar') || 'https://distribution.faceit-cdn.net/images/ac453a50-dbca-4d42-a740-dac12bdc74c0.jpeg';
+    const saved = localStorage.getItem('vortex_user_avatar');
+    if (!saved || saved.includes('blockeerz')) {
+      const def = 'https://distribution.faceit-cdn.net/images/ac453a50-dbca-4d42-a740-dac12bdc74c0.jpeg';
+      localStorage.setItem('vortex_user_avatar', def);
+      return def;
+    }
+    return saved;
   });
   const [initialOpenPremium, setInitialOpenPremium] = useState<boolean>(false);
 
@@ -97,7 +108,7 @@ export function App() {
     localStorage.removeItem('vortex_user_verification');
     localStorage.removeItem('vortex_faceit_nickname');
     localStorage.removeItem('vortex_faceit_connected');
-    setUserGamerTag('bLocKeeRz');
+    setUserGamerTag('M14');
   };
 
   return (
