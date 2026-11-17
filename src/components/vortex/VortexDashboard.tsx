@@ -203,7 +203,7 @@ const COMING_SOON_TABS: Record<string, ComingSoonData> = {
   }
 };
 
-const SHOW_TOURNAMENTS_LIVE = false; // Kept under development per user instruction until ready to launch
+const SHOW_TOURNAMENTS_LIVE = true; // Caliber Clutch official tournament circuit is now fully LIVE
 
 export interface PlatformRankingPlayer {
   rank: string;
@@ -973,6 +973,19 @@ export const VortexDashboard: React.FC<VortexDashboardProps> = ({
     return localStorage.getItem('vortex_notified_coming_soon') === 'true';
   });
 
+  // Tournaments Interactive State
+  const [registeredTourneys, setRegisteredTourneys] = useState<string[]>(() => {
+    try {
+      const saved = localStorage.getItem('vortex_registered_tournaments');
+      if (saved) return JSON.parse(saved);
+    } catch (_) {}
+    return ['CALIBER CLUTCH Major Championship 2026'];
+  });
+  const [selectedBracketTourney, setSelectedBracketTourney] = useState<any | null>(null);
+  const [selectedRegisterTourney, setSelectedRegisterTourney] = useState<any | null>(null);
+  const [tourneyFilter, setTourneyFilter] = useState<'all' | 'live' | 'open' | 'registered'>('all');
+  const [tourneySearchQuery, setTourneySearchQuery] = useState<string>('');
+
   useEffect(() => {
     const handleWallet = (e: Event) => {
       const custom = e as CustomEvent<number>;
@@ -1450,7 +1463,8 @@ export const VortexDashboard: React.FC<VortexDashboardProps> = ({
   }, [initialOpenPremium]);
   const [connectToast, setConnectToast] = useState<{ name: string; ip: string } | null>(null);
   const [rankingSearch, setRankingSearch] = useState('');
-  const [rankingRegion, setRankingRegion] = useState<'all' | 'XK' | 'AL' | 'lvl10'>('all');
+  const [rankingTab, setRankingTab] = useState<'europe' | 'global' | 'lvl10'>('europe');
+  const [rankingCountry, setRankingCountry] = useState<string>('all');
   const [viewedPlayer, setViewedPlayer] = useState<PlatformRankingPlayer | null>(null);
   const [hoveredTooltip, setHoveredTooltip] = useState<string | null>(null);
 
@@ -1876,10 +1890,12 @@ export const VortexDashboard: React.FC<VortexDashboardProps> = ({
     {
       id: 'tournaments' as VortexTab,
       label: 'Tournaments',
-      desc: 'Season 1 • Under Dev',
+      desc: isVisitorMode ? 'Season 1 • European Circuit' : 'Cash & CS2 Skins Circuit',
       icon: Trophy,
-      badge: 'COMING SOON',
-      badgeColor: 'bg-amber-500/15 text-amber-400 border border-amber-500/30 font-bold'
+      badge: isVisitorMode ? 'COMING SOON' : 'LIVE',
+      badgeColor: isVisitorMode
+        ? 'bg-amber-500/15 text-amber-400 border border-amber-500/30 font-bold'
+        : 'bg-yellow-500/15 text-yellow-400 border border-yellow-500/30 font-bold'
     },
     {
       id: 'cases' as VortexTab,
@@ -3517,8 +3533,8 @@ export const VortexDashboard: React.FC<VortexDashboardProps> = ({
                 <div>
                   <div className="flex items-center gap-2.5">
                     <h2 className="text-2xl font-black font-display text-white">CALIBER CLUTCH CS2 TOURNAMENT CIRCUIT</h2>
-                    <span className="px-2.5 py-0.5 rounded-full bg-emerald-500/15 border border-emerald-500/30 text-emerald-400 font-mono text-[10px] font-bold">
-                      VERIFIED ARENA
+                    <span className="px-2.5 py-0.5 rounded-full bg-emerald-500/15 border border-emerald-500/30 text-emerald-400 font-mono text-[10px] font-bold animate-pulse">
+                      SEASON 1 LIVE
                     </span>
                   </div>
                   <p className="text-xs text-[#94A3B8] mt-1">
@@ -3535,16 +3551,77 @@ export const VortexDashboard: React.FC<VortexDashboardProps> = ({
                 </div>
               </div>
 
+              {/* Circuit Quick Stats Banner */}
+              <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 p-4 rounded-2xl bg-[#090C12] border border-white/5">
+                <div className="p-3 rounded-xl bg-black/40 border border-white/5">
+                  <div className="text-[10px] font-mono text-slate-400 uppercase">Season 1 Cash Pool</div>
+                  <div className="text-xl font-mono font-black text-[#A3E635]">€25,000</div>
+                </div>
+                <div className="p-3 rounded-xl bg-black/40 border border-white/5">
+                  <div className="text-[10px] font-mono text-slate-400 uppercase">Enrolled Teams</div>
+                  <div className="text-xl font-mono font-black text-white">108 Rosters</div>
+                </div>
+                <div className="p-3 rounded-xl bg-black/40 border border-white/5">
+                  <div className="text-[10px] font-mono text-slate-400 uppercase">Dedicated Servers</div>
+                  <div className="text-xl font-mono font-black text-amber-400">128-Tick EU</div>
+                </div>
+                <div className="p-3 rounded-xl bg-black/40 border border-white/5">
+                  <div className="text-[10px] font-mono text-slate-400 uppercase">Integrity</div>
+                  <div className="text-xl font-mono font-black text-emerald-400 flex items-center gap-1.5">
+                    <ShieldCheck className="w-5 h-5 text-emerald-400" />
+                    <span>Ring-0 AC</span>
+                  </div>
+                </div>
+              </div>
+
+              {/* Tournament Filters & Search Bar */}
+              <div className="flex flex-wrap items-center justify-between gap-4">
+                <div className="flex flex-wrap items-center gap-2">
+                  {[
+                    { id: 'all', label: 'All Tournaments (4)' },
+                    { id: 'live', label: '🔴 Live Now (1)' },
+                    { id: 'open', label: '⚡ Open Registration (2)' },
+                    { id: 'registered', label: `✓ My Registered (${registeredTourneys.length})` }
+                  ].map(tab => (
+                    <button
+                      key={tab.id}
+                      onClick={() => { sound.playClick(); setTourneyFilter(tab.id as any); }}
+                      className={`px-3.5 py-1.5 rounded-xl text-xs font-mono font-bold transition cursor-pointer ${
+                        tourneyFilter === tab.id
+                          ? 'bg-[#A3E635] text-slate-950 shadow-md font-black'
+                          : 'bg-[#141722] text-slate-400 hover:text-white border border-[#232938]'
+                      }`}
+                    >
+                      {tab.label}
+                    </button>
+                  ))}
+                </div>
+
+                <div className="relative">
+                  <Search className="w-3.5 h-3.5 text-slate-400 absolute left-3 top-1/2 -translate-y-1/2" />
+                  <input
+                    type="text"
+                    value={tourneySearchQuery}
+                    onChange={(e) => setTourneySearchQuery(e.target.value)}
+                    placeholder="Search tournaments..."
+                    className="pl-8 pr-3 py-1.5 rounded-xl bg-[#12141C] border border-[#232938] text-xs font-mono text-white placeholder-slate-500 focus:outline-none focus:border-[#A3E635]"
+                  />
+                </div>
+              </div>
+
               {/* Tournament Cards with Cash + CS2 Skins Prize Breakdown */}
               <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
                 {[
                   {
+                    id: 'major-2026',
                     title: 'CALIBER CLUTCH Major Championship 2026',
                     cashPrize: '€10,000',
                     teams: '32 / 32',
                     date: 'LIVE NOW',
                     status: 'IN PROGRESS',
                     badge: 'bg-emerald-500/15 text-emerald-400 border-emerald-500/30',
+                    isLive: true,
+                    isOpen: false,
                     skins: [
                       { place: '1st', name: '★ Karambit | Lore (FN)', price: 1850, image: 'https://community.cloudflare.steamstatic.com/economy/image/-9a81dlWLwJ2UUGcVs_nsVtzdOEdtWwKGZZLQHTxDZ7I56KU0Zwwo4NUX4oFJZEHLbXH5ApeO4YmlhxYQknCRvCo04DEVlxkKgpovbSsLQJf2OD3fm5b09mJmYm0m_7zO6-fzj9V7cAl2eyVpIrz2FKx_0FtZ2D1cIGRcQRsYQ7Q81W3lOjxxcjr3M4pYjY/360fx360f' },
                       { place: '2nd', name: 'M4A4 | Temukau (FN)', price: 240, image: 'https://imgproxy.dmarket.com/insecure/rs:fit:360:260:0/g:ce/aHR0cHM6Ly9jb21tdW5pdHkuYWthbWFpLnN0ZWFtc3RhdGljLmNvbS9lY29ub215L2ltYWdlL2kwQ29aODFVaTBtLTlLd2xCWTFMXzE4bXl1R3VxMXdmaFdTYVpnTXR0eVZmUGFFUlNSMFdxbXU3TEFvY0dKS3oybHVfWHNuWHd0bWtKalNVOTFkaDhiajM1VlRxVkJQNGlvX2ZybkFWdmZiNmFxZHVjX1RGVmpUQ3hieDA1T1U0UzNqaWxFOXc0RHpSbkltdEl5MlNhMUp6REpFaFJQbEs3RWNPNFU4Z2ZB.webp' },
@@ -3552,12 +3629,15 @@ export const VortexDashboard: React.FC<VortexDashboardProps> = ({
                     ]
                   },
                   {
+                    id: 'balkan-open',
                     title: 'CALIBER CLUTCH CS2 Balkan Open Cup',
                     cashPrize: '€5,000',
                     teams: '16 / 16',
                     date: 'Starts in: 2d 14h',
                     status: 'OPEN',
                     badge: 'bg-lime-500/15 text-lime-400 border-lime-500/30',
+                    isLive: false,
+                    isOpen: true,
                     skins: [
                       { place: '1st', name: '★ M9 Bayonet | Doppler (FN)', price: 1200, image: 'https://community.cloudflare.steamstatic.com/economy/image/-9a81dlWLwJ2UUGcVs_nsVtzdOEdtWwKGZZLQHTxDZ7I56KU0Zwwo4NUX4oFJZEHLbXH5ApeO4YmlhxYQknCRvCo04DEVlxkKgpovbSsLQJfwOfBfUEv7d6_kIGZqOT9NrrFmDkH7p112rmRpt7wigbhqEVla2j1d9SXelI4aQ3X-wfrwb-60JO1uZ2ayXBkvyBzsHjcnkC30xsccKUx0lQ18oJv/360fx360f' },
                       { place: '2nd', name: 'AK-47 | Inheritance (FN)', price: 145, image: 'https://imgproxy.dmarket.com/insecure/rs:fit:360:260:0/g:ce/aHR0cHM6Ly9jb21tdW5pdHkuYWthbWFpLnN0ZWFtc3RhdGljLmNvbS9lY29ub215L2ltYWdlL2kwQ29aODFVaTBtLTlLd2xCWTFMXzE4bXl1R3VxMXdmaFdTYVpnTXR0eVZmUGFFUlNSMFdxbXU3TEFvY0dJR3ozVXFsWE9McnhNLXZNR21XOFZOeHU1RHg2MG5vVHlMd2xjSzN3aU5RME9LaGVxZG9MUEdhQUZpY3lPbC1wSzh4R0hfbndVdDFzR3JTejlpdmNIS1FPQWNqWE1Za1J1NVl1eGU0bFlDeVpPcTI1VlNNMm9NVDAyeWcyVXhCU0VnQQ==.webp' },
@@ -3565,12 +3645,15 @@ export const VortexDashboard: React.FC<VortexDashboardProps> = ({
                     ]
                   },
                   {
+                    id: 'iem-qualifier',
                     title: 'IEM Katowice 2026 Community Qualifier',
                     cashPrize: '€7,500',
                     teams: '48 / 64',
                     date: 'Starts in: 5d 08h',
                     status: 'REGISTRATION',
                     badge: 'bg-amber-500/15 text-amber-400 border-amber-500/30',
+                    isLive: false,
+                    isOpen: true,
                     skins: [
                       { place: '1st', name: '★ Butterfly Knife | Slaughter (MW)', price: 1450, image: 'https://imgproxy.dmarket.com/insecure/rs:fit:360:260:0/g:ce/aHR0cHM6Ly9jb21tdW5pdHkuYWthbWFpLnN0ZWFtc3RhdGljLmNvbS9lY29ub215L2ltYWdlL2kwQ29aODFVaTBtLTlLd2xCWTFMXzE4bXl1R3VxMXdmaFdTYVpnTXR0eVZmUGFFUlNSMFdxbXU3TEFvY0dKS3oybHVfWHNuWHd0bWtKalNVOTFkaDhiajM1VlRxVkJQNGlvX2ZybklWN0tiNU9hVS1KcWZIRHpYRmxlMHU0TFk4R3lfa2tSZ2lzR3pjbTR2NEozdkRPQVFtRE1keVJ2bEs3RWNtZUNVM3l3.webp' },
                       { place: '2nd', name: 'USP-S | Printstream (FN)', price: 110, image: 'https://imgproxy.dmarket.com/insecure/rs:fit:360:260:0/g:ce/aHR0cHM6Ly9jb21tdW5pdHkuYWthbWFpLnN0ZWFtc3RhdGljLmNvbS9lY29ub215L2ltYWdlL2kwQ29aODFVaTBtLTlLd2xCWTFMXzE4bXl1R3VxMXdmaFdTYVpnTXR0eVZmUGFFUlNSMFdxbXU3TEFvY0dKS3oybHVfWHNuWHd0bWtKalNVOTFkaDhiajM1VlRxVkJQNGlvX2ZybkFWdmZiNmFxZHVjX1RGVmpUQ3hieDA1T1U0UzNqaWxFOXc0RHpSbkltdEl5MlNhMUp6REpFaFJQbEs3RWNPNFU4Z2ZB.webp' },
@@ -3578,102 +3661,139 @@ export const VortexDashboard: React.FC<VortexDashboardProps> = ({
                     ]
                   },
                   {
+                    id: 'weekly-scrimfest',
                     title: 'CALIBER CLUTCH Weekly Scrimfest',
                     cashPrize: '€2,500',
                     teams: '12 / 16',
                     date: 'Starts Saturday',
                     status: 'REGISTER',
                     badge: 'bg-sky-500/15 text-sky-400 border-sky-500/30',
+                    isLive: false,
+                    isOpen: true,
                     skins: [
                       { place: '1st', name: '★ Kukri Knife | Fade (FN)', price: 850, image: 'https://imgproxy.dmarket.com/insecure/rs:fit:360:260:0/g:ce/aHR0cHM6Ly9jb21tdW5pdHkuYWthbWFpLnN0ZWFtc3RhdGljLmNvbS9lY29ub215L2ltYWdlL2kwQ29aODFVaTBtLTlLd2xCWTFMXzE4bXl1R3VxMXdmaFdTYVpnTXR0eVZmUGFFUlNSMFdxbXU3TEFvY0dKS3oybHVfWHNuWHd0bWtKalNVOTFkaDhiajM1VlRxVkJQNGlvX2ZybkVWdnFmX2E2Vm9JZkdTWHo3SGxid2c1N1F3U1NfbXhobDE1amlHeU4zN2MzX0dadzkxVzhCd1JmbEs3RWZLc2Eyc2Z3.webp' },
                       { place: '2nd', name: 'AWP | Chromatic Aberration (FN)', price: 35, image: 'https://imgproxy.dmarket.com/insecure/rs:fit:360:260:0/g:ce/aHR0cHM6Ly9jb21tdW5pdHkuYWthbWFpLnN0ZWFtc3RhdGljLmNvbS9lY29ub215L2ltYWdlL2kwQ29aODFVaTBtLTlLd2xCWTFMXzE4bXl1R3VxMXdmaFdTYVpnTXR0eVZmUGFFUlNSMFdxbXU3TEFvY0dJR3ozVXFsWE9McnhNLXZNR21XOFZOeHU1RHg2MG5vVHlMd2xjSzN3aU5RME9LaGVxZG9MUEdhQUZpY3lPbC1wSzh4R0hfbndVdDFzR3JTejlpdmNIS1FPQWNqWE1Za1J1NVl1eGU0bFlDeVpPcTI1VlNNMm9NVDAyeWcyVXhCU0VnQQ==.webp' },
                       { place: '3rd', name: 'AK-47 | Slate (FN)', price: 20, image: 'https://community.cloudflare.steamstatic.com/economy/image/-9a81dlWLwJ2UUGcVs_nsVtzdOEdtWwKGZZLQHTxDZ7I56KU0Zwwo4NUX4oFJZEHLbXH5ApeO4YmlhxYQknCRvCo04DEVlxkKgpot621FABz7PLfYQJS5NO0m5O0m_7zO6-fk29T-sBzpezT_I2tiVXs-RE5YTincY-WdVA4N13R81brx-e51sW9786czydiuSQn4ivcnBfmn1gSOd0N_1mS/360fx360f' }
                     ]
                   }
-                ].map((t, idx) => (
-                  <div key={idx} className="p-6 rounded-3xl bg-[#12141C] border border-[#23293B] hover:border-amber-400/50 transition flex flex-col justify-between gap-5 group shadow-lg">
-                    <div className="space-y-4">
-                      <div className="flex items-start justify-between">
-                        <div>
-                          <span className={`px-2.5 py-1 rounded text-[10px] font-mono font-bold border ${t.badge}`}>{t.status}</span>
-                          <h3 className="text-xl font-black font-display text-white mt-3 group-hover:text-amber-400 transition">{t.title}</h3>
-                          <p className="text-xs font-mono text-[#94A3B8] mt-1">{t.date}</p>
-                        </div>
-                        <div className="text-right">
-                          <div className="text-2xl font-black font-mono text-[#A3E635]">{t.cashPrize}</div>
-                          <div className="text-[10px] text-[#94A3B8] uppercase">Cash Pool</div>
-                        </div>
-                      </div>
+                ]
+                  .filter(t => {
+                    if (tourneyFilter === 'live' && !t.isLive) return false;
+                    if (tourneyFilter === 'open' && !t.isOpen) return false;
+                    if (tourneyFilter === 'registered' && !registeredTourneys.includes(t.title)) return false;
+                    if (tourneySearchQuery.trim()) {
+                      const q = tourneySearchQuery.toLowerCase().trim();
+                      return t.title.toLowerCase().includes(q) || t.cashPrize.toLowerCase().includes(q);
+                    }
+                    return true;
+                  })
+                  .map((t, idx) => {
+                    const isRegistered = registeredTourneys.includes(t.title);
 
-                      {/* CS2 Guaranteed Skin Prizes Preview */}
-                      <div className="p-3 rounded-2xl bg-black/40 border border-white/5 space-y-2">
-                        <div className="flex items-center justify-between text-[11px] font-mono text-slate-400">
-                          <span className="flex items-center gap-1 text-amber-400 font-bold">
-                            <Gift className="w-3.5 h-3.5" />
-                            <span>Guaranteed Skin Drops:</span>
-                          </span>
-                          <span className="text-[10px] text-emerald-400">Steam Bot Dispatch</span>
+                    return (
+                      <div key={idx} className="p-6 rounded-3xl bg-[#12141C] border border-[#23293B] hover:border-amber-400/50 transition flex flex-col justify-between gap-5 group shadow-lg">
+                        <div className="space-y-4">
+                          <div className="flex items-start justify-between">
+                            <div>
+                              <div className="flex items-center gap-2">
+                                <span className={`px-2.5 py-1 rounded text-[10px] font-mono font-bold border ${t.badge}`}>{t.status}</span>
+                                {isRegistered && (
+                                  <span className="px-2 py-0.5 rounded text-[10px] font-mono font-bold bg-emerald-500/20 text-emerald-400 border border-emerald-500/30 flex items-center gap-1">
+                                    <CheckCircle2 className="w-3 h-3" />
+                                    ENROLLED
+                                  </span>
+                                )}
+                              </div>
+                              <h3 className="text-xl font-black font-display text-white mt-3 group-hover:text-amber-400 transition">{t.title}</h3>
+                              <p className="text-xs font-mono text-[#94A3B8] mt-1">{t.date}</p>
+                            </div>
+                            <div className="text-right">
+                              <div className="text-2xl font-black font-mono text-[#A3E635]">{t.cashPrize}</div>
+                              <div className="text-[10px] text-[#94A3B8] uppercase">Cash Pool</div>
+                            </div>
+                          </div>
+
+                          {/* CS2 Guaranteed Skin Prizes Preview */}
+                          <div className="p-3 rounded-2xl bg-black/40 border border-white/5 space-y-2">
+                            <div className="flex items-center justify-between text-[11px] font-mono text-slate-400">
+                              <span className="flex items-center gap-1 text-amber-400 font-bold">
+                                <Gift className="w-3.5 h-3.5" />
+                                <span>Guaranteed Skin Drops:</span>
+                              </span>
+                              <span className="text-[10px] text-emerald-400">Steam Bot Dispatch</span>
+                            </div>
+
+                            <div className="grid grid-cols-3 gap-2">
+                              {t.skins.map((skin, sIdx) => (
+                                <div 
+                                  key={sIdx}
+                                  className="p-2 rounded-xl bg-[#090C12] border border-white/5 hover:border-amber-400/40 transition flex flex-col items-center text-center cursor-pointer"
+                                  onClick={() => {
+                                    sound.playSelect();
+                                    setSimulatedBotOffer({
+                                      tournament: t.title,
+                                      skinName: skin.name,
+                                      price: skin.price
+                                    });
+                                  }}
+                                  title={`Click to inspect ${skin.name} trade dispatch`}
+                                >
+                                  <div className="text-[9px] font-mono font-bold text-amber-400 mb-0.5">{skin.place} Place</div>
+                                  <img src={skin.image} alt={skin.name} className="w-12 h-10 object-contain my-1 group-hover:scale-105 transition-transform" />
+                                  <div className="text-[10px] font-bold text-white truncate w-full">{skin.name}</div>
+                                  <div className="text-[9px] font-mono text-emerald-400 font-bold">{skin.price} €</div>
+                                </div>
+                              ))}
+                            </div>
+                          </div>
                         </div>
 
-                        <div className="grid grid-cols-3 gap-2">
-                          {t.skins.map((skin, sIdx) => (
-                            <div 
-                              key={sIdx}
-                              className="p-2 rounded-xl bg-[#090C12] border border-white/5 hover:border-amber-400/40 transition flex flex-col items-center text-center cursor-pointer"
+                        <div className="flex flex-wrap items-center justify-between pt-4 border-t border-[#1C2233] gap-3">
+                          <div className="flex items-center gap-2.5">
+                            <span className="text-xs font-mono text-slate-300">Slots: {t.teams}</span>
+                            <span className="text-slate-600">•</span>
+                            <button
+                              type="button"
                               onClick={() => {
                                 sound.playSelect();
-                                setSimulatedBotOffer({
-                                  tournament: t.title,
-                                  skinName: skin.name,
-                                  price: skin.price
-                                });
+                                setSelectedBracketTourney(t);
                               }}
-                              title={`Click to inspect ${skin.name} trade dispatch`}
+                              className="px-3 py-1.5 rounded-xl bg-white/5 hover:bg-white/10 text-xs font-mono text-slate-200 hover:text-white border border-white/10 transition cursor-pointer flex items-center gap-1.5"
                             >
-                              <div className="text-[9px] font-mono font-bold text-amber-400 mb-0.5">{skin.place} Place</div>
-                              <img src={skin.image} alt={skin.name} className="w-12 h-10 object-contain my-1 group-hover:scale-105 transition-transform" />
-                              <div className="text-[10px] font-bold text-white truncate w-full">{skin.name}</div>
-                              <div className="text-[9px] font-mono text-emerald-400 font-bold">{skin.price} €</div>
-                            </div>
-                          ))}
+                              <Eye className="w-3.5 h-3.5 text-amber-400" />
+                              <span>View Bracket</span>
+                            </button>
+                          </div>
+
+                          <div className="flex items-center gap-2">
+                            {isRegistered ? (
+                              <button
+                                onClick={() => {
+                                  sound.playSelect();
+                                  setSelectedRegisterTourney(t);
+                                }}
+                                className="px-4 py-2 rounded-full bg-emerald-500/20 text-emerald-400 border border-emerald-500/40 font-display font-black text-xs uppercase tracking-wider transition hover:bg-emerald-500/30 cursor-pointer flex items-center gap-1.5"
+                              >
+                                <CheckCircle2 className="w-4 h-4" />
+                                <span>Team Enrolled</span>
+                              </button>
+                            ) : (
+                              <button
+                                onClick={() => {
+                                  sound.playSelect();
+                                  setSelectedRegisterTourney(t);
+                                }}
+                                className="px-5 py-2.5 rounded-full bg-gradient-to-r from-[#84CC16] to-[#A3E635] hover:brightness-110 text-slate-950 font-display font-black text-xs uppercase tracking-wider transition shadow-md cursor-pointer active:scale-95 flex items-center gap-1.5"
+                              >
+                                <Trophy className="w-4 h-4" />
+                                <span>Register Team</span>
+                              </button>
+                            )}
+                          </div>
                         </div>
                       </div>
-                    </div>
-
-                    <div className="flex items-center justify-between pt-4 border-t border-[#1C2233] gap-3">
-                      <div className="flex items-center gap-2">
-                        <span className="text-xs font-mono text-slate-300">Slots: {t.teams}</span>
-                        <span className="text-slate-600">•</span>
-                        <button
-                          type="button"
-                          onClick={() => {
-                            sound.playSelect();
-                            setSimulatedBotOffer({
-                              tournament: t.title,
-                              skinName: t.skins[0].name,
-                              price: t.skins[0].price
-                            });
-                          }}
-                          className="text-[11px] font-mono text-amber-400 hover:underline cursor-pointer flex items-center gap-1"
-                        >
-                          <span>Simulate Trade Bot</span>
-                        </button>
-                      </div>
-
-                      <button
-                        onClick={() => {
-                          sound.playTournamentVictory();
-                          confetti({ particleCount: 70, spread: 60, origin: { y: 0.6 } });
-                          setDashboardToast(`✓ Registration confirmed for ${t.title}! Tournament match room will notify your team.`);
-                          setTimeout(() => setDashboardToast(null), 5000);
-                        }}
-                        className="px-5 py-2.5 rounded-full bg-gradient-to-r from-[#84CC16] to-[#A3E635] hover:brightness-110 text-slate-950 font-display font-black text-xs uppercase tracking-wider transition shadow-md cursor-pointer active:scale-95"
-                      >
-                        Register Team
-                      </button>
-                    </div>
-                  </div>
-                ))}
+                    );
+                  })}
               </div>
 
               {/* Legal & Regulatory Esports Compliance Footer */}
@@ -3700,9 +3820,8 @@ export const VortexDashboard: React.FC<VortexDashboardProps> = ({
           {/* ======================================================== */}
           {activeTab === 'rankings' && (() => {
             const filteredPlayers = platformRankingPlayers.filter(p => {
-              if (rankingRegion === 'XK' && p.code !== 'XK') return false;
-              if (rankingRegion === 'AL' && p.code !== 'AL') return false;
-              if (rankingRegion === 'lvl10' && p.levelNum !== 10) return false;
+              if (rankingTab === 'lvl10' && p.levelNum !== 10) return false;
+              if (rankingCountry !== 'all' && p.code !== rankingCountry) return false;
               if (rankingSearch.trim()) {
                 const q = rankingSearch.toLowerCase();
                 return p.tag.toLowerCase().includes(q) || p.country.toLowerCase().includes(q);
@@ -3948,51 +4067,65 @@ export const VortexDashboard: React.FC<VortexDashboardProps> = ({
                   </div>
                 )}
 
-                {/* SEARCH & REGION FILTERS */}
+                {/* SEARCH & FACEIT-STYLE REGION/COUNTRY FILTERS */}
                 <div className="flex flex-wrap items-center justify-between gap-4 pt-2">
-                  <div className="flex items-center gap-2">
+                  <div className="flex flex-wrap items-center gap-2">
                     <button
-                      onClick={() => setRankingRegion('all')}
-                      className={`px-3 py-1.5 rounded-xl text-xs font-mono font-bold transition cursor-pointer ${
-                        rankingRegion === 'all'
-                          ? 'bg-[#A3E635] text-slate-950 shadow-md'
+                      onClick={() => { sound.playClick(); setRankingTab('europe'); }}
+                      className={`px-3.5 py-1.5 rounded-xl text-xs font-mono font-bold transition cursor-pointer flex items-center gap-2 ${
+                        rankingTab === 'europe'
+                          ? 'bg-[#A3E635] text-slate-950 shadow-md font-black'
                           : 'bg-[#141722] text-slate-400 hover:text-white border border-[#232938]'
                       }`}
                     >
-                      All Platform Players
+                      <span>🇪🇺</span>
+                      <span>Europe</span>
                     </button>
+
                     <button
-                      onClick={() => setRankingRegion('XK')}
-                      className={`px-3 py-1.5 rounded-xl text-xs font-mono font-bold transition cursor-pointer flex items-center gap-1.5 ${
-                        rankingRegion === 'XK'
-                          ? 'bg-[#A3E635] text-slate-950 shadow-md'
+                      onClick={() => { sound.playClick(); setRankingTab('global'); }}
+                      className={`px-3.5 py-1.5 rounded-xl text-xs font-mono font-bold transition cursor-pointer flex items-center gap-2 ${
+                        rankingTab === 'global'
+                          ? 'bg-[#A3E635] text-slate-950 shadow-md font-black'
                           : 'bg-[#141722] text-slate-400 hover:text-white border border-[#232938]'
                       }`}
                     >
-                      <CountryFlag code="XK" name="Kosovo" size="xs" />
-                      <span>Kosovo</span>
+                      <span>🌐</span>
+                      <span>Global</span>
                     </button>
+
                     <button
-                      onClick={() => setRankingRegion('AL')}
-                      className={`px-3 py-1.5 rounded-xl text-xs font-mono font-bold transition cursor-pointer flex items-center gap-1.5 ${
-                        rankingRegion === 'AL'
-                          ? 'bg-[#A3E635] text-slate-950 shadow-md'
+                      onClick={() => { sound.playClick(); setRankingTab('lvl10'); }}
+                      className={`px-3.5 py-1.5 rounded-xl text-xs font-mono font-bold transition cursor-pointer flex items-center gap-2 ${
+                        rankingTab === 'lvl10'
+                          ? 'bg-[#A3E635] text-slate-950 shadow-md font-black'
                           : 'bg-[#141722] text-slate-400 hover:text-white border border-[#232938]'
                       }`}
                     >
-                      <CountryFlag code="AL" name="Albania" size="xs" />
-                      <span>Albania</span>
+                      <Crown className="w-3.5 h-3.5 text-amber-400" />
+                      <span>Challenger / Level 10</span>
                     </button>
-                    <button
-                      onClick={() => setRankingRegion('lvl10')}
-                      className={`px-3 py-1.5 rounded-xl text-xs font-mono font-bold transition cursor-pointer ${
-                        rankingRegion === 'lvl10'
-                          ? 'bg-[#A3E635] text-slate-950 shadow-md'
-                          : 'bg-[#141722] text-slate-400 hover:text-white border border-[#232938]'
-                      }`}
-                    >
-                      Level 10 Masters
-                    </button>
+
+                    {/* FACEIT Official Country Selector Dropdown */}
+                    <div className="relative">
+                      <select
+                        value={rankingCountry}
+                        onChange={(e) => { sound.playSelect(); setRankingCountry(e.target.value); }}
+                        className="px-3 py-1.5 rounded-xl bg-[#141722] border border-[#232938] text-xs font-mono text-slate-300 hover:text-white focus:outline-none focus:border-[#A3E635] cursor-pointer"
+                      >
+                        <option value="all">🌍 All Countries</option>
+                        <option value="XK">🇽🇰 Kosovo</option>
+                        <option value="AL">🇦🇱 Albania</option>
+                        <option value="DE">🇩🇪 Germany</option>
+                        <option value="SE">🇸🇪 Sweden</option>
+                        <option value="FI">🇫🇮 Finland</option>
+                        <option value="GB">🇬🇧 United Kingdom</option>
+                        <option value="FR">🇫🇷 France</option>
+                        <option value="DK">🇩🇰 Denmark</option>
+                        <option value="PL">🇵🇱 Poland</option>
+                        <option value="UA">🇺🇦 Ukraine</option>
+                      </select>
+                    </div>
                   </div>
 
                   <div className="relative">
@@ -6204,6 +6337,395 @@ export const VortexDashboard: React.FC<VortexDashboardProps> = ({
             >
               Confirm Steam Trade Verification
             </button>
+          </div>
+        </div>
+      )}
+
+      {/* CALIBER CLUTCH CS2 TOURNAMENT BRACKET & MATCHES VIEWER MODAL */}
+      {selectedBracketTourney && (
+        <div className="fixed inset-0 z-[130] bg-black/85 backdrop-blur-md flex items-center justify-center p-4 animate-in fade-in duration-200">
+          <div className="w-full max-w-4xl max-h-[90vh] overflow-y-auto bg-[#0C1019] border border-[#252E42] rounded-3xl p-6 sm:p-8 shadow-2xl space-y-6 text-left relative">
+            {/* Modal Header */}
+            <div className="flex items-start justify-between border-b border-[#1E2638] pb-4">
+              <div className="space-y-1">
+                <div className="flex items-center gap-2.5">
+                  <span className="px-2.5 py-0.5 rounded text-[10px] font-mono font-bold bg-[#A3E635]/15 text-[#A3E635] border border-[#A3E635]/30 uppercase">
+                    Official Bracket Tree
+                  </span>
+                  <span className="text-xs font-mono text-amber-400 font-bold">
+                    Prize: {selectedBracketTourney.cashPrize}
+                  </span>
+                </div>
+                <h3 className="text-xl sm:text-2xl font-black font-display text-white">
+                  {selectedBracketTourney.title}
+                </h3>
+                <p className="text-xs font-mono text-slate-400">
+                  Valve MR12 Ruleset • Single Elimination Bracket • Dedicated 128-Tick European Nodes
+                </p>
+              </div>
+              <button 
+                onClick={() => setSelectedBracketTourney(null)}
+                className="w-8 h-8 rounded-xl bg-white/5 hover:bg-white/10 text-slate-400 hover:text-white flex items-center justify-center transition cursor-pointer"
+              >
+                ✕
+              </button>
+            </div>
+
+            {/* Live GOTV Broadcast Banner */}
+            <div className="p-3.5 rounded-2xl bg-black/50 border border-emerald-500/30 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+              <div className="flex items-center gap-2.5">
+                <span className="w-2.5 h-2.5 rounded-full bg-emerald-400 animate-ping shrink-0" />
+                <span className="text-xs font-mono text-emerald-400 font-bold">
+                  LIVE GOTV BROADCAST (0% Jitter • 128-Tick)
+                </span>
+              </div>
+              <div className="flex items-center gap-2">
+                <code className="text-[11px] font-mono bg-black/80 px-2.5 py-1 rounded-lg text-slate-300 border border-white/10 select-all">
+                  connect tv.caliberclutch.gg:27020; password gotv
+                </code>
+                <button
+                  onClick={() => {
+                    sound.playClick();
+                    navigator.clipboard.writeText('connect tv.caliberclutch.gg:27020; password gotv');
+                    setDashboardToast('✓ GOTV connect command copied to clipboard!');
+                    setTimeout(() => setDashboardToast(null), 3000);
+                  }}
+                  className="px-2.5 py-1 rounded-lg bg-emerald-500/20 text-emerald-400 hover:bg-emerald-500/30 text-xs font-mono font-bold cursor-pointer transition"
+                >
+                  Copy
+                </button>
+              </div>
+            </div>
+
+            {/* Esports Bracket Columns */}
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4 pt-2">
+              {/* Quarterfinals */}
+              <div className="space-y-3">
+                <div className="text-xs font-mono font-bold text-slate-400 uppercase tracking-wider flex items-center justify-between">
+                  <span>Quarterfinals (BO1)</span>
+                  <span className="text-[10px] text-emerald-400">Finished</span>
+                </div>
+
+                {/* Match QF-1 */}
+                <div className="p-3.5 rounded-2xl bg-[#121622] border border-[#232B3D] space-y-2">
+                  <div className="flex justify-between items-center text-xs font-mono">
+                    <span className="text-white font-bold flex items-center gap-1.5">
+                      <CountryFlag code="XK" size="xs" />
+                      Bad News Eagles
+                    </span>
+                    <span className="font-bold text-emerald-400">13 ✓</span>
+                  </div>
+                  <div className="flex justify-between items-center text-xs font-mono text-slate-400">
+                    <span className="flex items-center gap-1.5">
+                      <CountryFlag code="GB" size="xs" />
+                      Guild Esports
+                    </span>
+                    <span>9</span>
+                  </div>
+                  <div className="text-[10px] font-mono text-slate-500 border-t border-white/5 pt-1.5 flex justify-between">
+                    <span>de_mirage</span>
+                    <span className="text-slate-400">MR12</span>
+                  </div>
+                </div>
+
+                {/* Match QF-2 */}
+                <div className="p-3.5 rounded-2xl bg-[#121622] border border-[#232B3D] space-y-2">
+                  <div className="flex justify-between items-center text-xs font-mono">
+                    <span className="text-amber-300 font-bold flex items-center gap-1.5">
+                      <Crown className="w-3.5 h-3.5 text-amber-400" />
+                      M14 Clan (YOU)
+                    </span>
+                    <span className="font-bold text-emerald-400">13 ✓</span>
+                  </div>
+                  <div className="flex justify-between items-center text-xs font-mono text-slate-400">
+                    <span className="flex items-center gap-1.5">
+                      <CountryFlag code="UA" size="xs" />
+                      Monte Academy
+                    </span>
+                    <span>7</span>
+                  </div>
+                  <div className="text-[10px] font-mono text-slate-500 border-t border-white/5 pt-1.5 flex justify-between">
+                    <span>de_inferno</span>
+                    <span className="text-slate-400">MR12</span>
+                  </div>
+                </div>
+
+                {/* Match QF-3 */}
+                <div className="p-3.5 rounded-2xl bg-[#121622] border border-[#232B3D] space-y-2">
+                  <div className="flex justify-between items-center text-xs font-mono">
+                    <span className="text-white font-bold flex items-center gap-1.5">
+                      <CountryFlag code="DE" size="xs" />
+                      FaZe Clan Youth
+                    </span>
+                    <span className="font-bold text-emerald-400">13 ✓</span>
+                  </div>
+                  <div className="flex justify-between items-center text-xs font-mono text-slate-400">
+                    <span className="flex items-center gap-1.5">
+                      <CountryFlag code="SE" size="xs" />
+                      Fnatic Rising
+                    </span>
+                    <span>11</span>
+                  </div>
+                  <div className="text-[10px] font-mono text-slate-500 border-t border-white/5 pt-1.5 flex justify-between">
+                    <span>de_ancient</span>
+                    <span className="text-slate-400">MR12</span>
+                  </div>
+                </div>
+
+                {/* Match QF-4 */}
+                <div className="p-3.5 rounded-2xl bg-[#121622] border border-[#232B3D] space-y-2">
+                  <div className="flex justify-between items-center text-xs font-mono">
+                    <span className="text-white font-bold flex items-center gap-1.5">
+                      <CountryFlag code="FR" size="xs" />
+                      G2 Academy
+                    </span>
+                    <span className="font-bold text-emerald-400">13 ✓</span>
+                  </div>
+                  <div className="flex justify-between items-center text-xs font-mono text-slate-400">
+                    <span className="flex items-center gap-1.5">
+                      <CountryFlag code="DK" size="xs" />
+                      Astralis Talent
+                    </span>
+                    <span>8</span>
+                  </div>
+                  <div className="text-[10px] font-mono text-slate-500 border-t border-white/5 pt-1.5 flex justify-between">
+                    <span>de_nuke</span>
+                    <span className="text-slate-400">MR12</span>
+                  </div>
+                </div>
+              </div>
+
+              {/* Semifinals */}
+              <div className="space-y-3">
+                <div className="text-xs font-mono font-bold text-slate-400 uppercase tracking-wider flex items-center justify-between">
+                  <span>Semifinals (BO3)</span>
+                  <span className="text-[10px] text-emerald-400">Finished</span>
+                </div>
+
+                {/* Match SF-1 */}
+                <div className="p-4 rounded-2xl bg-[#121622] border border-[#232B3D] space-y-2.5 mt-8">
+                  <div className="flex justify-between items-center text-xs font-mono">
+                    <span className="text-white font-bold flex items-center gap-1.5">
+                      <CountryFlag code="XK" size="xs" />
+                      Bad News Eagles
+                    </span>
+                    <span className="font-bold text-emerald-400">2 ✓</span>
+                  </div>
+                  <div className="flex justify-between items-center text-xs font-mono">
+                    <span className="text-amber-300 font-bold flex items-center gap-1.5">
+                      <Crown className="w-3.5 h-3.5 text-amber-400" />
+                      M14 Clan (YOU)
+                    </span>
+                    <span className="text-slate-400">1</span>
+                  </div>
+                  <div className="text-[10px] font-mono text-slate-500 border-t border-white/5 pt-1.5 flex justify-between">
+                    <span>Dust II (13-11), Mirage (10-13), Anubis (16-14)</span>
+                    <span className="text-amber-400">OT</span>
+                  </div>
+                </div>
+
+                {/* Match SF-2 */}
+                <div className="p-4 rounded-2xl bg-[#121622] border border-[#232B3D] space-y-2.5 mt-16">
+                  <div className="flex justify-between items-center text-xs font-mono text-slate-400">
+                    <span className="flex items-center gap-1.5">
+                      <CountryFlag code="DE" size="xs" />
+                      FaZe Clan Youth
+                    </span>
+                    <span>0</span>
+                  </div>
+                  <div className="flex justify-between items-center text-xs font-mono">
+                    <span className="text-white font-bold flex items-center gap-1.5">
+                      <CountryFlag code="FR" size="xs" />
+                      G2 Academy
+                    </span>
+                    <span className="font-bold text-emerald-400">2 ✓</span>
+                  </div>
+                  <div className="text-[10px] font-mono text-slate-500 border-t border-white/5 pt-1.5 flex justify-between">
+                    <span>Nuke (8-13), Inferno (11-13)</span>
+                    <span className="text-slate-400">BO3</span>
+                  </div>
+                </div>
+              </div>
+
+              {/* Grand Final */}
+              <div className="space-y-3">
+                <div className="text-xs font-mono font-bold text-amber-400 uppercase tracking-wider flex items-center justify-between">
+                  <span>Grand Final (BO3)</span>
+                  <span className="px-2 py-0.5 rounded bg-emerald-500/20 text-emerald-400 text-[9px] font-bold animate-pulse">
+                    LIVE NOW
+                  </span>
+                </div>
+
+                <div className="p-5 rounded-2xl bg-gradient-to-b from-[#181D2B] to-[#0D1017] border border-amber-500/40 shadow-xl space-y-3 mt-20">
+                  <div className="flex justify-between items-center text-sm font-mono">
+                    <span className="text-white font-black flex items-center gap-2">
+                      <CountryFlag code="XK" size="sm" />
+                      Bad News Eagles
+                    </span>
+                    <span className="font-black text-[#A3E635]">1</span>
+                  </div>
+                  <div className="flex justify-between items-center text-sm font-mono">
+                    <span className="text-white font-black flex items-center gap-2">
+                      <CountryFlag code="FR" size="sm" />
+                      G2 Academy
+                    </span>
+                    <span className="font-black text-[#A3E635]">1</span>
+                  </div>
+
+                  <div className="p-2.5 rounded-xl bg-black/60 border border-white/5 space-y-1 text-center">
+                    <div className="text-[10px] font-mono text-amber-400 font-bold uppercase">Decider Map 3: Inferno</div>
+                    <div className="text-lg font-mono font-black text-white">10 - 9 (Round 20)</div>
+                    <div className="text-[10px] font-mono text-slate-400">1st Place: ★ Karambit Lore + €6,000 Cash</div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            {/* Bottom Modal Button */}
+            <div className="pt-2 flex justify-end">
+              <button
+                onClick={() => setSelectedBracketTourney(null)}
+                className="px-6 py-2.5 rounded-xl bg-white/10 hover:bg-white/15 text-xs font-mono font-bold text-white transition cursor-pointer"
+              >
+                Close Bracket View
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* TEAM REGISTRATION & ROSTER LOCK MODAL */}
+      {selectedRegisterTourney && (
+        <div className="fixed inset-0 z-[130] bg-black/85 backdrop-blur-md flex items-center justify-center p-4 animate-in fade-in duration-200">
+          <div className="w-full max-w-lg bg-[#0C1019] border border-[#252E42] rounded-3xl p-6 sm:p-7 shadow-2xl space-y-5 text-left relative overflow-hidden">
+            <div className="flex items-start justify-between border-b border-[#1E2638] pb-3">
+              <div className="space-y-1">
+                <div className="flex items-center gap-2">
+                  <span className="px-2 py-0.5 rounded text-[10px] font-mono font-bold bg-[#A3E635]/15 text-[#A3E635] border border-[#A3E635]/30 uppercase">
+                    Roster Enrollment
+                  </span>
+                  <span className="text-xs font-mono text-slate-400">5v5 Tournament Roster</span>
+                </div>
+                <h3 className="text-lg font-black font-display text-white">
+                  {selectedRegisterTourney.title}
+                </h3>
+              </div>
+              <button 
+                onClick={() => setSelectedRegisterTourney(null)}
+                className="w-7 h-7 rounded-lg bg-white/5 hover:bg-white/10 text-slate-400 hover:text-white flex items-center justify-center transition cursor-pointer"
+              >
+                ✕
+              </button>
+            </div>
+
+            {/* Team Info Form */}
+            <div className="space-y-3 text-xs font-mono">
+              <div className="grid grid-cols-2 gap-3">
+                <div>
+                  <label className="text-[10px] text-slate-400 uppercase tracking-wider block mb-1">Team Name</label>
+                  <input
+                    type="text"
+                    defaultValue={`${currentGamerTag} Esports`}
+                    className="w-full px-3 py-2 rounded-xl bg-[#141722] border border-[#252C3D] text-white font-bold focus:outline-none focus:border-[#A3E635]"
+                  />
+                </div>
+                <div>
+                  <label className="text-[10px] text-slate-400 uppercase tracking-wider block mb-1">Team Tag</label>
+                  <input
+                    type="text"
+                    defaultValue={currentClanTag || 'M14'}
+                    maxLength={5}
+                    className="w-full px-3 py-2 rounded-xl bg-[#141722] border border-[#252C3D] text-amber-400 font-bold focus:outline-none focus:border-[#A3E635]"
+                  />
+                </div>
+              </div>
+
+              {/* Roster Slots List */}
+              <div className="space-y-1.5 pt-1">
+                <label className="text-[10px] text-slate-400 uppercase tracking-wider block">Confirmed 5v5 Roster</label>
+                <div className="p-3 rounded-2xl bg-black/40 border border-white/5 space-y-2">
+                  <div className="flex items-center justify-between text-xs font-mono">
+                    <span className="text-amber-300 font-bold flex items-center gap-1.5">
+                      <Crown className="w-3.5 h-3.5 text-amber-400" />
+                      1. {currentGamerTag} (Captain)
+                    </span>
+                    <span className="text-[10px] text-emerald-400 font-bold">Ring-0 AC Ready ✓</span>
+                  </div>
+                  <div className="flex items-center justify-between text-xs font-mono">
+                    <span className="text-white flex items-center gap-1.5">
+                      <CountryFlag code="XK" size="xs" />
+                      2. juanflatroo (Entry Fragger)
+                    </span>
+                    <span className="text-[10px] text-emerald-400 font-bold">Ring-0 AC Ready ✓</span>
+                  </div>
+                  <div className="flex items-center justify-between text-xs font-mono">
+                    <span className="text-white flex items-center gap-1.5">
+                      <CountryFlag code="XK" size="xs" />
+                      3. sener1 (Support / Anchor)
+                    </span>
+                    <span className="text-[10px] text-emerald-400 font-bold">Ring-0 AC Ready ✓</span>
+                  </div>
+                  <div className="flex items-center justify-between text-xs font-mono">
+                    <span className="text-white flex items-center gap-1.5">
+                      <CountryFlag code="XK" size="xs" />
+                      4. gxx- (Main AWPer)
+                    </span>
+                    <span className="text-[10px] text-emerald-400 font-bold">Ring-0 AC Ready ✓</span>
+                  </div>
+                  <div className="flex items-center justify-between text-xs font-mono">
+                    <span className="text-white flex items-center gap-1.5">
+                      <CountryFlag code="XK" size="xs" />
+                      5. sinnopsyy (IGL)
+                    </span>
+                    <span className="text-[10px] text-emerald-400 font-bold">Ring-0 AC Ready ✓</span>
+                  </div>
+                </div>
+              </div>
+
+              {/* Server & Integrity Checklist */}
+              <div className="p-3 rounded-xl bg-emerald-500/10 border border-emerald-500/20 text-[11px] text-emerald-300 space-y-1">
+                <div className="flex items-center gap-2">
+                  <ShieldCheck className="w-4 h-4 text-emerald-400 shrink-0" />
+                  <span>All 5 players passed Valve VAC & Caliber Clutch Ring-0 Anti-Cheat checks.</span>
+                </div>
+                <div className="flex items-center gap-2">
+                  <Zap className="w-4 h-4 text-emerald-400 shrink-0" />
+                  <span>Dedicated server allocated: Frankfurt Node #02 (128-Tick • Ping 14 ms).</span>
+                </div>
+              </div>
+            </div>
+
+            {/* Modal Actions */}
+            <div className="pt-2 flex items-center justify-end gap-3">
+              <button
+                type="button"
+                onClick={() => setSelectedRegisterTourney(null)}
+                className="px-4 py-2 rounded-xl bg-white/5 hover:bg-white/10 text-xs font-mono text-slate-300 transition cursor-pointer"
+              >
+                Cancel
+              </button>
+              <button
+                type="button"
+                onClick={() => {
+                  sound.playTournamentVictory();
+                  confetti({ particleCount: 90, spread: 70, origin: { y: 0.6 } });
+                  const tourneyTitle = selectedRegisterTourney.title;
+                  setRegisteredTourneys(prev => {
+                    const next = Array.from(new Set([...prev, tourneyTitle]));
+                    try {
+                      localStorage.setItem('vortex_registered_tournaments', JSON.stringify(next));
+                    } catch (_) {}
+                    return next;
+                  });
+                  setSelectedRegisterTourney(null);
+                  setDashboardToast(`✓ Congratulations! Team ${currentGamerTag} Esports officially registered for ${tourneyTitle}!`);
+                  setTimeout(() => setDashboardToast(null), 5000);
+                }}
+                className="px-6 py-2.5 rounded-xl bg-gradient-to-r from-[#84CC16] to-[#A3E635] hover:brightness-110 text-slate-950 font-display font-black text-xs uppercase tracking-wider transition shadow-lg cursor-pointer active:scale-95"
+              >
+                Confirm & Lock Roster
+              </button>
+            </div>
           </div>
         </div>
       )}
