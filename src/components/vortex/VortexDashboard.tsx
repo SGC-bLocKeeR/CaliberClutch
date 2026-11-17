@@ -1842,30 +1842,6 @@ export const VortexDashboard: React.FC<VortexDashboardProps> = ({
       badgeColor: 'bg-amber-500/15 text-amber-400 border border-amber-500/30 font-bold'
     },
     {
-      id: 'scrims' as VortexTab,
-      label: 'Scrims Hub',
-      desc: 'Season 1 • Under Dev',
-      icon: Swords,
-      badge: 'COMING SOON',
-      badgeColor: 'bg-amber-500/15 text-amber-400 border border-amber-500/30 font-bold'
-    },
-    {
-      id: 'aim' as VortexTab,
-      label: '1v1 Aim Arena',
-      desc: 'Season 1 • Under Dev',
-      icon: Crosshair,
-      badge: 'COMING SOON',
-      badgeColor: 'bg-amber-500/15 text-amber-400 border border-amber-500/30 font-bold'
-    },
-    {
-      id: 'lineups' as VortexTab,
-      label: 'CS2 Lineups',
-      desc: 'Season 1 • Under Dev',
-      icon: Compass,
-      badge: 'COMING SOON',
-      badgeColor: 'bg-amber-500/15 text-amber-400 border border-amber-500/30 font-bold'
-    },
-    {
       id: 'anticheat' as VortexTab,
       label: 'Anti-Cheat',
       desc: isVisitorMode ? 'Season 1 • Under Dev' : (isAntiCheatActive ? 'Ring-0 Kernel Protected' : 'Driver Offline • Ready to Launch'),
