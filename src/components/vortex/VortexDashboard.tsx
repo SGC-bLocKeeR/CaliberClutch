@@ -2187,9 +2187,12 @@ export const VortexDashboard: React.FC<VortexDashboardProps> = ({
                 <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-6 border-b border-white/[0.08] pb-6">
                   <div className="space-y-3">
                     <div className="flex flex-wrap items-center gap-2.5">
-                      <span className="px-3.5 py-1 rounded-full text-xs font-mono font-black uppercase tracking-wider text-[#FF5500] bg-orange-500/15 border border-orange-500/40 flex items-center gap-2 shadow-[0_0_15px_rgba(255,85,0,0.25)]">
-                        <span className="w-2.5 h-2.5 rounded-full bg-[#FF5500] animate-ping" />
-                        <span>OFFICIAL LAUNCH STATUS</span>
+                      <span className="px-3.5 py-1 rounded-full text-xs font-mono font-black uppercase tracking-wider text-amber-400 bg-amber-500/15 border border-amber-500/40 flex items-center gap-2 shadow-[0_0_15px_rgba(245,158,11,0.25)]">
+                        <span className="relative flex h-2.5 w-2.5">
+                          <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-amber-400 opacity-80" />
+                          <span className="relative inline-flex rounded-full h-2.5 w-2.5 bg-amber-400" />
+                        </span>
+                        <span>COMING SOON</span>
                       </span>
                       <span className="px-3 py-1 rounded-full text-xs font-mono font-bold text-[#A3E635] bg-[#A3E635]/10 border border-[#A3E635]/30">
                         SEASON 1 CALIBRATION
