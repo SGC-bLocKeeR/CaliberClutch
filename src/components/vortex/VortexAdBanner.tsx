@@ -72,17 +72,29 @@ export const VortexAdBanner: React.FC<VortexAdBannerProps> = ({
 
       {/* Footer Info Pill (English) */}
       {showDisclaimer && (
-        <div className="px-4 py-1.5 bg-black/40 border-t border-white/[0.04] flex items-center justify-between text-[10px] font-mono text-slate-500">
+        <div className="px-4 py-1.5 bg-black/40 border-t border-white/[0.04] flex flex-col sm:flex-row items-center justify-between gap-2 text-[10px] font-mono text-slate-500">
           <span>Targeted CS2, Esports & Tech Ads • Instant Payout Enabled</span>
-          <a
-            href="https://aads.com?partner=2462347"
-            target="_blank"
-            rel="noopener noreferrer"
-            className="hover:text-amber-400 transition flex items-center gap-1"
-          >
-            <span>Advertise Here</span>
-            <ExternalLink className="w-2.5 h-2.5" />
-          </a>
+          <div className="flex items-center gap-3">
+            <a
+              href="https://uplcm.com/4/12281615"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="text-amber-400 hover:text-amber-300 transition flex items-center gap-1 font-bold"
+            >
+              <Sparkles className="w-3 h-3 text-amber-400" />
+              <span>Claim CS2 Partner Loot</span>
+              <ExternalLink className="w-2.5 h-2.5" />
+            </a>
+            <a
+              href="https://aads.com?partner=2462347"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="hover:text-slate-400 transition flex items-center gap-1"
+            >
+              <span>Advertise Here</span>
+              <ExternalLink className="w-2.5 h-2.5" />
+            </a>
+          </div>
         </div>
       )}
     </div>

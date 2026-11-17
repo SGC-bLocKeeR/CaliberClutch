@@ -70,6 +70,18 @@ export const VortexComingSoonDeals: React.FC<VortexComingSoonDealsProps> = ({
       color: '#F43F5E',
       accentBg: 'rgba(244, 63, 94, 0.12)',
       badge: 'KNIFE VAULT SPONSOR'
+    },
+    {
+      id: 'vortex-smartlink',
+      name: 'Vortex Direct Loot',
+      tagline: 'Instant CS2 Skin Rewards & Partner Offers',
+      bonus: 'DAILY BONUS OFFERS + INSTANT CASHOUT',
+      promoCode: 'VORTEX',
+      buttonText: 'Claim Free Loot',
+      url: 'https://uplcm.com/4/12281615',
+      color: '#A855F7',
+      accentBg: 'rgba(168, 85, 247, 0.12)',
+      badge: 'MONETAG SMART REWARD'
     }
   ];
 
@@ -107,8 +119,8 @@ export const VortexComingSoonDeals: React.FC<VortexComingSoonDealsProps> = ({
         )}
       </div>
 
-      {/* 3 Partner Deal Cards (English) */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+      {/* 4 Partner Deal Cards (English) */}
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
         {DEALS.map((deal) => (
           <div
             key={deal.id}
