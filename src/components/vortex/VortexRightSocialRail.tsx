@@ -202,7 +202,7 @@ export const VortexRightSocialRail: React.FC<VortexRightSocialRailProps> = ({
       bonus: '+10% Deposit Bonus + Free Gold Case',
       url: 'https://key-drop.com/?code=VORTEX',
       badgeColor: '#EAB308',
-      image: 'https://community.cloudflare.steamstatic.com/economy/image/-9a81dlWLwJ2UUGcVs_nsVtzdOEdtWwKGZZLQHTxDZ7I56KU0Zwwo4NUX4oFJZEHLbXH5ApeO4YmlhxYQknCRvCo04DEVlxkKgpovbssLQJf2OD3fm5b09mJmYm0m_7zO6-fzj9V7cAl2eyVpIrz2FKx_0FtZ2D1cIGRcQRsYQ7Q81W3lOjxxcjr3M4pYjY/360fx360f',
+      image: 'https://community.akamai.steamstatic.com/economy/image/-9a81dlWLwJ2UUGcVs_nsVtzdOEdtWwKGZZLQHTxDZ7I56KU0Zwwo4NUX4oFJZEHLbXH5ApeO4YmlhxYQknCRvCo04DEVlxkKgpovbssLQJf2OD3fm5b09mJmYm0m_7zO6-fzj9V7cAl2eyVpIrz2FKx_0FtZ2D1cIGRcQRsYQ7Q81W3lOjxxcjr3M4pYjY/360fx360f',
       features: ['Instant Steam Bot Trades', 'Daily Free Crates', 'Provably Fair 100%']
     },
     {
@@ -212,7 +212,7 @@ export const VortexRightSocialRail: React.FC<VortexRightSocialRailProps> = ({
       bonus: '+10% Bonus + Free $0.70 Starter Case',
       url: 'https://hellcase.com/f/VORTEX',
       badgeColor: '#EF4444',
-      image: 'https://community.cloudflare.steamstatic.com/economy/image/-9a81dlWLwJ2UUGcVs_nsVtzdOEdtWwKGZZLQHTxDZ7I56KU0Zwwo4NUX4oFJZEHLbXH5ApeO4YmlhxYQknCRvCo04DEVlxkKgpot621FABz7PLfYQJS5NO0m5O0m_7zO6-fk29T-sBzpezT_I2tiVXs-RE5YTincY-WdVA4N13R81brx-e51sW9786czydiuSQn4ivcnBfmn1gSOd0N_1mS/360fx360f',
+      image: 'https://community.akamai.steamstatic.com/economy/image/-9a81dlWLwJ2UUGcVs_nsVtzdOEdtWwKGZZLQHTxDZ7I56KU0Zwwo4NUX4oFJZEHLbXH5ApeO4YmlhxYQknCRvCo04DEVlxkKgpot621FABz7PLfYQJS5NO0m5O0m_7zO6-fk29T-sBzpezT_I2tiVXs-RE5YTincY-WdVA4N13R81brx-e51sW9786czydiuSQn4ivcnBfmn1gSOd0N_1mS/360fx360f',
       features: ['Covert Knife Crates', 'Contracts & Upgrades', '10M+ Users Worldwide']
     },
     {
@@ -222,7 +222,7 @@ export const VortexRightSocialRail: React.FC<VortexRightSocialRailProps> = ({
       bonus: '0% Buyer Commission • Direct Cashout',
       url: 'https://skinport.com/r/vortex',
       badgeColor: '#3B82F6',
-      image: 'https://community.cloudflare.steamstatic.com/economy/image/-9a81dlWLwJ2UUGcVs_nsVtzdOEdtWwKGZZLQHTxDZ7I56KU0Zwwo4NUX4oFJZEHLbXH5ApeO4YmlhxYQknCRvCo04DEVlxkKgpou-6kejhz2v_Nfz5H_uO1gb-Gw_alIITfn2xV_Pp_jez--YXygED6-kZkYj3wLITDdQc8MlCG_Fftxr3ug8C0u5vNnHJr6SQmsH6MnRDi1gYMMLIqu-Y0gQ/360fx360f',
+      image: 'https://community.akamai.steamstatic.com/economy/image/-9a81dlWLwJ2UUGcVs_nsVtzdOEdtWwKGZZLQHTxDZ7I56KU0Zwwo4NUX4oFJZEHLbXH5ApeO4YmlhxYQknCRvCo04DEVlxkKgpou-6kejhz2v_Nfz5H_uO1gb-Gw_alIITfn2xV_Pp_jez--YXygED6-kZkYj3wLITDdQc8MlCG_Fftxr3ug8C0u5vNnHJr6SQmsH6MnRDi1gYMMLIqu-Y0gQ/360fx360f',
       features: ['Official Steam WebAPI', 'Real Bank & Card Cashout', 'Guaranteed Anti-Scam']
     }
   ];
@@ -2335,6 +2335,7 @@ export const VortexRightSocialRail: React.FC<VortexRightSocialRailProps> = ({
                         src={partner.image} 
                         alt={partner.name} 
                         className="w-12 h-12 object-contain group-hover:scale-110 transition duration-300 drop-shadow-md" 
+                        onError={(e) => { (e.target as HTMLImageElement).src = '/images/karambit_lore.png'; }}
                       />
                     </div>
                     <div className="min-w-0">

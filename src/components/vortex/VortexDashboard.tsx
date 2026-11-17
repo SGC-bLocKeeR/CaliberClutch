@@ -56,10 +56,12 @@ import {
   Search,
   Upload,
   AlertCircle,
+  Coins,
   Image as ImageIcon
 } from 'lucide-react';
 import confetti from 'canvas-confetti';
 import { sound } from '../../utils/soundEffects';
+import { cleanGamerTag } from '../../utils/steamAuth';
 import { VortexBrandLogo } from './VortexLandingPage';
 import { CountryFlag } from './CountryFlag';
 import { ALL_COUNTRIES, getCountryByCode, Country } from '../../data/countries';
@@ -614,11 +616,11 @@ export const VortexDashboard: React.FC<VortexDashboardProps> = ({
   // Profile Customization State with localStorage persistence
   const [currentGamerTag, setCurrentGamerTag] = useState<string>(() => {
     const saved = localStorage.getItem('vortex_user_gamertag');
-    if (!saved || saved.toLowerCase().includes('blockeer')) {
-      localStorage.setItem('vortex_user_gamertag', 'M14');
-      return 'M14';
+    const cleaned = cleanGamerTag(saved);
+    if (!saved || saved !== cleaned) {
+      localStorage.setItem('vortex_user_gamertag', cleaned);
     }
-    return saved;
+    return cleaned;
   });
   const [currentAvatarUrl, setCurrentAvatarUrl] = useState<string>(() => {
     const saved = localStorage.getItem('vortex_user_avatar');
@@ -635,9 +637,10 @@ export const VortexDashboard: React.FC<VortexDashboardProps> = ({
     if (typeof window !== 'undefined') {
       try {
         const savedTag = localStorage.getItem('vortex_user_gamertag');
-        if (savedTag && savedTag.toLowerCase().includes('blockeer')) {
-          localStorage.setItem('vortex_user_gamertag', 'M14');
-          setCurrentGamerTag('M14');
+        const cleaned = cleanGamerTag(savedTag);
+        if (savedTag !== cleaned) {
+          localStorage.setItem('vortex_user_gamertag', cleaned);
+          setCurrentGamerTag(cleaned);
         }
         const savedAv = localStorage.getItem('vortex_user_avatar');
         if (savedAv && savedAv.includes('blockeerz')) {
@@ -998,6 +1001,8 @@ export const VortexDashboard: React.FC<VortexDashboardProps> = ({
   const [newTourneyTitle, setNewTourneyTitle] = useState('CALIBER CLUTCH Community Cup #1');
   const [newTourneyCashPrize, setNewTourneyCashPrize] = useState('€3,000');
   const [newTourneyMaxTeams, setNewTourneyMaxTeams] = useState<number>(16);
+  const [newTourneyEntryFee, setNewTourneyEntryFee] = useState<number>(50); // €50 per team (€10 / player)
+  const [newTourneyIsPaid, setNewTourneyIsPaid] = useState<boolean>(true);
   const [newTourneyStructure, setNewTourneyStructure] = useState<string>('Single Elimination');
   const [newTourneyPlayoffsFormat, setNewTourneyPlayoffsFormat] = useState<'BO1' | 'BO3'>('BO1');
   const [newTourneyFinalsFormat, setNewTourneyFinalsFormat] = useState<'BO1' | 'BO3' | 'BO5'>('BO3');
@@ -3418,13 +3423,6 @@ export const VortexDashboard: React.FC<VortexDashboardProps> = ({
                         <span>Official Partners (HLTV)</span>
                       </button>
                     )}
-                    <button
-                      onClick={() => setActiveTab('play')}
-                      className="px-4 py-2 rounded-xl bg-[#141722] hover:bg-[#1A202E] border border-[#252C3D] text-xs font-mono text-slate-300 hover:text-white cursor-pointer transition flex items-center gap-1.5"
-                    >
-                      <ArrowLeft className="w-3.5 h-3.5" />
-                      <span>Kthehu te Play (5v5)</span>
-                    </button>
                   </div>
                 </div>
 
@@ -3527,12 +3525,6 @@ export const VortexDashboard: React.FC<VortexDashboardProps> = ({
                       >
                         <Bell className="w-4 h-4" />
                         <span>Më njofto sapo të rikthehet tab-i</span>
-                      </button>
-                      <button
-                        onClick={() => setActiveTab('play')}
-                        className="px-6 py-3 rounded-2xl bg-[#141722] hover:bg-[#1C2232] border border-[#283044] text-slate-300 hover:text-white font-mono text-xs font-bold transition cursor-pointer"
-                      >
-                        ← Kthehu te Play (Ranked 5v5)
                       </button>
                     </div>
                   </div>
@@ -3665,7 +3657,7 @@ export const VortexDashboard: React.FC<VortexDashboardProps> = ({
                     isLive: true,
                     isOpen: false,
                     skins: [
-                      { place: '1st', name: '★ Karambit | Lore (FN)', price: 1850, image: 'https://community.cloudflare.steamstatic.com/economy/image/-9a81dlWLwJ2UUGcVs_nsVtzdOEdtWwKGZZLQHTxDZ7I56KU0Zwwo4NUX4oFJZEHLbXH5ApeO4YmlhxYQknCRvCo04DEVlxkKgpovbSsLQJf2OD3fm5b09mJmYm0m_7zO6-fzj9V7cAl2eyVpIrz2FKx_0FtZ2D1cIGRcQRsYQ7Q81W3lOjxxcjr3M4pYjY/360fx360f' },
+                      { place: '1st', name: '★ Karambit | Lore (FN)', price: 1850, image: '/images/karambit_lore.png' },
                       { place: '2nd', name: 'M4A4 | Temukau (FN)', price: 240, image: 'https://imgproxy.dmarket.com/insecure/rs:fit:360:260:0/g:ce/aHR0cHM6Ly9jb21tdW5pdHkuYWthbWFpLnN0ZWFtc3RhdGljLmNvbS9lY29ub215L2ltYWdlL2kwQ29aODFVaTBtLTlLd2xCWTFMXzE4bXl1R3VxMXdmaFdTYVpnTXR0eVZmUGFFUlNSMFdxbXU3TEFvY0dKS3oybHVfWHNuWHd0bWtKalNVOTFkaDhiajM1VlRxVkJQNGlvX2ZybkFWdmZiNmFxZHVjX1RGVmpUQ3hieDA1T1U0UzNqaWxFOXc0RHpSbkltdEl5MlNhMUp6REpFaFJQbEs3RWNPNFU4Z2ZB.webp' },
                       { place: '3rd', name: 'Desert Eagle | Printstream (FN)', price: 140, image: 'https://community.akamai.steamstatic.com/economy/image/i0CoZ81Ui0m-9KwlBY1L_18myuGuq1wfhWSaZgMttyVfPaERSR0Wqmu7LAocGIGz3UqlXOLrxM-vMGmW8VNxu5Dx60noTyL1m5fn8Sdk7OeRbKFsJ8-DHG6e1f1iouRoQha_nBovp3OGmdeqInyVP1V0XsYlRbEI50a5wNyzZr605AyI3t5MmCSohylAuC89_a9cBoMY9UkV' }
                     ]
@@ -3685,9 +3677,9 @@ export const VortexDashboard: React.FC<VortexDashboardProps> = ({
                     isLive: false,
                     isOpen: true,
                     skins: [
-                      { place: '1st', name: '★ M9 Bayonet | Doppler (FN)', price: 1200, image: 'https://community.cloudflare.steamstatic.com/economy/image/-9a81dlWLwJ2UUGcVs_nsVtzdOEdtWwKGZZLQHTxDZ7I56KU0Zwwo4NUX4oFJZEHLbXH5ApeO4YmlhxYQknCRvCo04DEVlxkKgpovbSsLQJfwOfBfUEv7d6_kIGZqOT9NrrFmDkH7p112rmRpt7wigbhqEVla2j1d9SXelI4aQ3X-wfrwb-60JO1uZ2ayXBkvyBzsHjcnkC30xsccKUx0lQ18oJv/360fx360f' },
+                      { place: '1st', name: '★ M9 Bayonet | Doppler (FN)', price: 1200, image: 'https://imgproxy.dmarket.com/insecure/rs:fit:360:260:0/g:ce/aHR0cHM6Ly9jb21tdW5pdHkuYWthbWFpLnN0ZWFtc3RhdGljLmNvbS9lY29ub215L2ltYWdlL2kwQ29aODFVaTBtLTlLd2xCWTFMXzE4bXl1R3VxMXdmaFdTYVpnTXR0eVZmUGFFUlNSMFdxbXU3TEFvY0dKS3oybHVfWHNuWHd0bWtKalNVOTFkaDhiajM1VlRxVkJQNGlvX2ZybklWN0tiNU9hVS1KcWZIRHpYRmxlMHU0TFk4R3lfa2tSZ2lzR3pjbTR2NEozdkRPQVFtRE1keVJ2bEs3RWNtZUNVM3l3.webp' },
                       { place: '2nd', name: 'AK-47 | Inheritance (FN)', price: 145, image: 'https://imgproxy.dmarket.com/insecure/rs:fit:360:260:0/g:ce/aHR0cHM6Ly9jb21tdW5pdHkuYWthbWFpLnN0ZWFtc3RhdGljLmNvbS9lY29ub215L2ltYWdlL2kwQ29aODFVaTBtLTlLd2xCWTFMXzE4bXl1R3VxMXdmaFdTYVpnTXR0eVZmUGFFUlNSMFdxbXU3TEFvY0dJR3ozVXFsWE9McnhNLXZNR21XOFZOeHU1RHg2MG5vVHlMd2xjSzN3aU5RME9LaGVxZG9MUEdhQUZpY3lPbC1wSzh4R0hfbndVdDFzR3JTejlpdmNIS1FPQWNqWE1Za1J1NVl1eGU0bFlDeVpPcTI1VlNNMm9NVDAyeWcyVXhCU0VnQQ==.webp' },
-                      { place: '3rd', name: 'AWP | Duality (FN)', price: 45, image: 'https://community.cloudflare.steamstatic.com/economy/image/-9a81dlWLwJ2UUGcVs_nsVtzdOEdtWwKGZZLQHTxDZ7I56KU0Zwwo4NUX4oFJZEHLbXH5ApeO4YmlhxYQknCRvCo04DEVlxkKgpot621FABz7PLfYQJS5NO0m5O0m_7zO6-fk29T-sBzpezT_I2tiVXs-RE5YTincY-WdVA4N13R81brx-e51sW9786czydiuSQn4ivcnBfmn1gSOd0N_1mS/360fx360f' }
+                      { place: '3rd', name: 'AWP | Duality (FN)', price: 45, image: 'https://imgproxy.dmarket.com/insecure/rs:fit:360:260:0/g:ce/aHR0cHM6Ly9jb21tdW5pdHkuYWthbWFpLnN0ZWFtc3RhdGljLmNvbS9lY29ub215L2ltYWdlL2kwQ29aODFVaTBtLTlLd2xCWTFMXzE4bXl1R3VxMXdmaFdTYVpnTXR0eVZmUGFFUlNSMFdxbXU3TEFvY0dJR3ozVXFsWE9McnhNLXZNR21XOFZOeHU1RHg2MG5vVHlMd2xjSzN3aU5RME9LaGVxZG9MUEdhQUZpY3lPbC1wSzh4R0hfbndVdDFzR3JTejlpdmNIS1FPQWNqWE1Za1J1NVl1eGU0bFlDeVpPcTI1VlNNMm9NVDAyeWcyVXhCU0VnQQ==.webp' }
                     ]
                   },
                   {
@@ -3707,7 +3699,7 @@ export const VortexDashboard: React.FC<VortexDashboardProps> = ({
                     skins: [
                       { place: '1st', name: '★ Butterfly Knife | Slaughter (MW)', price: 1450, image: 'https://imgproxy.dmarket.com/insecure/rs:fit:360:260:0/g:ce/aHR0cHM6Ly9jb21tdW5pdHkuYWthbWFpLnN0ZWFtc3RhdGljLmNvbS9lY29ub215L2ltYWdlL2kwQ29aODFVaTBtLTlLd2xCWTFMXzE4bXl1R3VxMXdmaFdTYVpnTXR0eVZmUGFFUlNSMFdxbXU3TEFvY0dKS3oybHVfWHNuWHd0bWtKalNVOTFkaDhiajM1VlRxVkJQNGlvX2ZybklWN0tiNU9hVS1KcWZIRHpYRmxlMHU0TFk4R3lfa2tSZ2lzR3pjbTR2NEozdkRPQVFtRE1keVJ2bEs3RWNtZUNVM3l3.webp' },
                       { place: '2nd', name: 'USP-S | Printstream (FN)', price: 110, image: 'https://imgproxy.dmarket.com/insecure/rs:fit:360:260:0/g:ce/aHR0cHM6Ly9jb21tdW5pdHkuYWthbWFpLnN0ZWFtc3RhdGljLmNvbS9lY29ub215L2ltYWdlL2kwQ29aODFVaTBtLTlLd2xCWTFMXzE4bXl1R3VxMXdmaFdTYVpnTXR0eVZmUGFFUlNSMFdxbXU3TEFvY0dKS3oybHVfWHNuWHd0bWtKalNVOTFkaDhiajM1VlRxVkJQNGlvX2ZybkFWdmZiNmFxZHVjX1RGVmpUQ3hieDA1T1U0UzNqaWxFOXc0RHpSbkltdEl5MlNhMUp6REpFaFJQbEs3RWNPNFU4Z2ZB.webp' },
-                      { place: '3rd', name: 'Glock-18 | Bullet Queen (FN)', price: 55, image: 'https://community.cloudflare.steamstatic.com/economy/image/-9a81dlWLwJ2UUGcVs_nsVtzdOEdtWwKGZZLQHTxDZ7I56KU0Zwwo4NUX4oFJZEHLbXH5ApeO4YmlhxYQknCRvCo04DEVlxkKgpou-6kejhz2v_Nfz5H_uO1gb-Gw_alIITfn2xV_Pp_jez--YXygED6-kZkYj3wLITDdQc8MlCG_Fftxr3ug8C0u5vNnHJr6SQmsH6MnRDi1gYMMLIqu-Y0gQ/360fx360f' }
+                      { place: '3rd', name: 'Glock-18 | Bullet Queen (FN)', price: 55, image: 'https://community.akamai.steamstatic.com/economy/image/i0CoZ81Ui0m-9KwlBY1L_18myuGuq1wfhWSaZgMttyVfPaERSR0Wqmu7LAocGIGz3UqlXOLrxM-vMGmW8VNxu5Dx60noTyL8ypexwiVI0P_6afBSNPWeG2yR1NF6ueZhW2ewlBtx5W6AmYv9JS6XaAV1CJEmTeUL4UTpxNzjZO3jtgaIjN9ExCuskGoXuRnyRhBA' }
                     ]
                   },
                   {
@@ -3727,7 +3719,7 @@ export const VortexDashboard: React.FC<VortexDashboardProps> = ({
                     skins: [
                       { place: '1st', name: '★ Kukri Knife | Fade (FN)', price: 850, image: 'https://imgproxy.dmarket.com/insecure/rs:fit:360:260:0/g:ce/aHR0cHM6Ly9jb21tdW5pdHkuYWthbWFpLnN0ZWFtc3RhdGljLmNvbS9lY29ub215L2ltYWdlL2kwQ29aODFVaTBtLTlLd2xCWTFMXzE4bXl1R3VxMXdmaFdTYVpnTXR0eVZmUGFFUlNSMFdxbXU3TEFvY0dKS3oybHVfWHNuWHd0bWtKalNVOTFkaDhiajM1VlRxVkJQNGlvX2ZybkVWdnFmX2E2Vm9JZkdTWHo3SGxid2c1N1F3U1NfbXhobDE1amlHeU4zN2MzX0dadzkxVzhCd1JmbEs3RWZLc2Eyc2Z3.webp' },
                       { place: '2nd', name: 'AWP | Chromatic Aberration (FN)', price: 35, image: 'https://imgproxy.dmarket.com/insecure/rs:fit:360:260:0/g:ce/aHR0cHM6Ly9jb21tdW5pdHkuYWthbWFpLnN0ZWFtc3RhdGljLmNvbS9lY29ub215L2ltYWdlL2kwQ29aODFVaTBtLTlLd2xCWTFMXzE4bXl1R3VxMXdmaFdTYVpnTXR0eVZmUGFFUlNSMFdxbXU3TEFvY0dJR3ozVXFsWE9McnhNLXZNR21XOFZOeHU1RHg2MG5vVHlMd2xjSzN3aU5RME9LaGVxZG9MUEdhQUZpY3lPbC1wSzh4R0hfbndVdDFzR3JTejlpdmNIS1FPQWNqWE1Za1J1NVl1eGU0bFlDeVpPcTI1VlNNMm9NVDAyeWcyVXhCU0VnQQ==.webp' },
-                      { place: '3rd', name: 'AK-47 | Slate (FN)', price: 20, image: 'https://community.cloudflare.steamstatic.com/economy/image/-9a81dlWLwJ2UUGcVs_nsVtzdOEdtWwKGZZLQHTxDZ7I56KU0Zwwo4NUX4oFJZEHLbXH5ApeO4YmlhxYQknCRvCo04DEVlxkKgpot621FABz7PLfYQJS5NO0m5O0m_7zO6-fk29T-sBzpezT_I2tiVXs-RE5YTincY-WdVA4N13R81brx-e51sW9786czydiuSQn4ivcnBfmn1gSOd0N_1mS/360fx360f' }
+                      { place: '3rd', name: 'AK-47 | Slate (FN)', price: 20, image: 'https://community.akamai.steamstatic.com/economy/image/i0CoZ81Ui0m-9KwlBY1L_18myuGuq1wfhWSaZgMttyVfPaERSR0Wqmu7LAocGIGz3UqlXOLrxM-vMGmW8VNxu5Dx60noTyL8ypexwiVI0P_6afBSJf2DC3Wf09F6ueZhW2exwBh_6m3dnt36InjDPQ4oXJt1TbJeshW_mtfjN-vrsgaKiokWy333kGoXuRj4z9Nd' }
                     ]
                   }
                 ]
@@ -3762,6 +3754,16 @@ export const VortexDashboard: React.FC<VortexDashboardProps> = ({
                                 {t.isCustom && (
                                   <span className="px-2 py-0.5 rounded text-[10px] font-mono font-bold bg-amber-500/20 text-amber-300 border border-amber-500/30">
                                     HOSTED BY {t.creator || 'M14'}
+                                  </span>
+                                )}
+                                {t.entryFee ? (
+                                  <span className="px-2 py-0.5 rounded text-[10px] font-mono font-bold bg-amber-500/15 text-amber-300 border border-amber-500/30 flex items-center gap-1">
+                                    <Coins className="w-3 h-3 text-amber-400" />
+                                    €{t.entryFee} / Team (€{(t.entryFee / 5).toFixed(0)}/player)
+                                  </span>
+                                ) : (
+                                  <span className="px-2 py-0.5 rounded text-[10px] font-mono font-bold bg-emerald-500/10 text-emerald-400 border border-emerald-500/20">
+                                    Free Entry
                                   </span>
                                 )}
                                 {isRegistered && (
@@ -3834,7 +3836,12 @@ export const VortexDashboard: React.FC<VortexDashboardProps> = ({
                                   title={`Click to inspect ${skin.name} trade dispatch`}
                                 >
                                   <div className="text-[9px] font-mono font-bold text-amber-400 mb-0.5">{skin.place} Place</div>
-                                  <img src={skin.image} alt={skin.name} className="w-12 h-10 object-contain my-1 group-hover:scale-105 transition-transform" />
+                                  <img 
+                                    src={skin.image} 
+                                    alt={skin.name} 
+                                    className="w-12 h-10 object-contain my-1 group-hover:scale-105 transition-transform" 
+                                    onError={(e) => { (e.target as HTMLImageElement).src = '/images/karambit_lore.png'; }}
+                                  />
                                   <div className="text-[10px] font-bold text-white truncate w-full">{skin.name}</div>
                                   <div className="text-[9px] font-mono text-emerald-400 font-bold">{skin.price} €</div>
                                 </div>
@@ -4346,12 +4353,12 @@ export const VortexDashboard: React.FC<VortexDashboardProps> = ({
             });
 
             const LIVE_RECENT_DROPS = [
-              { player: 'juanflatroo', weapon: '★ Karambit', skin: 'Doppler Phase 2', price: 1850.0, rarity: '#FFD700', image: 'https://community.cloudflare.steamstatic.com/economy/image/-9a81dlWLwJ2UUGcVs_nsVtzdOEdtWwKGZZLQHTxDZ7I56KU0Zwwo4NUX4oFJZEHLbXH5ApeO4YmlhxYQknCRvCo04DEVlxkKgpovbSsLQJf2OD3fm5b09mJmYm0m_7zO6-fzj9V7cAl2eyVpIrz2FKx_0FtZ2D1cIGRcQRsYQ7Q81W3lOjxxcjr3M4pYjY/360fx360f' },
-              { player: 'gxx-', weapon: 'AWP', skin: 'Dragon Lore', price: 4200.0, rarity: '#FFD700', image: 'https://community.cloudflare.steamstatic.com/economy/image/-9a81dlWLwJ2UUGcVs_nsVtzdOEdtWwKGZZLQHTxDZ7I56KU0Zwwo4NUX4oFJZEHLbXH5ApeO4YmlhxYQknCRvCo04DEVlxkKgpot621FABz7PLfYQJS5NO0m5O0m_7zO6-fk29T-sBzpezT_I2tiVXs-RE5YTincY-WdVA4N13R81brx-e51sW9786czydiuSQn4ivcnBfmn1gSOd0N_1mS/360fx360f' },
-              { player: 'Sinnopsyy', weapon: '★ Sport Gloves', skin: 'Vice', price: 2100.0, rarity: '#FFD700', image: 'https://community.cloudflare.steamstatic.com/economy/image/-9a81dlWLwJ2UUGcVs_nsVtzdOEdtWwKGZZLQHTxDZ7I56KU0Zwwo4NUX4oFJZEHLbXH5ApeO4YmlhxYQknCRvCo04DEVlxkKgpou-6kejhz2v_Nfz5H_uO1gb-Gw_alIITfn2xV_Pp_jez--YXygED6-kZkYj3wLITDdQc8MlCG_Fftxr3ug8C0u5vNnHJr6SQmsH6MnRDi1gYMMLIqu-Y0gQ/360fx360f' },
+              { player: 'juanflatroo', weapon: '★ Karambit', skin: 'Lore (FN)', price: 1850.0, rarity: '#FFD700', image: '/images/karambit_lore.png' },
+              { player: 'gxx-', weapon: 'AWP', skin: 'Chromosome', price: 420.0, rarity: '#EB4B4B', image: 'https://community.akamai.steamstatic.com/economy/image/i0CoZ81Ui0m-9KwlBY1L_18myuGuq1wfhWSaZgMttyVfPaERSR0Wqmu7LAocGIGz3UqlXOLrxM-vMGmW8VNxu5Dx60noTyLwiYbf_DVL0OarZbRoMvWXMWuZxuZi_uM6SXngxR5-smTXw4ugIi6RbVcpXsN1ELUDtxPrktOyNL7h4g2P2tpbjXKpKIbjbD4' },
+              { player: 'Sinnopsyy', weapon: '★ Butterfly', skin: 'Slaughter (MW)', price: 1450.0, rarity: '#FFD700', image: 'https://imgproxy.dmarket.com/insecure/rs:fit:360:260:0/g:ce/aHR0cHM6Ly9jb21tdW5pdHkuYWthbWFpLnN0ZWFtc3RhdGljLmNvbS9lY29ub215L2ltYWdlL2kwQ29aODFVaTBtLTlLd2xCWTFMXzE4bXl1R3VxMXdmaFdTYVpnTXR0eVZmUGFFUlNSMFdxbXU3TEFvY0dKS3oybHVfWHNuWHd0bWtKalNVOTFkaDhiajM1VlRxVkJQNGlvX2ZybklWN0tiNU9hVS1KcWZIRHpYRmxlMHU0TFk4R3lfa2tSZ2lzR3pjbTR2NEozdkRPQVFtRE1keVJ2bEs3RWNtZUNVM3l3.webp' },
               { player: 'rigoN', weapon: 'AK-47', skin: 'Inheritance', price: 145.0, rarity: '#EB4B4B', image: 'https://imgproxy.dmarket.com/insecure/rs:fit:360:260:0/g:ce/aHR0cHM6Ly9jb21tdW5pdHkuYWthbWFpLnN0ZWFtc3RhdGljLmNvbS9lY29ub215L2ltYWdlL2kwQ29aODFVaTBtLTlLd2xCWTFMXzE4bXl1R3VxMXdmaFdTYVpnTXR0eVZmUGFFUlNSMFdxbXU3TEFvY0dJR3ozVXFsWE9McnhNLXZNR21XOFZOeHU1RHg2MG5vVHlMd2xjSzN3aU5RME9LaGVxZG9MUEdhQUZpY3lPbC1wSzh4R0hfbndVdDFzR3JTejlpdmNIS1FPQWNqWE1Za1J1NVl1eGU0bFlDeVpPcTI1VlNNMm9NVDAyeWcyVXhCU0VnQQ==.webp' },
               { player: 'NiKo', weapon: 'Desert Eagle', skin: 'Printstream', price: 85.0, rarity: '#EB4B4B', image: 'https://community.akamai.steamstatic.com/economy/image/i0CoZ81Ui0m-9KwlBY1L_18myuGuq1wfhWSaZgMttyVfPaERSR0Wqmu7LAocGIGz3UqlXOLrxM-vMGmW8VNxu5Dx60noTyL1m5fn8Sdk7OeRbKFsJ8-DHG6e1f1iouRoQha_nBovp3OGmdeqInyVP1V0XsYlRbEI50a5wNyzZr605AyI3t5MmCSohylAuC89_a9cBoMY9UkV' },
-              { player: 'karrigan', weapon: '★ M9 Bayonet', skin: 'Crimson Web', price: 1650.0, rarity: '#FFD700', image: 'https://community.cloudflare.steamstatic.com/economy/image/-9a81dlWLwJ2UUGcVs_nsVtzdOEdtWwKGZZLQHTxDZ7I56KU0Zwwo4NUX4oFJZEHLbXH5ApeO4YmlhxYQknCRvCo04DEVlxkKgpovbSsLQJfwOfBfUEv7d6_kIGZqOT9NrrFmDkH7p112rmRpt7wigbhqEVla2j1d9SXelI4aQ3X-wfrwb-60JO1uZ2ayXBkvyBzsHjcnkC30xsccKUx0lQ18oJv/360fx360f' }
+              { player: 'karrigan', weapon: '★ Kukri Knife', skin: 'Fade (FN)', price: 850.0, rarity: '#FFD700', image: 'https://imgproxy.dmarket.com/insecure/rs:fit:360:260:0/g:ce/aHR0cHM6Ly9jb21tdW5pdHkuYWthbWFpLnN0ZWFtc3RhdGljLmNvbS9lY29ub215L2ltYWdlL2kwQ29aODFVaTBtLTlLd2xCWTFMXzE4bXl1R3VxMXdmaFdTYVpnTXR0eVZmUGFFUlNSMFdxbXU3TEFvY0dKS3oybHVfWHNuWHd0bWtKalNVOTFkaDhiajM1VlRxVkJQNGlvX2ZybkVWdnFmX2E2Vm9JZkdTWHo3SGxid2c1N1F3U1NfbXhobDE1amlHeU4zN2MzX0dadzkxVzhCd1JmbEs3RWZLc2Eyc2Z3.webp' }
             ];
 
             return (
@@ -4419,7 +4426,12 @@ export const VortexDashboard: React.FC<VortexDashboardProps> = ({
                         key={idx}
                         className="flex items-center gap-2.5 px-3 py-1.5 rounded-xl bg-[#121622] border border-[#202738] shrink-0 hover:border-amber-400/40 transition cursor-default"
                       >
-                        <img src={drop.image} alt={drop.weapon} className="w-7 h-7 object-contain shrink-0" />
+                        <img 
+                          src={drop.image} 
+                          alt={drop.weapon} 
+                          className="w-7 h-7 object-contain shrink-0" 
+                          onError={(e) => { (e.target as HTMLImageElement).src = '/images/karambit_lore.png'; }}
+                        />
                         <div className="text-left">
                           <div className="flex items-center gap-1">
                             <span className="text-[11px] font-bold text-white leading-tight">{drop.weapon}</span>
@@ -6819,6 +6831,22 @@ export const VortexDashboard: React.FC<VortexDashboardProps> = ({
                   <span>CaliberClutch Server allocated: {selectedRegisterTourney?.region || 'Germany (Frankfurt Central • 128-Tick • Ping 14 ms)'}.</span>
                 </div>
               </div>
+
+              {/* Entry Fee Escrow Notice if Paid */}
+              {selectedRegisterTourney?.entryFee > 0 && (
+                <div className="p-3.5 rounded-2xl bg-amber-500/10 border border-amber-500/25 space-y-1.5 text-[11px]">
+                  <div className="flex items-center justify-between text-amber-300 font-bold">
+                    <span className="flex items-center gap-1.5">
+                      <Coins className="w-3.5 h-3.5 text-amber-400" />
+                      Buy-In Entry Fee:
+                    </span>
+                    <span>€{selectedRegisterTourney.entryFee} / Ekip (€{(selectedRegisterTourney.entryFee / 5).toFixed(0)} / person)</span>
+                  </div>
+                  <p className="text-[10px] text-slate-300">
+                    Fondi i regjistrimit bllokohet në CaliberClutch Escrow. 15% mbahet automatikisht si komision platforme dhe 85% i kalon fondit të fituesve.
+                  </p>
+                </div>
+              )}
             </div>
 
             {/* Modal Actions */}
@@ -6863,22 +6891,23 @@ export const VortexDashboard: React.FC<VortexDashboardProps> = ({
         <div className="fixed inset-0 z-[130] bg-black/85 backdrop-blur-md flex items-center justify-center p-4 animate-in fade-in duration-200">
           <div className="w-full max-w-xl max-h-[90vh] overflow-y-auto bg-[#0C1019] border border-[#252E42] rounded-3xl p-6 sm:p-8 shadow-2xl space-y-5 text-left relative">
             {/* Header */}
-            <div className="flex items-start justify-between border-b border-[#1E2638] pb-3">
-              <div className="space-y-1">
-                <div className="flex items-center gap-2">
-                  <span className="px-2.5 py-0.5 rounded text-[10px] font-mono font-bold bg-[#A3E635]/15 text-[#A3E635] border border-[#A3E635]/30 uppercase flex items-center gap-1">
-                    <Trophy className="w-3 h-3" />
-                    Official Cup Creation
+            <div className="flex items-start justify-between border-b border-[#1E2638] pb-4">
+              <div className="space-y-1.5">
+                <div className="flex items-center gap-2 flex-wrap">
+                  <span className="px-2.5 py-1 rounded-lg text-[10px] font-mono font-black bg-[#A3E635]/15 text-[#A3E635] border border-[#A3E635]/30 uppercase flex items-center gap-1.5 tracking-wider">
+                    <Trophy className="w-3.5 h-3.5 text-[#A3E635]" />
+                    CALIBERCLUTCH ESPORTS CIRCUIT
                   </span>
-                  <span className="text-xs font-mono text-amber-400 font-bold">
-                    Host: {currentGamerTag} (Founder / Admin)
+                  <span className="px-2.5 py-1 rounded-lg text-[10px] font-mono font-bold bg-[#141A28] border border-[#232D42] text-amber-400 uppercase tracking-wider flex items-center gap-1.5">
+                    <Crown className="w-3 h-3 text-amber-400" />
+                    ORGANIZER: {cleanGamerTag(currentGamerTag)}
                   </span>
                 </div>
-                <h3 className="text-xl font-black font-display text-white">
+                <h3 className="text-2xl font-black font-display text-white tracking-wide">
                   HOST A CS2 TOURNAMENT
                 </h3>
                 <p className="text-xs font-mono text-slate-400">
-                  Configure format, prize pool, 128-tick server allocation, and anti-cheat requirements.
+                  Configure tournament format, entry fees, prize escrow pool, and 128-tick match servers.
                 </p>
               </div>
               <button 
@@ -6950,6 +6979,98 @@ export const VortexDashboard: React.FC<VortexDashboardProps> = ({
                   <option value="Double Elimination">5v5 Double Elimination (Upper & Lower Brackets)</option>
                   <option value="GSL Group Stage + Single Elim">GSL Group Stage + Single Elimination</option>
                 </select>
+              </div>
+
+              {/* Entry Fee & Platform Escrow (Monetization System) */}
+              <div className="p-4 rounded-2xl bg-[#101420] border border-[#20293D] space-y-3">
+                <div className="flex items-center justify-between flex-wrap gap-2">
+                  <div>
+                    <label className="text-[10px] text-amber-400 uppercase tracking-wider block font-bold flex items-center gap-1.5">
+                      <Coins className="w-3.5 h-3.5 text-amber-400" />
+                      <span>Tournament Buy-In & Entry Fee</span>
+                    </label>
+                    <span className="text-[10px] text-slate-400">
+                      Tarifa e pjesëmarrjes për ekip (5 lojtarë) dhe komisioni i platformës
+                    </span>
+                  </div>
+                  <div className="flex items-center gap-1.5 p-1 rounded-xl bg-black/40 border border-white/5">
+                    <button
+                      type="button"
+                      onClick={() => setNewTourneyIsPaid(false)}
+                      className={`px-3 py-1 rounded-lg text-[10px] font-bold transition cursor-pointer ${
+                        !newTourneyIsPaid ? 'bg-[#20283C] text-white shadow' : 'text-slate-400 hover:text-white'
+                      }`}
+                    >
+                      Free Entry
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => setNewTourneyIsPaid(true)}
+                      className={`px-3 py-1 rounded-lg text-[10px] font-bold transition cursor-pointer ${
+                        newTourneyIsPaid ? 'bg-amber-400 text-slate-950 font-black shadow-md' : 'text-slate-400 hover:text-white'
+                      }`}
+                    >
+                      Paid Buy-In (€)
+                    </button>
+                  </div>
+                </div>
+
+                {newTourneyIsPaid && (
+                  <div className="space-y-3 pt-2 border-t border-white/5">
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                      <div>
+                        <label className="text-[10px] text-slate-300 uppercase block mb-1 font-bold">
+                          Tarifa për Ekip (€ / Team)
+                        </label>
+                        <div className="relative">
+                          <input
+                            type="number"
+                            min={5}
+                            step={5}
+                            value={newTourneyEntryFee}
+                            onChange={(e) => setNewTourneyEntryFee(Math.max(5, Number(e.target.value)))}
+                            className="w-full pl-7 pr-3 py-2 rounded-xl bg-[#0B0E16] border border-[#252C3D] text-amber-300 font-bold focus:outline-none focus:border-amber-400"
+                          />
+                          <span className="absolute left-3 top-2 text-slate-400 font-bold">€</span>
+                        </div>
+                      </div>
+                      <div>
+                        <label className="text-[10px] text-slate-300 uppercase block mb-1 font-bold">
+                          Llogaritur për Lojtar (5v5 Roster)
+                        </label>
+                        <div className="w-full px-3 py-2 rounded-xl bg-[#0B0E16] border border-[#252C3D] text-emerald-400 font-bold flex items-center justify-between">
+                          <span>€{(newTourneyEntryFee / 5).toFixed(2)}</span>
+                          <span className="text-[10px] text-slate-400 font-normal">nga €{(newTourneyEntryFee / 5).toFixed(0)} / person</span>
+                        </div>
+                      </div>
+                    </div>
+
+                    {/* Financial Escrow Breakdown */}
+                    <div className="p-3.5 rounded-xl bg-black/50 border border-amber-500/20 space-y-2 text-[11px]">
+                      <div className="flex items-center justify-between text-slate-300">
+                        <span>Fondi Total i Buy-in ({newTourneyMaxTeams} ekipe × €{newTourneyEntryFee}):</span>
+                        <span className="font-bold text-white font-mono">€{(newTourneyMaxTeams * newTourneyEntryFee).toFixed(2)}</span>
+                      </div>
+                      <div className="flex items-center justify-between text-amber-400 font-bold">
+                        <span className="flex items-center gap-1.5">
+                          <ShieldCheck className="w-3.5 h-3.5 text-amber-400" />
+                          Komisioni i CaliberClutch (15% Net Revenue):
+                        </span>
+                        <span className="font-mono">+€{(newTourneyMaxTeams * newTourneyEntryFee * 0.15).toFixed(2)}</span>
+                      </div>
+                      <div className="flex items-center justify-between text-emerald-400 font-bold border-t border-white/10 pt-1.5">
+                        <span className="flex items-center gap-1.5">
+                          <Trophy className="w-3.5 h-3.5 text-emerald-400" />
+                          Prize Pool në Escrow (85% për Fituesit):
+                        </span>
+                        <span className="font-mono">€{(newTourneyMaxTeams * newTourneyEntryFee * 0.85).toFixed(2)}</span>
+                      </div>
+                      <div className="text-[10px] text-slate-400 pt-1 italic">
+                        * Paratë arkëtohen përmes CaliberClutch Escrow. Kur përfundon Grand Final, komisioni yt (15%) është i garantuar dhe çmimet shpërndahen automatikisht tek fituesit.
+                      </div>
+                    </div>
+                  </div>
+                )}
               </div>
 
               {/* Match Formats: Playoffs & Grand Final */}
@@ -7098,7 +7219,11 @@ export const VortexDashboard: React.FC<VortexDashboardProps> = ({
                     isLive: false,
                     isOpen: true,
                     isCustom: true,
-                    creator: currentGamerTag || 'M14',
+                    creator: cleanGamerTag(currentGamerTag) || 'M14',
+                    entryFee: newTourneyIsPaid ? newTourneyEntryFee : 0,
+                    entryFeePerPlayer: newTourneyIsPaid ? (newTourneyEntryFee / 5) : 0,
+                    isPaidEntry: newTourneyIsPaid,
+                    platformCommission: newTourneyIsPaid ? 0.15 : 0,
                     structure: newTourneyStructure,
                     playoffsFormat: newTourneyPlayoffsFormat,
                     finalsFormat: newTourneyFinalsFormat,

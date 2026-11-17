@@ -61,7 +61,7 @@ export const OFFICIAL_PARTNERS: PartnerProvider[] = [
     category: 'Marketplace',
     badge: 'EU LICENSED VALUATION',
     badgeColor: 'bg-blue-500/15 text-blue-400 border-blue-500/30',
-    logo: 'https://community.cloudflare.steamstatic.com/economy/image/-9a81dlWLwJ2UUGcVs_nsVtzdOEdtWwKGZZLQHTxDZ7I56KU0Zwwo4NUX4oFJZEHLbXH5ApeO4YmlhxYQknCRvCo04DEVlxkKgpou-6kejhz2v_Nfz5H_uO1gb-Gw_alIITfn2xV_Pp_jez--YXygED6-kZkYj3wLITDdQc8MlCG_Fftxr3ug8C0u5vNnHJr6SQmsH6MnRDi1gYMMLIqu-Y0gQ/360fx360f',
+    logo: 'https://community.akamai.steamstatic.com/economy/image/-9a81dlWLwJ2UUGcVs_nsVtzdOEdtWwKGZZLQHTxDZ7I56KU0Zwwo4NUX4oFJZEHLbXH5ApeO4YmlhxYQknCRvCo04DEVlxkKgpou-6kejhz2v_Nfz5H_uO1gb-Gw_alIITfn2xV_Pp_jez--YXygED6-kZkYj3wLITDdQc8MlCG_Fftxr3ug8C0u5vNnHJr6SQmsH6MnRDi1gYMMLIqu-Y0gQ/360fx360f',
     description: 'German-regulated CS2 item exchange providing official real-time pricing feeds and legal European bank cashout for VORTEX users.',
     bonusText: '0% deposit fees on bank wires & cards + Verified seller status',
     promoCode: 'VORTEX',

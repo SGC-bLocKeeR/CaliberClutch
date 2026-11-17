@@ -41,6 +41,26 @@ export const convertSteam64ToSteam2 = (steamId64: string): string => {
   }
 };
 
+/**
+ * Sanitizes Steam personaName so that domain suffixes, test URLs, or clunky URL tags
+ * (such as "| caliberclutch.vercel.app", ".vercel.app", or site URLs) are cleanly stripped.
+ * Returns clean esports GamerTag (e.g. "M14").
+ */
+export const cleanGamerTag = (name?: string | null): string => {
+  if (!name) return 'M14';
+  let cleaned = name;
+  // Strip domain names, vercel.app, website ads, etc.
+  cleaned = cleaned.replace(/\|\s*https?:\/\/[^\s]+/gi, '');
+  cleaned = cleaned.replace(/https?:\/\/[^\s]+/gi, '');
+  cleaned = cleaned.replace(/\|\s*[a-zA-Z0-9.-]*vercel\.app[^\s)]*/gi, '');
+  cleaned = cleaned.replace(/[a-zA-Z0-9.-]*vercel\.app[^\s)]*/gi, '');
+  cleaned = cleaned.replace(/\|\s*caliberclutch(\.com|\.gg|\.net|\.app)?[^\s)]*/gi, '');
+  // Clean up trailing pipes, dashes or extra whitespace
+  cleaned = cleaned.replace(/[\s|/–—-]+$/g, '').trim();
+  if (!cleaned || cleaned.toLowerCase().includes('blockeer')) return 'M14';
+  return cleaned;
+};
+
 export interface SteamUserProfile {
   steamId64: string;
   personaName: string;
@@ -56,7 +76,7 @@ export const fetchSteamProfile = async (steamId64: string): Promise<SteamUserPro
       if (data && data.personaName) {
         return {
           steamId64,
-          personaName: data.personaName,
+          personaName: cleanGamerTag(data.personaName),
           avatarUrl: data.avatarUrl || 'https://avatars.steamstatic.com/fef49e7fa7e1997310d705b2a6158ff8dc1cdfeb_full.jpg',
           countryCode: data.countryCode || 'XK'
         };

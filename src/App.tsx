@@ -3,7 +3,7 @@ import { VortexLandingPage } from './components/vortex/VortexLandingPage';
 import { VortexPureHtmlLanding } from './components/vortex/VortexPureHtmlLanding';
 import { VortexDashboard } from './components/vortex/VortexDashboard';
 import { sound } from './utils/soundEffects';
-import { redirectToSteamLogin, parseSteamLoginParams, getSteamOpenIdUrl, fetchSteamProfile } from './utils/steamAuth';
+import { redirectToSteamLogin, parseSteamLoginParams, getSteamOpenIdUrl, fetchSteamProfile, cleanGamerTag } from './utils/steamAuth';
 
 export function App() {
   const [isLoggedIn, setIsLoggedIn] = useState<boolean>(() => {
@@ -13,11 +13,11 @@ export function App() {
   const [landingMode] = useState<'pure-html' | 'image-reference'>('pure-html');
   const [userGamerTag, setUserGamerTag] = useState<string>(() => {
     const saved = localStorage.getItem('vortex_user_gamertag');
-    if (!saved || saved.toLowerCase().includes('blockeer')) {
-      localStorage.setItem('vortex_user_gamertag', 'M14');
-      return 'M14';
+    const cleaned = cleanGamerTag(saved);
+    if (!saved || saved !== cleaned) {
+      localStorage.setItem('vortex_user_gamertag', cleaned);
     }
-    return saved;
+    return cleaned;
   });
   const [avatarUrl, setAvatarUrl] = useState<string>(() => {
     const saved = localStorage.getItem('vortex_user_avatar');
@@ -42,11 +42,12 @@ export function App() {
       // Fetch authentic Steam persona name & avatar from Steam Community API
       fetchSteamProfile(steamId64).then((profile) => {
         if (profile?.personaName) {
-          setUserGamerTag(profile.personaName);
-          localStorage.setItem('vortex_user_gamertag', profile.personaName);
+          const cleanedName = cleanGamerTag(profile.personaName);
+          setUserGamerTag(cleanedName);
+          localStorage.setItem('vortex_user_gamertag', cleanedName);
 
           // Strictly and exclusively ONLY M14 has administrator access
-          const nameLower = (profile.personaName || '').toLowerCase();
+          const nameLower = cleanedName.toLowerCase();
           const isOwnerAdmin = nameLower.includes('m14');
           if (isOwnerAdmin) {
             localStorage.setItem('vortex_is_admin', 'true');
