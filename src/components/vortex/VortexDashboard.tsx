@@ -2199,13 +2199,18 @@ export const VortexDashboard: React.FC<VortexDashboardProps> = ({
                       </span>
                     </div>
 
-                    <div className="space-y-1">
-                      <h1 className="text-4xl sm:text-5xl lg:text-6xl font-black font-display tracking-tight uppercase">
-                        <span className="text-amber-400 drop-shadow-[0_0_30px_rgba(245,158,11,0.5)]">COMING SOON</span>
-                        <span className="text-slate-500 mx-2 font-mono font-normal">//</span>
-                        <span className="text-white">CALIBER CLUTCH</span>
+                    <div className="space-y-3">
+                      <div className="text-4xl sm:text-6xl lg:text-7xl font-black font-display tracking-tight uppercase text-amber-400 drop-shadow-[0_0_30px_rgba(245,158,11,0.5)] leading-tight">
+                        COMING SOON
+                      </div>
+                      
+                      {/* Sleek horizontal divider line as requested */}
+                      <div className="w-full max-w-2xl h-px bg-gradient-to-r from-amber-400/50 via-white/15 to-transparent my-1" />
+
+                      <h1 className="text-3xl sm:text-4xl lg:text-5xl font-black font-display text-white tracking-tight uppercase leading-tight">
+                        CALIBER CLUTCH
                       </h1>
-                      <p className="text-sm font-mono text-slate-300 max-w-3xl">
+                      <p className="text-sm font-mono text-slate-300 max-w-3xl pt-1">
                         Hold your angles and save your AWPs! The next generation of competitive Counter-Strike 2 is almost ready.
                       </p>
                     </div>
