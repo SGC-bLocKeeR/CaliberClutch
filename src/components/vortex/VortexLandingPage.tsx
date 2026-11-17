@@ -39,16 +39,11 @@ const SteamIcon = ({ className = "w-4 h-4" }: { className?: string }) => (
 export const VortexBrandLogo = ({ className = "h-8" }: { className?: string }) => (
   <div className={`flex items-center gap-2.5 select-none ${className}`}>
     <div className="relative flex items-center justify-center">
-      <svg className="w-7 h-7 drop-shadow-[0_0_12px_rgba(163,230,53,0.7)]" viewBox="0 0 32 32" fill="none">
-        <path 
-          d="M5 6L16 26L27 6H21L16 17L11 6H5Z" 
-          fill="#A3E635" 
-        />
-        <path 
-          d="M16 8L19 14L16 20L13 14L16 8Z" 
-          fill="#FFFFFF" 
-          opacity="0.9"
-        />
+      <svg className="w-7 h-7 drop-shadow-[0_0_14px_rgba(163,230,53,0.85)]" viewBox="0 0 32 32" fill="none">
+        <circle cx="16" cy="16" r="13" stroke="#A3E635" strokeWidth="2.2" strokeDasharray="18 4" opacity="0.9" />
+        <path d="M21 10.5H13.5C10.5 10.5 8 13 8 16C8 19 10.5 21.5 13.5 21.5H21" stroke="#A3E635" strokeWidth="2.8" strokeLinecap="round" />
+        <path d="M16 12L19 16L16 20L13 16L16 12Z" fill="#FFFFFF" />
+        <circle cx="16" cy="16" r="1.5" fill="#A3E635" />
       </svg>
     </div>
     <div className="flex items-baseline gap-1.5 leading-none">

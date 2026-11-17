@@ -1824,6 +1824,14 @@ export const VortexDashboard: React.FC<VortexDashboardProps> = ({
         : 'bg-[#A3E635]/15 text-[#A3E635] border border-[#A3E635]/30 font-bold'
     },
     {
+      id: 'tournaments' as VortexTab,
+      label: 'Tournaments',
+      desc: 'Season 1 • Under Dev',
+      icon: Trophy,
+      badge: 'COMING SOON',
+      badgeColor: 'bg-amber-500/15 text-amber-400 border border-amber-500/30 font-bold'
+    },
+    {
       id: 'cases' as VortexTab,
       label: 'Cases',
       desc: isVisitorMode ? 'Season 1 • Under Dev' : 'Hellcase & Farmskins CS2 Unboxing',
@@ -1832,14 +1840,6 @@ export const VortexDashboard: React.FC<VortexDashboardProps> = ({
       badgeColor: isVisitorMode
         ? 'bg-amber-500/15 text-amber-400 border border-amber-500/30 font-bold'
         : 'bg-gradient-to-r from-amber-500/20 to-orange-500/20 text-amber-300 border border-amber-500/40 font-bold'
-    },
-    {
-      id: 'tournaments' as VortexTab,
-      label: 'Tournaments',
-      desc: 'Season 1 • Under Dev',
-      icon: Trophy,
-      badge: 'COMING SOON',
-      badgeColor: 'bg-amber-500/15 text-amber-400 border border-amber-500/30 font-bold'
     },
     {
       id: 'anticheat' as VortexTab,
@@ -2165,8 +2165,8 @@ export const VortexDashboard: React.FC<VortexDashboardProps> = ({
                     <div className="flex flex-wrap items-center gap-2.5">
                       <span className="px-3.5 py-1 rounded-full text-xs font-mono font-black uppercase tracking-wider text-amber-400 bg-amber-500/15 border border-amber-500/40 flex items-center gap-2 shadow-[0_0_15px_rgba(245,158,11,0.25)]">
                         <span className="relative flex h-2.5 w-2.5">
-                          <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-amber-400 opacity-80" />
-                          <span className="relative inline-flex rounded-full h-2.5 w-2.5 bg-amber-400" />
+                          <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-[#A3E635] opacity-80" />
+                          <span className="relative inline-flex rounded-full h-2.5 w-2.5 bg-[#A3E635]" />
                         </span>
                         <span>COMING SOON</span>
                       </span>
@@ -2176,11 +2176,11 @@ export const VortexDashboard: React.FC<VortexDashboardProps> = ({
                     </div>
 
                     <div className="space-y-3">
-                      {/* HUGE COMING SOON WITH RADAR PULSING/BEATING CIRCLE IN FRONT */}
+                      {/* HUGE COMING SOON WITH VIBRANT GREEN PULSING/BEATING CIRCLE IN FRONT */}
                       <div className="flex items-center gap-3 sm:gap-4 md:gap-5 text-4xl sm:text-6xl lg:text-7xl font-black font-display tracking-tight uppercase text-amber-400 drop-shadow-[0_0_30px_rgba(245,158,11,0.5)] leading-tight select-none">
                         <span className="relative flex h-5 w-5 sm:h-7 sm:w-7 md:h-8 md:w-8 shrink-0">
-                          <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-amber-400 opacity-85" />
-                          <span className="relative inline-flex rounded-full h-5 w-5 sm:h-7 sm:w-7 md:h-8 md:w-8 bg-amber-400 shadow-[0_0_25px_#F59E0B]" />
+                          <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-[#A3E635] opacity-85" />
+                          <span className="relative inline-flex rounded-full h-5 w-5 sm:h-7 sm:w-7 md:h-8 md:w-8 bg-[#A3E635] shadow-[0_0_25px_#A3E635]" />
                         </span>
                         <span>COMING SOON</span>
                       </div>
