@@ -2199,20 +2199,13 @@ export const VortexDashboard: React.FC<VortexDashboardProps> = ({
                       </span>
                     </div>
 
-                    <div className="space-y-2">
-                      {/* HUGE ORANGE "COMING SOON" WITH GREEN NEON GLOW/RADIATION DIRECTLY ABOVE PLATFORM TITLE */}
-                      <div 
-                        className="text-4xl sm:text-6xl lg:text-7xl font-black font-display tracking-tight uppercase select-none text-[#FF5500]"
-                        style={{ 
-                          textShadow: '0 0 12px #A3E635, 0 0 25px #A3E635, 0 0 45px rgba(163, 230, 53, 0.85), 0 0 70px rgba(163, 230, 53, 0.5)' 
-                        }}
-                      >
-                        COMING SOON
-                      </div>
-                      <h1 className="text-3xl sm:text-4xl lg:text-5xl font-black font-display text-white tracking-tight uppercase">
-                        CALIBER CLUTCH PLATFORM
+                    <div className="space-y-1">
+                      <h1 className="text-4xl sm:text-5xl lg:text-6xl font-black font-display tracking-tight uppercase">
+                        <span className="text-amber-400 drop-shadow-[0_0_30px_rgba(245,158,11,0.5)]">COMING SOON</span>
+                        <span className="text-slate-500 mx-2 font-mono font-normal">//</span>
+                        <span className="text-white">CALIBER CLUTCH</span>
                       </h1>
-                      <p className="text-sm font-mono text-slate-300 max-w-3xl pt-1">
+                      <p className="text-sm font-mono text-slate-300 max-w-3xl">
                         Hold your angles and save your AWPs! The next generation of competitive Counter-Strike 2 is almost ready.
                       </p>
                     </div>
