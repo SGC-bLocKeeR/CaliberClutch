@@ -3606,7 +3606,7 @@ export const VortexDashboard: React.FC<VortexDashboardProps> = ({
                         HOST A CS2 TOURNAMENT & CLAN SETUP
                       </h3>
                       <p className="text-xs font-mono text-slate-400">
-                        Konfiguro formatin e kampionatit, rregullat zyrtare të klaneve dhe fondin e çmimeve në Cash me servera 128-tick.
+                        Configure championship formats, official clan rules, and pure cash prize pools on dedicated 128-tick match servers.
                       </p>
                     </div>
                     <button
@@ -3616,22 +3616,22 @@ export const VortexDashboard: React.FC<VortexDashboardProps> = ({
                       }}
                       className="px-4 py-2.5 rounded-xl bg-white/5 hover:bg-white/10 text-xs font-mono text-slate-300 hover:text-white border border-white/10 transition cursor-pointer self-start sm:self-center flex items-center gap-2"
                     >
-                      <span>← Kthehu te Lista e Turneve</span>
+                      <span>← Back to Tournament List</span>
                     </button>
                   </div>
 
-                  {/* STACKED LAYOUT: DRITARJA 1 SIPËR (ORGANIZIMI I TURNEUT) • DRITARJA 2 POSHTË (RREGULLORJA) */}
+                  {/* STACKED LAYOUT: TOP WINDOW (TOURNAMENT SETUP) • BOTTOM WINDOW (OFFICIAL RULEBOOK) */}
                   <div className="space-y-8">
                     
-                    {/* DRITARJA 1 (SIPËR • E GJERË): PJESA KU ORGANIZOHET TURNEU / BËHEN ZGJEDHJET */}
+                    {/* WINDOW 1 (TOP • FULL-WIDTH): TOURNAMENT SETUP & CLAN CONFIGURATION */}
                     <div className="w-full rounded-3xl bg-[#0E121B] border border-[#202738] p-6 sm:p-8 space-y-6 text-left shadow-2xl">
                       <div className="flex flex-col sm:flex-row sm:items-center justify-between border-b border-white/5 pb-4 gap-3">
                         <div>
                           <div className="flex items-center gap-2">
                             <SlidersHorizontal className="w-5 h-5 text-[#A3E635]" />
-                            <h4 className="font-display font-black text-white text-lg">PJESA KU BËHEN ZGJEDHJET • KONFIGURIMI I TURNEUT</h4>
+                            <h4 className="font-display font-black text-white text-lg">TOURNAMENT SETUP & CLAN CONFIGURATION</h4>
                           </div>
-                          <p className="text-xs font-mono text-slate-400 mt-1">Përzgjidh parametrat e kampionatit, formatin e playoff-eve, fondin e parave dhe emrin e organizatorit</p>
+                          <p className="text-xs font-mono text-slate-400 mt-1">Configure championship parameters, playoff formats, pure cash prize distribution, and organizer identity</p>
                         </div>
                         <div className="flex items-center gap-2">
                           <span className="px-3 py-1 rounded-xl text-[10px] font-mono font-bold bg-[#A3E635]/15 text-[#A3E635] border border-[#A3E635]/30 flex items-center gap-1.5">
@@ -3646,41 +3646,41 @@ export const VortexDashboard: React.FC<VortexDashboardProps> = ({
 
                       {/* Form Fields Container */}
                       <div className="space-y-5 text-xs font-mono">
-                        {/* 1. Emri i Organizatorit & Titulli i Turneut (2 Kolona të gjera) */}
+                        {/* 1. Organizer Name & Tournament Title (2 Columns) */}
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-4 sm:gap-6">
                           <div>
                             <label className="text-[11px] text-amber-400 uppercase tracking-wider block mb-1.5 font-bold flex items-center gap-1.5">
                               <Crown className="w-4 h-4 text-amber-400" />
-                              <span>Emri i Organizatorit / Klanit Organizator (Organizer / Host Clan)</span>
+                              <span>Organizer / Host Clan Name</span>
                             </label>
                             <input
                               type="text"
                               value={newTourneyOrganizer}
                               onChange={(e) => setNewTourneyOrganizer(e.target.value)}
-                              placeholder="Shkruaj emrin e organizatorit ose klanit tënd (p.sh. Bad News Eagles, FaZe Clan, Guild Gaming)..."
+                              placeholder="Enter organizer or clan name (e.g. Bad News Eagles, FaZe Clan, Guild Gaming)..."
                               className="w-full px-4 py-3 rounded-xl bg-[#141722] border border-[#252C3D] text-amber-300 font-bold focus:outline-none focus:border-amber-400 text-sm"
                             />
                           </div>
 
                           <div>
                             <label className="text-[11px] text-slate-300 uppercase tracking-wider block mb-1.5 font-bold">
-                              Emri i Turneut (Tournament Title)
+                              Tournament Title
                             </label>
                             <input
                               type="text"
                               value={newTourneyTitle}
                               onChange={(e) => setNewTourneyTitle(e.target.value)}
-                              placeholder="e.g. CALIBER CLUTCH Balkan Masters #1"
+                              placeholder="e.g. CALIBER CLUTCH European Masters #1"
                               className="w-full px-4 py-3 rounded-xl bg-[#141722] border border-[#252C3D] text-white font-bold focus:outline-none focus:border-[#A3E635] text-sm"
                             />
                           </div>
                         </div>
 
-                        {/* 2. Cash Prize Pool & Max Teams & Struktura (3 Kolona të gjera) */}
+                        {/* 2. Cash Prize Pool & Max Teams & Structure (3 Columns) */}
                         <div className="grid grid-cols-1 md:grid-cols-3 gap-4 sm:gap-6">
                           <div>
                             <label className="text-[11px] text-slate-300 uppercase tracking-wider block mb-1.5 font-bold">
-                              Fondi Total i Çmimeve (€ Cash Prize Pool)
+                              Total Cash Prize Pool (€)
                             </label>
                             <input
                               type="text"
@@ -3693,37 +3693,37 @@ export const VortexDashboard: React.FC<VortexDashboardProps> = ({
 
                           <div>
                             <label className="text-[11px] text-slate-300 uppercase tracking-wider block mb-1.5 font-bold">
-                              Kapaciteti i Klaneve (Max Teams)
+                              Team Capacity (Max Teams)
                             </label>
                             <select
                               value={newTourneyMaxTeams}
                               onChange={(e) => setNewTourneyMaxTeams(Number(e.target.value))}
                               className="w-full px-4 py-3 rounded-xl bg-[#141722] border border-[#252C3D] text-white font-bold focus:outline-none focus:border-[#A3E635] cursor-pointer text-sm"
                             >
-                              <option value={8}>8 Klane (Çerekfinale)</option>
-                              <option value={16}>16 Klane (Raundi i 16)</option>
-                              <option value={32}>32 Klane (Kampionat Madhor)</option>
-                              <option value={64}>64 Klane (Qark i Hapur Kualifikues)</option>
+                              <option value={8}>8 Teams (Quarter-Finals)</option>
+                              <option value={16}>16 Teams (Round of 16)</option>
+                              <option value={32}>32 Teams (Major Championship)</option>
+                              <option value={64}>64 Teams (Open Qualifier Circuit)</option>
                             </select>
                           </div>
 
                           <div>
                             <label className="text-[11px] text-slate-300 uppercase tracking-wider block mb-1.5 font-bold">
-                              Skema e Ndeshjeve (Sistemi i Garimit / Bracket)
+                              Tournament Bracket Structure
                             </label>
                             <select
                               value={newTourneyStructure}
                               onChange={(e) => setNewTourneyStructure(e.target.value)}
                               className="w-full px-4 py-3 rounded-xl bg-[#141722] border border-[#252C3D] text-white font-bold focus:outline-none focus:border-[#A3E635] cursor-pointer text-sm"
                             >
-                              <option value="Single Elimination">5v5 Single Elimination (Eliminim Direkt / Knockout)</option>
-                              <option value="Double Elimination">5v5 Double Elimination (Me Shans të Dytë / Upper & Lower)</option>
-                              <option value="GSL Group Stage + Single Elim">GSL Group Stage + Playoffs (Grupe + Finale)</option>
+                              <option value="Single Elimination">5v5 Single Elimination (Knockout)</option>
+                              <option value="Double Elimination">5v5 Double Elimination (Upper & Lower)</option>
+                              <option value="GSL Group Stage + Single Elim">GSL Group Stage + Single Elim</option>
                             </select>
                           </div>
                         </div>
 
-                        {/* 3. Shpërndarja 100% Cash Pool (Pa Skins) */}
+                        {/* 3. Pure 100% Cash Prize Distribution (Zero Skins) */}
                         {(() => {
                           const numericPrize = parseFloat(newTourneyCashPrize.replace(/[^0-9.]/g, '')) || 3000;
                           const firstPrize = Math.round(numericPrize * 0.70);
@@ -3735,23 +3735,23 @@ export const VortexDashboard: React.FC<VortexDashboardProps> = ({
                               <div className="flex items-center justify-between text-xs font-mono">
                                 <span className="text-[#A3E635] font-bold flex items-center gap-1.5">
                                   <Trophy className="w-4 h-4 text-[#A3E635]" />
-                                  <span>Llogaritja Zyrtare e Çmimeve në Para (Vetëm Cash • 100% Pa Skins):</span>
+                                  <span>Official Pure Cash Prize Distribution (100% Cash • Zero Skins):</span>
                                 </span>
-                                <span className="text-emerald-400 text-[11px] font-bold">Shpërndarje e Menjëhershme në Bilanc</span>
+                                <span className="text-emerald-400 text-[11px] font-bold">Instant Balance Payout</span>
                               </div>
                               <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 text-center font-mono">
                                 <div className="p-3 rounded-xl bg-amber-500/10 border border-amber-500/25">
-                                  <div className="text-xs font-bold text-amber-400">🥇 Vendi 1</div>
+                                  <div className="text-xs font-bold text-amber-400">🥇 1st Place</div>
                                   <div className="text-base font-black text-white mt-1">€{firstPrize.toLocaleString()}</div>
                                   <div className="text-[10px] text-[#A3E635] font-bold">70% Cash</div>
                                 </div>
                                 <div className="p-3 rounded-xl bg-slate-400/10 border border-slate-400/25">
-                                  <div className="text-xs font-bold text-slate-300">🥈 Vendi 2</div>
+                                  <div className="text-xs font-bold text-slate-300">🥈 2nd Place</div>
                                   <div className="text-base font-black text-white mt-1">€{secondPrize.toLocaleString()}</div>
                                   <div className="text-[10px] text-slate-400 font-bold">20% Cash</div>
                                 </div>
                                 <div className="p-3 rounded-xl bg-amber-700/10 border border-amber-700/25">
-                                  <div className="text-xs font-bold text-amber-600">🥉 Vendi 3</div>
+                                  <div className="text-xs font-bold text-amber-600">🥉 3rd Place</div>
                                   <div className="text-base font-black text-white mt-1">€{thirdPrize.toLocaleString()}</div>
                                   <div className="text-[10px] text-amber-500 font-bold">10% Cash</div>
                                 </div>
@@ -3760,26 +3760,26 @@ export const VortexDashboard: React.FC<VortexDashboardProps> = ({
                           );
                         })()}
 
-                        {/* 4. Formati i Ndeshjeve (Playoffs, Finals) & Serveri (3 Kolona) */}
+                        {/* 4. Match Formats (Playoffs, Finals) & Server Location (3 Columns) */}
                         <div className="grid grid-cols-1 md:grid-cols-3 gap-4 sm:gap-6">
                           <div>
                             <label className="text-[11px] text-amber-300 uppercase tracking-wider block mb-1.5 font-bold flex items-center justify-between">
-                              <span>Formati i Playoffs</span>
-                              <span className="text-[10px] text-slate-400 font-normal">Deri në Finale</span>
+                              <span>Playoffs Format</span>
+                              <span className="text-[10px] text-slate-400 font-normal">Up to Finals</span>
                             </label>
                             <select
                               value={newTourneyPlayoffsFormat}
                               onChange={(e) => setNewTourneyPlayoffsFormat(e.target.value as any)}
                               className="w-full px-4 py-3 rounded-xl bg-[#141722] border border-[#252C3D] text-amber-300 font-bold focus:outline-none focus:border-[#A3E635] cursor-pointer text-sm"
                             >
-                              <option value="BO1">BO1 (Best of 1 • Një Hartë)</option>
-                              <option value="BO3">BO3 (Best of 3 • Standard Konkurrues)</option>
+                              <option value="BO1">BO1 (Best of 1 • Single Map)</option>
+                              <option value="BO3">BO3 (Best of 3 • Competitive Standard)</option>
                             </select>
                           </div>
                           <div>
                             <label className="text-[11px] text-[#A3E635] uppercase tracking-wider block mb-1.5 font-bold flex items-center justify-between">
-                              <span>Formati i Grand Final</span>
-                              <span className="text-[10px] text-slate-400 font-normal">Ndeshja Kampionale</span>
+                              <span>Grand Finals Format</span>
+                              <span className="text-[10px] text-slate-400 font-normal">Championship Decider</span>
                             </label>
                             <select
                               value={newTourneyFinalsFormat}
@@ -3787,25 +3787,25 @@ export const VortexDashboard: React.FC<VortexDashboardProps> = ({
                               className="w-full px-4 py-3 rounded-xl bg-[#141722] border border-[#252C3D] text-[#A3E635] font-bold focus:outline-none focus:border-[#A3E635] cursor-pointer text-sm"
                             >
                               <option value="BO1">BO1 (Best of 1 • Sudden Death)</option>
-                              <option value="BO3">BO3 (Best of 3 • Standard Esports)</option>
-                              <option value="BO5">BO5 (Best of 5 • Kampionat Madhor)</option>
+                              <option value="BO3">BO3 (Best of 3 • Esports Standard)</option>
+                              <option value="BO5">BO5 (Best of 5 • Major Championship)</option>
                             </select>
                           </div>
                           <div>
                             <label className="text-[11px] text-slate-300 uppercase tracking-wider block mb-1.5 font-bold">
-                              Vendndodhja e Serverit (128-Tick)
+                              Server Location (128-Tick Dedicated)
                             </label>
                             <select
                               value={newTourneyRegion}
                               onChange={(e) => setNewTourneyRegion(e.target.value)}
                               className="w-full px-4 py-3 rounded-xl bg-[#141722] border border-[#252C3D] text-slate-200 font-bold focus:outline-none focus:border-[#A3E635] cursor-pointer text-sm"
                             >
-                              <option value="Germany (Frankfurt Central • 14ms)">🇩🇪 Gjermani (Frankfurt Central • 14ms)</option>
-                              <option value="Netherlands (Amsterdam • 16ms)">🇳🇱 Holandë (Amsterdam • 16ms)</option>
-                              <option value="Sweden (Stockholm • 28ms)">🇸🇪 Suedi (Stockholm • 28ms)</option>
-                              <option value="Finland (Helsinki • 31ms)">🇫🇮 Finlandë (Helsinki • 31ms)</option>
-                              <option value="United Kingdom (London • 19ms)">🇬🇧 Britani e Madhe (London • 19ms)</option>
-                              <option value="France (Paris • 21ms)">🇫🇷 Francë (Paris • 21ms)</option>
+                              <option value="Germany (Frankfurt Central • 14ms)">🇩🇪 Germany (Frankfurt Central • 14ms)</option>
+                              <option value="Netherlands (Amsterdam • 16ms)">🇳🇱 Netherlands (Amsterdam • 16ms)</option>
+                              <option value="Sweden (Stockholm • 28ms)">🇸🇪 Sweden (Stockholm • 28ms)</option>
+                              <option value="Finland (Helsinki • 31ms)">🇫🇮 Finland (Helsinki • 31ms)</option>
+                              <option value="United Kingdom (London • 19ms)">🇬🇧 United Kingdom (London • 19ms)</option>
+                              <option value="France (Paris • 21ms)">🇫🇷 France (Paris • 21ms)</option>
                             </select>
                           </div>
                         </div>
@@ -3816,10 +3816,10 @@ export const VortexDashboard: React.FC<VortexDashboardProps> = ({
                             <div>
                               <label className="text-[11px] text-amber-400 uppercase tracking-wider block font-bold flex items-center gap-1.5">
                                 <Coins className="w-4 h-4 text-amber-400" />
-                                <span>Tarifa e Pjesëmarrjes (Buy-In & Entry Fee)</span>
+                                <span>Tournament Entry Fee (Buy-In & Escrow)</span>
                               </label>
                               <span className="text-xs text-slate-400">
-                                Pagesa për klan (5 lojtarë) dhe komisioni i platformës
+                                Team registration fee (5 players) with automated escrow guarantee
                               </span>
                             </div>
                             <div className="flex items-center gap-1.5 p-1 rounded-xl bg-black/40 border border-white/5">
@@ -3849,7 +3849,7 @@ export const VortexDashboard: React.FC<VortexDashboardProps> = ({
                               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                                 <div>
                                   <label className="text-[11px] text-slate-300 uppercase block mb-1.5 font-bold">
-                                    Tarifa për Klan (€ / Team)
+                                    Fee per Team (€ / Team)
                                   </label>
                                   <div className="relative">
                                     <input
@@ -3865,11 +3865,11 @@ export const VortexDashboard: React.FC<VortexDashboardProps> = ({
                                 </div>
                                 <div>
                                   <label className="text-[11px] text-slate-300 uppercase block mb-1.5 font-bold">
-                                    Llogaritur për Lojtar (5v5 Roster)
+                                    Calculated per Player (5v5 Roster)
                                   </label>
                                   <div className="w-full px-4 py-2.5 rounded-xl bg-[#0B0E16] border border-[#252C3D] text-emerald-400 font-bold flex items-center justify-between text-sm">
                                     <span>€{(newTourneyEntryFee / 5).toFixed(2)}</span>
-                                    <span className="text-xs text-slate-400 font-normal">nga €{(newTourneyEntryFee / 5).toFixed(0)} / person</span>
+                                    <span className="text-xs text-slate-400 font-normal">approx €{(newTourneyEntryFee / 5).toFixed(0)} / person</span>
                                   </div>
                                 </div>
                               </div>
@@ -3877,20 +3877,20 @@ export const VortexDashboard: React.FC<VortexDashboardProps> = ({
                               {/* Financial Escrow Breakdown */}
                               <div className="p-4 rounded-xl bg-black/50 border border-amber-500/20 space-y-2.5 text-xs">
                                 <div className="flex items-center justify-between text-slate-300">
-                                  <span>Fondi Total i Buy-in ({newTourneyMaxTeams} klane × €{newTourneyEntryFee}):</span>
+                                  <span>Total Buy-In Pool ({newTourneyMaxTeams} teams × €{newTourneyEntryFee}):</span>
                                   <span className="font-bold text-white font-mono">€{(newTourneyMaxTeams * newTourneyEntryFee).toFixed(2)}</span>
                                 </div>
                                 <div className="flex items-center justify-between text-amber-400 font-bold">
                                   <span className="flex items-center gap-1.5">
                                     <ShieldCheck className="w-3.5 h-3.5 text-amber-400" />
-                                    Komisioni i CaliberClutch (15% Net Revenue):
+                                    CaliberClutch Platform Commission (15% Net Revenue):
                                   </span>
                                   <span className="font-mono">+€{(newTourneyMaxTeams * newTourneyEntryFee * 0.15).toFixed(2)}</span>
                                 </div>
                                 <div className="flex items-center justify-between text-emerald-400 font-bold border-t border-white/10 pt-2">
                                   <span className="flex items-center gap-1.5">
                                     <Trophy className="w-3.5 h-3.5 text-emerald-400" />
-                                    Prize Pool në Escrow (85% për Fituesit):
+                                    Prize Pool in Escrow (85% to Winners):
                                   </span>
                                   <span className="font-mono">€{(newTourneyMaxTeams * newTourneyEntryFee * 0.85).toFixed(2)}</span>
                                 </div>
@@ -3899,10 +3899,10 @@ export const VortexDashboard: React.FC<VortexDashboardProps> = ({
                           )}
                         </div>
 
-                        {/* 6. Data & Ora e Fillimit */}
+                        {/* 6. Schedule & Start Time */}
                         <div>
                           <label className="text-[11px] text-slate-300 uppercase tracking-wider block mb-1.5 font-bold">
-                            Data & Ora e Fillimit (Schedule / Start Time)
+                            Schedule & Start Time
                           </label>
                           <input
                             type="text"
@@ -3924,14 +3924,14 @@ export const VortexDashboard: React.FC<VortexDashboardProps> = ({
                           }}
                           className="px-5 py-3 rounded-2xl bg-white/5 hover:bg-white/10 text-xs font-mono text-slate-300 hover:text-white transition cursor-pointer"
                         >
-                          Anulo / Kthehu
+                          Cancel / Back
                         </button>
                         <button
                           type="button"
                           onClick={() => {
                             sound.playTournamentVictory();
                             if (!newTourneyTitle.trim()) {
-                              alert('Ju lutem shkruani një titull për turneun.');
+                              alert('Please enter a tournament title.');
                               return;
                             }
 
@@ -3985,7 +3985,7 @@ export const VortexDashboard: React.FC<VortexDashboardProps> = ({
                             setTourneyTabMode('browse');
                             sound.playTournamentVictory();
                             confetti({ particleCount: 110, spread: 85, origin: { y: 0.6 } });
-                            setDashboardToast(`✓ Urime! Turneu "${createdItem.title}" u publikua me sukses me çmime 100% Cash dhe regjistrimet janë të hapura!`);
+                            setDashboardToast(`✓ Success! Tournament "${createdItem.title}" published with 100% Cash prizes and registrations are open!`);
                             setTimeout(() => setDashboardToast(null), 5000);
                           }}
                           className="px-6 py-3 rounded-2xl bg-gradient-to-r from-[#84CC16] to-[#A3E635] hover:brightness-110 text-slate-950 font-display font-black text-xs uppercase tracking-wider transition shadow-lg shadow-lime-500/25 cursor-pointer active:scale-95 flex items-center gap-2"
@@ -3996,7 +3996,7 @@ export const VortexDashboard: React.FC<VortexDashboardProps> = ({
                       </div>
                     </div>
 
-                    {/* DRITARJA 2 (POSHTË • E GJERË): RREGULLORJA ZYRTARE E TURNEUT */}
+                    {/* WINDOW 2 (BOTTOM • FULL-WIDTH): OFFICIAL TOURNAMENT RULEBOOK */}
                     <div className="w-full rounded-3xl bg-[#090C12] border border-[#202738] p-6 sm:p-8 space-y-6 shadow-2xl">
                       <div className="flex flex-col sm:flex-row sm:items-center justify-between border-b border-white/5 pb-4 gap-3">
                         <div className="flex items-center gap-3">
@@ -4004,92 +4004,92 @@ export const VortexDashboard: React.FC<VortexDashboardProps> = ({
                             <BookOpen className="w-5 h-5" />
                           </div>
                           <div>
-                            <h4 className="font-display font-black text-white text-lg">RREGULLORJA ZYRTARE E TURNEUT</h4>
-                            <span className="text-xs font-mono text-amber-400 font-bold">Standardi Ndërkombëtar Esports • CaliberClutch Rulebook</span>
+                            <h4 className="font-display font-black text-white text-lg">OFFICIAL TOURNAMENT RULEBOOK</h4>
+                            <span className="text-xs font-mono text-amber-400 font-bold">International Esports Standard • CaliberClutch Rulebook</span>
                           </div>
                         </div>
                         <span className="px-3 py-1 rounded-xl text-xs font-mono font-bold bg-emerald-500/15 text-emerald-400 border border-emerald-500/30 self-start sm:self-auto flex items-center gap-1.5">
                           <ShieldCheck className="w-3.5 h-3.5" />
-                          E Detyrueshme për të Gjitha Klanet
+                          Mandatory for All Participating Clans
                         </span>
                       </div>
 
-                      {/* Responsive Grid i Rregullave: 3 Kolona të plota, pa asnjë ngushtim */}
+                      {/* Responsive Grid of Rules: 3 Full Columns */}
                       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 text-xs font-mono text-slate-300">
-                        {/* Rregulli 1 */}
+                        {/* Rule 1 */}
                         <div className="p-4 rounded-2xl bg-black/40 border border-white/5 space-y-2 hover:border-[#A3E635]/30 transition">
                           <div className="flex items-center gap-2 text-white font-bold">
                             <Target className="w-4 h-4 text-[#A3E635] shrink-0" />
-                            <span>1. Formati i Ndeshjeve (CS2 MR12 & Overtime)</span>
+                            <span>1. Match Format (CS2 MR12 & Overtime)</span>
                           </div>
                           <p className="text-[11px] text-slate-400 pl-6 leading-relaxed">
-                            Ndeshjet zhvillohen sipas rregullit zyrtar CS2 MR12 (12 raunde për pjesë, 24 raunde gjithsej). Në rast barazimi 12-12, luhet menjëherë Overtime MR3 ($10,000 para fillestare) derisa një klan të shpallet fitues me diferencë prej 2 raundesh.
+                            Matches are played according to official CS2 MR12 regulations (12 rounds per half, 24 rounds total). In the event of a 12-12 tie, an MR3 Overtime ($10,000 starting cash) is played immediately until a clan wins with a 2-round advantage.
                           </p>
                         </div>
 
-                        {/* Rregulli 2 */}
+                        {/* Rule 2 */}
                         <div className="p-4 rounded-2xl bg-black/40 border border-white/5 space-y-2 hover:border-emerald-500/30 transition">
                           <div className="flex items-center gap-2 text-white font-bold">
                             <ShieldCheck className="w-4 h-4 text-emerald-400 shrink-0" />
-                            <span>2. Anti-Cheat & Integriteti (Kernel Ring-0)</span>
+                            <span>2. Anti-Cheat & Integrity (Kernel Ring-0)</span>
                           </div>
                           <p className="text-[11px] text-slate-400 pl-6 leading-relaxed">
-                            Çdo lojtar i klanit duhet të ketë CaliberClutch Kernel Anti-Cheat të aktivizuar para se të hyjë në server. Lojtarët me VAC ban, modifikime të paautorizuara ose pa anti-cheat skualifikohen automatikisht.
+                            Every participating player must have the CaliberClutch Kernel Ring-0 Anti-Cheat client running before joining the match server. Players with VAC bans, unauthorized third-party injection, or missing anti-cheat will be automatically disqualified.
                           </p>
                         </div>
 
-                        {/* Rregulli 3 */}
+                        {/* Rule 3 */}
                         <div className="p-4 rounded-2xl bg-black/40 border border-white/5 space-y-2 hover:border-amber-400/30 transition">
                           <div className="flex items-center gap-2 text-white font-bold">
                             <Clock className="w-4 h-4 text-amber-400 shrink-0" />
-                            <span>3. Check-In & Ready Up (15 Minuta Kohë)</span>
+                            <span>3. Check-In & Ready Up (15-Minute Forfeit Timer)</span>
                           </div>
                           <p className="text-[11px] text-slate-400 pl-6 leading-relaxed">
-                            Klanet duhet të bëjnë Ready Up në dhomën e ndeshjes dhe të lidhen në server brenda 15 minutave nga gjenerimi i IP-së. Nëse një klan nuk paraqitet brenda 15 minutave, merr humbje teknike (Def-loss).
+                            Clans must click Ready Up in the match lobby and connect to the dedicated server within 15 minutes of server IP generation. Any clan failing to show up within 15 minutes receives an automatic default loss (Def-Loss).
                           </p>
                         </div>
 
-                        {/* Rregulli 4 */}
+                        {/* Rule 4 */}
                         <div className="p-4 rounded-2xl bg-black/40 border border-white/5 space-y-2 hover:border-sky-400/30 transition">
                           <div className="flex items-center gap-2 text-white font-bold">
                             <SlidersHorizontal className="w-4 h-4 text-sky-400 shrink-0" />
-                            <span>4. Zgjedhja e Hartave (Active Duty Map Veto)</span>
+                            <span>4. Map Veto (Active Duty Competitive Pool)</span>
                           </div>
                           <p className="text-[11px] text-slate-400 pl-6 leading-relaxed">
-                            Hartat zyrtare: Mirage, Inferno, Nuke, Dust II, Anubis, Ancient, Vertigo. Sistemi i heqjes së hartave (Pick & Ban) kryhet automatikisht në dhomën e ndeshjes para fillimit.
+                            Official competitive maps: Mirage, Inferno, Nuke, Dust II, Anubis, Ancient, Vertigo. The automated Pick & Ban veto system runs directly inside the match lobby prior to server launch.
                           </p>
                         </div>
 
-                        {/* Rregulli 5 */}
+                        {/* Rule 5 */}
                         <div className="p-4 rounded-2xl bg-black/40 border border-white/5 space-y-2 hover:border-purple-400/30 transition">
                           <div className="flex items-center gap-2 text-white font-bold">
                             <Users className="w-4 h-4 text-purple-400 shrink-0" />
-                            <span>5. Rostrat & Zëvendësimet (5+1 Stand-In)</span>
+                            <span>5. Rosters & Stand-Ins (5 Starters + 1 Sub)</span>
                           </div>
                           <p className="text-[11px] text-slate-400 pl-6 leading-relaxed">
-                            Çdo klan përbëhet nga 5 lojtarë titullarë dhe vetëm 1 lojtar rezervë (stand-in) të regjistruar paraprakisht. Rostrat bllokohen 30 minuta para turneut dhe ndalohet futja e lojtarëve të paregjistruar.
+                            Each clan roster must contain 5 starting players and at most 1 registered substitute (stand-in). Rosters are locked 30 minutes before tournament start; unregistered players are strictly prohibited from connecting.
                           </p>
                         </div>
 
-                        {/* Rregulli 6 */}
+                        {/* Rule 6 */}
                         <div className="p-4 rounded-2xl bg-black/40 border border-white/5 space-y-2 hover:border-amber-400/30 transition">
                           <div className="flex items-center gap-2 text-white font-bold">
                             <Coins className="w-4 h-4 text-amber-400 shrink-0" />
-                            <span>6. Çmimet 100% Cash (Pa Skins) & Garancia Escrow</span>
+                            <span>6. 100% Cash Prize Pool (Zero Skins) & Escrow Guarantee</span>
                           </div>
                           <p className="text-[11px] text-slate-400 pl-6 leading-relaxed">
-                            Fondi i çmimeve shpërndahet vetëm në para (100% Cash): 70% Vendi 1, 20% Vendi 2, 10% Vendi 3. Paratë ruhen në CaliberClutch Escrow dhe kalojnë direkt në bilancin e fituesve sapo mbyllet Grand Final.
+                            Prize pools are paid out exclusively in real cash (100% Pure Cash): 70% 1st Place, 20% 2nd Place, 10% 3rd Place. Funds are held in CaliberClutch Escrow and disbursed immediately to the winners' balances upon Grand Final conclusion.
                           </p>
                         </div>
 
-                        {/* Rregulli 7 */}
+                        {/* Rule 7 */}
                         <div className="p-4 rounded-2xl bg-black/40 border border-white/5 space-y-2 hover:border-emerald-500/30 transition md:col-span-2 lg:col-span-3">
                           <div className="flex items-center gap-2 text-white font-bold">
                             <CheckCircle2 className="w-4 h-4 text-emerald-400 shrink-0" />
-                            <span>7. Sjellja Sportive & Fair Play</span>
+                            <span>7. Sportsmanship & Fair Play</span>
                           </div>
                           <p className="text-[11px] text-slate-400 pl-6 leading-relaxed">
-                            Lejohet vetëm 1 pauzë taktike (30 sekonda) për pjesë nga çdo klan. Fyerjet, sharjet në chat ose shfrytëzimi i gabimeve të hartës sjellin pezullim të menjëhershëm nga gara.
+                            Each clan is allowed 1 tactical pause (30 seconds) per half. Toxicity, abusive in-game or chat behavior, or exploiting map glitches will result in immediate match forfeit and tournament suspension.
                           </p>
                         </div>
                       </div>
