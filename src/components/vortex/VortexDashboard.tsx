@@ -1001,6 +1001,7 @@ export const VortexDashboard: React.FC<VortexDashboardProps> = ({
 
   // Create tournament form state
   const [newTourneyTitle, setNewTourneyTitle] = useState('CALIBER CLUTCH Community Cup #1');
+  const [newTourneyOrganizer, setNewTourneyOrganizer] = useState<string>('');
   const [newTourneyCashPrize, setNewTourneyCashPrize] = useState('€3,000');
   const [newTourneyMaxTeams, setNewTourneyMaxTeams] = useState<number>(16);
   const [newTourneyEntryFee, setNewTourneyEntryFee] = useState<number>(50); // €50 per team (€10 / player)
@@ -3597,10 +3598,6 @@ export const VortexDashboard: React.FC<VortexDashboardProps> = ({
                           <Trophy className="w-3.5 h-3.5 text-[#A3E635]" />
                           CALIBERCLUTCH ESPORTS CIRCUIT
                         </span>
-                        <span className="px-2.5 py-1 rounded-lg text-[10px] font-mono font-bold bg-[#141A28] border border-[#232D42] text-amber-400 uppercase tracking-wider flex items-center gap-1.5">
-                          <Crown className="w-3 h-3 text-amber-400" />
-                          ORGANIZER: {cleanGamerTag(currentGamerTag)}
-                        </span>
                         <span className="px-2.5 py-1 rounded-lg text-[10px] font-mono font-bold bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 uppercase tracking-wider">
                           100% PURE CASH POOL
                         </span>
@@ -3737,7 +3734,22 @@ export const VortexDashboard: React.FC<VortexDashboardProps> = ({
 
                       {/* Form Fields Container */}
                       <div className="space-y-4 text-xs font-mono">
-                        {/* 1. Titulli */}
+                        {/* 1. Emri i Organizatorit / Klanit */}
+                        <div>
+                          <label className="text-[10px] text-amber-400 uppercase tracking-wider block mb-1 font-bold flex items-center gap-1.5">
+                            <Crown className="w-3.5 h-3.5 text-amber-400" />
+                            <span>Emri i Organizatorit / Klanit Organizator (Organizer / Host Clan)</span>
+                          </label>
+                          <input
+                            type="text"
+                            value={newTourneyOrganizer}
+                            onChange={(e) => setNewTourneyOrganizer(e.target.value)}
+                            placeholder="Shkruaj emrin e organizatorit ose klanit tënd (p.sh. Bad News Eagles, FaZe Clan, Guild Gaming)..."
+                            className="w-full px-3.5 py-2.5 rounded-xl bg-[#141722] border border-[#252C3D] text-amber-300 font-bold focus:outline-none focus:border-amber-400"
+                          />
+                        </div>
+
+                        {/* 2. Titulli */}
                         <div>
                           <label className="text-[10px] text-slate-400 uppercase tracking-wider block mb-1 font-bold">
                             Emri i Turneut (Tournament Title)
@@ -4021,7 +4033,8 @@ export const VortexDashboard: React.FC<VortexDashboardProps> = ({
                               isLive: false,
                               isOpen: true,
                               isCustom: true,
-                              creator: cleanGamerTag(currentGamerTag) || 'M14',
+                              organizer: newTourneyOrganizer.trim() || 'Clan Organizer',
+                              creator: newTourneyOrganizer.trim() || 'Clan Organizer',
                               entryFee: newTourneyIsPaid ? newTourneyEntryFee : 0,
                               entryFeePerPlayer: newTourneyIsPaid ? (newTourneyEntryFee / 5) : 0,
                               isPaidEntry: newTourneyIsPaid,
@@ -4148,6 +4161,7 @@ export const VortexDashboard: React.FC<VortexDashboardProps> = ({
                   {
                     id: 'major-2026',
                     title: 'CALIBER CLUTCH Major Championship 2026',
+                    organizer: 'CaliberClutch Circuit',
                     cashPrize: '€10,000',
                     teams: '32 / 32',
                     playoffsFormat: 'BO3',
@@ -4163,6 +4177,7 @@ export const VortexDashboard: React.FC<VortexDashboardProps> = ({
                   {
                     id: 'balkan-open',
                     title: 'CALIBER CLUTCH CS2 Balkan Open Cup',
+                    organizer: 'Balkan CS2 League',
                     cashPrize: '€5,000',
                     teams: '16 / 16',
                     playoffsFormat: 'BO1',
@@ -4178,6 +4193,7 @@ export const VortexDashboard: React.FC<VortexDashboardProps> = ({
                   {
                     id: 'iem-qualifier',
                     title: 'IEM Katowice 2026 Community Qualifier',
+                    organizer: 'ESL Pro Circuit',
                     cashPrize: '€7,500',
                     teams: '48 / 64',
                     playoffsFormat: 'BO3',
@@ -4193,6 +4209,7 @@ export const VortexDashboard: React.FC<VortexDashboardProps> = ({
                   {
                     id: 'weekly-scrimfest',
                     title: 'CALIBER CLUTCH Weekly Scrimfest',
+                    organizer: 'Community Hub',
                     cashPrize: '€2,500',
                     teams: '12 / 16',
                     playoffsFormat: 'BO1',
@@ -4234,9 +4251,10 @@ export const VortexDashboard: React.FC<VortexDashboardProps> = ({
                                     {t.structure}
                                   </span>
                                 )}
-                                {t.isCustom && (
-                                  <span className="px-2 py-0.5 rounded text-[10px] font-mono font-bold bg-amber-500/20 text-amber-300 border border-amber-500/30">
-                                    HOSTED BY {t.creator || 'M14'}
+                                {(t.organizer || t.creator) && (
+                                  <span className="px-2 py-0.5 rounded text-[10px] font-mono font-bold bg-[#182030] text-amber-300 border border-amber-500/30 flex items-center gap-1">
+                                    <Crown className="w-3 h-3 text-amber-400" />
+                                    <span>HOSTED BY {t.organizer || t.creator}</span>
                                   </span>
                                 )}
                                 {t.entryFee ? (
