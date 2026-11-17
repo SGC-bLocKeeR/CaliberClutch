@@ -2352,14 +2352,14 @@ export const VortexDashboard: React.FC<VortexDashboardProps> = ({
                             CALIBER CLUTCH
                           </h1>
                           <p className="text-sm font-mono text-slate-300 max-w-2xl">
-                            Competitive Counter-Strike 2 arena with dedicated European 128-tick servers, tournament prize pools, and automated weapon skin cases.
+                            Competitive Counter-Strike 2 arena with dedicated European 128-tick servers, tournament prize pools, and official leaderboards.
                           </p>
                         </div>
                       </div>
                     </div>
 
                     {/* Quick Launch Cards */}
-                    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+                    <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                       <div 
                         onClick={() => { sound.playSelect(); setActiveTab('play'); }}
                         className="p-5 rounded-2xl bg-gradient-to-br from-[#121622] to-[#0A0D14] border border-[#262E44] hover:border-[#A3E635]/60 transition cursor-pointer group shadow-lg hover:-translate-y-1"
@@ -2369,17 +2369,6 @@ export const VortexDashboard: React.FC<VortexDashboardProps> = ({
                         </div>
                         <h4 className="text-sm font-black font-display text-white uppercase tracking-wider">Play 5v5 Matchmaking</h4>
                         <p className="text-xs text-slate-400 mt-1">128-tick dedicated Europe queue.</p>
-                      </div>
-
-                      <div 
-                        onClick={() => { sound.playSelect(); setActiveTab('cases'); }}
-                        className="p-5 rounded-2xl bg-gradient-to-br from-[#121622] to-[#0A0D14] border border-[#262E44] hover:border-amber-500/60 transition cursor-pointer group shadow-lg hover:-translate-y-1"
-                      >
-                        <div className="w-10 h-10 rounded-xl bg-amber-500/15 border border-amber-500/30 flex items-center justify-center text-amber-400 mb-3 group-hover:scale-110 transition">
-                          <Package className="w-5 h-5" />
-                        </div>
-                        <h4 className="text-sm font-black font-display text-white uppercase tracking-wider">Cases Arena</h4>
-                        <p className="text-xs text-slate-400 mt-1">Unbox covert CS2 knives and gloves.</p>
                       </div>
 
                       <div 
