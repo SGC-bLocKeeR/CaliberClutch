@@ -88,12 +88,11 @@ export default async function handler(req, res) {
     console.warn('Faceit API fetch error:', err);
   }
 
-  // Realistic starter profile fallback for new verified players
-  const starterElo = 950 + Math.floor(Math.random() * 150); // Level 3 Starter on Faceit
+  // Faceit Level 3 starter baseline (800 ELO)
   return res.status(200).json({
     nickname: cleanNick,
     level: 3,
-    elo: starterElo,
+    elo: 800,
     country: 'XK',
     verified: false,
     synced: true

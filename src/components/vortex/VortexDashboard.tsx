@@ -687,9 +687,9 @@ export const VortexDashboard: React.FC<VortexDashboardProps> = ({
         const savedLvl = localStorage.getItem('vortex_user_level');
         const savedElo = localStorage.getItem('vortex_user_elo');
         const savedVerif = localStorage.getItem('vortex_user_verification');
-        if (!savedLvl || savedLvl === '7') {
-          setCurrentUserLevel(1);
-          localStorage.setItem('vortex_user_level', '1');
+        if (!savedLvl || savedLvl === '1' || savedLvl === '7') {
+          setCurrentUserLevel(3);
+          localStorage.setItem('vortex_user_level', '3');
         }
         if (!savedElo || savedElo === '1407') {
           setCurrentUserElo(800);
@@ -737,7 +737,16 @@ export const VortexDashboard: React.FC<VortexDashboardProps> = ({
     return localStorage.getItem('vortex_user_crosshair') || 'CSGO-4w29A-6yvKP-6k7kF-3xK2v-d9HkQ';
   });
 
-  // User ELO & Level State (Authentic Competitive Calibration & Steam/Faceit Sync)
+  // User Matches & ELO State (FACEIT-Standard Calibration: 0 matches = Level 3 & 800 ELO baseline)
+  const [currentUserMatches, setCurrentUserMatches] = useState<number>(() => {
+    const saved = localStorage.getItem('vortex_user_matches');
+    if (saved !== null) {
+      const parsed = parseInt(saved, 10);
+      if (!isNaN(parsed) && parsed >= 0) return parsed;
+    }
+    return 0; // Starts at 0 matches on Caliber Clutch
+  });
+
   const [currentUserElo, setCurrentUserElo] = useState<number>(() => {
     const saved = localStorage.getItem('vortex_user_elo');
     if (saved) {
@@ -745,7 +754,7 @@ export const VortexDashboard: React.FC<VortexDashboardProps> = ({
       if (!isNaN(parsed) && parsed > 0) return parsed;
     }
     const tag = localStorage.getItem('vortex_user_gamertag') || userGamerTag;
-    return isUserAdminOrFounder(tag) ? 1407 : 800; // Founder/Admin is Level 7/1407; others start at Level 1 (800 ELO)
+    return isUserAdminOrFounder(tag) ? 1407 : 800; // Founder/Admin is Level 7/1407; others start at Level 3 (800 ELO)
   });
 
   const [currentUserLevel, setCurrentUserLevel] = useState<number>(() => {
@@ -755,7 +764,7 @@ export const VortexDashboard: React.FC<VortexDashboardProps> = ({
       if (!isNaN(parsed) && parsed >= 1 && parsed <= 10) return parsed;
     }
     const tag = localStorage.getItem('vortex_user_gamertag') || userGamerTag;
-    return isUserAdminOrFounder(tag) ? 7 : 1;
+    return isUserAdminOrFounder(tag) ? 7 : 3; // FACEIT baseline: Level 3
   });
 
   const [faceitNickname, setFaceitNickname] = useState<string>(() => {
@@ -1498,8 +1507,8 @@ export const VortexDashboard: React.FC<VortexDashboardProps> = ({
 
   const rawPlatformRankingPlayers: PlatformRankingPlayer[] = [
     {
-      rank: '#1',
-      rankNum: 1,
+      rank: currentUserMatches > 0 ? '#1' : 'Unranked',
+      rankNum: currentUserMatches > 0 ? 1 : 9999,
       tag: currentGamerTag,
       clanTag: currentClanTag || 'VTX',
       avatar: currentAvatarUrl,
@@ -1509,10 +1518,10 @@ export const VortexDashboard: React.FC<VortexDashboardProps> = ({
       level: `Level ${currentUserLevel}`,
       levelNum: currentUserLevel,
       elo: currentUserElo,
-      matches: 0,
-      winrate: '--',
-      kd: '--',
-      hs: '--',
+      matches: currentUserMatches,
+      winrate: currentUserMatches > 0 ? '58.4%' : '--',
+      kd: currentUserMatches > 0 ? '1.18' : '--',
+      hs: currentUserMatches > 0 ? '42.0%' : '--',
       verification: currentVerification,
       isUser: true,
       bio: currentBio || 'Official verified player on Caliber Clutch.',
@@ -1569,8 +1578,9 @@ export const VortexDashboard: React.FC<VortexDashboardProps> = ({
     })()
   ];
 
-  // Dynamic ranking sorted strictly by authentic ELO
-  const platformRankingPlayers: PlatformRankingPlayer[] = [...rawPlatformRankingPlayers]
+  // Dynamic ranking: only players with matches > 0 receive active competitive ranks
+  const activeCompetitivePlayers = [...rawPlatformRankingPlayers]
+    .filter(p => p.matches > 0)
     .sort((a, b) => b.elo - a.elo)
     .map((p, idx) => ({
       ...p,
@@ -1578,8 +1588,18 @@ export const VortexDashboard: React.FC<VortexDashboardProps> = ({
       rankNum: idx + 1
     }));
 
+  const uncalibratedPlayers = [...rawPlatformRankingPlayers]
+    .filter(p => p.matches === 0)
+    .map(p => ({
+      ...p,
+      rank: 'Unranked',
+      rankNum: 9999
+    }));
+
+  const platformRankingPlayers: PlatformRankingPlayer[] = [...activeCompetitivePlayers, ...uncalibratedPlayers];
+
   const userRankEntry = platformRankingPlayers.find(p => p.isUser);
-  const userPlatformRank = userRankEntry ? userRankEntry.rank : '#1';
+  const userPlatformRank = (userRankEntry && userRankEntry.matches > 0) ? userRankEntry.rank : 'Unranked';
 
   const handleViewPlayerProfile = (p: PlatformRankingPlayer) => {
     sound.playSelect();
@@ -2485,8 +2505,19 @@ export const VortexDashboard: React.FC<VortexDashboardProps> = ({
                           Season 1
                         </span>
                         <span className="text-xl sm:text-2xl font-black font-display text-white tracking-tight flex items-center gap-2">
-                          {currentUserElo.toLocaleString()} ELO
-                          <TrendingUp className="w-4 h-4 text-emerald-400 inline" />
+                          {currentUserMatches > 0 ? (
+                            <>
+                              {currentUserElo.toLocaleString()} ELO
+                              <TrendingUp className="w-4 h-4 text-emerald-400 inline" />
+                            </>
+                          ) : (
+                            <>
+                              <span>800 ELO</span>
+                              <span className="text-[10px] font-mono font-bold text-amber-400 bg-amber-500/10 border border-amber-500/30 px-2 py-0.5 rounded tracking-wider">
+                                UNCALIBRATED • 0 MATCHES
+                              </span>
+                            </>
+                          )}
                         </span>
                         {currentVerification === 'none' && (
                           <span className="text-[10px] font-mono font-bold text-amber-400 bg-amber-500/10 border border-amber-500/30 px-2 py-0.5 rounded">
@@ -2504,7 +2535,7 @@ export const VortexDashboard: React.FC<VortexDashboardProps> = ({
                           </span>
                         )}
                         <div className="ml-auto flex items-center gap-1.5 px-2.5 py-0.5 rounded-lg bg-white/[0.04] border border-white/10 text-xs font-mono font-bold text-slate-300">
-                          <span>{userPlatformRank}</span>
+                          <span>{currentUserMatches > 0 ? userPlatformRank : 'Unranked (0 Matches)'}</span>
                           <CountryFlag code={currentCountry.code} name={currentCountry.name} size="xs" />
                           <ChevronRight className="w-3.5 h-3.5 text-emerald-400" />
                         </div>
@@ -2514,14 +2545,16 @@ export const VortexDashboard: React.FC<VortexDashboardProps> = ({
                       <div className="space-y-1">
                         <div className="w-full h-2 rounded-full bg-[#1A1D27] overflow-hidden p-[1px]">
                           <div 
-                            className="h-full bg-gradient-to-r from-[#FF5500] to-amber-500 rounded-full" 
-                            style={{ width: `${Math.min(100, Math.max(15, (currentUserElo % 200) / 2))}%` }} 
+                            className="h-full bg-gradient-to-r from-amber-400 to-[#A3E635] rounded-full transition-all duration-500" 
+                            style={{ width: currentUserMatches > 0 ? `${Math.min(100, Math.max(15, (currentUserElo % 200) / 2))}%` : '25%' }} 
                           />
                         </div>
                         <div className="flex items-center justify-between text-[11px] font-mono text-slate-400">
                           <span>Level {currentUserLevel}</span>
-                          <span className="text-slate-300 font-bold">{currentUserElo.toLocaleString()} ELO</span>
-                          <span>Level {Math.min(10, currentUserLevel + 1)}</span>
+                          <span className="text-slate-300 font-bold">
+                            {currentUserMatches > 0 ? `${currentUserElo.toLocaleString()} ELO` : '800 ELO (Level 3 Baseline)'}
+                          </span>
+                          <span>{currentUserMatches > 0 ? `Level ${Math.min(10, currentUserLevel + 1)}` : 'Play 1 Match to Rank'}</span>
                         </div>
                       </div>
 
@@ -4464,7 +4497,7 @@ export const VortexDashboard: React.FC<VortexDashboardProps> = ({
                       </span>
                     </div>
                     <p className="text-xs text-[#94A3B8] mt-1">
-                      Official competitive leaderboard of registered players on our platform • Your Standing: <strong className="text-white">{platformRankingPlayers.find(p => p.isUser)?.rank || '#--'} ({currentUserElo.toLocaleString()} ELO)</strong> (Click any player to view full profile)
+                      Official competitive leaderboard of registered players on our platform • Your Standing: <strong className="text-white">{currentUserMatches > 0 ? `${userPlatformRank} (${currentUserElo.toLocaleString()} ELO)` : 'Unranked (800 ELO • 0 Matches)'}</strong> (Click any player to view full profile)
                     </p>
                   </div>
                 </div>
@@ -4670,7 +4703,7 @@ export const VortexDashboard: React.FC<VortexDashboardProps> = ({
                             <FaceitVerificationBadge type={currentVerification} size="xs" />
                           </div>
                           <div className="text-[10px] font-mono text-slate-400">
-                            {currentVerification === 'none' ? '⚠️ Unverified • Level ' + currentUserLevel : 'Level ' + currentUserLevel} • {currentUserElo.toLocaleString()} ELO
+                            {currentVerification === 'none' ? '⚠️ Unverified • Level ' + currentUserLevel : 'Level ' + currentUserLevel} • {currentUserMatches > 0 ? `${currentUserElo.toLocaleString()} ELO` : '800 ELO (Uncalibrated)'}
                           </div>
                         </div>
                       </div>
@@ -5314,8 +5347,10 @@ export const VortexDashboard: React.FC<VortexDashboardProps> = ({
             const displayRole = viewedPlayer ? (viewedPlayer.role || 'CS2 Competitor') : currentRole;
             const displayElo = viewedPlayer ? viewedPlayer.elo : currentUserElo;
             const displayLevelNum = viewedPlayer ? viewedPlayer.levelNum : currentUserLevel;
-            const displayRank = viewedPlayer ? `${viewedPlayer.rank} Global` : `${userPlatformRank} Platform Leader`;
-            const displayMatches = viewedPlayer ? (viewedPlayer.matches || 0) : 0;
+            const displayMatches = viewedPlayer ? (viewedPlayer.matches || 0) : currentUserMatches;
+            const displayRank = displayMatches > 0 
+              ? (viewedPlayer ? `${viewedPlayer.rank} Global` : `${userPlatformRank} Platform Leader`)
+              : 'Unranked (0 Matches on Caliber Clutch)';
             const displayWinrate = (viewedPlayer && viewedPlayer.matches > 0) ? viewedPlayer.winrate : (displayMatches > 0 ? '0.0%' : '--');
             const displayKd = (viewedPlayer && viewedPlayer.matches > 0) ? viewedPlayer.kd : (displayMatches > 0 ? '0.00' : '--');
             const displayHs = (viewedPlayer && viewedPlayer.matches > 0) ? (viewedPlayer.hs || '--') : (displayMatches > 0 ? '0.0%' : '--');
@@ -5424,9 +5459,9 @@ export const VortexDashboard: React.FC<VortexDashboardProps> = ({
                             <span>{displayCountryName}</span>
                           </span>
                           <span>•</span>
-                          <span className="text-white font-bold">{displayElo.toLocaleString()} ELO</span>
+                          <span className="text-white font-bold">{displayMatches > 0 ? `${displayElo.toLocaleString()} ELO` : '800 ELO'}</span>
                           <span>•</span>
-                          <span className="text-[#A3E635] font-bold">{displayRank}</span>
+                          <span className={displayMatches > 0 ? "text-[#A3E635] font-bold" : "text-amber-400 font-bold"}>{displayRank}</span>
                           <span>•</span>
                           <span className="text-sky-400 font-bold">{displayRole}</span>
                         </div>
@@ -5493,17 +5528,23 @@ export const VortexDashboard: React.FC<VortexDashboardProps> = ({
                   <div className="mt-6 pt-5 border-t border-white/[0.06] space-y-2">
                     <div className="flex justify-between items-center text-xs font-mono">
                       <div className="flex items-center gap-2">
-                        <span className="w-2 h-2 rounded-full bg-[#A3E635] animate-ping" />
-                        <span className="text-slate-400">Current Standing: <strong className="text-white">{displayElo.toLocaleString()} ELO</strong> (Level {displayLevelNum})</span>
+                        <span className={`w-2 h-2 rounded-full ${displayMatches > 0 ? 'bg-[#A3E635] animate-ping' : 'bg-amber-400'}`} />
+                        {displayMatches > 0 ? (
+                          <span className="text-slate-400">Current Standing: <strong className="text-white">{displayElo.toLocaleString()} ELO</strong> (Level {displayLevelNum})</span>
+                        ) : (
+                          <span className="text-slate-400">Calibration Status: <strong className="text-amber-300">Level 3 • 800 ELO</strong> (0 Matches on Caliber Clutch)</span>
+                        )}
                       </div>
                       <span className="text-amber-400 font-bold">
-                        {displayLevelNum === 10 ? 'MAX LEVEL 10 • PLATFORM TITAN' : `+123 ELO to Level ${displayLevelNum + 1}`}
+                        {displayMatches > 0 
+                          ? (displayLevelNum === 10 ? 'MAX LEVEL 10 • PLATFORM TITAN' : `+123 ELO to Level ${displayLevelNum + 1}`) 
+                          : 'Play your first match to calibrate rank'}
                       </span>
                     </div>
                     <div className="w-full h-2 rounded-full bg-[#1A1D27] overflow-hidden">
                       <div 
-                        className="h-full bg-gradient-to-r from-[#FF5500] via-amber-500 to-[#A3E635] rounded-full" 
-                        style={{ width: displayLevelNum === 10 ? '100%' : '31%' }} 
+                        className="h-full bg-gradient-to-r from-amber-400 via-yellow-400 to-[#A3E635] rounded-full transition-all duration-500" 
+                        style={{ width: displayMatches > 0 ? (displayLevelNum === 10 ? '100%' : '31%') : '25%' }} 
                       />
                     </div>
                   </div>

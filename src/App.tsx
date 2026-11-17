@@ -56,8 +56,9 @@ export function App() {
             localStorage.removeItem('vortex_is_admin');
             const hasLinkedFaceit = localStorage.getItem('vortex_faceit_connected') === 'true';
             if (!hasLinkedFaceit) {
-              localStorage.setItem('vortex_user_level', '1');
-              localStorage.setItem('vortex_user_elo', '800');
+              localStorage.setItem('vortex_user_level', '3'); // FACEIT baseline: Level 3
+              localStorage.setItem('vortex_user_elo', '800'); // 800 ELO for 0 matches
+              localStorage.setItem('vortex_user_matches', '0');
               localStorage.setItem('vortex_user_verification', 'none');
             }
           }
