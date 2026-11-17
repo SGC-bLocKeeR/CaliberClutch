@@ -3655,12 +3655,7 @@ export const VortexDashboard: React.FC<VortexDashboardProps> = ({
                     status: 'IN PROGRESS',
                     badge: 'bg-emerald-500/15 text-emerald-400 border-emerald-500/30',
                     isLive: true,
-                    isOpen: false,
-                    skins: [
-                      { place: '1st', name: '★ Karambit | Lore (FN)', price: 1850, image: '/images/karambit_lore.png' },
-                      { place: '2nd', name: 'M4A4 | Temukau (FN)', price: 240, image: 'https://imgproxy.dmarket.com/insecure/rs:fit:360:260:0/g:ce/aHR0cHM6Ly9jb21tdW5pdHkuYWthbWFpLnN0ZWFtc3RhdGljLmNvbS9lY29ub215L2ltYWdlL2kwQ29aODFVaTBtLTlLd2xCWTFMXzE4bXl1R3VxMXdmaFdTYVpnTXR0eVZmUGFFUlNSMFdxbXU3TEFvY0dKS3oybHVfWHNuWHd0bWtKalNVOTFkaDhiajM1VlRxVkJQNGlvX2ZybkFWdmZiNmFxZHVjX1RGVmpUQ3hieDA1T1U0UzNqaWxFOXc0RHpSbkltdEl5MlNhMUp6REpFaFJQbEs3RWNPNFU4Z2ZB.webp' },
-                      { place: '3rd', name: 'Desert Eagle | Printstream (FN)', price: 140, image: 'https://community.akamai.steamstatic.com/economy/image/i0CoZ81Ui0m-9KwlBY1L_18myuGuq1wfhWSaZgMttyVfPaERSR0Wqmu7LAocGIGz3UqlXOLrxM-vMGmW8VNxu5Dx60noTyL1m5fn8Sdk7OeRbKFsJ8-DHG6e1f1iouRoQha_nBovp3OGmdeqInyVP1V0XsYlRbEI50a5wNyzZr605AyI3t5MmCSohylAuC89_a9cBoMY9UkV' }
-                    ]
+                    isOpen: false
                   },
                   {
                     id: 'balkan-open',
@@ -3675,12 +3670,7 @@ export const VortexDashboard: React.FC<VortexDashboardProps> = ({
                     status: 'OPEN',
                     badge: 'bg-lime-500/15 text-lime-400 border-lime-500/30',
                     isLive: false,
-                    isOpen: true,
-                    skins: [
-                      { place: '1st', name: '★ M9 Bayonet | Doppler (FN)', price: 1200, image: 'https://imgproxy.dmarket.com/insecure/rs:fit:360:260:0/g:ce/aHR0cHM6Ly9jb21tdW5pdHkuYWthbWFpLnN0ZWFtc3RhdGljLmNvbS9lY29ub215L2ltYWdlL2kwQ29aODFVaTBtLTlLd2xCWTFMXzE4bXl1R3VxMXdmaFdTYVpnTXR0eVZmUGFFUlNSMFdxbXU3TEFvY0dKS3oybHVfWHNuWHd0bWtKalNVOTFkaDhiajM1VlRxVkJQNGlvX2ZybklWN0tiNU9hVS1KcWZIRHpYRmxlMHU0TFk4R3lfa2tSZ2lzR3pjbTR2NEozdkRPQVFtRE1keVJ2bEs3RWNtZUNVM3l3.webp' },
-                      { place: '2nd', name: 'AK-47 | Inheritance (FN)', price: 145, image: 'https://imgproxy.dmarket.com/insecure/rs:fit:360:260:0/g:ce/aHR0cHM6Ly9jb21tdW5pdHkuYWthbWFpLnN0ZWFtc3RhdGljLmNvbS9lY29ub215L2ltYWdlL2kwQ29aODFVaTBtLTlLd2xCWTFMXzE4bXl1R3VxMXdmaFdTYVpnTXR0eVZmUGFFUlNSMFdxbXU3TEFvY0dJR3ozVXFsWE9McnhNLXZNR21XOFZOeHU1RHg2MG5vVHlMd2xjSzN3aU5RME9LaGVxZG9MUEdhQUZpY3lPbC1wSzh4R0hfbndVdDFzR3JTejlpdmNIS1FPQWNqWE1Za1J1NVl1eGU0bFlDeVpPcTI1VlNNMm9NVDAyeWcyVXhCU0VnQQ==.webp' },
-                      { place: '3rd', name: 'AWP | Duality (FN)', price: 45, image: 'https://imgproxy.dmarket.com/insecure/rs:fit:360:260:0/g:ce/aHR0cHM6Ly9jb21tdW5pdHkuYWthbWFpLnN0ZWFtc3RhdGljLmNvbS9lY29ub215L2ltYWdlL2kwQ29aODFVaTBtLTlLd2xCWTFMXzE4bXl1R3VxMXdmaFdTYVpnTXR0eVZmUGFFUlNSMFdxbXU3TEFvY0dJR3ozVXFsWE9McnhNLXZNR21XOFZOeHU1RHg2MG5vVHlMd2xjSzN3aU5RME9LaGVxZG9MUEdhQUZpY3lPbC1wSzh4R0hfbndVdDFzR3JTejlpdmNIS1FPQWNqWE1Za1J1NVl1eGU0bFlDeVpPcTI1VlNNMm9NVDAyeWcyVXhCU0VnQQ==.webp' }
-                    ]
+                    isOpen: true
                   },
                   {
                     id: 'iem-qualifier',
@@ -3695,12 +3685,7 @@ export const VortexDashboard: React.FC<VortexDashboardProps> = ({
                     status: 'REGISTRATION',
                     badge: 'bg-amber-500/15 text-amber-400 border-amber-500/30',
                     isLive: false,
-                    isOpen: true,
-                    skins: [
-                      { place: '1st', name: '★ Butterfly Knife | Slaughter (MW)', price: 1450, image: 'https://imgproxy.dmarket.com/insecure/rs:fit:360:260:0/g:ce/aHR0cHM6Ly9jb21tdW5pdHkuYWthbWFpLnN0ZWFtc3RhdGljLmNvbS9lY29ub215L2ltYWdlL2kwQ29aODFVaTBtLTlLd2xCWTFMXzE4bXl1R3VxMXdmaFdTYVpnTXR0eVZmUGFFUlNSMFdxbXU3TEFvY0dKS3oybHVfWHNuWHd0bWtKalNVOTFkaDhiajM1VlRxVkJQNGlvX2ZybklWN0tiNU9hVS1KcWZIRHpYRmxlMHU0TFk4R3lfa2tSZ2lzR3pjbTR2NEozdkRPQVFtRE1keVJ2bEs3RWNtZUNVM3l3.webp' },
-                      { place: '2nd', name: 'USP-S | Printstream (FN)', price: 110, image: 'https://imgproxy.dmarket.com/insecure/rs:fit:360:260:0/g:ce/aHR0cHM6Ly9jb21tdW5pdHkuYWthbWFpLnN0ZWFtc3RhdGljLmNvbS9lY29ub215L2ltYWdlL2kwQ29aODFVaTBtLTlLd2xCWTFMXzE4bXl1R3VxMXdmaFdTYVpnTXR0eVZmUGFFUlNSMFdxbXU3TEFvY0dKS3oybHVfWHNuWHd0bWtKalNVOTFkaDhiajM1VlRxVkJQNGlvX2ZybkFWdmZiNmFxZHVjX1RGVmpUQ3hieDA1T1U0UzNqaWxFOXc0RHpSbkltdEl5MlNhMUp6REpFaFJQbEs3RWNPNFU4Z2ZB.webp' },
-                      { place: '3rd', name: 'Glock-18 | Bullet Queen (FN)', price: 55, image: 'https://community.akamai.steamstatic.com/economy/image/i0CoZ81Ui0m-9KwlBY1L_18myuGuq1wfhWSaZgMttyVfPaERSR0Wqmu7LAocGIGz3UqlXOLrxM-vMGmW8VNxu5Dx60noTyL8ypexwiVI0P_6afBSNPWeG2yR1NF6ueZhW2ewlBtx5W6AmYv9JS6XaAV1CJEmTeUL4UTpxNzjZO3jtgaIjN9ExCuskGoXuRnyRhBA' }
-                    ]
+                    isOpen: true
                   },
                   {
                     id: 'weekly-scrimfest',
@@ -3715,12 +3700,7 @@ export const VortexDashboard: React.FC<VortexDashboardProps> = ({
                     status: 'REGISTER',
                     badge: 'bg-sky-500/15 text-sky-400 border-sky-500/30',
                     isLive: false,
-                    isOpen: true,
-                    skins: [
-                      { place: '1st', name: '★ Kukri Knife | Fade (FN)', price: 850, image: 'https://imgproxy.dmarket.com/insecure/rs:fit:360:260:0/g:ce/aHR0cHM6Ly9jb21tdW5pdHkuYWthbWFpLnN0ZWFtc3RhdGljLmNvbS9lY29ub215L2ltYWdlL2kwQ29aODFVaTBtLTlLd2xCWTFMXzE4bXl1R3VxMXdmaFdTYVpnTXR0eVZmUGFFUlNSMFdxbXU3TEFvY0dKS3oybHVfWHNuWHd0bWtKalNVOTFkaDhiajM1VlRxVkJQNGlvX2ZybkVWdnFmX2E2Vm9JZkdTWHo3SGxid2c1N1F3U1NfbXhobDE1amlHeU4zN2MzX0dadzkxVzhCd1JmbEs3RWZLc2Eyc2Z3.webp' },
-                      { place: '2nd', name: 'AWP | Chromatic Aberration (FN)', price: 35, image: 'https://imgproxy.dmarket.com/insecure/rs:fit:360:260:0/g:ce/aHR0cHM6Ly9jb21tdW5pdHkuYWthbWFpLnN0ZWFtc3RhdGljLmNvbS9lY29ub215L2ltYWdlL2kwQ29aODFVaTBtLTlLd2xCWTFMXzE4bXl1R3VxMXdmaFdTYVpnTXR0eVZmUGFFUlNSMFdxbXU3TEFvY0dJR3ozVXFsWE9McnhNLXZNR21XOFZOeHU1RHg2MG5vVHlMd2xjSzN3aU5RME9LaGVxZG9MUEdhQUZpY3lPbC1wSzh4R0hfbndVdDFzR3JTejlpdmNIS1FPQWNqWE1Za1J1NVl1eGU0bFlDeVpPcTI1VlNNMm9NVDAyeWcyVXhCU0VnQQ==.webp' },
-                      { place: '3rd', name: 'AK-47 | Slate (FN)', price: 20, image: 'https://community.akamai.steamstatic.com/economy/image/i0CoZ81Ui0m-9KwlBY1L_18myuGuq1wfhWSaZgMttyVfPaERSR0Wqmu7LAocGIGz3UqlXOLrxM-vMGmW8VNxu5Dx60noTyL8ypexwiVI0P_6afBSJf2DC3Wf09F6ueZhW2exwBh_6m3dnt36InjDPQ4oXJt1TbJeshW_mtfjN-vrsgaKiokWy333kGoXuRj4z9Nd' }
-                    ]
+                    isOpen: true
                   }
                 ]
                   .filter(t => {
@@ -3810,44 +3790,46 @@ export const VortexDashboard: React.FC<VortexDashboardProps> = ({
                             </div>
                           </div>
 
-                          {/* CS2 Guaranteed Skin Prizes Preview */}
-                          <div className="p-3 rounded-2xl bg-black/40 border border-white/5 space-y-2">
-                            <div className="flex items-center justify-between text-[11px] font-mono text-slate-400">
-                              <span className="flex items-center gap-1 text-amber-400 font-bold">
-                                <Gift className="w-3.5 h-3.5" />
-                                <span>Guaranteed Skin Drops:</span>
-                              </span>
-                              <span className="text-[10px] text-emerald-400">Steam Bot Dispatch</span>
-                            </div>
+                          {/* Official 100% Cash Prize Pool Distribution (No Skins) */}
+                          {(() => {
+                            const numeric = parseFloat(String(t.cashPrize).replace(/[^0-9.]/g, '')) || 3000;
+                            const firstCash = Math.round(numeric * 0.70);
+                            const secondCash = Math.round(numeric * 0.20);
+                            const thirdCash = Math.round(numeric * 0.10);
 
-                            <div className="grid grid-cols-3 gap-2">
-                              {t.skins.map((skin: any, sIdx: number) => (
-                                <div 
-                                  key={sIdx}
-                                  className="p-2 rounded-xl bg-[#090C12] border border-white/5 hover:border-amber-400/40 transition flex flex-col items-center text-center cursor-pointer"
-                                  onClick={() => {
-                                    sound.playSelect();
-                                    setSimulatedBotOffer({
-                                      tournament: t.title,
-                                      skinName: skin.name,
-                                      price: skin.price
-                                    });
-                                  }}
-                                  title={`Click to inspect ${skin.name} trade dispatch`}
-                                >
-                                  <div className="text-[9px] font-mono font-bold text-amber-400 mb-0.5">{skin.place} Place</div>
-                                  <img 
-                                    src={skin.image} 
-                                    alt={skin.name} 
-                                    className="w-12 h-10 object-contain my-1 group-hover:scale-105 transition-transform" 
-                                    onError={(e) => { (e.target as HTMLImageElement).src = '/images/karambit_lore.png'; }}
-                                  />
-                                  <div className="text-[10px] font-bold text-white truncate w-full">{skin.name}</div>
-                                  <div className="text-[9px] font-mono text-emerald-400 font-bold">{skin.price} €</div>
+                            return (
+                              <div className="p-3.5 rounded-2xl bg-black/40 border border-white/5 space-y-2.5">
+                                <div className="flex items-center justify-between text-[11px] font-mono text-slate-400">
+                                  <span className="flex items-center gap-1.5 text-[#A3E635] font-bold">
+                                    <Trophy className="w-3.5 h-3.5 text-[#A3E635]" />
+                                    <span>Prize Pool Breakdown (100% Cash • Pa Skins):</span>
+                                  </span>
+                                  <span className="text-[10px] text-emerald-400 font-bold">Direct Cash Payout</span>
                                 </div>
-                              ))}
-                            </div>
-                          </div>
+
+                                <div className="grid grid-cols-3 gap-2">
+                                  <div className="p-2.5 rounded-xl bg-amber-500/10 border border-amber-500/25 text-center">
+                                    <div className="text-[10px] font-mono font-bold text-amber-400">🥇 1st Place</div>
+                                    <div className="text-sm font-black font-mono text-white mt-0.5">€{firstCash.toLocaleString()}</div>
+                                    <div className="text-[9px] font-mono font-bold text-[#A3E635]">70% Cash Pool</div>
+                                    <div className="text-[8px] font-mono text-slate-400 uppercase mt-0.5">Vetëm Para</div>
+                                  </div>
+                                  <div className="p-2.5 rounded-xl bg-slate-400/10 border border-slate-400/25 text-center">
+                                    <div className="text-[10px] font-mono font-bold text-slate-300">🥈 2nd Place</div>
+                                    <div className="text-sm font-black font-mono text-white mt-0.5">€{secondCash.toLocaleString()}</div>
+                                    <div className="text-[9px] font-mono font-bold text-slate-400">20% Cash Pool</div>
+                                    <div className="text-[8px] font-mono text-slate-400 uppercase mt-0.5">Vetëm Para</div>
+                                  </div>
+                                  <div className="p-2.5 rounded-xl bg-amber-700/10 border border-amber-700/25 text-center">
+                                    <div className="text-[10px] font-mono font-bold text-amber-600">🥉 3rd Place</div>
+                                    <div className="text-sm font-black font-mono text-white mt-0.5">€{thirdCash.toLocaleString()}</div>
+                                    <div className="text-[9px] font-mono font-bold text-amber-500">10% Cash Pool</div>
+                                    <div className="text-[8px] font-mono text-slate-400 uppercase mt-0.5">Vetëm Para</div>
+                                  </div>
+                                </div>
+                              </div>
+                            );
+                          })()}
                         </div>
 
                         <div className="flex flex-wrap items-center justify-between pt-4 border-t border-[#1C2233] gap-3">
@@ -7139,44 +7121,47 @@ export const VortexDashboard: React.FC<VortexDashboardProps> = ({
                 />
               </div>
 
-              {/* Guaranteed 1st Place Skin Prize */}
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                <div>
-                  <label className="text-[10px] text-slate-400 uppercase tracking-wider block mb-1 font-bold flex items-center gap-1.5">
-                    <Gift className="w-3 h-3 text-amber-400" />
-                    <span>1st Place Skin Drop</span>
-                  </label>
-                  <select
-                    value={newTourneySkinPrize}
-                    onChange={(e) => {
-                      const val = e.target.value;
-                      setNewTourneySkinPrize(val);
-                      if (val.includes('Butterfly')) setNewTourneySkinValue(1450);
-                      else if (val.includes('Karambit')) setNewTourneySkinValue(1850);
-                      else if (val.includes('M9 Bayonet')) setNewTourneySkinValue(1200);
-                      else if (val.includes('Dragon Lore')) setNewTourneySkinValue(4200);
-                      else if (val.includes('Kukri')) setNewTourneySkinValue(850);
-                    }}
-                    className="w-full px-3.5 py-2.5 rounded-xl bg-[#141722] border border-[#252C3D] text-amber-300 font-bold focus:outline-none focus:border-[#A3E635] cursor-pointer"
-                  >
-                    <option value="★ Butterfly Knife | Doppler (FN)">★ Butterfly Knife | Doppler (FN)</option>
-                    <option value="★ Karambit | Lore (FN)">★ Karambit | Lore (FN)</option>
-                    <option value="★ M9 Bayonet | Doppler (FN)">★ M9 Bayonet | Doppler (FN)</option>
-                    <option value="★ Kukri Knife | Fade (FN)">★ Kukri Knife | Fade (FN)</option>
-                    <option value="AWP | Dragon Lore (FT)">AWP | Dragon Lore (FT)</option>
-                  </select>
+              {/* Pure Cash Prize Distribution (100% Cash • No Skins) */}
+              <div className="p-4 rounded-2xl bg-[#101420] border border-[#20293D] space-y-3">
+                <div className="flex items-center justify-between">
+                  <span className="text-[10px] text-[#A3E635] uppercase tracking-wider font-bold flex items-center gap-1.5">
+                    <Trophy className="w-3.5 h-3.5 text-[#A3E635]" />
+                    <span>Cash Prize Pool Distribution (100% Pure Cash • Pa Skins)</span>
+                  </span>
+                  <span className="text-[10px] font-mono text-emerald-400 font-bold">
+                    Automated Cashout
+                  </span>
                 </div>
-                <div>
-                  <label className="text-[10px] text-slate-400 uppercase tracking-wider block mb-1 font-bold">
-                    Estimated Skin Market Value (€)
-                  </label>
-                  <input
-                    type="number"
-                    value={newTourneySkinValue}
-                    onChange={(e) => setNewTourneySkinValue(Number(e.target.value))}
-                    className="w-full px-3.5 py-2.5 rounded-xl bg-[#141722] border border-[#252C3D] text-emerald-400 font-bold focus:outline-none focus:border-[#A3E635]"
-                  />
-                </div>
+
+                {(() => {
+                  const numericPrize = parseFloat(newTourneyCashPrize.replace(/[^0-9.]/g, '')) || 3000;
+                  const firstPrize = Math.round(numericPrize * 0.70);
+                  const secondPrize = Math.round(numericPrize * 0.20);
+                  const thirdPrize = Math.round(numericPrize * 0.10);
+
+                  return (
+                    <div className="grid grid-cols-3 gap-2.5 pt-1 text-center font-mono">
+                      <div className="p-2.5 rounded-xl bg-amber-500/10 border border-amber-500/25">
+                        <div className="text-[10px] font-bold text-amber-400">🥇 1st Place</div>
+                        <div className="text-sm font-black text-white mt-1">€{firstPrize.toLocaleString()}</div>
+                        <div className="text-[9px] text-[#A3E635] font-bold">70% Cash</div>
+                        <div className="text-[8px] text-slate-400 uppercase mt-0.5 font-bold">Vetëm Para</div>
+                      </div>
+                      <div className="p-2.5 rounded-xl bg-slate-400/10 border border-slate-400/25">
+                        <div className="text-[10px] font-bold text-slate-300">🥈 2nd Place</div>
+                        <div className="text-sm font-black text-white mt-1">€{secondPrize.toLocaleString()}</div>
+                        <div className="text-[9px] text-slate-400 font-bold">20% Cash</div>
+                        <div className="text-[8px] text-slate-400 uppercase mt-0.5 font-bold">Vetëm Para</div>
+                      </div>
+                      <div className="p-2.5 rounded-xl bg-amber-700/10 border border-amber-700/25">
+                        <div className="text-[10px] font-bold text-amber-600">🥉 3rd Place</div>
+                        <div className="text-sm font-black text-white mt-1">€{thirdPrize.toLocaleString()}</div>
+                        <div className="text-[9px] text-amber-500 font-bold">10% Cash</div>
+                        <div className="text-[8px] text-slate-400 uppercase mt-0.5 font-bold">Vetëm Para</div>
+                      </div>
+                    </div>
+                  );
+                })()}
               </div>
 
               {/* Integrity Checklist Box */}
@@ -7185,9 +7170,9 @@ export const VortexDashboard: React.FC<VortexDashboardProps> = ({
                   <ShieldCheck className="w-4 h-4 text-emerald-400 shrink-0" />
                   <span>Ring-0 Kernel Anti-Cheat is automatically enforced for all 5v5 rosters.</span>
                 </div>
-                <div className="flex items-center gap-2 text-slate-400">
-                  <Zap className="w-4 h-4 text-amber-400 shrink-0" />
-                  <span>Automated Steam Bot escrow will dispatch skin rewards immediately upon Grand Final match conclusion.</span>
+                <div className="flex items-center gap-2 text-slate-300">
+                  <Zap className="w-4 h-4 text-[#A3E635] shrink-0" />
+                  <span>Automated Cash Payout: Fituesit shpërblehen 100% me para (CASH) të kredituara menjëherë në bilanc pas Grand Final.</span>
                 </div>
               </div>
             </div>
@@ -7228,11 +7213,9 @@ export const VortexDashboard: React.FC<VortexDashboardProps> = ({
                     playoffsFormat: newTourneyPlayoffsFormat,
                     finalsFormat: newTourneyFinalsFormat,
                     region: newTourneyRegion,
-                    skins: [
-                      { place: '1st', name: newTourneySkinPrize, price: Number(newTourneySkinValue) || 1450, image: 'https://imgproxy.dmarket.com/insecure/rs:fit:360:260:0/g:ce/aHR0cHM6Ly9jb21tdW5pdHkuYWthbWFpLnN0ZWFtc3RhdGljLmNvbS9lY29ub215L2ltYWdlL2kwQ29aODFVaTBtLTlLd2xCWTFMXzE4bXl1R3VxMXdmaFdTYVpnTXR0eVZmUGFFUlNSMFdxbXU3TEFvY0dKS3oybHVfWHNuWHd0bWtKalNVOTFkaDhiajM1VlRxVkJQNGlvX2ZybklWN0tiNU9hVS1KcWZIRHpYRmxlMHU0TFk4R3lfa2tSZ2lzR3pjbTR2NEozdkRPQVFtRE1keVJ2bEs3RWNtZUNVM3l3.webp' },
-                      { place: '2nd', name: 'M4A4 | Temukau (FN)', price: 240, image: 'https://imgproxy.dmarket.com/insecure/rs:fit:360:260:0/g:ce/aHR0cHM6Ly9jb21tdW5pdHkuYWthbWFpLnN0ZWFtc3RhdGljLmNvbS9lY29ub215L2ltYWdlL2kwQ29aODFVaTBtLTlLd2xCWTFMXzE4bXl1R3VxMXdmaFdTYVpnTXR0eVZmUGFFUlNSMFdxbXU3TEFvY0dKS3oybHVfWHNuWHd0bWtKalNVOTFkaDhiajM1VlRxVkJQNGlvX2ZybkFWdmZiNmFxZHVjX1RGVmpUQ3hieDA1T1U0UzNqaWxFOXc0RHpSbkltdEl5MlNhMUp6REpFaFJQbEs3RWNPNFU4Z2ZB.webp' },
-                      { place: '3rd', name: 'Desert Eagle | Printstream (FN)', price: 140, image: 'https://community.akamai.steamstatic.com/economy/image/i0CoZ81Ui0m-9KwlBY1L_18myuGuq1wfhWSaZgMttyVfPaERSR0Wqmu7LAocGIGz3UqlXOLrxM-vMGmW8VNxu5Dx60noTyL1m5fn8Sdk7OeRbKFsJ8-DHG6e1f1iouRoQha_nBovp3OGmdeqInyVP1V0XsYlRbEI50a5wNyzZr605AyI3t5MmCSohylAuC89_a9cBoMY9UkV' }
-                    ]
+                    payout1st: '70% Cash',
+                    payout2nd: '20% Cash',
+                    payout3rd: '10% Cash'
                   };
 
                   setCustomTournaments((prev: any[]) => {
