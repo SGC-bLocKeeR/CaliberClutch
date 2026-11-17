@@ -998,8 +998,8 @@ export const VortexDashboard: React.FC<VortexDashboardProps> = ({
   const [newTourneyTitle, setNewTourneyTitle] = useState('CALIBER CLUTCH Community Cup #1');
   const [newTourneyCashPrize, setNewTourneyCashPrize] = useState('€3,000');
   const [newTourneyMaxTeams, setNewTourneyMaxTeams] = useState<number>(16);
-  const [newTourneyFormat, setNewTourneyFormat] = useState('5v5 Single Elimination MR12');
-  const [newTourneyRegion, setNewTourneyRegion] = useState('Frankfurt Node #01 (128-Tick)');
+  const [newTourneyFormat, setNewTourneyFormat] = useState('5v5 Single Elimination (BO3 Playoffs • BO5 Grand Final)');
+  const [newTourneyRegion, setNewTourneyRegion] = useState('FACEIT Germany (Frankfurt • 14ms)');
   const [newTourneyDate, setNewTourneyDate] = useState('Starts Sunday • 19:00 CET');
   const [newTourneySkinPrize, setNewTourneySkinPrize] = useState('★ Butterfly Knife | Doppler (FN)');
   const [newTourneySkinValue, setNewTourneySkinValue] = useState<number>(1450);
@@ -3584,8 +3584,8 @@ export const VortexDashboard: React.FC<VortexDashboardProps> = ({
                   <div className="text-xl font-mono font-black text-white">108 Rosters</div>
                 </div>
                 <div className="p-3 rounded-xl bg-black/40 border border-white/5">
-                  <div className="text-[10px] font-mono text-slate-400 uppercase">Dedicated Servers</div>
-                  <div className="text-xl font-mono font-black text-amber-400">128-Tick EU</div>
+                  <div className="text-[10px] font-mono text-slate-400 uppercase">Match Servers</div>
+                  <div className="text-xl font-mono font-black text-amber-400">FACEIT 128T</div>
                 </div>
                 <div className="p-3 rounded-xl bg-black/40 border border-white/5">
                   <div className="text-[10px] font-mono text-slate-400 uppercase">Integrity</div>
@@ -6413,7 +6413,7 @@ export const VortexDashboard: React.FC<VortexDashboardProps> = ({
                   {selectedBracketTourney.title}
                 </h3>
                 <p className="text-xs font-mono text-slate-400">
-                  Valve MR12 Ruleset • Single Elimination Bracket • Dedicated 128-Tick European Nodes
+                  Valve MR12 Ruleset • BO3 Playoffs & BO5 Grand Finals • Official FACEIT European Matchmaking Servers (128-Tick)
                 </p>
               </div>
               <button 
@@ -6455,7 +6455,7 @@ export const VortexDashboard: React.FC<VortexDashboardProps> = ({
               {/* Quarterfinals */}
               <div className="space-y-3">
                 <div className="text-xs font-mono font-bold text-slate-400 uppercase tracking-wider flex items-center justify-between">
-                  <span>Quarterfinals (BO1)</span>
+                  <span>Quarterfinals (BO3)</span>
                   <span className="text-[10px] text-emerald-400">Finished</span>
                 </div>
 
@@ -6466,18 +6466,18 @@ export const VortexDashboard: React.FC<VortexDashboardProps> = ({
                       <CountryFlag code="XK" size="xs" />
                       Bad News Eagles
                     </span>
-                    <span className="font-bold text-emerald-400">13 ✓</span>
+                    <span className="font-bold text-emerald-400">2 ✓</span>
                   </div>
                   <div className="flex justify-between items-center text-xs font-mono text-slate-400">
                     <span className="flex items-center gap-1.5">
                       <CountryFlag code="GB" size="xs" />
                       Guild Esports
                     </span>
-                    <span>9</span>
+                    <span>0</span>
                   </div>
                   <div className="text-[10px] font-mono text-slate-500 border-t border-white/5 pt-1.5 flex justify-between">
-                    <span>de_mirage</span>
-                    <span className="text-slate-400">MR12</span>
+                    <span>Mirage (13-9), Anubis (13-11)</span>
+                    <span className="text-emerald-400">BO3</span>
                   </div>
                 </div>
 
@@ -6488,18 +6488,18 @@ export const VortexDashboard: React.FC<VortexDashboardProps> = ({
                       <Crown className="w-3.5 h-3.5 text-amber-400" />
                       M14 Clan (YOU)
                     </span>
-                    <span className="font-bold text-emerald-400">13 ✓</span>
+                    <span className="font-bold text-emerald-400">2 ✓</span>
                   </div>
                   <div className="flex justify-between items-center text-xs font-mono text-slate-400">
                     <span className="flex items-center gap-1.5">
                       <CountryFlag code="UA" size="xs" />
                       Monte Academy
                     </span>
-                    <span>7</span>
+                    <span>1</span>
                   </div>
                   <div className="text-[10px] font-mono text-slate-500 border-t border-white/5 pt-1.5 flex justify-between">
-                    <span>de_inferno</span>
-                    <span className="text-slate-400">MR12</span>
+                    <span>Inferno (13-7), Nuke (10-13), Ancient (13-8)</span>
+                    <span className="text-emerald-400">BO3</span>
                   </div>
                 </div>
 
@@ -6510,18 +6510,18 @@ export const VortexDashboard: React.FC<VortexDashboardProps> = ({
                       <CountryFlag code="DE" size="xs" />
                       FaZe Clan Youth
                     </span>
-                    <span className="font-bold text-emerald-400">13 ✓</span>
+                    <span className="font-bold text-emerald-400">2 ✓</span>
                   </div>
                   <div className="flex justify-between items-center text-xs font-mono text-slate-400">
                     <span className="flex items-center gap-1.5">
                       <CountryFlag code="SE" size="xs" />
                       Fnatic Rising
                     </span>
-                    <span>11</span>
+                    <span>1</span>
                   </div>
                   <div className="text-[10px] font-mono text-slate-500 border-t border-white/5 pt-1.5 flex justify-between">
-                    <span>de_ancient</span>
-                    <span className="text-slate-400">MR12</span>
+                    <span>Ancient (13-11), Dust II (11-13), Mirage (13-9)</span>
+                    <span className="text-emerald-400">BO3</span>
                   </div>
                 </div>
 
@@ -6532,18 +6532,18 @@ export const VortexDashboard: React.FC<VortexDashboardProps> = ({
                       <CountryFlag code="FR" size="xs" />
                       G2 Academy
                     </span>
-                    <span className="font-bold text-emerald-400">13 ✓</span>
+                    <span className="font-bold text-emerald-400">2 ✓</span>
                   </div>
                   <div className="flex justify-between items-center text-xs font-mono text-slate-400">
                     <span className="flex items-center gap-1.5">
                       <CountryFlag code="DK" size="xs" />
                       Astralis Talent
                     </span>
-                    <span>8</span>
+                    <span>0</span>
                   </div>
                   <div className="text-[10px] font-mono text-slate-500 border-t border-white/5 pt-1.5 flex justify-between">
-                    <span>de_nuke</span>
-                    <span className="text-slate-400">MR12</span>
+                    <span>Nuke (13-8), Inferno (13-6)</span>
+                    <span className="text-emerald-400">BO3</span>
                   </div>
                 </div>
               </div>
@@ -6603,7 +6603,7 @@ export const VortexDashboard: React.FC<VortexDashboardProps> = ({
               {/* Grand Final */}
               <div className="space-y-3">
                 <div className="text-xs font-mono font-bold text-amber-400 uppercase tracking-wider flex items-center justify-between">
-                  <span>Grand Final (BO3)</span>
+                  <span>Grand Final (BO5)</span>
                   <span className="px-2 py-0.5 rounded bg-emerald-500/20 text-emerald-400 text-[9px] font-bold animate-pulse">
                     LIVE NOW
                   </span>
@@ -6615,18 +6615,18 @@ export const VortexDashboard: React.FC<VortexDashboardProps> = ({
                       <CountryFlag code="XK" size="sm" />
                       Bad News Eagles
                     </span>
-                    <span className="font-black text-[#A3E635]">1</span>
+                    <span className="font-black text-[#A3E635]">2</span>
                   </div>
                   <div className="flex justify-between items-center text-sm font-mono">
                     <span className="text-white font-black flex items-center gap-2">
                       <CountryFlag code="FR" size="sm" />
                       G2 Academy
                     </span>
-                    <span className="font-black text-[#A3E635]">1</span>
+                    <span className="font-black text-[#A3E635]">2</span>
                   </div>
 
                   <div className="p-2.5 rounded-xl bg-black/60 border border-white/5 space-y-1 text-center">
-                    <div className="text-[10px] font-mono text-amber-400 font-bold uppercase">Decider Map 3: Inferno</div>
+                    <div className="text-[10px] font-mono text-amber-400 font-bold uppercase">Series Tied 2 - 2 • Decider Map 5: Inferno</div>
                     <div className="text-lg font-mono font-black text-white">10 - 9 (Round 20)</div>
                     <div className="text-[10px] font-mono text-slate-400">1st Place: ★ Karambit Lore + €6,000 Cash</div>
                   </div>
@@ -6743,7 +6743,7 @@ export const VortexDashboard: React.FC<VortexDashboardProps> = ({
                 </div>
                 <div className="flex items-center gap-2">
                   <Zap className="w-4 h-4 text-emerald-400 shrink-0" />
-                  <span>Dedicated server allocated: Frankfurt Node #02 (128-Tick • Ping 14 ms).</span>
+                  <span>Official FACEIT Server allocated: FACEIT Germany (Frankfurt • 128-Tick • Ping 14 ms).</span>
                 </div>
               </div>
             </div>
@@ -6855,10 +6855,10 @@ export const VortexDashboard: React.FC<VortexDashboardProps> = ({
                     onChange={(e) => setNewTourneyMaxTeams(Number(e.target.value))}
                     className="w-full px-3.5 py-2.5 rounded-xl bg-[#141722] border border-[#252C3D] text-white font-bold focus:outline-none focus:border-[#A3E635] cursor-pointer"
                   >
-                    <option value={8}>8 Teams (Quarterfinals BO3)</option>
-                    <option value={16}>16 Teams (Round of 16 BO1 + BO3)</option>
-                    <option value={32}>32 Teams (Major Championship Scale)</option>
-                    <option value={64}>64 Teams (Open Community Qualifier)</option>
+                    <option value={8}>8 Teams (BO3 Quarterfinals • BO5 Grand Final)</option>
+                    <option value={16}>16 Teams (BO3 Playoffs • BO5 Grand Final)</option>
+                    <option value={32}>32 Teams (Major Scale • BO3 Playoffs • BO5 Grand Final)</option>
+                    <option value={64}>64 Teams (Open Circuit • BO3 Playoffs • BO5 Grand Final)</option>
                   </select>
                 </div>
               </div>
@@ -6874,24 +6874,26 @@ export const VortexDashboard: React.FC<VortexDashboardProps> = ({
                     onChange={(e) => setNewTourneyFormat(e.target.value)}
                     className="w-full px-3.5 py-2.5 rounded-xl bg-[#141722] border border-[#252C3D] text-white focus:outline-none focus:border-[#A3E635] cursor-pointer"
                   >
-                    <option value="5v5 Single Elimination MR12">5v5 Single Elimination MR12</option>
-                    <option value="5v5 Double Elimination (Upper/Lower)">5v5 Double Elimination (Upper/Lower)</option>
-                    <option value="GSL Group Stage + Single Elim">GSL Group Stage + Single Elim</option>
+                    <option value="5v5 Single Elimination (BO3 Playoffs • BO5 Grand Final)">5v5 Single Elimination (BO3 Playoffs • BO5 Grand Final)</option>
+                    <option value="5v5 Double Elimination (BO3 Upper/Lower • BO5 Grand Final)">5v5 Double Elimination (BO3 Upper/Lower • BO5 Grand Final)</option>
+                    <option value="GSL Group Stage BO3 + BO5 Grand Finals">GSL Group Stage BO3 + BO5 Grand Finals</option>
                   </select>
                 </div>
                 <div>
                   <label className="text-[10px] text-slate-400 uppercase tracking-wider block mb-1 font-bold">
-                    Dedicated Server Cluster
+                    Official FACEIT Server Location
                   </label>
                   <select
                     value={newTourneyRegion}
                     onChange={(e) => setNewTourneyRegion(e.target.value)}
                     className="w-full px-3.5 py-2.5 rounded-xl bg-[#141722] border border-[#252C3D] text-amber-400 font-bold focus:outline-none focus:border-[#A3E635] cursor-pointer"
                   >
-                    <option value="Frankfurt Node #01 (128-Tick)">🇩🇪 Frankfurt Node #01 (128-Tick • 14ms)</option>
-                    <option value="Vienna Node #02 (128-Tick)">🇦🇹 Vienna Node #02 (128-Tick • 18ms)</option>
-                    <option value="Stockholm Node #03 (128-Tick)">🇸🇪 Stockholm Node #03 (128-Tick • 25ms)</option>
-                    <option value="Helsinki Node #04 (128-Tick)">🇫🇮 Helsinki Node #04 (128-Tick • 30ms)</option>
+                    <option value="FACEIT Germany (Frankfurt • 14ms)">🇩🇪 FACEIT Germany (Frankfurt • 14ms)</option>
+                    <option value="FACEIT Netherlands (Amsterdam • 16ms)">🇳🇱 FACEIT Netherlands (Amsterdam • 16ms)</option>
+                    <option value="FACEIT Sweden (Stockholm • 28ms)">🇸🇪 FACEIT Sweden (Stockholm • 28ms)</option>
+                    <option value="FACEIT Finland (Helsinki • 31ms)">🇫🇮 FACEIT Finland (Helsinki • 31ms)</option>
+                    <option value="FACEIT UK (London • 19ms)">🇬🇧 FACEIT UK (London • 19ms)</option>
+                    <option value="FACEIT France (Paris • 21ms)">🇫🇷 FACEIT France (Paris • 21ms)</option>
                   </select>
                 </div>
               </div>
