@@ -904,8 +904,8 @@ export const VortexDashboard: React.FC<VortexDashboardProps> = ({
   const [selectedMatchTier, setSelectedMatchTier] = useState<'free' | 'premium' | 'vip'>('free');
   // Selected server country locations (default 4 matching screenshot: Netherlands, Germany, Sweden, Finland)
   const [selectedServers, setSelectedServers] = useState<string[]>(['netherlands', 'germany', 'sweden', 'finland']);
-  // Dashboard is #1 and Play is #2 in order
-  const [activeTab, setActiveTab] = useState<VortexTab>('dashboard');
+  // Default tab is Play (5v5 competitive queue)
+  const [activeTab, setActiveTab] = useState<VortexTab>('play');
   const [profileDropdownOpen, setProfileDropdownOpen] = useState(false);
   const [notificationsOpen, setNotificationsOpen] = useState(false);
   const [showPremiumModal, setShowPremiumModal] = useState(initialOpenPremium);
@@ -1421,10 +1421,10 @@ export const VortexDashboard: React.FC<VortexDashboardProps> = ({
       level: `Level ${currentUserLevel}`,
       levelNum: currentUserLevel,
       elo: currentUserElo,
-      matches: faceitConnected ? 84 : 12,
-      winrate: faceitConnected ? '58.9%' : '50.0%',
-      kd: faceitConnected ? '1.28' : '1.05',
-      hs: faceitConnected ? '64.2%' : '48.0%',
+      matches: 0,
+      winrate: '--',
+      kd: '--',
+      hs: '--',
       verification: currentVerification,
       isUser: true,
       bio: currentBio || 'Official verified player on VORTEX Gaming.',
@@ -1433,7 +1433,7 @@ export const VortexDashboard: React.FC<VortexDashboardProps> = ({
       steamId: localStorage.getItem('vortex_steam_id') || 'STEAM_0:1:43918293',
       sens: '800 DPI • 1.15 Sens • 1280x960 4:3 Stretched',
       bestMap: 'Mirage',
-      bestMapWin: 64
+      bestMapWin: 0
     },
     ...(() => {
       try {
@@ -1455,9 +1455,9 @@ export const VortexDashboard: React.FC<VortexDashboardProps> = ({
             levelNum: p.level || 1,
             elo: p.elo || 1000,
             matches: p.matches || 0,
-            winrate: p.winrate || '0%',
-            kd: p.kd || '1.00',
-            hs: p.hs || '0%',
+            winrate: p.winrate || (p.matches ? '0.0%' : '--'),
+            kd: p.kd || (p.matches ? '1.00' : '--'),
+            hs: p.hs || (p.matches ? '0.0%' : '--'),
             verification: p.verification || 'none',
             isUser: false,
             bio: p.bio || 'Verified VORTEX registered player.',
@@ -1466,7 +1466,7 @@ export const VortexDashboard: React.FC<VortexDashboardProps> = ({
             steamId: p.steamId || 'STEAM_0:1:00000000',
             sens: '800 DPI • 1.10 Sens',
             bestMap: 'Mirage',
-            bestMapWin: 50
+            bestMapWin: 0
           }));
       } catch {
         return [];
@@ -1482,6 +1482,9 @@ export const VortexDashboard: React.FC<VortexDashboardProps> = ({
       rank: `#${idx + 1}`,
       rankNum: idx + 1
     }));
+
+  const userRankEntry = platformRankingPlayers.find(p => p.isUser);
+  const userPlatformRank = userRankEntry ? userRankEntry.rank : '#1';
 
   const handleViewPlayerProfile = (p: PlatformRankingPlayer) => {
     sound.playSelect();
@@ -1790,86 +1793,96 @@ export const VortexDashboard: React.FC<VortexDashboardProps> = ({
     } catch (_) {}
   };
 
+  const isVisitorMode = !isProjectAdmin || !adminBypassComingSoon;
+
   const navItems = [
     {
       id: 'play' as VortexTab,
       label: 'Play',
-      desc: (isProjectAdmin && adminBypassComingSoon) ? 'Ranked 128-tick matchmaking' : 'Season 1 • Launching Soon',
+      desc: isVisitorMode ? 'Season 1 • Launching Soon' : 'Ranked 128-tick matchmaking',
       icon: Play,
-      badge: (isProjectAdmin && adminBypassComingSoon)
-        ? (isQueuing ? 'QUEUING' : 'ACTIVE')
-        : 'COMING SOON',
-      badgeColor: (isProjectAdmin && adminBypassComingSoon)
-        ? (isQueuing
+      badge: isVisitorMode
+        ? 'COMING SOON'
+        : (isQueuing ? 'QUEUING' : 'ACTIVE'),
+      badgeColor: isVisitorMode
+        ? 'bg-amber-500/15 text-amber-400 border border-amber-500/30 font-bold'
+        : (isQueuing
           ? 'bg-red-500/20 text-red-400 border border-red-500/40 animate-pulse'
           : 'bg-[#A3E635]/15 text-[#A3E635] border border-[#A3E635]/30')
-        : 'bg-amber-500/15 text-amber-400 border border-amber-500/30'
     },
     {
       id: 'rankings' as VortexTab,
       label: 'Rank',
-      desc: 'Platform Player Leaderboard',
+      desc: isVisitorMode ? 'Season 1 • Under Dev' : 'Platform Player Leaderboard',
       icon: BarChart2,
-      badge: 'TOP PLAYERS',
-      badgeColor: 'bg-[#A3E635]/15 text-[#A3E635] border border-[#A3E635]/30 font-bold'
+      badge: isVisitorMode ? 'COMING SOON' : 'TOP PLAYERS',
+      badgeColor: isVisitorMode
+        ? 'bg-amber-500/15 text-amber-400 border border-amber-500/30 font-bold'
+        : 'bg-[#A3E635]/15 text-[#A3E635] border border-[#A3E635]/30 font-bold'
     },
     {
       id: 'cases' as VortexTab,
       label: 'Cases',
-      desc: 'Hellcase & Farmskins CS2 Unboxing',
+      desc: isVisitorMode ? 'Season 1 • Under Dev' : 'Hellcase & Farmskins CS2 Unboxing',
       icon: Package,
-      badge: 'HOT',
-      badgeColor: 'bg-gradient-to-r from-amber-500/20 to-orange-500/20 text-amber-300 border border-amber-500/40 font-bold'
+      badge: isVisitorMode ? 'COMING SOON' : 'HOT',
+      badgeColor: isVisitorMode
+        ? 'bg-amber-500/15 text-amber-400 border border-amber-500/30 font-bold'
+        : 'bg-gradient-to-r from-amber-500/20 to-orange-500/20 text-amber-300 border border-amber-500/40 font-bold'
     },
     {
       id: 'tournaments' as VortexTab,
       label: 'Tournaments',
-      desc: 'Rikthehet Së Shpejti • Under Dev',
+      desc: 'Season 1 • Under Dev',
       icon: Trophy,
-      badge: 'LOCKED',
+      badge: 'COMING SOON',
       badgeColor: 'bg-amber-500/15 text-amber-400 border border-amber-500/30 font-bold'
     },
     {
       id: 'scrims' as VortexTab,
       label: 'Scrims Hub',
-      desc: 'Rikthehet Së Shpejti • Under Dev',
+      desc: 'Season 1 • Under Dev',
       icon: Swords,
-      badge: 'LOCKED',
+      badge: 'COMING SOON',
       badgeColor: 'bg-amber-500/15 text-amber-400 border border-amber-500/30 font-bold'
     },
     {
       id: 'aim' as VortexTab,
       label: '1v1 Aim Arena',
-      desc: 'Rikthehet Së Shpejti • Under Dev',
+      desc: 'Season 1 • Under Dev',
       icon: Crosshair,
-      badge: 'LOCKED',
+      badge: 'COMING SOON',
       badgeColor: 'bg-amber-500/15 text-amber-400 border border-amber-500/30 font-bold'
     },
     {
       id: 'lineups' as VortexTab,
       label: 'CS2 Lineups',
-      desc: 'Rikthehet Së Shpejti • Under Dev',
+      desc: 'Season 1 • Under Dev',
       icon: Compass,
-      badge: 'LOCKED',
+      badge: 'COMING SOON',
       badgeColor: 'bg-amber-500/15 text-amber-400 border border-amber-500/30 font-bold'
     },
     {
       id: 'anticheat' as VortexTab,
       label: 'Anti-Cheat',
-      desc: isAntiCheatActive ? 'Ring-0 Kernel Protected' : 'Driver Offline • Ready to Launch',
+      desc: isVisitorMode ? 'Season 1 • Under Dev' : (isAntiCheatActive ? 'Ring-0 Kernel Protected' : 'Driver Offline • Ready to Launch'),
       icon: ShieldCheck,
-      badge: isAntiCheatActive ? 'ACTIVE' : 'READY',
-      badgeColor: isAntiCheatActive 
-        ? 'bg-emerald-500/15 text-emerald-400 border border-emerald-500/30 font-bold'
-        : 'bg-amber-500/15 text-amber-400 border border-amber-500/30 font-bold'
+      badge: isVisitorMode ? 'COMING SOON' : (isAntiCheatActive ? 'ACTIVE' : 'READY'),
+      badgeColor: isVisitorMode
+        ? 'bg-amber-500/15 text-amber-400 border border-amber-500/30 font-bold'
+        : (isAntiCheatActive 
+          ? 'bg-emerald-500/15 text-emerald-400 border border-emerald-500/30 font-bold'
+          : 'bg-amber-500/15 text-amber-400 border border-amber-500/30 font-bold')
     },
     {
       id: 'profile' as VortexTab,
       label: 'Player Profile',
-      desc: 'Digital Passport & Settings',
+      desc: isVisitorMode ? 'Season 1 • Under Dev' : 'Digital Passport & Settings',
       icon: User,
-      badge: 'VERIFIED',
-      badgeColor: 'bg-[#A3E635]/15 text-[#A3E635] border border-[#A3E635]/30 font-bold'
+      badge: isVisitorMode ? 'COMING SOON' : 'VERIFIED',
+      badgeColor: isVisitorMode
+        ? 'bg-amber-500/15 text-amber-400 border border-amber-500/30 font-bold'
+        : 'bg-[#A3E635]/15 text-[#A3E635] border border-[#A3E635]/30 font-bold'
     },
   ];
 
@@ -2069,31 +2082,33 @@ export const VortexDashboard: React.FC<VortexDashboardProps> = ({
             </nav>
           </div>
 
-          {/* Go Premium Card */}
-          {!sidebarCollapsed ? (
-            <button
-              onClick={() => { sound.playTournamentVictory(); setShowPremiumModal(true); }}
-              className="mt-6 p-4 rounded-2xl bg-gradient-to-r from-[#1C160B] to-[#12141C] border border-amber-500/40 hover:border-amber-400 text-left transition cursor-pointer group shadow-lg"
-            >
-              <div className="flex items-center gap-2 text-amber-400 text-xs font-display font-black mb-1">
-                <Crown className="w-4 h-4" />
-                <span>{userMembershipTier === 'vip' ? 'VIP Elite Active' : userMembershipTier === 'premium' ? 'Upgrade to VIP' : 'Go Premium'}</span>
-              </div>
-              <p className="text-[10px] text-[#94A3B8]">
-                {userMembershipTier === 'vip' ? 'All Pro 128-tick queues unlocked' : userMembershipTier === 'premium' ? 'Unlock €25k Pro Tournaments' : 'Unlock Super Match 5v5 & VODs'}
-              </p>
-            </button>
-          ) : (
-            <button
-              onClick={() => { sound.playTournamentVictory(); setShowPremiumModal(true); }}
-              className="mt-6 w-full h-11 rounded-xl bg-gradient-to-br from-[#1C160B] to-[#12141C] border border-amber-500/40 hover:border-amber-400 flex items-center justify-center transition cursor-pointer group relative shadow-lg"
-              title={userMembershipTier === 'vip' ? 'VIP Elite Active' : userMembershipTier === 'premium' ? 'Upgrade to VIP' : 'Go Premium'}
-            >
-              <Crown className="w-5 h-5 text-amber-400 group-hover:scale-110 transition" />
-              <div className="absolute left-full ml-3 px-3 py-1.5 rounded-xl bg-[#141722] border border-amber-500/40 text-amber-400 text-xs font-bold whitespace-nowrap opacity-0 group-hover:opacity-100 pointer-events-none transition-all duration-150 z-50 shadow-2xl">
-                {userMembershipTier === 'vip' ? 'VIP Elite Active' : userMembershipTier === 'premium' ? 'Upgrade to VIP' : 'Go Premium'}
-              </div>
-            </button>
+          {/* Go Premium Card (Hidden in Visitor Mode) */}
+          {!isVisitorMode && (
+            !sidebarCollapsed ? (
+              <button
+                onClick={() => { sound.playTournamentVictory(); setShowPremiumModal(true); }}
+                className="mt-6 p-4 rounded-2xl bg-gradient-to-r from-[#1C160B] to-[#12141C] border border-amber-500/40 hover:border-amber-400 text-left transition cursor-pointer group shadow-lg"
+              >
+                <div className="flex items-center gap-2 text-amber-400 text-xs font-display font-black mb-1">
+                  <Crown className="w-4 h-4" />
+                  <span>{userMembershipTier === 'vip' ? 'VIP Elite Active' : userMembershipTier === 'premium' ? 'Upgrade to VIP' : 'Go Premium'}</span>
+                </div>
+                <p className="text-[10px] text-[#94A3B8]">
+                  {userMembershipTier === 'vip' ? 'All Pro queues unlocked' : userMembershipTier === 'premium' ? 'Unlock Pro Tournaments' : 'Unlock Super Match 5v5 & VODs'}
+                </p>
+              </button>
+            ) : (
+              <button
+                onClick={() => { sound.playTournamentVictory(); setShowPremiumModal(true); }}
+                className="mt-6 w-full h-11 rounded-xl bg-gradient-to-br from-[#1C160B] to-[#12141C] border border-amber-500/40 hover:border-amber-400 flex items-center justify-center transition cursor-pointer group relative shadow-lg"
+                title={userMembershipTier === 'vip' ? 'VIP Elite Active' : userMembershipTier === 'premium' ? 'Upgrade to VIP' : 'Go Premium'}
+              >
+                <Crown className="w-5 h-5 text-amber-400 group-hover:scale-110 transition" />
+                <div className="absolute left-full ml-3 px-3 py-1.5 rounded-xl bg-[#141722] border border-amber-500/40 text-amber-400 text-xs font-bold whitespace-nowrap opacity-0 group-hover:opacity-100 pointer-events-none transition-all duration-150 z-50 shadow-2xl">
+                  {userMembershipTier === 'vip' ? 'VIP Elite Active' : userMembershipTier === 'premium' ? 'Upgrade to VIP' : 'Go Premium'}
+                </div>
+              </button>
+            )
           )}
         </aside>
 
@@ -2146,176 +2161,125 @@ export const VortexDashboard: React.FC<VortexDashboardProps> = ({
           {/* TOP GLOBAL SPONSOR RIBBON (100% ENGLISH // LIVE MONETIZATION) */}
           <VortexTopSponsorRibbon onOpenPartnersModal={() => setShowPartnersModal(true)} />
 
-          {/* ========================================================================= */}
-          {/* TAB: "PLAY" -> THE COMPLETE MATCHMAKING HUB AS SHOWN IN THE PHOTO!       */}
-          {/* ========================================================================= */}
-          {activeTab === 'play' && (
+          {/* ADMIN VIEW MODE SWITCHER (ONLY VISIBLE TO PROJECT ADMIN) */}
+          {isProjectAdmin && (
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 p-3.5 px-5 rounded-2xl bg-[#141A29] border border-amber-500/40 shadow-lg text-xs font-mono">
+              <div className="flex items-center gap-2.5">
+                <span className="w-2.5 h-2.5 rounded-full bg-amber-400 animate-pulse" />
+                <span className="font-bold text-amber-400 uppercase tracking-wider flex items-center gap-1.5">
+                  <Crown className="w-4 h-4 text-amber-400" />
+                  <span>PROJECT ADMINISTRATOR MODE</span>
+                </span>
+                <span className="text-slate-400 hidden md:inline">
+                  • {adminBypassComingSoon ? 'Viewing Live Admin Platform' : 'Previewing Visitor Coming Soon View'}
+                </span>
+              </div>
+              <button
+                onClick={() => {
+                  sound.playClick();
+                  const next = !adminBypassComingSoon;
+                  setAdminBypassComingSoon(next);
+                  localStorage.setItem('vortex_admin_bypass_coming_soon', String(next));
+                }}
+                className="px-3.5 py-1.5 rounded-xl bg-amber-500/20 hover:bg-amber-500/30 border border-amber-500/50 text-amber-200 font-bold transition flex items-center gap-2 cursor-pointer shadow-sm hover:scale-105 active:scale-95"
+                title="Toggle between viewing the Live Admin Platform and testing what normal visitors see"
+              >
+                <Eye className="w-3.5 h-3.5 text-amber-400" />
+                <span>{adminBypassComingSoon ? 'Preview Visitor Coming Soon' : 'Return to Admin Live Platform'}</span>
+              </button>
+            </div>
+          )}
+
+          {/* FOR ALL REGULAR VISITORS: UNIFIED COMING SOON VIEW (100% CLEAN & HUMOROUS CS2 GAMER TEXT) */}
+          {isVisitorMode ? (
             <div className="space-y-6 animate-in fade-in duration-200">
+              <div className="w-full bg-[#0B0D12] border border-[#202535] rounded-3xl p-6 sm:p-10 relative overflow-hidden shadow-2xl text-left space-y-8">
+                {/* Subtle Ambient Glows */}
+                <div className="absolute top-0 right-1/4 w-[500px] h-[500px] bg-lime-500/[0.04] rounded-full blur-3xl pointer-events-none" />
+                <div className="absolute bottom-0 left-1/4 w-[500px] h-[500px] bg-amber-500/[0.04] rounded-full blur-3xl pointer-events-none" />
 
-              {/* ADMIN VIEW MODE SWITCHER (ONLY VISIBLE TO PROJECT ADMIN) */}
-              {isProjectAdmin && (
-                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 p-3.5 px-5 rounded-2xl bg-[#141A29] border border-amber-500/40 shadow-lg text-xs font-mono">
-                  <div className="flex items-center gap-2.5">
-                    <span className="w-2.5 h-2.5 rounded-full bg-amber-400 animate-pulse" />
-                    <span className="font-bold text-amber-400 uppercase tracking-wider flex items-center gap-1.5">
-                      <Crown className="w-4 h-4 text-amber-400" />
-                      <span>PROJECT ADMINISTRATOR MODE</span>
-                    </span>
-                    <span className="text-slate-400 hidden md:inline">
-                      • {adminBypassComingSoon ? 'Viewing Live Matchmaking Arena' : 'Previewing Visitor Coming Soon View'}
-                    </span>
+                {/* Top Header Section */}
+                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-white/[0.08] pb-6">
+                  <div className="space-y-2">
+                    <div className="flex items-center gap-2.5">
+                      <span className="px-3 py-1 rounded-full text-[10px] font-mono font-bold uppercase tracking-wider text-[#A3E635] bg-[#A3E635]/10 border border-[#A3E635]/30 flex items-center gap-1.5 shadow-sm">
+                        <span className="w-2 h-2 rounded-full bg-[#A3E635] animate-pulse" />
+                        <span>SEASON 1 CALIBRATION • UNDER DEV</span>
+                      </span>
+                      <span className="px-2.5 py-0.5 rounded-full text-[10px] font-mono font-bold text-amber-400 bg-amber-500/10 border border-amber-500/25">
+                        COMING SOON
+                      </span>
+                    </div>
+
+                    <h1 className="text-3xl sm:text-4xl font-black font-display text-white tracking-tight uppercase">
+                      VORTEX GAMING PLATFORM
+                    </h1>
+                    <p className="text-sm font-mono text-slate-400 max-w-3xl">
+                      Hold your angles and save your AWPs! The next generation of competitive Counter-Strike 2 is almost ready.
+                    </p>
                   </div>
-                  <button
-                    onClick={() => {
-                      sound.playClick();
-                      const next = !adminBypassComingSoon;
-                      setAdminBypassComingSoon(next);
-                      localStorage.setItem('vortex_admin_bypass_coming_soon', String(next));
-                    }}
-                    className="px-3.5 py-1.5 rounded-xl bg-amber-500/20 hover:bg-amber-500/30 border border-amber-500/50 text-amber-200 font-bold transition flex items-center gap-2 cursor-pointer shadow-sm"
-                    title="Toggle between viewing the Live Arena and testing what normal visitors see"
-                  >
-                    <Eye className="w-3.5 h-3.5 text-amber-400" />
-                    <span>{adminBypassComingSoon ? 'Preview Visitor Coming Soon' : 'Return to Admin Live Arena'}</span>
-                  </button>
+
+                  {/* Progress & Launch Pill */}
+                  <div className="sm:text-right shrink-0">
+                    <div className="text-[11px] font-mono text-slate-400 uppercase tracking-wider">DEPLOYMENT PROGRESS</div>
+                    <div className="text-2xl font-black font-display text-[#A3E635]">60% COMPLETED</div>
+                    <div className="text-[10px] font-mono text-slate-500">Phase 3/5: Matchmaking & Server Calibration</div>
+                  </div>
                 </div>
-              )}
 
-              {/* FOR REGULAR VISITORS: BEAUTIFUL COMING SOON VIEW (100% ENGLISH) */}
-              {(!isProjectAdmin || !adminBypassComingSoon) ? (
-                <div className="w-full bg-[#0B0D12] border border-[#202535] rounded-3xl p-6 sm:p-10 relative overflow-hidden shadow-2xl text-left space-y-8">
-                  {/* Subtle Ambient Glows */}
-                  <div className="absolute top-0 right-1/4 w-[500px] h-[500px] bg-lime-500/[0.04] rounded-full blur-3xl pointer-events-none" />
-                  <div className="absolute bottom-0 left-1/4 w-[500px] h-[500px] bg-amber-500/[0.04] rounded-full blur-3xl pointer-events-none" />
+                {/* Main Announcement Box (Professional & Humorous CS2 Copy as requested!) */}
+                <div className="p-6 sm:p-8 rounded-2xl bg-gradient-to-br from-[#121622] via-[#0E121B] to-[#0A0D14] border border-[#262E44] shadow-xl relative overflow-hidden">
+                  <div className="absolute top-0 right-0 w-64 h-64 bg-[#A3E635]/5 rounded-full blur-2xl pointer-events-none" />
 
-                  {/* Top Header Section */}
-                  <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-white/[0.08] pb-6">
-                    <div className="space-y-2">
-                      <div className="flex items-center gap-2.5">
-                        <span className="px-3 py-1 rounded-full text-[10px] font-mono font-bold uppercase tracking-wider text-[#A3E635] bg-[#A3E635]/10 border border-[#A3E635]/30 flex items-center gap-1.5 shadow-sm">
-                          <span className="w-2 h-2 rounded-full bg-[#A3E635] animate-pulse" />
-                          <span>SEASON 1 INITIALIZING • UNDER DEV</span>
-                        </span>
-                        <span className="px-2.5 py-0.5 rounded-full text-[10px] font-mono font-bold text-amber-400 bg-amber-500/10 border border-amber-500/25">
-                          LAUNCHING SOON
-                        </span>
-                      </div>
-
-                      <h1 className="text-3xl sm:text-4xl font-black font-display text-white tracking-tight uppercase">
-                        VORTEX 5V5 COMPETITIVE ARENA
-                      </h1>
-                      <p className="text-sm font-mono text-slate-400 max-w-3xl">
-                        High-performance European CS2 infrastructure, automated captain veto systems, and verified Anti-Cheat lobbies.
-                      </p>
+                  <div className="relative z-10 space-y-4">
+                    <div className="flex items-center gap-2">
+                      <Sparkles className="w-5 h-5 text-amber-400" />
+                      <h3 className="text-lg font-black font-display text-white uppercase tracking-wide">
+                        Official Competitive Notice for CS2 Players
+                      </h3>
                     </div>
 
-                    {/* Progress & Launch Pill */}
-                    <div className="sm:text-right shrink-0">
-                      <div className="text-[11px] font-mono text-slate-400 uppercase tracking-wider">DEPLOYMENT PROGRESS</div>
-                      <div className="text-2xl font-black font-display text-[#A3E635]">92% COMPLETED</div>
-                      <div className="text-[10px] font-mono text-slate-500">Phase 4/5: Server Stress Tests</div>
-                    </div>
-                  </div>
+                    <p className="text-sm text-slate-300 font-sans leading-relaxed">
+                      Welcome to <strong className="text-white font-bold">VORTEX Gaming</strong>! Before you rush B without utility or blame sub-tick for missing your AK-47 spray, our engineers are currently fine-tuning our European server infrastructure to ensure crisp hit registration, zero rubberbanding, and genuine competitive 5v5 action.
+                    </p>
 
-                  {/* Main Announcement Box (Beautiful English Copy as requested) */}
-                  <div className="p-6 sm:p-8 rounded-2xl bg-gradient-to-br from-[#121622] via-[#0E121B] to-[#0A0D14] border border-[#262E44] shadow-xl relative overflow-hidden">
-                    <div className="absolute top-0 right-0 w-64 h-64 bg-[#A3E635]/5 rounded-full blur-2xl pointer-events-none" />
+                    <p className="text-sm text-slate-300 font-sans leading-relaxed">
+                      <span className="text-[#A3E635] font-bold">Tired of solo-queue teammates who don’t buy defuse kits, buy Decoys on eco rounds, or accidentally flashbang their own squad?</span> <em>We feel your pain.</em> Our built-in <strong className="text-white">5-Man Party Finder and Matchmaking Lobby</strong> will allow you to recruit dedicated players, assemble a chemistry-driven stack, and climb the seasonal ELO ladders together.
+                    </p>
 
-                    <div className="relative z-10 space-y-4">
-                      <div className="flex items-center gap-2">
-                        <Sparkles className="w-5 h-5 text-amber-400" />
-                        <h3 className="text-lg font-black font-display text-white uppercase tracking-wide">
-                          Official Platform Return & Launch Announcement
-                        </h3>
-                      </div>
+                    <p className="text-sm text-slate-400 font-sans leading-relaxed">
+                      Grab an energy drink, practice your smoke lineups in offline servers for a bit longer, and click <strong className="text-white">"Notify Me When Online"</strong> below. We'll sound the alarm the exact second the servers go live!
+                    </p>
 
-                      <p className="text-sm text-slate-300 font-sans leading-relaxed">
-                        Welcome to <strong className="text-white font-bold">VORTEX Gaming</strong>! We are currently finalizing the deployment of our next-generation competitive CS2 arena. When our official servers go live, you will have the pleasure of experiencing ultra-smooth, sub-tick optimized matchmaking, low-latency 128-tick European game servers, and guaranteed skin drops.
-                      </p>
+                    <div className="pt-2 flex flex-wrap items-center gap-3">
+                      <button
+                        onClick={() => {
+                          sound.playSelect();
+                          confetti({ particleCount: 50, spread: 70, origin: { y: 0.7 } });
+                          alert("You're on the VIP priority notification list! Prepare your crosshair — launch announcement coming soon.");
+                        }}
+                        className="px-5 py-2.5 rounded-xl bg-[#A3E635] hover:bg-[#B4F046] text-slate-950 font-mono font-bold text-xs uppercase tracking-wider transition cursor-pointer shadow-lg shadow-lime-500/20 flex items-center gap-2 hover:scale-105 active:scale-95"
+                      >
+                        <Bell className="w-4 h-4 text-slate-950" />
+                        <span>Notify Me When Online</span>
+                      </button>
 
-                      <p className="text-sm text-slate-300 font-sans leading-relaxed">
-                        <span className="text-[#A3E635] font-bold">Playing solo or don’t have a team yet? No problem at all!</span> Our built-in Matchmaking Lobby and Party Finder will allow you to discover like-minded teammates, complete your roster, and form an unstoppable 5-man stack. Coordinate tactics, climb the seasonal ELO ladders, and enjoy competitive Counter-Strike at its absolute best.
-                      </p>
-
-                      <div className="pt-2 flex flex-wrap items-center gap-3">
-                        <button
-                          onClick={() => {
-                            sound.playSelect();
-                            confetti({ particleCount: 40, spread: 60, origin: { y: 0.8 } });
-                            alert("You are on the VIP priority notification list! We'll announce the official launch date soon.");
-                          }}
-                          className="px-5 py-2.5 rounded-xl bg-[#A3E635] hover:bg-[#B4F046] text-slate-950 font-mono font-bold text-xs uppercase tracking-wider transition cursor-pointer shadow-lg shadow-lime-500/20 flex items-center gap-2"
-                        >
-                          <Bell className="w-4 h-4 text-slate-950" />
-                          <span>Notify Me When Online</span>
-                        </button>
-
-                        <a
-                          href="https://uplcm.com/4/12281615"
-                          target="_blank"
-                          rel="noopener noreferrer"
-                          className="px-5 py-2.5 rounded-xl bg-[#1A1F2E] hover:bg-[#252C40] text-amber-300 border border-amber-400/40 font-mono font-bold text-xs uppercase tracking-wider transition flex items-center gap-2 shadow-sm"
-                        >
-                          <Gift className="w-4 h-4 text-amber-400" />
-                          <span>Claim Free CS2 Partner Loot</span>
-                          <ExternalLink className="w-3 h-3" />
-                        </a>
-                      </div>
+                      <span className="text-xs font-mono text-slate-400 italic">
+                        * Remember: always buy armor on pistol round!
+                      </span>
                     </div>
                   </div>
-
-                  {/* 4 Feature Highlights Grid */}
-                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-                    <div className="p-5 rounded-2xl bg-[#0E121B] border border-white/[0.06] space-y-2">
-                      <div className="w-9 h-9 rounded-xl bg-lime-500/10 border border-lime-500/20 flex items-center justify-center text-[#A3E635]">
-                        <Server className="w-5 h-5" />
-                      </div>
-                      <h4 className="text-sm font-bold font-display text-white">128-Tick Dedicated Hubs</h4>
-                      <p className="text-xs text-slate-400 font-mono leading-relaxed">
-                        Ultra-low latency routing across Frankfurt, London & Stockholm with zero loss.
-                      </p>
-                    </div>
-
-                    <div className="p-5 rounded-2xl bg-[#0E121B] border border-white/[0.06] space-y-2">
-                      <div className="w-9 h-9 rounded-xl bg-amber-500/10 border border-amber-500/20 flex items-center justify-center text-amber-400">
-                        <Users className="w-5 h-5" />
-                      </div>
-                      <h4 className="text-sm font-bold font-display text-white">Smart 5-Man Party Stack</h4>
-                      <p className="text-xs text-slate-400 font-mono leading-relaxed">
-                        Find missing roles, invite friends, and queue together with built-in comms.
-                      </p>
-                    </div>
-
-                    <div className="p-5 rounded-2xl bg-[#0E121B] border border-white/[0.06] space-y-2">
-                      <div className="w-9 h-9 rounded-xl bg-emerald-500/10 border border-emerald-500/20 flex items-center justify-center text-emerald-400">
-                        <ShieldCheck className="w-5 h-5" />
-                      </div>
-                      <h4 className="text-sm font-bold font-display text-white">Ring-0 Kernel Anti-Cheat</h4>
-                      <p className="text-xs text-slate-400 font-mono leading-relaxed">
-                        100% clean competitive integrity with hardware heartbeat checks and zero smurfs.
-                      </p>
-                    </div>
-
-                    <div className="p-5 rounded-2xl bg-[#0E121B] border border-white/[0.06] space-y-2">
-                      <div className="w-9 h-9 rounded-xl bg-purple-500/10 border border-purple-500/20 flex items-center justify-center text-purple-400">
-                        <Award className="w-5 h-5" />
-                      </div>
-                      <h4 className="text-sm font-bold font-display text-white">Weekly Drops & Skin Vault</h4>
-                      <p className="text-xs text-slate-400 font-mono leading-relaxed">
-                        Compete in seasonal ladders to win Covert knives, gloves, and instant cashouts.
-                      </p>
-                    </div>
-                  </div>
-
-                  {/* Live Sponsor Ads Banner (Generates Monetag / AADS Revenue!) */}
-                  <VortexAdBanner placement="top" showDisclaimer={true} />
-
-                  {/* Partner Deals Ribbon */}
-                  <VortexComingSoonDeals onOpenPartnersModal={() => setShowPartnersModal(true)} />
                 </div>
-              ) : (
-                /* FOR ADMINISTRATOR: FULL LIVE MATCHMAKING LOBBY */
-                <>
+
+                {/* Live Sponsor Ads Banner (Generates Monetag Revenue from all visitor traffic!) */}
+                <VortexAdBanner placement="top" showDisclaimer={true} />
+              </div>
+            </div>
+          ) : (
+            <>
+              {/* TAB: PLAY (OR DASHBOARD FOR ADMIN) */}
+              {(activeTab === 'play' || activeTab === 'dashboard') && (
+                <div className="space-y-6 animate-in fade-in duration-200">
                   {/* HERO MODULE: 5v5 CS2 MATCHMAKING LOBBY (1:1 FACEIT REPLICA) */}
                   <div className="w-full bg-[#0B0D12] border border-[#202535] rounded-3xl p-6 sm:p-8 relative overflow-hidden shadow-2xl">
                 {/* Subtle Glow Accents */}
@@ -2354,7 +2318,7 @@ export const VortexDashboard: React.FC<VortexDashboardProps> = ({
                     <div className="flex-1 space-y-2">
                       <div className="flex items-center gap-3">
                         <span className="px-2.5 py-0.5 rounded-full bg-[#1A1D27] text-slate-300 text-xs font-mono border border-white/5">
-                          Season 9
+                          Season 1
                         </span>
                         <span className="text-xl sm:text-2xl font-black font-display text-white tracking-tight flex items-center gap-2">
                           {currentUserElo.toLocaleString()} ELO
@@ -2376,7 +2340,7 @@ export const VortexDashboard: React.FC<VortexDashboardProps> = ({
                           </span>
                         )}
                         <div className="ml-auto flex items-center gap-1.5 px-2.5 py-0.5 rounded-lg bg-white/[0.04] border border-white/10 text-xs font-mono font-bold text-slate-300">
-                          <span>{currentUserElo >= 3000 ? '#1' : currentUserElo >= 1900 ? '#3' : currentUserElo >= 1400 ? '#5' : '#91'}</span>
+                          <span>{userPlatformRank}</span>
                           <CountryFlag code={currentCountry.code} name={currentCountry.name} size="xs" />
                           <ChevronRight className="w-3.5 h-3.5 text-emerald-400" />
                         </div>
@@ -3248,224 +3212,6 @@ export const VortexDashboard: React.FC<VortexDashboardProps> = ({
                 </div>
 
               </div>
-              </>
-            )}
-
-            </div>
-          )}
-
-          {/* ========================================================================= */}
-          {/* TAB: "DASHBOARD" -> DEDICATED TO OTHER THINGS: CAREER, DEMOS, NEWS, ETC. */}
-          {/* ========================================================================= */}
-          {activeTab === 'dashboard' && (
-            <div className="space-y-6 animate-in fade-in duration-200">
-
-              {/* 1. HERO PLATFORM BANNER & ESPORTS COMMAND HUB */}
-              <div className="w-full bg-[#0E1017] border border-[#202536] rounded-3xl p-6 sm:p-8 shadow-2xl relative overflow-hidden">
-                <div className="absolute top-0 right-0 w-96 h-96 bg-lime-500/5 rounded-full blur-3xl pointer-events-none" />
-                <div className="absolute bottom-0 left-1/3 w-80 h-80 bg-orange-600/5 rounded-full blur-3xl pointer-events-none" />
-
-                <div className="relative z-10 space-y-6">
-                  {/* Top Badge & Platform Title */}
-                  <div className="flex flex-wrap items-center justify-between gap-4">
-                    <div className="space-y-2">
-                      <div className="flex items-center gap-2.5">
-                        <span className="px-3 py-1 rounded-full text-xs font-mono font-bold bg-[#182012] text-[#A3E635] border border-[#A3E635]/40 flex items-center gap-1.5 shadow-sm">
-                          <span className="w-2 h-2 rounded-full bg-[#A3E635] animate-pulse" />
-                          SEASON 9 ACTIVE • EUROPE
-                        </span>
-                        <span className="px-3 py-1 rounded-full text-xs font-mono font-bold bg-white/[0.04] text-slate-300 border border-white/10">
-                          128-TICK DIRECT SYNC
-                        </span>
-                      </div>
-                      <h1 className="text-3xl sm:text-4xl lg:text-5xl font-black font-display text-white tracking-tight">
-                        VORTEX GAMING PLATFORM
-                      </h1>
-                      <p className="text-sm sm:text-base text-slate-300 max-w-2xl leading-relaxed">
-                        The elite competitive CS2 infrastructure. Queue for ranked 5v5 matches, join verified tournament circuits, and climb the official platform leaderboard.
-                      </p>
-                    </div>
-
-                    {/* Live Players Online Widget */}
-                    <div className="p-4 rounded-2xl bg-[#12141C] border border-[#232938] flex flex-col items-end gap-1 shrink-0">
-                      <div className="flex items-center gap-2 text-xs font-mono text-slate-400">
-                        <span className="w-2 h-2 rounded-full bg-emerald-400 animate-ping" />
-                        <span>PLAYERS ONLINE</span>
-                      </div>
-                      <div className="text-2xl sm:text-3xl font-black font-mono text-white">14,820</div>
-                      <div className="text-[10px] font-mono text-[#A3E635] font-bold">2,140 Matches Live</div>
-                    </div>
-                  </div>
-
-                  {/* 3 Quick Jump Cards */}
-                  <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 pt-2">
-                    <button
-                      onClick={() => {
-                        sound.playSelect();
-                        setActiveTab('play');
-                      }}
-                      className="p-4 rounded-2xl bg-[#12141C] hover:bg-[#181D2A] border border-[#232938] hover:border-[#FF5500]/60 transition group cursor-pointer text-left space-y-2"
-                    >
-                      <div className="flex items-center justify-between">
-                        <div className="w-10 h-10 rounded-xl bg-orange-500/15 border border-orange-500/30 flex items-center justify-center text-[#FF5500]">
-                          <Play className="w-5 h-5 fill-current" />
-                        </div>
-                        <ChevronRight className="w-4 h-4 text-slate-500 group-hover:text-[#FF5500] group-hover:translate-x-1 transition-all" />
-                      </div>
-                      <div>
-                        <div className="text-base font-bold font-display text-white group-hover:text-[#FF5500] transition">
-                          Play (5v5 Queue)
-                        </div>
-                        <p className="text-xs font-mono text-slate-400">Ranked European competitive matchmaking</p>
-                      </div>
-                    </button>
-
-                    <button
-                      onClick={() => {
-                        sound.playSelect();
-                        setActiveTab('rankings');
-                      }}
-                      className="p-4 rounded-2xl bg-[#12141C] hover:bg-[#181D2A] border border-[#232938] hover:border-[#A3E635]/60 transition group cursor-pointer text-left space-y-2"
-                    >
-                      <div className="flex items-center justify-between">
-                        <div className="w-10 h-10 rounded-xl bg-lime-500/15 border border-lime-500/30 flex items-center justify-center text-[#A3E635]">
-                          <BarChart2 className="w-5 h-5" />
-                        </div>
-                        <ChevronRight className="w-4 h-4 text-slate-500 group-hover:text-[#A3E635] group-hover:translate-x-1 transition-all" />
-                      </div>
-                      <div>
-                        <div className="text-base font-bold font-display text-white group-hover:text-[#A3E635] transition">
-                          Platform Leaderboard
-                        </div>
-                        <p className="text-xs font-mono text-slate-400">Top players, regional standings & ELO</p>
-                      </div>
-                    </button>
-
-                    <button
-                      onClick={() => {
-                        sound.playSelect();
-                        setActiveTab('tournaments');
-                      }}
-                      className="p-4 rounded-2xl bg-[#12141C] hover:bg-[#181D2A] border border-[#232938] hover:border-amber-500/60 transition group cursor-pointer text-left space-y-2"
-                    >
-                      <div className="flex items-center justify-between">
-                        <div className="w-10 h-10 rounded-xl bg-amber-500/15 border border-amber-500/30 flex items-center justify-center text-amber-400">
-                          <Trophy className="w-5 h-5" />
-                        </div>
-                        <ChevronRight className="w-4 h-4 text-slate-500 group-hover:text-amber-400 group-hover:translate-x-1 transition-all" />
-                      </div>
-                      <div>
-                        <div className="text-base font-bold font-display text-white group-hover:text-amber-400 transition">
-                          CS2 Tournaments
-                        </div>
-                        <p className="text-xs font-mono text-slate-400">Automated brackets & cash prize pools</p>
-                      </div>
-                    </button>
-                  </div>
-                </div>
-              </div>
-
-              {/* FEATURED PLATFORM TOURNAMENTS & COMPETITIVE CIRCUIT */}
-              <div className="bg-[#0E1017] border border-[#202536] rounded-3xl p-6 shadow-xl space-y-4">
-                <div className="flex flex-col sm:flex-row sm:items-center justify-between pb-3 border-b border-white/[0.06] gap-2">
-                  <div>
-                    <h3 className="text-lg font-black font-display text-white">Featured Platform Tournaments & Prize Pools</h3>
-                    <p className="text-xs text-[#94A3B8]">Official European CS2 single & double elimination brackets with automated FACEIT anti-cheat</p>
-                  </div>
-                  <button
-                    onClick={() => {
-                      sound.playClick();
-                      setActiveTab('tournaments');
-                    }}
-                    className="px-3.5 py-1.5 rounded-xl bg-[#141722] hover:bg-[#84CC16]/20 border border-[#A3E635]/40 text-[#A3E635] text-xs font-mono font-bold transition cursor-pointer flex items-center gap-1.5 self-start sm:self-auto"
-                  >
-                    <Trophy className="w-3.5 h-3.5" />
-                    <span>View All Tournaments →</span>
-                  </button>
-                </div>
-
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                  {[
-                    {
-                      title: 'VORTEX CS2 Global Open',
-                      prize: '$25,000',
-                      status: 'REGISTRATION OPEN',
-                      badgeColor: 'bg-emerald-500/15 text-emerald-400 border border-emerald-500/30',
-                      slots: '14 / 16 Teams',
-                      start: 'Starts in 2d 14h'
-                    },
-                    {
-                      title: 'VORTEX Major Championship 2026',
-                      prize: '€10,000',
-                      status: 'IN PROGRESS',
-                      badgeColor: 'bg-[#A3E635]/15 text-[#A3E635] border border-[#A3E635]/30',
-                      slots: '32 / 32 Teams',
-                      start: 'Live Matches on GOTV'
-                    },
-                    {
-                      title: 'Balkan Open CS2 Cup',
-                      prize: '€5,000',
-                      status: 'REGISTRATION OPEN',
-                      badgeColor: 'bg-amber-500/15 text-amber-400 border border-amber-500/30',
-                      slots: '8 / 16 Teams',
-                      start: 'Starts Saturday 20:00'
-                    }
-                  ].map((tourney, idx) => (
-                    <div key={idx} className="p-5 rounded-2xl bg-[#12141C] border border-[#232938] hover:border-[#A3E635]/40 transition space-y-3">
-                      <div className="flex items-center justify-between">
-                        <span className={`px-2 py-0.5 rounded text-[10px] font-mono font-bold ${tourney.badgeColor}`}>
-                          {tourney.status}
-                        </span>
-                        <span className="text-base font-black font-mono text-[#A3E635]">{tourney.prize}</span>
-                      </div>
-                      <div>
-                        <h4 className="text-sm font-bold font-display text-white">{tourney.title}</h4>
-                        <p className="text-xs font-mono text-slate-400 mt-0.5">{tourney.start} • {tourney.slots}</p>
-                      </div>
-                      <button
-                        onClick={() => {
-                          sound.playClick();
-                          setActiveTab('tournaments');
-                        }}
-                        className="w-full py-2 rounded-xl bg-[#141722] hover:bg-[#84CC16] hover:text-slate-950 border border-white/10 hover:border-[#A3E635] text-xs font-mono font-bold text-slate-300 transition cursor-pointer flex items-center justify-center gap-1.5"
-                      >
-                        <span>View Bracket</span>
-                        <ChevronRight className="w-3.5 h-3.5" />
-                      </button>
-                    </div>
-                  ))}
-                </div>
-              </div>
-
-              {/* 5. COMMUNITY ANNOUNCEMENTS & GLOBAL ESPORTS NEWS */}
-              <div className="bg-[#0E1017] border border-[#202536] rounded-3xl p-6 shadow-xl space-y-4">
-                <div className="flex items-center justify-between pb-3 border-b border-white/[0.06]">
-                  <div>
-                    <h3 className="text-lg font-black font-display text-white">Community & Global Esports News</h3>
-                    <p className="text-xs text-[#94A3B8]">Official updates from the VORTEX Competitive Circuit</p>
-                  </div>
-                  <Newspaper className="w-4 h-4 text-[#A3E635]" />
-                </div>
-
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                  <div className="p-4 rounded-2xl bg-[#12141C] border border-[#232938] space-y-2">
-                    <span className="text-[10px] font-mono text-[#A3E635] font-bold">GLOBAL ANNOUNCEMENT</span>
-                    <h4 className="text-sm font-bold text-white font-display">VORTEX CS2 Global Open Championship</h4>
-                    <p className="text-xs text-slate-400">$25,000 international cash prize pool tournament open to verified teams worldwide.</p>
-                  </div>
-                  <div className="p-4 rounded-2xl bg-[#12141C] border border-[#232938] space-y-2">
-                    <span className="text-[10px] font-mono text-amber-400 font-bold">ANTI-CHEAT UPDATE</span>
-                    <h4 className="text-sm font-bold text-white font-display">Kernel Anti-Cheat v2.9 Global Rollout</h4>
-                    <p className="text-xs text-slate-400">Mandatory ring-0 handshake update ensures 100% fair matchmaking across all global servers.</p>
-                  </div>
-                  <div className="p-4 rounded-2xl bg-[#12141C] border border-[#232938] space-y-2">
-                    <span className="text-[10px] font-mono text-emerald-400 font-bold">NETWORK UPGRADE</span>
-                    <h4 className="text-sm font-bold text-white font-display">Global Sub-Tick Edge Network Live</h4>
-                    <p className="text-xs text-slate-400">Direct low-latency fiber routing deployed across Frankfurt, Stockholm, London, and New York.</p>
-                  </div>
-                </div>
-              </div>
-
             </div>
           )}
 
@@ -4708,11 +4454,11 @@ export const VortexDashboard: React.FC<VortexDashboardProps> = ({
             const displayRole = viewedPlayer ? (viewedPlayer.role || 'CS2 Competitor') : currentRole;
             const displayElo = viewedPlayer ? viewedPlayer.elo : currentUserElo;
             const displayLevelNum = viewedPlayer ? viewedPlayer.levelNum : currentUserLevel;
-            const displayRank = viewedPlayer ? `${viewedPlayer.rank} Global` : (currentUserElo >= 3000 ? '#1 Global' : currentUserElo >= 1900 ? '#3 Global' : currentUserElo >= 1400 ? '#5 Global' : '#91 Global');
-            const displayWinrate = viewedPlayer ? viewedPlayer.winrate : '58.9%';
-            const displayKd = viewedPlayer ? viewedPlayer.kd : '1.38';
-            const displayHs = viewedPlayer ? (viewedPlayer.hs || '64.2%') : '64.2%';
-            const displayMatches = viewedPlayer ? viewedPlayer.matches : 2480;
+            const displayRank = viewedPlayer ? `${viewedPlayer.rank} Global` : `${userPlatformRank} Platform Leader`;
+            const displayMatches = viewedPlayer ? (viewedPlayer.matches || 0) : 0;
+            const displayWinrate = (viewedPlayer && viewedPlayer.matches > 0) ? viewedPlayer.winrate : (displayMatches > 0 ? '0.0%' : '--');
+            const displayKd = (viewedPlayer && viewedPlayer.matches > 0) ? viewedPlayer.kd : (displayMatches > 0 ? '0.00' : '--');
+            const displayHs = (viewedPlayer && viewedPlayer.matches > 0) ? (viewedPlayer.hs || '--') : (displayMatches > 0 ? '0.0%' : '--');
             const displaySteamId = viewedPlayer ? (viewedPlayer.steamId || 'STEAM_0:1:88291039') : 'STEAM_0:1:43918293';
             const displayCrosshairCode = viewedPlayer ? (viewedPlayer.crosshairCode || 'CSGO-vortx-CS299-PRO88-MATCH') : currentCrosshairCode;
             const displaySens = viewedPlayer ? (viewedPlayer.sens || '800 DPI • 1.15 Sens • 1280x960 4:3') : '800 DPI • 1.15 Sens • 1280x960 4:3 Stretched';
@@ -4911,7 +4657,9 @@ export const VortexDashboard: React.FC<VortexDashboardProps> = ({
                       <span>Win Rate</span>
                     </div>
                     <div className="text-2xl font-black font-mono text-white">{displayWinrate}</div>
-                    <div className="text-[10px] font-mono text-emerald-400 font-bold">+2.4% this season</div>
+                    <div className="text-[10px] font-mono text-slate-500 font-bold">
+                      {displayMatches > 0 ? '+2.4% this season' : 'No matches played yet'}
+                    </div>
                   </div>
 
                   <div className="p-5 rounded-2xl bg-[#0E1017] border border-[#202536] space-y-2">
@@ -4920,7 +4668,9 @@ export const VortexDashboard: React.FC<VortexDashboardProps> = ({
                       <span>K/D Ratio</span>
                     </div>
                     <div className="text-2xl font-black font-mono text-[#A3E635]">{displayKd}</div>
-                    <div className="text-[10px] font-mono text-slate-400">1.42 Impact Rating</div>
+                    <div className="text-[10px] font-mono text-slate-500">
+                      {displayMatches > 0 ? '1.42 Impact Rating' : '0 Kills / 0 Deaths'}
+                    </div>
                   </div>
 
                   <div className="p-5 rounded-2xl bg-[#0E1017] border border-[#202536] space-y-2">
@@ -4929,7 +4679,9 @@ export const VortexDashboard: React.FC<VortexDashboardProps> = ({
                       <span>Headshot %</span>
                     </div>
                     <div className="text-2xl font-black font-mono text-amber-400">{displayHs}</div>
-                    <div className="text-[10px] font-mono text-slate-400">AK-47 Precision</div>
+                    <div className="text-[10px] font-mono text-slate-500">
+                      {displayMatches > 0 ? 'AK-47 Precision' : 'Awaiting first match'}
+                    </div>
                   </div>
 
                   <div className="p-5 rounded-2xl bg-[#0E1017] border border-[#202536] space-y-2">
@@ -4938,7 +4690,9 @@ export const VortexDashboard: React.FC<VortexDashboardProps> = ({
                       <span>Matches Total</span>
                     </div>
                     <div className="text-2xl font-black font-mono text-white">{displayMatches.toLocaleString()}</div>
-                    <div className="text-[10px] font-mono text-[#A3E635] font-bold">Competitive 5v5</div>
+                    <div className="text-[10px] font-mono text-slate-500 font-bold">
+                      {displayMatches > 0 ? 'Competitive 5v5' : 'Season 1 Calibrating'}
+                    </div>
                   </div>
                 </div>
 
@@ -5079,30 +4833,47 @@ export const VortexDashboard: React.FC<VortexDashboardProps> = ({
                         <h3 className="text-lg font-black font-display text-white">Competitive Map Performance</h3>
                         <p className="text-xs text-slate-400">Telemetry across official 128-tick ranked pool</p>
                       </div>
-                      <span className="text-xs font-mono text-[#A3E635]">Season 9</span>
+                      <span className="text-xs font-mono text-[#A3E635]">Season 1</span>
                     </div>
 
-                    <div className="space-y-3 font-mono">
-                      {[
-                        { map: 'Mirage (de_mirage)', winRate: isViewingOther ? 69 : 64, matches: isViewingOther ? 180 : 320, color: 'bg-[#A3E635]' },
-                        { map: 'Inferno (de_inferno)', winRate: isViewingOther ? 65 : 58, matches: isViewingOther ? 140 : 285, color: 'bg-amber-400' },
-                        { map: 'Nuke (de_nuke)', winRate: isViewingOther ? 62 : 61, matches: isViewingOther ? 110 : 190, color: 'bg-emerald-400' },
-                        { map: 'Dust II (de_dust2)', winRate: 52, matches: isViewingOther ? 95 : 145, color: 'bg-sky-400' },
-                        { map: 'Ancient (de_ancient)', winRate: 59, matches: isViewingOther ? 70 : 110, color: 'bg-purple-400' },
-                      ].map((m, idx) => (
-                        <div key={idx} className="space-y-1">
-                          <div className="flex justify-between text-xs">
-                            <span className="text-white font-bold">{m.map}</span>
-                            <span className="text-slate-400">
-                              <strong className="text-white">{m.winRate}%</strong> ({m.matches} matches)
-                            </span>
-                          </div>
-                          <div className="w-full h-1.5 rounded-full bg-[#1A1D27] overflow-hidden">
-                            <div className={`h-full ${m.color} rounded-full`} style={{ width: `${m.winRate}%` }} />
-                          </div>
+                    {displayMatches === 0 ? (
+                      <div className="p-8 rounded-2xl bg-[#12141C] border border-white/5 flex flex-col items-center justify-center text-center space-y-3 min-h-[220px]">
+                        <div className="w-12 h-12 rounded-2xl bg-white/[0.04] border border-white/10 flex items-center justify-center text-slate-500">
+                          <Activity className="w-6 h-6 text-[#A3E635]" />
                         </div>
-                      ))}
-                    </div>
+                        <div className="space-y-1">
+                          <div className="text-sm font-bold text-white font-mono">No Map Telemetry Recorded Yet</div>
+                          <p className="text-xs text-slate-400 max-w-sm">
+                            Telemetry across Mirage, Inferno, Nuke, Dust II & Ancient will calibrate automatically once your first 5v5 ranked match is played.
+                          </p>
+                        </div>
+                        <span className="text-[10px] font-mono font-bold text-[#A3E635] bg-[#A3E635]/10 px-2.5 py-1 rounded-full border border-[#A3E635]/30">
+                          CALIBRATION READY • 0 MATCHES
+                        </span>
+                      </div>
+                    ) : (
+                      <div className="space-y-3 font-mono">
+                        {[
+                          { map: 'Mirage (de_mirage)', winRate: isViewingOther ? 69 : 64, matches: isViewingOther ? 180 : 320, color: 'bg-[#A3E635]' },
+                          { map: 'Inferno (de_inferno)', winRate: isViewingOther ? 65 : 58, matches: isViewingOther ? 140 : 285, color: 'bg-amber-400' },
+                          { map: 'Nuke (de_nuke)', winRate: isViewingOther ? 62 : 61, matches: isViewingOther ? 110 : 190, color: 'bg-emerald-400' },
+                          { map: 'Dust II (de_dust2)', winRate: 52, matches: isViewingOther ? 95 : 145, color: 'bg-sky-400' },
+                          { map: 'Ancient (de_ancient)', winRate: 59, matches: isViewingOther ? 70 : 110, color: 'bg-purple-400' },
+                        ].map((m, idx) => (
+                          <div key={idx} className="space-y-1">
+                            <div className="flex justify-between text-xs">
+                              <span className="text-white font-bold">{m.map}</span>
+                              <span className="text-slate-400">
+                                <strong className="text-white">{m.winRate}%</strong> ({m.matches} matches)
+                              </span>
+                            </div>
+                            <div className="w-full h-1.5 rounded-full bg-[#1A1D27] overflow-hidden">
+                              <div className={`h-full ${m.color} rounded-full`} style={{ width: `${m.winRate}%` }} />
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                    )}
                   </div>
 
                 </div>
@@ -5114,40 +4885,57 @@ export const VortexDashboard: React.FC<VortexDashboardProps> = ({
                       <h3 className="text-lg font-black font-display text-white">Weapon Mastery & Accuracy</h3>
                       <p className="text-xs text-[#94A3B8]">Telemetry synchronized with CS2 competitive servers</p>
                     </div>
-                    <span className="text-xs font-mono text-emerald-400 font-bold">Season 9 Data</span>
+                    <span className="text-xs font-mono text-emerald-400 font-bold">Season 1 Data</span>
                   </div>
 
-                  <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-                    {[
-                      { gun: 'AK-47', kills: isViewingOther ? 2140 : 1420, hs: isViewingOther ? '72.4%' : '68.4%', rating: isViewingOther ? '1.52' : '1.42', badge: 'RIFLE', color: 'text-amber-400' },
-                      { gun: 'M4A1-S', kills: isViewingOther ? 1290 : 890, hs: isViewingOther ? '64.0%' : '61.2%', rating: isViewingOther ? '1.40' : '1.35', badge: 'RIFLE', color: 'text-sky-400' },
-                      { gun: 'AWP', kills: isViewingOther ? 820 : 540, hs: '14.5%', rating: isViewingOther ? '1.65' : '1.60', badge: 'SNIPER', color: 'text-emerald-400' },
-                      { gun: 'Desert Eagle', kills: isViewingOther ? 490 : 310, hs: isViewingOther ? '81.0%' : '78.2%', rating: isViewingOther ? '1.35' : '1.25', badge: 'PISTOL', color: 'text-[#A3E635]' },
-                    ].map((w, idx) => (
-                      <div key={idx} className="p-4 rounded-2xl bg-[#12141C] border border-[#232938] space-y-3">
-                        <div className="flex items-center justify-between">
-                          <span className="px-2 py-0.5 rounded text-[10px] font-mono font-bold bg-white/[0.05] text-slate-300">
-                            {w.badge}
-                          </span>
-                          <span className={`text-xs font-mono font-bold ${w.color}`}>{w.gun}</span>
-                        </div>
-                        <div className="space-y-1">
-                          <div className="flex justify-between text-xs font-mono">
-                            <span className="text-slate-400">Total Kills:</span>
-                            <span className="text-white font-bold">{w.kills.toLocaleString()}</span>
-                          </div>
-                          <div className="flex justify-between text-xs font-mono">
-                            <span className="text-slate-400">Headshot %:</span>
-                            <span className="text-amber-400 font-bold">{w.hs}</span>
-                          </div>
-                          <div className="flex justify-between text-xs font-mono">
-                            <span className="text-slate-400">Impact Rating:</span>
-                            <span className="text-emerald-400 font-bold">{w.rating}</span>
-                          </div>
-                        </div>
+                  {displayMatches === 0 ? (
+                    <div className="p-8 rounded-2xl bg-[#12141C] border border-white/5 flex flex-col items-center justify-center text-center space-y-3 min-h-[160px]">
+                      <div className="w-12 h-12 rounded-2xl bg-white/[0.04] border border-white/10 flex items-center justify-center text-slate-500">
+                        <Crosshair className="w-6 h-6 text-amber-400" />
                       </div>
-                    ))}
-                  </div>
+                      <div className="space-y-1">
+                        <div className="text-sm font-bold text-white font-mono">No Weapon Accuracy Telemetry Recorded</div>
+                        <p className="text-xs text-slate-400 max-w-md">
+                          Kills, Headshot percentages, and Impact Ratings will record automatically from live game servers upon completion of your first match.
+                        </p>
+                      </div>
+                      <span className="text-[10px] font-mono font-bold text-amber-400 bg-amber-500/10 px-2.5 py-1 rounded-full border border-amber-500/30">
+                        0 KILLS RECORDED • AK-47 / M4A1-S / AWP / DEAGLE
+                      </span>
+                    </div>
+                  ) : (
+                    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+                      {[
+                        { gun: 'AK-47', kills: isViewingOther ? 2140 : 1420, hs: isViewingOther ? '72.4%' : '68.4%', rating: isViewingOther ? '1.52' : '1.42', badge: 'RIFLE', color: 'text-amber-400' },
+                        { gun: 'M4A1-S', kills: isViewingOther ? 1290 : 890, hs: isViewingOther ? '64.0%' : '61.2%', rating: isViewingOther ? '1.40' : '1.35', badge: 'RIFLE', color: 'text-sky-400' },
+                        { gun: 'AWP', kills: isViewingOther ? 820 : 540, hs: '14.5%', rating: isViewingOther ? '1.65' : '1.60', badge: 'SNIPER', color: 'text-emerald-400' },
+                        { gun: 'Desert Eagle', kills: isViewingOther ? 490 : 310, hs: isViewingOther ? '81.0%' : '78.2%', rating: isViewingOther ? '1.35' : '1.25', badge: 'PISTOL', color: 'text-[#A3E635]' },
+                      ].map((w, idx) => (
+                        <div key={idx} className="p-4 rounded-2xl bg-[#12141C] border border-[#232938] space-y-3">
+                          <div className="flex items-center justify-between">
+                            <span className="px-2 py-0.5 rounded text-[10px] font-mono font-bold bg-white/[0.05] text-slate-300">
+                              {w.badge}
+                            </span>
+                            <span className={`text-xs font-mono font-bold ${w.color}`}>{w.gun}</span>
+                          </div>
+                          <div className="space-y-1">
+                            <div className="flex justify-between text-xs font-mono">
+                              <span className="text-slate-400">Total Kills:</span>
+                              <span className="text-white font-bold">{w.kills.toLocaleString()}</span>
+                            </div>
+                            <div className="flex justify-between text-xs font-mono">
+                              <span className="text-slate-400">Headshot %:</span>
+                              <span className="text-amber-400 font-bold">{w.hs}</span>
+                            </div>
+                            <div className="flex justify-between text-xs font-mono">
+                              <span className="text-slate-400">Impact Rating:</span>
+                              <span className="text-emerald-400 font-bold">{w.rating}</span>
+                            </div>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  )}
                 </div>
 
                 {/* AUTHENTIC FACEIT-STYLE RECENT MATCHES TABLE (IN PROFILE TAB) */}
@@ -5157,20 +4945,45 @@ export const VortexDashboard: React.FC<VortexDashboardProps> = ({
                       <h3 className="text-xl font-bold font-sans text-white tracking-tight">Recent matches</h3>
                       <p className="text-xs text-[#94A3B8]">Verified 128-tick ranked competitive match history & GOTV replays</p>
                     </div>
-                    <button
-                      onClick={() => {
-                        sound.playClick();
-                        setDashboardToast('Full 5v5 competitive match history archive synced (420 matches)');
-                        setTimeout(() => setDashboardToast(null), 3000);
-                      }}
-                      className="text-xs font-sans text-slate-400 hover:text-white transition flex items-center gap-1 cursor-pointer group font-medium"
-                    >
-                      <span>Full match history</span>
-                      <ChevronRight className="w-3.5 h-3.5 group-hover:translate-x-0.5 transition-transform" />
-                    </button>
+                    {displayMatches > 0 && (
+                      <button
+                        onClick={() => {
+                          sound.playClick();
+                          setDashboardToast('Full 5v5 competitive match history archive synced');
+                          setTimeout(() => setDashboardToast(null), 3000);
+                        }}
+                        className="text-xs font-sans text-slate-400 hover:text-white transition flex items-center gap-1 cursor-pointer group font-medium"
+                      >
+                        <span>Full match history</span>
+                        <ChevronRight className="w-3.5 h-3.5 group-hover:translate-x-0.5 transition-transform" />
+                      </button>
+                    )}
                   </div>
 
-                  <div className="overflow-x-auto -mx-6 px-6">
+                  {displayMatches === 0 ? (
+                    <div className="p-10 rounded-2xl bg-[#0B0D13] border border-[#1C202E] flex flex-col items-center justify-center text-center space-y-3 min-h-[180px]">
+                      <div className="w-12 h-12 rounded-2xl bg-white/[0.04] border border-white/10 flex items-center justify-center text-slate-500">
+                        <Clock className="w-6 h-6 text-sky-400" />
+                      </div>
+                      <div className="space-y-1">
+                        <div className="text-sm font-bold text-white font-sans">No competitive matches played yet</div>
+                        <p className="text-xs text-slate-400 max-w-sm font-sans">
+                          You haven't played any 5v5 competitive matches on VORTEX yet. Queue up in the Play tab to earn ELO and record your match history.
+                        </p>
+                      </div>
+                      <button
+                        onClick={() => {
+                          sound.playClick();
+                          setActiveTab('play');
+                        }}
+                        className="px-4 py-2 rounded-xl bg-[#84CC16] hover:bg-[#A3E635] text-slate-950 font-mono text-xs font-bold transition flex items-center gap-2 cursor-pointer shadow-lg hover:scale-105 active:scale-95"
+                      >
+                        <Play className="w-3.5 h-3.5 fill-current" />
+                        <span>Find 5v5 Match</span>
+                      </button>
+                    </div>
+                  ) : (
+                    <div className="overflow-x-auto -mx-6 px-6">
                     <div className="min-w-[860px] space-y-2">
                       {/* Table Header matching FACEIT photo */}
                       <div className="flex items-center gap-4 px-4 py-2 text-xs font-sans font-bold text-[#8E97A8] border-b border-white/[0.04]">
@@ -5441,13 +5254,14 @@ export const VortexDashboard: React.FC<VortexDashboardProps> = ({
                       ))}
                     </div>
                   </div>
+                )}
                 </div>
 
               </div>
             );
           })()}
-
-
+            </>
+          )}
 
         </main>
       </div>
@@ -7209,6 +7023,7 @@ export const VortexDashboard: React.FC<VortexDashboardProps> = ({
         onLeaveParty={handleLeaveParty}
         onUpgrade={() => setShowPremiumModal(true)}
         onLogout={onLogout}
+        visitorMode={isVisitorMode}
       />
 
     </div>

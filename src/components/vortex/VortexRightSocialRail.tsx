@@ -90,6 +90,7 @@ interface VortexRightSocialRailProps {
   onLeaveParty?: () => void;
   onUpgrade?: () => void;
   onLogout?: () => void;
+  visitorMode?: boolean;
 }
 
 export const VortexRightSocialRail: React.FC<VortexRightSocialRailProps> = ({
@@ -109,6 +110,7 @@ export const VortexRightSocialRail: React.FC<VortexRightSocialRailProps> = ({
   onLeaveParty,
   onUpgrade,
   onLogout,
+  visitorMode = false,
 }) => {
   // Drawer active state: 'none' | 'social' | 'party' | 'profile' | 'notifications'
   const [activeDrawer, setActiveDrawer] = useState<'none' | 'social' | 'party' | 'profile' | 'notifications'>('none');
@@ -480,6 +482,51 @@ export const VortexRightSocialRail: React.FC<VortexRightSocialRailProps> = ({
   const playingFriends = filteredFriends.filter(f => f.status === 'playing');
   const onlineFriends = filteredFriends.filter(f => f.status === 'online');
   const offlineFriends = filteredFriends.filter(f => f.status === 'offline');
+
+  if (visitorMode) {
+    return (
+      <aside className="fixed right-3 top-3 z-[80] select-none flex items-center gap-3 p-2 px-3 rounded-2xl bg-[#0C0E14]/95 border border-[#202536] shadow-xl backdrop-blur-md animate-in fade-in duration-200">
+        <div className="flex items-center gap-2.5">
+          <div className="relative w-8 h-8 shrink-0">
+            <img 
+              src={currentAvatarUrl} 
+              alt={currentGamerTag} 
+              className="w-full h-full rounded-full object-cover border-2 border-[#A3E635] shadow-[0_0_10px_rgba(163,230,53,0.3)] block"
+              onError={(e) => {
+                (e.target as HTMLImageElement).src = '/images/blockeerz_avatar.png';
+              }}
+            />
+            <span className="absolute bottom-0 right-0 w-2.5 h-2.5 rounded-full bg-emerald-400 border-2 border-[#08090D]" />
+          </div>
+          <div className="flex flex-col">
+            <div className="flex items-center gap-1.5">
+              <span className="font-display font-black text-xs text-white tracking-tight">
+                {currentGamerTag}
+              </span>
+              <CountryFlag code={currentCountry.code} name={currentCountry.name} size="xs" />
+            </div>
+            <span className="text-[10px] font-mono text-[#A3E635]">Early Access Visitor</span>
+          </div>
+        </div>
+
+        <div className="w-[1px] h-6 bg-white/10 mx-1" />
+
+        {onLogout && (
+          <button
+            onClick={() => {
+              sound.playClick();
+              onLogout();
+            }}
+            className="px-3 py-1.5 rounded-xl bg-rose-500/10 hover:bg-rose-500/20 text-rose-400 hover:text-rose-300 border border-rose-500/30 text-xs font-mono font-bold transition flex items-center gap-1.5 cursor-pointer shadow-sm active:scale-95"
+            title="Log out of VORTEX"
+          >
+            <LogOut className="w-3.5 h-3.5" />
+            <span>Log Out</span>
+          </button>
+        )}
+      </aside>
+    );
+  }
 
   return (
     <>
