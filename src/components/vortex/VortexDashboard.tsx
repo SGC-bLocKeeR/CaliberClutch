@@ -3570,12 +3570,6 @@ export const VortexDashboard: React.FC<VortexDashboardProps> = ({
                     <Plus className="w-4 h-4 text-slate-950 stroke-[3]" />
                     <span>CREATE TOURNAMENT</span>
                   </button>
-                  <button
-                    onClick={() => setActiveTab('play')}
-                    className="px-4 py-2.5 rounded-2xl bg-[#141722] hover:bg-[#1A202E] border border-[#252C3D] text-xs font-mono text-slate-300 hover:text-white cursor-pointer transition"
-                  >
-                    ← Back to Play
-                  </button>
                 </div>
               </div>
 
@@ -3914,12 +3908,6 @@ export const VortexDashboard: React.FC<VortexDashboardProps> = ({
                       Official competitive leaderboard of registered players on our platform • Your Standing: <strong className="text-white">{platformRankingPlayers.find(p => p.isUser)?.rank || '#--'} ({currentUserElo.toLocaleString()} ELO)</strong> (Click any player to view full profile)
                     </p>
                   </div>
-                  <button
-                    onClick={() => { sound.playClick(); setActiveTab('play'); }}
-                    className="px-4 py-2 rounded-xl bg-[#141722] hover:bg-[#1C2130] border border-[#252C3D] hover:border-[#A3E635]/40 text-xs font-mono text-slate-300 hover:text-white transition cursor-pointer flex items-center gap-2"
-                  >
-                    <span>← Back to Play</span>
-                  </button>
                 </div>
 
                 {/* TOP 3 PODIUM CARDS (REAL REGISTERED PLAYERS ONLY) */}
@@ -4694,12 +4682,6 @@ export const VortexDashboard: React.FC<VortexDashboardProps> = ({
                   <h2 className="text-2xl font-black font-display text-white">CALIBER CLUTCH Kernel Anti-Cheat Protection</h2>
                   <p className="text-xs text-[#94A3B8]">Ring-0 hardware enforcement and driver integrity monitor</p>
                 </div>
-                <button
-                  onClick={() => setActiveTab('play')}
-                  className="px-4 py-2 rounded-xl bg-[#141722] border border-[#252C3D] text-xs font-mono hover:text-white cursor-pointer"
-                >
-                  ← Back to Play
-                </button>
               </div>
 
               <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
