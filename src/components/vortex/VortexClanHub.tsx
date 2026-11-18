@@ -1401,7 +1401,6 @@ export const VortexClanHub: React.FC<VortexClanHubProps> = ({
   const [inviteInput, setInviteInput] = useState('');
   const [selectedRoleForInvite, setSelectedRoleForInvite] = useState<ClanMember['role']>('Entry Fragger');
   const [searchClanQuery, setSearchClanQuery] = useState('');
-  const [clanViewOption, setClanViewOption] = useState<'match-center' | 'wars-hub' | 'rivals'>('match-center');
   const [matchFilter, setMatchFilter] = useState<'all' | 'my-clan' | 'wins' | 'losses'>('all');
   const [selectedScoreboardMatch, setSelectedScoreboardMatch] = useState<ClanMatch | null>(null);
   const [scoreboardSubTab, setScoreboardSubTab] = useState<'scoreboard' | 'rounds' | 'performance'>('scoreboard');
@@ -2282,533 +2281,218 @@ export const VortexClanHub: React.FC<VortexClanHubProps> = ({
         </div>
       )}
 
-      {/* TAB 3: CLAN DIRECTORY & SCRIMS CHALLENGE */}
+      {/* TAB 3: CLAN MATCHES & OFFICIAL CS2 SCOREBOARDS (SINGLE DEDICATED WINDOW) */}
       {activeTab === 'clans-list' && (
-        <div className="space-y-5">
-          {/* TOP BANNER: LIVE TEST SWITCHER (TO PREVIEW ALL 3 OPTIONS) */}
-          <div className="p-4 rounded-3xl bg-gradient-to-r from-[#10141F] via-[#151926] to-[#0E111A] border-2 border-[#A3E635]/40 shadow-2xl flex flex-col lg:flex-row lg:items-center justify-between gap-4">
-            <div className="space-y-1">
-              <div className="flex items-center gap-2">
-                <span className="px-2 py-0.5 rounded text-[10px] font-mono font-black uppercase bg-[#A3E635] text-slate-950">
-                  Live Test Mode
-                </span>
-                <span className="text-xs font-mono text-[#A3E635] font-bold flex items-center gap-1.5">
-                  <span className="w-2 h-2 rounded-full bg-[#A3E635] animate-ping" />
-                  Select between 3 view options to preview your preferred design:
-                </span>
-              </div>
-              <p className="text-xs text-slate-300 font-sans">
-                Choose how official 5v5 clan matches, map picks, and competitive results are presented.
-              </p>
-            </div>
-
-            {/* THE 3 LIVE OPTION BUTTONS */}
-            <div className="flex flex-wrap items-center gap-2 shrink-0">
-              <button
-                onClick={() => { sound.playSelect(); setClanViewOption('match-center'); }}
-                className={`px-3.5 py-2 rounded-xl text-xs font-mono font-bold transition flex items-center gap-2 cursor-pointer shadow-md ${
-                  clanViewOption === 'match-center'
-                    ? 'bg-[#A3E635] text-slate-950 font-black ring-2 ring-[#A3E635]/60 scale-105'
-                    : 'bg-white/5 hover:bg-white/10 text-slate-300 border border-white/10'
-                }`}
-              >
-                <Flame className="w-3.5 h-3.5" />
-                <span>Option 1: Official Matches & CS2 Scoreboards</span>
-              </button>
-
-              <button
-                onClick={() => { sound.playSelect(); setClanViewOption('wars-hub'); }}
-                className={`px-3.5 py-2 rounded-xl text-xs font-mono font-bold transition flex items-center gap-2 cursor-pointer shadow-md ${
-                  clanViewOption === 'wars-hub'
-                    ? 'bg-[#A3E635] text-slate-950 font-black ring-2 ring-[#A3E635]/60 scale-105'
-                    : 'bg-white/5 hover:bg-white/10 text-slate-300 border border-white/10'
-                }`}
-              >
-                <Trophy className="w-3.5 h-3.5" />
-                <span>Option 2: Leaderboard & Matches</span>
-              </button>
-
-              <button
-                onClick={() => { sound.playSelect(); setClanViewOption('rivals'); }}
-                className={`px-3.5 py-2 rounded-xl text-xs font-mono font-bold transition flex items-center gap-2 cursor-pointer shadow-md ${
-                  clanViewOption === 'rivals'
-                    ? 'bg-[#A3E635] text-slate-950 font-black ring-2 ring-[#A3E635]/60 scale-105'
-                    : 'bg-white/5 hover:bg-white/10 text-slate-300 border border-white/10'
-                }`}
-              >
-                <Swords className="w-3.5 h-3.5" />
-                <span>Option 3: Head-to-Head Rivals</span>
-              </button>
-            </div>
-          </div>
-
+        <div className="animate-in fade-in duration-200">
           {/* ======================================================== */}
-          {/* OPSIONI 1: FACEIT MATCH HISTORY & SCOREBOARDS (1:1 AUTENTIKE) */}
+          {/* SINGLE DEDICATED 5v5 MATCH CENTER & SCOREBOARDS WINDOW   */}
           {/* ======================================================== */}
-          {clanViewOption === 'match-center' && (
-            <div className="space-y-4 animate-in fade-in duration-200">
-              {/* Header & Controls */}
-              <div className="p-5 rounded-3xl bg-[#0E1017] border border-[#202536] flex flex-wrap items-center justify-between gap-4 shadow-xl">
-                <div>
-                  <div className="flex items-center gap-2">
-                    <span className="px-2.5 py-0.5 rounded text-[10px] font-mono font-black uppercase bg-[#A3E635] text-slate-950 tracking-wider">
-                      CALIBER 5v5 OFFICIAL
-                    </span>
-                    <h3 className="text-lg font-black font-display text-white">Clan Matches & Stats (CS2 Scoreboards)</h3>
-                  </div>
-                  <p className="text-xs font-mono text-slate-400 mt-1">
-                    Official 5v5 tournament cash match history, performance ratings, and official 17-column CS2 scoreboards
-                  </p>
-                </div>
-
-                <div className="flex flex-wrap items-center gap-2.5">
-                  <button
-                    onClick={handleSimulateNewClanMatch}
-                    className="px-4 py-2 rounded-xl bg-gradient-to-r from-[#84CC16] to-[#A3E635] hover:brightness-110 text-slate-950 font-display font-black text-xs uppercase tracking-wider flex items-center gap-1.5 cursor-pointer shadow-lg active:scale-95 transition"
-                  >
-                    <Zap className="w-3.5 h-3.5 fill-current" />
-                    <span>Simulate Match (1-Click Test)</span>
-                  </button>
-
-                  {/* Filter Pills */}
-                  <div className="flex items-center gap-1 bg-black/40 p-1 rounded-xl border border-white/10 text-xs font-mono">
-                    {(['all', 'wins', 'losses'] as const).map(f => (
-                      <button
-                        key={f}
-                        onClick={() => { sound.playClick(); setMatchFilter(f); }}
-                        className={`px-3 py-1 rounded-lg transition capitalize cursor-pointer ${
-                          matchFilter === f
-                            ? 'bg-white/15 text-white font-bold'
-                            : 'text-slate-400 hover:text-white'
-                        }`}
-                      >
-                        {f === 'all' ? 'All Matches' : f === 'wins' ? 'Wins (W)' : 'Losses (L)'}
-                      </button>
-                    ))}
-                  </div>
-                </div>
-              </div>
-
-              {/* ======================================================== */}
-              {/* UNIFIED 5v5 MATCH CENTER (SINGLE PROFESSIONAL WINDOW)    */}
-              {/* ======================================================== */}
-              <div className="w-full rounded-2xl border-2 border-[#1E2842] bg-[#080C16] shadow-[0_10px_40px_rgba(0,0,0,0.7)] overflow-hidden">
-                <div className="overflow-x-auto">
-                  <div className="min-w-[980px]">
-                    
-                    {/* Unified Header Row */}
-                    <div className="grid grid-cols-[100px_130px_110px_90px_130px_80px_80px_130px_1fr] items-center px-4 py-3 bg-[#0D1220] border-b border-[#1E2842] text-[11px] font-mono font-bold uppercase tracking-wider text-slate-400 select-none">
-                      <div className="flex items-center gap-1.5 pl-2">
-                        <Calendar className="w-3.5 h-3.5 text-slate-500" />
-                        <span>Date</span>
-                      </div>
-                      <div className="flex items-center gap-1.5 pl-2">
-                        <Trophy className="w-3.5 h-3.5 text-slate-500" />
-                        <span>Score</span>
-                      </div>
-                      <div className="text-center">Prize</div>
-                      <div className="text-center">Rating</div>
-                      <div className="text-center">K / D / A</div>
-                      <div className="text-center">K/D</div>
-                      <div className="text-center">ADR</div>
-                      <div className="flex items-center gap-1.5 pl-2">
-                        <MapPin className="w-3.5 h-3.5 text-slate-500" />
-                        <span>Map</span>
-                      </div>
-                      <div className="text-right pr-4 text-slate-500 font-normal text-[10px]">
-                        Demo & Scoreboard
-                      </div>
-                    </div>
-
-                    {/* Unified Table Rows (All inside the SAME window, divided by clean borders) */}
-                    <div className="divide-y divide-[#172036]">
-                      {clanMatches
-                        .filter(m => {
-                          if (matchFilter === 'wins') return m.isWin;
-                          if (matchFilter === 'losses') return !m.isWin;
-                          return true;
-                        })
-                        .map(match => (
-                          <div
-                            key={match.id}
-                            onClick={() => openMatchScoreboard(match)}
-                            className={`grid grid-cols-[100px_130px_110px_90px_130px_80px_80px_130px_1fr] items-center px-4 py-3.5 transition-colors duration-150 cursor-pointer select-none group relative ${
-                              match.isWin
-                                ? 'bg-[#0B1E15]/50 hover:bg-[#0E281C]/90 text-slate-200'
-                                : 'bg-[#1E0D12]/50 hover:bg-[#281118]/90 text-slate-200'
-                            }`}
-                            title="Click to open match scoreboard & player stats"
-                          >
-                            {/* Left indicator accent stripe */}
-                            <div
-                              className={`absolute left-0 top-0 bottom-0 w-1.5 ${
-                                match.isWin ? 'bg-[#A3E635]' : 'bg-rose-500'
-                              }`}
-                            />
-
-                            {/* 1. Date & Time */}
-                            <div className="flex flex-col pl-2">
-                              <span className="text-xs sm:text-sm font-bold text-white tracking-tight">{match.date}</span>
-                              <span className="text-[10px] sm:text-xs font-mono text-slate-400">{match.time}</span>
-                            </div>
-
-                            {/* 2. Score Badge */}
-                            <div className="flex items-center gap-2 pl-2">
-                              <span
-                                className={`px-2 py-0.5 rounded-lg flex items-center justify-center font-black text-[11px] uppercase font-mono shadow-sm ${
-                                  match.isWin
-                                    ? 'bg-[#A3E635] text-slate-950 font-black'
-                                    : 'bg-rose-500/20 text-rose-300 border border-rose-500/40'
-                                }`}
-                              >
-                                {match.isWin ? 'WIN' : 'LOSS'}
-                              </span>
-                              <span className="font-mono font-black text-sm tracking-wide">
-                                <span className={match.isWin ? 'text-[#22C55E]' : 'text-rose-400'}>
-                                  {match.scoreDisplay.split(':')[0].trim()}
-                                </span>
-                                <span className="text-slate-500 mx-1">:</span>
-                                <span className="text-slate-300">
-                                  {match.scoreDisplay.split(':')[1].trim()}
-                                </span>
-                              </span>
-                            </div>
-
-                            {/* 3. Cash Prize */}
-                            <div className="flex justify-center" title="Tournament Prize Pool Earnings">
-                              <div
-                                className={`px-2.5 py-0.5 rounded-lg font-mono text-xs font-black flex items-center gap-1 shadow-sm border ${
-                                  match.isWin
-                                    ? 'bg-emerald-500/20 text-emerald-300 border-emerald-500/35'
-                                    : 'bg-rose-500/15 text-rose-300 border-rose-500/30'
-                                }`}
-                              >
-                                <span className="text-xs">{match.isWin ? '💰' : '💸'}</span>
-                                <span>{match.prizeEarned || (match.isWin ? '+$75.00' : '-$25.00')}</span>
-                              </div>
-                            </div>
-
-                            {/* 4. Rating */}
-                            <div className="flex justify-center" title="HLTV Performance Rating">
-                              <span
-                                className={`px-2 py-0.5 rounded font-mono font-bold text-xs ${
-                                  parseFloat(match.userRating) >= 1.00
-                                    ? 'bg-[#A3E635]/20 text-[#A3E635] border border-[#A3E635]/35'
-                                    : 'bg-rose-500/20 text-rose-400 border border-rose-500/35'
-                                }`}
-                              >
-                                {match.userRating}
-                              </span>
-                            </div>
-
-                            {/* 5. K / D / A (Guaranteed single line, never wraps!) */}
-                            <div className="text-center font-mono text-xs sm:text-sm font-bold text-white whitespace-nowrap" title="Kills / Deaths / Assists">
-                              {match.userStats.kills} <span className="text-slate-500">/</span> {match.userStats.deaths} <span className="text-slate-500">/</span> {match.userStats.assists}
-                            </div>
-
-                            {/* 6. K/D */}
-                            <div className="text-center font-mono text-xs sm:text-sm font-bold text-slate-200" title="Kill / Death Ratio">
-                              {match.userStats.kd}
-                            </div>
-
-                            {/* 7. ADR */}
-                            <div className="text-center font-mono text-xs sm:text-sm font-bold text-slate-200" title="Average Damage per Round">
-                              {match.userStats.adr}
-                            </div>
-
-                            {/* 8. Map */}
-                            <div className="flex items-center gap-2 pl-2">
-                              <div className="w-6 h-6 rounded-full overflow-hidden bg-black/60 border border-white/10 shrink-0">
-                                <img src={match.mapImage} alt={match.mapDisplayName} className="w-full h-full object-cover" />
-                              </div>
-                              <span className="text-xs sm:text-sm font-semibold text-white truncate">
-                                {match.mapDisplayName}
-                              </span>
-                            </div>
-
-                            {/* 9. Action Buttons */}
-                            <div className="flex items-center justify-end gap-1.5 pr-3">
-                              <button
-                                onClick={(e) => {
-                                  e.stopPropagation();
-                                  handleDownloadDemo(match);
-                                }}
-                                title="Download GOTV Demo (.dem)"
-                                className="w-8 h-8 rounded-lg bg-white/5 hover:bg-white/15 text-slate-400 hover:text-white flex items-center justify-center transition cursor-pointer"
-                              >
-                                <Download className="w-3.5 h-3.5" />
-                              </button>
-                              <button
-                                onClick={(e) => {
-                                  e.stopPropagation();
-                                  sound.playSelect();
-                                  openMatchScoreboard(match);
-                                }}
-                                title="Open Full CS2 Scoreboard"
-                                className="w-8 h-8 rounded-lg bg-white/5 hover:bg-[#A3E635]/20 hover:text-[#A3E635] text-slate-400 flex items-center justify-center transition cursor-pointer border border-transparent hover:border-[#A3E635]/30"
-                              >
-                                <ExternalLink className="w-3.5 h-3.5" />
-                              </button>
-                            </div>
-                          </div>
-                        ))}
-                    </div>
-                  </div>
-                </div>
-              </div>
-
-              {/* Direct Scoreboard TAB Live Preview under the feed */}
-              <div className="p-4 rounded-2xl bg-[#0B0D13] border border-white/5 space-y-3">
-                <div className="flex items-center justify-between">
-                  <div className="flex items-center gap-2">
-                    <span className="w-2 h-2 rounded-full bg-[#A3E635] animate-ping" />
-                    <span className="text-xs font-mono font-bold text-white uppercase">
-                      Scoreboard Preview (CS2 TAB Mode)
-                    </span>
-                  </div>
-                  <span className="text-[11px] font-mono text-slate-400">
-                    Click any match above to inspect its official Scoreboard
+          <div className="w-full rounded-3xl border-2 border-[#1E2842] bg-[#080C16] shadow-[0_12px_45px_rgba(0,0,0,0.75)] overflow-hidden">
+            {/* Window Header & Controls */}
+            <div className="p-5 sm:p-6 bg-gradient-to-r from-[#0C101D] via-[#0A0D18] to-[#080B14] border-b border-[#1E2842] flex flex-wrap items-center justify-between gap-4">
+              <div>
+                <div className="flex items-center gap-2">
+                  <span className="px-2.5 py-0.5 rounded text-[10px] font-mono font-black uppercase bg-[#A3E635] text-slate-950 tracking-wider">
+                    CALIBER 5v5 OFFICIAL
                   </span>
+                  <h3 className="text-lg font-black font-display text-white">Clan Matches & Stats (CS2 Scoreboards)</h3>
                 </div>
-
-                <div className="flex items-center justify-between p-3 rounded-xl bg-white/[0.02] border border-white/5 text-xs font-mono">
-                  <span className="text-slate-300">
-                    Currently Previewing: <strong className="text-white">[{clanMatches[0]?.mapDisplayName}] {clanMatches[0]?.scoreDisplay} ({clanMatches[0]?.team1?.name} vs {clanMatches[0]?.team2?.name})</strong>
-                  </span>
-                  <button
-                    onClick={() => {
-                      sound.playSelect();
-                      openMatchScoreboard(clanMatches[0]);
-                    }}
-                    className="px-3 py-1.5 rounded-lg bg-[#A3E635] hover:bg-[#bef264] text-slate-950 font-black text-xs flex items-center gap-1.5 transition cursor-pointer"
-                  >
-                    <ExternalLink className="w-3.5 h-3.5" />
-                    <span>Open Full Scoreboard (17 Columns)</span>
-                  </button>
-                </div>
-              </div>
-            </div>
-          )}
-
-          {/* ======================================================== */}
-          {/* OPTION 2: LEADERBOARD & RECENT MATCHES */}
-          {/* ======================================================== */}
-          {clanViewOption === 'wars-hub' && (
-            <div className="space-y-5 animate-in fade-in duration-200">
-              {/* Leaderboard Table of Clans */}
-              <div className="p-6 rounded-3xl bg-[#0E1017] border border-[#202536] space-y-4">
-                <div className="flex items-center justify-between border-b border-[#1E2333] pb-3">
-                  <div>
-                    <h3 className="text-lg font-black font-display text-white">🏆 European CS2 5v5 Clans Leaderboard</h3>
-                    <p className="text-xs font-mono text-slate-400">Official European clan standings ranked by Clan ELO, trophies, and match record</p>
-                  </div>
-                  <span className="text-xs font-mono text-[#A3E635] font-bold">Season 2026 • Division I</span>
-                </div>
-
-                <div className="overflow-x-auto">
-                  <table className="w-full text-left font-mono text-xs">
-                    <thead>
-                      <tr className="border-b border-white/10 text-slate-400 text-[11px] uppercase">
-                        <th className="py-2.5 px-3">Rank</th>
-                        <th className="py-2.5 px-3">Clan</th>
-                        <th className="py-2.5 px-3">Region</th>
-                        <th className="py-2.5 px-3 text-right">Team ELO</th>
-                        <th className="py-2.5 px-3 text-right">Matches</th>
-                        <th className="py-2.5 px-3 text-right">Winrate</th>
-                        <th className="py-2.5 px-3 text-center">Cups</th>
-                      </tr>
-                    </thead>
-                    <tbody className="divide-y divide-white/5">
-                      {[
-                        { rank: 1, name: 'Bad News Eagles Academy', tag: 'BNE', logo: '/images/clan_badges/badge_caliber_gold.svg', flag: '🇽🇰', elo: 2682, matches: 48, winrate: '81.2%', cups: 5, isUser: false },
-                        { rank: 2, name: 'FaZe Clan Balkan Talent', tag: 'FaZe', logo: '/images/clan_badges/badge_caliber_fire.svg', flag: '🇩🇪', elo: 2366, matches: 34, winrate: '70.5%', cups: 3, isUser: false },
-                        { rank: 3, name: userClan.name, tag: userClan.tag, logo: userClan.logo, flag: '🇽🇰', elo: userClan.stats.avgElo, matches: userClan.stats.matches, winrate: userClan.stats.winrate, cups: userClan.stats.tournamentsWon, isUser: true },
-                        { rank: 4, name: 'Prishtina Clutch Stars', tag: 'PRN', logo: '/images/clan_badges/badge_caliber_shield.svg', flag: '🇽🇰', elo: 1978, matches: 22, winrate: '68.2%', cups: 1, isUser: false }
-                      ]
-                        .sort((a, b) => b.elo - a.elo)
-                        .map((c, idx) => (
-                          <tr
-                            key={c.tag}
-                            onClick={() => {
-                              sound.playSelect();
-                              if (!c.isUser) {
-                                setClanViewOption('rivals');
-                                setToast(`Selected rival [${c.tag}] ${c.name} - Viewing Head-to-Head & Scrim History`);
-                              }
-                            }}
-                            className={`transition cursor-pointer ${c.isUser ? 'bg-[#A3E635]/10 font-bold border-l-4 border-l-[#A3E635]' : 'hover:bg-white/[0.06]'}`}
-                            title={c.isUser ? 'Your Clan' : `Click to challenge [${c.tag}] ${c.name}`}
-                          >
-                            <td className="py-3 px-3">
-                              <span className={`inline-flex items-center justify-center w-6 h-6 rounded-lg text-xs font-black ${
-                                idx === 0 ? 'bg-amber-400 text-black' : idx === 1 ? 'bg-slate-300 text-black' : idx === 2 ? 'bg-amber-700 text-white' : 'text-slate-400'
-                              }`}>
-                                #{idx + 1}
-                              </span>
-                            </td>
-                            <td className="py-3 px-3">
-                              <div className="flex items-center gap-2.5">
-                                <img src={c.logo} alt={c.name} className="w-8 h-8 rounded-lg object-cover" />
-                                <div>
-                                  <div className="flex items-center gap-1.5">
-                                    <span className="text-white font-bold">{c.name}</span>
-                                    <span className="text-[10px] text-[#A3E635]">[{c.tag}]</span>
-                                    {c.isUser && <span className="px-1.5 py-0.2 rounded bg-[#A3E635] text-black text-[9px] font-black uppercase">YOU</span>}
-                                  </div>
-                                </div>
-                              </div>
-                            </td>
-                            <td className="py-3 px-3 text-slate-300">{c.flag} Europe</td>
-                            <td className="py-3 px-3 text-right font-black text-[#A3E635]">{c.elo.toLocaleString()}</td>
-                            <td className="py-3 px-3 text-right text-slate-300">{c.matches}</td>
-                            <td className="py-3 px-3 text-right text-white font-bold">{c.winrate}</td>
-                            <td className="py-3 px-3 text-center text-amber-400 font-bold">{c.cups} 🏆</td>
-                          </tr>
-                        ))}
-                    </tbody>
-                  </table>
-                </div>
+                <p className="text-xs font-mono text-slate-400 mt-1">
+                  Official 5v5 tournament cash match history, performance ratings, and official 17-column CS2 scoreboards
+                </p>
               </div>
 
-              {/* Feed of Clan vs Clan Matches */}
-              <div className="p-6 rounded-3xl bg-[#0E1017] border border-[#202536] space-y-4">
-                <div className="flex items-center justify-between border-b border-[#1E2333] pb-3">
-                  <h3 className="text-base font-black font-display text-white">Recent Match Results on CS2 Maps</h3>
-                  <button
-                    onClick={handleSimulateNewClanMatch}
-                    className="text-xs font-mono font-bold text-[#A3E635] hover:underline cursor-pointer flex items-center gap-1"
-                  >
-                    <span>+ Simulate Match</span>
-                  </button>
-                </div>
+              <div className="flex flex-wrap items-center gap-2.5">
+                <button
+                  onClick={handleSimulateNewClanMatch}
+                  className="px-4 py-2 rounded-xl bg-gradient-to-r from-[#84CC16] to-[#A3E635] hover:brightness-110 text-slate-950 font-display font-black text-xs uppercase tracking-wider flex items-center gap-1.5 cursor-pointer shadow-lg active:scale-95 transition"
+                >
+                  <Zap className="w-3.5 h-3.5 fill-current" />
+                  <span>Simulate Match (1-Click Test)</span>
+                </button>
 
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-3.5">
-                  {clanMatches.slice(0, 4).map(m => (
-                    <div key={m.id} className="p-3.5 rounded-2xl bg-[#121520] border border-[#22283A] flex items-center justify-between gap-3">
-                      <div className="flex items-center gap-2.5">
-                        <img src={m.mapImage} alt={m.mapName} className="w-12 h-10 rounded-lg object-cover border border-white/10" />
-                        <div>
-                          <div className="text-xs font-bold font-display text-white">
-                            [{m.clan1.tag}] {m.clan1.score} - {m.clan2.score} [{m.clan2.tag}]
-                          </div>
-                          <div className="text-[10px] font-mono text-[#A3E635]">
-                            {m.mapName.toUpperCase().replace('DE_', '')} • {m.date}
-                          </div>
-                        </div>
-                      </div>
-
-                      <button
-                        onClick={() => openMatchScoreboard(m)}
-                        className="px-2.5 py-1 rounded-lg bg-white/5 hover:bg-white/10 text-white font-mono text-xs cursor-pointer"
-                      >
-                        Scoreboard
-                      </button>
-                    </div>
+                {/* Filter Pills */}
+                <div className="flex items-center gap-1 bg-black/40 p-1 rounded-xl border border-white/10 text-xs font-mono">
+                  {(['all', 'wins', 'losses'] as const).map(f => (
+                    <button
+                      key={f}
+                      onClick={() => { sound.playClick(); setMatchFilter(f); }}
+                      className={`px-3 py-1 rounded-lg transition capitalize cursor-pointer ${
+                        matchFilter === f
+                          ? 'bg-white/15 text-white font-bold'
+                          : 'text-slate-400 hover:text-white'
+                      }`}
+                    >
+                      {f === 'all' ? 'All Matches' : f === 'wins' ? 'Wins (W)' : 'Losses (L)'}
+                    </button>
                   ))}
                 </div>
               </div>
             </div>
-          )}
 
-          {/* ======================================================== */}
-          {/* OPTION 3: HEAD-TO-HEAD RIVALS */}
-          {/* ======================================================== */}
-          {clanViewOption === 'rivals' && (
-            <div className="p-6 rounded-3xl bg-[#0E1017] border border-[#202536] space-y-5 animate-in fade-in duration-200">
-              <div className="border-b border-[#1E2333] pb-3">
-                <h3 className="text-lg font-black font-display text-white">Head-to-Head Clan Rivals & Match History</h3>
-                <p className="text-xs font-mono text-slate-400">
-                  Head-to-head match history of [{userClan.tag}] against rival rosters across all maps
-                </p>
-              </div>
+            {/* Match Table (Directly integrated in the exact same window) */}
+            <div className="overflow-x-auto">
+              <div className="min-w-[980px]">
+                {/* Unified Header Row */}
+                <div className="grid grid-cols-[100px_130px_110px_90px_130px_80px_80px_130px_1fr] items-center px-4 py-3 bg-[#0D1220] border-b border-[#1E2842] text-[11px] font-mono font-bold uppercase tracking-wider text-slate-400 select-none">
+                  <div className="flex items-center gap-1.5 pl-2">
+                    <Calendar className="w-3.5 h-3.5 text-slate-500" />
+                    <span>Date</span>
+                  </div>
+                  <div className="flex items-center gap-1.5 pl-2">
+                    <Trophy className="w-3.5 h-3.5 text-slate-500" />
+                    <span>Score</span>
+                  </div>
+                  <div className="text-center">Prize</div>
+                  <div className="text-center">Rating</div>
+                  <div className="text-center">K / D / A</div>
+                  <div className="text-center">K/D</div>
+                  <div className="text-center">ADR</div>
+                  <div className="flex items-center gap-1.5 pl-2">
+                    <MapPin className="w-3.5 h-3.5 text-slate-500" />
+                    <span>Map</span>
+                  </div>
+                  <div className="text-right pr-4 text-slate-500 font-normal text-[10px]">
+                    Demo & Scoreboard
+                  </div>
+                </div>
 
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                {DEFAULT_OPPONENT_CLANS.map(opponent => {
-                  const matchesAgainstThisClan = clanMatches.filter(
-                    m => (m.clan1.tag === opponent.tag && m.clan2.tag === userClan.tag) ||
-                         (m.clan2.tag === opponent.tag && m.clan1.tag === userClan.tag)
-                  );
-                  const userWinsVsThis = matchesAgainstThisClan.filter(m => 
-                    (m.clan1.tag === userClan.tag && m.clan1.isWinner) ||
-                    (m.clan2.tag === userClan.tag && m.clan2.isWinner)
-                  ).length;
-                  const totalPlayed = matchesAgainstThisClan.length;
-                  const winRatePct = totalPlayed > 0 ? Math.round((userWinsVsThis / totalPlayed) * 100) : 0;
-
-                  return (
-                    <div
-                      key={opponent.id}
-                      className="p-5 rounded-2xl bg-[#121520] border border-[#22283A] hover:border-[#A3E635]/50 transition space-y-4 shadow-lg"
-                    >
-                      {/* Opponent Identity */}
-                      <div className="flex items-center gap-3">
-                        <img src={opponent.logo} alt={opponent.name} className="w-12 h-12 rounded-xl object-cover border border-white/10" />
-                        <div>
-                          <div className="flex items-center gap-1.5">
-                            <h4 className="text-sm font-black font-display text-white">{opponent.name}</h4>
-                            <span className="text-[10px] font-mono font-bold text-[#A3E635]">[{opponent.tag}]</span>
-                          </div>
-                          <span className="text-[10px] font-mono text-slate-400">{opponent.flag} {opponent.country} • ELO: {opponent.stats.avgElo}</span>
-                        </div>
-                      </div>
-
-                      {/* Head to Head Scorebox */}
-                      <div className="p-3 rounded-xl bg-black/50 border border-white/5 space-y-1 text-center font-mono">
-                        <div className="text-[10px] text-slate-400 uppercase font-bold">Your Head-to-Head Record</div>
-                        <div className="text-xl font-display font-black text-white">
-                          <span className="text-emerald-400">{userWinsVsThis} WINS</span>
-                          <span className="text-slate-600 mx-2">-</span>
-                          <span className="text-red-400">{totalPlayed - userWinsVsThis} LOSSES</span>
-                        </div>
-                        <div className="text-[11px] text-[#A3E635] font-bold">
-                          {totalPlayed > 0 ? `${winRatePct}% Win rate vs them` : 'No matches played yet'}
-                        </div>
-                      </div>
-
-                      {/* Matches against them */}
-                      <div className="space-y-1.5 text-xs font-mono">
-                        <span className="text-[10px] text-slate-500 uppercase font-bold block">Recent map encounters:</span>
-                        {matchesAgainstThisClan.length > 0 ? (
-                          matchesAgainstThisClan.map(m => {
-                            const isWin = (m.clan1.tag === userClan.tag && m.clan1.isWinner) || (m.clan2.tag === userClan.tag && m.clan2.isWinner);
-                            return (
-                              <div
-                                key={m.id}
-                                onClick={() => {
-                                  sound.playSelect();
-                                  setSelectedScoreboardMatch(m);
-                                }}
-                                className="flex items-center justify-between p-2 rounded-lg bg-white/[0.02] hover:bg-white/[0.08] cursor-pointer transition border border-transparent hover:border-white/10 group"
-                                title="Click to open match Scoreboard (TAB)"
-                              >
-                                <div className="flex items-center gap-1.5">
-                                  <span className="font-bold text-white group-hover:text-[#A3E635] transition">{m.mapName.toUpperCase().replace('DE_', '')}</span>
-                                  <ExternalLink className="w-3 h-3 text-slate-500 group-hover:text-white transition" />
-                                </div>
-                                <span className={isWin ? 'text-emerald-400 font-bold' : 'text-red-400 font-bold'}>
-                                  {isWin ? 'WIN (13-' + (m.clan1.tag === userClan.tag ? m.clan2.score : m.clan1.score) + ')' : 'LOSS (' + (m.clan1.tag === userClan.tag ? m.clan1.score : m.clan2.score) + '-13)'}
-                                </span>
-                              </div>
-                            );
-                          })
-                        ) : (
-                          <div className="text-[11px] text-slate-500 italic py-1">No recorded head-to-head encounters yet.</div>
-                        )}
-                      </div>
-
-                      <button
-                        onClick={handleSimulateNewClanMatch}
-                        className="w-full py-2 rounded-xl bg-gradient-to-r from-[#84CC16] to-[#A3E635] hover:brightness-110 text-slate-950 font-display font-black text-xs uppercase tracking-wider flex items-center justify-center gap-1.5 cursor-pointer shadow transition active:scale-95"
+                {/* Unified Table Rows */}
+                <div className="divide-y divide-[#172036]">
+                  {clanMatches
+                    .filter(m => {
+                      if (matchFilter === 'wins') return m.isWin;
+                      if (matchFilter === 'losses') return !m.isWin;
+                      return true;
+                    })
+                    .map(match => (
+                      <div
+                        key={match.id}
+                        onClick={() => openMatchScoreboard(match)}
+                        className={`grid grid-cols-[100px_130px_110px_90px_130px_80px_80px_130px_1fr] items-center px-4 py-3.5 transition-colors duration-150 cursor-pointer select-none group relative ${
+                          match.isWin
+                            ? 'bg-[#0B1E15]/50 hover:bg-[#0E281C]/90 text-slate-200'
+                            : 'bg-[#1E0D12]/50 hover:bg-[#281118]/90 text-slate-200'
+                        }`}
+                        title="Click to open match scoreboard & player stats"
                       >
-                        <Zap className="w-3.5 h-3.5 fill-current" />
-                        <span>Simulate Match vs [{opponent.tag}]</span>
-                      </button>
-                    </div>
-                  );
-                })}
+                        {/* Left indicator accent stripe */}
+                        <div
+                          className={`absolute left-0 top-0 bottom-0 w-1.5 ${
+                            match.isWin ? 'bg-[#A3E635]' : 'bg-rose-500'
+                          }`}
+                        />
+
+                        {/* 1. Date & Time */}
+                        <div className="flex flex-col pl-2">
+                          <span className="text-xs sm:text-sm font-bold text-white tracking-tight">{match.date}</span>
+                          <span className="text-[10px] font-mono text-slate-400">{match.time}</span>
+                        </div>
+
+                        {/* 2. Score Badge */}
+                        <div className="flex items-center gap-2 pl-2">
+                          <span
+                            className={`px-2 py-0.5 rounded-lg flex items-center justify-center font-black text-[11px] uppercase font-mono shadow-sm ${
+                              match.isWin
+                                ? 'bg-[#A3E635] text-slate-950 font-black'
+                                : 'bg-rose-500/20 text-rose-300 border border-rose-500/40'
+                            }`}
+                          >
+                            {match.isWin ? 'WIN' : 'LOSS'}
+                          </span>
+                          <span className="font-mono font-black text-sm tracking-wide">
+                            <span className={match.isWin ? 'text-[#22C55E]' : 'text-rose-400'}>
+                              {match.scoreDisplay.split(':')[0].trim()}
+                            </span>
+                            <span className="text-slate-500 mx-1">:</span>
+                            <span className="text-slate-300">
+                              {match.scoreDisplay.split(':')[1].trim()}
+                            </span>
+                          </span>
+                        </div>
+
+                        {/* 3. Cash Prize */}
+                        <div className="flex justify-center" title="Tournament Prize Pool Earnings">
+                          <div
+                            className={`px-2.5 py-0.5 rounded-lg font-mono text-xs font-black flex items-center gap-1 shadow-sm border ${
+                              match.isWin
+                                ? 'bg-emerald-500/20 text-emerald-300 border-emerald-500/35'
+                                : 'bg-rose-500/15 text-rose-300 border-rose-500/30'
+                            }`}
+                          >
+                            <span className="text-xs">{match.isWin ? '💰' : '💸'}</span>
+                            <span>{match.prizeEarned || (match.isWin ? '+$75.00' : '-$25.00')}</span>
+                          </div>
+                        </div>
+
+                        {/* 4. Rating */}
+                        <div className="flex justify-center" title="HLTV Performance Rating">
+                          <span
+                            className={`px-2 py-0.5 rounded font-mono font-bold text-xs ${
+                              parseFloat(match.userRating) >= 1.00
+                                ? 'bg-[#A3E635]/20 text-[#A3E635] border border-[#A3E635]/35'
+                                : 'bg-rose-500/20 text-rose-400 border border-rose-500/35'
+                            }`}
+                          >
+                            {match.userRating}
+                          </span>
+                        </div>
+
+                        {/* 5. K / D / A (Guaranteed single line, never wraps!) */}
+                        <div className="text-center font-mono text-xs sm:text-sm font-bold text-white whitespace-nowrap" title="Kills / Deaths / Assists">
+                          {match.userStats.kills} <span className="text-slate-500">/</span> {match.userStats.deaths} <span className="text-slate-500">/</span> {match.userStats.assists}
+                        </div>
+
+                        {/* 6. K/D */}
+                        <div className="text-center font-mono text-xs sm:text-sm font-bold text-slate-200" title="Kill / Death Ratio">
+                          {match.userStats.kd}
+                        </div>
+
+                        {/* 7. ADR */}
+                        <div className="text-center font-mono text-xs sm:text-sm font-bold text-slate-200" title="Average Damage per Round">
+                          {match.userStats.adr}
+                        </div>
+
+                        {/* 8. Map */}
+                        <div className="flex items-center gap-2 pl-2">
+                          <div className="w-6 h-6 rounded-full overflow-hidden bg-black/60 border border-white/10 shrink-0">
+                            <img src={match.mapImage} alt={match.mapDisplayName} className="w-full h-full object-cover" />
+                          </div>
+                          <span className="text-xs sm:text-sm font-semibold text-white truncate">
+                            {match.mapDisplayName}
+                          </span>
+                        </div>
+
+                        {/* 9. Action Buttons */}
+                        <div className="flex items-center justify-end gap-1.5 pr-3">
+                          <button
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              handleDownloadDemo(match);
+                            }}
+                            title="Download GOTV Demo (.dem)"
+                            className="w-8 h-8 rounded-lg bg-white/5 hover:bg-white/15 text-slate-400 hover:text-white flex items-center justify-center transition cursor-pointer"
+                          >
+                            <Download className="w-3.5 h-3.5" />
+                          </button>
+                          <button
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              sound.playSelect();
+                              openMatchScoreboard(match);
+                            }}
+                            title="Open Full CS2 Scoreboard"
+                            className="w-8 h-8 rounded-lg bg-white/5 hover:bg-[#A3E635]/20 hover:text-[#A3E635] text-slate-400 flex items-center justify-center transition cursor-pointer border border-transparent hover:border-[#A3E635]/30"
+                          >
+                            <ExternalLink className="w-3.5 h-3.5" />
+                          </button>
+                        </div>
+                      </div>
+                    ))}
+                </div>
               </div>
             </div>
-          )}
+          </div>
         </div>
       )}
 
