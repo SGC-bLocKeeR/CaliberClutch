@@ -1234,8 +1234,18 @@ export const VortexMatchRoom: React.FC<VortexMatchRoomProps> = ({
       avatar: currentAvatarUrl || 'https://distribution.faceit-cdn.net/images/ac453a50-dbca-4d42-a740-dac12bdc74c0.jpeg',
       code: 'XK',
       countryName: 'Kosovo',
-      rankLevel: 7,
-      rankElo: 1407,
+      rankLevel: (() => {
+        const u = partyMembers?.find(p => p.id === 'current-user' || p.name === currentGamerTag);
+        if (u && u.level) return u.level;
+        const m = typeof window !== 'undefined' ? localStorage.getItem('vortex_user_matches') : null;
+        return m && m !== '0' ? 7 : 3;
+      })(),
+      rankElo: (() => {
+        const u = partyMembers?.find(p => p.id === 'current-user' || p.name === currentGamerTag);
+        if (u && u.elo) return u.elo;
+        const m = typeof window !== 'undefined' ? localStorage.getItem('vortex_user_matches') : null;
+        return m && m !== '0' ? 1407 : 800;
+      })(),
       rating: '0.76',
       ratingScore: 0.76,
       team: 'team2',
@@ -1879,8 +1889,18 @@ export const VortexMatchRoom: React.FC<VortexMatchRoomProps> = ({
       avatar: currentAvatarUrl || 'https://distribution.faceit-cdn.net/images/ac453a50-dbca-4d42-a740-dac12bdc74c0.jpeg',
       code: 'XK',
       countryName: 'Kosovo',
-      rankLevel: 7,
-      rankElo: 1407,
+      rankLevel: (() => {
+        const u = partyMembers?.find(p => p.id === 'current-user' || p.name === currentGamerTag);
+        if (u && u.level) return u.level;
+        const m = typeof window !== 'undefined' ? localStorage.getItem('vortex_user_matches') : null;
+        return m && m !== '0' ? 7 : 3;
+      })(),
+      rankElo: (() => {
+        const u = partyMembers?.find(p => p.id === 'current-user' || p.name === currentGamerTag);
+        if (u && u.elo) return u.elo;
+        const m = typeof window !== 'undefined' ? localStorage.getItem('vortex_user_matches') : null;
+        return m && m !== '0' ? 1407 : 800;
+      })(),
       rating: '0.88',
       ratingScore: 0.88,
       team: 'team2',
@@ -2400,8 +2420,18 @@ export const VortexMatchRoom: React.FC<VortexMatchRoomProps> = ({
       avatar: currentAvatarUrl || 'https://distribution.faceit-cdn.net/images/ac453a50-dbca-4d42-a740-dac12bdc74c0.jpeg',
       code: 'XK',
       countryName: 'Kosovo',
-      rankLevel: 7,
-      rankElo: 1407,
+      rankLevel: (() => {
+        const u = partyMembers?.find(p => p.id === 'current-user' || p.name === currentGamerTag);
+        if (u && u.level) return u.level;
+        const m = typeof window !== 'undefined' ? localStorage.getItem('vortex_user_matches') : null;
+        return m && m !== '0' ? 7 : 3;
+      })(),
+      rankElo: (() => {
+        const u = partyMembers?.find(p => p.id === 'current-user' || p.name === currentGamerTag);
+        if (u && u.elo) return u.elo;
+        const m = typeof window !== 'undefined' ? localStorage.getItem('vortex_user_matches') : null;
+        return m && m !== '0' ? 1407 : 800;
+      })(),
       rating: '0.90',
       ratingScore: 0.90,
       team: 'team2',

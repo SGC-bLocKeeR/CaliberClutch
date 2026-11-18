@@ -54,11 +54,19 @@ export function App() {
             localStorage.setItem('vortex_user_verification', 'vip');
           } else {
             localStorage.removeItem('vortex_is_admin');
-            const hasLinkedFaceit = localStorage.getItem('vortex_faceit_connected') === 'true';
-            if (!hasLinkedFaceit) {
+          }
+
+          // FACEIT standard baseline: 0 matches = Level 3 & 800 ELO (Uncalibrated)
+          const hasLinkedFaceit = localStorage.getItem('vortex_faceit_connected') === 'true';
+          const savedMatches = localStorage.getItem('vortex_user_matches');
+          const matchCount = savedMatches !== null ? parseInt(savedMatches, 10) : 0;
+          if (!hasLinkedFaceit || matchCount === 0) {
+            if (matchCount === 0) {
               localStorage.setItem('vortex_user_level', '3'); // FACEIT baseline: Level 3
-              localStorage.setItem('vortex_user_elo', '800'); // 800 ELO for 0 matches
+              localStorage.setItem('vortex_user_elo', '800'); // 800 ELO baseline for 0 matches
               localStorage.setItem('vortex_user_matches', '0');
+            }
+            if (!isOwnerAdmin) {
               localStorage.setItem('vortex_user_verification', 'none');
             }
           }

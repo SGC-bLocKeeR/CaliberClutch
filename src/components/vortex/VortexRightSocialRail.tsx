@@ -240,12 +240,18 @@ export const VortexRightSocialRail: React.FC<VortexRightSocialRailProps> = ({
   // Register current user into the platform directory
   useEffect(() => {
     if (currentGamerTag && !currentGamerTag.toLowerCase().includes('blockeer')) {
+      const savedMatches = typeof window !== 'undefined' ? localStorage.getItem('vortex_user_matches') : null;
+      const matchCount = savedMatches !== null ? parseInt(savedMatches, 10) : 0;
+      const savedElo = typeof window !== 'undefined' ? localStorage.getItem('vortex_user_elo') : null;
+      const elo = matchCount > 0 && savedElo ? parseInt(savedElo, 10) : 800;
+      const lvl = matchCount > 0 ? (elo >= 2001 ? 10 : elo >= 1751 ? 9 : elo >= 1531 ? 8 : elo >= 1351 ? 7 : elo >= 1201 ? 6 : elo >= 1051 ? 5 : elo >= 901 ? 4 : elo >= 751 ? 3 : elo >= 501 ? 2 : 1) : 3;
+
       registerPlatformPlayer({
         id: `u-${currentGamerTag.toLowerCase()}`,
         gamerTag: currentGamerTag,
         avatar: currentAvatarUrl || 'https://distribution.faceit-cdn.net/images/ac453a50-dbca-4d42-a740-dac12bdc74c0.jpeg',
-        level: 7,
-        elo: 1407,
+        level: lvl,
+        elo: elo,
         verification: currentVerification || 'vip',
         countryCode: currentCountry?.code || 'XK',
         countryName: currentCountry?.name || 'Kosovo',

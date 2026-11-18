@@ -77,6 +77,7 @@ import { VortexPartnersModal } from './VortexPartnersModal';
 import { VortexAdBanner } from './VortexAdBanner';
 import { VortexTopSponsorRibbon, VortexComingSoonDeals } from './VortexSponsorRibbon';
 import { VORTEX_CASE_CATALOG, CS2Case, getVortexWalletBalance, creditVortexWalletBalance } from '../../services/skinDeliveryService';
+import { FaceitSkillTrack, FaceitSeasonStatsCard } from './FaceitSkillTrack';
 
 interface VortexDashboardProps {
   userGamerTag?: string;
@@ -607,6 +608,53 @@ export const isUserAdminOrFounder = (tagName?: string | null): boolean => {
   return t.includes('m14');
 };
 
+// ============================================================================
+// OFFICIAL FACEIT CS2 ELO & SKILL LEVEL TIERS (100 - 2001+ ELO)
+// Reference: Refrag.gg / FACEIT Official Standard
+// ============================================================================
+export interface FaceitTierInfo {
+  level: number;
+  minElo: number;
+  maxElo: number;
+  label: string;
+  badgeColor: string;
+  ringBorder: string;
+  ringGlow: string;
+  ringSvgColor: string;
+  ringPercent: number;
+}
+
+export const FACEIT_TIERS: Record<number, FaceitTierInfo> = {
+  1: { level: 1, minElo: 100, maxElo: 500, label: 'Level 1', badgeColor: 'text-slate-300', ringBorder: 'border-slate-500', ringGlow: 'shadow-slate-500/20', ringSvgColor: '#94A3B8', ringPercent: 10 },
+  2: { level: 2, minElo: 501, maxElo: 750, label: 'Level 2', badgeColor: 'text-emerald-400', ringBorder: 'border-emerald-500', ringGlow: 'shadow-emerald-500/20', ringSvgColor: '#10B981', ringPercent: 20 },
+  3: { level: 3, minElo: 751, maxElo: 900, label: 'Level 3', badgeColor: 'text-[#A3E635]', ringBorder: 'border-[#A3E635]', ringGlow: 'shadow-lime-500/25', ringSvgColor: '#A3E635', ringPercent: 30 },
+  4: { level: 4, minElo: 901, maxElo: 1050, label: 'Level 4', badgeColor: 'text-yellow-400', ringBorder: 'border-yellow-400', ringGlow: 'shadow-yellow-500/20', ringSvgColor: '#FACC15', ringPercent: 40 },
+  5: { level: 5, minElo: 1051, maxElo: 1200, label: 'Level 5', badgeColor: 'text-yellow-400', ringBorder: 'border-yellow-500', ringGlow: 'shadow-yellow-500/20', ringSvgColor: '#EAB308', ringPercent: 50 },
+  6: { level: 6, minElo: 1201, maxElo: 1350, label: 'Level 6', badgeColor: 'text-amber-400', ringBorder: 'border-amber-400', ringGlow: 'shadow-amber-500/20', ringSvgColor: '#F59E0B', ringPercent: 60 },
+  7: { level: 7, minElo: 1351, maxElo: 1530, label: 'Level 7', badgeColor: 'text-amber-500', ringBorder: 'border-amber-500', ringGlow: 'shadow-amber-500/25', ringSvgColor: '#D97706', ringPercent: 70 },
+  8: { level: 8, minElo: 1531, maxElo: 1750, label: 'Level 8', badgeColor: 'text-orange-500', ringBorder: 'border-orange-500', ringGlow: 'shadow-orange-500/25', ringSvgColor: '#EA580C', ringPercent: 80 },
+  9: { level: 9, minElo: 1751, maxElo: 2000, label: 'Level 9', badgeColor: 'text-orange-500', ringBorder: 'border-orange-600', ringGlow: 'shadow-orange-600/25', ringSvgColor: '#C2410C', ringPercent: 90 },
+  10: { level: 10, minElo: 2001, maxElo: 9999, label: 'Level 10', badgeColor: 'text-red-500', ringBorder: 'border-red-600', ringGlow: 'shadow-red-600/30', ringSvgColor: '#DC2626', ringPercent: 100 }
+};
+
+export const getFaceitLevelFromElo = (elo: number): number => {
+  if (elo >= 2001) return 10;
+  if (elo >= 1751) return 9;
+  if (elo >= 1531) return 8;
+  if (elo >= 1351) return 7;
+  if (elo >= 1201) return 6;
+  if (elo >= 1051) return 5;
+  if (elo >= 901) return 4;
+  if (elo >= 751) return 3;
+  if (elo >= 501) return 2;
+  return 1;
+};
+
+export const getFaceitTierInfo = (levelOrElo: number): FaceitTierInfo => {
+  const level = levelOrElo > 10 ? getFaceitLevelFromElo(levelOrElo) : Math.max(1, Math.min(10, Math.round(levelOrElo)));
+  return FACEIT_TIERS[level] || FACEIT_TIERS[3];
+};
+
 export const VortexDashboard: React.FC<VortexDashboardProps> = ({
   userGamerTag = 'M14',
   avatarUrl = 'https://distribution.faceit-cdn.net/images/ac453a50-dbca-4d42-a740-dac12bdc74c0.jpeg',
@@ -677,41 +725,6 @@ export const VortexDashboard: React.FC<VortexDashboardProps> = ({
     return true;
   });
 
-  useEffect(() => {
-    if (userGamerTag) {
-      setCurrentGamerTag(userGamerTag);
-      const isFounder = isUserAdminOrFounder(userGamerTag) || isUserAdminOrFounder(currentGamerTag);
-      const hasFaceit = localStorage.getItem('vortex_faceit_connected') === 'true';
-
-      if (!isFounder && !hasFaceit) {
-        const savedLvl = localStorage.getItem('vortex_user_level');
-        const savedElo = localStorage.getItem('vortex_user_elo');
-        const savedVerif = localStorage.getItem('vortex_user_verification');
-        if (!savedLvl || savedLvl === '1' || savedLvl === '7') {
-          setCurrentUserLevel(3);
-          localStorage.setItem('vortex_user_level', '3');
-        }
-        if (!savedElo || savedElo === '1407') {
-          setCurrentUserElo(800);
-          localStorage.setItem('vortex_user_elo', '800');
-        }
-        if (!savedVerif || savedVerif === 'vip') {
-          setCurrentVerification('none');
-          localStorage.setItem('vortex_user_verification', 'none');
-        }
-      } else if (isFounder) {
-        setCurrentUserLevel(7);
-        setCurrentUserElo(1407);
-        setCurrentVerification('vip');
-      }
-    }
-  }, [userGamerTag]);
-
-  useEffect(() => {
-    if (avatarUrl) {
-      setCurrentAvatarUrl(avatarUrl);
-    }
-  }, [avatarUrl]);
   const [currentClanTag, setCurrentClanTag] = useState<string>(() => {
     return localStorage.getItem('vortex_user_clantag') || 'CC';
   });
@@ -748,24 +761,66 @@ export const VortexDashboard: React.FC<VortexDashboardProps> = ({
   });
 
   const [currentUserElo, setCurrentUserElo] = useState<number>(() => {
+    const savedMatches = localStorage.getItem('vortex_user_matches');
+    const matchesCount = savedMatches !== null ? parseInt(savedMatches, 10) : 0;
+    if (matchesCount === 0) {
+      localStorage.setItem('vortex_user_elo', '800');
+      return 800;
+    }
     const saved = localStorage.getItem('vortex_user_elo');
     if (saved) {
       const parsed = parseInt(saved, 10);
       if (!isNaN(parsed) && parsed > 0) return parsed;
     }
-    const tag = localStorage.getItem('vortex_user_gamertag') || userGamerTag;
-    return isUserAdminOrFounder(tag) ? 1407 : 800; // Founder/Admin is Level 7/1407; others start at Level 3 (800 ELO)
+    return 800;
   });
 
   const [currentUserLevel, setCurrentUserLevel] = useState<number>(() => {
+    const savedMatches = localStorage.getItem('vortex_user_matches');
+    const matchesCount = savedMatches !== null ? parseInt(savedMatches, 10) : 0;
+    if (matchesCount === 0) {
+      localStorage.setItem('vortex_user_level', '3');
+      return 3;
+    }
     const saved = localStorage.getItem('vortex_user_level');
     if (saved) {
       const parsed = parseInt(saved, 10);
       if (!isNaN(parsed) && parsed >= 1 && parsed <= 10) return parsed;
     }
-    const tag = localStorage.getItem('vortex_user_gamertag') || userGamerTag;
-    return isUserAdminOrFounder(tag) ? 7 : 3; // FACEIT baseline: Level 3
+    return 3;
   });
+
+  // Effective ELO & Level (Strict FACEIT standard: 0 matches = Level 3 & 800 ELO)
+  const isCalibrated = currentUserMatches > 0;
+  const effectiveElo = isCalibrated ? currentUserElo : 800;
+  const effectiveLevel = isCalibrated ? getFaceitLevelFromElo(currentUserElo) : 3;
+
+  useEffect(() => {
+    if (userGamerTag) {
+      setCurrentGamerTag(userGamerTag);
+      const isFounder = isUserAdminOrFounder(userGamerTag) || isUserAdminOrFounder(currentGamerTag);
+      const hasFaceit = localStorage.getItem('vortex_faceit_connected') === 'true';
+
+      if (currentUserMatches === 0) {
+        setCurrentUserLevel(3);
+        setCurrentUserElo(800);
+        localStorage.setItem('vortex_user_level', '3');
+        localStorage.setItem('vortex_user_elo', '800');
+        localStorage.setItem('vortex_user_matches', '0');
+      }
+
+      if (isFounder) {
+        setCurrentVerification('vip');
+        localStorage.setItem('vortex_user_verification', 'vip');
+      } else if (!hasFaceit) {
+        const savedVerif = localStorage.getItem('vortex_user_verification');
+        if (!savedVerif || savedVerif === 'vip') {
+          setCurrentVerification('none');
+          localStorage.setItem('vortex_user_verification', 'none');
+        }
+      }
+    }
+  }, [userGamerTag, currentUserMatches]);
 
   const [faceitNickname, setFaceitNickname] = useState<string>(() => {
     return localStorage.getItem('vortex_faceit_nickname') || '';
@@ -1622,8 +1677,8 @@ export const VortexDashboard: React.FC<VortexDashboardProps> = ({
       name: currentGamerTag,
       tag: currentClanTag,
       avatar: currentAvatarUrl,
-      level: currentUserLevel,
-      elo: currentUserElo,
+      level: effectiveLevel,
+      elo: effectiveElo,
       isLeader: true,
       verification: currentVerification,
       flag: currentCountry.flag,
@@ -1691,8 +1746,8 @@ export const VortexDashboard: React.FC<VortexDashboardProps> = ({
         name: currentGamerTag,
         tag: currentClanTag,
         avatar: currentAvatarUrl,
-        level: currentUserLevel,
-        elo: currentUserElo,
+        level: effectiveLevel,
+        elo: effectiveElo,
         isLeader: true,
         verification: currentVerification,
         flag: currentCountry.flag,
@@ -1701,7 +1756,7 @@ export const VortexDashboard: React.FC<VortexDashboardProps> = ({
       };
       return next;
     });
-  }, [currentGamerTag, currentClanTag, currentAvatarUrl, currentVerification, currentCountry, currentUserLevel, currentUserElo]);
+  }, [currentGamerTag, currentClanTag, currentAvatarUrl, currentVerification, currentCountry, effectiveLevel, effectiveElo]);
 
   // Queue Interval Timer
   useEffect(() => {
@@ -2483,18 +2538,22 @@ export const VortexDashboard: React.FC<VortexDashboardProps> = ({
                   
                   {/* Dynamic Faceit Level Badge & ELO Progression */}
                   <div className="flex flex-col sm:flex-row sm:items-center gap-5 w-full">
-                    {/* Faceit Level Circular Badge (Color scaled by Level) */}
+                    {/* Faceit Level Circular Badge (Color scaled by Level matching Refrag official standards) */}
                     <div className={`w-16 h-16 sm:w-20 sm:h-20 rounded-full p-[3.5px] shadow-lg shrink-0 ${
-                      currentUserLevel >= 10
+                      effectiveLevel >= 10
                         ? 'bg-gradient-to-br from-[#FF5500] via-red-600 to-rose-700 shadow-orange-500/25'
-                        : currentUserLevel >= 7
+                        : effectiveLevel >= 8
+                        ? 'bg-gradient-to-br from-orange-500 via-orange-600 to-amber-600 shadow-orange-500/25'
+                        : effectiveLevel >= 7
                         ? 'bg-gradient-to-br from-amber-400 via-amber-500 to-yellow-600 shadow-amber-500/25'
-                        : currentUserLevel >= 4
-                        ? 'bg-gradient-to-br from-yellow-400 via-amber-500 to-orange-500 shadow-amber-500/20'
-                        : 'bg-gradient-to-br from-[#A3E635] via-emerald-500 to-teal-600 shadow-lime-500/20'
+                        : effectiveLevel >= 4
+                        ? 'bg-gradient-to-br from-yellow-400 via-yellow-500 to-amber-500 shadow-yellow-500/20'
+                        : effectiveLevel >= 2
+                        ? 'bg-gradient-to-br from-[#A3E635] via-emerald-500 to-teal-600 shadow-lime-500/20'
+                        : 'bg-gradient-to-br from-slate-400 via-slate-500 to-slate-600 shadow-slate-500/20'
                     }`}>
                       <div className="w-full h-full rounded-full bg-[#12141C] flex items-center justify-center border border-white/20">
-                        <span className="text-2xl sm:text-3xl font-black font-display text-white tracking-tighter">{currentUserLevel}</span>
+                        <span className="text-2xl sm:text-3xl font-black font-display text-white tracking-tighter">{effectiveLevel}</span>
                       </div>
                     </div>
 
@@ -2505,9 +2564,9 @@ export const VortexDashboard: React.FC<VortexDashboardProps> = ({
                           Season 1
                         </span>
                         <span className="text-xl sm:text-2xl font-black font-display text-white tracking-tight flex items-center gap-2">
-                          {currentUserMatches > 0 ? (
+                          {isCalibrated ? (
                             <>
-                              {currentUserElo.toLocaleString()} ELO
+                              {effectiveElo.toLocaleString()} ELO
                               <TrendingUp className="w-4 h-4 text-emerald-400 inline" />
                             </>
                           ) : (
@@ -2535,28 +2594,14 @@ export const VortexDashboard: React.FC<VortexDashboardProps> = ({
                           </span>
                         )}
                         <div className="ml-auto flex items-center gap-1.5 px-2.5 py-0.5 rounded-lg bg-white/[0.04] border border-white/10 text-xs font-mono font-bold text-slate-300">
-                          <span>{currentUserMatches > 0 ? userPlatformRank : 'Unranked (0 Matches)'}</span>
+                          <span>{isCalibrated ? userPlatformRank : 'Unranked (0 Matches)'}</span>
                           <CountryFlag code={currentCountry.code} name={currentCountry.name} size="xs" />
                           <ChevronRight className="w-3.5 h-3.5 text-emerald-400" />
                         </div>
                       </div>
 
-                      {/* ELO Progress Bar */}
-                      <div className="space-y-1">
-                        <div className="w-full h-2 rounded-full bg-[#1A1D27] overflow-hidden p-[1px]">
-                          <div 
-                            className="h-full bg-gradient-to-r from-amber-400 to-[#A3E635] rounded-full transition-all duration-500" 
-                            style={{ width: currentUserMatches > 0 ? `${Math.min(100, Math.max(15, (currentUserElo % 200) / 2))}%` : '25%' }} 
-                          />
-                        </div>
-                        <div className="flex items-center justify-between text-[11px] font-mono text-slate-400">
-                          <span>Level {currentUserLevel}</span>
-                          <span className="text-slate-300 font-bold">
-                            {currentUserMatches > 0 ? `${currentUserElo.toLocaleString()} ELO` : '800 ELO (Level 3 Baseline)'}
-                          </span>
-                          <span>{currentUserMatches > 0 ? `Level ${Math.min(10, currentUserLevel + 1)}` : 'Play 1 Match to Rank'}</span>
-                        </div>
-                      </div>
+                      {/* Authentic FACEIT CS2 Horizontal Skill Rank Track (1 to 10 + Challenger) */}
+                      <FaceitSkillTrack elo={effectiveElo} level={effectiveLevel} isCalibrated={isCalibrated} />
 
                       {/* Party Action Buttons */}
                       <div className="flex items-center gap-2.5 pt-1">
@@ -2726,8 +2771,20 @@ export const VortexDashboard: React.FC<VortexDashboardProps> = ({
                                     <svg className="w-4 h-4 -rotate-90" viewBox="0 0 36 36">
                                       <path className="text-white/10" strokeWidth="4" stroke="currentColor" fill="none" d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" />
                                       <path 
-                                        className={member.level >= 10 ? 'text-[#FF5500]' : member.level >= 7 ? 'text-amber-500' : 'text-[#A3E635]'} 
-                                        strokeDasharray="68, 100" 
+                                        className={
+                                          member.level >= 10 
+                                            ? 'text-[#FF5500]' 
+                                            : member.level >= 8 
+                                            ? 'text-orange-500' 
+                                            : member.level >= 7 
+                                            ? 'text-amber-500' 
+                                            : member.level >= 4 
+                                            ? 'text-yellow-400' 
+                                            : member.level >= 2 
+                                            ? 'text-[#A3E635]' 
+                                            : 'text-slate-400'
+                                        } 
+                                        strokeDasharray={`${(FACEIT_TIERS[member.level]?.ringPercent || 30) * 0.95}, 100`} 
                                         strokeWidth="4" 
                                         strokeLinecap="round" 
                                         stroke="currentColor" 
@@ -3671,8 +3728,8 @@ export const VortexDashboard: React.FC<VortexDashboardProps> = ({
                             <span className="w-1.5 h-1.5 rounded-full bg-[#A3E635] animate-pulse" />
                             128-Tick Match Servers
                           </span>
-                          <span className="px-3 py-1 rounded-xl text-[10px] font-mono font-bold bg-amber-400/15 text-amber-300 border border-amber-400/30">
-                            Escrow Protected
+                          <span className="px-3 py-1 rounded-xl text-[10px] font-mono font-bold bg-emerald-400/15 text-emerald-300 border border-emerald-400/30">
+                            Instant Payout
                           </span>
                         </div>
                       </div>
@@ -3843,16 +3900,16 @@ export const VortexDashboard: React.FC<VortexDashboardProps> = ({
                           </div>
                         </div>
 
-                        {/* 5. Entry Fee & Platform Escrow (Monetization System) */}
+                        {/* 5. Entry Fee & Platform Payout System */}
                         <div className="p-4 sm:p-5 rounded-2xl bg-[#101420] border border-[#20293D] space-y-4">
                           <div className="flex items-center justify-between flex-wrap gap-2">
                             <div>
                               <label className="text-[11px] text-amber-400 uppercase tracking-wider block font-bold flex items-center gap-1.5">
                                 <Coins className="w-4 h-4 text-amber-400" />
-                                <span>Tournament Entry Fee (Buy-In & Escrow)</span>
+                                <span>Tournament Entry Fee (Buy-In & Prize Pool)</span>
                               </label>
                               <span className="text-xs text-slate-400">
-                                Team registration fee (5 players) with automated escrow guarantee
+                                Team registration fee (5 players) with automated instant payout to winners
                               </span>
                             </div>
                             <div className="flex items-center gap-1.5 p-1 rounded-xl bg-black/40 border border-white/5">
@@ -3907,7 +3964,7 @@ export const VortexDashboard: React.FC<VortexDashboardProps> = ({
                                 </div>
                               </div>
 
-                              {/* Financial Escrow Breakdown */}
+                              {/* Financial Payout Breakdown */}
                               <div className="p-4 rounded-xl bg-black/50 border border-amber-500/20 space-y-2.5 text-xs">
                                 <div className="flex items-center justify-between text-slate-300">
                                   <span>Total Buy-In Pool ({newTourneyMaxTeams} teams × €{newTourneyEntryFee}):</span>
@@ -3923,7 +3980,7 @@ export const VortexDashboard: React.FC<VortexDashboardProps> = ({
                                 <div className="flex items-center justify-between text-emerald-400 font-bold border-t border-white/10 pt-2">
                                   <span className="flex items-center gap-1.5">
                                     <Trophy className="w-3.5 h-3.5 text-emerald-400" />
-                                    Prize Pool in Escrow (85% to Winners):
+                                    Prize Pool for Winners (85% Instant Payout):
                                   </span>
                                   <span className="font-mono">€{(newTourneyMaxTeams * newTourneyEntryFee * 0.85).toFixed(2)}</span>
                                 </div>
@@ -4108,10 +4165,10 @@ export const VortexDashboard: React.FC<VortexDashboardProps> = ({
                         <div className="p-4 rounded-2xl bg-black/40 border border-white/5 space-y-2 hover:border-amber-400/30 transition">
                           <div className="flex items-center gap-2 text-white font-bold">
                             <Coins className="w-4 h-4 text-amber-400 shrink-0" />
-                            <span>6. 100% Cash Prize Pool & Escrow Guarantee</span>
+                            <span>6. 100% Cash Prize Pool & Instant Payout</span>
                           </div>
                           <p className="text-[11px] text-slate-400 pl-6 leading-relaxed">
-                            Prize pools are paid out exclusively in real cash (100% Pure Cash): 70% 1st Place, 20% 2nd Place, 10% 3rd Place. Funds are held in CaliberClutch Escrow and disbursed immediately to the winners' balances upon Grand Final conclusion.
+                            Prize pools are paid out exclusively in real cash (100% Pure Cash): 70% 1st Place, 20% 2nd Place, 10% 3rd Place. Prize funds are disbursed automatically and instantly to the winners' balances the moment the Grand Final concludes.
                           </p>
                         </div>
 
@@ -4372,9 +4429,9 @@ export const VortexDashboard: React.FC<VortexDashboardProps> = ({
                                 <div className="flex items-center justify-between text-[11px] font-mono text-slate-400">
                                   <span className="flex items-center gap-1.5 text-[#A3E635] font-bold">
                                     <Trophy className="w-3.5 h-3.5 text-[#A3E635]" />
-                                    <span>Prize Pool Breakdown (100% Cash • Pa Skins):</span>
+                                    <span>Official Cash Prize Breakdown (100% Pure Cash Pool):</span>
                                   </span>
-                                  <span className="text-[10px] text-emerald-400 font-bold">Direct Cash Payout</span>
+                                  <span className="text-[10px] text-emerald-400 font-bold">Instant Payout</span>
                                 </div>
 
                                 <div className="grid grid-cols-3 gap-2">
@@ -4382,19 +4439,19 @@ export const VortexDashboard: React.FC<VortexDashboardProps> = ({
                                     <div className="text-[10px] font-mono font-bold text-amber-400">🥇 1st Place</div>
                                     <div className="text-sm font-black font-mono text-white mt-0.5">€{firstCash.toLocaleString()}</div>
                                     <div className="text-[9px] font-mono font-bold text-[#A3E635]">70% Cash Pool</div>
-                                    <div className="text-[8px] font-mono text-slate-400 uppercase mt-0.5">Vetëm Para</div>
+                                    <div className="text-[8px] font-mono text-slate-400 uppercase mt-0.5">Pure Cash</div>
                                   </div>
                                   <div className="p-2.5 rounded-xl bg-slate-400/10 border border-slate-400/25 text-center">
                                     <div className="text-[10px] font-mono font-bold text-slate-300">🥈 2nd Place</div>
                                     <div className="text-sm font-black font-mono text-white mt-0.5">€{secondCash.toLocaleString()}</div>
                                     <div className="text-[9px] font-mono font-bold text-slate-400">20% Cash Pool</div>
-                                    <div className="text-[8px] font-mono text-slate-400 uppercase mt-0.5">Vetëm Para</div>
+                                    <div className="text-[8px] font-mono text-slate-400 uppercase mt-0.5">Pure Cash</div>
                                   </div>
                                   <div className="p-2.5 rounded-xl bg-amber-700/10 border border-amber-700/25 text-center">
                                     <div className="text-[10px] font-mono font-bold text-amber-600">🥉 3rd Place</div>
                                     <div className="text-sm font-black font-mono text-white mt-0.5">€{thirdCash.toLocaleString()}</div>
                                     <div className="text-[9px] font-mono font-bold text-amber-500">10% Cash Pool</div>
-                                    <div className="text-[8px] font-mono text-slate-400 uppercase mt-0.5">Vetëm Para</div>
+                                    <div className="text-[8px] font-mono text-slate-400 uppercase mt-0.5">Pure Cash</div>
                                   </div>
                                 </div>
                               </div>
@@ -4455,7 +4512,7 @@ export const VortexDashboard: React.FC<VortexDashboardProps> = ({
                 <div className="flex items-center gap-2">
                   <ShieldCheck className="w-4 h-4 text-emerald-400 shrink-0" />
                   <span>
-                    100% Skill-Based Competition: Prize distribution complies with European esports regulations. 100% cash prize pools securely escrowed and automatically paid out.
+                    100% Skill-Based Competition: Prize distribution complies with European esports regulations. 100% cash prize pools automatically and instantly paid out to winners upon conclusion.
                   </span>
                 </div>
                 <button
@@ -5523,79 +5580,19 @@ export const VortexDashboard: React.FC<VortexDashboardProps> = ({
                       )}
                     </div>
                   </div>
-
-                  {/* ELO Progress Meter */}
-                  <div className="mt-6 pt-5 border-t border-white/[0.06] space-y-2">
-                    <div className="flex justify-between items-center text-xs font-mono">
-                      <div className="flex items-center gap-2">
-                        <span className={`w-2 h-2 rounded-full ${displayMatches > 0 ? 'bg-[#A3E635] animate-ping' : 'bg-amber-400'}`} />
-                        {displayMatches > 0 ? (
-                          <span className="text-slate-400">Current Standing: <strong className="text-white">{displayElo.toLocaleString()} ELO</strong> (Level {displayLevelNum})</span>
-                        ) : (
-                          <span className="text-slate-400">Calibration Status: <strong className="text-amber-300">Level 3 • 800 ELO</strong> (0 Matches on Caliber Clutch)</span>
-                        )}
-                      </div>
-                      <span className="text-amber-400 font-bold">
-                        {displayMatches > 0 
-                          ? (displayLevelNum === 10 ? 'MAX LEVEL 10 • PLATFORM TITAN' : `+123 ELO to Level ${displayLevelNum + 1}`) 
-                          : 'Play your first match to calibrate rank'}
-                      </span>
-                    </div>
-                    <div className="w-full h-2 rounded-full bg-[#1A1D27] overflow-hidden">
-                      <div 
-                        className="h-full bg-gradient-to-r from-amber-400 via-yellow-400 to-[#A3E635] rounded-full transition-all duration-500" 
-                        style={{ width: displayMatches > 0 ? (displayLevelNum === 10 ? '100%' : '31%') : '25%' }} 
-                      />
-                    </div>
-                  </div>
                 </div>
 
-                {/* 4 VITALS METRICS CARDS */}
-                <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
-                  <div className="p-5 rounded-2xl bg-[#0E1017] border border-[#202536] space-y-2">
-                    <div className="text-[10px] font-mono uppercase tracking-wider text-slate-400 flex items-center gap-1.5">
-                      <Trophy className="w-3.5 h-3.5 text-amber-400" />
-                      <span>Win Rate</span>
-                    </div>
-                    <div className="text-2xl font-black font-mono text-white">{displayWinrate}</div>
-                    <div className="text-[10px] font-mono text-slate-500 font-bold">
-                      {displayMatches > 0 ? '+2.4% this season' : 'No matches played yet'}
-                    </div>
-                  </div>
-
-                  <div className="p-5 rounded-2xl bg-[#0E1017] border border-[#202536] space-y-2">
-                    <div className="text-[10px] font-mono uppercase tracking-wider text-slate-400 flex items-center gap-1.5">
-                      <Crosshair className="w-3.5 h-3.5 text-[#A3E635]" />
-                      <span>K/D Ratio</span>
-                    </div>
-                    <div className="text-2xl font-black font-mono text-[#A3E635]">{displayKd}</div>
-                    <div className="text-[10px] font-mono text-slate-500">
-                      {displayMatches > 0 ? '1.42 Impact Rating' : '0 Kills / 0 Deaths'}
-                    </div>
-                  </div>
-
-                  <div className="p-5 rounded-2xl bg-[#0E1017] border border-[#202536] space-y-2">
-                    <div className="text-[10px] font-mono uppercase tracking-wider text-slate-400 flex items-center gap-1.5">
-                      <Target className="w-3.5 h-3.5 text-amber-400" />
-                      <span>Headshot %</span>
-                    </div>
-                    <div className="text-2xl font-black font-mono text-amber-400">{displayHs}</div>
-                    <div className="text-[10px] font-mono text-slate-500">
-                      {displayMatches > 0 ? 'AK-47 Precision' : 'Awaiting first match'}
-                    </div>
-                  </div>
-
-                  <div className="p-5 rounded-2xl bg-[#0E1017] border border-[#202536] space-y-2">
-                    <div className="text-[10px] font-mono uppercase tracking-wider text-slate-400 flex items-center gap-1.5">
-                      <Activity className="w-3.5 h-3.5 text-sky-400" />
-                      <span>Matches Total</span>
-                    </div>
-                    <div className="text-2xl font-black font-mono text-white">{displayMatches.toLocaleString()}</div>
-                    <div className="text-[10px] font-mono text-slate-500 font-bold">
-                      {displayMatches > 0 ? 'Competitive 5v5' : 'Season 1 Calibrating'}
-                    </div>
-                  </div>
-                </div>
+                {/* AUTHENTIC FACEIT SEASON STATS & PERFORMANCE DASHBOARD ("JA KOMPLET PAMJA") */}
+                <FaceitSeasonStatsCard
+                  gamerTag={displayTag}
+                  countryCode={displayCountryCode}
+                  countryName={displayCountryName}
+                  elo={displayMatches > 0 ? displayElo : 800}
+                  level={displayMatches > 0 ? displayLevelNum : 3}
+                  matches={displayMatches}
+                  isCalibrated={displayMatches > 0}
+                  userRank={displayMatches > 0 ? userPlatformRank : 97}
+                />
 
                 {/* TWO COLUMN GRID: ESPORTS GEAR & STEAM CONFIG + CS2 MAP POOL MASTERY */}
                 <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
@@ -7395,7 +7392,7 @@ export const VortexDashboard: React.FC<VortexDashboardProps> = ({
                 </div>
               </div>
 
-              {/* Entry Fee Escrow Notice if Paid */}
+              {/* Entry Fee Instant Payout Notice if Paid */}
               {selectedRegisterTourney?.entryFee > 0 && (
                 <div className="p-3.5 rounded-2xl bg-amber-500/10 border border-amber-500/25 space-y-1.5 text-[11px]">
                   <div className="flex items-center justify-between text-amber-300 font-bold">
@@ -7406,7 +7403,7 @@ export const VortexDashboard: React.FC<VortexDashboardProps> = ({
                     <span>€{selectedRegisterTourney.entryFee} / Ekip (€{(selectedRegisterTourney.entryFee / 5).toFixed(0)} / person)</span>
                   </div>
                   <p className="text-[10px] text-slate-300">
-                    Fondi i regjistrimit bllokohet në CaliberClutch Escrow. 15% mbahet automatikisht si komision platforme dhe 85% i kalon fondit të fituesve.
+                    Fondi i çmimit shpërndahet në sekondë me Instant Payout. 15% mbahet si komision platforme dhe 85% i kalon menjëherë fituesve në bilanc sapo mbyllet finalja.
                   </p>
                 </div>
               )}
