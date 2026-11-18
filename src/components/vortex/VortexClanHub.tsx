@@ -179,6 +179,7 @@ export interface ClanMatch {
   timeAgo: string;
   duration: string;
   eloChange: number;
+  prizeEarned?: string;
   tournamentOrEvent?: string;
 
   // Authentic 1:1 FACEIT Scoreboard Data
@@ -244,6 +245,7 @@ export const DEFAULT_CLAN_MATCHES: ClanMatch[] = [
     opponentScore: 13,
     userElo: 1381,
     eloDelta: -28,
+    prizeEarned: '-$25.00',
     userRating: '0.67',
     userStats: {
       kills: 8,
@@ -259,7 +261,7 @@ export const DEFAULT_CLAN_MATCHES: ClanMatch[] = [
     timeAgo: 'Sun 15 Nov',
     duration: '32 mins',
     eloChange: 28,
-    tournamentOrEvent: 'FACEIT 5v5 Competitive Match',
+    tournamentOrEvent: 'Caliber Clutch 5v5 Clan Championship',
 
     team1: {
       name: 'team_SiLVERiNYO',
@@ -578,6 +580,7 @@ export const DEFAULT_CLAN_MATCHES: ClanMatch[] = [
     opponentScore: 4,
     userElo: 1409,
     eloDelta: 29,
+    prizeEarned: '+$120.00',
     userRating: '1.30',
     userStats: {
       kills: 15,
@@ -593,7 +596,7 @@ export const DEFAULT_CLAN_MATCHES: ClanMatch[] = [
     timeAgo: 'Sun 15 Nov',
     duration: '28 mins',
     eloChange: 29,
-    tournamentOrEvent: 'FACEIT 5v5 Competitive Match',
+    tournamentOrEvent: 'Caliber Clutch 5v5 Clan Championship',
 
     team1: {
       name: 'team_edd1-',
@@ -912,6 +915,7 @@ export const DEFAULT_CLAN_MATCHES: ClanMatch[] = [
     opponentScore: 11,
     userElo: 1380,
     eloDelta: 25,
+    prizeEarned: '+$90.00',
     userRating: '1.28',
     userStats: {
       kills: 21,
@@ -1404,6 +1408,37 @@ export const VortexClanHub: React.FC<VortexClanHubProps> = ({
   const [scoreboardSortKey, setScoreboardSortKey] = useState<string>('rating');
   const [scoreboardSortAsc, setScoreboardSortAsc] = useState<boolean>(false);
   const [selectedRoundDetail, setSelectedRoundDetail] = useState<number | null>(null);
+  const [selectedPlayerProfile, setSelectedPlayerProfile] = useState<FaceitScoreboardPlayer | null>(null);
+
+  // Helper to convert ClanMember to FaceitScoreboardPlayer for profile inspection
+  const handleOpenMemberProfile = (m: ClanMember) => {
+    sound.playSelect();
+    setSelectedPlayerProfile({
+      id: m.id,
+      name: m.name,
+      avatar: m.avatar,
+      level: m.level,
+      elo: m.elo,
+      rating: (1.10 + (m.elo / 6000)).toFixed(2),
+      hasMvpStar: m.isCaptain,
+      swing: '+4.25%',
+      isPositiveSwing: true,
+      kills: Math.max(12, Math.floor(m.elo / 95)),
+      deaths: 11,
+      assists: 6,
+      adr: '86.4',
+      kd: '1.36',
+      kr: '0.88',
+      hs: 9,
+      hsPercentage: '62.5%',
+      k5: 0,
+      k4: 1,
+      k3: 2,
+      k2: 4,
+      mvps: m.isCaptain ? 3 : 1,
+      isCurrentUser: m.isUser,
+    });
+  };
 
   // Helper to open match scoreboard and reset to Scoreboard view
   const openMatchScoreboard = (match: ClanMatch) => {
@@ -1417,14 +1452,15 @@ export const VortexClanHub: React.FC<VortexClanHubProps> = ({
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
       if (e.key === 'Escape') {
-        if (selectedScoreboardMatch) setSelectedScoreboardMatch(null);
-        if (isEditModalOpen) setIsEditModalOpen(false);
-        if (isInviteModalOpen) setIsInviteModalOpen(false);
+        if (selectedPlayerProfile) setSelectedPlayerProfile(null);
+        else if (selectedScoreboardMatch) setSelectedScoreboardMatch(null);
+        else if (isEditModalOpen) setIsEditModalOpen(false);
+        else if (isInviteModalOpen) setIsInviteModalOpen(false);
       }
     };
     window.addEventListener('keydown', handleKeyDown);
     return () => window.removeEventListener('keydown', handleKeyDown);
-  }, [selectedScoreboardMatch, isEditModalOpen, isInviteModalOpen]);
+  }, [selectedPlayerProfile, selectedScoreboardMatch, isEditModalOpen, isInviteModalOpen]);
 
   // Real GOTV Demo file download trigger
   const handleDownloadDemo = (match: ClanMatch) => {
@@ -1550,7 +1586,7 @@ export const VortexClanHub: React.FC<VortexClanHubProps> = ({
       timeAgo: 'Just now',
       duration: '31 mins',
       eloChange: 25,
-      tournamentOrEvent: 'FACEIT 5v5 Competitive Live Test',
+      tournamentOrEvent: 'Caliber Clutch 5v5 Competitive Live Test',
 
       team1: {
         name: userClan.name,
@@ -2107,11 +2143,7 @@ export const VortexClanHub: React.FC<VortexClanHubProps> = ({
               {userClan.members.slice(0, 5).map((member, idx) => (
                 <div
                   key={member.id}
-                  onClick={() => {
-                    sound.playClick();
-                    setActiveTab('roster');
-                    setToast(`Managing tactical role for ${member.name} (${member.role})`);
-                  }}
+                  onClick={() => handleOpenMemberProfile(member)}
                   className={`p-3.5 rounded-2xl border transition cursor-pointer hover:scale-[1.02] relative overflow-hidden flex flex-col justify-between gap-3 ${
                     member.isCaptain
                       ? 'bg-gradient-to-b from-[#1C1708] to-[#11131A] border-amber-500/40 shadow-lg hover:border-amber-400'
@@ -2177,11 +2209,13 @@ export const VortexClanHub: React.FC<VortexClanHubProps> = ({
             {userClan.members.map((member, idx) => (
               <div
                 key={member.id}
-                className={`p-4 rounded-2xl border transition flex flex-col sm:flex-row sm:items-center justify-between gap-4 ${
+                onClick={() => handleOpenMemberProfile(member)}
+                className={`p-4 rounded-2xl border transition flex flex-col sm:flex-row sm:items-center justify-between gap-4 cursor-pointer hover:border-[#A3E635]/60 hover:scale-[1.005] select-none ${
                   member.isCaptain
                     ? 'bg-[#181510] border-amber-500/30'
-                    : 'bg-[#12141D] border-[#222838] hover:border-slate-600'
+                    : 'bg-[#12141D] border-[#222838]'
                 }`}
+                title={`Click to view ${member.name}'s profile card`}
               >
                 <div className="flex items-center gap-3.5">
                   <span className="w-6 text-center text-xs font-mono font-bold text-slate-500">
@@ -2318,12 +2352,12 @@ export const VortexClanHub: React.FC<VortexClanHubProps> = ({
                 <div>
                   <div className="flex items-center gap-2">
                     <span className="px-2.5 py-0.5 rounded text-[10px] font-mono font-black uppercase bg-[#A3E635] text-slate-950 tracking-wider">
-                      FACEIT 5v5 OFFICIAL
+                      CALIBER 5v5 OFFICIAL
                     </span>
                     <h3 className="text-lg font-black font-display text-white">Clan Matches & Stats (CS2 Scoreboards)</h3>
                   </div>
                   <p className="text-xs font-mono text-slate-400 mt-1">
-                    Official 5v5 match history, ELO progression, performance ratings, and authentic 17-column FACEIT scoreboards
+                    Official 5v5 tournament cash match history, performance ratings, and official 17-column CS2 scoreboards
                   </p>
                 </div>
 
@@ -2367,12 +2401,16 @@ export const VortexClanHub: React.FC<VortexClanHubProps> = ({
                     <div
                       key={match.id}
                       onClick={() => openMatchScoreboard(match)}
-                      className="w-full bg-gradient-to-r from-[#121624] via-[#0F121C] to-[#0A0C14] hover:from-[#161C2E] hover:to-[#0F131D] border border-[#222A3E] hover:border-[#A3E635]/60 rounded-2xl transition-all duration-200 flex items-center justify-between px-3 sm:px-5 py-3.5 cursor-pointer group relative overflow-hidden shadow-xl"
+                      className={`w-full rounded-2xl transition-all duration-200 flex items-center justify-between px-3 sm:px-5 py-3.5 cursor-pointer group relative overflow-hidden ${
+                        match.isWin
+                          ? 'bg-gradient-to-r from-[#0C1F16]/90 via-[#091811]/75 to-[#06100B]/60 hover:from-[#0F261B]/95 hover:to-[#08150E]/80 border border-emerald-500/25 hover:border-emerald-400/50 shadow-[0_4px_20px_rgba(16,185,129,0.06)] hover:shadow-[0_4px_25px_rgba(16,185,129,0.12)]'
+                          : 'bg-gradient-to-r from-[#210D12]/90 via-[#18090D]/75 to-[#100609]/60 hover:from-[#281016]/95 hover:to-[#14080B]/80 border border-rose-500/25 hover:border-rose-400/50 shadow-[0_4px_20px_rgba(244,63,94,0.06)] hover:shadow-[0_4px_25px_rgba(244,63,94,0.12)]'
+                      }`}
                     >
-                      {/* Left Colored Indicator Stripe (Caliber Glow: Lime = Win, Red = Loss) */}
+                      {/* Left Colored Indicator Stripe (Soft Caliber Glow: Lime = Win, Soft Rose = Loss) */}
                       <div
                         className={`absolute left-0 top-0 bottom-0 w-1.5 sm:w-2 ${
-                          match.isWin ? 'bg-[#A3E635] shadow-[0_0_12px_#A3E635]' : 'bg-[#EF4444] shadow-[0_0_12px_#EF4444]'
+                          match.isWin ? 'bg-[#A3E635] shadow-[0_0_10px_rgba(163,230,53,0.4)]' : 'bg-rose-500 shadow-[0_0_10px_rgba(244,63,94,0.4)]'
                         }`}
                       />
 
@@ -2409,20 +2447,17 @@ export const VortexClanHub: React.FC<VortexClanHubProps> = ({
                           <Crosshair className="w-4 h-4 opacity-70" />
                         </div>
 
-                        {/* FACEIT Level Ring & ELO + Delta */}
-                        <div className="flex items-center gap-2.5 shrink-0 min-w-[115px]">
-                          <FaceitLevelRing level={match.team1?.players?.find(p => p.isCurrentUser)?.level || match.team2?.players?.find(p => p.isCurrentUser)?.level || 7} size={26} />
-                          <div className="flex items-center gap-1.5 font-mono text-xs sm:text-sm">
-                            <span className="font-bold text-white">
-                              {match.userElo?.toLocaleString()}
-                            </span>
-                            <span
-                              className={`font-bold flex items-center text-xs ${
-                                match.eloDelta >= 0 ? 'text-[#22C55E]' : 'text-[#EF4444]'
-                              }`}
-                            >
-                              {match.eloDelta >= 0 ? `↑ ${match.eloDelta}` : `↓ ${Math.abs(match.eloDelta)}`}
-                            </span>
+                        {/* Tournament Cash Prize Earnings (Playing for Real Money) */}
+                        <div className="flex items-center gap-2 shrink-0 min-w-[110px]" title="Tournament Cash Prize Earnings (Playing for Cash, Not ELO)">
+                          <div
+                            className={`px-3 py-1 rounded-xl font-mono text-xs font-black flex items-center gap-1.5 shadow-sm border ${
+                              match.isWin
+                                ? 'bg-emerald-500/15 text-emerald-400 border-emerald-500/30 shadow-[0_0_12px_rgba(16,185,129,0.12)]'
+                                : 'bg-rose-500/15 text-rose-400 border-rose-500/30 shadow-[0_0_12px_rgba(244,63,94,0.12)]'
+                            }`}
+                          >
+                            <span className="text-xs">{match.isWin ? '💰' : '💸'}</span>
+                            <span>{match.prizeEarned || (match.isWin ? '+$75.00' : '-$25.00')}</span>
                           </div>
                         </div>
 
@@ -2904,7 +2939,7 @@ export const VortexClanHub: React.FC<VortexClanHubProps> = ({
                           <th 
                             onClick={() => handleToggleSort('rating')}
                             className="py-2.5 px-2 min-w-[90px] cursor-pointer transition select-none"
-                            title="Sort by HLTV / FACEIT Performance Rating"
+                            title="Sort by Performance Rating"
                           >
                             <span className={`inline-flex items-center gap-1.5 ${scoreboardSortKey === 'rating' ? 'text-[#A3E635] font-black' : 'text-slate-300 hover:text-white'}`}>
                               <span className="w-3.5 h-3.5 rounded-full bg-[#A3E635] text-slate-950 font-black text-[9px] flex items-center justify-center shadow-sm">⯆</span>
@@ -2929,28 +2964,35 @@ export const VortexClanHub: React.FC<VortexClanHubProps> = ({
                         </tr>
                       </thead>
                       <tbody className="divide-y divide-white/5 text-slate-300">
-                        {getSortedPlayers(selectedScoreboardMatch.team1?.players || []).map(p => {
+                        {getSortedPlayers(selectedScoreboardMatch.team1?.players || []).map((p, idx) => {
                           const isUser = p.isCurrentUser || p.name.toLowerCase() === currentGamerTag.toLowerCase() || p.name.toLowerCase().includes('blockeer');
                           const ratingNum = parseFloat(p.rating);
 
                           return (
                             <tr
                               key={p.id || p.name}
-                              className={`transition ${
+                              onClick={() => {
+                                sound.playSelect();
+                                setSelectedPlayerProfile(p);
+                              }}
+                              className={`transition cursor-pointer group select-none ${
                                 isUser
-                                  ? 'bg-gradient-to-r from-[#A3E635]/15 via-[#A3E635]/5 to-transparent font-bold border-l-4 border-l-[#A3E635] shadow-inner'
-                                  : 'hover:bg-white/[0.03]'
+                                  ? 'bg-gradient-to-r from-[#A3E635]/20 via-[#A3E635]/5 to-transparent font-bold border-l-4 border-l-[#A3E635] shadow-inner hover:bg-[#A3E635]/25'
+                                  : 'hover:bg-[#131C30]'
                               }`}
+                              title={`Click to view ${p.name}'s player profile and career stats`}
                             >
                               <td className="py-2.5 px-3">
                                 <div className="flex items-center gap-2">
-                                  <span className="text-purple-400 text-xs">▲</span>
-                                  <img src={p.avatar} alt="" className="w-6 h-6 rounded-full object-cover border border-white/10" />
-                                  <span className={`text-xs ${isUser ? 'text-[#2dd4bf] font-black' : 'text-white font-semibold'}`}>
+                                  <span className="w-4 h-4 rounded-md bg-[#A3E635]/15 border border-[#A3E635]/35 text-[9px] font-mono font-bold text-[#A3E635] flex items-center justify-center shrink-0">
+                                    {idx + 1}
+                                  </span>
+                                  <img src={p.avatar} alt="" className="w-6 h-6 rounded-full object-cover border border-white/10 group-hover:border-[#A3E635] transition" />
+                                  <span className={`text-xs group-hover:underline transition ${isUser ? 'text-[#2dd4bf] font-black' : 'text-white font-semibold group-hover:text-[#A3E635]'}`}>
                                     {p.name}
                                   </span>
                                   {isUser && (
-                                    <span className="px-1.5 py-0.5 rounded text-[9px] font-mono font-black bg-[#A3E635] text-black uppercase shadow-sm">
+                                    <span className="px-1.5 py-0.5 rounded text-[9px] font-mono font-black bg-[#A3E635] text-slate-950 uppercase shadow-sm">
                                       YOU
                                     </span>
                                   )}
@@ -3070,28 +3112,35 @@ export const VortexClanHub: React.FC<VortexClanHubProps> = ({
                         </tr>
                       </thead>
                       <tbody className="divide-y divide-white/5 text-slate-300">
-                        {getSortedPlayers(selectedScoreboardMatch.team2?.players || []).map(p => {
+                        {getSortedPlayers(selectedScoreboardMatch.team2?.players || []).map((p, idx) => {
                           const isUser = p.isCurrentUser || p.name.toLowerCase() === currentGamerTag.toLowerCase() || p.name.toLowerCase().includes('blockeer');
                           const ratingNum = parseFloat(p.rating);
 
                           return (
                             <tr
                               key={p.id || p.name}
-                              className={`transition ${
+                              onClick={() => {
+                                sound.playSelect();
+                                setSelectedPlayerProfile(p);
+                              }}
+                              className={`transition cursor-pointer group select-none ${
                                 isUser
-                                  ? 'bg-gradient-to-r from-[#A3E635]/15 via-[#A3E635]/5 to-transparent font-bold border-l-4 border-l-[#A3E635] shadow-inner'
-                                  : 'hover:bg-white/[0.03]'
+                                  ? 'bg-gradient-to-r from-[#A3E635]/20 via-[#A3E635]/5 to-transparent font-bold border-l-4 border-l-[#A3E635] shadow-inner hover:bg-[#A3E635]/25'
+                                  : 'hover:bg-[#131C30]'
                               }`}
+                              title={`Click to view ${p.name}'s player profile and career stats`}
                             >
                               <td className="py-2.5 px-3">
                                 <div className="flex items-center gap-2">
-                                  <span className="text-[#2dd4bf] text-xs">◆</span>
-                                  <img src={p.avatar} alt="" className="w-6 h-6 rounded-full object-cover border border-white/10" />
-                                  <span className={`text-xs ${isUser ? 'text-[#2dd4bf] font-black' : 'text-white font-semibold'}`}>
+                                  <span className="w-4 h-4 rounded-md bg-[#06B6D4]/15 border border-[#06B6D4]/35 text-[9px] font-mono font-bold text-[#22D3EE] flex items-center justify-center shrink-0">
+                                    {idx + 1}
+                                  </span>
+                                  <img src={p.avatar} alt="" className="w-6 h-6 rounded-full object-cover border border-white/10 group-hover:border-[#06B6D4] transition" />
+                                  <span className={`text-xs group-hover:underline transition ${isUser ? 'text-[#2dd4bf] font-black' : 'text-white font-semibold group-hover:text-[#22D3EE]'}`}>
                                     {p.name}
                                   </span>
                                   {isUser && (
-                                    <span className="px-1.5 py-0.5 rounded text-[9px] font-mono font-black bg-[#A3E635] text-black uppercase shadow-sm">
+                                    <span className="px-1.5 py-0.5 rounded text-[9px] font-mono font-black bg-[#A3E635] text-slate-950 uppercase shadow-sm">
                                       YOU
                                     </span>
                                   )}
@@ -3555,6 +3604,200 @@ export const VortexClanHub: React.FC<VortexClanHubProps> = ({
               </button>
             </div>
           </form>
+        </div>
+      )}
+
+
+      {/* ======================================================== */}
+      {/* INTERACTIVE PLAYER PROFILE INSPECT MODAL (CLICKABLE)     */}
+      {/* ======================================================== */}
+      {selectedPlayerProfile && (
+        <div 
+          className="fixed inset-0 z-[160] bg-black/85 backdrop-blur-md flex items-center justify-center p-3 sm:p-5 animate-in fade-in duration-200"
+          onClick={() => setSelectedPlayerProfile(null)}
+        >
+          <div 
+            className="w-full max-w-lg bg-gradient-to-b from-[#0F1424] via-[#0B0F1C] to-[#070A12] border-2 border-[#1E2946] rounded-3xl p-5 sm:p-6 shadow-[0_0_80px_rgba(0,0,0,0.95)] space-y-5 text-left relative overflow-hidden"
+            onClick={(e) => e.stopPropagation()}
+          >
+            {/* Ambient background glows */}
+            <div className="absolute top-0 right-0 w-64 h-64 bg-[#A3E635]/5 rounded-full blur-3xl pointer-events-none" />
+            <div className="absolute bottom-0 left-0 w-64 h-64 bg-[#06B6D4]/5 rounded-full blur-3xl pointer-events-none" />
+
+            {/* Header with Close */}
+            <div className="flex items-center justify-between border-b border-[#1E2842] pb-3 relative z-10">
+              <div className="flex items-center gap-2">
+                <Shield className="w-4 h-4 text-[#A3E635]" />
+                <span className="text-xs font-mono font-bold uppercase tracking-wider text-slate-300">
+                  Player Profile Card • CS2 Statistics
+                </span>
+              </div>
+              <button
+                onClick={() => setSelectedPlayerProfile(null)}
+                title="Close Profile (Esc)"
+                className="w-8 h-8 rounded-xl bg-white/5 hover:bg-white/10 text-slate-400 hover:text-white flex items-center justify-center transition cursor-pointer"
+              >
+                ✕
+              </button>
+            </div>
+
+            {/* Player Identity Banner */}
+            <div className="flex items-center gap-4 relative z-10">
+              <div className="relative shrink-0">
+                <img
+                  src={selectedPlayerProfile.avatar}
+                  alt={selectedPlayerProfile.name}
+                  className="w-16 h-16 rounded-2xl object-cover border-2 border-[#A3E635]/60 shadow-[0_0_20px_rgba(163,230,53,0.25)]"
+                />
+                <div className="absolute -bottom-1.5 -right-1.5">
+                  <FaceitLevelRing level={selectedPlayerProfile.level} size={24} />
+                </div>
+              </div>
+
+              <div className="flex-1 min-w-0">
+                <div className="flex flex-wrap items-center gap-2">
+                  <h3 className="text-xl font-black font-sans text-white truncate">
+                    {selectedPlayerProfile.name}
+                  </h3>
+                  {selectedPlayerProfile.isCurrentUser && (
+                    <span className="px-2 py-0.5 rounded text-[10px] font-mono font-black bg-[#A3E635] text-slate-950 uppercase shadow-sm">
+                      YOU
+                    </span>
+                  )}
+                  {selectedPlayerProfile.hasMvpStar && (
+                    <span className="px-2 py-0.5 rounded text-[10px] font-mono font-black bg-amber-400/20 text-amber-300 border border-amber-400/40 flex items-center gap-1">
+                      <Star className="w-3 h-3 fill-current text-amber-400" />
+                      MATCH MVP
+                    </span>
+                  )}
+                </div>
+                <div className="flex items-center gap-3 text-xs font-mono text-slate-400 mt-1">
+                  <span className="text-[#A3E635] font-bold">
+                    Skill Level {selectedPlayerProfile.level} • {selectedPlayerProfile.elo.toLocaleString()} ELO
+                  </span>
+                  <span>•</span>
+                  <span className="flex items-center gap-1 text-emerald-400">
+                    <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />
+                    Verified Caliber Pro
+                  </span>
+                </div>
+              </div>
+            </div>
+
+            {/* Match Performance Snapshot */}
+            <div className="space-y-2 relative z-10">
+              <span className="text-[11px] font-mono font-bold uppercase tracking-wider text-slate-400">
+                Current Match Performance
+              </span>
+              <div className="grid grid-cols-4 gap-2">
+                <div className="p-2.5 rounded-xl bg-[#0B0F1A] border border-[#1E2942] text-center">
+                  <span className="text-[10px] font-mono text-slate-400 block">Rating</span>
+                  <span className="text-sm font-black font-mono text-[#A3E635] block mt-0.5">
+                    {selectedPlayerProfile.rating}
+                  </span>
+                </div>
+                <div className="p-2.5 rounded-xl bg-[#0B0F1A] border border-[#1E2942] text-center">
+                  <span className="text-[10px] font-mono text-slate-400 block">K / D / A</span>
+                  <span className="text-sm font-black font-mono text-white block mt-0.5">
+                    {selectedPlayerProfile.kills}/{selectedPlayerProfile.deaths}/{selectedPlayerProfile.assists}
+                  </span>
+                </div>
+                <div className="p-2.5 rounded-xl bg-[#0B0F1A] border border-[#1E2942] text-center">
+                  <span className="text-[10px] font-mono text-slate-400 block">K/D Ratio</span>
+                  <span className="text-sm font-black font-mono text-cyan-300 block mt-0.5">
+                    {selectedPlayerProfile.kd}
+                  </span>
+                </div>
+                <div className="p-2.5 rounded-xl bg-[#0B0F1A] border border-[#1E2942] text-center">
+                  <span className="text-[10px] font-mono text-slate-400 block">ADR</span>
+                  <span className="text-sm font-black font-mono text-slate-200 block mt-0.5">
+                    {selectedPlayerProfile.adr}
+                  </span>
+                </div>
+              </div>
+
+              <div className="grid grid-cols-3 gap-2 pt-1">
+                <div className="p-2 rounded-xl bg-[#0B0F1A] border border-[#1E2942] text-center">
+                  <span className="text-[10px] font-mono text-slate-400 block">Headshot %</span>
+                  <span className="text-xs font-bold font-mono text-white block mt-0.5">{selectedPlayerProfile.hsPercentage}</span>
+                </div>
+                <div className="p-2 rounded-xl bg-[#0B0F1A] border border-[#1E2942] text-center">
+                  <span className="text-[10px] font-mono text-slate-400 block">Swing Impact</span>
+                  <span className={`text-xs font-bold font-mono block mt-0.5 ${selectedPlayerProfile.isPositiveSwing ? 'text-emerald-400' : 'text-rose-400'}`}>
+                    {selectedPlayerProfile.swing}
+                  </span>
+                </div>
+                <div className="p-2 rounded-xl bg-[#0B0F1A] border border-[#1E2942] text-center">
+                  <span className="text-[10px] font-mono text-slate-400 block">Round MVPs</span>
+                  <span className="text-xs font-bold font-mono text-amber-300 block mt-0.5">
+                    ⭐ {selectedPlayerProfile.mvps} MVPs
+                  </span>
+                </div>
+              </div>
+            </div>
+
+            {/* Multi-Kill Rounds */}
+            <div className="p-3 rounded-2xl bg-[#0B0F1A] border border-[#1E2942] space-y-1.5 relative z-10 text-xs font-mono">
+              <span className="text-[10px] text-slate-400 uppercase font-bold tracking-wider block">
+                Multi-Kill Rounds
+              </span>
+              <div className="flex items-center justify-between text-slate-300">
+                <span>Aces (5K): <strong className="text-amber-400">{selectedPlayerProfile.k5}</strong></span>
+                <span>Quad (4K): <strong className="text-amber-400">{selectedPlayerProfile.k4}</strong></span>
+                <span>Triple (3K): <strong className="text-amber-400">{selectedPlayerProfile.k3}</strong></span>
+                <span>Double (2K): <strong className="text-white">{selectedPlayerProfile.k2}</strong></span>
+              </div>
+            </div>
+
+            {/* Anti-Cheat & VAC Standing */}
+            <div className="p-3 rounded-2xl bg-[#070A12] border border-[#182136] flex items-center justify-between text-xs font-mono text-slate-400 relative z-10">
+              <div>
+                <span className="text-[10px] uppercase text-slate-500 block font-bold">Vortex Client Anti-Cheat</span>
+                <span className="text-emerald-400 font-bold flex items-center gap-1 mt-0.5">
+                  <Shield className="w-3.5 h-3.5 text-emerald-400" />
+                  Active • VAC Clean & In Good Standing
+                </span>
+              </div>
+              <button
+                type="button"
+                onClick={() => {
+                  navigator.clipboard.writeText(`STEAM_0:1:${Math.floor(Math.random() * 89999999 + 10000000)}`);
+                  setToast(`✓ Steam ID of ${selectedPlayerProfile.name} copied!`);
+                }}
+                className="px-2.5 py-1.5 rounded-lg bg-white/5 hover:bg-white/10 text-slate-300 hover:text-white border border-white/10 text-[11px] font-mono cursor-pointer transition flex items-center gap-1.5"
+                title="Copy Steam ID"
+              >
+                <Copy className="w-3 h-3 text-[#A3E635]" />
+                <span>Copy SteamID</span>
+              </button>
+            </div>
+
+            {/* Interactive Action Buttons */}
+            <div className="grid grid-cols-2 gap-2.5 pt-1 relative z-10">
+              <button
+                type="button"
+                onClick={() => {
+                  sound.playSelect();
+                  setToast(`✓ Friend request sent to ${selectedPlayerProfile.name}!`);
+                }}
+                className="px-4 py-2.5 rounded-xl bg-white/10 hover:bg-white/15 text-white font-mono font-bold text-xs flex items-center justify-center gap-1.5 cursor-pointer transition active:scale-95 border border-white/10"
+              >
+                <UserPlus className="w-3.5 h-3.5 text-[#06B6D4]" />
+                <span>Add Friend</span>
+              </button>
+              <button
+                type="button"
+                onClick={() => {
+                  sound.playSelect();
+                  setToast(`✓ Clan & match invite sent to ${selectedPlayerProfile.name}!`);
+                }}
+                className="px-4 py-2.5 rounded-xl bg-gradient-to-r from-[#84CC16] to-[#A3E635] hover:brightness-110 text-slate-950 font-mono font-black text-xs flex items-center justify-center gap-1.5 cursor-pointer transition active:scale-95 shadow-lg shadow-[#A3E635]/20"
+              >
+                <Zap className="w-3.5 h-3.5 fill-current" />
+                <span>Invite to Clan</span>
+              </button>
+            </div>
+          </div>
         </div>
       )}
 
