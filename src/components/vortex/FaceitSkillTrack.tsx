@@ -90,10 +90,10 @@ export const FaceitSkillTrack: React.FC<FaceitSkillTrackProps> = ({
   const progressInSegment = Math.min(100, Math.max(8, Math.round(((currentElo - currentTier.minElo) / range) * 100)));
 
   return (
-    <div className={`w-full rounded-2xl bg-black/40 border border-white/5 p-4 sm:p-5 space-y-3.5 ${className}`}>
-      {/* Scrollable container on mobile, full width on desktop */}
-      <div className="overflow-x-auto overflow-y-hidden pb-1 pt-2 scrollbar-thin scrollbar-thumb-white/10">
-        <div className="min-w-[540px] sm:min-w-[620px] flex items-center justify-between px-2">
+    <div className={`w-full py-1.5 space-y-2.5 ${className}`}>
+      {/* 100% Responsive track without any horizontal scrollbar or drag-handle */}
+      <div className="w-full overflow-hidden [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden">
+        <div className="w-full flex items-center justify-between">
           {[1, 2, 3, 4, 5, 6, 7, 8, 9, 10].map((lvl, idx) => {
             const isReached = lvl <= currentLevel;
             const isCurrent = lvl === currentLevel;
@@ -109,16 +109,16 @@ export const FaceitSkillTrack: React.FC<FaceitSkillTrackProps> = ({
                 {/* Node Level Badge */}
                 <div className="flex flex-col items-center relative group shrink-0">
                   <div
-                    className={`w-7 h-7 sm:w-8 sm:h-8 rounded-full bg-[#121620] flex items-center justify-center relative transition-transform duration-200 group-hover:scale-110 ${
+                    className={`w-6 h-6 sm:w-7 sm:h-7 md:w-8 md:h-8 rounded-full bg-[#121620] flex items-center justify-center relative transition-transform duration-200 group-hover:scale-110 ${
                       isCurrent
-                        ? 'ring-2 ring-white/40 shadow-[0_0_15px_rgba(255,255,255,0.25)]'
+                        ? 'ring-2 ring-white/40 shadow-[0_0_12px_rgba(255,255,255,0.25)]'
                         : isReached
                         ? 'border border-white/10'
                         : 'border border-white/5 opacity-40'
                     }`}
                   >
                     {/* Circular Arc Ring (matching authentic FACEIT SVG gauge) */}
-                    <svg className="w-full h-full -rotate-90 absolute inset-0 p-[2px]" viewBox="0 0 36 36">
+                    <svg className="w-full h-full -rotate-90 absolute inset-0 p-[1.5px] sm:p-[2px]" viewBox="0 0 36 36">
                       <circle cx="18" cy="18" r="14" fill="none" stroke="#1A202C" strokeWidth="3" />
                       <circle
                         cx="18"
@@ -133,7 +133,7 @@ export const FaceitSkillTrack: React.FC<FaceitSkillTrackProps> = ({
                       />
                     </svg>
                     <span
-                      className={`text-[10px] sm:text-[11px] font-black font-mono relative z-10 ${
+                      className={`text-[9px] sm:text-[10px] md:text-[11px] font-black font-mono relative z-10 ${
                         isReached ? 'text-white' : 'text-slate-500'
                       }`}
                     >
@@ -148,7 +148,7 @@ export const FaceitSkillTrack: React.FC<FaceitSkillTrackProps> = ({
                 </div>
 
                 {/* Connecting Segment */}
-                <div className="flex-1 h-[3px] mx-1 sm:mx-1.5 rounded-full bg-[#1E2433] relative overflow-hidden shrink-1">
+                <div className="flex-1 h-[2.5px] sm:h-[3px] mx-0.5 sm:mx-1 md:mx-1.5 rounded-full bg-[#1E2433] relative overflow-hidden min-w-[10px]">
                   {isFilledLine && (
                     <div className={`h-full w-full rounded-full ${segmentColorClass}`} />
                   )}
@@ -166,13 +166,13 @@ export const FaceitSkillTrack: React.FC<FaceitSkillTrackProps> = ({
           {/* 11th Node: Challenger (Top 1,000 Wreath) */}
           <div className="flex flex-col items-center relative group shrink-0">
             <div
-              className={`w-7 h-7 sm:w-8 sm:h-8 rounded-full bg-[#121620] flex items-center justify-center relative transition-transform duration-200 group-hover:scale-110 ${
+              className={`w-6 h-6 sm:w-7 sm:h-7 md:w-8 md:h-8 rounded-full bg-[#121620] flex items-center justify-center relative transition-transform duration-200 group-hover:scale-110 ${
                 currentLevel >= 10
-                  ? 'border border-red-500 shadow-[0_0_15px_rgba(220,38,38,0.5)] ring-1 ring-red-500/50'
+                  ? 'border border-red-500 shadow-[0_0_12px_rgba(220,38,38,0.5)] ring-1 ring-red-500/50'
                   : 'border border-white/5 opacity-40'
               }`}
             >
-              <svg className="w-4 h-4 text-red-500" viewBox="0 0 24 24" fill="currentColor">
+              <svg className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-red-500" viewBox="0 0 24 24" fill="currentColor">
                 {/* Authentic Laurel Wreath with Wings / Sword */}
                 <path d="M5 12c.5-2.5 2-4.5 4-5.5-.3.8-.4 1.7-.4 2.5 0 1.2.3 2.3.8 3.2-1.7-.1-3.2-.8-4.4-1.7zm14 0c-.5-2.5-2-4.5-4-5.5.3.8.4 1.7.4 2.5 0 1.2-.3 2.3-.8 3.2 1.7-.1 3.2-.8 4.4-1.7zM7 16.5c1.2.8 2.6 1.3 4.2 1.4-.4-.8-.6-1.7-.6-2.7 0-.5.1-1 .2-1.5-1.5.3-2.8 1.3-3.8 2.8zm10 0c-1.2.8-2.6 1.3-4.2 1.4.4-.8.6-1.7.6-2.7 0-.5-.1-1-.2-1.5 1.5.3 2.8 1.3 3.8 2.8zM12 5l1.5 4h-3L12 5zm0 5l1 3h-2l1-3z" />
               </svg>
@@ -185,7 +185,7 @@ export const FaceitSkillTrack: React.FC<FaceitSkillTrackProps> = ({
         </div>
       </div>
 
-      {/* Underneath: Elo needed to next skill rank */}
+      {/* Underneath: Elo needed to next skill rank (1:1 with authentic FACEIT UI) */}
       <div className="text-center pt-1 text-xs font-mono flex items-center justify-center gap-1.5">
         {currentLevel < 10 ? (
           <>
