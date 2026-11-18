@@ -1560,11 +1560,26 @@ export const VortexDashboard: React.FC<VortexDashboardProps> = ({
   const [isCountryDropdownOpen, setIsCountryDropdownOpen] = useState<boolean>(false);
   const countryDropdownRef = useRef<HTMLDivElement>(null);
 
-  // Close custom FACEIT country dropdown when clicking outside
+  const [rankingRegion, setRankingRegion] = useState<string>('EU');
+  const [isRegionDropdownOpen, setIsRegionDropdownOpen] = useState<boolean>(false);
+  const regionDropdownRef = useRef<HTMLDivElement>(null);
+
+  const FACEIT_REGIONS = [
+    { code: 'EU', label: 'EU' },
+    { code: 'NA', label: 'NA' },
+    { code: 'SA', label: 'SA' },
+    { code: 'SEA', label: 'SEA' },
+    { code: 'OCE', label: 'OCE' },
+  ];
+
+  // Close custom FACEIT country & region dropdowns when clicking outside
   useEffect(() => {
     const handleClickOutside = (e: MouseEvent) => {
       if (countryDropdownRef.current && !countryDropdownRef.current.contains(e.target as Node)) {
         setIsCountryDropdownOpen(false);
+      }
+      if (regionDropdownRef.current && !regionDropdownRef.current.contains(e.target as Node)) {
+        setIsRegionDropdownOpen(false);
       }
     };
     document.addEventListener('mousedown', handleClickOutside);
@@ -4566,7 +4581,7 @@ export const VortexDashboard: React.FC<VortexDashboardProps> = ({
                     <div className="flex items-center gap-2.5">
                       <h2 className="text-2xl font-black font-display text-white">Platform Player Rankings</h2>
                       <span className="px-2.5 py-0.5 rounded-full text-[10px] font-mono font-bold bg-[#A3E635]/15 text-[#A3E635] border border-[#A3E635]/30">
-                        SEASON 1 LIVE
+                        COMPETITIVE LEADERBOARD
                       </span>
                     </div>
                     <p className="text-xs text-[#94A3B8] mt-1">
@@ -4830,76 +4845,125 @@ export const VortexDashboard: React.FC<VortexDashboardProps> = ({
                       <span>Challenger / Level 10</span>
                     </button>
 
-                    {/* 1:1 Authentic FACEIT Country Selector Dropdown */}
-                    <div className="relative flex items-center gap-1.5" ref={countryDropdownRef}>
-                      <button
-                        type="button"
-                        onClick={() => {
-                          sound.playClick();
-                          setIsCountryDropdownOpen(prev => !prev);
-                        }}
-                        className={`px-3 py-1.5 rounded-lg text-xs font-sans transition flex items-center justify-between gap-3 min-w-[155px] cursor-pointer ${
-                          isCountryDropdownOpen
-                            ? 'bg-[#101114] border-2 border-[#FF5500] text-white shadow-[0_0_12px_rgba(255,85,0,0.25)]'
-                            : 'bg-[#14151A] border border-[#2B2D33] text-slate-200 hover:text-white hover:border-slate-500'
-                        }`}
-                      >
-                        <span className="font-medium text-xs truncate">
-                          {rankingCountry === 'all'
-                            ? 'All countries'
-                            : (sortedRankingCountries.find(c => c.code.toUpperCase() === rankingCountry.toUpperCase())?.name || 'All countries')}
-                        </span>
-                        <ChevronDown className={`w-3.5 h-3.5 text-slate-400 transition-transform duration-200 ${isCountryDropdownOpen ? 'rotate-180 text-[#FF5500]' : ''}`} />
-                      </button>
+                    {/* 1:1 Authentic FACEIT Country & Region Selectors */}
+                    <div className="flex items-center gap-1.5">
+                      {/* 1:1 Authentic FACEIT Country Selector Dropdown */}
+                      <div className="relative" ref={countryDropdownRef}>
+                        <button
+                          type="button"
+                          onClick={() => {
+                            sound.playClick();
+                            setIsCountryDropdownOpen(prev => !prev);
+                            setIsRegionDropdownOpen(false);
+                          }}
+                          className={`px-3 py-1.5 rounded-lg text-xs font-sans transition flex items-center justify-between gap-3 min-w-[155px] cursor-pointer ${
+                            isCountryDropdownOpen
+                              ? 'bg-[#101114] border-2 border-[#FF5500] text-white shadow-[0_0_12px_rgba(255,85,0,0.25)]'
+                              : 'bg-[#14151A] border border-[#2B2D33] text-slate-200 hover:text-white hover:border-slate-500'
+                          }`}
+                        >
+                          <span className="font-medium text-xs truncate">
+                            {rankingCountry === 'all'
+                              ? 'All countries'
+                              : (sortedRankingCountries.find(c => c.code.toUpperCase() === rankingCountry.toUpperCase())?.name || 'All countries')}
+                          </span>
+                          <ChevronDown className={`w-3.5 h-3.5 text-slate-400 transition-transform duration-200 ${isCountryDropdownOpen ? 'rotate-180 text-[#FF5500]' : ''}`} />
+                        </button>
 
-                      {/* EU Region Indicator Tag (matching FACEIT Header) */}
-                      <div className="px-2.5 py-1.5 rounded-lg bg-[#14151A] border border-[#2B2D33] text-xs font-mono font-bold text-slate-300 select-none">
-                        EU
+                        {/* Custom FACEIT Dark Country Dropdown Menu */}
+                        {isCountryDropdownOpen && (
+                          <div className="absolute left-0 top-full mt-1.5 w-64 max-h-72 overflow-y-auto rounded-lg bg-[#18191C] border border-[#2B2D33] shadow-2xl z-50 py-1 divide-y divide-white/[0.04]">
+                            {/* All countries option */}
+                            <button
+                              type="button"
+                              onClick={() => {
+                                sound.playSelect();
+                                setRankingCountry('all');
+                                setIsCountryDropdownOpen(false);
+                              }}
+                              className={`w-full px-3.5 py-2 text-left text-xs font-sans transition flex items-center justify-between cursor-pointer ${
+                                rankingCountry === 'all'
+                                  ? 'bg-[#2A2B31] text-white font-bold'
+                                  : 'text-slate-300 hover:bg-[#24252B] hover:text-white'
+                              }`}
+                            >
+                              <span>All countries</span>
+                              {rankingCountry === 'all' && (
+                                <Check className="w-3.5 h-3.5 text-white stroke-[2.5]" />
+                              )}
+                            </button>
+
+                            {/* Alphabetical List of all ~250 Official Countries */}
+                            <div className="py-0.5">
+                              {sortedRankingCountries.map((c) => {
+                                const isSelected = rankingCountry.toUpperCase() === c.code.toUpperCase();
+                                return (
+                                  <button
+                                    key={c.code}
+                                    type="button"
+                                    onClick={() => {
+                                      sound.playSelect();
+                                      setRankingCountry(c.code);
+                                      setIsCountryDropdownOpen(false);
+                                    }}
+                                    className={`w-full px-3.5 py-2 text-left text-xs font-sans transition flex items-center justify-between cursor-pointer ${
+                                      isSelected
+                                        ? 'bg-[#2A2B31] text-white font-bold'
+                                        : 'text-slate-300 hover:bg-[#24252B] hover:text-white'
+                                    }`}
+                                  >
+                                    <span className="truncate">{c.name}</span>
+                                    {isSelected && (
+                                      <Check className="w-3.5 h-3.5 text-white stroke-[2.5] shrink-0" />
+                                    )}
+                                  </button>
+                                );
+                              })}
+                            </div>
+                          </div>
+                        )}
                       </div>
 
-                      {/* Custom FACEIT Dark Dropdown Menu */}
-                      {isCountryDropdownOpen && (
-                        <div className="absolute left-0 top-full mt-1.5 w-64 max-h-72 overflow-y-auto rounded-lg bg-[#18191C] border border-[#2B2D33] shadow-2xl z-50 py-1 divide-y divide-white/[0.04]">
-                          {/* All countries option */}
-                          <button
-                            type="button"
-                            onClick={() => {
-                              sound.playSelect();
-                              setRankingCountry('all');
-                              setIsCountryDropdownOpen(false);
-                            }}
-                            className={`w-full px-3.5 py-2 text-left text-xs font-sans transition flex items-center justify-between cursor-pointer ${
-                              rankingCountry === 'all'
-                                ? 'bg-[#2A2B31] text-white font-bold'
-                                : 'text-slate-300 hover:bg-[#24252B] hover:text-white'
-                            }`}
-                          >
-                            <span>All countries</span>
-                            {rankingCountry === 'all' && (
-                              <Check className="w-3.5 h-3.5 text-white stroke-[2.5]" />
-                            )}
-                          </button>
+                      {/* 1:1 Authentic FACEIT Region Selector Dropdown (EU, NA, SA, SEA, OCE) */}
+                      <div className="relative" ref={regionDropdownRef}>
+                        <button
+                          type="button"
+                          onClick={() => {
+                            sound.playClick();
+                            setIsRegionDropdownOpen(prev => !prev);
+                            setIsCountryDropdownOpen(false);
+                          }}
+                          className={`px-3 py-1.5 rounded-lg text-xs font-sans font-bold transition flex items-center justify-between gap-3 min-w-[78px] cursor-pointer ${
+                            isRegionDropdownOpen
+                              ? 'bg-[#101114] border-2 border-[#FF5500] text-white shadow-[0_0_12px_rgba(255,85,0,0.25)]'
+                              : 'bg-[#14151A] border border-[#2B2D33] text-slate-200 hover:text-white hover:border-slate-500'
+                          }`}
+                        >
+                          <span className="font-bold text-xs">{rankingRegion}</span>
+                          <ChevronDown className={`w-3.5 h-3.5 text-slate-400 transition-transform duration-200 ${isRegionDropdownOpen ? 'rotate-180 text-[#FF5500]' : ''}`} />
+                        </button>
 
-                          {/* Alphabetical List of all ~250 Official Countries */}
-                          <div className="py-0.5">
-                            {sortedRankingCountries.map((c) => {
-                              const isSelected = rankingCountry.toUpperCase() === c.code.toUpperCase();
+                        {/* Custom FACEIT Dark Region Dropdown Menu matching user photo */}
+                        {isRegionDropdownOpen && (
+                          <div className="absolute left-0 top-full mt-1.5 w-full min-w-[82px] rounded-lg bg-[#141416] border border-[#2B2D33] shadow-2xl z-50 py-1">
+                            {FACEIT_REGIONS.map((r) => {
+                              const isSelected = rankingRegion === r.code;
                               return (
                                 <button
-                                  key={c.code}
+                                  key={r.code}
                                   type="button"
                                   onClick={() => {
                                     sound.playSelect();
-                                    setRankingCountry(c.code);
-                                    setIsCountryDropdownOpen(false);
+                                    setRankingRegion(r.code);
+                                    setIsRegionDropdownOpen(false);
                                   }}
-                                  className={`w-full px-3.5 py-2 text-left text-xs font-sans transition flex items-center justify-between cursor-pointer ${
+                                  className={`w-full px-3 py-1.5 text-left text-xs font-sans font-semibold transition flex items-center justify-between cursor-pointer ${
                                     isSelected
-                                      ? 'bg-[#2A2B31] text-white font-bold'
-                                      : 'text-slate-300 hover:bg-[#24252B] hover:text-white'
+                                      ? 'bg-[#24252B] text-white font-bold'
+                                      : 'text-slate-300 hover:bg-[#1E1F24] hover:text-white'
                                   }`}
                                 >
-                                  <span className="truncate">{c.name}</span>
+                                  <span>{r.label}</span>
                                   {isSelected && (
                                     <Check className="w-3.5 h-3.5 text-white stroke-[2.5] shrink-0" />
                                   )}
@@ -4907,8 +4971,8 @@ export const VortexDashboard: React.FC<VortexDashboardProps> = ({
                               );
                             })}
                           </div>
-                        </div>
-                      )}
+                        )}
+                      </div>
                     </div>
                   </div>
 
