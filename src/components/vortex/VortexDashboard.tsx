@@ -7,6 +7,7 @@ import {
   Crosshair, 
   Compass, 
   Award, 
+  Shield,
   ShieldCheck, 
   ShieldAlert, 
   User, 
@@ -78,6 +79,7 @@ import { VortexAdBanner } from './VortexAdBanner';
 import { VortexTopSponsorRibbon, VortexComingSoonDeals } from './VortexSponsorRibbon';
 import { VORTEX_CASE_CATALOG, CS2Case, getVortexWalletBalance, creditVortexWalletBalance } from '../../services/skinDeliveryService';
 import { FaceitSkillTrack, FaceitSeasonStatsCard } from './FaceitSkillTrack';
+import { VortexClanHub } from './VortexClanHub';
 
 interface VortexDashboardProps {
   userGamerTag?: string;
@@ -95,6 +97,7 @@ export type VortexTab =
   | 'cases'
   | 'servers' 
   | 'tournaments' 
+  | 'teams'
   | 'scrims' 
   | 'aim' 
   | 'lineups' 
@@ -1565,11 +1568,11 @@ export const VortexDashboard: React.FC<VortexDashboardProps> = ({
   const regionDropdownRef = useRef<HTMLDivElement>(null);
 
   const FACEIT_REGIONS = [
-    { code: 'EU', label: 'EU' },
-    { code: 'NA', label: 'NA' },
-    { code: 'SA', label: 'SA' },
-    { code: 'SEA', label: 'SEA' },
-    { code: 'OCE', label: 'OCE' },
+    { code: 'EU', label: 'EU', name: 'Europe' },
+    { code: 'NA', label: 'NA', name: 'North America' },
+    { code: 'SA', label: 'SA', name: 'South America' },
+    { code: 'SEA', label: 'SEA', name: 'Southeast Asia' },
+    { code: 'OCE', label: 'OCE', name: 'Oceania' },
   ];
 
   // Close custom FACEIT country & region dropdowns when clicking outside
@@ -2027,7 +2030,7 @@ export const VortexDashboard: React.FC<VortexDashboardProps> = ({
     {
       id: 'tournaments' as VortexTab,
       label: 'Tournaments',
-      desc: isVisitorMode ? 'Season 1 • European Circuit' : 'Cash & CS2 Skins Circuit',
+      desc: isVisitorMode ? 'Official CS2 Circuit' : 'Cash & CS2 Tournaments',
       icon: Trophy,
       badge: isVisitorMode ? 'COMING SOON' : 'LIVE',
       badgeColor: isVisitorMode
@@ -2035,9 +2038,19 @@ export const VortexDashboard: React.FC<VortexDashboardProps> = ({
         : 'bg-yellow-500/15 text-yellow-400 border border-yellow-500/30 font-bold'
     },
     {
+      id: 'teams' as VortexTab,
+      label: 'Teams & Clans',
+      desc: isVisitorMode ? '5v5 Squads' : '5v5 Roster & Clan Hub',
+      icon: Users,
+      badge: isVisitorMode ? 'COMING SOON' : `[${currentClanTag || 'M14'}]`,
+      badgeColor: isVisitorMode
+        ? 'bg-amber-500/15 text-amber-400 border border-amber-500/30 font-bold'
+        : 'bg-[#FF5500]/15 text-[#FF5500] border border-[#FF5500]/30 font-bold'
+    },
+    {
       id: 'cases' as VortexTab,
       label: 'Cases',
-      desc: isVisitorMode ? 'Season 1 • Under Dev' : 'Hellcase & Farmskins CS2 Unboxing',
+      desc: isVisitorMode ? 'CS2 Unboxing' : 'Hellcase & Farmskins CS2 Unboxing',
       icon: Package,
       badge: isVisitorMode ? 'COMING SOON' : 'HOT',
       badgeColor: isVisitorMode
@@ -2047,7 +2060,7 @@ export const VortexDashboard: React.FC<VortexDashboardProps> = ({
     {
       id: 'anticheat' as VortexTab,
       label: 'Anti-Cheat',
-      desc: isVisitorMode ? 'Season 1 • Under Dev' : (isAntiCheatActive ? 'Ring-0 Kernel Protected' : 'Driver Offline • Ready to Launch'),
+      desc: isVisitorMode ? 'Kernel Protection' : (isAntiCheatActive ? 'Ring-0 Kernel Protected' : 'Driver Offline • Ready to Launch'),
       icon: ShieldCheck,
       badge: isVisitorMode ? 'COMING SOON' : (isAntiCheatActive ? 'ACTIVE' : 'READY'),
       badgeColor: isVisitorMode
@@ -2059,7 +2072,7 @@ export const VortexDashboard: React.FC<VortexDashboardProps> = ({
     {
       id: 'profile' as VortexTab,
       label: 'Player Profile',
-      desc: isVisitorMode ? 'Season 1 • Under Dev' : 'Digital Passport & Settings',
+      desc: isVisitorMode ? 'Digital Passport' : 'Digital Passport & Settings',
       icon: User,
       badge: isVisitorMode ? 'COMING SOON' : 'VERIFIED',
       badgeColor: isVisitorMode
@@ -2649,6 +2662,13 @@ export const VortexDashboard: React.FC<VortexDashboardProps> = ({
                           className="px-3 py-1 rounded-full bg-white/[0.05] hover:bg-white/[0.10] border border-white/10 text-slate-300 hover:text-white font-mono text-xs transition cursor-pointer"
                         >
                           Post party
+                        </button>
+                        <button
+                          onClick={() => { sound.playSelect(); setActiveTab('teams'); }}
+                          className="px-3 py-1 rounded-full bg-white/[0.05] hover:bg-white/[0.10] border border-[#FF5500]/30 text-amber-300 hover:text-white font-mono text-xs flex items-center gap-1.5 transition cursor-pointer"
+                        >
+                          <Shield className="w-3.5 h-3.5 text-[#FF5500]" />
+                          <span>Team Roster [{currentClanTag || 'M14'}]</span>
                         </button>
                       </div>
                     </div>
@@ -4561,6 +4581,31 @@ export const VortexDashboard: React.FC<VortexDashboardProps> = ({
           )}
 
           {/* ======================================================== */}
+          {/* TAB: TEAMS & CLANS (5v5 ROSTER & CLAN DIRECTORY)         */}
+          {/* ======================================================== */}
+          {activeTab === 'teams' && (
+            <VortexClanHub
+              currentGamerTag={currentGamerTag}
+              currentClanTag={currentClanTag}
+              currentAvatarUrl={currentAvatarUrl}
+              currentUserLevel={currentUserLevel}
+              currentUserElo={currentUserElo}
+              currentCountry={currentCountry}
+              onUpdateClanTag={(newTag) => {
+                setCurrentClanTag(newTag);
+                localStorage.setItem('vortex_user_clantag', newTag);
+              }}
+              onNavigateTab={(tab) => {
+                setActiveTab(tab as VortexTab);
+              }}
+              setToast={(msg) => {
+                setDashboardToast(msg);
+                setTimeout(() => setDashboardToast(null), 3500);
+              }}
+            />
+          )}
+
+          {/* ======================================================== */}
           {/* TAB: RANKINGS (PLATFORM PLAYER LEADERBOARD - RANK #3)    */}
           {/* ======================================================== */}
           {activeTab === 'rankings' && (() => {
@@ -4809,17 +4854,22 @@ export const VortexDashboard: React.FC<VortexDashboardProps> = ({
                 {/* SEARCH & FACEIT-STYLE REGION/COUNTRY FILTERS */}
                 <div className="flex flex-wrap items-center justify-between gap-4 pt-2">
                   <div className="flex flex-wrap items-center gap-2">
-                    <button
-                      onClick={() => { sound.playClick(); setRankingTab('europe'); }}
-                      className={`px-3.5 py-1.5 rounded-xl text-xs font-mono font-bold transition cursor-pointer flex items-center gap-2 ${
-                        rankingTab === 'europe'
-                          ? 'bg-[#A3E635] text-slate-950 shadow-md font-black'
-                          : 'bg-[#141722] text-slate-400 hover:text-white border border-[#232938]'
-                      }`}
-                    >
-                      <span>🇪🇺</span>
-                      <span>Europe</span>
-                    </button>
+                    {(() => {
+                      const activeRegion = FACEIT_REGIONS.find(r => r.code === rankingRegion) || FACEIT_REGIONS[0];
+                      return (
+                        <button
+                          onClick={() => { sound.playClick(); setRankingTab('europe'); }}
+                          className={`px-3.5 py-1.5 rounded-xl text-xs font-mono font-bold transition cursor-pointer flex items-center gap-2 ${
+                            rankingTab === 'europe'
+                              ? 'bg-[#A3E635] text-slate-950 shadow-md font-black'
+                              : 'bg-[#141722] text-slate-400 hover:text-white border border-[#232938]'
+                          }`}
+                        >
+                          <span className="text-[10px] font-black uppercase tracking-wider">{activeRegion.code}</span>
+                          <span>{activeRegion.name}</span>
+                        </button>
+                      );
+                    })()}
 
                     <button
                       onClick={() => { sound.playClick(); setRankingTab('global'); }}
@@ -4955,6 +5005,7 @@ export const VortexDashboard: React.FC<VortexDashboardProps> = ({
                                   onClick={() => {
                                     sound.playSelect();
                                     setRankingRegion(r.code);
+                                    setRankingTab('europe');
                                     setIsRegionDropdownOpen(false);
                                   }}
                                   className={`w-full px-3 py-1.5 text-left text-xs font-sans font-semibold transition flex items-center justify-between cursor-pointer ${
