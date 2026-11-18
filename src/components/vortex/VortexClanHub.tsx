@@ -39,6 +39,7 @@ import {
 } from 'lucide-react';
 import confetti from 'canvas-confetti';
 import { sound } from '../../utils/soundEffects';
+import { getUserFriends, SocialFriend } from '../../services/friendService';
 
 export interface ClanMember {
   id: string;
@@ -1396,6 +1397,24 @@ export const VortexClanHub: React.FC<VortexClanHubProps> = ({
   const [isInviteModalOpen, setIsInviteModalOpen] = useState(false);
   const [inviteInput, setInviteInput] = useState('');
   const [selectedRoleForInvite, setSelectedRoleForInvite] = useState<ClanMember['role']>('Entry Fragger');
+  const [selectedFriendToInvite, setSelectedFriendToInvite] = useState<SocialFriend | null>(null);
+  const [userFriends, setUserFriends] = useState<SocialFriend[]>(() => getUserFriends(currentGamerTag));
+
+  useEffect(() => {
+    const handleFriendsUpdate = () => {
+      setUserFriends(getUserFriends(currentGamerTag));
+    };
+    window.addEventListener('vortex_friends_updated', handleFriendsUpdate);
+    return () => window.removeEventListener('vortex_friends_updated', handleFriendsUpdate);
+  }, [currentGamerTag]);
+
+  useEffect(() => {
+    if (isInviteModalOpen) {
+      setUserFriends(getUserFriends(currentGamerTag));
+      setSelectedFriendToInvite(null);
+      setInviteInput('');
+    }
+  }, [isInviteModalOpen, currentGamerTag]);
   const [searchClanQuery, setSearchClanQuery] = useState('');
   const clanLogoFileInputRef = useRef<HTMLInputElement | null>(null);
 
@@ -1853,22 +1872,38 @@ export const VortexClanHub: React.FC<VortexClanHubProps> = ({
   // Add teammate to roster
   const handleInviteTeammate = (e: React.FormEvent) => {
     e.preventDefault();
-    if (!inviteInput.trim()) return;
-    sound.playClick();
+    if (!selectedFriendToInvite) {
+      setToast('⚠️ Please choose a player from your Friends list to invite.');
+      return;
+    }
+    sound.playSelect();
 
     if (userClan.members.length >= 6) {
       alert('The roster already has maximum capacity (5 starters + 1 substitute). Remove a member first.');
       return;
     }
 
+    // Strictly enforce friends-only requirement
+    const isFriend = userFriends.some(f => f.name.toLowerCase() === selectedFriendToInvite.name.toLowerCase());
+    if (!isFriend) {
+      setToast(`⚠️ You must add ${selectedFriendToInvite.name} as a friend before inviting them to your clan.`);
+      return;
+    }
+
+    // Check if friend is already in clan
+    if (userClan.members.some(m => m.name.toLowerCase() === selectedFriendToInvite.name.toLowerCase())) {
+      setToast(`⚠️ ${selectedFriendToInvite.name} is already in the clan roster.`);
+      return;
+    }
+
     const newMember: ClanMember = {
-      id: `member-${Date.now()}`,
-      name: inviteInput.trim(),
+      id: `member-${selectedFriendToInvite.id || Date.now()}`,
+      name: selectedFriendToInvite.name,
       role: selectedRoleForInvite,
-      level: Math.max(3, currentUserLevel + 1),
-      elo: currentUserElo + 150,
-      avatar: PRESET_CLAN_LOGOS[Math.floor(Math.random() * PRESET_CLAN_LOGOS.length)].url,
-      country: currentCountry.name,
+      level: selectedFriendToInvite.level || currentUserLevel,
+      elo: selectedFriendToInvite.elo || currentUserElo,
+      avatar: selectedFriendToInvite.avatar || '/images/avatar_duck_exact.png',
+      country: selectedFriendToInvite.countryName || currentCountry.name,
       flag: currentCountry.flag,
     };
 
@@ -1884,14 +1919,16 @@ export const VortexClanHub: React.FC<VortexClanHubProps> = ({
     };
 
     setUserClan(nextClan);
-    localStorage.setItem('vortex_user_clan_data', JSON.stringify(nextClan));
+    try {
+      localStorage.setItem('vortex_user_clan_data', JSON.stringify(nextClan));
+    } catch (_) {}
+
+    setSelectedFriendToInvite(null);
     setInviteInput('');
     setIsInviteModalOpen(false);
-    sound.playTournamentVictory();
-    setToast(`✓ ${newMember.name} joined [${userClan.tag}] as ${newMember.role}!`);
+    setToast(`✓ ${newMember.name} joined [${userClan.tag}] roster as ${newMember.role}!`);
   };
 
-  // Kick member
   const handleKickMember = (memberId: string) => {
     sound.playClick();
     if (memberId === 'current-user') {
@@ -3365,17 +3402,22 @@ export const VortexClanHub: React.FC<VortexClanHubProps> = ({
         </div>
       )}
 
-      {/* INVITE PLAYER MODAL */}
+      {/* INVITE PLAYER MODAL (FRIENDS LIST ONLY ENFORCEMENT) */}
       {isInviteModalOpen && (
         <div className="fixed inset-0 z-[150] bg-black/85 backdrop-blur-md flex items-center justify-center p-4 animate-in fade-in duration-200">
           <form
             onSubmit={handleInviteTeammate}
-            className="w-full max-w-md bg-[#0C1019] border border-[#252E42] rounded-3xl p-6 shadow-2xl space-y-4 text-left relative"
+            className="w-full max-w-lg bg-[#0C1019] border border-[#252E42] rounded-3xl p-6 shadow-2xl space-y-4 text-left relative"
           >
             <div className="flex items-center justify-between border-b border-[#1E2638] pb-3">
               <div className="flex items-center gap-2.5">
-                <UserPlus className="w-5 h-5 text-[#A3E635]" />
-                <h3 className="text-base font-black font-display text-white">Invite Player to [{userClan.tag}]</h3>
+                <div className="w-9 h-9 rounded-xl bg-[#A3E635]/15 border border-[#A3E635]/30 flex items-center justify-center text-[#A3E635]">
+                  <UserPlus className="w-5 h-5" />
+                </div>
+                <div>
+                  <h3 className="text-base font-black font-display text-white">Invite Teammate to [{userClan.tag}]</h3>
+                  <p className="text-[10px] font-mono text-slate-400">Clan Roster Requirement: Friends List Only</p>
+                </div>
               </div>
               <button
                 type="button"
@@ -3386,35 +3428,144 @@ export const VortexClanHub: React.FC<VortexClanHubProps> = ({
               </button>
             </div>
 
-            <div className="space-y-3 text-xs font-mono">
-              <div className="space-y-1.5">
-                <label className="text-slate-400">Player GamerTag or Steam ID</label>
-                <input
-                  type="text"
-                  required
-                  value={inviteInput}
-                  onChange={(e) => setInviteInput(e.target.value)}
-                  placeholder="e.g. SimpleAim, STEAM_0:1:..."
-                  className="w-full px-3 py-2 rounded-xl bg-[#141722] border border-[#262D3E] text-white focus:outline-none focus:border-[#A3E635]"
-                />
-              </div>
+            {/* Friends Requirement Verification Banner */}
+            <div className="p-3 rounded-2xl bg-[#121624] border border-[#232C42] flex items-center gap-3 text-xs font-mono">
+              <Shield className="w-4 h-4 text-[#A3E635] shrink-0" />
+              <p className="text-slate-300 text-[11px] leading-tight">
+                To prevent unverified invites, players <strong className="text-[#A3E635]">must be on your Friends list</strong> before you can invite them into your 5v5 clan lineup.
+              </p>
+            </div>
 
+            <div className="space-y-3.5 text-xs font-mono">
+              {/* Friends Picker or Empty Notice */}
+              {userFriends.length === 0 ? (
+                <div className="p-5 rounded-2xl bg-black/40 border border-white/5 text-center space-y-3">
+                  <div className="w-12 h-12 rounded-2xl bg-amber-500/10 border border-amber-500/25 text-amber-400 flex items-center justify-center mx-auto">
+                    <Users className="w-6 h-6" />
+                  </div>
+                  <div>
+                    <h4 className="text-sm font-bold text-white">No Friends on Your List Yet</h4>
+                    <p className="text-[11px] text-slate-400 mt-1">
+                      You cannot invite players to your clan without having them as friends first.
+                    </p>
+                  </div>
+                  <div className="p-3 rounded-xl bg-[#141724] border border-white/5 text-[10px] text-slate-400 text-left space-y-1">
+                    <div className="text-white font-bold flex items-center gap-1.5">
+                      <Info className="w-3.5 h-3.5 text-[#A3E635]" />
+                      <span>How to invite teammates:</span>
+                    </div>
+                    <div>1. Open the Social / Friends panel on the right side.</div>
+                    <div>2. Add your teammates as friends using their GamerTag.</div>
+                    <div>3. Once accepted, select them here to add them to your 5v5 roster.</div>
+                  </div>
+                </div>
+              ) : (
+                <div className="space-y-2">
+                  <div className="flex items-center justify-between">
+                    <label className="text-slate-400 flex items-center gap-1">
+                      <Users className="w-3.5 h-3.5 text-[#A3E635]" />
+                      <span>Choose from Friends ({userFriends.length} Available)</span>
+                    </label>
+                    {selectedFriendToInvite && (
+                      <span className="text-[10px] text-[#A3E635] font-bold">
+                        Selected: {selectedFriendToInvite.name} ✓
+                      </span>
+                    )}
+                  </div>
+
+                  {/* Friends Filter Input */}
+                  {userFriends.length > 3 && (
+                    <div className="relative">
+                      <Search className="w-3.5 h-3.5 text-slate-500 absolute left-3 top-1/2 -translate-y-1/2" />
+                      <input
+                        type="text"
+                        value={inviteInput}
+                        onChange={(e) => setInviteInput(e.target.value)}
+                        placeholder="Search among your friends..."
+                        className="w-full pl-8 pr-3 py-1.5 rounded-xl bg-[#141722] border border-[#262D3E] text-white text-xs font-mono placeholder-slate-500 focus:outline-none focus:border-[#A3E635]"
+                      />
+                    </div>
+                  )}
+
+                  {/* Friends Cards Scrollable List */}
+                  <div className="space-y-1.5 max-h-44 overflow-y-auto pr-1">
+                    {userFriends
+                      .filter(f => !inviteInput.trim() || f.name.toLowerCase().includes(inviteInput.toLowerCase().trim()))
+                      .map((friend) => {
+                        const inClan = userClan.members.some(m => m.name.toLowerCase() === friend.name.toLowerCase());
+                        const isSelected = selectedFriendToInvite?.id === friend.id;
+
+                        return (
+                          <div
+                            key={friend.id}
+                            onClick={() => {
+                              if (inClan) return;
+                              sound.playClick();
+                              setSelectedFriendToInvite(friend);
+                            }}
+                            className={`p-2.5 rounded-2xl border transition flex items-center justify-between gap-3 cursor-pointer select-none ${
+                              inClan
+                                ? 'opacity-40 bg-white/5 border-transparent cursor-not-allowed'
+                                : isSelected
+                                ? 'bg-gradient-to-r from-[#A3E635]/20 to-[#06B6D4]/15 border-[#A3E635] shadow-md scale-[1.01]'
+                                : 'bg-[#121624] border-[#22293C] hover:border-[#A3E635]/60 hover:bg-[#161B2C]'
+                            }`}
+                          >
+                            <div className="flex items-center gap-3 min-w-0">
+                              <img
+                                src={friend.avatar || '/images/avatar_duck_exact.png'}
+                                alt={friend.name}
+                                className="w-9 h-9 rounded-xl object-cover border border-white/10 shrink-0"
+                              />
+                              <div className="min-w-0">
+                                <div className="text-xs font-bold text-white flex items-center gap-1.5 truncate">
+                                  <span>{friend.name}</span>
+                                  {inClan && (
+                                    <span className="text-[9px] font-mono text-slate-400 bg-white/5 px-1.5 py-0.2 rounded">
+                                      In Clan
+                                    </span>
+                                  )}
+                                </div>
+                                <div className="text-[10px] font-mono text-slate-400 mt-0.5">
+                                  Level {friend.level || 7} • {friend.elo || 1500} ELO
+                                </div>
+                              </div>
+                            </div>
+
+                            {!inClan && (
+                              <span className={`text-[11px] font-mono font-bold px-2.5 py-1 rounded-lg transition ${
+                                isSelected
+                                  ? 'bg-[#A3E635] text-slate-950 font-black'
+                                  : 'bg-white/5 text-slate-400 hover:text-white'
+                              }`}>
+                                {isSelected ? 'Selected ✓' : 'Choose'}
+                              </span>
+                            )}
+                          </div>
+                        );
+                      })}
+                  </div>
+                </div>
+              )}
+
+              {/* Tactical Role Selection */}
               <div className="space-y-1.5">
-                <label className="text-slate-400">Tactical Role Assignment</label>
+                <label className="text-slate-400">Tactical Role in 5v5 Roster</label>
                 <select
                   value={selectedRoleForInvite}
                   onChange={(e) => setSelectedRoleForInvite(e.target.value as ClanMember['role'])}
                   className="w-full px-3 py-2 rounded-xl bg-[#141722] border border-[#262D3E] text-white focus:outline-none focus:border-[#A3E635] cursor-pointer"
                 >
-                  <option value="AWPer">AWPer</option>
-                  <option value="Entry Fragger">Entry Fragger</option>
-                  <option value="Support">Support</option>
-                  <option value="Lurker">Lurker</option>
+                  <option value="AWPer">AWPer (Sniper)</option>
+                  <option value="Entry Fragger">Entry Fragger (First Contact)</option>
+                  <option value="Support">Support (Utility & Trades)</option>
+                  <option value="Lurker">Lurker (Flank & Space)</option>
                   <option value="Substitute">Substitute (Stand-in)</option>
                 </select>
               </div>
             </div>
 
+            {/* Modal Actions */}
             <div className="flex items-center justify-end gap-3 pt-3 border-t border-[#1E2638]">
               <button
                 type="button"
@@ -3425,15 +3576,20 @@ export const VortexClanHub: React.FC<VortexClanHubProps> = ({
               </button>
               <button
                 type="submit"
-                className="px-5 py-2 rounded-xl bg-gradient-to-r from-[#84CC16] to-[#A3E635] hover:brightness-110 text-black text-xs font-mono font-black cursor-pointer transition shadow"
+                disabled={!selectedFriendToInvite}
+                className={`px-5 py-2 rounded-xl font-mono font-black text-xs uppercase tracking-wider transition shadow flex items-center gap-1.5 ${
+                  selectedFriendToInvite
+                    ? 'bg-gradient-to-r from-[#84CC16] to-[#A3E635] hover:brightness-110 text-slate-950 cursor-pointer shadow-lime-500/20 active:scale-95'
+                    : 'bg-white/5 text-slate-500 border border-white/5 cursor-not-allowed'
+                }`}
               >
-                Send Invite
+                <UserPlus className="w-3.5 h-3.5" />
+                <span>Add Friend to Clan</span>
               </button>
             </div>
           </form>
         </div>
       )}
-
 
       {/* ======================================================== */}
       {/* INTERACTIVE PLAYER PROFILE INSPECT MODAL (CLICKABLE)     */}
@@ -3626,7 +3782,19 @@ export const VortexClanHub: React.FC<VortexClanHubProps> = ({
                     type="button"
                     onClick={() => {
                       sound.playSelect();
-                      setToast(`✓ Clan & match invite sent to ${selectedPlayerProfile.name}!`);
+                      const isFriend = userFriends.some(f => f.name.toLowerCase() === selectedPlayerProfile.name.toLowerCase());
+                      if (!isFriend) {
+                        setToast(`⚠️ You must add ${selectedPlayerProfile.name} as a friend before inviting them to your clan.`);
+                        return;
+                      }
+                      if (userClan.members.some(m => m.name.toLowerCase() === selectedPlayerProfile.name.toLowerCase())) {
+                        setToast(`⚠️ ${selectedPlayerProfile.name} is already in your clan.`);
+                        return;
+                      }
+                      setSelectedPlayerProfile(null);
+                      const matchingFriend = userFriends.find(f => f.name.toLowerCase() === selectedPlayerProfile.name.toLowerCase()) || null;
+                      setSelectedFriendToInvite(matchingFriend);
+                      setIsInviteModalOpen(true);
                     }}
                     className="px-4 py-2.5 rounded-xl bg-gradient-to-r from-[#84CC16] to-[#A3E635] hover:brightness-110 text-slate-950 font-mono font-black text-xs flex items-center justify-center gap-1.5 cursor-pointer transition active:scale-95 shadow-lg shadow-[#A3E635]/20"
                   >
