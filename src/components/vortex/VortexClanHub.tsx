@@ -2389,196 +2389,172 @@ export const VortexClanHub: React.FC<VortexClanHubProps> = ({
                 </div>
               </div>
 
-              {/* Match History Feed with Header Bar */}
-              <div className="space-y-2">
-                {/* COLUMN HEADER BAR (Date | Score | Prize | Rating | K/D/A | K/D | ADR | Map) */}
-                <div className="hidden lg:flex items-center justify-between px-3 sm:px-5 py-2.5 rounded-xl bg-[#080C16] border border-[#1A2338] text-[11px] font-mono font-bold uppercase tracking-wider text-slate-400 select-none shadow-sm">
-                  <div className="flex items-center gap-3 sm:gap-4 pl-3">
-                    <span className="w-[72px]">Date</span>
-                    <div className="w-[1px] h-3.5 bg-white/10 shrink-0" />
-                    <span className="w-[105px]">Score</span>
-                    <div className="w-[1px] h-3.5 bg-white/10 shrink-0" />
-                    <span className="w-[95px] text-center">Prize</span>
-                    <div className="w-[1px] h-3.5 bg-white/10 shrink-0" />
-                    <span className="w-[50px] text-center">Rating</span>
-                    <div className="w-[1px] h-3.5 bg-white/10 shrink-0" />
-                    <span className="w-[78px] text-center">K / D / A</span>
-                    <div className="w-[1px] h-3.5 bg-white/10 shrink-0" />
-                    <span className="w-[46px] text-center">K/D</span>
-                    <div className="w-[1px] h-3.5 bg-white/10 shrink-0" />
-                    <span className="w-[48px] text-center">ADR</span>
-                    <div className="w-[1px] h-3.5 bg-white/10 shrink-0" />
-                    <span className="w-[95px]">Map</span>
-                  </div>
-                  <div className="pr-4 text-slate-500 font-normal text-[10px]">
-                    Demo & Scoreboard
-                  </div>
-                </div>
-
-                {clanMatches
-                  .filter(m => {
-                    if (matchFilter === 'wins') return m.isWin;
-                    if (matchFilter === 'losses') return !m.isWin;
-                    return true;
-                  })
-                  .map(match => (
-                    <div
-                      key={match.id}
-                      onClick={() => openMatchScoreboard(match)}
-                      className={`w-full rounded-2xl transition-all duration-200 flex items-center justify-between px-3 sm:px-5 py-3.5 cursor-pointer group relative overflow-hidden ${
-                        match.isWin
-                          ? 'bg-gradient-to-r from-[#0C1F16]/90 via-[#091811]/75 to-[#06100B]/60 hover:from-[#0F261B]/95 hover:to-[#08150E]/80 border border-emerald-500/25 hover:border-emerald-400/50 shadow-[0_4px_20px_rgba(16,185,129,0.06)] hover:shadow-[0_4px_25px_rgba(16,185,129,0.12)]'
-                          : 'bg-gradient-to-r from-[#210D12]/90 via-[#18090D]/75 to-[#100609]/60 hover:from-[#281016]/95 hover:to-[#14080B]/80 border border-rose-500/25 hover:border-rose-400/50 shadow-[0_4px_20px_rgba(244,63,94,0.06)] hover:shadow-[0_4px_25px_rgba(244,63,94,0.12)]'
-                      }`}
-                    >
-                      {/* Left Colored Indicator Stripe (Soft Caliber Glow: Lime = Win, Soft Rose = Loss) */}
-                      <div
-                        className={`absolute left-0 top-0 bottom-0 w-1.5 sm:w-2 ${
-                          match.isWin ? 'bg-[#A3E635] shadow-[0_0_10px_rgba(163,230,53,0.4)]' : 'bg-rose-500 shadow-[0_0_10px_rgba(244,63,94,0.4)]'
-                        }`}
-                      />
-
-                      {/* Match Info with Vertical Divider Lines Between Each Section */}
-                      <div className="flex items-center gap-3 sm:gap-4 pl-2 sm:pl-3 overflow-x-auto no-scrollbar">
-                        {/* 1. Date & Time */}
-                        <div className="flex flex-col shrink-0 w-[72px] shrink-0">
-                          <span className="text-xs sm:text-sm font-bold text-white tracking-tight">{match.date}</span>
-                          <span className="text-[10px] sm:text-xs font-mono text-slate-400">{match.time}</span>
-                        </div>
-
-                        {/* Divider */}
-                        <div className="w-[1px] h-6 bg-white/10 shrink-0 self-center" />
-
-                        {/* 2. Match Result Badge: [WIN] 13 : 4 or [LOSS] 3 : 13 */}
-                        <div className="flex items-center gap-2 shrink-0 w-[105px] shrink-0">
-                          <span
-                            className={`px-2 py-0.5 rounded-lg flex items-center justify-center font-black text-[11px] shadow-sm uppercase font-mono ${
-                              match.isWin ? 'bg-[#A3E635] text-slate-950 font-black' : 'bg-rose-500/20 text-rose-300 border border-rose-500/40'
-                            }`}
-                          >
-                            {match.isWin ? 'WIN' : 'LOSS'}
-                          </span>
-                          <span className="font-mono font-black text-sm sm:text-base tracking-wide">
-                            <span className={match.isWin ? 'text-[#22C55E]' : 'text-rose-400'}>
-                              {match.scoreDisplay.split(':')[0].trim()}
-                            </span>
-                            <span className="text-slate-500 mx-1">:</span>
-                            <span className="text-slate-300">
-                              {match.scoreDisplay.split(':')[1].trim()}
-                            </span>
-                          </span>
-                        </div>
-
-                        {/* Divider */}
-                        <div className="w-[1px] h-6 bg-white/10 shrink-0 self-center" />
-
-                        {/* 3. Tournament Cash Prize Earnings */}
-                        <div className="flex flex-col items-center shrink-0 w-[95px] shrink-0" title="Tournament Cash Prize Earnings">
-                          <div
-                            className={`px-2.5 py-0.5 rounded-lg font-mono text-xs font-black flex items-center gap-1 shadow-sm border ${
-                              match.isWin
-                                ? 'bg-emerald-500/20 text-emerald-300 border-emerald-500/35'
-                                : 'bg-rose-500/15 text-rose-300 border-rose-500/30'
-                            }`}
-                          >
-                            <span className="text-xs">{match.isWin ? '💰' : '💸'}</span>
-                            <span>{match.prizeEarned || (match.isWin ? '+$75.00' : '-$25.00')}</span>
-                          </div>
-                          <span className="text-[9px] font-mono text-slate-400 uppercase tracking-wider mt-0.5">
-                            {match.isWin ? 'Won' : 'Entry'}
-                          </span>
-                        </div>
-
-                        {/* Divider */}
-                        <div className="w-[1px] h-6 bg-white/10 shrink-0 self-center" />
-
-                        {/* 4. Performance Rating Badge */}
-                        <div className="shrink-0 flex flex-col items-center w-[50px] shrink-0" title="HLTV Performance Rating">
-                          <div
-                            className={`px-2 py-0.5 rounded font-mono font-bold text-xs ${
-                              parseFloat(match.userRating) >= 1.00
-                                ? 'bg-[#A3E635]/20 text-[#A3E635] border border-[#A3E635]/35'
-                                : 'bg-rose-500/20 text-rose-400 border border-rose-500/35'
-                            }`}
-                          >
-                            {match.userRating}
-                          </div>
-                          <span className="text-[9px] font-mono text-slate-400 uppercase tracking-wider mt-0.5">Rating</span>
-                        </div>
-
-                        {/* Divider */}
-                        <div className="w-[1px] h-6 bg-white/10 shrink-0 self-center" />
-
-                        {/* 5. User K / D / A */}
-                        <div className="shrink-0 flex flex-col items-center w-[78px] shrink-0" title="Kills / Deaths / Assists">
-                          <span className="font-mono text-xs sm:text-sm font-bold text-white tracking-tight">
-                            {match.userStats.kills} <span className="text-slate-500">/</span> {match.userStats.deaths} <span className="text-slate-500">/</span> {match.userStats.assists}
-                          </span>
-                          <span className="text-[9px] font-mono text-slate-400 uppercase tracking-wider mt-0.5">K / D / A</span>
-                        </div>
-
-                        {/* Divider */}
-                        <div className="w-[1px] h-6 bg-white/10 shrink-0 self-center" />
-
-                        {/* 6. User K/D */}
-                        <div className="shrink-0 flex flex-col items-center w-[46px] shrink-0" title="Kill / Death Ratio">
-                          <span className="font-mono text-xs sm:text-sm font-bold text-slate-200">
-                            {match.userStats.kd}
-                          </span>
-                          <span className="text-[9px] font-mono text-slate-400 uppercase tracking-wider mt-0.5">K/D</span>
-                        </div>
-
-                        {/* Divider */}
-                        <div className="w-[1px] h-6 bg-white/10 shrink-0 self-center" />
-
-                        {/* 7. User ADR */}
-                        <div className="shrink-0 flex flex-col items-center w-[48px] shrink-0" title="Average Damage per Round">
-                          <span className="font-mono text-xs sm:text-sm font-bold text-slate-200">
-                            {match.userStats.adr}
-                          </span>
-                          <span className="text-[9px] font-mono text-slate-400 uppercase tracking-wider mt-0.5">ADR</span>
-                        </div>
-
-                        {/* Divider */}
-                        <div className="w-[1px] h-6 bg-white/10 shrink-0 self-center" />
-
-                        {/* 8. Map Badge */}
-                        <div className="flex items-center gap-2 shrink-0 w-[95px] shrink-0">
-                          <div className="w-6 h-6 rounded-full overflow-hidden bg-black/60 border border-white/10 shrink-0">
-                            <img src={match.mapImage} alt={match.mapDisplayName} className="w-full h-full object-cover" />
-                          </div>
-                          <span className="text-xs sm:text-sm font-semibold text-white">
-                            {match.mapDisplayName}
-                          </span>
-                        </div>
+              {/* ======================================================== */}
+              {/* UNIFIED 5v5 MATCH CENTER (SINGLE PROFESSIONAL WINDOW)    */}
+              {/* ======================================================== */}
+              <div className="w-full rounded-2xl border-2 border-[#1E2842] bg-[#080C16] shadow-[0_10px_40px_rgba(0,0,0,0.7)] overflow-hidden">
+                <div className="overflow-x-auto">
+                  <div className="min-w-[980px]">
+                    
+                    {/* Unified Header Row */}
+                    <div className="grid grid-cols-[100px_130px_110px_90px_130px_80px_80px_130px_1fr] items-center px-4 py-3 bg-[#0D1220] border-b border-[#1E2842] text-[11px] font-mono font-bold uppercase tracking-wider text-slate-400 select-none">
+                      <div className="flex items-center gap-1.5 pl-2">
+                        <Calendar className="w-3.5 h-3.5 text-slate-500" />
+                        <span>Date</span>
                       </div>
-
-                      {/* Right Action Icons: Download Demo [↓] and Scoreboard [↗] */}
-                      <div className="flex items-center gap-1.5 shrink-0 ml-3">
-                        <button
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            handleDownloadDemo(match);
-                          }}
-                          title="Download GOTV Demo (.dem)"
-                          className="w-8 h-8 rounded-lg bg-white/5 hover:bg-white/15 text-slate-400 hover:text-white flex items-center justify-center transition cursor-pointer"
-                        >
-                          <Download className="w-4 h-4" />
-                        </button>
-                        <button
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            sound.playSelect();
-                            openMatchScoreboard(match);
-                          }}
-                          title="Open Scoreboard (TAB)"
-                          className="w-8 h-8 rounded-lg bg-white/5 hover:bg-white/15 text-slate-400 hover:text-white flex items-center justify-center transition cursor-pointer"
-                        >
-                          <ExternalLink className="w-4 h-4" />
-                        </button>
+                      <div className="flex items-center gap-1.5 pl-2">
+                        <Trophy className="w-3.5 h-3.5 text-slate-500" />
+                        <span>Score</span>
+                      </div>
+                      <div className="text-center">Prize</div>
+                      <div className="text-center">Rating</div>
+                      <div className="text-center">K / D / A</div>
+                      <div className="text-center">K/D</div>
+                      <div className="text-center">ADR</div>
+                      <div className="flex items-center gap-1.5 pl-2">
+                        <MapPin className="w-3.5 h-3.5 text-slate-500" />
+                        <span>Map</span>
+                      </div>
+                      <div className="text-right pr-4 text-slate-500 font-normal text-[10px]">
+                        Demo & Scoreboard
                       </div>
                     </div>
-                  ))}
+
+                    {/* Unified Table Rows (All inside the SAME window, divided by clean borders) */}
+                    <div className="divide-y divide-[#172036]">
+                      {clanMatches
+                        .filter(m => {
+                          if (matchFilter === 'wins') return m.isWin;
+                          if (matchFilter === 'losses') return !m.isWin;
+                          return true;
+                        })
+                        .map(match => (
+                          <div
+                            key={match.id}
+                            onClick={() => openMatchScoreboard(match)}
+                            className={`grid grid-cols-[100px_130px_110px_90px_130px_80px_80px_130px_1fr] items-center px-4 py-3.5 transition-colors duration-150 cursor-pointer select-none group relative ${
+                              match.isWin
+                                ? 'bg-[#0B1E15]/50 hover:bg-[#0E281C]/90 text-slate-200'
+                                : 'bg-[#1E0D12]/50 hover:bg-[#281118]/90 text-slate-200'
+                            }`}
+                            title="Click to open match scoreboard & player stats"
+                          >
+                            {/* Left indicator accent stripe */}
+                            <div
+                              className={`absolute left-0 top-0 bottom-0 w-1.5 ${
+                                match.isWin ? 'bg-[#A3E635]' : 'bg-rose-500'
+                              }`}
+                            />
+
+                            {/* 1. Date & Time */}
+                            <div className="flex flex-col pl-2">
+                              <span className="text-xs sm:text-sm font-bold text-white tracking-tight">{match.date}</span>
+                              <span className="text-[10px] sm:text-xs font-mono text-slate-400">{match.time}</span>
+                            </div>
+
+                            {/* 2. Score Badge */}
+                            <div className="flex items-center gap-2 pl-2">
+                              <span
+                                className={`px-2 py-0.5 rounded-lg flex items-center justify-center font-black text-[11px] uppercase font-mono shadow-sm ${
+                                  match.isWin
+                                    ? 'bg-[#A3E635] text-slate-950 font-black'
+                                    : 'bg-rose-500/20 text-rose-300 border border-rose-500/40'
+                                }`}
+                              >
+                                {match.isWin ? 'WIN' : 'LOSS'}
+                              </span>
+                              <span className="font-mono font-black text-sm tracking-wide">
+                                <span className={match.isWin ? 'text-[#22C55E]' : 'text-rose-400'}>
+                                  {match.scoreDisplay.split(':')[0].trim()}
+                                </span>
+                                <span className="text-slate-500 mx-1">:</span>
+                                <span className="text-slate-300">
+                                  {match.scoreDisplay.split(':')[1].trim()}
+                                </span>
+                              </span>
+                            </div>
+
+                            {/* 3. Cash Prize */}
+                            <div className="flex justify-center" title="Tournament Prize Pool Earnings">
+                              <div
+                                className={`px-2.5 py-0.5 rounded-lg font-mono text-xs font-black flex items-center gap-1 shadow-sm border ${
+                                  match.isWin
+                                    ? 'bg-emerald-500/20 text-emerald-300 border-emerald-500/35'
+                                    : 'bg-rose-500/15 text-rose-300 border-rose-500/30'
+                                }`}
+                              >
+                                <span className="text-xs">{match.isWin ? '💰' : '💸'}</span>
+                                <span>{match.prizeEarned || (match.isWin ? '+$75.00' : '-$25.00')}</span>
+                              </div>
+                            </div>
+
+                            {/* 4. Rating */}
+                            <div className="flex justify-center" title="HLTV Performance Rating">
+                              <span
+                                className={`px-2 py-0.5 rounded font-mono font-bold text-xs ${
+                                  parseFloat(match.userRating) >= 1.00
+                                    ? 'bg-[#A3E635]/20 text-[#A3E635] border border-[#A3E635]/35'
+                                    : 'bg-rose-500/20 text-rose-400 border border-rose-500/35'
+                                }`}
+                              >
+                                {match.userRating}
+                              </span>
+                            </div>
+
+                            {/* 5. K / D / A (Guaranteed single line, never wraps!) */}
+                            <div className="text-center font-mono text-xs sm:text-sm font-bold text-white whitespace-nowrap" title="Kills / Deaths / Assists">
+                              {match.userStats.kills} <span className="text-slate-500">/</span> {match.userStats.deaths} <span className="text-slate-500">/</span> {match.userStats.assists}
+                            </div>
+
+                            {/* 6. K/D */}
+                            <div className="text-center font-mono text-xs sm:text-sm font-bold text-slate-200" title="Kill / Death Ratio">
+                              {match.userStats.kd}
+                            </div>
+
+                            {/* 7. ADR */}
+                            <div className="text-center font-mono text-xs sm:text-sm font-bold text-slate-200" title="Average Damage per Round">
+                              {match.userStats.adr}
+                            </div>
+
+                            {/* 8. Map */}
+                            <div className="flex items-center gap-2 pl-2">
+                              <div className="w-6 h-6 rounded-full overflow-hidden bg-black/60 border border-white/10 shrink-0">
+                                <img src={match.mapImage} alt={match.mapDisplayName} className="w-full h-full object-cover" />
+                              </div>
+                              <span className="text-xs sm:text-sm font-semibold text-white truncate">
+                                {match.mapDisplayName}
+                              </span>
+                            </div>
+
+                            {/* 9. Action Buttons */}
+                            <div className="flex items-center justify-end gap-1.5 pr-3">
+                              <button
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  handleDownloadDemo(match);
+                                }}
+                                title="Download GOTV Demo (.dem)"
+                                className="w-8 h-8 rounded-lg bg-white/5 hover:bg-white/15 text-slate-400 hover:text-white flex items-center justify-center transition cursor-pointer"
+                              >
+                                <Download className="w-3.5 h-3.5" />
+                              </button>
+                              <button
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  sound.playSelect();
+                                  openMatchScoreboard(match);
+                                }}
+                                title="Open Full CS2 Scoreboard"
+                                className="w-8 h-8 rounded-lg bg-white/5 hover:bg-[#A3E635]/20 hover:text-[#A3E635] text-slate-400 flex items-center justify-center transition cursor-pointer border border-transparent hover:border-[#A3E635]/30"
+                              >
+                                <ExternalLink className="w-3.5 h-3.5" />
+                              </button>
+                            </div>
+                          </div>
+                        ))}
+                    </div>
+                  </div>
+                </div>
               </div>
 
               {/* Direct Scoreboard TAB Live Preview under the feed */}
