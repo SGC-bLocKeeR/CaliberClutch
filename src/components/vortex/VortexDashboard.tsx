@@ -1050,9 +1050,16 @@ export const VortexDashboard: React.FC<VortexDashboardProps> = ({
   const [registeredTourneys, setRegisteredTourneys] = useState<string[]>(() => {
     try {
       const saved = localStorage.getItem('vortex_registered_tournaments');
-      if (saved) return JSON.parse(saved);
+      if (saved) {
+        const parsed: string[] = JSON.parse(saved);
+        // Purge legacy fake tournament titles
+        const cleaned = parsed.filter(t => 
+          !['CALIBER CLUTCH Major Championship 2026', 'CALIBER CLUTCH CS2 Balkan Open Cup', 'IEM Katowice 2026 Community Qualifier', 'CALIBER CLUTCH Weekly Scrimfest'].includes(t)
+        );
+        return cleaned;
+      }
     } catch (_) {}
-    return ['CALIBER CLUTCH Major Championship 2026'];
+    return [];
   });
   const [customTournaments, setCustomTournaments] = useState<any[]>(() => {
     try {
@@ -1085,10 +1092,6 @@ export const VortexDashboard: React.FC<VortexDashboardProps> = ({
       logo: '/images/clan_badges/badge_caliber_lime.svg',
       members: [
         { id: '1', name: currentGamerTag, role: 'IGL / Captain' },
-        { id: '2', name: 'juanflatro-aim', role: 'AWPer' },
-        { id: '3', name: 'sener1-tap', role: 'Entry Fragger' },
-        { id: '4', name: 'gxx-fire', role: 'Support' },
-        { id: '5', name: 'sinnopsyy-beast', role: 'Lurker' },
       ],
       stats: {
         matches: 14,
@@ -4252,9 +4255,8 @@ export const VortexDashboard: React.FC<VortexDashboardProps> = ({
                             });
 
                             setTourneyTabMode('browse');
-                            sound.playTournamentVictory();
-                            confetti({ particleCount: 110, spread: 85, origin: { y: 0.6 } });
-                            setDashboardToast(`✓ Success! Tournament "${createdItem.title}" published with 100% Cash prizes and registrations are open!`);
+                            sound.playSelect();
+                            setDashboardToast(`✓ Tournament "${createdItem.title}" published. Registrations are open.`);
                             setTimeout(() => setDashboardToast(null), 5000);
                           }}
                           className="px-6 py-3 rounded-2xl bg-gradient-to-r from-[#84CC16] to-[#A3E635] hover:brightness-110 text-slate-950 font-display font-black text-xs uppercase tracking-wider transition shadow-lg shadow-lime-500/25 cursor-pointer active:scale-95 flex items-center gap-2"
@@ -4369,14 +4371,17 @@ export const VortexDashboard: React.FC<VortexDashboardProps> = ({
               ) : (
                 <>
                   {/* Circuit Quick Stats Banner */}
+              {/* Circuit Real Stats Banner */}
               <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 p-4 rounded-2xl bg-[#090C12] border border-white/5">
                 <div className="p-3 rounded-xl bg-black/40 border border-white/5">
-                  <div className="text-[10px] font-mono text-slate-400 uppercase">Season 1 Cash Pool</div>
-                  <div className="text-xl font-mono font-black text-[#A3E635]">€25,000</div>
+                  <div className="text-[10px] font-mono text-slate-400 uppercase">Active Cash Pools</div>
+                  <div className="text-xl font-mono font-black text-[#A3E635]">
+                    €{(1250 + customTournaments.reduce((acc: number, t: any) => acc + (parseInt(String(t.cashPrize).replace(/[^0-9]/g, ''), 10) || 0), 0)).toLocaleString()}
+                  </div>
                 </div>
                 <div className="p-3 rounded-xl bg-black/40 border border-white/5">
                   <div className="text-[10px] font-mono text-slate-400 uppercase">Enrolled Teams</div>
-                  <div className="text-xl font-mono font-black text-white">108 Rosters</div>
+                  <div className="text-xl font-mono font-black text-white">{registeredTourneys.length} Rosters</div>
                 </div>
                 <div className="p-3 rounded-xl bg-black/40 border border-white/5">
                   <div className="text-[10px] font-mono text-slate-400 uppercase">Match Servers</div>
@@ -4395,8 +4400,8 @@ export const VortexDashboard: React.FC<VortexDashboardProps> = ({
               <div className="flex flex-wrap items-center justify-between gap-4">
                 <div className="flex flex-wrap items-center gap-2">
                   {[
-                    { id: 'all', label: `All Tournaments (${4 + customTournaments.length})` },
-                    { id: 'live', label: '🔴 Live Now (1)' },
+                    { id: 'all', label: `All Tournaments (${2 + customTournaments.length})` },
+                    { id: 'live', label: '🔴 Live Now (0)' },
                     { id: 'open', label: `⚡ Open Registration (${2 + customTournaments.length})` },
                     { id: 'registered', label: `✓ My Registered (${registeredTourneys.length})` }
                   ].map(tab => (
@@ -4444,66 +4449,34 @@ export const VortexDashboard: React.FC<VortexDashboardProps> = ({
                 {[
                   ...customTournaments,
                   {
-                    id: 'major-2026',
-                    title: 'CALIBER CLUTCH Major Championship 2026',
-                    organizer: 'CaliberClutch Circuit',
-                    cashPrize: '€10,000',
-                    teams: '32 / 32',
-                    playoffsFormat: 'BO3',
-                    finalsFormat: 'BO5',
-                    structure: 'Single Elimination',
-                    region: 'Germany (Frankfurt Central • 14ms)',
-                    date: 'LIVE NOW',
-                    status: 'IN PROGRESS',
-                    badge: 'bg-emerald-500/15 text-emerald-400 border-emerald-500/30',
-                    isLive: true,
-                    isOpen: false
-                  },
-                  {
-                    id: 'balkan-open',
-                    title: 'CALIBER CLUTCH CS2 Balkan Open Cup',
-                    organizer: 'Balkan CS2 League',
-                    cashPrize: '€5,000',
-                    teams: '16 / 16',
+                    id: 'cc-cash-cup-1',
+                    title: 'CALIBER CLUTCH 5v5 Open Cash Cup #1',
+                    organizer: 'CaliberClutch Official',
+                    cashPrize: '€1,000',
+                    teams: `${registeredTourneys.includes('CALIBER CLUTCH 5v5 Open Cash Cup #1') ? '1 / 16' : '0 / 16'}`,
                     playoffsFormat: 'BO1',
                     finalsFormat: 'BO3',
                     structure: 'Single Elimination',
-                    region: 'Netherlands (Amsterdam • 16ms)',
-                    date: 'Starts in: 2d 14h',
+                    region: 'Germany (Frankfurt Central • 14ms)',
+                    date: 'Registration Open',
                     status: 'OPEN',
-                    badge: 'bg-lime-500/15 text-lime-400 border-lime-500/30',
+                    badge: 'bg-emerald-500/15 text-emerald-400 border-emerald-500/30',
                     isLive: false,
                     isOpen: true
                   },
                   {
-                    id: 'iem-qualifier',
-                    title: 'IEM Katowice 2026 Community Qualifier',
-                    organizer: 'ESL Pro Circuit',
-                    cashPrize: '€7,500',
-                    teams: '48 / 64',
-                    playoffsFormat: 'BO3',
-                    finalsFormat: 'BO3',
-                    structure: 'Double Elimination',
-                    region: 'Sweden (Stockholm • 28ms)',
-                    date: 'Starts in: 5d 08h',
-                    status: 'REGISTRATION',
-                    badge: 'bg-amber-500/15 text-amber-400 border-amber-500/30',
-                    isLive: false,
-                    isOpen: true
-                  },
-                  {
-                    id: 'weekly-scrimfest',
-                    title: 'CALIBER CLUTCH Weekly Scrimfest',
-                    organizer: 'Community Hub',
-                    cashPrize: '€2,500',
-                    teams: '12 / 16',
+                    id: 'cc-weekly-scrim-1',
+                    title: 'CALIBER CLUTCH Weekly 5v5 Scrimfest #1',
+                    organizer: 'CaliberClutch Community',
+                    cashPrize: '€250',
+                    teams: `${registeredTourneys.includes('CALIBER CLUTCH Weekly 5v5 Scrimfest #1') ? '1 / 8' : '0 / 8'}`,
                     playoffsFormat: 'BO1',
                     finalsFormat: 'BO1',
-                    structure: 'Fast Cup Single Elimination',
+                    structure: 'Single Elimination',
                     region: 'Germany (Frankfurt Central • 14ms)',
-                    date: 'Starts Saturday',
-                    status: 'REGISTER',
-                    badge: 'bg-sky-500/15 text-sky-400 border-sky-500/30',
+                    date: 'Registration Open',
+                    status: 'OPEN',
+                    badge: 'bg-lime-500/15 text-lime-400 border-lime-500/30',
                     isLive: false,
                     isOpen: true
                   }
@@ -7900,8 +7873,7 @@ export const VortexDashboard: React.FC<VortexDashboardProps> = ({
               <button
                 type="button"
                 onClick={() => {
-                  sound.playTournamentVictory();
-                  confetti({ particleCount: 90, spread: 70, origin: { y: 0.6 } });
+                  sound.playSelect();
                   const tourneyTitle = selectedRegisterTourney.title;
                   setRegisteredTourneys(prev => {
                     const next = Array.from(new Set([...prev, tourneyTitle]));
@@ -7911,8 +7883,8 @@ export const VortexDashboard: React.FC<VortexDashboardProps> = ({
                     return next;
                   });
                   setSelectedRegisterTourney(null);
-                  setDashboardToast(`✓ Congratulations! [${userClanData.tag}] ${userClanData.name} officially registered for ${tourneyTitle}! Full 5v5 roster locked.`);
-                  setTimeout(() => setDashboardToast(null), 5000);
+                  setDashboardToast(`✓ [${userClanData.tag}] registered for ${tourneyTitle}. Roster confirmed.`);
+                  setTimeout(() => setDashboardToast(null), 4000);
                 }}
                 className="px-6 py-2.5 rounded-xl bg-gradient-to-r from-[#84CC16] to-[#A3E635] hover:brightness-110 text-slate-950 font-display font-black text-xs uppercase tracking-wider transition shadow-lg cursor-pointer active:scale-95"
               >

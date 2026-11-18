@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import {
   Shield,
   Users,
@@ -33,6 +33,7 @@ import {
   Layers,
   Zap,
   BarChart2,
+  Upload,
   ExternalLink,
   Star
 } from 'lucide-react';
@@ -1261,33 +1262,28 @@ export interface PresetBadge {
 export const PRESET_CLAN_LOGOS: PresetBadge[] = [
   {
     id: 'caliber-neon',
-    name: 'Caliber Clutch Official Neon Crest',
+    name: 'CaliberClutch Neon Tactical Crosshair',
     url: '/images/clan_badges/badge_caliber_lime.svg'
   },
   {
-    id: 'caliber-fire',
-    name: 'Caliber Clutch Fire Strike',
-    url: '/images/clan_badges/badge_caliber_fire.svg'
+    id: 'caliber-cyan',
+    name: 'CaliberClutch Cyber Apex Hexagon',
+    url: '/images/clan_badges/badge_caliber_cyan.svg'
   },
   {
-    id: 'caliber-skull',
-    name: 'Caliber Tactical Skull & Crossed Blades',
-    url: '/images/clan_badges/badge_caliber_skull.svg'
+    id: 'caliber-gold',
+    name: 'CaliberClutch Champion Star Shield',
+    url: '/images/clan_badges/badge_caliber_gold.svg'
   },
   {
-    id: 'caliber-sniper',
-    name: 'Caliber AWP 128-Tick Scope',
-    url: '/images/clan_badges/badge_caliber_sniper.svg'
+    id: 'caliber-crimson',
+    name: 'CaliberClutch Strike Combat Diamond',
+    url: '/images/clan_badges/badge_caliber_crimson.svg'
   },
   {
-    id: 'caliber-shield',
-    name: 'Caliber Championship Star Shield',
-    url: '/images/clan_badges/badge_caliber_shield.svg'
-  },
-  {
-    id: 'karambit-lore',
-    name: 'Caliber Clutch Karambit Lore',
-    url: '/images/karambit_lore.png'
+    id: 'caliber-purple',
+    name: 'CaliberClutch Stealth Wing Crest',
+    url: '/images/clan_badges/badge_caliber_purple.svg'
   }
 ];
 
@@ -1401,6 +1397,28 @@ export const VortexClanHub: React.FC<VortexClanHubProps> = ({
   const [inviteInput, setInviteInput] = useState('');
   const [selectedRoleForInvite, setSelectedRoleForInvite] = useState<ClanMember['role']>('Entry Fragger');
   const [searchClanQuery, setSearchClanQuery] = useState('');
+  const clanLogoFileInputRef = useRef<HTMLInputElement | null>(null);
+
+  const handleCustomLogoUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    if (file.size > 5 * 1024 * 1024) {
+      setToast('⚠️ Logo file is too large (maximum 5MB).');
+      return;
+    }
+
+    const reader = new FileReader();
+    reader.onload = (event) => {
+      const dataUrl = event.target?.result as string;
+      if (dataUrl) {
+        sound.playSelect();
+        setDraftLogo(dataUrl);
+        setToast('✓ Custom clan logo loaded successfully!');
+      }
+    };
+    reader.readAsDataURL(file);
+  };
   const [matchFilter, setMatchFilter] = useState<'all' | 'my-clan' | 'wins' | 'losses'>('all');
   const [selectedScoreboardMatch, setSelectedScoreboardMatch] = useState<ClanMatch | null>(null);
   const [scoreboardSubTab, setScoreboardSubTab] = useState<'scoreboard' | 'rounds' | 'performance'>('scoreboard');
@@ -1545,8 +1563,7 @@ export const VortexClanHub: React.FC<VortexClanHubProps> = ({
 
   // 1-Click Simulation of a New Clan War Match
   const handleSimulateNewClanMatch = () => {
-    sound.playTournamentVictory();
-    confetti({ particleCount: 90, spread: 80, origin: { y: 0.6 } });
+    sound.playSelect();
 
     const opponent = DEFAULT_OPPONENT_CLANS[Math.floor(Math.random() * DEFAULT_OPPONENT_CLANS.length)];
     const maps = [
@@ -1738,11 +1755,13 @@ export const VortexClanHub: React.FC<VortexClanHubProps> = ({
           parsed.logo = '/images/clan_badges/badge_caliber_lime.svg';
           modified = true;
         }
-        // Purge dummy/test bot names (Vortex_Ghost, Silent_Clutcher, ShadowStrike, K1llshot_AL, BalkanSub_01)
-        const hasDummyMembers = parsed.members && parsed.members.some((m: any) => 
-          ['vortex_ghost', 'silent_clutcher', 'shadowstrike', 'k1llshot_al', 'balkansub_01', 'aimgod_99'].includes(m.name?.toLowerCase())
+        // Reset clan members to ONLY registered users (no fake un-registered pros or bots)
+        const hasUnregisteredMembers = parsed.members && (
+          parsed.members.length > 1 && parsed.members.some((m: any) => 
+            ['juanflatro-aim', 'sener1-tap', 'gxx-fire', 'sinnopsyy-beast', 'devilwalk-coach', 'vortex_ghost', 'silent_clutcher', 'shadowstrike', 'k1llshot_al', 'balkansub_01', 'aimgod_99'].includes(m.name?.toLowerCase())
+          )
         );
-        if (hasDummyMembers || !parsed.members || parsed.members.length === 0) {
+        if (hasUnregisteredMembers || !parsed.members || parsed.members.length === 0) {
           parsed.members = [
             {
               id: 'current-user',
@@ -1755,57 +1774,7 @@ export const VortexClanHub: React.FC<VortexClanHubProps> = ({
               flag: currentCountry.flag,
               isCaptain: true,
               isUser: true,
-            },
-            {
-              id: 'teammate-2',
-              name: 'juanflatro-aim',
-              role: 'AWPer',
-              level: 10,
-              elo: 2790,
-              avatar: 'https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?auto=format&fit=crop&w=120&q=80',
-              country: 'Kosovo',
-              flag: '🇽🇰',
-            },
-            {
-              id: 'teammate-3',
-              name: 'sener1-tap',
-              role: 'Entry Fragger',
-              level: 10,
-              elo: 2650,
-              avatar: 'https://images.unsplash.com/photo-1570295999919-56ceb5ecca61?auto=format&fit=crop&w=120&q=80',
-              country: 'Kosovo',
-              flag: '🇽🇰',
-            },
-            {
-              id: 'teammate-4',
-              name: 'gxx-fire',
-              role: 'Support',
-              level: 9,
-              elo: 2420,
-              avatar: 'https://images.unsplash.com/photo-1527980965255-d3b416303d12?auto=format&fit=crop&w=120&q=80',
-              country: 'Albania',
-              flag: '🇦🇱',
-            },
-            {
-              id: 'teammate-5',
-              name: 'sinnopsyy-beast',
-              role: 'Lurker',
-              level: 10,
-              elo: 2710,
-              avatar: 'https://images.unsplash.com/photo-1580489944761-15a19d654956?auto=format&fit=crop&w=120&q=80',
-              country: 'Kosovo',
-              flag: '🇽🇰',
-            },
-            {
-              id: 'teammate-6',
-              name: 'devilwalk-coach',
-              role: 'Substitute',
-              level: 8,
-              elo: 2150,
-              avatar: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?auto=format&fit=crop&w=120&q=80',
-              country: 'Sweden',
-              flag: '🇸🇪',
-            },
+            }
           ];
           modified = true;
         }
@@ -1842,57 +1811,7 @@ export const VortexClanHub: React.FC<VortexClanHubProps> = ({
           flag: currentCountry.flag,
           isCaptain: true,
           isUser: true,
-        },
-        {
-          id: 'teammate-2',
-          name: 'juanflatro-aim',
-          role: 'AWPer',
-          level: 10,
-          elo: 2790,
-          avatar: 'https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?auto=format&fit=crop&w=120&q=80',
-          country: 'Kosovo',
-          flag: '🇽🇰',
-        },
-        {
-          id: 'teammate-3',
-          name: 'sener1-tap',
-          role: 'Entry Fragger',
-          level: 10,
-          elo: 2650,
-          avatar: 'https://images.unsplash.com/photo-1570295999919-56ceb5ecca61?auto=format&fit=crop&w=120&q=80',
-          country: 'Kosovo',
-          flag: '🇽🇰',
-        },
-        {
-          id: 'teammate-4',
-          name: 'gxx-fire',
-          role: 'Support',
-          level: 9,
-          elo: 2420,
-          avatar: 'https://images.unsplash.com/photo-1527980965255-d3b416303d12?auto=format&fit=crop&w=120&q=80',
-          country: 'Albania',
-          flag: '🇦🇱',
-        },
-        {
-          id: 'teammate-5',
-          name: 'sinnopsyy-beast',
-          role: 'Lurker',
-          level: 10,
-          elo: 2710,
-          avatar: 'https://images.unsplash.com/photo-1580489944761-15a19d654956?auto=format&fit=crop&w=120&q=80',
-          country: 'Kosovo',
-          flag: '🇽🇰',
-        },
-        {
-          id: 'teammate-6',
-          name: 'devilwalk-coach',
-          role: 'Substitute',
-          level: 8,
-          elo: 2150,
-          avatar: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?auto=format&fit=crop&w=120&q=80',
-          country: 'Sweden',
-          flag: '🇸🇪',
-        },
+        }
       ],
       stats: {
         matches: 14,
@@ -2225,7 +2144,7 @@ export const VortexClanHub: React.FC<VortexClanHubProps> = ({
                       ? 'bg-gradient-to-b from-[#1C1708] to-[#11131A] border-amber-500/40 shadow-lg hover:border-amber-400'
                       : 'bg-[#141620] border-[#252A3C] hover:border-[#A3E635]/60'
                   }`}
-                  title="Click to manage tactical role in Roster"
+                  title="Click to view player stats"
                 >
                   <div className="flex items-center justify-between">
                     <span className="px-2 py-0.5 rounded text-[10px] font-mono font-bold bg-white/5 text-slate-400">
@@ -2258,6 +2177,43 @@ export const VortexClanHub: React.FC<VortexClanHubProps> = ({
                   <div className="flex items-center justify-between pt-2 border-t border-white/5 text-[10px] font-mono">
                     <span className="text-slate-400">Level {member.level}</span>
                     <span className="text-[#A3E635] font-bold">{member.elo} ELO</span>
+                  </div>
+                </div>
+              ))}
+
+              {/* Open recruitment slots */}
+              {Array.from({ length: Math.max(0, 5 - userClan.members.length) }).map((_, i) => (
+                <div
+                  key={`open-lineup-${i}`}
+                  onClick={() => { sound.playClick(); setIsInviteModalOpen(true); }}
+                  className="p-3.5 rounded-2xl border border-dashed border-[#252A3C] hover:border-[#A3E635]/60 bg-[#0B0E17]/60 hover:bg-[#121624] transition cursor-pointer flex flex-col justify-between gap-3 min-h-[135px] group"
+                  title="Click to invite a player to this slot"
+                >
+                  <div className="flex items-center justify-between">
+                    <span className="px-2 py-0.5 rounded text-[10px] font-mono font-bold bg-white/5 text-slate-500">
+                      Slot #{userClan.members.length + i + 1}
+                    </span>
+                    <span className="text-[9px] font-mono text-slate-500 uppercase">
+                      OPEN SLOT
+                    </span>
+                  </div>
+                  <div className="flex items-center gap-2.5">
+                    <div className="w-9 h-9 rounded-xl border border-dashed border-slate-700 bg-white/5 flex items-center justify-center text-slate-500 group-hover:text-[#A3E635] group-hover:border-[#A3E635]/50 transition shrink-0">
+                      <UserPlus className="w-4 h-4" />
+                    </div>
+                    <div>
+                      <div className="text-xs font-bold text-slate-400 group-hover:text-white transition">
+                        + Open Slot
+                      </div>
+                      <span className="text-[10px] font-mono text-slate-500">
+                        Invite Player
+                      </span>
+                    </div>
+                  </div>
+                  <div className="pt-2 border-t border-white/5 flex justify-end">
+                    <span className="text-[10px] font-mono text-slate-500 group-hover:text-[#A3E635] transition">
+                      Invite Player →
+                    </span>
                   </div>
                 </div>
               ))}
@@ -2331,7 +2287,11 @@ export const VortexClanHub: React.FC<VortexClanHubProps> = ({
                   {/* ROLE SELECTOR DROPDOWN */}
                   <select
                     value={member.role}
-                    onChange={(e) => handleChangeRole(member.id, e.target.value as ClanMember['role'])}
+                    onClick={(e) => e.stopPropagation()}
+                    onChange={(e) => {
+                      e.stopPropagation();
+                      handleChangeRole(member.id, e.target.value as ClanMember['role']);
+                    }}
                     className="px-3 py-1.5 rounded-xl bg-[#1A1E2B] border border-[#2D354A] text-xs font-mono text-slate-200 focus:outline-none focus:border-[#A3E635] cursor-pointer"
                   >
                     <option value="IGL / Captain">IGL / Captain</option>
@@ -2344,7 +2304,10 @@ export const VortexClanHub: React.FC<VortexClanHubProps> = ({
 
                   {!member.isUser && (
                     <button
-                      onClick={() => handleKickMember(member.id)}
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        handleKickMember(member.id);
+                      }}
                       title="Remove from roster"
                       className="w-8 h-8 rounded-xl bg-red-500/10 hover:bg-red-500/25 border border-red-500/30 text-red-400 flex items-center justify-center cursor-pointer transition"
                     >
@@ -2352,6 +2315,44 @@ export const VortexClanHub: React.FC<VortexClanHubProps> = ({
                     </button>
                   )}
                 </div>
+              </div>
+            ))}
+
+            {/* Open Recruitment Slots up to 6 capacity */}
+            {Array.from({ length: Math.max(0, 6 - userClan.members.length) }).map((_, i) => (
+              <div
+                key={`roster-open-${i}`}
+                onClick={() => { sound.playClick(); setIsInviteModalOpen(true); }}
+                className="p-4 rounded-2xl border border-dashed border-[#23293D] hover:border-[#A3E635]/60 bg-[#0A0D15]/60 hover:bg-[#101422] transition flex flex-col sm:flex-row sm:items-center justify-between gap-4 cursor-pointer group"
+                title="Click to invite a player to this slot"
+              >
+                <div className="flex items-center gap-3.5">
+                  <span className="w-6 text-center text-xs font-mono font-bold text-slate-600">
+                    #{userClan.members.length + i + 1}
+                  </span>
+                  <div className="w-11 h-11 rounded-xl border border-dashed border-slate-700 bg-white/5 flex items-center justify-center text-slate-500 group-hover:text-[#A3E635] group-hover:border-[#A3E635]/50 transition shrink-0">
+                    <UserPlus className="w-5 h-5" />
+                  </div>
+                  <div>
+                    <div className="text-sm font-bold text-slate-400 group-hover:text-white transition flex items-center gap-2">
+                      <span>+ Open Roster Slot</span>
+                      {userClan.members.length + i === 5 && (
+                        <span className="px-1.5 py-0.2 rounded text-[10px] font-mono font-bold bg-white/5 text-slate-500">
+                          BENCH / SUB
+                        </span>
+                      )}
+                    </div>
+                    <span className="text-xs font-mono text-slate-500">
+                      Slot is open. Click to invite a registered teammate.
+                    </span>
+                  </div>
+                </div>
+                <button
+                  type="button"
+                  className="px-3.5 py-1.5 rounded-xl bg-white/5 group-hover:bg-[#A3E635]/15 text-slate-400 group-hover:text-[#A3E635] border border-white/10 group-hover:border-[#A3E635]/30 text-xs font-mono font-bold transition cursor-pointer self-start sm:self-auto"
+                >
+                  + Invite Player
+                </button>
               </div>
             ))}
           </div>
@@ -3268,12 +3269,12 @@ export const VortexClanHub: React.FC<VortexClanHubProps> = ({
                 />
               </div>
 
-              <div className="space-y-2">
+              <div className="space-y-3">
                 <div className="flex items-center justify-between">
-                  <label className="text-slate-400">Select Preset Clan Badge (Caliber Clutch Official)</label>
-                  <span className="text-[10px] font-mono text-[#A3E635]">6 Official Badges</span>
+                  <label className="text-slate-400">Select Official CaliberClutch Clan Badge</label>
+                  <span className="text-[10px] font-mono text-[#A3E635]">5 Distinct Designs</span>
                 </div>
-                <div className="grid grid-cols-3 sm:grid-cols-6 gap-2.5">
+                <div className="grid grid-cols-5 gap-2.5">
                   {PRESET_CLAN_LOGOS.map((badge) => (
                     <div
                       key={badge.id}
@@ -3285,7 +3286,7 @@ export const VortexClanHub: React.FC<VortexClanHubProps> = ({
                       className={`relative rounded-2xl p-2 bg-[#12141D] cursor-pointer border-2 transition group flex flex-col items-center justify-center ${
                         draftLogo === badge.url
                           ? 'border-[#A3E635] shadow-[0_0_16px_rgba(163,230,53,0.45)] scale-105 bg-[#0F1626]'
-                          : 'border-white/10 opacity-70 hover:opacity-100 hover:border-slate-500 hover:scale-102'
+                          : 'border-white/10 opacity-75 hover:opacity-100 hover:border-slate-500 hover:scale-102'
                       }`}
                     >
                       <img
@@ -3300,6 +3301,46 @@ export const VortexClanHub: React.FC<VortexClanHubProps> = ({
                       )}
                     </div>
                   ))}
+                </div>
+
+                {/* Custom Clan Logo File Upload Section */}
+                <div className="pt-2.5 border-t border-white/5 space-y-2">
+                  <div className="flex items-center justify-between">
+                    <span className="text-xs text-slate-300 font-bold flex items-center gap-1.5">
+                      <Upload className="w-3.5 h-3.5 text-[#A3E635]" />
+                      <span>Upload Custom Clan Logo</span>
+                    </span>
+                    <span className="text-[10px] text-slate-500 font-mono">PNG, JPG, SVG, WEBP</span>
+                  </div>
+
+                  <div className="flex items-center gap-3">
+                    <input
+                      type="file"
+                      ref={clanLogoFileInputRef}
+                      accept="image/png,image/jpeg,image/webp,image/svg+xml"
+                      onChange={handleCustomLogoUpload}
+                      className="hidden"
+                    />
+                    <button
+                      type="button"
+                      onClick={() => clanLogoFileInputRef.current?.click()}
+                      className="flex-1 py-2.5 px-4 rounded-xl bg-[#141722] hover:bg-[#1D2232] border border-dashed border-[#2F3952] hover:border-[#A3E635]/60 text-slate-300 hover:text-white font-mono text-xs flex items-center justify-center gap-2 transition cursor-pointer"
+                    >
+                      <Upload className="w-4 h-4 text-[#A3E635]" />
+                      <span>Choose Logo File from Device...</span>
+                    </button>
+
+                    {draftLogo && !PRESET_CLAN_LOGOS.some(b => b.url === draftLogo) && (
+                      <div className="flex items-center gap-2 p-1.5 pr-3 rounded-xl bg-[#0E1320] border border-[#A3E635]/50">
+                        <img
+                          src={draftLogo}
+                          alt="Custom Clan Logo"
+                          className="w-8 h-8 rounded-lg object-cover border border-[#A3E635]"
+                        />
+                        <span className="text-[10px] font-mono text-[#A3E635] font-bold">Custom Active ✓</span>
+                      </div>
+                    )}
+                  </div>
                 </div>
               </div>
             </div>
@@ -3559,29 +3600,41 @@ export const VortexClanHub: React.FC<VortexClanHubProps> = ({
             </div>
 
             {/* Interactive Action Buttons */}
-            <div className="grid grid-cols-2 gap-2.5 pt-1 relative z-10">
-              <button
-                type="button"
-                onClick={() => {
-                  sound.playSelect();
-                  setToast(`✓ Friend request sent to ${selectedPlayerProfile.name}!`);
-                }}
-                className="px-4 py-2.5 rounded-xl bg-white/10 hover:bg-white/15 text-white font-mono font-bold text-xs flex items-center justify-center gap-1.5 cursor-pointer transition active:scale-95 border border-white/10"
-              >
-                <UserPlus className="w-3.5 h-3.5 text-[#06B6D4]" />
-                <span>Add Friend</span>
-              </button>
-              <button
-                type="button"
-                onClick={() => {
-                  sound.playSelect();
-                  setToast(`✓ Clan & match invite sent to ${selectedPlayerProfile.name}!`);
-                }}
-                className="px-4 py-2.5 rounded-xl bg-gradient-to-r from-[#84CC16] to-[#A3E635] hover:brightness-110 text-slate-950 font-mono font-black text-xs flex items-center justify-center gap-1.5 cursor-pointer transition active:scale-95 shadow-lg shadow-[#A3E635]/20"
-              >
-                <Zap className="w-3.5 h-3.5 fill-current" />
-                <span>Invite to Clan</span>
-              </button>
+            <div className="pt-1 relative z-10">
+              {selectedPlayerProfile.isCurrentUser ? (
+                <button
+                  type="button"
+                  onClick={() => setSelectedPlayerProfile(null)}
+                  className="w-full py-2.5 rounded-xl bg-white/10 hover:bg-white/15 text-white font-mono font-bold text-xs flex items-center justify-center gap-1.5 cursor-pointer transition active:scale-95 border border-white/10"
+                >
+                  <span>Close Passport</span>
+                </button>
+              ) : (
+                <div className="grid grid-cols-2 gap-2.5">
+                  <button
+                    type="button"
+                    onClick={() => {
+                      sound.playSelect();
+                      setToast(`✓ Friend request sent to ${selectedPlayerProfile.name}!`);
+                    }}
+                    className="px-4 py-2.5 rounded-xl bg-white/10 hover:bg-white/15 text-white font-mono font-bold text-xs flex items-center justify-center gap-1.5 cursor-pointer transition active:scale-95 border border-white/10"
+                  >
+                    <UserPlus className="w-3.5 h-3.5 text-[#06B6D4]" />
+                    <span>Add Friend</span>
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => {
+                      sound.playSelect();
+                      setToast(`✓ Clan & match invite sent to ${selectedPlayerProfile.name}!`);
+                    }}
+                    className="px-4 py-2.5 rounded-xl bg-gradient-to-r from-[#84CC16] to-[#A3E635] hover:brightness-110 text-slate-950 font-mono font-black text-xs flex items-center justify-center gap-1.5 cursor-pointer transition active:scale-95 shadow-lg shadow-[#A3E635]/20"
+                  >
+                    <UserPlus className="w-3.5 h-3.5 stroke-[2.5]" />
+                    <span>Invite to Clan</span>
+                  </button>
+                </div>
+              )}
             </div>
           </div>
         </div>
