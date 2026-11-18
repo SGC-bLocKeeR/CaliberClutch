@@ -1930,8 +1930,8 @@ export const VortexClanHub: React.FC<VortexClanHubProps> = ({
                 : 'bg-[#141722] text-slate-400 hover:text-white border border-[#232938]'
             }`}
           >
-            <Swords className="w-3.5 h-3.5" />
-            <span>Clan Matches</span>
+            <BarChart2 className="w-3.5 h-3.5" />
+            <span>Matchet e Klanit & Statistikat</span>
           </button>
         </div>
 
@@ -2218,7 +2218,7 @@ export const VortexClanHub: React.FC<VortexClanHubProps> = ({
                     <span className="px-2.5 py-0.5 rounded text-[10px] font-mono font-black uppercase bg-[#FF5500] text-black tracking-wider">
                       FACEIT 5v5 OFFICIAL
                     </span>
-                    <h3 className="text-lg font-black font-display text-white">Clan Match History & CS2 Scoreboards</h3>
+                    <h3 className="text-lg font-black font-display text-white">Matchet e Klanit & Statistikat (CS2 Scoreboards)</h3>
                   </div>
                   <p className="text-xs font-mono text-slate-400 mt-1">
                     Lista autentike e ndeshjeve 5v5, ELO progression, performance ratings dhe Scoreboard-i zyrtar FACEIT 17-kolonash
