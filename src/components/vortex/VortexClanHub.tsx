@@ -926,7 +926,7 @@ export const DEFAULT_CLAN_MATCHES: ClanMatch[] = [
     timeAgo: 'Sun 15 Nov',
     duration: '34 mins',
     eloChange: 25,
-    tournamentOrEvent: 'Clan War 5v5 Challenge',
+    tournamentOrEvent: 'Clan 5v5 Match',
 
     team1: {
       name: 'CC Competitive Squad',
@@ -1592,7 +1592,7 @@ export const VortexClanHub: React.FC<VortexClanHubProps> = ({
       localStorage.setItem('vortex_user_clan_data', JSON.stringify(nextClan));
     } catch (_) {}
 
-    setToast(`🎉 Clan War Won! [${userClan.tag}] ${userScore} - ${oppScore} [${opponent.tag}] on ${pickedMap.name.toUpperCase().replace('DE_', '')} (+25 Clan ELO)!`);
+    setToast(`🎉 Clan Match Won! [${userClan.tag}] ${userScore} - ${oppScore} [${opponent.tag}] on ${pickedMap.name.toUpperCase().replace('DE_', '')} (+25 Clan ELO)!`);
   };
 
   // Load user clan from localStorage or initialize with M14 / Caliber Clutch default
@@ -1931,7 +1931,7 @@ export const VortexClanHub: React.FC<VortexClanHubProps> = ({
             }`}
           >
             <Swords className="w-3.5 h-3.5" />
-            <span>Clan Matches & Wars</span>
+            <span>Clan Matches</span>
           </button>
         </div>
 
