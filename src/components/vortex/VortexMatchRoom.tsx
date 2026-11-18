@@ -1571,7 +1571,7 @@ export const VortexMatchRoom: React.FC<VortexMatchRoomProps> = ({
                   }}
                   className="w-full py-2.5 rounded-lg bg-[#18110E] hover:bg-[#201511] border border-[#FF5500]/20 text-[#FF5500] font-display font-bold text-xs uppercase tracking-wider transition flex items-center justify-center cursor-pointer shadow-sm active:scale-95"
                 >
-                  <span>WATCH DEMO (.dem)</span>
+                  <span>WATCH GOTV REPLAY (.dem)</span>
                 </button>
 
                 <button

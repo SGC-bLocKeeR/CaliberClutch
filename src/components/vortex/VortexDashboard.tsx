@@ -1072,7 +1072,12 @@ export const VortexDashboard: React.FC<VortexDashboardProps> = ({
   const userClanData = useMemo(() => {
     try {
       const saved = localStorage.getItem('vortex_user_clan_data');
-      if (saved) return JSON.parse(saved);
+      if (saved) {
+        const parsed = JSON.parse(saved);
+        if (parsed.members && !parsed.members.some((m: any) => ['vortex_ghost', 'silent_clutcher', 'shadowstrike'].includes(m.name?.toLowerCase()))) {
+          return parsed;
+        }
+      }
     } catch (_) {}
     return {
       name: `${currentClanTag || 'M14'} Competitive Squad`,
@@ -1080,10 +1085,10 @@ export const VortexDashboard: React.FC<VortexDashboardProps> = ({
       logo: '/images/clan_badges/badge_caliber_lime.svg',
       members: [
         { id: '1', name: currentGamerTag, role: 'IGL / Captain' },
-        { id: '2', name: 'Vortex_Ghost', role: 'AWPer' },
-        { id: '3', name: 'K1llshot_AL', role: 'Entry Fragger' },
-        { id: '4', name: 'ShadowStrike', role: 'Support' },
-        { id: '5', name: 'Silent_Clutcher', role: 'Lurker' },
+        { id: '2', name: 'juanflatro-aim', role: 'AWPer' },
+        { id: '3', name: 'sener1-tap', role: 'Entry Fragger' },
+        { id: '4', name: 'gxx-fire', role: 'Support' },
+        { id: '5', name: 'sinnopsyy-beast', role: 'Lurker' },
       ],
       stats: {
         matches: 14,
@@ -3620,7 +3625,7 @@ export const VortexDashboard: React.FC<VortexDashboardProps> = ({
                     <button
                       onClick={handleToggleAntiCheat}
                       className="inline-flex items-center gap-1.5 transition cursor-pointer hover:underline"
-                      title={isAntiCheatActive ? "Anti-Cheat is ACTIVE (Click to toggle & test warning pill)" : "Anti-Cheat is STOPPED (Click to launch)"}
+                      title={isAntiCheatActive ? "Anti-Cheat is ACTIVE" : "Anti-Cheat is STOPPED (Click to launch)"}
                     >
                       {isAntiCheatActive ? (
                         <>
@@ -5679,7 +5684,7 @@ export const VortexDashboard: React.FC<VortexDashboardProps> = ({
                         : 'bg-[#84CC16] hover:bg-[#A3E635] text-slate-950 shadow-md'
                     }`}
                   >
-                    {isAntiCheatActive ? 'Stop Driver (Test Inactive)' : 'Launch Anti-Cheat Now'}
+                    {isAntiCheatActive ? 'Stop Driver' : 'Launch Anti-Cheat Now'}
                   </button>
                 </div>
 
@@ -6958,12 +6963,12 @@ export const VortexDashboard: React.FC<VortexDashboardProps> = ({
                   title="Show VORTEX Party Invite dialog with Accept and Decline"
                 >
                   <Users className="w-3 h-3 text-[#A3E635]" />
-                  <span>Show Party Invite (Test)</span>
+                  <span>Show Party Invite</span>
                 </button>
                 <button
                   onClick={handleTriggerTestNotif}
                   className="text-slate-400 hover:text-white transition flex items-center gap-1 cursor-pointer"
-                  title="Send a mock incoming 5v5 ready check"
+                  title="Send incoming 5v5 match ready alert"
                 >
                   <Plus className="w-3 h-3 text-[#A3E635]" />
                   <span>5v5 Alert</span>
@@ -7366,12 +7371,12 @@ export const VortexDashboard: React.FC<VortexDashboardProps> = ({
                   <img
                     src={userClanData.logo}
                     alt={userClanData.name}
-                    className="w-10 h-10 rounded-xl object-contain border border-[#FF5500]/40 bg-[#12141D] p-0.5"
+                    className="w-10 h-10 rounded-xl object-contain border border-[#A3E635]/40 bg-[#12141D] p-0.5"
                   />
                   <div>
                     <div className="flex items-center gap-2">
                       <span className="text-sm font-black font-display text-white">{userClanData.name}</span>
-                      <span className="px-1.5 py-0.2 rounded text-[10px] font-mono font-black bg-[#FF5500]/20 text-[#FF5500] border border-[#FF5500]/40">
+                      <span className="px-1.5 py-0.2 rounded text-[10px] font-mono font-black bg-[#A3E635]/20 text-[#A3E635] border border-[#A3E635]/40">
                         [{userClanData.tag}]
                       </span>
                     </div>
@@ -7615,7 +7620,7 @@ export const VortexDashboard: React.FC<VortexDashboardProps> = ({
                   {/* Match SF-1 (User Clan vs Bad News Eagles) */}
                   <div className={`p-4 rounded-2xl border space-y-2.5 mt-8 transition ${
                     stage === 'sf'
-                      ? 'bg-gradient-to-b from-[#231A12] to-[#141622] border-[#FF5500]/60 shadow-xl'
+                      ? 'bg-gradient-to-b from-[#172212] to-[#10141D] border-[#A3E635]/60 shadow-xl'
                       : 'bg-[#121622] border-[#232B3D]'
                   }`}>
                     <div className="flex justify-between items-center text-xs font-mono">
@@ -7649,7 +7654,7 @@ export const VortexDashboard: React.FC<VortexDashboardProps> = ({
                           setDashboardToast(`✓ Semifinals Won! [${userClanData.tag}] defeats Bad News Eagles (2 - 1) and enters the Grand Final!`);
                           setTimeout(() => setDashboardToast(null), 4000);
                         }}
-                        className="w-full mt-2 py-2 rounded-xl bg-gradient-to-r from-[#FF5500] to-amber-500 hover:brightness-110 text-black font-mono font-black text-xs uppercase tracking-wider flex items-center justify-center gap-2 cursor-pointer shadow transition"
+                        className="w-full mt-2 py-2 rounded-xl bg-gradient-to-r from-emerald-500 to-[#A3E635] hover:brightness-110 text-slate-950 font-mono font-black text-xs uppercase tracking-wider flex items-center justify-center gap-2 cursor-pointer shadow transition"
                       >
                         <Swords className="w-3.5 h-3.5" />
                         <span>Play Semifinals & Enter Grand Final</span>

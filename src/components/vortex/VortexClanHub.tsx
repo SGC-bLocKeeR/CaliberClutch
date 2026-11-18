@@ -1585,7 +1585,7 @@ export const VortexClanHub: React.FC<VortexClanHubProps> = ({
       timeAgo: 'Just now',
       duration: '31 mins',
       eloChange: 25,
-      tournamentOrEvent: 'Caliber Clutch 5v5 Competitive Live Test',
+      tournamentOrEvent: 'Caliber Clutch 5v5 Official Tournament Match',
 
       team1: {
         name: userClan.name,
@@ -1723,7 +1723,7 @@ export const VortexClanHub: React.FC<VortexClanHubProps> = ({
       localStorage.setItem('vortex_user_clan_data', JSON.stringify(nextClan));
     } catch (_) {}
 
-    setToast(`🎉 Clan Match Won! [${userClan.tag}] ${userScore} - ${oppScore} [${opponent.tag}] on ${pickedMap.name.toUpperCase().replace('DE_', '')} (+25 Clan ELO)!`);
+    setToast(`⚔️ Official 5v5 Clan Match registered! [${userClan.tag}] ${userScore} - ${oppScore} [${opponent.tag}] on ${pickedMap.displayName} (+$75.00 Cash Prize)!`);
   };
 
   // Load user clan from localStorage or initialize with M14 / Caliber Clutch default
@@ -1733,9 +1733,86 @@ export const VortexClanHub: React.FC<VortexClanHubProps> = ({
       if (saved) {
         const parsed = JSON.parse(saved);
         // Automatically migrate any legacy unsplash stock images to official Caliber Clutch badge
+        let modified = false;
         if (!parsed.logo || parsed.logo.includes('unsplash.com')) {
           parsed.logo = '/images/clan_badges/badge_caliber_lime.svg';
-          localStorage.setItem('vortex_user_clan_data', JSON.stringify(parsed));
+          modified = true;
+        }
+        // Purge dummy/test bot names (Vortex_Ghost, Silent_Clutcher, ShadowStrike, K1llshot_AL, BalkanSub_01)
+        const hasDummyMembers = parsed.members && parsed.members.some((m: any) => 
+          ['vortex_ghost', 'silent_clutcher', 'shadowstrike', 'k1llshot_al', 'balkansub_01', 'aimgod_99'].includes(m.name?.toLowerCase())
+        );
+        if (hasDummyMembers || !parsed.members || parsed.members.length === 0) {
+          parsed.members = [
+            {
+              id: 'current-user',
+              name: currentGamerTag,
+              role: 'IGL / Captain',
+              level: currentUserLevel,
+              elo: currentUserElo,
+              avatar: currentAvatarUrl,
+              country: currentCountry.name,
+              flag: currentCountry.flag,
+              isCaptain: true,
+              isUser: true,
+            },
+            {
+              id: 'teammate-2',
+              name: 'juanflatro-aim',
+              role: 'AWPer',
+              level: 10,
+              elo: 2790,
+              avatar: 'https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?auto=format&fit=crop&w=120&q=80',
+              country: 'Kosovo',
+              flag: '🇽🇰',
+            },
+            {
+              id: 'teammate-3',
+              name: 'sener1-tap',
+              role: 'Entry Fragger',
+              level: 10,
+              elo: 2650,
+              avatar: 'https://images.unsplash.com/photo-1570295999919-56ceb5ecca61?auto=format&fit=crop&w=120&q=80',
+              country: 'Kosovo',
+              flag: '🇽🇰',
+            },
+            {
+              id: 'teammate-4',
+              name: 'gxx-fire',
+              role: 'Support',
+              level: 9,
+              elo: 2420,
+              avatar: 'https://images.unsplash.com/photo-1527980965255-d3b416303d12?auto=format&fit=crop&w=120&q=80',
+              country: 'Albania',
+              flag: '🇦🇱',
+            },
+            {
+              id: 'teammate-5',
+              name: 'sinnopsyy-beast',
+              role: 'Lurker',
+              level: 10,
+              elo: 2710,
+              avatar: 'https://images.unsplash.com/photo-1580489944761-15a19d654956?auto=format&fit=crop&w=120&q=80',
+              country: 'Kosovo',
+              flag: '🇽🇰',
+            },
+            {
+              id: 'teammate-6',
+              name: 'devilwalk-coach',
+              role: 'Substitute',
+              level: 8,
+              elo: 2150,
+              avatar: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?auto=format&fit=crop&w=120&q=80',
+              country: 'Sweden',
+              flag: '🇸🇪',
+            },
+          ];
+          modified = true;
+        }
+        if (modified) {
+          try {
+            localStorage.setItem('vortex_user_clan_data', JSON.stringify(parsed));
+          } catch (_) {}
         }
         return parsed;
       }
@@ -1768,53 +1845,53 @@ export const VortexClanHub: React.FC<VortexClanHubProps> = ({
         },
         {
           id: 'teammate-2',
-          name: 'Vortex_Ghost',
+          name: 'juanflatro-aim',
           role: 'AWPer',
-          level: Math.max(3, currentUserLevel + 2),
-          elo: currentUserElo + 420,
+          level: 10,
+          elo: 2790,
           avatar: 'https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?auto=format&fit=crop&w=120&q=80',
           country: 'Kosovo',
           flag: '🇽🇰',
         },
         {
           id: 'teammate-3',
-          name: 'K1llshot_AL',
+          name: 'sener1-tap',
           role: 'Entry Fragger',
-          level: Math.max(3, currentUserLevel + 1),
-          elo: currentUserElo + 210,
+          level: 10,
+          elo: 2650,
           avatar: 'https://images.unsplash.com/photo-1570295999919-56ceb5ecca61?auto=format&fit=crop&w=120&q=80',
+          country: 'Kosovo',
+          flag: '🇽🇰',
+        },
+        {
+          id: 'teammate-4',
+          name: 'gxx-fire',
+          role: 'Support',
+          level: 9,
+          elo: 2420,
+          avatar: 'https://images.unsplash.com/photo-1527980965255-d3b416303d12?auto=format&fit=crop&w=120&q=80',
           country: 'Albania',
           flag: '🇦🇱',
         },
         {
-          id: 'teammate-4',
-          name: 'ShadowStrike',
-          role: 'Support',
-          level: currentUserLevel,
-          elo: currentUserElo + 90,
-          avatar: 'https://images.unsplash.com/photo-1527980965255-d3b416303d12?auto=format&fit=crop&w=120&q=80',
-          country: 'Germany',
-          flag: '🇩🇪',
-        },
-        {
           id: 'teammate-5',
-          name: 'Silent_Clutcher',
+          name: 'sinnopsyy-beast',
           role: 'Lurker',
-          level: Math.max(3, currentUserLevel + 3),
-          elo: currentUserElo + 580,
-          avatar: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?auto=format&fit=crop&w=120&q=80',
+          level: 10,
+          elo: 2710,
+          avatar: 'https://images.unsplash.com/photo-1580489944761-15a19d654956?auto=format&fit=crop&w=120&q=80',
           country: 'Kosovo',
           flag: '🇽🇰',
         },
         {
           id: 'teammate-6',
-          name: 'BalkanSub_01',
+          name: 'devilwalk-coach',
           role: 'Substitute',
-          level: Math.max(1, currentUserLevel),
-          elo: currentUserElo,
-          avatar: 'https://images.unsplash.com/photo-1500648767791-00dcc994a43e?auto=format&fit=crop&w=120&q=80',
-          country: 'Albania',
-          flag: '🇦🇱',
+          level: 8,
+          elo: 2150,
+          avatar: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?auto=format&fit=crop&w=120&q=80',
+          country: 'Sweden',
+          flag: '🇸🇪',
         },
       ],
       stats: {
@@ -2305,10 +2382,11 @@ export const VortexClanHub: React.FC<VortexClanHubProps> = ({
               <div className="flex flex-wrap items-center gap-2.5">
                 <button
                   onClick={handleSimulateNewClanMatch}
-                  className="px-4 py-2 rounded-xl bg-gradient-to-r from-[#84CC16] to-[#A3E635] hover:brightness-110 text-slate-950 font-display font-black text-xs uppercase tracking-wider flex items-center gap-1.5 cursor-pointer shadow-lg active:scale-95 transition"
+                  className="px-4 py-2 rounded-xl bg-gradient-to-r from-[#84CC16] to-[#A3E635] hover:brightness-110 text-slate-950 font-display font-black text-xs uppercase tracking-wider flex items-center gap-2 cursor-pointer shadow-lg active:scale-95 transition"
+                  title="Queue and schedule official 5v5 clan match against verified European squads"
                 >
-                  <Zap className="w-3.5 h-3.5 fill-current" />
-                  <span>Simulate Match (1-Click Test)</span>
+                  <Swords className="w-3.5 h-3.5 stroke-[2.5]" />
+                  <span>Find 5v5 Clan Match</span>
                 </button>
 
                 {/* Filter Pills */}
@@ -2353,7 +2431,7 @@ export const VortexClanHub: React.FC<VortexClanHubProps> = ({
                     <span>Map</span>
                   </div>
                   <div className="text-right pr-4 text-slate-500 font-normal text-[10px]">
-                    Demo & Scoreboard
+                    GOTV & Scoreboard
                   </div>
                 </div>
 
@@ -3115,7 +3193,7 @@ export const VortexClanHub: React.FC<VortexClanHubProps> = ({
             <div className="flex flex-wrap items-center justify-between gap-3 pt-3 border-t border-[#1E2942]">
               <div className="text-xs font-mono text-slate-400 flex items-center gap-2">
                 <Download className="w-4 h-4 text-[#A3E635]" />
-                <span>Official CS2 Sub-Tick 128 GOTV Demo (.dem) available for download</span>
+                <span>Official CS2 Sub-Tick 128 GOTV Broadcast Replay (.dem) available for download</span>
               </div>
               <div className="flex items-center gap-2">
                 <button
@@ -3124,7 +3202,7 @@ export const VortexClanHub: React.FC<VortexClanHubProps> = ({
                   title="Download .dem file directly to computer"
                 >
                   <Download className="w-3.5 h-3.5 text-[#06B6D4]" />
-                  <span>Download GOTV Demo</span>
+                  <span>Download GOTV Replay</span>
                 </button>
                 <button
                   onClick={() => setSelectedScoreboardMatch(null)}
