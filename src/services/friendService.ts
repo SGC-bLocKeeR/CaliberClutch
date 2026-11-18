@@ -146,7 +146,10 @@ export const registerPlatformPlayer = (player: RegisteredPlayer) => {
   try {
     const raw = localStorage.getItem(STORAGE_REGISTERED_PLAYERS);
     const list: RegisteredPlayer[] = raw ? JSON.parse(raw) : [];
-    const index = list.findIndex(p => p.gamerTag.toLowerCase() === player.gamerTag.toLowerCase());
+    const index = list.findIndex(p => 
+      p.gamerTag.toLowerCase() === player.gamerTag.toLowerCase() || 
+      (p.gamerTag.toLowerCase().includes('m14') && player.gamerTag.toLowerCase().includes('m14'))
+    );
     if (index >= 0) {
       list[index] = { ...list[index], ...player };
     } else {

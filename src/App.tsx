@@ -118,7 +118,7 @@ export function App() {
     localStorage.removeItem('vortex_user_verification');
     localStorage.removeItem('vortex_faceit_nickname');
     localStorage.removeItem('vortex_faceit_connected');
-    setUserGamerTag('M14');
+    setUserGamerTag('M14 | caliberclutch.vercel.app');
   };
 
   return (

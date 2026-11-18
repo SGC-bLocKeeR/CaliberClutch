@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef, useMemo } from 'react';
 import { 
   BarChart2, 
   Server, 
@@ -656,7 +656,7 @@ export const getFaceitTierInfo = (levelOrElo: number): FaceitTierInfo => {
 };
 
 export const VortexDashboard: React.FC<VortexDashboardProps> = ({
-  userGamerTag = 'M14',
+  userGamerTag = 'M14 | caliberclutch.vercel.app',
   avatarUrl = 'https://distribution.faceit-cdn.net/images/ac453a50-dbca-4d42-a740-dac12bdc74c0.jpeg',
   onNavigateTab,
   onLogout,
@@ -702,7 +702,7 @@ export const VortexDashboard: React.FC<VortexDashboardProps> = ({
           const list: any[] = JSON.parse(rawPlayers);
           const cleaned = list.filter(p => {
             const tag = (p.gamerTag || p.name || '').toLowerCase();
-            return !tag.includes('blockeer') && !tag.includes('shadow_kid') && !tag.includes('nyxora') && !tag.includes('chronopulse') && !tag.includes('test');
+            return !tag.includes('blockeer') && !tag.includes('shadow_kid') && !tag.includes('nyxora') && !tag.includes('chronopulse') && !tag.includes('test') && !tag.includes('m14');
           });
           localStorage.setItem('vortex_platform_registered_players', JSON.stringify(cleaned));
         }
@@ -1557,6 +1557,25 @@ export const VortexDashboard: React.FC<VortexDashboardProps> = ({
   const [rankingSearch, setRankingSearch] = useState('');
   const [rankingTab, setRankingTab] = useState<'europe' | 'global' | 'lvl10'>('europe');
   const [rankingCountry, setRankingCountry] = useState<string>('all');
+  const [isCountryDropdownOpen, setIsCountryDropdownOpen] = useState<boolean>(false);
+  const countryDropdownRef = useRef<HTMLDivElement>(null);
+
+  // Close custom FACEIT country dropdown when clicking outside
+  useEffect(() => {
+    const handleClickOutside = (e: MouseEvent) => {
+      if (countryDropdownRef.current && !countryDropdownRef.current.contains(e.target as Node)) {
+        setIsCountryDropdownOpen(false);
+      }
+    };
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
+  }, []);
+
+  // Sorted list of all ~250 official countries alphabetically (A-Z) like FACEIT
+  const sortedRankingCountries = useMemo(() => {
+    return [...ALL_COUNTRIES].sort((a, b) => a.name.localeCompare(b.name));
+  }, []);
+
   const [viewedPlayer, setViewedPlayer] = useState<PlatformRankingPlayer | null>(null);
   const [hoveredTooltip, setHoveredTooltip] = useState<string | null>(null);
 
@@ -1597,7 +1616,7 @@ export const VortexDashboard: React.FC<VortexDashboardProps> = ({
             if (!p.gamerTag) return false;
             const lower = p.gamerTag.toLowerCase();
             if (lower.includes('blockeer')) return false;
-            if (lower === currentGamerTag.toLowerCase()) return false;
+            if (lower === currentGamerTag.toLowerCase() || lower.includes('m14')) return false;
             if (lower.includes('shadow_kid') || lower.includes('nyxora') || lower.includes('chronopulse') || lower.includes('test')) return false;
             return true;
           })
@@ -2560,9 +2579,6 @@ export const VortexDashboard: React.FC<VortexDashboardProps> = ({
                     {/* ELO Details & Progression Line */}
                     <div className="flex-1 space-y-2">
                       <div className="flex items-center gap-3">
-                        <span className="px-2.5 py-0.5 rounded-full bg-[#1A1D27] text-slate-300 text-xs font-mono border border-white/5">
-                          Season 1
-                        </span>
                         <span className="text-xl sm:text-2xl font-black font-display text-white tracking-tight flex items-center gap-2">
                           {isCalibrated ? (
                             <>
@@ -4535,7 +4551,7 @@ export const VortexDashboard: React.FC<VortexDashboardProps> = ({
           {activeTab === 'rankings' && (() => {
             const filteredPlayers = platformRankingPlayers.filter(p => {
               if (rankingTab === 'lvl10' && p.levelNum !== 10) return false;
-              if (rankingCountry !== 'all' && p.code !== rankingCountry) return false;
+              if (rankingCountry !== 'all' && (p.code || '').toUpperCase() !== rankingCountry.toUpperCase()) return false;
               if (rankingSearch.trim()) {
                 const q = rankingSearch.toLowerCase();
                 return p.tag.toLowerCase().includes(q) || p.country.toLowerCase().includes(q);
@@ -4814,25 +4830,85 @@ export const VortexDashboard: React.FC<VortexDashboardProps> = ({
                       <span>Challenger / Level 10</span>
                     </button>
 
-                    {/* FACEIT Official Country Selector Dropdown */}
-                    <div className="relative">
-                      <select
-                        value={rankingCountry}
-                        onChange={(e) => { sound.playSelect(); setRankingCountry(e.target.value); }}
-                        className="px-3 py-1.5 rounded-xl bg-[#141722] border border-[#232938] text-xs font-mono text-slate-300 hover:text-white focus:outline-none focus:border-[#A3E635] cursor-pointer"
+                    {/* 1:1 Authentic FACEIT Country Selector Dropdown */}
+                    <div className="relative flex items-center gap-1.5" ref={countryDropdownRef}>
+                      <button
+                        type="button"
+                        onClick={() => {
+                          sound.playClick();
+                          setIsCountryDropdownOpen(prev => !prev);
+                        }}
+                        className={`px-3 py-1.5 rounded-lg text-xs font-sans transition flex items-center justify-between gap-3 min-w-[155px] cursor-pointer ${
+                          isCountryDropdownOpen
+                            ? 'bg-[#101114] border-2 border-[#FF5500] text-white shadow-[0_0_12px_rgba(255,85,0,0.25)]'
+                            : 'bg-[#14151A] border border-[#2B2D33] text-slate-200 hover:text-white hover:border-slate-500'
+                        }`}
                       >
-                        <option value="all">🌍 All Countries</option>
-                        <option value="XK">🇽🇰 Kosovo</option>
-                        <option value="AL">🇦🇱 Albania</option>
-                        <option value="DE">🇩🇪 Germany</option>
-                        <option value="SE">🇸🇪 Sweden</option>
-                        <option value="FI">🇫🇮 Finland</option>
-                        <option value="GB">🇬🇧 United Kingdom</option>
-                        <option value="FR">🇫🇷 France</option>
-                        <option value="DK">🇩🇰 Denmark</option>
-                        <option value="PL">🇵🇱 Poland</option>
-                        <option value="UA">🇺🇦 Ukraine</option>
-                      </select>
+                        <span className="font-medium text-xs truncate">
+                          {rankingCountry === 'all'
+                            ? 'All countries'
+                            : (sortedRankingCountries.find(c => c.code.toUpperCase() === rankingCountry.toUpperCase())?.name || 'All countries')}
+                        </span>
+                        <ChevronDown className={`w-3.5 h-3.5 text-slate-400 transition-transform duration-200 ${isCountryDropdownOpen ? 'rotate-180 text-[#FF5500]' : ''}`} />
+                      </button>
+
+                      {/* EU Region Indicator Tag (matching FACEIT Header) */}
+                      <div className="px-2.5 py-1.5 rounded-lg bg-[#14151A] border border-[#2B2D33] text-xs font-mono font-bold text-slate-300 select-none">
+                        EU
+                      </div>
+
+                      {/* Custom FACEIT Dark Dropdown Menu */}
+                      {isCountryDropdownOpen && (
+                        <div className="absolute left-0 top-full mt-1.5 w-64 max-h-72 overflow-y-auto rounded-lg bg-[#18191C] border border-[#2B2D33] shadow-2xl z-50 py-1 divide-y divide-white/[0.04]">
+                          {/* All countries option */}
+                          <button
+                            type="button"
+                            onClick={() => {
+                              sound.playSelect();
+                              setRankingCountry('all');
+                              setIsCountryDropdownOpen(false);
+                            }}
+                            className={`w-full px-3.5 py-2 text-left text-xs font-sans transition flex items-center justify-between cursor-pointer ${
+                              rankingCountry === 'all'
+                                ? 'bg-[#2A2B31] text-white font-bold'
+                                : 'text-slate-300 hover:bg-[#24252B] hover:text-white'
+                            }`}
+                          >
+                            <span>All countries</span>
+                            {rankingCountry === 'all' && (
+                              <Check className="w-3.5 h-3.5 text-white stroke-[2.5]" />
+                            )}
+                          </button>
+
+                          {/* Alphabetical List of all ~250 Official Countries */}
+                          <div className="py-0.5">
+                            {sortedRankingCountries.map((c) => {
+                              const isSelected = rankingCountry.toUpperCase() === c.code.toUpperCase();
+                              return (
+                                <button
+                                  key={c.code}
+                                  type="button"
+                                  onClick={() => {
+                                    sound.playSelect();
+                                    setRankingCountry(c.code);
+                                    setIsCountryDropdownOpen(false);
+                                  }}
+                                  className={`w-full px-3.5 py-2 text-left text-xs font-sans transition flex items-center justify-between cursor-pointer ${
+                                    isSelected
+                                      ? 'bg-[#2A2B31] text-white font-bold'
+                                      : 'text-slate-300 hover:bg-[#24252B] hover:text-white'
+                                  }`}
+                                >
+                                  <span className="truncate">{c.name}</span>
+                                  {isSelected && (
+                                    <Check className="w-3.5 h-3.5 text-white stroke-[2.5] shrink-0" />
+                                  )}
+                                </button>
+                              );
+                            })}
+                          </div>
+                        </div>
+                      )}
                     </div>
                   </div>
 

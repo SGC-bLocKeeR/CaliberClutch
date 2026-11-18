@@ -241,10 +241,10 @@ export const FaceitSeasonStatsCard: React.FC<FaceitSeasonStatsCardProps> = ({
   return (
     <div className="w-full bg-[#0E1017] border border-[#202536] rounded-3xl p-5 sm:p-7 shadow-2xl space-y-6">
       
-      {/* 1. Header: Season 1 stats & Regional / Global Ranks */}
+      {/* 1. Header: Competitive stats & Regional / Global Ranks */}
       <div className="flex items-center justify-between flex-wrap gap-3 pb-3 border-b border-white/[0.06]">
         <div className="flex items-center gap-2">
-          <h2 className="text-base sm:text-lg font-bold font-display text-white">Season 1 stats</h2>
+          <h2 className="text-base sm:text-lg font-bold font-display text-white">Competitive stats</h2>
         </div>
 
         <div className="flex items-center gap-3 text-xs font-mono">
@@ -487,7 +487,7 @@ export const FaceitSeasonStatsCard: React.FC<FaceitSeasonStatsCardProps> = ({
               <div className="divide-y divide-white/5 text-xs font-mono">
                 <div className="grid grid-cols-3 py-1.5 text-slate-400 text-[11px]">
                   <span>Stat</span>
-                  <span className="text-right">Season</span>
+                  <span className="text-right">Overall</span>
                   <span className="text-right">Best</span>
                 </div>
                 <div className="grid grid-cols-3 py-1.5 text-slate-300">

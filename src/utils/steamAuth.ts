@@ -42,22 +42,16 @@ export const convertSteam64ToSteam2 = (steamId64: string): string => {
 };
 
 /**
- * Sanitizes Steam personaName so that domain suffixes, test URLs, or clunky URL tags
- * (such as "| caliberclutch.vercel.app", ".vercel.app", or site URLs) are cleanly stripped.
- * Returns clean esports GamerTag (e.g. "M14").
+ * Sanitizes Steam personaName.
+ * Preserves authentic team/domain tags (e.g. "M14 | caliberclutch.vercel.app").
+ * Replaces legacy placeholders or blocked names with authentic Steam gamer tag.
  */
 export const cleanGamerTag = (name?: string | null): string => {
-  if (!name) return 'M14';
-  let cleaned = name;
-  // Strip domain names, vercel.app, website ads, etc.
-  cleaned = cleaned.replace(/\|\s*https?:\/\/[^\s]+/gi, '');
-  cleaned = cleaned.replace(/https?:\/\/[^\s]+/gi, '');
-  cleaned = cleaned.replace(/\|\s*[a-zA-Z0-9.-]*vercel\.app[^\s)]*/gi, '');
-  cleaned = cleaned.replace(/[a-zA-Z0-9.-]*vercel\.app[^\s)]*/gi, '');
-  cleaned = cleaned.replace(/\|\s*caliberclutch(\.com|\.gg|\.net|\.app)?[^\s)]*/gi, '');
-  // Clean up trailing pipes, dashes or extra whitespace
-  cleaned = cleaned.replace(/[\s|/–—-]+$/g, '').trim();
-  if (!cleaned || cleaned.toLowerCase().includes('blockeer')) return 'M14';
+  if (!name) return 'M14 | caliberclutch.vercel.app';
+  const cleaned = name.trim();
+  if (!cleaned || cleaned.toLowerCase().includes('blockeer') || cleaned === 'M14') {
+    return 'M14 | caliberclutch.vercel.app';
+  }
   return cleaned;
 };
 

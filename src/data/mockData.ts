@@ -593,7 +593,7 @@ export const INITIAL_CONNECTED_SERVICES: ConnectedService[] = [
 
 export const CURRENT_USER_PASSPORT: GamerPassport = {
   id: 'passport-user-01',
-  gamerTag: 'M14',
+  gamerTag: 'M14 | caliberclutch.vercel.app',
   realName: 'M14',
   avatar: 'https://distribution.faceit-cdn.net/images/ac453a50-dbca-4d42-a740-dac12bdc74c0.jpeg',
   country: 'Kosovo',
