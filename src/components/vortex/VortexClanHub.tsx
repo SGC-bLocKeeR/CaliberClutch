@@ -2279,7 +2279,7 @@ export const VortexClanHub: React.FC<VortexClanHubProps> = ({
                 }`}
               >
                 <Flame className="w-3.5 h-3.5" />
-                <span>Option 1: FACEIT Matches & Scoreboard (1:1)</span>
+                <span>Option 1: Official Matches & CS2 Scoreboards</span>
               </button>
 
               <button
@@ -2367,12 +2367,12 @@ export const VortexClanHub: React.FC<VortexClanHubProps> = ({
                     <div
                       key={match.id}
                       onClick={() => openMatchScoreboard(match)}
-                      className="w-full bg-[#111215] hover:bg-[#16171d] border border-white/5 hover:border-white/20 rounded-xl transition-all duration-150 flex items-center justify-between px-3 sm:px-5 py-3 cursor-pointer group relative overflow-hidden shadow-md"
+                      className="w-full bg-gradient-to-r from-[#121624] via-[#0F121C] to-[#0A0C14] hover:from-[#161C2E] hover:to-[#0F131D] border border-[#222A3E] hover:border-[#FF5500]/60 rounded-2xl transition-all duration-200 flex items-center justify-between px-3 sm:px-5 py-3.5 cursor-pointer group relative overflow-hidden shadow-xl"
                     >
-                      {/* Left Colored Indicator Stripe (Green = Win, Red = Loss) */}
+                      {/* Left Colored Indicator Stripe (Caliber Glow: Lime = Win, Red = Loss) */}
                       <div
-                        className={`absolute left-0 top-0 bottom-0 w-1 sm:w-1.5 ${
-                          match.isWin ? 'bg-[#22C55E]' : 'bg-[#EF4444]'
+                        className={`absolute left-0 top-0 bottom-0 w-1.5 sm:w-2 ${
+                          match.isWin ? 'bg-[#A3E635] shadow-[0_0_12px_#A3E635]' : 'bg-[#EF4444] shadow-[0_0_12px_#EF4444]'
                         }`}
                       />
 
@@ -2387,11 +2387,11 @@ export const VortexClanHub: React.FC<VortexClanHubProps> = ({
                         {/* Match Result Badge: [W] 13 : 4 or [L] 3 : 13 */}
                         <div className="flex items-center gap-2 shrink-0">
                           <span
-                            className={`w-5 h-5 rounded flex items-center justify-center font-black text-[11px] text-white shadow-sm ${
-                              match.isWin ? 'bg-[#22C55E]' : 'bg-[#EF4444]'
+                            className={`px-2 py-0.5 rounded-lg flex items-center justify-center font-black text-[11px] shadow-sm uppercase font-mono ${
+                              match.isWin ? 'bg-[#A3E635] text-slate-950 font-black' : 'bg-red-500/20 text-red-400 border border-red-500/40'
                             }`}
                           >
-                            {match.isWin ? 'W' : 'L'}
+                            {match.isWin ? 'WIN' : 'LOSS'}
                           </span>
                           <span className="font-mono font-black text-sm sm:text-base tracking-wide">
                             <span className={match.isWin ? 'text-[#22C55E]' : 'text-[#EF4444]'}>
@@ -2431,8 +2431,8 @@ export const VortexClanHub: React.FC<VortexClanHubProps> = ({
                           <div
                             className={`px-2.5 py-0.5 rounded font-mono font-bold text-xs ${
                               parseFloat(match.userRating) >= 1.00
-                                ? 'bg-[#15341c] text-[#22C55E] border border-[#22C55E]/30'
-                                : 'bg-[#3b1517] text-[#EF4444] border border-[#EF4444]/30'
+                                ? 'bg-[#A3E635]/15 text-[#A3E635] border border-[#A3E635]/30'
+                                : 'bg-red-500/15 text-red-400 border border-red-500/30'
                             }`}
                           >
                             {match.userRating}
@@ -2760,11 +2760,11 @@ export const VortexClanHub: React.FC<VortexClanHubProps> = ({
           onClick={() => setSelectedScoreboardMatch(null)}
         >
           <div 
-            className="w-full max-w-6xl max-h-[94vh] overflow-y-auto bg-[#0d0e12] border border-[#20222a] rounded-2xl shadow-2xl space-y-4 text-left relative p-4 sm:p-6"
+            className="w-full max-w-6xl max-h-[93vh] overflow-y-auto bg-gradient-to-b from-[#0F131F] via-[#0C0F18] to-[#080A10] border-2 border-[#20283C] rounded-3xl shadow-[0_0_60px_rgba(0,0,0,0.85)] space-y-5 text-left relative p-5 sm:p-7"
             onClick={(e) => e.stopPropagation()}
           >
             {/* Modal Top Bar */}
-            <div className="flex flex-wrap items-center justify-between gap-3 border-b border-white/5 pb-3">
+            <div className="flex flex-wrap items-center justify-between gap-4 border-b border-[#1E2538] pb-4">
               <div className="flex items-center gap-3">
                 <div className="w-9 h-9 rounded-xl overflow-hidden border border-white/10 shrink-0">
                   <img src={selectedScoreboardMatch.mapImage} alt={selectedScoreboardMatch.mapDisplayName} className="w-full h-full object-cover" />
@@ -2790,43 +2790,46 @@ export const VortexClanHub: React.FC<VortexClanHubProps> = ({
                 </div>
               </div>
 
-              {/* Sub-Tabs: Scoreboard / Rounds / Performance (Exact 1:1 Match with User Reference Screenshot) */}
+              {/* Sub-Tabs: Scoreboard / Rounds / Performance (Vortex / Caliber Clutch Signature Style) */}
               <div className="flex items-center gap-2">
-                <div className="flex items-center bg-[#0d0e12] p-1 rounded-xl border border-white/10 text-xs font-mono shadow-inner">
+                <div className="flex items-center bg-[#090C14] p-1.5 rounded-2xl border border-[#20273A] shadow-inner gap-1.5 text-xs font-mono">
                   <button
                     type="button"
                     onClick={() => { sound.playClick(); setScoreboardSubTab('scoreboard'); }}
-                    className={`px-4 py-1.5 rounded-lg font-bold transition-all duration-150 cursor-pointer ${
+                    className={`px-4 py-2 rounded-xl font-display font-black text-xs uppercase tracking-wider transition-all duration-150 flex items-center gap-1.5 cursor-pointer ${
                       scoreboardSubTab === 'scoreboard'
-                        ? 'bg-[#FF5500] text-black font-black shadow-md scale-102'
-                        : 'text-slate-400 hover:text-white hover:bg-white/5'
+                        ? 'bg-gradient-to-r from-[#FF5500] to-amber-500 text-black shadow-lg shadow-[#FF5500]/25 scale-102'
+                        : 'bg-[#121622] hover:bg-[#1A2030] text-slate-300 hover:text-white border border-[#232B3E]'
                     }`}
                   >
-                    Scoreboard
+                    <BarChart2 className="w-3.5 h-3.5" />
+                    <span>Scoreboard</span>
                   </button>
 
                   <button
                     type="button"
                     onClick={() => { sound.playClick(); setScoreboardSubTab('rounds'); }}
-                    className={`px-4 py-1.5 rounded-lg font-bold transition-all duration-150 cursor-pointer ${
+                    className={`px-4 py-2 rounded-xl font-display font-black text-xs uppercase tracking-wider transition-all duration-150 flex items-center gap-1.5 cursor-pointer ${
                       scoreboardSubTab === 'rounds'
-                        ? 'bg-[#FF5500] text-black font-black shadow-md scale-102'
-                        : 'text-slate-400 hover:text-white hover:bg-white/5'
+                        ? 'bg-gradient-to-r from-[#FF5500] to-amber-500 text-black shadow-lg shadow-[#FF5500]/25 scale-102'
+                        : 'bg-[#121622] hover:bg-[#1A2030] text-slate-300 hover:text-white border border-[#232B3E]'
                     }`}
                   >
-                    Rounds
+                    <Clock className="w-3.5 h-3.5" />
+                    <span>Rounds</span>
                   </button>
 
                   <button
                     type="button"
                     onClick={() => { sound.playClick(); setScoreboardSubTab('performance'); }}
-                    className={`px-4 py-1.5 rounded-lg font-bold transition-all duration-150 cursor-pointer ${
+                    className={`px-4 py-2 rounded-xl font-display font-black text-xs uppercase tracking-wider transition-all duration-150 flex items-center gap-1.5 cursor-pointer ${
                       scoreboardSubTab === 'performance'
-                        ? 'bg-[#FF5500] text-black font-black shadow-md scale-102'
-                        : 'text-slate-400 hover:text-white hover:bg-white/5'
+                        ? 'bg-gradient-to-r from-[#FF5500] to-amber-500 text-black shadow-lg shadow-[#FF5500]/25 scale-102'
+                        : 'bg-[#121622] hover:bg-[#1A2030] text-slate-300 hover:text-white border border-[#232B3E]'
                     }`}
                   >
-                    Performance
+                    <Flame className="w-3.5 h-3.5" />
+                    <span>Performance</span>
                   </button>
                 </div>
 
@@ -2935,8 +2938,8 @@ export const VortexClanHub: React.FC<VortexClanHubProps> = ({
                               key={p.id || p.name}
                               className={`transition ${
                                 isUser
-                                  ? 'bg-[#0e272a] font-bold border-l-4 border-l-[#2dd4bf]'
-                                  : 'hover:bg-white/[0.04]'
+                                  ? 'bg-gradient-to-r from-[#A3E635]/15 via-[#A3E635]/5 to-transparent font-bold border-l-4 border-l-[#A3E635] shadow-inner'
+                                  : 'hover:bg-white/[0.03]'
                               }`}
                             >
                               <td className="py-2.5 px-3">
@@ -2947,7 +2950,7 @@ export const VortexClanHub: React.FC<VortexClanHubProps> = ({
                                     {p.name}
                                   </span>
                                   {isUser && (
-                                    <span className="px-1.5 py-0.2 rounded text-[9px] font-mono font-bold bg-[#2dd4bf]/20 text-[#2dd4bf] border border-[#2dd4bf]/40 uppercase">
+                                    <span className="px-1.5 py-0.5 rounded text-[9px] font-mono font-black bg-[#A3E635] text-black uppercase shadow-sm">
                                       YOU
                                     </span>
                                   )}
@@ -2965,12 +2968,12 @@ export const VortexClanHub: React.FC<VortexClanHubProps> = ({
                                 <span
                                   className={`px-2 py-0.5 rounded text-xs font-bold inline-flex items-center gap-1 ${
                                     p.hasMvpStar
-                                      ? 'bg-[#c2850c] text-white font-black shadow'
+                                      ? 'bg-amber-500/25 text-amber-300 border border-amber-500/50 shadow-sm'
                                       : ratingNum >= 1.20
-                                      ? 'bg-[#22C55E] text-black font-black'
+                                      ? 'bg-[#A3E635]/20 text-[#A3E635] border border-[#A3E635]/40'
                                       : ratingNum >= 1.00
-                                      ? 'bg-[#272b38] text-slate-200'
-                                      : 'bg-[#ef4444] text-white font-black'
+                                      ? 'bg-white/10 text-slate-200 border border-white/15'
+                                      : 'bg-red-500/20 text-red-400 border border-red-500/40'
                                   }`}
                                 >
                                   <span>{p.rating}</span>
@@ -3076,8 +3079,8 @@ export const VortexClanHub: React.FC<VortexClanHubProps> = ({
                               key={p.id || p.name}
                               className={`transition ${
                                 isUser
-                                  ? 'bg-[#0e272a] font-bold border-l-4 border-l-[#2dd4bf]'
-                                  : 'hover:bg-white/[0.04]'
+                                  ? 'bg-gradient-to-r from-[#A3E635]/15 via-[#A3E635]/5 to-transparent font-bold border-l-4 border-l-[#A3E635] shadow-inner'
+                                  : 'hover:bg-white/[0.03]'
                               }`}
                             >
                               <td className="py-2.5 px-3">
@@ -3088,7 +3091,7 @@ export const VortexClanHub: React.FC<VortexClanHubProps> = ({
                                     {p.name}
                                   </span>
                                   {isUser && (
-                                    <span className="px-1.5 py-0.2 rounded text-[9px] font-mono font-bold bg-[#2dd4bf]/20 text-[#2dd4bf] border border-[#2dd4bf]/40 uppercase">
+                                    <span className="px-1.5 py-0.5 rounded text-[9px] font-mono font-black bg-[#A3E635] text-black uppercase shadow-sm">
                                       YOU
                                     </span>
                                   )}
@@ -3106,12 +3109,12 @@ export const VortexClanHub: React.FC<VortexClanHubProps> = ({
                                 <span
                                   className={`px-2 py-0.5 rounded text-xs font-bold inline-flex items-center gap-1 ${
                                     p.hasMvpStar
-                                      ? 'bg-[#c2850c] text-white font-black shadow'
+                                      ? 'bg-amber-500/25 text-amber-300 border border-amber-500/50 shadow-sm'
                                       : ratingNum >= 1.20
-                                      ? 'bg-[#22C55E] text-black font-black'
+                                      ? 'bg-[#A3E635]/20 text-[#A3E635] border border-[#A3E635]/40'
                                       : ratingNum >= 1.00
-                                      ? 'bg-[#272b38] text-slate-200'
-                                      : 'bg-[#ef4444] text-white font-black'
+                                      ? 'bg-white/10 text-slate-200 border border-white/15'
+                                      : 'bg-red-500/20 text-red-400 border border-red-500/40'
                                   }`}
                                 >
                                   <span>{p.rating}</span>
