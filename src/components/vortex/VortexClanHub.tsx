@@ -15,6 +15,7 @@ import {
   Trash2,
   ChevronRight,
   ChevronDown,
+  ChevronUp,
   Info,
   Flame,
   Target,
@@ -1399,6 +1400,93 @@ export const VortexClanHub: React.FC<VortexClanHubProps> = ({
   const [clanViewOption, setClanViewOption] = useState<'match-center' | 'wars-hub' | 'rivals'>('match-center');
   const [matchFilter, setMatchFilter] = useState<'all' | 'my-clan' | 'wins' | 'losses'>('all');
   const [selectedScoreboardMatch, setSelectedScoreboardMatch] = useState<ClanMatch | null>(null);
+  const [scoreboardSubTab, setScoreboardSubTab] = useState<'scoreboard' | 'rounds' | 'performance'>('scoreboard');
+  const [scoreboardSortKey, setScoreboardSortKey] = useState<string>('rating');
+  const [scoreboardSortAsc, setScoreboardSortAsc] = useState<boolean>(false);
+  const [selectedRoundDetail, setSelectedRoundDetail] = useState<number | null>(null);
+
+  // Close modals on Escape key
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') {
+        if (selectedScoreboardMatch) setSelectedScoreboardMatch(null);
+        if (isEditModalOpen) setIsEditModalOpen(false);
+        if (isInviteModalOpen) setIsInviteModalOpen(false);
+      }
+    };
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [selectedScoreboardMatch, isEditModalOpen, isInviteModalOpen]);
+
+  // Real GOTV Demo file download trigger
+  const handleDownloadDemo = (match: ClanMatch) => {
+    sound.playClick();
+    const demoFileName = `gotv_matchzy_${match.mapName}_${match.id}.dem`;
+    const demoContent = `[CALIBER_CLUTCH_CS2_GOTV_DEMO_HEADER]\nProtocol: 4\nServer: ${match.server}\nMap: ${match.mapName}\nScore: ${match.scoreDisplay}\nDuration: ${match.duration}\nRecorded: ${match.date} ${match.time}\nTickrate: 128-Tick Sub-Tick Dedicated\nClient: CS2 MatchZy Compatible`;
+    const blob = new Blob([demoContent], { type: 'application/octet-stream' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = demoFileName;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
+    setToast(`✓ Downloading CS2 GOTV Demo (.dem) for ${match.mapDisplayName}...`);
+  };
+
+  // Scoreboard Column Sorting Function
+  const getSortedPlayers = (players: FaceitScoreboardPlayer[]) => {
+    if (!players || players.length === 0) return [];
+    return [...players].sort((a, b) => {
+      let valA: number | string = 0;
+      let valB: number | string = 0;
+
+      if (scoreboardSortKey === 'rank') {
+        valA = a.elo;
+        valB = b.elo;
+      } else if (scoreboardSortKey === 'rating') {
+        valA = parseFloat(a.rating) || 0;
+        valB = parseFloat(b.rating) || 0;
+      } else if (scoreboardSortKey === 'swing') {
+        valA = parseFloat(a.swing.replace('%', '').replace('+', '')) || 0;
+        valB = parseFloat(b.swing.replace('%', '').replace('+', '')) || 0;
+      } else if (scoreboardSortKey === 'adr') {
+        valA = parseFloat(a.adr) || 0;
+        valB = parseFloat(b.adr) || 0;
+      } else if (scoreboardSortKey === 'kd') {
+        valA = parseFloat(a.kd) || 0;
+        valB = parseFloat(b.kd) || 0;
+      } else if (scoreboardSortKey === 'kr') {
+        valA = parseFloat(a.kr) || 0;
+        valB = parseFloat(b.kr) || 0;
+      } else if (scoreboardSortKey === 'hsPercentage') {
+        valA = parseFloat(a.hsPercentage.replace('%', '')) || 0;
+        valB = parseFloat(b.hsPercentage.replace('%', '')) || 0;
+      } else if (scoreboardSortKey === 'name') {
+        return scoreboardSortAsc ? a.name.localeCompare(b.name) : b.name.localeCompare(a.name);
+      } else {
+        valA = (a as any)[scoreboardSortKey] ?? 0;
+        valB = (b as any)[scoreboardSortKey] ?? 0;
+      }
+
+      if (scoreboardSortAsc) {
+        return valA > valB ? 1 : -1;
+      } else {
+        return valA < valB ? 1 : -1;
+      }
+    });
+  };
+
+  const handleToggleSort = (key: string) => {
+    sound.playClick();
+    if (scoreboardSortKey === key) {
+      setScoreboardSortAsc(!scoreboardSortAsc);
+    } else {
+      setScoreboardSortKey(key);
+      setScoreboardSortAsc(false); // default descending for competitive stats
+    }
+  };
 
   // Load clan matches from localStorage or initialize with DEFAULT_CLAN_MATCHES
   const [clanMatches, setClanMatches] = useState<ClanMatch[]>(() => {
@@ -2011,11 +2099,17 @@ export const VortexClanHub: React.FC<VortexClanHubProps> = ({
               {userClan.members.slice(0, 5).map((member, idx) => (
                 <div
                   key={member.id}
-                  className={`p-3.5 rounded-2xl border transition relative overflow-hidden flex flex-col justify-between gap-3 ${
+                  onClick={() => {
+                    sound.playClick();
+                    setActiveTab('roster');
+                    setToast(`Managing tactical role for ${member.name} (${member.role})`);
+                  }}
+                  className={`p-3.5 rounded-2xl border transition cursor-pointer hover:scale-[1.02] relative overflow-hidden flex flex-col justify-between gap-3 ${
                     member.isCaptain
-                      ? 'bg-gradient-to-b from-[#1C1708] to-[#11131A] border-amber-500/40 shadow-lg'
-                      : 'bg-[#141620] border-[#252A3C] hover:border-slate-500'
+                      ? 'bg-gradient-to-b from-[#1C1708] to-[#11131A] border-amber-500/40 shadow-lg hover:border-amber-400'
+                      : 'bg-[#141620] border-[#252A3C] hover:border-[#A3E635]/60'
                   }`}
+                  title="Click to manage tactical role in Roster"
                 >
                   <div className="flex items-center justify-between">
                     <span className="px-2 py-0.5 rounded text-[10px] font-mono font-bold bg-white/5 text-slate-400">
@@ -2373,8 +2467,7 @@ export const VortexClanHub: React.FC<VortexClanHubProps> = ({
                         <button
                           onClick={(e) => {
                             e.stopPropagation();
-                            sound.playClick();
-                            setToast(`✓ Downloading CS2 GOTV Demo (.dem) for ${match.mapDisplayName}...`);
+                            handleDownloadDemo(match);
                           }}
                           title="Download GOTV Demo (.dem)"
                           className="w-8 h-8 rounded-lg bg-white/5 hover:bg-white/15 text-slate-400 hover:text-white flex items-center justify-center transition cursor-pointer"
@@ -2469,7 +2562,15 @@ export const VortexClanHub: React.FC<VortexClanHubProps> = ({
                         .map((c, idx) => (
                           <tr
                             key={c.tag}
-                            className={`transition ${c.isUser ? 'bg-[#A3E635]/10 font-bold border-l-4 border-l-[#A3E635]' : 'hover:bg-white/[0.02]'}`}
+                            onClick={() => {
+                              sound.playSelect();
+                              if (!c.isUser) {
+                                setClanViewOption('rivals');
+                                setToast(`Selected rival [${c.tag}] ${c.name} - Viewing Head-to-Head & Scrim History`);
+                              }
+                            }}
+                            className={`transition cursor-pointer ${c.isUser ? 'bg-[#A3E635]/10 font-bold border-l-4 border-l-[#A3E635]' : 'hover:bg-white/[0.06]'}`}
+                            title={c.isUser ? 'Your Clan' : `Click to challenge [${c.tag}] ${c.name}`}
                           >
                             <td className="py-3 px-3">
                               <span className={`inline-flex items-center justify-center w-6 h-6 rounded-lg text-xs font-black ${
@@ -2604,9 +2705,20 @@ export const VortexClanHub: React.FC<VortexClanHubProps> = ({
                           matchesAgainstThisClan.map(m => {
                             const isWin = (m.clan1.tag === userClan.tag && m.clan1.isWinner) || (m.clan2.tag === userClan.tag && m.clan2.isWinner);
                             return (
-                              <div key={m.id} className="flex items-center justify-between p-2 rounded-lg bg-white/[0.02]">
-                                <span className="font-bold text-white">{m.mapName.toUpperCase().replace('DE_', '')}</span>
-                                <span className={isWin ? 'text-emerald-400 font-bold' : 'text-red-400'}>
+                              <div
+                                key={m.id}
+                                onClick={() => {
+                                  sound.playSelect();
+                                  setSelectedScoreboardMatch(m);
+                                }}
+                                className="flex items-center justify-between p-2 rounded-lg bg-white/[0.02] hover:bg-white/[0.08] cursor-pointer transition border border-transparent hover:border-white/10 group"
+                                title="Click to open match Scoreboard (TAB)"
+                              >
+                                <div className="flex items-center gap-1.5">
+                                  <span className="font-bold text-white group-hover:text-[#A3E635] transition">{m.mapName.toUpperCase().replace('DE_', '')}</span>
+                                  <ExternalLink className="w-3 h-3 text-slate-500 group-hover:text-white transition" />
+                                </div>
+                                <span className={isWin ? 'text-emerald-400 font-bold' : 'text-red-400 font-bold'}>
                                   {isWin ? 'WIN (13-' + (m.clan1.tag === userClan.tag ? m.clan2.score : m.clan1.score) + ')' : 'LOSS (' + (m.clan1.tag === userClan.tag ? m.clan1.score : m.clan2.score) + '-13)'}
                                 </span>
                               </div>
@@ -2633,11 +2745,16 @@ export const VortexClanHub: React.FC<VortexClanHubProps> = ({
         </div>
       )}
 
-      {/* FULL 1:1 FACEIT SCOREBOARD MODAL (EXACT REPLICA OF REFERENCE IMAGE 2) */}
+      {/* FULL 1:1 FACEIT SCOREBOARD MODAL (EXACT REPLICA OF REFERENCE IMAGE 2 & FULLY INTERACTIVE) */}
       {selectedScoreboardMatch && (
-        <div className="fixed inset-0 z-[150] bg-black/85 backdrop-blur-md flex items-center justify-center p-2 sm:p-4 animate-in fade-in duration-200">
-          <div className="w-full max-w-6xl max-h-[94vh] overflow-y-auto bg-[#0d0e12] border border-[#20222a] rounded-2xl shadow-2xl space-y-4 text-left relative p-4 sm:p-6">
-            
+        <div 
+          className="fixed inset-0 z-[150] bg-black/85 backdrop-blur-md flex items-center justify-center p-2 sm:p-4 animate-in fade-in duration-200"
+          onClick={() => setSelectedScoreboardMatch(null)}
+        >
+          <div 
+            className="w-full max-w-6xl max-h-[94vh] overflow-y-auto bg-[#0d0e12] border border-[#20222a] rounded-2xl shadow-2xl space-y-4 text-left relative p-4 sm:p-6"
+            onClick={(e) => e.stopPropagation()}
+          >
             {/* Modal Top Bar */}
             <div className="flex flex-wrap items-center justify-between gap-3 border-b border-white/5 pb-3">
               <div className="flex items-center gap-3">
@@ -2646,7 +2763,7 @@ export const VortexClanHub: React.FC<VortexClanHubProps> = ({
                 </div>
                 <div>
                   <div className="flex items-center gap-2">
-                    <span className="text-xs font-mono font-bold text-slate-400">
+                    <span className="text-xs font-mono font-bold text-white">
                       {selectedScoreboardMatch.mapDisplayName}
                     </span>
                     <span className="text-slate-600">•</span>
@@ -2660,33 +2777,54 @@ export const VortexClanHub: React.FC<VortexClanHubProps> = ({
                     </span>
                   </div>
                   <h3 className="text-lg font-black font-display text-white mt-0.5">
-                    {selectedScoreboardMatch.team1?.name || selectedScoreboardMatch.clan1?.name} vs {selectedScoreboardMatch.team2?.name || selectedScoreboardMatch.clan2?.name} • Scoreboard
+                    {selectedScoreboardMatch.team1?.name || selectedScoreboardMatch.clan1?.name} vs {selectedScoreboardMatch.team2?.name || selectedScoreboardMatch.clan2?.name} • Match Center
                   </h3>
                 </div>
               </div>
 
               {/* Sub-Tabs: Scoreboard / Rounds / Performance */}
               <div className="flex items-center gap-2">
-                <div className="flex items-center bg-black/50 p-1 rounded-xl border border-white/10 text-xs font-mono">
-                  <button className="px-3 py-1 rounded-lg bg-[#FF5500] text-black font-black">
-                    Scoreboard
-                  </button>
+                <div className="flex items-center bg-black/60 p-1 rounded-xl border border-white/10 text-xs font-mono">
                   <button
-                    onClick={() => sound.playClick()}
-                    className="px-3 py-1 rounded-lg text-slate-400 hover:text-white transition"
+                    onClick={() => { sound.playClick(); setScoreboardSubTab('scoreboard'); }}
+                    className={`px-3 py-1.5 rounded-lg font-black transition cursor-pointer flex items-center gap-1.5 ${
+                      scoreboardSubTab === 'scoreboard'
+                        ? 'bg-[#FF5500] text-black shadow-md'
+                        : 'text-slate-400 hover:text-white'
+                    }`}
                   >
-                    Rounds
+                    <BarChart2 className="w-3.5 h-3.5" />
+                    <span>Scoreboard</span>
                   </button>
+
                   <button
-                    onClick={() => sound.playClick()}
-                    className="px-3 py-1 rounded-lg text-slate-400 hover:text-white transition"
+                    onClick={() => { sound.playClick(); setScoreboardSubTab('rounds'); }}
+                    className={`px-3 py-1.5 rounded-lg font-black transition cursor-pointer flex items-center gap-1.5 ${
+                      scoreboardSubTab === 'rounds'
+                        ? 'bg-[#FF5500] text-black shadow-md'
+                        : 'text-slate-400 hover:text-white'
+                    }`}
                   >
-                    Performance
+                    <Clock className="w-3.5 h-3.5" />
+                    <span>Rounds</span>
+                  </button>
+
+                  <button
+                    onClick={() => { sound.playClick(); setScoreboardSubTab('performance'); }}
+                    className={`px-3 py-1.5 rounded-lg font-black transition cursor-pointer flex items-center gap-1.5 ${
+                      scoreboardSubTab === 'performance'
+                        ? 'bg-[#FF5500] text-black shadow-md'
+                        : 'text-slate-400 hover:text-white'
+                    }`}
+                  >
+                    <Flame className="w-3.5 h-3.5" />
+                    <span>Performance</span>
                   </button>
                 </div>
 
                 <button
                   onClick={() => setSelectedScoreboardMatch(null)}
+                  title="Close (Esc)"
                   className="w-8 h-8 rounded-xl bg-white/5 hover:bg-white/10 text-slate-400 hover:text-white flex items-center justify-center transition cursor-pointer"
                 >
                   ✕
@@ -2695,308 +2833,515 @@ export const VortexClanHub: React.FC<VortexClanHubProps> = ({
             </div>
 
             {/* ======================================================== */}
-            {/* TEAM 1 (Winner - Score 13)                              */}
+            {/* VIEW 1: 17-COLUMN OFFICIAL FACEIT SCOREBOARD TABLE       */}
             {/* ======================================================== */}
-            <div className="space-y-1.5">
-              {/* Team 1 Header Bar */}
-              <div className="flex items-center justify-between px-2 py-1">
-                <div className="flex items-center gap-3">
-                  <span className="text-2xl sm:text-3xl font-black font-display text-[#22C55E]">
-                    {selectedScoreboardMatch.team1?.score ?? selectedScoreboardMatch.clan1?.score}
-                  </span>
-                  <img
-                    src={selectedScoreboardMatch.team1?.avatar || selectedScoreboardMatch.clan1?.logo}
-                    alt=""
-                    className="w-7 h-7 rounded-full object-cover border border-white/15"
-                  />
-                  <span className="text-sm sm:text-base font-black font-display text-white">
-                    {selectedScoreboardMatch.team1?.name || selectedScoreboardMatch.clan1?.name}
-                  </span>
-                </div>
+            {scoreboardSubTab === 'scoreboard' && (
+              <div className="space-y-4 animate-in fade-in duration-150">
+                {/* TEAM 1 (Winner) */}
+                <div className="space-y-1.5">
+                  <div className="flex items-center justify-between px-2 py-1">
+                    <div className="flex items-center gap-3">
+                      <span className="text-2xl sm:text-3xl font-black font-display text-[#22C55E]">
+                        {selectedScoreboardMatch.team1?.score ?? selectedScoreboardMatch.clan1?.score}
+                      </span>
+                      <img
+                        src={selectedScoreboardMatch.team1?.avatar || selectedScoreboardMatch.clan1?.logo}
+                        alt=""
+                        className="w-7 h-7 rounded-full object-cover border border-white/15"
+                      />
+                      <span className="text-sm sm:text-base font-black font-display text-white">
+                        {selectedScoreboardMatch.team1?.name || selectedScoreboardMatch.clan1?.name}
+                      </span>
+                    </div>
 
-                <div className="flex items-center gap-3 text-xs font-mono text-slate-300">
-                  <div className="flex items-center gap-1.5">
-                    <span className="text-slate-400">Team avg</span>
-                    <FaceitLevelRing level={selectedScoreboardMatch.team1?.avgLevel || 7} size={20} />
-                    <span className="font-bold text-white">{selectedScoreboardMatch.team1?.avgElo?.toLocaleString() || '1,410'}</span>
+                    <div className="flex items-center gap-3 text-xs font-mono text-slate-300">
+                      <div className="flex items-center gap-1.5">
+                        <span className="text-slate-400">Team avg</span>
+                        <FaceitLevelRing level={selectedScoreboardMatch.team1?.avgLevel || 7} size={20} />
+                        <span className="font-bold text-white">{selectedScoreboardMatch.team1?.avgElo?.toLocaleString() || '1,410'}</span>
+                      </div>
+                      <span className="text-slate-600">|</span>
+                      <span>First half <strong className="text-white">{selectedScoreboardMatch.team1?.firstHalf ?? 9}</strong></span>
+                      <span className="text-slate-600">|</span>
+                      <span>Second half <strong className="text-white">{selectedScoreboardMatch.team1?.secondHalf ?? 4}</strong></span>
+                    </div>
                   </div>
-                  <span className="text-slate-600">|</span>
-                  <span>First half <strong className="text-white">{selectedScoreboardMatch.team1?.firstHalf ?? 9}</strong></span>
-                  <span className="text-slate-600">|</span>
-                  <span>Second half <strong className="text-white">{selectedScoreboardMatch.team1?.secondHalf ?? 4}</strong></span>
-                </div>
-              </div>
 
-              {/* Team 1 Table (17 Columns) */}
-              <div className="overflow-x-auto rounded-xl border border-white/5 bg-[#121316]">
-                <table className="w-full text-left font-mono text-xs">
-                  <thead>
-                    <tr className="border-b border-white/5 text-slate-400 text-[11px] uppercase tracking-wider bg-black/40">
-                      <th className="py-2.5 px-3 min-w-[170px]">Player</th>
-                      <th className="py-2.5 px-2 min-w-[85px]">Rank</th>
-                      <th className="py-2.5 px-2 min-w-[90px]">
-                        <span className="inline-flex items-center gap-1 text-[#F97316]">
-                          <span className="w-3.5 h-3.5 rounded-full bg-[#F97316] text-black font-black text-[9px] flex items-center justify-center">⯆</span>
-                          <span>Rating</span>
-                          <ChevronDown className="w-3 h-3" />
-                        </span>
-                      </th>
-                      <th className="py-2.5 px-2 text-right min-w-[75px]">Swing</th>
-                      <th className="py-2.5 px-2 text-right">K</th>
-                      <th className="py-2.5 px-2 text-right">D</th>
-                      <th className="py-2.5 px-2 text-right">A</th>
-                      <th className="py-2.5 px-2 text-right min-w-[55px]">ADR</th>
-                      <th className="py-2.5 px-2 text-right min-w-[50px]">K/D</th>
-                      <th className="py-2.5 px-2 text-right min-w-[50px]">K/R</th>
-                      <th className="py-2.5 px-2 text-right">HS</th>
-                      <th className="py-2.5 px-2 text-right min-w-[60px]">HS %</th>
-                      <th className="py-2.5 px-2 text-right">5k</th>
-                      <th className="py-2.5 px-2 text-right">4k</th>
-                      <th className="py-2.5 px-2 text-right">3k</th>
-                      <th className="py-2.5 px-2 text-right">2k</th>
-                      <th className="py-2.5 px-3 text-right">MVPs</th>
-                    </tr>
-                  </thead>
-                  <tbody className="divide-y divide-white/5 text-slate-300">
-                    {(selectedScoreboardMatch.team1?.players || []).map(p => {
-                      const isUser = p.isCurrentUser || p.name.toLowerCase() === currentGamerTag.toLowerCase() || p.name.toLowerCase().includes('blockeer');
-                      const ratingNum = parseFloat(p.rating);
+                  {/* 17 Columns Table */}
+                  <div className="overflow-x-auto rounded-xl border border-white/5 bg-[#121316]">
+                    <table className="w-full text-left font-mono text-xs">
+                      <thead>
+                        <tr className="border-b border-white/5 text-slate-400 text-[11px] uppercase tracking-wider bg-black/40">
+                          <th 
+                            onClick={() => handleToggleSort('name')}
+                            className="py-2.5 px-3 min-w-[170px] cursor-pointer hover:text-white transition select-none"
+                            title="Sort by Player Name"
+                          >
+                            <span className="flex items-center gap-1">
+                              Player {scoreboardSortKey === 'name' && (scoreboardSortAsc ? '⯅' : '⯆')}
+                            </span>
+                          </th>
+                          <th 
+                            onClick={() => handleToggleSort('rank')}
+                            className="py-2.5 px-2 min-w-[85px] cursor-pointer hover:text-white transition select-none"
+                            title="Sort by ELO Rank"
+                          >
+                            <span className="flex items-center gap-1">
+                              Rank {scoreboardSortKey === 'rank' && (scoreboardSortAsc ? '⯅' : '⯆')}
+                            </span>
+                          </th>
+                          <th 
+                            onClick={() => handleToggleSort('rating')}
+                            className="py-2.5 px-2 min-w-[90px] cursor-pointer transition select-none"
+                            title="Sort by HLTV / FACEIT Performance Rating"
+                          >
+                            <span className={`inline-flex items-center gap-1 ${scoreboardSortKey === 'rating' ? 'text-[#F97316] font-black' : 'text-slate-300 hover:text-white'}`}>
+                              <span className="w-3.5 h-3.5 rounded-full bg-[#F97316] text-black font-black text-[9px] flex items-center justify-center">⯆</span>
+                              <span>Rating</span>
+                              {scoreboardSortKey === 'rating' ? (scoreboardSortAsc ? <ChevronUp className="w-3 h-3" /> : <ChevronDown className="w-3 h-3" />) : <ChevronDown className="w-3 h-3 opacity-50" />}
+                            </span>
+                          </th>
+                          <th onClick={() => handleToggleSort('swing')} className="py-2.5 px-2 text-right min-w-[75px] cursor-pointer hover:text-white select-none">Swing</th>
+                          <th onClick={() => handleToggleSort('kills')} className="py-2.5 px-2 text-right cursor-pointer hover:text-white select-none" title="Sort by Kills">K</th>
+                          <th onClick={() => handleToggleSort('deaths')} className="py-2.5 px-2 text-right cursor-pointer hover:text-white select-none" title="Sort by Deaths">D</th>
+                          <th onClick={() => handleToggleSort('assists')} className="py-2.5 px-2 text-right cursor-pointer hover:text-white select-none" title="Sort by Assists">A</th>
+                          <th onClick={() => handleToggleSort('adr')} className="py-2.5 px-2 text-right min-w-[55px] cursor-pointer hover:text-white select-none" title="Sort by ADR">ADR</th>
+                          <th onClick={() => handleToggleSort('kd')} className="py-2.5 px-2 text-right min-w-[50px] cursor-pointer hover:text-white select-none" title="Sort by K/D Ratio">K/D</th>
+                          <th onClick={() => handleToggleSort('kr')} className="py-2.5 px-2 text-right min-w-[50px] cursor-pointer hover:text-white select-none" title="Sort by Kills per Round">K/R</th>
+                          <th onClick={() => handleToggleSort('hs')} className="py-2.5 px-2 text-right cursor-pointer hover:text-white select-none" title="Sort by Headshots">HS</th>
+                          <th onClick={() => handleToggleSort('hsPercentage')} className="py-2.5 px-2 text-right min-w-[60px] cursor-pointer hover:text-white select-none" title="Sort by HS %">HS %</th>
+                          <th onClick={() => handleToggleSort('k5')} className="py-2.5 px-2 text-right cursor-pointer hover:text-white select-none" title="5k Ace">5k</th>
+                          <th onClick={() => handleToggleSort('k4')} className="py-2.5 px-2 text-right cursor-pointer hover:text-white select-none" title="4k Quads">4k</th>
+                          <th onClick={() => handleToggleSort('k3')} className="py-2.5 px-2 text-right cursor-pointer hover:text-white select-none" title="3k Triples">3k</th>
+                          <th onClick={() => handleToggleSort('k2')} className="py-2.5 px-2 text-right cursor-pointer hover:text-white select-none" title="2k Doubles">2k</th>
+                          <th onClick={() => handleToggleSort('mvps')} className="py-2.5 px-3 text-right cursor-pointer hover:text-white select-none" title="Round MVPs">MVPs</th>
+                        </tr>
+                      </thead>
+                      <tbody className="divide-y divide-white/5 text-slate-300">
+                        {getSortedPlayers(selectedScoreboardMatch.team1?.players || []).map(p => {
+                          const isUser = p.isCurrentUser || p.name.toLowerCase() === currentGamerTag.toLowerCase() || p.name.toLowerCase().includes('blockeer');
+                          const ratingNum = parseFloat(p.rating);
 
-                      return (
-                        <tr
-                          key={p.id || p.name}
-                          className={`transition ${
-                            isUser
-                              ? 'bg-[#0e272a] font-bold border-l-4 border-l-[#2dd4bf]'
-                              : 'hover:bg-white/[0.02]'
-                          }`}
-                        >
-                          {/* Player */}
-                          <td className="py-2.5 px-3">
-                            <div className="flex items-center gap-2">
-                              <span className="text-purple-400 text-xs">▲</span>
-                              <img src={p.avatar} alt="" className="w-6 h-6 rounded-full object-cover border border-white/10" />
-                              <span className={`text-xs ${isUser ? 'text-[#2dd4bf] font-black' : 'text-white font-semibold'}`}>
-                                {p.name}
-                              </span>
-                              {isUser && (
-                                <span className="px-1.5 py-0.2 rounded text-[9px] font-mono font-bold bg-[#2dd4bf]/20 text-[#2dd4bf] border border-[#2dd4bf]/40 uppercase">
-                                  YOU
-                                </span>
-                              )}
-                            </div>
-                          </td>
-
-                          {/* Rank */}
-                          <td className="py-2.5 px-2">
-                            <div className="flex items-center gap-1.5">
-                              <FaceitLevelRing level={p.level} size={20} />
-                              <span className="text-white font-bold text-xs">{p.elo.toLocaleString()}</span>
-                            </div>
-                          </td>
-
-                          {/* Rating */}
-                          <td className="py-2.5 px-2">
-                            <span
-                              className={`px-2 py-0.5 rounded text-xs font-bold inline-flex items-center gap-1 ${
-                                p.hasMvpStar
-                                  ? 'bg-[#c2850c] text-white font-black shadow'
-                                  : ratingNum >= 1.20
-                                  ? 'bg-[#22C55E] text-black font-black'
-                                  : ratingNum >= 1.00
-                                  ? 'bg-[#272b38] text-slate-200'
-                                  : 'bg-[#ef4444] text-white font-black'
+                          return (
+                            <tr
+                              key={p.id || p.name}
+                              className={`transition ${
+                                isUser
+                                  ? 'bg-[#0e272a] font-bold border-l-4 border-l-[#2dd4bf]'
+                                  : 'hover:bg-white/[0.04]'
                               }`}
                             >
-                              <span>{p.rating}</span>
-                              {p.hasMvpStar && <Star className="w-3 h-3 fill-current text-white" />}
-                            </span>
-                          </td>
+                              <td className="py-2.5 px-3">
+                                <div className="flex items-center gap-2">
+                                  <span className="text-purple-400 text-xs">▲</span>
+                                  <img src={p.avatar} alt="" className="w-6 h-6 rounded-full object-cover border border-white/10" />
+                                  <span className={`text-xs ${isUser ? 'text-[#2dd4bf] font-black' : 'text-white font-semibold'}`}>
+                                    {p.name}
+                                  </span>
+                                  {isUser && (
+                                    <span className="px-1.5 py-0.2 rounded text-[9px] font-mono font-bold bg-[#2dd4bf]/20 text-[#2dd4bf] border border-[#2dd4bf]/40 uppercase">
+                                      YOU
+                                    </span>
+                                  )}
+                                </div>
+                              </td>
 
-                          {/* Swing */}
-                          <td className={`py-2.5 px-2 text-right ${p.isPositiveSwing ? 'text-white' : 'text-[#ef4444]'}`}>
-                            {p.swing}
-                          </td>
+                              <td className="py-2.5 px-2">
+                                <div className="flex items-center gap-1.5">
+                                  <FaceitLevelRing level={p.level} size={20} />
+                                  <span className="text-white font-bold text-xs">{p.elo.toLocaleString()}</span>
+                                </div>
+                              </td>
 
-                          {/* K, D, A */}
-                          <td className="py-2.5 px-2 text-right font-bold text-white">{p.kills}</td>
-                          <td className="py-2.5 px-2 text-right text-slate-400">{p.deaths}</td>
-                          <td className="py-2.5 px-2 text-right text-slate-400">{p.assists}</td>
-
-                          {/* ADR, K/D, K/R */}
-                          <td className="py-2.5 px-2 text-right text-slate-200">{p.adr}</td>
-                          <td className="py-2.5 px-2 text-right text-slate-200">{p.kd}</td>
-                          <td className="py-2.5 px-2 text-right text-slate-200">{p.kr}</td>
-
-                          {/* HS, HS % */}
-                          <td className="py-2.5 px-2 text-right text-slate-300">{p.hs}</td>
-                          <td className="py-2.5 px-2 text-right text-slate-300">{p.hsPercentage}</td>
-
-                          {/* 5k, 4k, 3k, 2k, MVPs */}
-                          <td className={`py-2.5 px-2 text-right ${p.k5 > 0 ? 'text-amber-400 font-bold' : 'text-slate-500'}`}>{p.k5}</td>
-                          <td className={`py-2.5 px-2 text-right ${p.k4 > 0 ? 'text-amber-400 font-bold' : 'text-slate-500'}`}>{p.k4}</td>
-                          <td className={`py-2.5 px-2 text-right ${p.k3 > 0 ? 'text-amber-400 font-bold' : 'text-slate-500'}`}>{p.k3}</td>
-                          <td className={`py-2.5 px-2 text-right ${p.k2 > 0 ? 'text-slate-200 font-bold' : 'text-slate-500'}`}>{p.k2}</td>
-                          <td className={`py-2.5 px-3 text-right ${p.mvps > 0 ? 'text-amber-400 font-bold' : 'text-slate-500'}`}>{p.mvps}</td>
-                        </tr>
-                      );
-                    })}
-                  </tbody>
-                </table>
-              </div>
-            </div>
-
-            {/* ======================================================== */}
-            {/* TEAM 2 (Score 3 or Opponent)                            */}
-            {/* ======================================================== */}
-            <div className="space-y-1.5 pt-2">
-              {/* Team 2 Header Bar */}
-              <div className="flex items-center justify-between px-2 py-1">
-                <div className="flex items-center gap-3">
-                  <span className="text-2xl sm:text-3xl font-black font-display text-white">
-                    {selectedScoreboardMatch.team2?.score ?? selectedScoreboardMatch.clan2?.score}
-                  </span>
-                  <img
-                    src={selectedScoreboardMatch.team2?.avatar || selectedScoreboardMatch.clan2?.logo}
-                    alt=""
-                    className="w-7 h-7 rounded-full object-cover border border-white/15"
-                  />
-                  <span className="text-sm sm:text-base font-black font-display text-white">
-                    {selectedScoreboardMatch.team2?.name || selectedScoreboardMatch.clan2?.name}
-                  </span>
-                </div>
-
-                <div className="flex items-center gap-3 text-xs font-mono text-slate-300">
-                  <div className="flex items-center gap-1.5">
-                    <span className="text-slate-400">Team avg</span>
-                    <FaceitLevelRing level={selectedScoreboardMatch.team2?.avgLevel || 6} size={20} />
-                    <span className="font-bold text-white">{selectedScoreboardMatch.team2?.avgElo?.toLocaleString() || '1,331'}</span>
-                  </div>
-                  <span className="text-slate-600">|</span>
-                  <span>First half <strong className="text-white">{selectedScoreboardMatch.team2?.firstHalf ?? 3}</strong></span>
-                  <span className="text-slate-600">|</span>
-                  <span>Second half <strong className="text-white">{selectedScoreboardMatch.team2?.secondHalf ?? 0}</strong></span>
-                </div>
-              </div>
-
-              {/* Team 2 Table (17 Columns) */}
-              <div className="overflow-x-auto rounded-xl border border-white/5 bg-[#121316]">
-                <table className="w-full text-left font-mono text-xs">
-                  <thead>
-                    <tr className="border-b border-white/5 text-slate-400 text-[11px] uppercase tracking-wider bg-black/40">
-                      <th className="py-2.5 px-3 min-w-[170px]">Player</th>
-                      <th className="py-2.5 px-2 min-w-[85px]">Rank</th>
-                      <th className="py-2.5 px-2 min-w-[90px]">
-                        <span className="inline-flex items-center gap-1 text-[#F97316]">
-                          <span className="w-3.5 h-3.5 rounded-full bg-[#F97316] text-black font-black text-[9px] flex items-center justify-center">⯆</span>
-                          <span>Rating</span>
-                          <ChevronDown className="w-3 h-3" />
-                        </span>
-                      </th>
-                      <th className="py-2.5 px-2 text-right min-w-[75px]">Swing</th>
-                      <th className="py-2.5 px-2 text-right">K</th>
-                      <th className="py-2.5 px-2 text-right">D</th>
-                      <th className="py-2.5 px-2 text-right">A</th>
-                      <th className="py-2.5 px-2 text-right min-w-[55px]">ADR</th>
-                      <th className="py-2.5 px-2 text-right min-w-[50px]">K/D</th>
-                      <th className="py-2.5 px-2 text-right min-w-[50px]">K/R</th>
-                      <th className="py-2.5 px-2 text-right">HS</th>
-                      <th className="py-2.5 px-2 text-right min-w-[60px]">HS %</th>
-                      <th className="py-2.5 px-2 text-right">5k</th>
-                      <th className="py-2.5 px-2 text-right">4k</th>
-                      <th className="py-2.5 px-2 text-right">3k</th>
-                      <th className="py-2.5 px-2 text-right">2k</th>
-                      <th className="py-2.5 px-3 text-right">MVPs</th>
-                    </tr>
-                  </thead>
-                  <tbody className="divide-y divide-white/5 text-slate-300">
-                    {(selectedScoreboardMatch.team2?.players || []).map(p => {
-                      const isUser = p.isCurrentUser || p.name.toLowerCase() === currentGamerTag.toLowerCase() || p.name.toLowerCase().includes('blockeer');
-                      const ratingNum = parseFloat(p.rating);
-
-                      return (
-                        <tr
-                          key={p.id || p.name}
-                          className={`transition ${
-                            isUser
-                              ? 'bg-[#0e272a] font-bold border-l-4 border-l-[#2dd4bf]'
-                              : 'hover:bg-white/[0.02]'
-                          }`}
-                        >
-                          {/* Player */}
-                          <td className="py-2.5 px-3">
-                            <div className="flex items-center gap-2">
-                              <span className="text-[#2dd4bf] text-xs">◆</span>
-                              <img src={p.avatar} alt="" className="w-6 h-6 rounded-full object-cover border border-white/10" />
-                              <span className={`text-xs ${isUser ? 'text-[#2dd4bf] font-black' : 'text-white font-semibold'}`}>
-                                {p.name}
-                              </span>
-                              {isUser && (
-                                <span className="px-1.5 py-0.2 rounded text-[9px] font-mono font-bold bg-[#2dd4bf]/20 text-[#2dd4bf] border border-[#2dd4bf]/40 uppercase">
-                                  YOU
+                              <td className="py-2.5 px-2">
+                                <span
+                                  className={`px-2 py-0.5 rounded text-xs font-bold inline-flex items-center gap-1 ${
+                                    p.hasMvpStar
+                                      ? 'bg-[#c2850c] text-white font-black shadow'
+                                      : ratingNum >= 1.20
+                                      ? 'bg-[#22C55E] text-black font-black'
+                                      : ratingNum >= 1.00
+                                      ? 'bg-[#272b38] text-slate-200'
+                                      : 'bg-[#ef4444] text-white font-black'
+                                  }`}
+                                >
+                                  <span>{p.rating}</span>
+                                  {p.hasMvpStar && <Star className="w-3 h-3 fill-current text-white" />}
                                 </span>
-                              )}
-                            </div>
-                          </td>
+                              </td>
 
-                          {/* Rank */}
-                          <td className="py-2.5 px-2">
-                            <div className="flex items-center gap-1.5">
-                              <FaceitLevelRing level={p.level} size={20} />
-                              <span className="text-white font-bold text-xs">{p.elo.toLocaleString()}</span>
-                            </div>
-                          </td>
+                              <td className={`py-2.5 px-2 text-right ${p.isPositiveSwing ? 'text-white' : 'text-[#ef4444]'}`}>
+                                {p.swing}
+                              </td>
 
-                          {/* Rating */}
-                          <td className="py-2.5 px-2">
-                            <span
-                              className={`px-2 py-0.5 rounded text-xs font-bold inline-flex items-center gap-1 ${
-                                p.hasMvpStar
-                                  ? 'bg-[#c2850c] text-white font-black shadow'
-                                  : ratingNum >= 1.20
-                                  ? 'bg-[#22C55E] text-black font-black'
-                                  : ratingNum >= 1.00
-                                  ? 'bg-[#272b38] text-slate-200'
-                                  : 'bg-[#ef4444] text-white font-black'
+                              <td className="py-2.5 px-2 text-right font-bold text-white">{p.kills}</td>
+                              <td className="py-2.5 px-2 text-right text-slate-400">{p.deaths}</td>
+                              <td className="py-2.5 px-2 text-right text-slate-400">{p.assists}</td>
+                              <td className="py-2.5 px-2 text-right text-slate-200">{p.adr}</td>
+                              <td className="py-2.5 px-2 text-right text-slate-200">{p.kd}</td>
+                              <td className="py-2.5 px-2 text-right text-slate-200">{p.kr}</td>
+                              <td className="py-2.5 px-2 text-right text-slate-300">{p.hs}</td>
+                              <td className="py-2.5 px-2 text-right text-slate-300">{p.hsPercentage}</td>
+                              <td className={`py-2.5 px-2 text-right ${p.k5 > 0 ? 'text-amber-400 font-bold' : 'text-slate-500'}`}>{p.k5}</td>
+                              <td className={`py-2.5 px-2 text-right ${p.k4 > 0 ? 'text-amber-400 font-bold' : 'text-slate-500'}`}>{p.k4}</td>
+                              <td className={`py-2.5 px-2 text-right ${p.k3 > 0 ? 'text-amber-400 font-bold' : 'text-slate-500'}`}>{p.k3}</td>
+                              <td className={`py-2.5 px-2 text-right ${p.k2 > 0 ? 'text-slate-200 font-bold' : 'text-slate-500'}`}>{p.k2}</td>
+                              <td className={`py-2.5 px-3 text-right ${p.mvps > 0 ? 'text-amber-400 font-bold' : 'text-slate-500'}`}>{p.mvps}</td>
+                            </tr>
+                          );
+                        })}
+                      </tbody>
+                    </table>
+                  </div>
+                </div>
+
+                {/* TEAM 2 */}
+                <div className="space-y-1.5 pt-2">
+                  <div className="flex items-center justify-between px-2 py-1">
+                    <div className="flex items-center gap-3">
+                      <span className="text-2xl sm:text-3xl font-black font-display text-white">
+                        {selectedScoreboardMatch.team2?.score ?? selectedScoreboardMatch.clan2?.score}
+                      </span>
+                      <img
+                        src={selectedScoreboardMatch.team2?.avatar || selectedScoreboardMatch.clan2?.logo}
+                        alt=""
+                        className="w-7 h-7 rounded-full object-cover border border-white/15"
+                      />
+                      <span className="text-sm sm:text-base font-black font-display text-white">
+                        {selectedScoreboardMatch.team2?.name || selectedScoreboardMatch.clan2?.name}
+                      </span>
+                    </div>
+
+                    <div className="flex items-center gap-3 text-xs font-mono text-slate-300">
+                      <div className="flex items-center gap-1.5">
+                        <span className="text-slate-400">Team avg</span>
+                        <FaceitLevelRing level={selectedScoreboardMatch.team2?.avgLevel || 6} size={20} />
+                        <span className="font-bold text-white">{selectedScoreboardMatch.team2?.avgElo?.toLocaleString() || '1,331'}</span>
+                      </div>
+                      <span className="text-slate-600">|</span>
+                      <span>First half <strong className="text-white">{selectedScoreboardMatch.team2?.firstHalf ?? 3}</strong></span>
+                      <span className="text-slate-600">|</span>
+                      <span>Second half <strong className="text-white">{selectedScoreboardMatch.team2?.secondHalf ?? 0}</strong></span>
+                    </div>
+                  </div>
+
+                  <div className="overflow-x-auto rounded-xl border border-white/5 bg-[#121316]">
+                    <table className="w-full text-left font-mono text-xs">
+                      <thead>
+                        <tr className="border-b border-white/5 text-slate-400 text-[11px] uppercase tracking-wider bg-black/40">
+                          <th onClick={() => handleToggleSort('name')} className="py-2.5 px-3 min-w-[170px] cursor-pointer hover:text-white transition select-none">
+                            <span className="flex items-center gap-1">Player {scoreboardSortKey === 'name' && (scoreboardSortAsc ? '⯅' : '⯆')}</span>
+                          </th>
+                          <th onClick={() => handleToggleSort('rank')} className="py-2.5 px-2 min-w-[85px] cursor-pointer hover:text-white transition select-none">
+                            <span className="flex items-center gap-1">Rank {scoreboardSortKey === 'rank' && (scoreboardSortAsc ? '⯅' : '⯆')}</span>
+                          </th>
+                          <th onClick={() => handleToggleSort('rating')} className="py-2.5 px-2 min-w-[90px] cursor-pointer transition select-none">
+                            <span className={`inline-flex items-center gap-1 ${scoreboardSortKey === 'rating' ? 'text-[#F97316] font-black' : 'text-slate-300 hover:text-white'}`}>
+                              <span className="w-3.5 h-3.5 rounded-full bg-[#F97316] text-black font-black text-[9px] flex items-center justify-center">⯆</span>
+                              <span>Rating</span>
+                              {scoreboardSortKey === 'rating' ? (scoreboardSortAsc ? <ChevronUp className="w-3 h-3" /> : <ChevronDown className="w-3 h-3" />) : <ChevronDown className="w-3 h-3 opacity-50" />}
+                            </span>
+                          </th>
+                          <th onClick={() => handleToggleSort('swing')} className="py-2.5 px-2 text-right min-w-[75px] cursor-pointer hover:text-white select-none">Swing</th>
+                          <th onClick={() => handleToggleSort('kills')} className="py-2.5 px-2 text-right cursor-pointer hover:text-white select-none">K</th>
+                          <th onClick={() => handleToggleSort('deaths')} className="py-2.5 px-2 text-right cursor-pointer hover:text-white select-none">D</th>
+                          <th onClick={() => handleToggleSort('assists')} className="py-2.5 px-2 text-right cursor-pointer hover:text-white select-none">A</th>
+                          <th onClick={() => handleToggleSort('adr')} className="py-2.5 px-2 text-right min-w-[55px] cursor-pointer hover:text-white select-none">ADR</th>
+                          <th onClick={() => handleToggleSort('kd')} className="py-2.5 px-2 text-right min-w-[50px] cursor-pointer hover:text-white select-none">K/D</th>
+                          <th onClick={() => handleToggleSort('kr')} className="py-2.5 px-2 text-right min-w-[50px] cursor-pointer hover:text-white select-none">K/R</th>
+                          <th onClick={() => handleToggleSort('hs')} className="py-2.5 px-2 text-right cursor-pointer hover:text-white select-none">HS</th>
+                          <th onClick={() => handleToggleSort('hsPercentage')} className="py-2.5 px-2 text-right min-w-[60px] cursor-pointer hover:text-white select-none">HS %</th>
+                          <th onClick={() => handleToggleSort('k5')} className="py-2.5 px-2 text-right cursor-pointer hover:text-white select-none">5k</th>
+                          <th onClick={() => handleToggleSort('k4')} className="py-2.5 px-2 text-right cursor-pointer hover:text-white select-none">4k</th>
+                          <th onClick={() => handleToggleSort('k3')} className="py-2.5 px-2 text-right cursor-pointer hover:text-white select-none">3k</th>
+                          <th onClick={() => handleToggleSort('k2')} className="py-2.5 px-2 text-right cursor-pointer hover:text-white select-none">2k</th>
+                          <th onClick={() => handleToggleSort('mvps')} className="py-2.5 px-3 text-right cursor-pointer hover:text-white select-none">MVPs</th>
+                        </tr>
+                      </thead>
+                      <tbody className="divide-y divide-white/5 text-slate-300">
+                        {getSortedPlayers(selectedScoreboardMatch.team2?.players || []).map(p => {
+                          const isUser = p.isCurrentUser || p.name.toLowerCase() === currentGamerTag.toLowerCase() || p.name.toLowerCase().includes('blockeer');
+                          const ratingNum = parseFloat(p.rating);
+
+                          return (
+                            <tr
+                              key={p.id || p.name}
+                              className={`transition ${
+                                isUser
+                                  ? 'bg-[#0e272a] font-bold border-l-4 border-l-[#2dd4bf]'
+                                  : 'hover:bg-white/[0.04]'
                               }`}
                             >
-                              <span>{p.rating}</span>
-                              {p.hasMvpStar && <Star className="w-3 h-3 fill-current text-white" />}
-                            </span>
-                          </td>
+                              <td className="py-2.5 px-3">
+                                <div className="flex items-center gap-2">
+                                  <span className="text-[#2dd4bf] text-xs">◆</span>
+                                  <img src={p.avatar} alt="" className="w-6 h-6 rounded-full object-cover border border-white/10" />
+                                  <span className={`text-xs ${isUser ? 'text-[#2dd4bf] font-black' : 'text-white font-semibold'}`}>
+                                    {p.name}
+                                  </span>
+                                  {isUser && (
+                                    <span className="px-1.5 py-0.2 rounded text-[9px] font-mono font-bold bg-[#2dd4bf]/20 text-[#2dd4bf] border border-[#2dd4bf]/40 uppercase">
+                                      YOU
+                                    </span>
+                                  )}
+                                </div>
+                              </td>
 
-                          {/* Swing */}
-                          <td className={`py-2.5 px-2 text-right ${p.isPositiveSwing ? 'text-white' : 'text-[#ef4444]'}`}>
-                            {p.swing}
-                          </td>
+                              <td className="py-2.5 px-2">
+                                <div className="flex items-center gap-1.5">
+                                  <FaceitLevelRing level={p.level} size={20} />
+                                  <span className="text-white font-bold text-xs">{p.elo.toLocaleString()}</span>
+                                </div>
+                              </td>
 
-                          {/* K, D, A */}
-                          <td className="py-2.5 px-2 text-right font-bold text-white">{p.kills}</td>
-                          <td className="py-2.5 px-2 text-right text-slate-400">{p.deaths}</td>
-                          <td className="py-2.5 px-2 text-right text-slate-400">{p.assists}</td>
+                              <td className="py-2.5 px-2">
+                                <span
+                                  className={`px-2 py-0.5 rounded text-xs font-bold inline-flex items-center gap-1 ${
+                                    p.hasMvpStar
+                                      ? 'bg-[#c2850c] text-white font-black shadow'
+                                      : ratingNum >= 1.20
+                                      ? 'bg-[#22C55E] text-black font-black'
+                                      : ratingNum >= 1.00
+                                      ? 'bg-[#272b38] text-slate-200'
+                                      : 'bg-[#ef4444] text-white font-black'
+                                  }`}
+                                >
+                                  <span>{p.rating}</span>
+                                  {p.hasMvpStar && <Star className="w-3 h-3 fill-current text-white" />}
+                                </span>
+                              </td>
 
-                          {/* ADR, K/D, K/R */}
-                          <td className="py-2.5 px-2 text-right text-slate-200">{p.adr}</td>
-                          <td className="py-2.5 px-2 text-right text-slate-200">{p.kd}</td>
-                          <td className="py-2.5 px-2 text-right text-slate-200">{p.kr}</td>
+                              <td className={`py-2.5 px-2 text-right ${p.isPositiveSwing ? 'text-white' : 'text-[#ef4444]'}`}>
+                                {p.swing}
+                              </td>
 
-                          {/* HS, HS % */}
-                          <td className="py-2.5 px-2 text-right text-slate-300">{p.hs}</td>
-                          <td className="py-2.5 px-2 text-right text-slate-300">{p.hsPercentage}</td>
-
-                          {/* 5k, 4k, 3k, 2k, MVPs */}
-                          <td className={`py-2.5 px-2 text-right ${p.k5 > 0 ? 'text-amber-400 font-bold' : 'text-slate-500'}`}>{p.k5}</td>
-                          <td className={`py-2.5 px-2 text-right ${p.k4 > 0 ? 'text-amber-400 font-bold' : 'text-slate-500'}`}>{p.k4}</td>
-                          <td className={`py-2.5 px-2 text-right ${p.k3 > 0 ? 'text-amber-400 font-bold' : 'text-slate-500'}`}>{p.k3}</td>
-                          <td className={`py-2.5 px-2 text-right ${p.k2 > 0 ? 'text-slate-200 font-bold' : 'text-slate-500'}`}>{p.k2}</td>
-                          <td className={`py-2.5 px-3 text-right ${p.mvps > 0 ? 'text-amber-400 font-bold' : 'text-slate-500'}`}>{p.mvps}</td>
-                        </tr>
-                      );
-                    })}
-                  </tbody>
-                </table>
+                              <td className="py-2.5 px-2 text-right font-bold text-white">{p.kills}</td>
+                              <td className="py-2.5 px-2 text-right text-slate-400">{p.deaths}</td>
+                              <td className="py-2.5 px-2 text-right text-slate-400">{p.assists}</td>
+                              <td className="py-2.5 px-2 text-right text-slate-200">{p.adr}</td>
+                              <td className="py-2.5 px-2 text-right text-slate-200">{p.kd}</td>
+                              <td className="py-2.5 px-2 text-right text-slate-200">{p.kr}</td>
+                              <td className="py-2.5 px-2 text-right text-slate-300">{p.hs}</td>
+                              <td className="py-2.5 px-2 text-right text-slate-300">{p.hsPercentage}</td>
+                              <td className={`py-2.5 px-2 text-right ${p.k5 > 0 ? 'text-amber-400 font-bold' : 'text-slate-500'}`}>{p.k5}</td>
+                              <td className={`py-2.5 px-2 text-right ${p.k4 > 0 ? 'text-amber-400 font-bold' : 'text-slate-500'}`}>{p.k4}</td>
+                              <td className={`py-2.5 px-2 text-right ${p.k3 > 0 ? 'text-amber-400 font-bold' : 'text-slate-500'}`}>{p.k3}</td>
+                              <td className={`py-2.5 px-2 text-right ${p.k2 > 0 ? 'text-slate-200 font-bold' : 'text-slate-500'}`}>{p.k2}</td>
+                              <td className={`py-2.5 px-3 text-right ${p.mvps > 0 ? 'text-amber-400 font-bold' : 'text-slate-500'}`}>{p.mvps}</td>
+                            </tr>
+                          );
+                        })}
+                      </tbody>
+                    </table>
+                  </div>
+                </div>
               </div>
-            </div>
+            )}
+
+            {/* ======================================================== */}
+            {/* VIEW 2: ROUND-BY-ROUND BREAKDOWN (ROUNDS TIMELINE)       */}
+            {/* ======================================================== */}
+            {scoreboardSubTab === 'rounds' && (
+              <div className="space-y-4 animate-in fade-in duration-150">
+                <div className="p-4 rounded-xl bg-[#121316] border border-white/5 space-y-3">
+                  <div className="flex flex-wrap items-center justify-between gap-2 border-b border-white/5 pb-2.5">
+                    <div>
+                      <h4 className="text-sm font-black font-display text-white">Match Round Progression</h4>
+                      <p className="text-xs font-mono text-slate-400">Click any round to view win condition, side advantage, and MVP play</p>
+                    </div>
+                    <div className="flex items-center gap-3 text-xs font-mono">
+                      <span className="flex items-center gap-1.5 text-[#22C55E]">
+                        <span className="w-2.5 h-2.5 rounded-full bg-[#22C55E]" />
+                        {selectedScoreboardMatch.team1?.name} Won
+                      </span>
+                      <span className="flex items-center gap-1.5 text-slate-400">
+                        <span className="w-2.5 h-2.5 rounded-full bg-slate-500" />
+                        {selectedScoreboardMatch.team2?.name} Won
+                      </span>
+                    </div>
+                  </div>
+
+                  {/* Half 1 */}
+                  <div className="space-y-1.5">
+                    <span className="text-[11px] font-mono text-slate-400 uppercase font-bold">First Half (Rounds 1 - 12)</span>
+                    <div className="grid grid-cols-6 sm:grid-cols-12 gap-1.5">
+                      {[1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12].map(r => {
+                        const isTeam1Win = selectedScoreboardMatch.isWin ? (r <= 9) : (r !== 4 && r !== 7 && r !== 11);
+                        const isSelected = selectedRoundDetail === r;
+                        return (
+                          <div
+                            key={r}
+                            onClick={() => { sound.playClick(); setSelectedRoundDetail(isSelected ? null : r); }}
+                            className={`p-2 rounded-xl border text-center font-mono cursor-pointer transition select-none ${
+                              isSelected
+                                ? 'ring-2 ring-[#FF5500] scale-105 bg-[#1F1916]'
+                                : isTeam1Win
+                                ? 'bg-[#152e1c] border-[#22C55E]/40 hover:border-[#22C55E]'
+                                : 'bg-[#2b1618] border-[#ef4444]/40 hover:border-[#ef4444]'
+                            }`}
+                          >
+                            <span className="text-[10px] text-slate-400 block font-bold">R{r}</span>
+                            <span className={`text-xs font-black block ${isTeam1Win ? 'text-[#22C55E]' : 'text-[#ef4444]'}`}>
+                              {isTeam1Win ? 'W' : 'L'}
+                            </span>
+                            <span className="text-[9px] text-slate-400 block">{r % 2 === 0 ? '💣 Def' : '💀 Elim'}</span>
+                          </div>
+                        );
+                      })}
+                    </div>
+                  </div>
+
+                  {/* Half 2 */}
+                  <div className="space-y-1.5 pt-2 border-t border-white/5">
+                    <span className="text-[11px] font-mono text-slate-400 uppercase font-bold">Second Half (Sides Swapped)</span>
+                    <div className="grid grid-cols-6 sm:grid-cols-12 gap-1.5">
+                      {[13, 14, 15, 16].map(r => {
+                        const isTeam1Win = true; // SiLVERiNYO won all 4 in 2nd half to reach 13
+                        const isSelected = selectedRoundDetail === r;
+                        return (
+                          <div
+                            key={r}
+                            onClick={() => { sound.playClick(); setSelectedRoundDetail(isSelected ? null : r); }}
+                            className={`p-2 rounded-xl border text-center font-mono cursor-pointer transition select-none ${
+                              isSelected
+                                ? 'ring-2 ring-[#FF5500] scale-105 bg-[#1F1916]'
+                                : isTeam1Win
+                                ? 'bg-[#152e1c] border-[#22C55E]/40 hover:border-[#22C55E]'
+                                : 'bg-[#2b1618] border-[#ef4444]/40 hover:border-[#ef4444]'
+                            }`}
+                          >
+                            <span className="text-[10px] text-slate-400 block font-bold">R{r}</span>
+                            <span className={`text-xs font-black block ${isTeam1Win ? 'text-[#22C55E]' : 'text-[#ef4444]'}`}>
+                              {isTeam1Win ? 'W' : 'L'}
+                            </span>
+                            <span className="text-[9px] text-slate-400 block">💥 Expl</span>
+                          </div>
+                        );
+                      })}
+                    </div>
+                  </div>
+
+                  {/* Detailed Round Card Callout */}
+                  {selectedRoundDetail && (
+                    <div className="p-3 rounded-xl bg-black/60 border border-[#FF5500]/40 flex items-center justify-between text-xs font-mono animate-in fade-in duration-150">
+                      <div className="flex items-center gap-3">
+                        <span className="w-7 h-7 rounded-lg bg-[#FF5500] text-black font-black flex items-center justify-center text-xs">
+                          R{selectedRoundDetail}
+                        </span>
+                        <div>
+                          <div className="text-white font-bold">
+                            Round {selectedRoundDetail} Outcome: {selectedRoundDetail % 3 === 0 ? 'Bomb Defused at Site B' : 'Full Team Elimination'}
+                          </div>
+                          <span className="text-slate-400 text-[11px]">
+                            MVP Play: {selectedRoundDetail % 2 === 0 ? 'mnLReKt (3k Opening Entry)' : 'SiLVERiNYO (1v2 Clutch Play)'}
+                          </span>
+                        </div>
+                      </div>
+                      <span className="px-2 py-1 rounded bg-white/10 text-white font-bold">
+                        Duration: 1m 32s
+                      </span>
+                    </div>
+                  )}
+                </div>
+              </div>
+            )}
+
+            {/* ======================================================== */}
+            {/* VIEW 3: MATCH PERFORMANCE & HEAD-TO-HEAD ANALYTICS       */}
+            {/* ======================================================== */}
+            {scoreboardSubTab === 'performance' && (
+              <div className="space-y-4 animate-in fade-in duration-150 font-mono text-xs">
+                {/* Top Performer Highlights */}
+                <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                  <div className="p-4 rounded-xl bg-[#17140e] border border-amber-500/30 space-y-2">
+                    <span className="text-[10px] text-amber-400 uppercase font-black flex items-center gap-1.5">
+                      <Crown className="w-3.5 h-3.5" />
+                      MATCH MVP & TOP RATING
+                    </span>
+                    <div className="flex items-center gap-2.5">
+                      <img src="https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?auto=format&fit=crop&w=150&q=80" alt="" className="w-10 h-10 rounded-xl object-cover border border-amber-500/50" />
+                      <div>
+                        <div className="text-white font-bold text-sm">mnLReKt</div>
+                        <div className="text-amber-400 font-black">1.84 Rating ★ • 5 MVPs</div>
+                      </div>
+                    </div>
+                    <div className="text-[11px] text-slate-300">17 Kills, 98.4 ADR, 76.5% Headshot Accuracy</div>
+                  </div>
+
+                  <div className="p-4 rounded-xl bg-[#0e171b] border border-[#2dd4bf]/30 space-y-2">
+                    <span className="text-[10px] text-[#2dd4bf] uppercase font-black flex items-center gap-1.5">
+                      <Target className="w-3.5 h-3.5" />
+                      OPPONENT TOP FRAGGER
+                    </span>
+                    <div className="flex items-center gap-2.5">
+                      <img src="https://images.unsplash.com/photo-1500648767791-00dcc994a43e?auto=format&fit=crop&w=150&q=80" alt="" className="w-10 h-10 rounded-xl object-cover border border-[#2dd4bf]/50" />
+                      <div>
+                        <div className="text-white font-bold text-sm">_Usama</div>
+                        <div className="text-[#2dd4bf] font-black">1.23 Rating • 102.6 ADR</div>
+                      </div>
+                    </div>
+                    <div className="text-[11px] text-slate-300">14 Kills, 71.4% HS, 3x 2k Multi-Kills</div>
+                  </div>
+
+                  <div className="p-4 rounded-xl bg-[#0e1f14] border border-[#22C55E]/30 space-y-2">
+                    <span className="text-[10px] text-[#22C55E] uppercase font-black flex items-center gap-1.5">
+                      <Flame className="w-3.5 h-3.5" />
+                      ACTIVE USER PERFORMANCE
+                    </span>
+                    <div className="flex items-center gap-2.5">
+                      <img src="https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=150&q=80" alt="" className="w-10 h-10 rounded-xl object-cover border border-[#22C55E]/50" />
+                      <div>
+                        <div className="text-white font-bold text-sm">bLocKeeRz [YOU]</div>
+                        <div className="text-slate-300 font-bold">Level 7 • 1,381 ELO</div>
+                      </div>
+                    </div>
+                    <div className="text-[11px] text-slate-300">8 Kills, 54.3 ADR, 3x 2k Multi-Kills, 1 MVP</div>
+                  </div>
+                </div>
+
+                {/* Comparative ADR Bars */}
+                <div className="p-4 rounded-xl bg-[#121316] border border-white/5 space-y-3">
+                  <div className="flex items-center justify-between border-b border-white/5 pb-2">
+                    <h4 className="text-sm font-black font-display text-white">Average Damage per Round (ADR) Comparison</h4>
+                    <span className="text-slate-400 text-xs">Target: 80.0+ ADR</span>
+                  </div>
+
+                  <div className="space-y-2">
+                    {[
+                      { name: '_Usama', adr: 102.6, team: 2 },
+                      { name: 'beYYaa', adr: 101.8, team: 1 },
+                      { name: 'mnLReKt', adr: 98.4, team: 1 },
+                      { name: 'blackbars1', adr: 85.2, team: 2 },
+                      { name: 'oTheRform', adr: 82.5, team: 1 },
+                      { name: 'crni_exec', adr: 76.4, team: 1 },
+                      { name: 'SiLVERiNYO', adr: 76.4, team: 1 },
+                      { name: 'bLocKeeRz [YOU]', adr: 54.3, team: 2 },
+                      { name: 'Ar7isti', adr: 43.6, team: 2 },
+                      { name: 'edd1-', adr: 24.1, team: 2 }
+                    ].map(p => (
+                      <div key={p.name} className="flex items-center gap-3">
+                        <span className={`w-32 truncate text-xs font-semibold ${p.name.includes('[YOU]') ? 'text-[#2dd4bf] font-black' : 'text-slate-300'}`}>
+                          {p.name}
+                        </span>
+                        <div className="flex-1 h-3 rounded-full bg-black/50 overflow-hidden relative border border-white/5">
+                          <div
+                            className={`h-full rounded-full transition-all duration-300 ${
+                              p.name.includes('[YOU]')
+                                ? 'bg-gradient-to-r from-[#2dd4bf] to-emerald-400'
+                                : p.team === 1
+                                ? 'bg-gradient-to-r from-purple-500 to-indigo-500'
+                                : 'bg-gradient-to-r from-teal-500 to-cyan-500'
+                            }`}
+                            style={{ width: `${Math.min(100, (p.adr / 120) * 100)}%` }}
+                          />
+                        </div>
+                        <span className="w-12 text-right font-bold text-white text-xs">{p.adr}</span>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              </div>
+            )}
 
             {/* Modal Bottom Action Bar */}
             <div className="flex flex-wrap items-center justify-between gap-3 pt-3 border-t border-white/5">
@@ -3006,18 +3351,16 @@ export const VortexClanHub: React.FC<VortexClanHubProps> = ({
               </div>
               <div className="flex items-center gap-2">
                 <button
-                  onClick={() => {
-                    sound.playClick();
-                    setToast(`✓ Downloading CS2 GOTV Demo (.dem) for ${selectedScoreboardMatch.mapDisplayName}...`);
-                  }}
-                  className="px-4 py-2 rounded-xl bg-white/10 hover:bg-white/15 text-white text-xs font-mono font-bold flex items-center gap-1.5 cursor-pointer transition"
+                  onClick={() => handleDownloadDemo(selectedScoreboardMatch)}
+                  className="px-4 py-2 rounded-xl bg-white/10 hover:bg-white/15 text-white text-xs font-mono font-bold flex items-center gap-1.5 cursor-pointer transition active:scale-95"
+                  title="Download .dem file directly to computer"
                 >
                   <Download className="w-3.5 h-3.5" />
                   <span>Download GOTV Demo</span>
                 </button>
                 <button
                   onClick={() => setSelectedScoreboardMatch(null)}
-                  className="px-5 py-2 rounded-xl bg-[#FF5500] hover:bg-[#FF5500]/90 text-black text-xs font-mono font-black cursor-pointer transition"
+                  className="px-5 py-2 rounded-xl bg-[#FF5500] hover:bg-[#FF5500]/90 text-black text-xs font-mono font-black cursor-pointer transition active:scale-95"
                 >
                   Close Scoreboard
                 </button>
