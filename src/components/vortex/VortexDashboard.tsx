@@ -4032,8 +4032,8 @@ export const VortexDashboard: React.FC<VortexDashboardProps> = ({
                           );
                         })()}
 
-                        {/* 4. Match Formats (Playoffs, Finals) & Server Location (3 Columns) */}
-                        <div className="grid grid-cols-1 md:grid-cols-3 gap-4 sm:gap-6">
+                        {/* 4. Match Formats (Playoffs, Finals) (2 Columns) */}
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 sm:gap-6">
                           <div>
                             <label className="text-[11px] text-amber-300 uppercase tracking-wider block mb-1.5 font-bold flex items-center justify-between">
                               <span>Playoffs Format</span>
@@ -4061,23 +4061,6 @@ export const VortexDashboard: React.FC<VortexDashboardProps> = ({
                               <option value="BO1">BO1 (Best of 1 • Sudden Death)</option>
                               <option value="BO3">BO3 (Best of 3 • Esports Standard)</option>
                               <option value="BO5">BO5 (Best of 5 • Major Championship)</option>
-                            </select>
-                          </div>
-                          <div>
-                            <label className="text-[11px] text-slate-300 uppercase tracking-wider block mb-1.5 font-bold">
-                              Server Location (128-Tick Dedicated)
-                            </label>
-                            <select
-                              value={newTourneyRegion}
-                              onChange={(e) => setNewTourneyRegion(e.target.value)}
-                              className="w-full px-4 py-3 rounded-xl bg-[#141722] border border-[#252C3D] text-slate-200 font-bold focus:outline-none focus:border-[#A3E635] cursor-pointer text-sm"
-                            >
-                              <option value="Germany (Frankfurt Central • 14ms)">🇩🇪 Germany (Frankfurt Central • 14ms)</option>
-                              <option value="Netherlands (Amsterdam • 16ms)">🇳🇱 Netherlands (Amsterdam • 16ms)</option>
-                              <option value="Sweden (Stockholm • 28ms)">🇸🇪 Sweden (Stockholm • 28ms)</option>
-                              <option value="Finland (Helsinki • 31ms)">🇫🇮 Finland (Helsinki • 31ms)</option>
-                              <option value="United Kingdom (London • 19ms)">🇬🇧 United Kingdom (London • 19ms)</option>
-                              <option value="France (Paris • 21ms)">🇫🇷 France (Paris • 21ms)</option>
                             </select>
                           </div>
                         </div>
@@ -4384,8 +4367,8 @@ export const VortexDashboard: React.FC<VortexDashboardProps> = ({
                   <div className="text-xl font-mono font-black text-white">{registeredTourneys.length} Rosters</div>
                 </div>
                 <div className="p-3 rounded-xl bg-black/40 border border-white/5">
-                  <div className="text-[10px] font-mono text-slate-400 uppercase">Match Servers</div>
-                  <div className="text-xl font-mono font-black text-amber-400">Caliber 128T</div>
+                  <div className="text-[10px] font-mono text-slate-400 uppercase">Match Format</div>
+                  <div className="text-xl font-mono font-black text-amber-400">Official 5v5</div>
                 </div>
                 <div className="p-3 rounded-xl bg-black/40 border border-white/5">
                   <div className="text-[10px] font-mono text-slate-400 uppercase">Integrity</div>
@@ -4457,7 +4440,7 @@ export const VortexDashboard: React.FC<VortexDashboardProps> = ({
                     playoffsFormat: 'BO1',
                     finalsFormat: 'BO3',
                     structure: 'Single Elimination',
-                    region: 'Germany (Frankfurt Central • 14ms)',
+                    region: 'European Online Bracket',
                     date: 'Registration Open',
                     status: 'OPEN',
                     badge: 'bg-emerald-500/15 text-emerald-400 border-emerald-500/30',
@@ -4473,7 +4456,7 @@ export const VortexDashboard: React.FC<VortexDashboardProps> = ({
                     playoffsFormat: 'BO1',
                     finalsFormat: 'BO1',
                     structure: 'Single Elimination',
-                    region: 'Germany (Frankfurt Central • 14ms)',
+                    region: 'European Online Bracket',
                     date: 'Registration Open',
                     status: 'OPEN',
                     badge: 'bg-lime-500/15 text-lime-400 border-lime-500/30',
@@ -4536,7 +4519,7 @@ export const VortexDashboard: React.FC<VortexDashboardProps> = ({
                               <p className="text-xs font-mono text-[#94A3B8] mt-1 flex flex-wrap items-center gap-2">
                                 <span>{t.date}</span>
                                 <span className="text-slate-600">•</span>
-                                <span className="text-slate-400">{t.region || 'Germany (Frankfurt Central)'}</span>
+                                <span className="text-slate-400">{t.region || 'European Online Bracket'}</span>
                               </p>
                             </div>
                             <div className="text-right flex items-start gap-2">

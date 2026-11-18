@@ -35,7 +35,8 @@ import {
   BarChart2,
   Upload,
   ExternalLink,
-  Star
+  Star,
+  X
 } from 'lucide-react';
 import confetti from 'canvas-confetti';
 import { sound } from '../../utils/soundEffects';
@@ -52,6 +53,24 @@ export interface ClanMember {
   flag: string;
   isCaptain?: boolean;
   isUser?: boolean;
+}
+
+export interface ClanInvite {
+  id: string;
+  clanId: string;
+  clanName: string;
+  clanTag: string;
+  clanLogo: string;
+  senderGamerTag: string;
+  friendName: string;
+  friendAvatar: string;
+  friendLevel: number;
+  friendElo: number;
+  friendCountry: string;
+  friendFlag: string;
+  role: ClanMember['role'];
+  status: 'pending' | 'accepted' | 'rejected';
+  createdAt: number;
 }
 
 export interface ClanData {
@@ -1399,6 +1418,23 @@ export const VortexClanHub: React.FC<VortexClanHubProps> = ({
   const [selectedRoleForInvite, setSelectedRoleForInvite] = useState<ClanMember['role']>('Entry Fragger');
   const [selectedFriendToInvite, setSelectedFriendToInvite] = useState<SocialFriend | null>(null);
   const [userFriends, setUserFriends] = useState<SocialFriend[]>(() => getUserFriends(currentGamerTag));
+  const [pendingInvites, setPendingInvites] = useState<ClanInvite[]>(() => {
+    try {
+      const raw = localStorage.getItem('vortex_clan_pending_invites');
+      if (raw) {
+        const list = JSON.parse(raw);
+        if (Array.isArray(list)) return list.filter((i: ClanInvite) => i.status === 'pending');
+      }
+    } catch (_) {}
+    return [];
+  });
+  const [activeDecisionInvite, setActiveDecisionInvite] = useState<ClanInvite | null>(null);
+
+  useEffect(() => {
+    try {
+      localStorage.setItem('vortex_clan_pending_invites', JSON.stringify(pendingInvites));
+    } catch (_) {}
+  }, [pendingInvites]);
 
   useEffect(() => {
     const handleFriendsUpdate = () => {
@@ -1869,7 +1905,7 @@ export const VortexClanHub: React.FC<VortexClanHubProps> = ({
     setToast(`✓ Clan details updated! Clan Tag set to [${cleanTag}].`);
   };
 
-  // Add teammate to roster
+  // Send Clan Roster Invitation to friend (Pending Confirmation)
   const handleInviteTeammate = (e: React.FormEvent) => {
     e.preventDefault();
     if (!selectedFriendToInvite) {
@@ -1878,8 +1914,8 @@ export const VortexClanHub: React.FC<VortexClanHubProps> = ({
     }
     sound.playSelect();
 
-    if (userClan.members.length >= 6) {
-      alert('The roster already has maximum capacity (5 starters + 1 substitute). Remove a member first.');
+    if (userClan.members.length + pendingInvites.length >= 6) {
+      alert('The roster already has maximum capacity (5 starters + 1 substitute, including pending invites). Remove a member or cancel an invite first.');
       return;
     }
 
@@ -1896,15 +1932,57 @@ export const VortexClanHub: React.FC<VortexClanHubProps> = ({
       return;
     }
 
-    const newMember: ClanMember = {
-      id: `member-${selectedFriendToInvite.id || Date.now()}`,
-      name: selectedFriendToInvite.name,
+    // Check if friend already has a pending invite
+    if (pendingInvites.some(i => i.friendName.toLowerCase() === selectedFriendToInvite.name.toLowerCase())) {
+      setToast(`⚠️ An invitation is already pending for ${selectedFriendToInvite.name}.`);
+      return;
+    }
+
+    const newInvite: ClanInvite = {
+      id: `cinv-${Date.now()}-${Math.random().toString(36).substring(2, 6)}`,
+      clanId: userClan.id,
+      clanName: userClan.name,
+      clanTag: userClan.tag,
+      clanLogo: userClan.logo,
+      senderGamerTag: currentGamerTag,
+      friendName: selectedFriendToInvite.name,
+      friendAvatar: selectedFriendToInvite.avatar || '/images/avatar_duck_exact.png',
+      friendLevel: selectedFriendToInvite.level || currentUserLevel,
+      friendElo: selectedFriendToInvite.elo || currentUserElo,
+      friendCountry: selectedFriendToInvite.countryName || currentCountry.name,
+      friendFlag: currentCountry.flag,
       role: selectedRoleForInvite,
-      level: selectedFriendToInvite.level || currentUserLevel,
-      elo: selectedFriendToInvite.elo || currentUserElo,
-      avatar: selectedFriendToInvite.avatar || '/images/avatar_duck_exact.png',
-      country: selectedFriendToInvite.countryName || currentCountry.name,
-      flag: currentCountry.flag,
+      status: 'pending',
+      createdAt: Date.now()
+    };
+
+    setPendingInvites(prev => [...prev, newInvite]);
+    setActiveDecisionInvite(newInvite);
+    setSelectedFriendToInvite(null);
+    setInviteInput('');
+    setIsInviteModalOpen(false);
+    setToast(`📨 Clan invitation sent to ${newInvite.friendName}! Awaiting player decision (Accept or Reject).`);
+  };
+
+  const handleAcceptClanInvite = (inviteId: string) => {
+    sound.playSelect();
+    const invite = pendingInvites.find(i => i.id === inviteId);
+    if (!invite) return;
+
+    if (userClan.members.length >= 6) {
+      alert('The roster already has maximum capacity (6 members).');
+      return;
+    }
+
+    const newMember: ClanMember = {
+      id: `member-${Date.now()}`,
+      name: invite.friendName,
+      role: invite.role,
+      level: invite.friendLevel,
+      elo: invite.friendElo,
+      avatar: invite.friendAvatar,
+      country: invite.friendCountry,
+      flag: invite.friendFlag,
     };
 
     const nextMembers = [...userClan.members, newMember];
@@ -1923,10 +2001,32 @@ export const VortexClanHub: React.FC<VortexClanHubProps> = ({
       localStorage.setItem('vortex_user_clan_data', JSON.stringify(nextClan));
     } catch (_) {}
 
-    setSelectedFriendToInvite(null);
-    setInviteInput('');
-    setIsInviteModalOpen(false);
-    setToast(`✓ ${newMember.name} joined [${userClan.tag}] roster as ${newMember.role}!`);
+    setPendingInvites(prev => prev.filter(i => i.id !== inviteId));
+    if (activeDecisionInvite?.id === inviteId) {
+      setActiveDecisionInvite(null);
+    }
+    setToast(`✓ ${invite.friendName} ACCEPTED the invitation and joined [${userClan.tag}] roster as ${invite.role}!`);
+  };
+
+  const handleRejectClanInvite = (inviteId: string) => {
+    sound.playClick();
+    const invite = pendingInvites.find(i => i.id === inviteId);
+    const friendName = invite ? invite.friendName : 'Player';
+
+    setPendingInvites(prev => prev.filter(i => i.id !== inviteId));
+    if (activeDecisionInvite?.id === inviteId) {
+      setActiveDecisionInvite(null);
+    }
+    setToast(`✕ ${friendName} DECLINED (rejected) the invitation to join [${userClan.tag}].`);
+  };
+
+  const handleCancelClanInvite = (inviteId: string) => {
+    sound.playClick();
+    setPendingInvites(prev => prev.filter(i => i.id !== inviteId));
+    if (activeDecisionInvite?.id === inviteId) {
+      setActiveDecisionInvite(null);
+    }
+    setToast(`✓ Invitation canceled.`);
   };
 
   const handleKickMember = (memberId: string) => {
@@ -2218,8 +2318,51 @@ export const VortexClanHub: React.FC<VortexClanHubProps> = ({
                 </div>
               ))}
 
+              {/* Pending Lineup Invites (Awaiting Decision) */}
+              {pendingInvites.slice(0, Math.max(0, 5 - userClan.members.length)).map((invite, pIdx) => (
+                <div
+                  key={invite.id}
+                  onClick={() => {
+                    sound.playSelect();
+                    setActiveDecisionInvite(invite);
+                  }}
+                  className="p-3.5 rounded-2xl border-2 border-dashed border-amber-500/50 hover:border-amber-400 bg-gradient-to-b from-[#1C1708] to-[#12141F] transition cursor-pointer flex flex-col justify-between gap-3 min-h-[135px] group relative"
+                  title="Pending Invitation: Click to Accept or Reject"
+                >
+                  <div className="flex items-center justify-between">
+                    <span className="px-2 py-0.5 rounded text-[10px] font-mono font-bold bg-white/5 text-slate-400">
+                      Slot #{userClan.members.length + pIdx + 1}
+                    </span>
+                    <span className="px-1.5 py-0.5 rounded text-[9px] font-mono font-black bg-amber-500/20 text-amber-300 border border-amber-500/40 uppercase animate-pulse">
+                      PENDING
+                    </span>
+                  </div>
+
+                  <div className="flex items-center gap-3">
+                    <img
+                      src={invite.friendAvatar}
+                      alt={invite.friendName}
+                      className="w-10 h-10 rounded-xl object-cover border border-amber-500/30"
+                    />
+                    <div className="min-w-0">
+                      <div className="text-xs font-black font-sans text-white truncate flex items-center gap-1">
+                        <span>{invite.friendName}</span>
+                      </div>
+                      <span className="text-[10px] font-mono text-amber-400 block truncate">
+                        {invite.role}
+                      </span>
+                    </div>
+                  </div>
+
+                  <div className="flex items-center justify-between pt-2 border-t border-white/5 text-[10px] font-mono">
+                    <span className="text-slate-400">Level {invite.friendLevel}</span>
+                    <span className="text-amber-400 font-bold">Awaiting Decision →</span>
+                  </div>
+                </div>
+              ))}
+
               {/* Open recruitment slots */}
-              {Array.from({ length: Math.max(0, 5 - userClan.members.length) }).map((_, i) => (
+              {Array.from({ length: Math.max(0, 5 - (userClan.members.length + pendingInvites.length)) }).map((_, i) => (
                 <div
                   key={`open-lineup-${i}`}
                   onClick={() => { sound.playClick(); setIsInviteModalOpen(true); }}
@@ -2228,7 +2371,7 @@ export const VortexClanHub: React.FC<VortexClanHubProps> = ({
                 >
                   <div className="flex items-center justify-between">
                     <span className="px-2 py-0.5 rounded text-[10px] font-mono font-bold bg-white/5 text-slate-500">
-                      Slot #{userClan.members.length + i + 1}
+                      Slot #{userClan.members.length + pendingInvites.length + i + 1}
                     </span>
                     <span className="text-[9px] font-mono text-slate-500 uppercase">
                       OPEN SLOT
@@ -2270,7 +2413,7 @@ export const VortexClanHub: React.FC<VortexClanHubProps> = ({
               </p>
             </div>
             <span className="text-xs font-mono text-slate-400">
-              Capacity: <strong className="text-white">{userClan.members.length} / 6</strong>
+              Capacity: <strong className="text-white">{userClan.members.length} / 6</strong>{pendingInvites.length > 0 && <span className="text-amber-400 font-bold ml-1.5">({pendingInvites.length} Pending Invites)</span>}
             </span>
           </div>
 
@@ -2355,8 +2498,88 @@ export const VortexClanHub: React.FC<VortexClanHubProps> = ({
               </div>
             ))}
 
+            {/* Pending Invitations Slots (Awaiting Player Decision: Accept or Reject) */}
+            {pendingInvites.map((invite, pIdx) => (
+              <div
+                key={invite.id}
+                onClick={() => {
+                  sound.playSelect();
+                  setActiveDecisionInvite(invite);
+                }}
+                className="p-4 rounded-2xl border-2 border-dashed border-amber-500/50 hover:border-amber-400 bg-gradient-to-r from-[#18140D] via-[#12141F] to-[#0E1019] transition flex flex-col sm:flex-row sm:items-center justify-between gap-4 cursor-pointer select-none group"
+                title="Click to view full invitation details or select decision"
+              >
+                <div className="flex items-center gap-3.5">
+                  <span className="w-6 text-center text-xs font-mono font-bold text-amber-500">
+                    #{userClan.members.length + pIdx + 1}
+                  </span>
+                  <img
+                    src={invite.friendAvatar}
+                    alt={invite.friendName}
+                    className="w-11 h-11 rounded-xl object-cover border border-amber-500/40"
+                  />
+                  <div>
+                    <div className="flex items-center gap-2">
+                      <span className="text-sm font-black font-sans text-white">{invite.friendName}</span>
+                      <span className="px-2 py-0.5 rounded text-[10px] font-mono font-black bg-amber-500/20 text-amber-300 border border-amber-500/40 uppercase tracking-wider flex items-center gap-1 animate-pulse">
+                        <Clock className="w-3 h-3" /> Awaiting Decision
+                      </span>
+                      <span className="text-xs">{invite.friendFlag}</span>
+                    </div>
+                    <div className="text-xs font-mono text-slate-400 flex items-center gap-2 mt-0.5">
+                      <span>FACEIT Level {invite.friendLevel}</span>
+                      <span>•</span>
+                      <span className="text-[#A3E635] font-bold">{invite.friendElo} ELO</span>
+                      <span>•</span>
+                      <span className="text-amber-400 font-bold">Role: {invite.role}</span>
+                    </div>
+                  </div>
+                </div>
+
+                <div className="flex items-center gap-2 self-end sm:self-center">
+                  <button
+                    type="button"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      handleAcceptClanInvite(invite.id);
+                    }}
+                    className="px-3.5 py-1.5 rounded-xl bg-gradient-to-r from-[#84CC16] to-[#A3E635] hover:brightness-110 text-slate-950 font-mono font-black text-xs transition cursor-pointer flex items-center gap-1.5 shadow-sm active:scale-95"
+                    title="Accept Invitation into Clan"
+                  >
+                    <Check className="w-3.5 h-3.5 stroke-[3]" />
+                    <span>Accept</span>
+                  </button>
+
+                  <button
+                    type="button"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      handleRejectClanInvite(invite.id);
+                    }}
+                    className="px-3.5 py-1.5 rounded-xl bg-red-500/15 hover:bg-red-500/25 border border-red-500/40 text-red-400 font-mono font-black text-xs transition cursor-pointer flex items-center gap-1.5 active:scale-95"
+                    title="Reject / Decline Invitation"
+                  >
+                    <X className="w-3.5 h-3.5 stroke-[3]" />
+                    <span>Reject</span>
+                  </button>
+
+                  <button
+                    type="button"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      handleCancelClanInvite(invite.id);
+                    }}
+                    title="Cancel Invitation"
+                    className="w-8 h-8 rounded-xl bg-white/5 hover:bg-white/10 text-slate-400 hover:text-white flex items-center justify-center cursor-pointer transition"
+                  >
+                    <Trash2 className="w-3.5 h-3.5" />
+                  </button>
+                </div>
+              </div>
+            ))}
+
             {/* Open Recruitment Slots up to 6 capacity */}
-            {Array.from({ length: Math.max(0, 6 - userClan.members.length) }).map((_, i) => (
+            {Array.from({ length: Math.max(0, 6 - (userClan.members.length + pendingInvites.length)) }).map((_, i) => (
               <div
                 key={`roster-open-${i}`}
                 onClick={() => { sound.playClick(); setIsInviteModalOpen(true); }}
@@ -2365,7 +2588,7 @@ export const VortexClanHub: React.FC<VortexClanHubProps> = ({
               >
                 <div className="flex items-center gap-3.5">
                   <span className="w-6 text-center text-xs font-mono font-bold text-slate-600">
-                    #{userClan.members.length + i + 1}
+                    #{userClan.members.length + pendingInvites.length + i + 1}
                   </span>
                   <div className="w-11 h-11 rounded-xl border border-dashed border-slate-700 bg-white/5 flex items-center justify-center text-slate-500 group-hover:text-[#A3E635] group-hover:border-[#A3E635]/50 transition shrink-0">
                     <UserPlus className="w-5 h-5" />
@@ -3257,8 +3480,17 @@ export const VortexClanHub: React.FC<VortexClanHubProps> = ({
 
       {/* EDIT CLAN MODAL */}
       {isEditModalOpen && (
-        <div className="fixed inset-0 z-[150] bg-black/85 backdrop-blur-md flex items-center justify-center p-4 animate-in fade-in duration-200">
-          <div className="w-full max-w-lg bg-[#0C1019] border border-[#252E42] rounded-3xl p-6 shadow-2xl space-y-5 text-left relative">
+        <div 
+          className="fixed inset-0 z-[150] bg-black/85 backdrop-blur-md flex items-center justify-center p-4 animate-in fade-in duration-200 cursor-pointer"
+          onClick={() => {
+            sound.playClick();
+            setIsEditModalOpen(false);
+          }}
+        >
+          <div 
+            onClick={(e) => e.stopPropagation()}
+            className="w-full max-w-lg bg-[#0C1019] border border-[#252E42] rounded-3xl p-6 shadow-2xl space-y-5 text-left relative cursor-default"
+          >
             <div className="flex items-center justify-between border-b border-[#1E2638] pb-3">
               <div className="flex items-center gap-2.5">
                 <Shield className="w-5 h-5 text-[#A3E635]" />
@@ -3404,10 +3636,17 @@ export const VortexClanHub: React.FC<VortexClanHubProps> = ({
 
       {/* INVITE PLAYER MODAL (FRIENDS LIST ONLY ENFORCEMENT) */}
       {isInviteModalOpen && (
-        <div className="fixed inset-0 z-[150] bg-black/85 backdrop-blur-md flex items-center justify-center p-4 animate-in fade-in duration-200">
+        <div 
+          className="fixed inset-0 z-[150] bg-black/85 backdrop-blur-md flex items-center justify-center p-4 animate-in fade-in duration-200 cursor-pointer"
+          onClick={() => {
+            sound.playClick();
+            setIsInviteModalOpen(false);
+          }}
+        >
           <form
             onSubmit={handleInviteTeammate}
-            className="w-full max-w-lg bg-[#0C1019] border border-[#252E42] rounded-3xl p-6 shadow-2xl space-y-4 text-left relative"
+            onClick={(e) => e.stopPropagation()}
+            className="w-full max-w-lg bg-[#0C1019] border border-[#252E42] rounded-3xl p-6 shadow-2xl space-y-4 text-left relative cursor-default"
           >
             <div className="flex items-center justify-between border-b border-[#1E2638] pb-3">
               <div className="flex items-center gap-2.5">
@@ -3584,10 +3823,104 @@ export const VortexClanHub: React.FC<VortexClanHubProps> = ({
                 }`}
               >
                 <UserPlus className="w-3.5 h-3.5" />
-                <span>Add Friend to Clan</span>
+                <span>Send Clan Invite</span>
               </button>
             </div>
           </form>
+        </div>
+      )}
+
+      {/* CLAN INVITATION DECISION MODAL (PLAYER CAN ACCEPT OR REJECT) */}
+      {activeDecisionInvite && (
+        <div 
+          className="fixed inset-0 z-[160] bg-black/85 backdrop-blur-md flex items-center justify-center p-4 animate-in fade-in duration-200 cursor-pointer"
+          onClick={() => setActiveDecisionInvite(null)}
+        >
+          <div 
+            onClick={(e) => e.stopPropagation()}
+            className="w-full max-w-md bg-gradient-to-b from-[#111624] via-[#0D111C] to-[#090C15] border-2 border-[#222E4A] rounded-3xl p-6 shadow-2xl space-y-5 text-left relative cursor-default"
+          >
+            {/* Header */}
+            <div className="flex items-center justify-between border-b border-[#1E273E] pb-3">
+              <div className="flex items-center gap-2.5">
+                <div className="w-9 h-9 rounded-xl bg-amber-500/15 border border-amber-500/30 flex items-center justify-center text-amber-400">
+                  <Shield className="w-5 h-5" />
+                </div>
+                <div>
+                  <h3 className="text-base font-black font-display text-white">Clan Roster Invitation</h3>
+                  <p className="text-[10px] font-mono text-slate-400">Official Player Response Needed</p>
+                </div>
+              </div>
+              <button
+                type="button"
+                onClick={() => setActiveDecisionInvite(null)}
+                className="w-7 h-7 rounded-lg bg-white/5 hover:bg-white/10 text-slate-400 hover:text-white flex items-center justify-center transition cursor-pointer"
+              >
+                ✕
+              </button>
+            </div>
+
+            {/* Invited Player Capsule */}
+            <div className="p-4 rounded-2xl bg-[#131828] border border-[#25314C] space-y-3">
+              <div className="flex items-center gap-3">
+                <img 
+                  src={activeDecisionInvite.friendAvatar} 
+                  alt={activeDecisionInvite.friendName}
+                  className="w-12 h-12 rounded-2xl object-cover border border-white/10 shrink-0"
+                />
+                <div className="min-w-0 flex-1">
+                  <div className="flex items-center gap-2">
+                    <span className="text-sm font-black font-display text-white truncate">{activeDecisionInvite.friendName}</span>
+                    <span className="text-xs">{activeDecisionInvite.friendFlag}</span>
+                  </div>
+                  <div className="text-[11px] font-mono text-slate-400">
+                    Level {activeDecisionInvite.friendLevel} • {activeDecisionInvite.friendElo} ELO
+                  </div>
+                  <div className="text-[10px] font-mono text-[#A3E635] font-bold mt-0.5">
+                    Assigned Role: {activeDecisionInvite.role}
+                  </div>
+                </div>
+              </div>
+
+              <div className="p-3 rounded-xl bg-black/40 border border-white/5 text-[11px] font-mono text-slate-300 leading-relaxed">
+                Captain <strong className="text-white">{activeDecisionInvite.senderGamerTag}</strong> invited <strong className="text-[#A3E635]">{activeDecisionInvite.friendName}</strong> to join <strong className="text-white">[{activeDecisionInvite.clanTag}] {activeDecisionInvite.clanName}</strong>. As an esports player, they have full right to <strong>Accept</strong> or <strong>Reject</strong> this invitation.
+              </div>
+            </div>
+
+            {/* Decision Buttons */}
+            <div className="space-y-2.5 pt-1">
+              <div className="text-[10px] font-mono text-slate-400 uppercase tracking-wider text-center">
+                Select Invitation Decision:
+              </div>
+              <div className="grid grid-cols-2 gap-3">
+                <button
+                  type="button"
+                  onClick={() => handleAcceptClanInvite(activeDecisionInvite.id)}
+                  className="py-3 px-4 rounded-xl bg-gradient-to-r from-[#84CC16] to-[#A3E635] hover:brightness-110 text-slate-950 font-mono font-black text-xs uppercase tracking-wider flex items-center justify-center gap-2 cursor-pointer transition active:scale-95 shadow-lg shadow-lime-500/20"
+                >
+                  <Check className="w-4 h-4 stroke-[3]" />
+                  <span>Accept Invite</span>
+                </button>
+
+                <button
+                  type="button"
+                  onClick={() => handleRejectClanInvite(activeDecisionInvite.id)}
+                  className="py-3 px-4 rounded-xl bg-red-500/15 hover:bg-red-500/25 border border-red-500/40 text-red-400 font-mono font-black text-xs uppercase tracking-wider flex items-center justify-center gap-2 cursor-pointer transition active:scale-95"
+                >
+                  <X className="w-4 h-4 stroke-[3]" />
+                  <span>Reject / Decline</span>
+                </button>
+              </div>
+
+              <button
+                type="button"
+                onClick={() => handleCancelClanInvite(activeDecisionInvite.id)}
+                className="w-full py-2 text-center text-[10px] font-mono text-slate-500 hover:text-slate-300 transition cursor-pointer"
+              >
+                Cancel Invitation (Remove from Pending)
+              </button>
+            </div>
+          </div>
         </div>
       )}
 
@@ -3778,29 +4111,45 @@ export const VortexClanHub: React.FC<VortexClanHubProps> = ({
                     <UserPlus className="w-3.5 h-3.5 text-[#06B6D4]" />
                     <span>Add Friend</span>
                   </button>
-                  <button
-                    type="button"
-                    onClick={() => {
-                      sound.playSelect();
-                      const isFriend = userFriends.some(f => f.name.toLowerCase() === selectedPlayerProfile.name.toLowerCase());
-                      if (!isFriend) {
-                        setToast(`⚠️ You must add ${selectedPlayerProfile.name} as a friend before inviting them to your clan.`);
-                        return;
-                      }
-                      if (userClan.members.some(m => m.name.toLowerCase() === selectedPlayerProfile.name.toLowerCase())) {
-                        setToast(`⚠️ ${selectedPlayerProfile.name} is already in your clan.`);
-                        return;
-                      }
-                      setSelectedPlayerProfile(null);
-                      const matchingFriend = userFriends.find(f => f.name.toLowerCase() === selectedPlayerProfile.name.toLowerCase()) || null;
-                      setSelectedFriendToInvite(matchingFriend);
-                      setIsInviteModalOpen(true);
-                    }}
-                    className="px-4 py-2.5 rounded-xl bg-gradient-to-r from-[#84CC16] to-[#A3E635] hover:brightness-110 text-slate-950 font-mono font-black text-xs flex items-center justify-center gap-1.5 cursor-pointer transition active:scale-95 shadow-lg shadow-[#A3E635]/20"
-                  >
-                    <UserPlus className="w-3.5 h-3.5 stroke-[2.5]" />
-                    <span>Invite to Clan</span>
-                  </button>
+                  {pendingInvites.some(i => i.friendName.toLowerCase() === selectedPlayerProfile.name.toLowerCase()) ? (
+                    <button
+                      type="button"
+                      onClick={() => {
+                        sound.playSelect();
+                        const pending = pendingInvites.find(i => i.friendName.toLowerCase() === selectedPlayerProfile.name.toLowerCase()) || null;
+                        setSelectedPlayerProfile(null);
+                        if (pending) setActiveDecisionInvite(pending);
+                      }}
+                      className="px-4 py-2.5 rounded-xl bg-amber-500/20 hover:bg-amber-500/30 border border-amber-500/40 text-amber-300 font-mono font-bold text-xs flex items-center justify-center gap-1.5 cursor-pointer transition active:scale-95"
+                    >
+                      <Clock className="w-3.5 h-3.5 text-amber-400" />
+                      <span>Invite Pending (Accept/Reject)</span>
+                    </button>
+                  ) : (
+                    <button
+                      type="button"
+                      onClick={() => {
+                        sound.playSelect();
+                        const isFriend = userFriends.some(f => f.name.toLowerCase() === selectedPlayerProfile.name.toLowerCase());
+                        if (!isFriend) {
+                          setToast(`⚠️ You must add ${selectedPlayerProfile.name} as a friend before inviting them to your clan.`);
+                          return;
+                        }
+                        if (userClan.members.some(m => m.name.toLowerCase() === selectedPlayerProfile.name.toLowerCase())) {
+                          setToast(`⚠️ ${selectedPlayerProfile.name} is already in your clan.`);
+                          return;
+                        }
+                        setSelectedPlayerProfile(null);
+                        const matchingFriend = userFriends.find(f => f.name.toLowerCase() === selectedPlayerProfile.name.toLowerCase()) || null;
+                        setSelectedFriendToInvite(matchingFriend);
+                        setIsInviteModalOpen(true);
+                      }}
+                      className="px-4 py-2.5 rounded-xl bg-gradient-to-r from-[#84CC16] to-[#A3E635] hover:brightness-110 text-slate-950 font-mono font-black text-xs flex items-center justify-center gap-1.5 cursor-pointer transition active:scale-95 shadow-lg shadow-[#A3E635]/20"
+                    >
+                      <UserPlus className="w-3.5 h-3.5 stroke-[2.5]" />
+                      <span>Invite to Clan</span>
+                    </button>
+                  )}
                 </div>
               )}
             </div>
