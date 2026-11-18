@@ -1931,7 +1931,7 @@ export const VortexClanHub: React.FC<VortexClanHubProps> = ({
             }`}
           >
             <BarChart2 className="w-3.5 h-3.5" />
-            <span>Matchet e Klanit & Statistikat</span>
+            <span>Clan Matches & Stats</span>
           </button>
         </div>
 
@@ -2158,11 +2158,11 @@ export const VortexClanHub: React.FC<VortexClanHubProps> = ({
                 </span>
                 <span className="text-xs font-mono text-[#A3E635] font-bold flex items-center gap-1.5">
                   <span className="w-2 h-2 rounded-full bg-[#A3E635] animate-ping" />
-                  Kliko midis 3 Opsioneve për të zgjedhur dizajnin tënd të preferuar:
+                  Select between 3 view options to preview your preferred design:
                 </span>
               </div>
               <p className="text-xs text-slate-300 font-sans">
-                Zgjidh mënyrën se si dëshiron të paraqiten ndeshjet Clan vs Clan, hartat dhe rezultatet zyrtare.
+                Choose how official 5v5 clan matches, map picks, and competitive results are presented.
               </p>
             </div>
 
@@ -2177,7 +2177,7 @@ export const VortexClanHub: React.FC<VortexClanHubProps> = ({
                 }`}
               >
                 <Flame className="w-3.5 h-3.5" />
-                <span>Opsioni 1: FACEIT Matches & Scoreboard (1:1)</span>
+                <span>Option 1: FACEIT Matches & Scoreboard (1:1)</span>
               </button>
 
               <button
@@ -2189,7 +2189,7 @@ export const VortexClanHub: React.FC<VortexClanHubProps> = ({
                 }`}
               >
                 <Trophy className="w-3.5 h-3.5" />
-                <span>Opsioni 2: Leaderboard + Ndeshjet</span>
+                <span>Option 2: Leaderboard & Matches</span>
               </button>
 
               <button
@@ -2201,7 +2201,7 @@ export const VortexClanHub: React.FC<VortexClanHubProps> = ({
                 }`}
               >
                 <Swords className="w-3.5 h-3.5" />
-                <span>Opsioni 3: Head-to-Head Rivals</span>
+                <span>Option 3: Head-to-Head Rivals</span>
               </button>
             </div>
           </div>
@@ -2218,10 +2218,10 @@ export const VortexClanHub: React.FC<VortexClanHubProps> = ({
                     <span className="px-2.5 py-0.5 rounded text-[10px] font-mono font-black uppercase bg-[#FF5500] text-black tracking-wider">
                       FACEIT 5v5 OFFICIAL
                     </span>
-                    <h3 className="text-lg font-black font-display text-white">Matchet e Klanit & Statistikat (CS2 Scoreboards)</h3>
+                    <h3 className="text-lg font-black font-display text-white">Clan Matches & Stats (CS2 Scoreboards)</h3>
                   </div>
                   <p className="text-xs font-mono text-slate-400 mt-1">
-                    Lista autentike e ndeshjeve 5v5, ELO progression, performance ratings dhe Scoreboard-i zyrtar FACEIT 17-kolonash
+                    Official 5v5 match history, ELO progression, performance ratings, and authentic 17-column FACEIT scoreboards
                   </p>
                 </div>
 
@@ -2231,7 +2231,7 @@ export const VortexClanHub: React.FC<VortexClanHubProps> = ({
                     className="px-4 py-2 rounded-xl bg-gradient-to-r from-[#FF5500] to-amber-500 hover:brightness-110 text-black font-display font-black text-xs uppercase tracking-wider flex items-center gap-1.5 cursor-pointer shadow-lg active:scale-95 transition"
                   >
                     <Zap className="w-3.5 h-3.5 fill-current" />
-                    <span>Simulo Ndeshje Re (1-Click Test)</span>
+                    <span>Simulate Match (1-Click Test)</span>
                   </button>
 
                   {/* Filter Pills */}
@@ -2246,7 +2246,7 @@ export const VortexClanHub: React.FC<VortexClanHubProps> = ({
                             : 'text-slate-400 hover:text-white'
                         }`}
                       >
-                        {f === 'all' ? 'Të Gjitha' : f === 'wins' ? 'Fitore (W)' : 'Humbje (L)'}
+                        {f === 'all' ? 'All Matches' : f === 'wins' ? 'Wins (W)' : 'Losses (L)'}
                       </button>
                     ))}
                   </div>
@@ -2374,7 +2374,7 @@ export const VortexClanHub: React.FC<VortexClanHubProps> = ({
                           onClick={(e) => {
                             e.stopPropagation();
                             sound.playClick();
-                            setToast(`✓ Shkarkimi i GOTV Demo (.dem) për ${match.mapDisplayName} filloi...`);
+                            setToast(`✓ Downloading CS2 GOTV Demo (.dem) for ${match.mapDisplayName}...`);
                           }}
                           title="Download GOTV Demo (.dem)"
                           className="w-8 h-8 rounded-lg bg-white/5 hover:bg-white/15 text-slate-400 hover:text-white flex items-center justify-center transition cursor-pointer"
@@ -2387,7 +2387,7 @@ export const VortexClanHub: React.FC<VortexClanHubProps> = ({
                             sound.playSelect();
                             setSelectedScoreboardMatch(match);
                           }}
-                          title="Hap Scoreboard (TAB)"
+                          title="Open Scoreboard (TAB)"
                           className="w-8 h-8 rounded-lg bg-white/5 hover:bg-white/15 text-slate-400 hover:text-white flex items-center justify-center transition cursor-pointer"
                         >
                           <ExternalLink className="w-4 h-4" />
@@ -2407,13 +2407,13 @@ export const VortexClanHub: React.FC<VortexClanHubProps> = ({
                     </span>
                   </div>
                   <span className="text-[11px] font-mono text-slate-400">
-                    Kliko mbi çdo ndeshje më sipër për të parë Scoreboard-in përkatës
+                    Click any match above to inspect its official Scoreboard
                   </span>
                 </div>
 
                 <div className="flex items-center justify-between p-3 rounded-xl bg-white/[0.02] border border-white/5 text-xs font-mono">
                   <span className="text-slate-300">
-                    Aktualisht shfaqet: <strong className="text-white">[{clanMatches[0]?.mapDisplayName}] {clanMatches[0]?.scoreDisplay} ({clanMatches[0]?.team1?.name} vs {clanMatches[0]?.team2?.name})</strong>
+                    Currently Previewing: <strong className="text-white">[{clanMatches[0]?.mapDisplayName}] {clanMatches[0]?.scoreDisplay} ({clanMatches[0]?.team1?.name} vs {clanMatches[0]?.team2?.name})</strong>
                   </span>
                   <button
                     onClick={() => {
@@ -2423,7 +2423,7 @@ export const VortexClanHub: React.FC<VortexClanHubProps> = ({
                     className="px-3 py-1.5 rounded-lg bg-[#FF5500] hover:bg-[#FF5500]/90 text-black font-black text-xs flex items-center gap-1.5 transition cursor-pointer"
                   >
                     <ExternalLink className="w-3.5 h-3.5" />
-                    <span>Hap Scoreboard të Plotë (17 Kolona)</span>
+                    <span>Open Full Scoreboard (17 Columns)</span>
                   </button>
                 </div>
               </div>
@@ -2431,7 +2431,7 @@ export const VortexClanHub: React.FC<VortexClanHubProps> = ({
           )}
 
           {/* ======================================================== */}
-          {/* OPSIONI 2: CLAN WARS HUB (LEADERBOARD + NDESHJET)        */}
+          {/* OPTION 2: LEADERBOARD & RECENT MATCHES */}
           {/* ======================================================== */}
           {clanViewOption === 'wars-hub' && (
             <div className="space-y-5 animate-in fade-in duration-200">
@@ -2440,7 +2440,7 @@ export const VortexClanHub: React.FC<VortexClanHubProps> = ({
                 <div className="flex items-center justify-between border-b border-[#1E2333] pb-3">
                   <div>
                     <h3 className="text-lg font-black font-display text-white">🏆 European CS2 5v5 Clans Leaderboard</h3>
-                    <p className="text-xs font-mono text-slate-400">Renditja zyrtare sipas Clan ELO, trofeve dhe ndeshjeve të fituara</p>
+                    <p className="text-xs font-mono text-slate-400">Official European clan standings ranked by Clan ELO, trophies, and match record</p>
                   </div>
                   <span className="text-xs font-mono text-[#A3E635] font-bold">Season 2026 • Division I</span>
                 </div>
@@ -2510,7 +2510,7 @@ export const VortexClanHub: React.FC<VortexClanHubProps> = ({
                     onClick={handleSimulateNewClanMatch}
                     className="text-xs font-mono font-bold text-[#FF5500] hover:underline cursor-pointer flex items-center gap-1"
                   >
-                    <span>+ Simulo Ndeshje</span>
+                    <span>+ Simulate Match</span>
                   </button>
                 </div>
 
@@ -2543,14 +2543,14 @@ export const VortexClanHub: React.FC<VortexClanHubProps> = ({
           )}
 
           {/* ======================================================== */}
-          {/* OPSIONI 3: HEAD-TO-HEAD RIVALS (BALLË PËR BALLË)        */}
+          {/* OPTION 3: HEAD-TO-HEAD RIVALS */}
           {/* ======================================================== */}
           {clanViewOption === 'rivals' && (
             <div className="p-6 rounded-3xl bg-[#0E1017] border border-[#202536] space-y-5 animate-in fade-in duration-200">
               <div className="border-b border-[#1E2333] pb-3">
                 <h3 className="text-lg font-black font-display text-white">Head-to-Head Clan Rivals & Match History</h3>
                 <p className="text-xs font-mono text-slate-400">
-                  Bilanci i drejtpërdrejtë i klanit tënd [{userClan.tag}] kundër çdo klani rival sipas hartave
+                  Head-to-head match history of [{userClan.tag}] against rival rosters across all maps
                 </p>
               </div>
 
@@ -2588,18 +2588,18 @@ export const VortexClanHub: React.FC<VortexClanHubProps> = ({
                       <div className="p-3 rounded-xl bg-black/50 border border-white/5 space-y-1 text-center font-mono">
                         <div className="text-[10px] text-slate-400 uppercase font-bold">Your Head-to-Head Record</div>
                         <div className="text-xl font-display font-black text-white">
-                          <span className="text-emerald-400">{userWinsVsThis} FITORE</span>
+                          <span className="text-emerald-400">{userWinsVsThis} WINS</span>
                           <span className="text-slate-600 mx-2">-</span>
-                          <span className="text-red-400">{totalPlayed - userWinsVsThis} HUMBJE</span>
+                          <span className="text-red-400">{totalPlayed - userWinsVsThis} LOSSES</span>
                         </div>
                         <div className="text-[11px] text-[#A3E635] font-bold">
-                          {totalPlayed > 0 ? `${winRatePct}% Winrate kundër tyre` : 'Asnjë ndeshje e luajtur ende'}
+                          {totalPlayed > 0 ? `${winRatePct}% Win rate vs them` : 'No matches played yet'}
                         </div>
                       </div>
 
                       {/* Matches against them */}
                       <div className="space-y-1.5 text-xs font-mono">
-                        <span className="text-[10px] text-slate-500 uppercase font-bold block">Ndeshjet e fundit në harta:</span>
+                        <span className="text-[10px] text-slate-500 uppercase font-bold block">Recent map encounters:</span>
                         {matchesAgainstThisClan.length > 0 ? (
                           matchesAgainstThisClan.map(m => {
                             const isWin = (m.clan1.tag === userClan.tag && m.clan1.isWinner) || (m.clan2.tag === userClan.tag && m.clan2.isWinner);
@@ -2607,13 +2607,13 @@ export const VortexClanHub: React.FC<VortexClanHubProps> = ({
                               <div key={m.id} className="flex items-center justify-between p-2 rounded-lg bg-white/[0.02]">
                                 <span className="font-bold text-white">{m.mapName.toUpperCase().replace('DE_', '')}</span>
                                 <span className={isWin ? 'text-emerald-400 font-bold' : 'text-red-400'}>
-                                  {isWin ? 'FITORE (13-' + (m.clan1.tag === userClan.tag ? m.clan2.score : m.clan1.score) + ')' : 'HUMBJE (' + (m.clan1.tag === userClan.tag ? m.clan1.score : m.clan2.score) + '-13)'}
+                                  {isWin ? 'WIN (13-' + (m.clan1.tag === userClan.tag ? m.clan2.score : m.clan1.score) + ')' : 'LOSS (' + (m.clan1.tag === userClan.tag ? m.clan1.score : m.clan2.score) + '-13)'}
                                 </span>
                               </div>
                             );
                           })
                         ) : (
-                          <div className="text-[11px] text-slate-500 italic py-1">Nuk ka përballje të drejtpërdrejta të regjistruara.</div>
+                          <div className="text-[11px] text-slate-500 italic py-1">No recorded head-to-head encounters yet.</div>
                         )}
                       </div>
 
@@ -2622,7 +2622,7 @@ export const VortexClanHub: React.FC<VortexClanHubProps> = ({
                         className="w-full py-2 rounded-xl bg-gradient-to-r from-[#FF5500] to-amber-500 hover:brightness-110 text-black font-display font-black text-xs uppercase tracking-wider flex items-center justify-center gap-1.5 cursor-pointer shadow transition active:scale-95"
                       >
                         <Zap className="w-3.5 h-3.5 fill-current" />
-                        <span>Simulo Ndeshje vs [{opponent.tag}]</span>
+                        <span>Simulate Match vs [{opponent.tag}]</span>
                       </button>
                     </div>
                   );
@@ -3008,7 +3008,7 @@ export const VortexClanHub: React.FC<VortexClanHubProps> = ({
                 <button
                   onClick={() => {
                     sound.playClick();
-                    setToast(`✓ Shkarkimi i GOTV Demo për ndeshjen ${selectedScoreboardMatch.mapDisplayName} filloi...`);
+                    setToast(`✓ Downloading CS2 GOTV Demo (.dem) for ${selectedScoreboardMatch.mapDisplayName}...`);
                   }}
                   className="px-4 py-2 rounded-xl bg-white/10 hover:bg-white/15 text-white text-xs font-mono font-bold flex items-center gap-1.5 cursor-pointer transition"
                 >
@@ -3019,7 +3019,7 @@ export const VortexClanHub: React.FC<VortexClanHubProps> = ({
                   onClick={() => setSelectedScoreboardMatch(null)}
                   className="px-5 py-2 rounded-xl bg-[#FF5500] hover:bg-[#FF5500]/90 text-black text-xs font-mono font-black cursor-pointer transition"
                 >
-                  Mbyll Scoreboard
+                  Close Scoreboard
                 </button>
               </div>
             </div>
