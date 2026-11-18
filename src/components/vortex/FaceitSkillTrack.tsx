@@ -19,16 +19,16 @@ export interface FaceitTierInfo {
 }
 
 export const FACEIT_TIERS: Record<number, FaceitTierInfo> = {
-  1: { level: 1, minElo: 100, maxElo: 500, label: 'Level 1', badgeColor: 'text-slate-300', ringBorder: 'border-slate-500', ringGlow: 'shadow-slate-500/20', ringSvgColor: '#94A3B8', ringPercent: 12 },
-  2: { level: 2, minElo: 501, maxElo: 750, label: 'Level 2', badgeColor: 'text-emerald-400', ringBorder: 'border-emerald-500', ringGlow: 'shadow-emerald-500/20', ringSvgColor: '#22C55E', ringPercent: 25 },
-  3: { level: 3, minElo: 751, maxElo: 900, label: 'Level 3', badgeColor: 'text-[#A3E635]', ringBorder: 'border-[#A3E635]', ringGlow: 'shadow-lime-500/25', ringSvgColor: '#22C55E', ringPercent: 35 },
-  4: { level: 4, minElo: 901, maxElo: 1050, label: 'Level 4', badgeColor: 'text-yellow-400', ringBorder: 'border-yellow-400', ringGlow: 'shadow-yellow-500/20', ringSvgColor: '#EAB308', ringPercent: 45 },
-  5: { level: 5, minElo: 1051, maxElo: 1200, label: 'Level 5', badgeColor: 'text-yellow-400', ringBorder: 'border-yellow-500', ringGlow: 'shadow-yellow-500/20', ringSvgColor: '#EAB308', ringPercent: 55 },
-  6: { level: 6, minElo: 1201, maxElo: 1350, label: 'Level 6', badgeColor: 'text-amber-400', ringBorder: 'border-amber-400', ringGlow: 'shadow-amber-500/20', ringSvgColor: '#F59E0B', ringPercent: 65 },
-  7: { level: 7, minElo: 1351, maxElo: 1530, label: 'Level 7', badgeColor: 'text-amber-500', ringBorder: 'border-amber-500', ringGlow: 'shadow-amber-500/25', ringSvgColor: '#F59E0B', ringPercent: 75 },
-  8: { level: 8, minElo: 1531, maxElo: 1750, label: 'Level 8', badgeColor: 'text-orange-500', ringBorder: 'border-orange-500', ringGlow: 'shadow-orange-500/25', ringSvgColor: '#EA580C', ringPercent: 82 },
-  9: { level: 9, minElo: 1751, maxElo: 2000, label: 'Level 9', badgeColor: 'text-orange-500', ringBorder: 'border-orange-600', ringGlow: 'shadow-orange-600/25', ringSvgColor: '#EA580C', ringPercent: 90 },
-  10: { level: 10, minElo: 2001, maxElo: 9999, label: 'Level 10', badgeColor: 'text-red-500', ringBorder: 'border-red-600', ringGlow: 'shadow-red-600/30', ringSvgColor: '#DC2626', ringPercent: 100 }
+  1: { level: 1, minElo: 100, maxElo: 500, label: 'Level 1', badgeColor: 'text-sky-400', ringBorder: 'border-sky-500', ringGlow: 'shadow-sky-500/20', ringSvgColor: '#38BDF8', ringPercent: 12 },
+  2: { level: 2, minElo: 501, maxElo: 750, label: 'Level 2', badgeColor: 'text-sky-300', ringBorder: 'border-sky-400', ringGlow: 'shadow-sky-400/20', ringSvgColor: '#38BDF8', ringPercent: 25 },
+  3: { level: 3, minElo: 751, maxElo: 900, label: 'Level 3', badgeColor: 'text-teal-400', ringBorder: 'border-teal-500', ringGlow: 'shadow-teal-500/25', ringSvgColor: '#14B8A6', ringPercent: 35 },
+  4: { level: 4, minElo: 901, maxElo: 1050, label: 'Level 4', badgeColor: 'text-emerald-400', ringBorder: 'border-emerald-500', ringGlow: 'shadow-emerald-500/20', ringSvgColor: '#10B981', ringPercent: 45 },
+  5: { level: 5, minElo: 1051, maxElo: 1200, label: 'Level 5', badgeColor: 'text-emerald-300', ringBorder: 'border-emerald-400', ringGlow: 'shadow-emerald-400/20', ringSvgColor: '#10B981', ringPercent: 55 },
+  6: { level: 6, minElo: 1201, maxElo: 1350, label: 'Level 6', badgeColor: 'text-[#A3E635]', ringBorder: 'border-[#A3E635]', ringGlow: 'shadow-lime-500/20', ringSvgColor: '#84CC16', ringPercent: 65 },
+  7: { level: 7, minElo: 1351, maxElo: 1530, label: 'Level 7', badgeColor: 'text-[#bef264]', ringBorder: 'border-[#bef264]', ringGlow: 'shadow-lime-400/25', ringSvgColor: '#A3E635', ringPercent: 75 },
+  8: { level: 8, minElo: 1531, maxElo: 1750, label: 'Level 8', badgeColor: 'text-cyan-400', ringBorder: 'border-cyan-500', ringGlow: 'shadow-cyan-500/25', ringSvgColor: '#06B6D4', ringPercent: 82 },
+  9: { level: 9, minElo: 1751, maxElo: 2000, label: 'Level 9', badgeColor: 'text-cyan-300', ringBorder: 'border-cyan-400', ringGlow: 'shadow-cyan-400/25', ringSvgColor: '#22D3EE', ringPercent: 90 },
+  10: { level: 10, minElo: 2001, maxElo: 9999, label: 'Level 10', badgeColor: 'text-red-500', ringBorder: 'border-red-600', ringGlow: 'shadow-red-600/30', ringSvgColor: '#EF4444', ringPercent: 100 }
 };
 
 export const getFaceitLevelFromElo = (elo: number): number => {
@@ -314,14 +314,14 @@ export const FaceitSeasonStatsCard: React.FC<FaceitSeasonStatsCardProps> = ({
               </div>
             </div>
 
-            {/* Glowing Orange Area Graph (Authentic ELO Curve) */}
+            {/* Glowing Lime & Cyan Area Graph (Caliber ELO Curve) */}
             <div className="w-full h-36 rounded-2xl bg-[#090C12] border border-white/5 relative overflow-hidden p-2">
               <svg className="w-full h-full" viewBox="0 0 500 120" preserveAspectRatio="none">
                 <defs>
                   <linearGradient id="faceitEloGrad" x1="0%" y1="0%" x2="0%" y2="100%">
-                    <stop offset="0%" stopColor="#EA580C" stopOpacity="0.45" />
-                    <stop offset="70%" stopColor="#EA580C" stopOpacity="0.08" />
-                    <stop offset="100%" stopColor="#EA580C" stopOpacity="0" />
+                    <stop offset="0%" stopColor="#A3E635" stopOpacity="0.45" />
+                    <stop offset="70%" stopColor="#84CC16" stopOpacity="0.08" />
+                    <stop offset="100%" stopColor="#84CC16" stopOpacity="0" />
                   </linearGradient>
                 </defs>
                 <path
@@ -331,7 +331,7 @@ export const FaceitSeasonStatsCard: React.FC<FaceitSeasonStatsCardProps> = ({
                 <path
                   d="M 0 95 Q 40 85 70 70 T 130 50 T 180 30 T 230 40 T 260 22 T 300 45 T 340 70 T 380 90 T 420 82 T 460 76 T 500 85"
                   fill="none"
-                  stroke="#F97316"
+                  stroke="#A3E635"
                   strokeWidth="2.5"
                   strokeLinecap="round"
                 />

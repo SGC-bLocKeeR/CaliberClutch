@@ -79,11 +79,11 @@ export interface ClanData {
 // Authentic FACEIT circular level ring badge (Yellow for 6-7, Orange for 8-9, Red for 10)
 export const FaceitLevelRing: React.FC<{ level: number; size?: number }> = ({ level, size = 26 }) => {
   const getArcColor = (lvl: number) => {
-    if (lvl === 10) return '#EF4444'; // Red
-    if (lvl >= 8) return '#F97316';  // Orange
-    if (lvl >= 6) return '#EAB308';  // Yellow
-    if (lvl >= 4) return '#22C55E';  // Green
-    return '#94A3B8';               // Slate
+    if (lvl === 10) return '#EF4444'; // Crimson Red (Master)
+    if (lvl >= 8) return '#06B6D4';  // Cyber Ice Cyan (Elite) - no Faceit orange
+    if (lvl >= 6) return '#A3E635';  // Electric Lime (High) - no Faceit yellow
+    if (lvl >= 4) return '#10B981';  // Emerald Green
+    return '#38BDF8';               // Sky Cyan - no Faceit slate gray
   };
 
   const color = getArcColor(level);
@@ -97,15 +97,15 @@ export const FaceitLevelRing: React.FC<{ level: number; size?: number }> = ({ le
     <div 
       className="relative flex items-center justify-center shrink-0" 
       style={{ width: size, height: size }}
-      title={`Level ${level}`}
+      title={`Skill Level ${level}`}
     >
       <svg className="w-full h-full -rotate-90" viewBox={`0 0 ${size} ${size}`}>
         <circle
           cx={size / 2}
           cy={size / 2}
           r={radius}
-          fill="#111219"
-          stroke="#262835"
+          fill="#0B0E18"
+          stroke="#1E2740"
           strokeWidth={strokeWidth}
         />
         <circle
@@ -1914,9 +1914,9 @@ export const VortexClanHub: React.FC<VortexClanHubProps> = ({
               <img
                 src={userClan.logo}
                 alt={userClan.name}
-                className="w-20 h-20 md:w-24 md:h-24 rounded-2xl object-cover border-2 border-[#FF5500] shadow-[0_0_20px_rgba(255,85,0,0.35)]"
+                className="w-20 h-20 md:w-24 md:h-24 rounded-2xl object-cover border-2 border-[#A3E635] shadow-[0_0_20px_rgba(163,230,53,0.35)]"
               />
-              <span className="absolute -bottom-2 -right-2 px-2 py-0.5 rounded-md text-[10px] font-mono font-black bg-[#FF5500] text-black uppercase tracking-wider shadow">
+              <span className="absolute -bottom-2 -right-2 px-2 py-0.5 rounded-md text-[10px] font-mono font-black bg-[#A3E635] text-slate-950 uppercase tracking-wider shadow">
                 [{userClan.tag}]
               </span>
             </div>
@@ -1949,7 +1949,7 @@ export const VortexClanHub: React.FC<VortexClanHubProps> = ({
                 </span>
                 <span>•</span>
                 <span className="flex items-center gap-1.5">
-                  <Users className="w-3.5 h-3.5 text-[#FF5500]" />
+                  <Users className="w-3.5 h-3.5 text-[#A3E635]" />
                   <span>Roster:</span>
                   <strong className="text-white">{userClan.members.length} / 6 Players</strong>
                 </span>
@@ -1972,7 +1972,7 @@ export const VortexClanHub: React.FC<VortexClanHubProps> = ({
               }}
               className="px-4 py-2 rounded-xl bg-white/5 hover:bg-white/10 border border-white/10 text-white text-xs font-mono font-bold flex items-center justify-center gap-2 cursor-pointer transition"
             >
-              <Edit3 className="w-3.5 h-3.5 text-[#FF5500]" />
+              <Edit3 className="w-3.5 h-3.5 text-[#A3E635]" />
               <span>Edit Clan Profile</span>
             </button>
 
@@ -1982,7 +1982,7 @@ export const VortexClanHub: React.FC<VortexClanHubProps> = ({
                 onNavigateTab('tournaments');
                 setToast(`✓ Navigating to Tournaments with Clan [${userClan.tag}] roster ready!`);
               }}
-              className="px-4 py-2 rounded-xl bg-gradient-to-r from-[#FF5500] to-amber-500 hover:brightness-110 text-black text-xs font-mono font-black flex items-center justify-center gap-2 shadow-lg shadow-[#FF5500]/25 cursor-pointer transition"
+              className="px-4 py-2 rounded-xl bg-gradient-to-r from-[#84CC16] to-[#A3E635] hover:brightness-110 text-slate-950 text-xs font-mono font-black flex items-center justify-center gap-2 shadow-lg shadow-[#A3E635]/25 cursor-pointer transition"
             >
               <Trophy className="w-3.5 h-3.5" />
               <span>Register for Tournament</span>
@@ -2037,7 +2037,7 @@ export const VortexClanHub: React.FC<VortexClanHubProps> = ({
               sound.playClick();
               setIsInviteModalOpen(true);
             }}
-            className="px-3.5 py-1.5 rounded-xl bg-[#FF5500]/15 hover:bg-[#FF5500]/25 text-[#FF5500] border border-[#FF5500]/30 text-xs font-mono font-bold flex items-center gap-1.5 cursor-pointer transition"
+            className="px-3.5 py-1.5 rounded-xl bg-[#A3E635]/15 hover:bg-[#A3E635]/25 text-[#A3E635] border border-[#A3E635]/30 text-xs font-mono font-bold flex items-center gap-1.5 cursor-pointer transition"
           >
             <UserPlus className="w-3.5 h-3.5" />
             <span>Invite Player</span>
@@ -2061,10 +2061,10 @@ export const VortexClanHub: React.FC<VortexClanHubProps> = ({
 
             <div className="p-4 rounded-2xl bg-[#0E1017] border border-[#202536] space-y-1">
               <span className="text-[10px] font-mono text-slate-400 uppercase tracking-wider flex items-center gap-1.5">
-                <Flame className="w-3.5 h-3.5 text-[#FF5500]" />
+                <Flame className="w-3.5 h-3.5 text-[#A3E635]" />
                 Current Streak
               </span>
-              <div className="text-2xl font-black font-display text-[#FF5500]">{userClan.stats.streak} Wins</div>
+              <div className="text-2xl font-black font-display text-[#A3E635]">{userClan.stats.streak} Wins</div>
               <p className="text-[10px] font-mono text-slate-400">Competitive Momentum</p>
             </div>
 
@@ -2222,7 +2222,7 @@ export const VortexClanHub: React.FC<VortexClanHubProps> = ({
                   <select
                     value={member.role}
                     onChange={(e) => handleChangeRole(member.id, e.target.value as ClanMember['role'])}
-                    className="px-3 py-1.5 rounded-xl bg-[#1A1E2B] border border-[#2D354A] text-xs font-mono text-slate-200 focus:outline-none focus:border-[#FF5500] cursor-pointer"
+                    className="px-3 py-1.5 rounded-xl bg-[#1A1E2B] border border-[#2D354A] text-xs font-mono text-slate-200 focus:outline-none focus:border-[#A3E635] cursor-pointer"
                   >
                     <option value="IGL / Captain">IGL / Captain</option>
                     <option value="AWPer">AWPer</option>
@@ -2252,10 +2252,10 @@ export const VortexClanHub: React.FC<VortexClanHubProps> = ({
       {activeTab === 'clans-list' && (
         <div className="space-y-5">
           {/* TOP BANNER: LIVE TEST SWITCHER (TO PREVIEW ALL 3 OPTIONS) */}
-          <div className="p-4 rounded-3xl bg-gradient-to-r from-[#10141F] via-[#151926] to-[#0E111A] border-2 border-[#FF5500]/40 shadow-2xl flex flex-col lg:flex-row lg:items-center justify-between gap-4">
+          <div className="p-4 rounded-3xl bg-gradient-to-r from-[#10141F] via-[#151926] to-[#0E111A] border-2 border-[#A3E635]/40 shadow-2xl flex flex-col lg:flex-row lg:items-center justify-between gap-4">
             <div className="space-y-1">
               <div className="flex items-center gap-2">
-                <span className="px-2 py-0.5 rounded text-[10px] font-mono font-black uppercase bg-[#FF5500] text-black">
+                <span className="px-2 py-0.5 rounded text-[10px] font-mono font-black uppercase bg-[#A3E635] text-slate-950">
                   Live Test Mode
                 </span>
                 <span className="text-xs font-mono text-[#A3E635] font-bold flex items-center gap-1.5">
@@ -2274,7 +2274,7 @@ export const VortexClanHub: React.FC<VortexClanHubProps> = ({
                 onClick={() => { sound.playSelect(); setClanViewOption('match-center'); }}
                 className={`px-3.5 py-2 rounded-xl text-xs font-mono font-bold transition flex items-center gap-2 cursor-pointer shadow-md ${
                   clanViewOption === 'match-center'
-                    ? 'bg-[#FF5500] text-black font-black ring-2 ring-[#FF5500]/60 scale-105'
+                    ? 'bg-[#A3E635] text-slate-950 font-black ring-2 ring-[#A3E635]/60 scale-105'
                     : 'bg-white/5 hover:bg-white/10 text-slate-300 border border-white/10'
                 }`}
               >
@@ -2286,7 +2286,7 @@ export const VortexClanHub: React.FC<VortexClanHubProps> = ({
                 onClick={() => { sound.playSelect(); setClanViewOption('wars-hub'); }}
                 className={`px-3.5 py-2 rounded-xl text-xs font-mono font-bold transition flex items-center gap-2 cursor-pointer shadow-md ${
                   clanViewOption === 'wars-hub'
-                    ? 'bg-[#FF5500] text-black font-black ring-2 ring-[#FF5500]/60 scale-105'
+                    ? 'bg-[#A3E635] text-slate-950 font-black ring-2 ring-[#A3E635]/60 scale-105'
                     : 'bg-white/5 hover:bg-white/10 text-slate-300 border border-white/10'
                 }`}
               >
@@ -2298,7 +2298,7 @@ export const VortexClanHub: React.FC<VortexClanHubProps> = ({
                 onClick={() => { sound.playSelect(); setClanViewOption('rivals'); }}
                 className={`px-3.5 py-2 rounded-xl text-xs font-mono font-bold transition flex items-center gap-2 cursor-pointer shadow-md ${
                   clanViewOption === 'rivals'
-                    ? 'bg-[#FF5500] text-black font-black ring-2 ring-[#FF5500]/60 scale-105'
+                    ? 'bg-[#A3E635] text-slate-950 font-black ring-2 ring-[#A3E635]/60 scale-105'
                     : 'bg-white/5 hover:bg-white/10 text-slate-300 border border-white/10'
                 }`}
               >
@@ -2317,7 +2317,7 @@ export const VortexClanHub: React.FC<VortexClanHubProps> = ({
               <div className="p-5 rounded-3xl bg-[#0E1017] border border-[#202536] flex flex-wrap items-center justify-between gap-4 shadow-xl">
                 <div>
                   <div className="flex items-center gap-2">
-                    <span className="px-2.5 py-0.5 rounded text-[10px] font-mono font-black uppercase bg-[#FF5500] text-black tracking-wider">
+                    <span className="px-2.5 py-0.5 rounded text-[10px] font-mono font-black uppercase bg-[#A3E635] text-slate-950 tracking-wider">
                       FACEIT 5v5 OFFICIAL
                     </span>
                     <h3 className="text-lg font-black font-display text-white">Clan Matches & Stats (CS2 Scoreboards)</h3>
@@ -2330,7 +2330,7 @@ export const VortexClanHub: React.FC<VortexClanHubProps> = ({
                 <div className="flex flex-wrap items-center gap-2.5">
                   <button
                     onClick={handleSimulateNewClanMatch}
-                    className="px-4 py-2 rounded-xl bg-gradient-to-r from-[#FF5500] to-amber-500 hover:brightness-110 text-black font-display font-black text-xs uppercase tracking-wider flex items-center gap-1.5 cursor-pointer shadow-lg active:scale-95 transition"
+                    className="px-4 py-2 rounded-xl bg-gradient-to-r from-[#84CC16] to-[#A3E635] hover:brightness-110 text-slate-950 font-display font-black text-xs uppercase tracking-wider flex items-center gap-1.5 cursor-pointer shadow-lg active:scale-95 transition"
                   >
                     <Zap className="w-3.5 h-3.5 fill-current" />
                     <span>Simulate Match (1-Click Test)</span>
@@ -2367,7 +2367,7 @@ export const VortexClanHub: React.FC<VortexClanHubProps> = ({
                     <div
                       key={match.id}
                       onClick={() => openMatchScoreboard(match)}
-                      className="w-full bg-gradient-to-r from-[#121624] via-[#0F121C] to-[#0A0C14] hover:from-[#161C2E] hover:to-[#0F131D] border border-[#222A3E] hover:border-[#FF5500]/60 rounded-2xl transition-all duration-200 flex items-center justify-between px-3 sm:px-5 py-3.5 cursor-pointer group relative overflow-hidden shadow-xl"
+                      className="w-full bg-gradient-to-r from-[#121624] via-[#0F121C] to-[#0A0C14] hover:from-[#161C2E] hover:to-[#0F131D] border border-[#222A3E] hover:border-[#A3E635]/60 rounded-2xl transition-all duration-200 flex items-center justify-between px-3 sm:px-5 py-3.5 cursor-pointer group relative overflow-hidden shadow-xl"
                     >
                       {/* Left Colored Indicator Stripe (Caliber Glow: Lime = Win, Red = Loss) */}
                       <div
@@ -2521,7 +2521,7 @@ export const VortexClanHub: React.FC<VortexClanHubProps> = ({
                       sound.playSelect();
                       openMatchScoreboard(clanMatches[0]);
                     }}
-                    className="px-3 py-1.5 rounded-lg bg-[#FF5500] hover:bg-[#FF5500]/90 text-black font-black text-xs flex items-center gap-1.5 transition cursor-pointer"
+                    className="px-3 py-1.5 rounded-lg bg-[#A3E635] hover:bg-[#bef264] text-slate-950 font-black text-xs flex items-center gap-1.5 transition cursor-pointer"
                   >
                     <ExternalLink className="w-3.5 h-3.5" />
                     <span>Open Full Scoreboard (17 Columns)</span>
@@ -2593,7 +2593,7 @@ export const VortexClanHub: React.FC<VortexClanHubProps> = ({
                                 <div>
                                   <div className="flex items-center gap-1.5">
                                     <span className="text-white font-bold">{c.name}</span>
-                                    <span className="text-[10px] text-[#FF5500]">[{c.tag}]</span>
+                                    <span className="text-[10px] text-[#A3E635]">[{c.tag}]</span>
                                     {c.isUser && <span className="px-1.5 py-0.2 rounded bg-[#A3E635] text-black text-[9px] font-black uppercase">YOU</span>}
                                   </div>
                                 </div>
@@ -2617,7 +2617,7 @@ export const VortexClanHub: React.FC<VortexClanHubProps> = ({
                   <h3 className="text-base font-black font-display text-white">Recent Match Results on CS2 Maps</h3>
                   <button
                     onClick={handleSimulateNewClanMatch}
-                    className="text-xs font-mono font-bold text-[#FF5500] hover:underline cursor-pointer flex items-center gap-1"
+                    className="text-xs font-mono font-bold text-[#A3E635] hover:underline cursor-pointer flex items-center gap-1"
                   >
                     <span>+ Simulate Match</span>
                   </button>
@@ -2679,7 +2679,7 @@ export const VortexClanHub: React.FC<VortexClanHubProps> = ({
                   return (
                     <div
                       key={opponent.id}
-                      className="p-5 rounded-2xl bg-[#121520] border border-[#22283A] hover:border-[#FF5500]/50 transition space-y-4 shadow-lg"
+                      className="p-5 rounded-2xl bg-[#121520] border border-[#22283A] hover:border-[#A3E635]/50 transition space-y-4 shadow-lg"
                     >
                       {/* Opponent Identity */}
                       <div className="flex items-center gap-3">
@@ -2687,7 +2687,7 @@ export const VortexClanHub: React.FC<VortexClanHubProps> = ({
                         <div>
                           <div className="flex items-center gap-1.5">
                             <h4 className="text-sm font-black font-display text-white">{opponent.name}</h4>
-                            <span className="text-[10px] font-mono font-bold text-[#FF5500]">[{opponent.tag}]</span>
+                            <span className="text-[10px] font-mono font-bold text-[#A3E635]">[{opponent.tag}]</span>
                           </div>
                           <span className="text-[10px] font-mono text-slate-400">{opponent.flag} {opponent.country} • ELO: {opponent.stats.avgElo}</span>
                         </div>
@@ -2739,7 +2739,7 @@ export const VortexClanHub: React.FC<VortexClanHubProps> = ({
 
                       <button
                         onClick={handleSimulateNewClanMatch}
-                        className="w-full py-2 rounded-xl bg-gradient-to-r from-[#FF5500] to-amber-500 hover:brightness-110 text-black font-display font-black text-xs uppercase tracking-wider flex items-center justify-center gap-1.5 cursor-pointer shadow transition active:scale-95"
+                        className="w-full py-2 rounded-xl bg-gradient-to-r from-[#84CC16] to-[#A3E635] hover:brightness-110 text-slate-950 font-display font-black text-xs uppercase tracking-wider flex items-center justify-center gap-1.5 cursor-pointer shadow transition active:scale-95"
                       >
                         <Zap className="w-3.5 h-3.5 fill-current" />
                         <span>Simulate Match vs [{opponent.tag}]</span>
@@ -2760,7 +2760,7 @@ export const VortexClanHub: React.FC<VortexClanHubProps> = ({
           onClick={() => setSelectedScoreboardMatch(null)}
         >
           <div 
-            className="w-full max-w-6xl max-h-[93vh] overflow-y-auto bg-gradient-to-b from-[#0F131F] via-[#0C0F18] to-[#080A10] border-2 border-[#20283C] rounded-3xl shadow-[0_0_60px_rgba(0,0,0,0.85)] space-y-5 text-left relative p-5 sm:p-7"
+            className="w-full max-w-6xl max-h-[93vh] overflow-y-auto bg-gradient-to-b from-[#0B0F1A] via-[#080C16] to-[#05070E] border-2 border-[#1E2942] rounded-3xl shadow-[0_0_80px_rgba(0,0,0,0.95)] space-y-5 text-left relative p-5 sm:p-7"
             onClick={(e) => e.stopPropagation()}
           >
             {/* Modal Top Bar */}
@@ -2792,14 +2792,14 @@ export const VortexClanHub: React.FC<VortexClanHubProps> = ({
 
               {/* Sub-Tabs: Scoreboard / Rounds / Performance (Vortex / Caliber Clutch Signature Style) */}
               <div className="flex items-center gap-2">
-                <div className="flex items-center bg-[#090C14] p-1.5 rounded-2xl border border-[#20273A] shadow-inner gap-1.5 text-xs font-mono">
+                <div className="flex items-center bg-[#070912] p-1.5 rounded-2xl border border-[#182136] shadow-inner gap-1.5 text-xs font-mono">
                   <button
                     type="button"
                     onClick={() => { sound.playClick(); setScoreboardSubTab('scoreboard'); }}
                     className={`px-4 py-2 rounded-xl font-display font-black text-xs uppercase tracking-wider transition-all duration-150 flex items-center gap-1.5 cursor-pointer ${
                       scoreboardSubTab === 'scoreboard'
-                        ? 'bg-gradient-to-r from-[#FF5500] to-amber-500 text-black shadow-lg shadow-[#FF5500]/25 scale-102'
-                        : 'bg-[#121622] hover:bg-[#1A2030] text-slate-300 hover:text-white border border-[#232B3E]'
+                        ? 'bg-gradient-to-r from-[#84CC16] to-[#A3E635] text-slate-950 shadow-lg shadow-[#A3E635]/30 scale-102'
+                        : 'bg-[#0E1322] hover:bg-[#141B30] text-slate-300 hover:text-white border border-[#1E2842] hover:border-[#A3E635]/40'
                     }`}
                   >
                     <BarChart2 className="w-3.5 h-3.5" />
@@ -2811,8 +2811,8 @@ export const VortexClanHub: React.FC<VortexClanHubProps> = ({
                     onClick={() => { sound.playClick(); setScoreboardSubTab('rounds'); }}
                     className={`px-4 py-2 rounded-xl font-display font-black text-xs uppercase tracking-wider transition-all duration-150 flex items-center gap-1.5 cursor-pointer ${
                       scoreboardSubTab === 'rounds'
-                        ? 'bg-gradient-to-r from-[#FF5500] to-amber-500 text-black shadow-lg shadow-[#FF5500]/25 scale-102'
-                        : 'bg-[#121622] hover:bg-[#1A2030] text-slate-300 hover:text-white border border-[#232B3E]'
+                        ? 'bg-gradient-to-r from-[#84CC16] to-[#A3E635] text-slate-950 shadow-lg shadow-[#A3E635]/30 scale-102'
+                        : 'bg-[#0E1322] hover:bg-[#141B30] text-slate-300 hover:text-white border border-[#1E2842] hover:border-[#A3E635]/40'
                     }`}
                   >
                     <Clock className="w-3.5 h-3.5" />
@@ -2824,8 +2824,8 @@ export const VortexClanHub: React.FC<VortexClanHubProps> = ({
                     onClick={() => { sound.playClick(); setScoreboardSubTab('performance'); }}
                     className={`px-4 py-2 rounded-xl font-display font-black text-xs uppercase tracking-wider transition-all duration-150 flex items-center gap-1.5 cursor-pointer ${
                       scoreboardSubTab === 'performance'
-                        ? 'bg-gradient-to-r from-[#FF5500] to-amber-500 text-black shadow-lg shadow-[#FF5500]/25 scale-102'
-                        : 'bg-[#121622] hover:bg-[#1A2030] text-slate-300 hover:text-white border border-[#232B3E]'
+                        ? 'bg-gradient-to-r from-[#84CC16] to-[#A3E635] text-slate-950 shadow-lg shadow-[#A3E635]/30 scale-102'
+                        : 'bg-[#0E1322] hover:bg-[#141B30] text-slate-300 hover:text-white border border-[#1E2842] hover:border-[#A3E635]/40'
                     }`}
                   >
                     <Flame className="w-3.5 h-3.5" />
@@ -2879,10 +2879,10 @@ export const VortexClanHub: React.FC<VortexClanHubProps> = ({
                   </div>
 
                   {/* 17 Columns Table */}
-                  <div className="overflow-x-auto rounded-xl border border-white/5 bg-[#121316]">
+                  <div className="overflow-x-auto rounded-2xl border border-[#1E2942] bg-[#0A0E18] shadow-xl">
                     <table className="w-full text-left font-mono text-xs">
                       <thead>
-                        <tr className="border-b border-white/5 text-slate-400 text-[11px] uppercase tracking-wider bg-black/40">
+                        <tr className="border-b border-[#1E2942] text-slate-300 text-[11px] uppercase tracking-wider bg-[#0E1424]">
                           <th 
                             onClick={() => handleToggleSort('name')}
                             className="py-2.5 px-3 min-w-[170px] cursor-pointer hover:text-white transition select-none"
@@ -2906,10 +2906,10 @@ export const VortexClanHub: React.FC<VortexClanHubProps> = ({
                             className="py-2.5 px-2 min-w-[90px] cursor-pointer transition select-none"
                             title="Sort by HLTV / FACEIT Performance Rating"
                           >
-                            <span className={`inline-flex items-center gap-1 ${scoreboardSortKey === 'rating' ? 'text-[#F97316] font-black' : 'text-slate-300 hover:text-white'}`}>
-                              <span className="w-3.5 h-3.5 rounded-full bg-[#F97316] text-black font-black text-[9px] flex items-center justify-center">⯆</span>
+                            <span className={`inline-flex items-center gap-1.5 ${scoreboardSortKey === 'rating' ? 'text-[#A3E635] font-black' : 'text-slate-300 hover:text-white'}`}>
+                              <span className="w-3.5 h-3.5 rounded-full bg-[#A3E635] text-slate-950 font-black text-[9px] flex items-center justify-center shadow-sm">⯆</span>
                               <span>Rating</span>
-                              {scoreboardSortKey === 'rating' ? (scoreboardSortAsc ? <ChevronUp className="w-3 h-3" /> : <ChevronDown className="w-3 h-3" />) : <ChevronDown className="w-3 h-3 opacity-50" />}
+                              {scoreboardSortKey === 'rating' ? (scoreboardSortAsc ? <ChevronUp className="w-3 h-3 text-[#A3E635]" /> : <ChevronDown className="w-3 h-3 text-[#A3E635]" />) : <ChevronDown className="w-3 h-3 opacity-50" />}
                             </span>
                           </th>
                           <th onClick={() => handleToggleSort('swing')} className="py-2.5 px-2 text-right min-w-[75px] cursor-pointer hover:text-white select-none">Swing</th>
@@ -2966,14 +2966,14 @@ export const VortexClanHub: React.FC<VortexClanHubProps> = ({
 
                               <td className="py-2.5 px-2">
                                 <span
-                                  className={`px-2 py-0.5 rounded text-xs font-bold inline-flex items-center gap-1 ${
+                                  className={`px-2 py-0.5 rounded-lg text-xs font-black font-mono inline-flex items-center gap-1 ${
                                     p.hasMvpStar
-                                      ? 'bg-amber-500/25 text-amber-300 border border-amber-500/50 shadow-sm'
+                                      ? 'bg-amber-400/20 text-amber-300 border border-amber-400/50 shadow-sm'
                                       : ratingNum >= 1.20
-                                      ? 'bg-[#A3E635]/20 text-[#A3E635] border border-[#A3E635]/40'
+                                      ? 'bg-[#A3E635]/20 text-[#A3E635] border border-[#A3E635]/40 shadow-sm'
                                       : ratingNum >= 1.00
-                                      ? 'bg-white/10 text-slate-200 border border-white/15'
-                                      : 'bg-red-500/20 text-red-400 border border-red-500/40'
+                                      ? 'bg-[#06B6D4]/20 text-[#22D3EE] border border-[#06B6D4]/40'
+                                      : 'bg-rose-500/20 text-rose-400 border border-rose-500/40'
                                   }`}
                                 >
                                   <span>{p.rating}</span>
@@ -3036,10 +3036,10 @@ export const VortexClanHub: React.FC<VortexClanHubProps> = ({
                     </div>
                   </div>
 
-                  <div className="overflow-x-auto rounded-xl border border-white/5 bg-[#121316]">
+                  <div className="overflow-x-auto rounded-2xl border border-[#1E2942] bg-[#0A0E18] shadow-xl">
                     <table className="w-full text-left font-mono text-xs">
                       <thead>
-                        <tr className="border-b border-white/5 text-slate-400 text-[11px] uppercase tracking-wider bg-black/40">
+                        <tr className="border-b border-[#1E2942] text-slate-300 text-[11px] uppercase tracking-wider bg-[#0E1424]">
                           <th onClick={() => handleToggleSort('name')} className="py-2.5 px-3 min-w-[170px] cursor-pointer hover:text-white transition select-none">
                             <span className="flex items-center gap-1">Player {scoreboardSortKey === 'name' && (scoreboardSortAsc ? '⯅' : '⯆')}</span>
                           </th>
@@ -3047,10 +3047,10 @@ export const VortexClanHub: React.FC<VortexClanHubProps> = ({
                             <span className="flex items-center gap-1">Rank {scoreboardSortKey === 'rank' && (scoreboardSortAsc ? '⯅' : '⯆')}</span>
                           </th>
                           <th onClick={() => handleToggleSort('rating')} className="py-2.5 px-2 min-w-[90px] cursor-pointer transition select-none">
-                            <span className={`inline-flex items-center gap-1 ${scoreboardSortKey === 'rating' ? 'text-[#F97316] font-black' : 'text-slate-300 hover:text-white'}`}>
-                              <span className="w-3.5 h-3.5 rounded-full bg-[#F97316] text-black font-black text-[9px] flex items-center justify-center">⯆</span>
+                            <span className={`inline-flex items-center gap-1.5 ${scoreboardSortKey === 'rating' ? 'text-[#A3E635] font-black' : 'text-slate-300 hover:text-white'}`}>
+                              <span className="w-3.5 h-3.5 rounded-full bg-[#A3E635] text-slate-950 font-black text-[9px] flex items-center justify-center shadow-sm">⯆</span>
                               <span>Rating</span>
-                              {scoreboardSortKey === 'rating' ? (scoreboardSortAsc ? <ChevronUp className="w-3 h-3" /> : <ChevronDown className="w-3 h-3" />) : <ChevronDown className="w-3 h-3 opacity-50" />}
+                              {scoreboardSortKey === 'rating' ? (scoreboardSortAsc ? <ChevronUp className="w-3 h-3 text-[#A3E635]" /> : <ChevronDown className="w-3 h-3 text-[#A3E635]" />) : <ChevronDown className="w-3 h-3 opacity-50" />}
                             </span>
                           </th>
                           <th onClick={() => handleToggleSort('swing')} className="py-2.5 px-2 text-right min-w-[75px] cursor-pointer hover:text-white select-none">Swing</th>
@@ -3107,14 +3107,14 @@ export const VortexClanHub: React.FC<VortexClanHubProps> = ({
 
                               <td className="py-2.5 px-2">
                                 <span
-                                  className={`px-2 py-0.5 rounded text-xs font-bold inline-flex items-center gap-1 ${
+                                  className={`px-2 py-0.5 rounded-lg text-xs font-black font-mono inline-flex items-center gap-1 ${
                                     p.hasMvpStar
-                                      ? 'bg-amber-500/25 text-amber-300 border border-amber-500/50 shadow-sm'
+                                      ? 'bg-amber-400/20 text-amber-300 border border-amber-400/50 shadow-sm'
                                       : ratingNum >= 1.20
-                                      ? 'bg-[#A3E635]/20 text-[#A3E635] border border-[#A3E635]/40'
+                                      ? 'bg-[#A3E635]/20 text-[#A3E635] border border-[#A3E635]/40 shadow-sm'
                                       : ratingNum >= 1.00
-                                      ? 'bg-white/10 text-slate-200 border border-white/15'
-                                      : 'bg-red-500/20 text-red-400 border border-red-500/40'
+                                      ? 'bg-[#06B6D4]/20 text-[#22D3EE] border border-[#06B6D4]/40'
+                                      : 'bg-rose-500/20 text-rose-400 border border-rose-500/40'
                                   }`}
                                 >
                                   <span>{p.rating}</span>
@@ -3154,7 +3154,7 @@ export const VortexClanHub: React.FC<VortexClanHubProps> = ({
             {/* ======================================================== */}
             {scoreboardSubTab === 'rounds' && (
               <div className="space-y-4 animate-in fade-in duration-150">
-                <div className="p-4 rounded-xl bg-[#121316] border border-white/5 space-y-3">
+                <div className="p-4 rounded-2xl bg-[#0A0E18] border border-[#1E2942] space-y-3">
                   <div className="flex flex-wrap items-center justify-between gap-2 border-b border-white/5 pb-2.5">
                     <div>
                       <h4 className="text-sm font-black font-display text-white">Match Round Progression</h4>
@@ -3185,7 +3185,7 @@ export const VortexClanHub: React.FC<VortexClanHubProps> = ({
                             onClick={() => { sound.playClick(); setSelectedRoundDetail(isSelected ? null : r); }}
                             className={`p-2 rounded-xl border text-center font-mono cursor-pointer transition select-none ${
                               isSelected
-                                ? 'ring-2 ring-[#FF5500] scale-105 bg-[#1F1916]'
+                                ? 'ring-2 ring-[#A3E635] scale-105 bg-[#0C1F16] border-[#A3E635]'
                                 : isTeam1Win
                                 ? 'bg-[#152e1c] border-[#22C55E]/40 hover:border-[#22C55E]'
                                 : 'bg-[#2b1618] border-[#ef4444]/40 hover:border-[#ef4444]'
@@ -3215,7 +3215,7 @@ export const VortexClanHub: React.FC<VortexClanHubProps> = ({
                             onClick={() => { sound.playClick(); setSelectedRoundDetail(isSelected ? null : r); }}
                             className={`p-2 rounded-xl border text-center font-mono cursor-pointer transition select-none ${
                               isSelected
-                                ? 'ring-2 ring-[#FF5500] scale-105 bg-[#1F1916]'
+                                ? 'ring-2 ring-[#A3E635] scale-105 bg-[#0C1F16] border-[#A3E635]'
                                 : isTeam1Win
                                 ? 'bg-[#152e1c] border-[#22C55E]/40 hover:border-[#22C55E]'
                                 : 'bg-[#2b1618] border-[#ef4444]/40 hover:border-[#ef4444]'
@@ -3234,9 +3234,9 @@ export const VortexClanHub: React.FC<VortexClanHubProps> = ({
 
                   {/* Detailed Round Card Callout */}
                   {selectedRoundDetail && (
-                    <div className="p-3 rounded-xl bg-black/60 border border-[#FF5500]/40 flex items-center justify-between text-xs font-mono animate-in fade-in duration-150">
+                    <div className="p-3 rounded-xl bg-black/60 border border-[#A3E635]/40 flex items-center justify-between text-xs font-mono animate-in fade-in duration-150">
                       <div className="flex items-center gap-3">
-                        <span className="w-7 h-7 rounded-lg bg-[#FF5500] text-black font-black flex items-center justify-center text-xs">
+                        <span className="w-7 h-7 rounded-lg bg-[#A3E635] text-slate-950 font-black flex items-center justify-center text-xs">
                           R{selectedRoundDetail}
                         </span>
                         <div>
@@ -3311,7 +3311,7 @@ export const VortexClanHub: React.FC<VortexClanHubProps> = ({
                 </div>
 
                 {/* Comparative ADR Bars */}
-                <div className="p-4 rounded-xl bg-[#121316] border border-white/5 space-y-3">
+                <div className="p-4 rounded-2xl bg-[#0A0E18] border border-[#1E2942] space-y-3">
                   <div className="flex items-center justify-between border-b border-white/5 pb-2">
                     <h4 className="text-sm font-black font-display text-white">Average Damage per Round (ADR) Comparison</h4>
                     <span className="text-slate-400 text-xs">Target: 80.0+ ADR</span>
@@ -3355,23 +3355,23 @@ export const VortexClanHub: React.FC<VortexClanHubProps> = ({
             )}
 
             {/* Modal Bottom Action Bar */}
-            <div className="flex flex-wrap items-center justify-between gap-3 pt-3 border-t border-white/5">
+            <div className="flex flex-wrap items-center justify-between gap-3 pt-3 border-t border-[#1E2942]">
               <div className="text-xs font-mono text-slate-400 flex items-center gap-2">
-                <Download className="w-4 h-4 text-emerald-400" />
+                <Download className="w-4 h-4 text-[#A3E635]" />
                 <span>Official CS2 Sub-Tick 128 GOTV Demo (.dem) available for download</span>
               </div>
               <div className="flex items-center gap-2">
                 <button
                   onClick={() => handleDownloadDemo(selectedScoreboardMatch)}
-                  className="px-4 py-2 rounded-xl bg-white/10 hover:bg-white/15 text-white text-xs font-mono font-bold flex items-center gap-1.5 cursor-pointer transition active:scale-95"
+                  className="px-4 py-2 rounded-xl bg-[#101728] hover:bg-[#16213A] text-white border border-[#202E50] text-xs font-mono font-bold flex items-center gap-1.5 cursor-pointer transition active:scale-95"
                   title="Download .dem file directly to computer"
                 >
-                  <Download className="w-3.5 h-3.5" />
+                  <Download className="w-3.5 h-3.5 text-[#06B6D4]" />
                   <span>Download GOTV Demo</span>
                 </button>
                 <button
                   onClick={() => setSelectedScoreboardMatch(null)}
-                  className="px-5 py-2 rounded-xl bg-[#FF5500] hover:bg-[#FF5500]/90 text-black text-xs font-mono font-black cursor-pointer transition active:scale-95"
+                  className="px-5 py-2 rounded-xl bg-gradient-to-r from-[#84CC16] to-[#A3E635] hover:brightness-110 text-slate-950 font-black text-xs font-mono uppercase tracking-wider cursor-pointer transition active:scale-95 shadow-lg shadow-[#A3E635]/25"
                 >
                   Close Scoreboard
                 </button>
@@ -3388,7 +3388,7 @@ export const VortexClanHub: React.FC<VortexClanHubProps> = ({
           <div className="w-full max-w-lg bg-[#0C1019] border border-[#252E42] rounded-3xl p-6 shadow-2xl space-y-5 text-left relative">
             <div className="flex items-center justify-between border-b border-[#1E2638] pb-3">
               <div className="flex items-center gap-2.5">
-                <Shield className="w-5 h-5 text-[#FF5500]" />
+                <Shield className="w-5 h-5 text-[#A3E635]" />
                 <h3 className="text-base font-black font-display text-white">Edit Clan Identity & Tag</h3>
               </div>
               <button
@@ -3407,7 +3407,7 @@ export const VortexClanHub: React.FC<VortexClanHubProps> = ({
                     type="text"
                     value={draftName}
                     onChange={(e) => setDraftName(e.target.value)}
-                    className="w-full px-3 py-2 rounded-xl bg-[#141722] border border-[#262D3E] text-white focus:outline-none focus:border-[#FF5500]"
+                    className="w-full px-3 py-2 rounded-xl bg-[#141722] border border-[#262D3E] text-white focus:outline-none focus:border-[#A3E635]"
                   />
                 </div>
 
@@ -3418,7 +3418,7 @@ export const VortexClanHub: React.FC<VortexClanHubProps> = ({
                     maxLength={5}
                     value={draftTag}
                     onChange={(e) => setDraftTag(e.target.value.toUpperCase())}
-                    className="w-full px-3 py-2 rounded-xl bg-[#141722] border border-[#262D3E] text-amber-400 font-bold focus:outline-none focus:border-[#FF5500]"
+                    className="w-full px-3 py-2 rounded-xl bg-[#141722] border border-[#262D3E] text-amber-400 font-bold focus:outline-none focus:border-[#A3E635]"
                   />
                 </div>
               </div>
@@ -3429,7 +3429,7 @@ export const VortexClanHub: React.FC<VortexClanHubProps> = ({
                   rows={3}
                   value={draftDesc}
                   onChange={(e) => setDraftDesc(e.target.value)}
-                  className="w-full px-3 py-2 rounded-xl bg-[#141722] border border-[#262D3E] text-slate-200 focus:outline-none focus:border-[#FF5500]"
+                  className="w-full px-3 py-2 rounded-xl bg-[#141722] border border-[#262D3E] text-slate-200 focus:outline-none focus:border-[#A3E635]"
                 />
               </div>
 
@@ -3449,7 +3449,7 @@ export const VortexClanHub: React.FC<VortexClanHubProps> = ({
                       title={badge.name}
                       className={`relative rounded-2xl p-2 bg-[#12141D] cursor-pointer border-2 transition group flex flex-col items-center justify-center ${
                         draftLogo === badge.url
-                          ? 'border-[#FF5500] shadow-[0_0_16px_rgba(255,85,0,0.45)] scale-105 bg-[#181B26]'
+                          ? 'border-[#A3E635] shadow-[0_0_16px_rgba(163,230,53,0.45)] scale-105 bg-[#0F1626]'
                           : 'border-white/10 opacity-70 hover:opacity-100 hover:border-slate-500 hover:scale-102'
                       }`}
                     >
@@ -3459,7 +3459,7 @@ export const VortexClanHub: React.FC<VortexClanHubProps> = ({
                         className="w-12 h-12 rounded-xl object-contain drop-shadow"
                       />
                       {draftLogo === badge.url && (
-                        <span className="absolute -top-1.5 -right-1.5 w-4 h-4 rounded-full bg-[#FF5500] text-black text-[9px] font-black flex items-center justify-center shadow">
+                        <span className="absolute -top-1.5 -right-1.5 w-4 h-4 rounded-full bg-[#A3E635] text-slate-950 text-[9px] font-black flex items-center justify-center shadow">
                           ✓
                         </span>
                       )}
@@ -3480,7 +3480,7 @@ export const VortexClanHub: React.FC<VortexClanHubProps> = ({
               <button
                 type="button"
                 onClick={saveClanChanges}
-                className="px-5 py-2 rounded-xl bg-gradient-to-r from-[#FF5500] to-amber-500 hover:brightness-110 text-black text-xs font-mono font-black cursor-pointer transition shadow"
+                className="px-5 py-2 rounded-xl bg-gradient-to-r from-[#84CC16] to-[#A3E635] hover:brightness-110 text-black text-xs font-mono font-black cursor-pointer transition shadow"
               >
                 Save Changes
               </button>
@@ -3498,7 +3498,7 @@ export const VortexClanHub: React.FC<VortexClanHubProps> = ({
           >
             <div className="flex items-center justify-between border-b border-[#1E2638] pb-3">
               <div className="flex items-center gap-2.5">
-                <UserPlus className="w-5 h-5 text-[#FF5500]" />
+                <UserPlus className="w-5 h-5 text-[#A3E635]" />
                 <h3 className="text-base font-black font-display text-white">Invite Player to [{userClan.tag}]</h3>
               </div>
               <button
@@ -3519,7 +3519,7 @@ export const VortexClanHub: React.FC<VortexClanHubProps> = ({
                   value={inviteInput}
                   onChange={(e) => setInviteInput(e.target.value)}
                   placeholder="e.g. SimpleAim, STEAM_0:1:..."
-                  className="w-full px-3 py-2 rounded-xl bg-[#141722] border border-[#262D3E] text-white focus:outline-none focus:border-[#FF5500]"
+                  className="w-full px-3 py-2 rounded-xl bg-[#141722] border border-[#262D3E] text-white focus:outline-none focus:border-[#A3E635]"
                 />
               </div>
 
@@ -3528,7 +3528,7 @@ export const VortexClanHub: React.FC<VortexClanHubProps> = ({
                 <select
                   value={selectedRoleForInvite}
                   onChange={(e) => setSelectedRoleForInvite(e.target.value as ClanMember['role'])}
-                  className="w-full px-3 py-2 rounded-xl bg-[#141722] border border-[#262D3E] text-white focus:outline-none focus:border-[#FF5500] cursor-pointer"
+                  className="w-full px-3 py-2 rounded-xl bg-[#141722] border border-[#262D3E] text-white focus:outline-none focus:border-[#A3E635] cursor-pointer"
                 >
                   <option value="AWPer">AWPer</option>
                   <option value="Entry Fragger">Entry Fragger</option>
@@ -3549,7 +3549,7 @@ export const VortexClanHub: React.FC<VortexClanHubProps> = ({
               </button>
               <button
                 type="submit"
-                className="px-5 py-2 rounded-xl bg-gradient-to-r from-[#FF5500] to-amber-500 hover:brightness-110 text-black text-xs font-mono font-black cursor-pointer transition shadow"
+                className="px-5 py-2 rounded-xl bg-gradient-to-r from-[#84CC16] to-[#A3E635] hover:brightness-110 text-black text-xs font-mono font-black cursor-pointer transition shadow"
               >
                 Send Invite
               </button>
