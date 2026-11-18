@@ -2389,8 +2389,32 @@ export const VortexClanHub: React.FC<VortexClanHubProps> = ({
                 </div>
               </div>
 
-              {/* Exact FACEIT Match History Feed (Reference Images 0 & 1) */}
+              {/* Match History Feed with Header Bar */}
               <div className="space-y-2">
+                {/* COLUMN HEADER BAR (Date | Score | Prize | Rating | K/D/A | K/D | ADR | Map) */}
+                <div className="hidden lg:flex items-center justify-between px-3 sm:px-5 py-2.5 rounded-xl bg-[#080C16] border border-[#1A2338] text-[11px] font-mono font-bold uppercase tracking-wider text-slate-400 select-none shadow-sm">
+                  <div className="flex items-center gap-3 sm:gap-4 pl-3">
+                    <span className="w-[72px]">Date</span>
+                    <div className="w-[1px] h-3.5 bg-white/10 shrink-0" />
+                    <span className="w-[105px]">Score</span>
+                    <div className="w-[1px] h-3.5 bg-white/10 shrink-0" />
+                    <span className="w-[95px] text-center">Prize</span>
+                    <div className="w-[1px] h-3.5 bg-white/10 shrink-0" />
+                    <span className="w-[50px] text-center">Rating</span>
+                    <div className="w-[1px] h-3.5 bg-white/10 shrink-0" />
+                    <span className="w-[78px] text-center">K / D / A</span>
+                    <div className="w-[1px] h-3.5 bg-white/10 shrink-0" />
+                    <span className="w-[46px] text-center">K/D</span>
+                    <div className="w-[1px] h-3.5 bg-white/10 shrink-0" />
+                    <span className="w-[48px] text-center">ADR</span>
+                    <div className="w-[1px] h-3.5 bg-white/10 shrink-0" />
+                    <span className="w-[95px]">Map</span>
+                  </div>
+                  <div className="pr-4 text-slate-500 font-normal text-[10px]">
+                    Demo & Scoreboard
+                  </div>
+                </div>
+
                 {clanMatches
                   .filter(m => {
                     if (matchFilter === 'wins') return m.isWin;
@@ -2414,88 +2438,112 @@ export const VortexClanHub: React.FC<VortexClanHubProps> = ({
                         }`}
                       />
 
-                      {/* Left Info Group (Sleek FACEIT Horizontal Layout) */}
-                      <div className="flex items-center gap-4 sm:gap-7 pl-2 sm:pl-3 overflow-x-auto no-scrollbar">
-                        {/* Date & Time */}
-                        <div className="flex flex-col shrink-0 min-w-[75px]">
+                      {/* Match Info with Vertical Divider Lines Between Each Section */}
+                      <div className="flex items-center gap-3 sm:gap-4 pl-2 sm:pl-3 overflow-x-auto no-scrollbar">
+                        {/* 1. Date & Time */}
+                        <div className="flex flex-col shrink-0 w-[72px] shrink-0">
                           <span className="text-xs sm:text-sm font-bold text-white tracking-tight">{match.date}</span>
                           <span className="text-[10px] sm:text-xs font-mono text-slate-400">{match.time}</span>
                         </div>
 
-                        {/* Match Result Badge: [W] 13 : 4 or [L] 3 : 13 */}
-                        <div className="flex items-center gap-2 shrink-0">
+                        {/* Divider */}
+                        <div className="w-[1px] h-6 bg-white/10 shrink-0 self-center" />
+
+                        {/* 2. Match Result Badge: [WIN] 13 : 4 or [LOSS] 3 : 13 */}
+                        <div className="flex items-center gap-2 shrink-0 w-[105px] shrink-0">
                           <span
                             className={`px-2 py-0.5 rounded-lg flex items-center justify-center font-black text-[11px] shadow-sm uppercase font-mono ${
-                              match.isWin ? 'bg-[#A3E635] text-slate-950 font-black' : 'bg-red-500/20 text-red-400 border border-red-500/40'
+                              match.isWin ? 'bg-[#A3E635] text-slate-950 font-black' : 'bg-rose-500/20 text-rose-300 border border-rose-500/40'
                             }`}
                           >
                             {match.isWin ? 'WIN' : 'LOSS'}
                           </span>
                           <span className="font-mono font-black text-sm sm:text-base tracking-wide">
-                            <span className={match.isWin ? 'text-[#22C55E]' : 'text-[#EF4444]'}>
+                            <span className={match.isWin ? 'text-[#22C55E]' : 'text-rose-400'}>
                               {match.scoreDisplay.split(':')[0].trim()}
                             </span>
-                            <span className="text-slate-500 mx-1.5">:</span>
+                            <span className="text-slate-500 mx-1">:</span>
                             <span className="text-slate-300">
                               {match.scoreDisplay.split(':')[1].trim()}
                             </span>
                           </span>
                         </div>
 
-                        {/* Crosshair / Party Stack Icon */}
-                        <div className="shrink-0 text-slate-500 group-hover:text-slate-300 transition" title="5v5 Party Stack">
-                          <Crosshair className="w-4 h-4 opacity-70" />
-                        </div>
+                        {/* Divider */}
+                        <div className="w-[1px] h-6 bg-white/10 shrink-0 self-center" />
 
-                        {/* Tournament Cash Prize Earnings (Playing for Real Money) */}
-                        <div className="flex items-center gap-2 shrink-0 min-w-[110px]" title="Tournament Cash Prize Earnings (Playing for Cash, Not ELO)">
+                        {/* 3. Tournament Cash Prize Earnings */}
+                        <div className="flex flex-col items-center shrink-0 w-[95px] shrink-0" title="Tournament Cash Prize Earnings">
                           <div
-                            className={`px-3 py-1 rounded-xl font-mono text-xs font-black flex items-center gap-1.5 shadow-sm border ${
+                            className={`px-2.5 py-0.5 rounded-lg font-mono text-xs font-black flex items-center gap-1 shadow-sm border ${
                               match.isWin
-                                ? 'bg-emerald-500/15 text-emerald-400 border-emerald-500/30 shadow-[0_0_12px_rgba(16,185,129,0.12)]'
-                                : 'bg-rose-500/15 text-rose-400 border-rose-500/30 shadow-[0_0_12px_rgba(244,63,94,0.12)]'
+                                ? 'bg-emerald-500/20 text-emerald-300 border-emerald-500/35'
+                                : 'bg-rose-500/15 text-rose-300 border-rose-500/30'
                             }`}
                           >
                             <span className="text-xs">{match.isWin ? '💰' : '💸'}</span>
                             <span>{match.prizeEarned || (match.isWin ? '+$75.00' : '-$25.00')}</span>
                           </div>
+                          <span className="text-[9px] font-mono text-slate-400 uppercase tracking-wider mt-0.5">
+                            {match.isWin ? 'Won' : 'Entry'}
+                          </span>
                         </div>
 
-                        {/* Performance Rating Badge with Underline Bar */}
-                        <div className="shrink-0 flex flex-col items-center">
+                        {/* Divider */}
+                        <div className="w-[1px] h-6 bg-white/10 shrink-0 self-center" />
+
+                        {/* 4. Performance Rating Badge */}
+                        <div className="shrink-0 flex flex-col items-center w-[50px] shrink-0" title="HLTV Performance Rating">
                           <div
-                            className={`px-2.5 py-0.5 rounded font-mono font-bold text-xs ${
+                            className={`px-2 py-0.5 rounded font-mono font-bold text-xs ${
                               parseFloat(match.userRating) >= 1.00
-                                ? 'bg-[#A3E635]/15 text-[#A3E635] border border-[#A3E635]/30'
-                                : 'bg-red-500/15 text-red-400 border border-red-500/30'
+                                ? 'bg-[#A3E635]/20 text-[#A3E635] border border-[#A3E635]/35'
+                                : 'bg-rose-500/20 text-rose-400 border border-rose-500/35'
                             }`}
                           >
                             {match.userRating}
                           </div>
-                          <div
-                            className={`w-full h-[2.5px] mt-0.5 rounded-full ${
-                              parseFloat(match.userRating) >= 1.00 ? 'bg-[#22C55E]' : 'bg-[#EF4444]'
-                            }`}
-                          />
+                          <span className="text-[9px] font-mono text-slate-400 uppercase tracking-wider mt-0.5">Rating</span>
                         </div>
 
-                        {/* User K / D / A */}
-                        <div className="shrink-0 font-mono text-xs sm:text-sm text-slate-200 min-w-[70px] text-center" title="Kills / Deaths / Assists">
-                          {match.userStats.kills} / {match.userStats.deaths} / {match.userStats.assists}
+                        {/* Divider */}
+                        <div className="w-[1px] h-6 bg-white/10 shrink-0 self-center" />
+
+                        {/* 5. User K / D / A */}
+                        <div className="shrink-0 flex flex-col items-center w-[78px] shrink-0" title="Kills / Deaths / Assists">
+                          <span className="font-mono text-xs sm:text-sm font-bold text-white tracking-tight">
+                            {match.userStats.kills} <span className="text-slate-500">/</span> {match.userStats.deaths} <span className="text-slate-500">/</span> {match.userStats.assists}
+                          </span>
+                          <span className="text-[9px] font-mono text-slate-400 uppercase tracking-wider mt-0.5">K / D / A</span>
                         </div>
 
-                        {/* User K/D */}
-                        <div className="shrink-0 font-mono text-xs sm:text-sm text-slate-300 min-w-[45px] text-center" title="Kill / Death Ratio">
-                          {match.userStats.kd}
+                        {/* Divider */}
+                        <div className="w-[1px] h-6 bg-white/10 shrink-0 self-center" />
+
+                        {/* 6. User K/D */}
+                        <div className="shrink-0 flex flex-col items-center w-[46px] shrink-0" title="Kill / Death Ratio">
+                          <span className="font-mono text-xs sm:text-sm font-bold text-slate-200">
+                            {match.userStats.kd}
+                          </span>
+                          <span className="text-[9px] font-mono text-slate-400 uppercase tracking-wider mt-0.5">K/D</span>
                         </div>
 
-                        {/* User ADR */}
-                        <div className="shrink-0 font-mono text-xs sm:text-sm text-slate-300 min-w-[50px] text-center" title="Average Damage per Round">
-                          {match.userStats.adr}
+                        {/* Divider */}
+                        <div className="w-[1px] h-6 bg-white/10 shrink-0 self-center" />
+
+                        {/* 7. User ADR */}
+                        <div className="shrink-0 flex flex-col items-center w-[48px] shrink-0" title="Average Damage per Round">
+                          <span className="font-mono text-xs sm:text-sm font-bold text-slate-200">
+                            {match.userStats.adr}
+                          </span>
+                          <span className="text-[9px] font-mono text-slate-400 uppercase tracking-wider mt-0.5">ADR</span>
                         </div>
 
-                        {/* Map Badge */}
-                        <div className="flex items-center gap-2 shrink-0 min-w-[95px]">
+                        {/* Divider */}
+                        <div className="w-[1px] h-6 bg-white/10 shrink-0 self-center" />
+
+                        {/* 8. Map Badge */}
+                        <div className="flex items-center gap-2 shrink-0 w-[95px] shrink-0">
                           <div className="w-6 h-6 rounded-full overflow-hidden bg-black/60 border border-white/10 shrink-0">
                             <img src={match.mapImage} alt={match.mapDisplayName} className="w-full h-full object-cover" />
                           </div>
@@ -2952,8 +3000,8 @@ export const VortexClanHub: React.FC<VortexClanHubProps> = ({
                           <th onClick={() => handleToggleSort('deaths')} className="py-2.5 px-2 text-right cursor-pointer hover:text-white select-none" title="Sort by Deaths">D</th>
                           <th onClick={() => handleToggleSort('assists')} className="py-2.5 px-2 text-right cursor-pointer hover:text-white select-none" title="Sort by Assists">A</th>
                           <th onClick={() => handleToggleSort('adr')} className="py-2.5 px-2 text-right min-w-[55px] cursor-pointer hover:text-white select-none" title="Sort by ADR">ADR</th>
-                          <th onClick={() => handleToggleSort('kd')} className="py-2.5 px-2 text-right min-w-[50px] cursor-pointer hover:text-white select-none" title="Sort by K/D Ratio">K/D</th>
-                          <th onClick={() => handleToggleSort('kr')} className="py-2.5 px-2 text-right min-w-[50px] cursor-pointer hover:text-white select-none" title="Sort by Kills per Round">K/R</th>
+                          <th onClick={() => handleToggleSort('kd')} className="py-2.5 px-2 text-right w-[50px] shrink-0 cursor-pointer hover:text-white select-none" title="Sort by K/D Ratio">K/D</th>
+                          <th onClick={() => handleToggleSort('kr')} className="py-2.5 px-2 text-right w-[50px] shrink-0 cursor-pointer hover:text-white select-none" title="Sort by Kills per Round">K/R</th>
                           <th onClick={() => handleToggleSort('hs')} className="py-2.5 px-2 text-right cursor-pointer hover:text-white select-none" title="Sort by Headshots">HS</th>
                           <th onClick={() => handleToggleSort('hsPercentage')} className="py-2.5 px-2 text-right min-w-[60px] cursor-pointer hover:text-white select-none" title="Sort by HS %">HS %</th>
                           <th onClick={() => handleToggleSort('k5')} className="py-2.5 px-2 text-right cursor-pointer hover:text-white select-none" title="5k Ace">5k</th>
@@ -3100,8 +3148,8 @@ export const VortexClanHub: React.FC<VortexClanHubProps> = ({
                           <th onClick={() => handleToggleSort('deaths')} className="py-2.5 px-2 text-right cursor-pointer hover:text-white select-none">D</th>
                           <th onClick={() => handleToggleSort('assists')} className="py-2.5 px-2 text-right cursor-pointer hover:text-white select-none">A</th>
                           <th onClick={() => handleToggleSort('adr')} className="py-2.5 px-2 text-right min-w-[55px] cursor-pointer hover:text-white select-none">ADR</th>
-                          <th onClick={() => handleToggleSort('kd')} className="py-2.5 px-2 text-right min-w-[50px] cursor-pointer hover:text-white select-none">K/D</th>
-                          <th onClick={() => handleToggleSort('kr')} className="py-2.5 px-2 text-right min-w-[50px] cursor-pointer hover:text-white select-none">K/R</th>
+                          <th onClick={() => handleToggleSort('kd')} className="py-2.5 px-2 text-right w-[50px] shrink-0 cursor-pointer hover:text-white select-none">K/D</th>
+                          <th onClick={() => handleToggleSort('kr')} className="py-2.5 px-2 text-right w-[50px] shrink-0 cursor-pointer hover:text-white select-none">K/R</th>
                           <th onClick={() => handleToggleSort('hs')} className="py-2.5 px-2 text-right cursor-pointer hover:text-white select-none">HS</th>
                           <th onClick={() => handleToggleSort('hsPercentage')} className="py-2.5 px-2 text-right min-w-[60px] cursor-pointer hover:text-white select-none">HS %</th>
                           <th onClick={() => handleToggleSort('k5')} className="py-2.5 px-2 text-right cursor-pointer hover:text-white select-none">5k</th>
