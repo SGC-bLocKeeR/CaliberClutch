@@ -1405,6 +1405,14 @@ export const VortexClanHub: React.FC<VortexClanHubProps> = ({
   const [scoreboardSortAsc, setScoreboardSortAsc] = useState<boolean>(false);
   const [selectedRoundDetail, setSelectedRoundDetail] = useState<number | null>(null);
 
+  // Helper to open match scoreboard and reset to Scoreboard view
+  const openMatchScoreboard = (match: ClanMatch) => {
+    sound.playSelect();
+    setScoreboardSubTab('scoreboard');
+    setSelectedRoundDetail(null);
+    setSelectedScoreboardMatch(match);
+  };
+
   // Close modals on Escape key
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
@@ -2358,7 +2366,7 @@ export const VortexClanHub: React.FC<VortexClanHubProps> = ({
                   .map(match => (
                     <div
                       key={match.id}
-                      onClick={() => { sound.playSelect(); setSelectedScoreboardMatch(match); }}
+                      onClick={() => openMatchScoreboard(match)}
                       className="w-full bg-[#111215] hover:bg-[#16171d] border border-white/5 hover:border-white/20 rounded-xl transition-all duration-150 flex items-center justify-between px-3 sm:px-5 py-3 cursor-pointer group relative overflow-hidden shadow-md"
                     >
                       {/* Left Colored Indicator Stripe (Green = Win, Red = Loss) */}
@@ -2478,7 +2486,7 @@ export const VortexClanHub: React.FC<VortexClanHubProps> = ({
                           onClick={(e) => {
                             e.stopPropagation();
                             sound.playSelect();
-                            setSelectedScoreboardMatch(match);
+                            openMatchScoreboard(match);
                           }}
                           title="Open Scoreboard (TAB)"
                           className="w-8 h-8 rounded-lg bg-white/5 hover:bg-white/15 text-slate-400 hover:text-white flex items-center justify-center transition cursor-pointer"
@@ -2511,7 +2519,7 @@ export const VortexClanHub: React.FC<VortexClanHubProps> = ({
                   <button
                     onClick={() => {
                       sound.playSelect();
-                      setSelectedScoreboardMatch(clanMatches[0]);
+                      openMatchScoreboard(clanMatches[0]);
                     }}
                     className="px-3 py-1.5 rounded-lg bg-[#FF5500] hover:bg-[#FF5500]/90 text-black font-black text-xs flex items-center gap-1.5 transition cursor-pointer"
                   >
@@ -2631,7 +2639,7 @@ export const VortexClanHub: React.FC<VortexClanHubProps> = ({
                       </div>
 
                       <button
-                        onClick={() => setSelectedScoreboardMatch(m)}
+                        onClick={() => openMatchScoreboard(m)}
                         className="px-2.5 py-1 rounded-lg bg-white/5 hover:bg-white/10 text-white font-mono text-xs cursor-pointer"
                       >
                         Scoreboard
@@ -2782,43 +2790,43 @@ export const VortexClanHub: React.FC<VortexClanHubProps> = ({
                 </div>
               </div>
 
-              {/* Sub-Tabs: Scoreboard / Rounds / Performance */}
+              {/* Sub-Tabs: Scoreboard / Rounds / Performance (Exact 1:1 Match with User Reference Screenshot) */}
               <div className="flex items-center gap-2">
-                <div className="flex items-center bg-black/60 p-1 rounded-xl border border-white/10 text-xs font-mono">
+                <div className="flex items-center bg-[#0d0e12] p-1 rounded-xl border border-white/10 text-xs font-mono shadow-inner">
                   <button
+                    type="button"
                     onClick={() => { sound.playClick(); setScoreboardSubTab('scoreboard'); }}
-                    className={`px-3 py-1.5 rounded-lg font-black transition cursor-pointer flex items-center gap-1.5 ${
+                    className={`px-4 py-1.5 rounded-lg font-bold transition-all duration-150 cursor-pointer ${
                       scoreboardSubTab === 'scoreboard'
-                        ? 'bg-[#FF5500] text-black shadow-md'
-                        : 'text-slate-400 hover:text-white'
+                        ? 'bg-[#FF5500] text-black font-black shadow-md scale-102'
+                        : 'text-slate-400 hover:text-white hover:bg-white/5'
                     }`}
                   >
-                    <BarChart2 className="w-3.5 h-3.5" />
-                    <span>Scoreboard</span>
+                    Scoreboard
                   </button>
 
                   <button
+                    type="button"
                     onClick={() => { sound.playClick(); setScoreboardSubTab('rounds'); }}
-                    className={`px-3 py-1.5 rounded-lg font-black transition cursor-pointer flex items-center gap-1.5 ${
+                    className={`px-4 py-1.5 rounded-lg font-bold transition-all duration-150 cursor-pointer ${
                       scoreboardSubTab === 'rounds'
-                        ? 'bg-[#FF5500] text-black shadow-md'
-                        : 'text-slate-400 hover:text-white'
+                        ? 'bg-[#FF5500] text-black font-black shadow-md scale-102'
+                        : 'text-slate-400 hover:text-white hover:bg-white/5'
                     }`}
                   >
-                    <Clock className="w-3.5 h-3.5" />
-                    <span>Rounds</span>
+                    Rounds
                   </button>
 
                   <button
+                    type="button"
                     onClick={() => { sound.playClick(); setScoreboardSubTab('performance'); }}
-                    className={`px-3 py-1.5 rounded-lg font-black transition cursor-pointer flex items-center gap-1.5 ${
+                    className={`px-4 py-1.5 rounded-lg font-bold transition-all duration-150 cursor-pointer ${
                       scoreboardSubTab === 'performance'
-                        ? 'bg-[#FF5500] text-black shadow-md'
-                        : 'text-slate-400 hover:text-white'
+                        ? 'bg-[#FF5500] text-black font-black shadow-md scale-102'
+                        : 'text-slate-400 hover:text-white hover:bg-white/5'
                     }`}
                   >
-                    <Flame className="w-3.5 h-3.5" />
-                    <span>Performance</span>
+                    Performance
                   </button>
                 </div>
 
