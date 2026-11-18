@@ -69,6 +69,7 @@ import { CountryFlag } from './CountryFlag';
 import { ALL_COUNTRIES, getCountryByCode, Country } from '../../data/countries';
 import { VortexPartyChat } from './VortexPartyChat';
 import { VortexMatchRoom } from './VortexMatchRoom';
+import { BalancedMatch, generateBalancedMatch } from '../../utils/faceitMatchmaking';
 import { VortexRightSocialRail } from './VortexRightSocialRail';
 import { XsollaCheckoutModal } from './XsollaCheckoutModal';
 import { XsollaOrderItem } from '../../services/xsollaService';
@@ -119,6 +120,7 @@ interface PartySlotMember {
   flag?: string;
   code?: string;
   countryName?: string;
+  matches?: number;
 }
 
 interface ComingSoonData {
@@ -1406,6 +1408,7 @@ export const VortexDashboard: React.FC<VortexDashboardProps> = ({
   // Party Leader Index (Default to center slot 2: M14) & Match Room modal
   const [partyLeaderIndex, setPartyLeaderIndex] = useState<number>(2);
   const [isMatchRoomOpen, setIsMatchRoomOpen] = useState<boolean>(false);
+  const [currentBalancedMatch, setCurrentBalancedMatch] = useState<BalancedMatch | null>(null);
 
   const handlePromoteToLeader = (slotIndex: number, e?: React.MouseEvent) => {
     if (e) e.stopPropagation();
@@ -1906,34 +1909,35 @@ export const VortexDashboard: React.FC<VortexDashboardProps> = ({
     return () => clearInterval(timer);
   }, [matchFoundModal]);
 
-  // Progressive bot accept simulation for 10 boxes
+  // Progressive bot accept simulation for the 10 balanced players
   useEffect(() => {
-    if (!matchFoundModal) return;
+    if (!matchFoundModal || !currentBalancedMatch) return;
 
-    const remainingBots: Array<{ name: string; avatar: string }> = [
-      { name: 'NiKo', avatar: 'https://images.unsplash.com/photo-1580489944761-15a19d654956?auto=format&fit=crop&w=150&q=80' },
-      { name: 'ZywOo', avatar: 'https://images.unsplash.com/photo-1570295999919-56ceb5ecca61?auto=format&fit=crop&w=150&q=80' },
-      { name: 'donk', avatar: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?auto=format&fit=crop&w=150&q=80' },
-      { name: 'm0NESY', avatar: 'https://images.unsplash.com/photo-1527980965255-d3b416303d12?auto=format&fit=crop&w=150&q=80' },
-      { name: 'ropz', avatar: 'https://images.unsplash.com/photo-1500648767791-00dcc994a43e?auto=format&fit=crop&w=150&q=80' },
-      { name: 'b1t', avatar: 'https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?auto=format&fit=crop&w=150&q=80' }
+    // Remaining players from the balanced match who haven't accepted yet
+    const allMatchPlayers = [
+      ...currentBalancedMatch.team1.players.map(p => ({ name: p.name, avatar: p.avatar, isUser: p.name === currentGamerTag })),
+      ...currentBalancedMatch.team2.players.map(p => ({ name: p.name, avatar: p.avatar, isUser: false }))
     ];
 
     let botIdx = 0;
     const botInterval = setInterval(() => {
       setAcceptedPlayerList(prev => {
-        if (prev.length >= 10 || botIdx >= remainingBots.length) {
+        if (prev.length >= 10) {
           clearInterval(botInterval);
           return prev;
         }
-        const candidate = remainingBots[botIdx++];
-        if (prev.some(p => p.name === candidate.name)) return prev;
-        return [...prev, candidate];
+        // Find next player who isn't current user and not yet in accepted list
+        const nextPlayer = allMatchPlayers.find(p => !p.isUser && !prev.some(a => a.name === p.name));
+        if (!nextPlayer) {
+          clearInterval(botInterval);
+          return prev;
+        }
+        return [...prev, nextPlayer];
       });
-    }, 750);
+    }, 600);
 
     return () => clearInterval(botInterval);
-  }, [matchFoundModal]);
+  }, [matchFoundModal, currentBalancedMatch, currentGamerTag]);
 
   // Transition to Match Room when all 10 accepted
   useEffect(() => {
@@ -1953,13 +1957,39 @@ export const VortexDashboard: React.FC<VortexDashboardProps> = ({
     setMatchReadyCountdown(60);
     sound.playNotification();
 
-    const initialAccepted = [
-      { name: 'M18', avatar: '/images/faceit_m18_badge.png' },
-      { name: 'juanflatroo', avatar: 'https://images.unsplash.com/photo-1566492031773-4f4e44671857?auto=format&fit=crop&w=150&q=80' },
-      { name: 's1mple', avatar: 'https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?auto=format&fit=crop&w=150&q=80' }
-    ];
-    setAcceptedPlayerList(initialAccepted);
-    setAcceptedPlayers(3);
+    // 1. Generate strictly balanced match based on active party members & user ELO
+    const activePartyMembers = partySlots.filter((m): m is PartySlotMember => m !== null);
+    const generatedMatch = generateBalancedMatch({
+      partyMembers: activePartyMembers.map(m => ({
+        id: m.id,
+        name: m.name,
+        tag: m.tag,
+        avatar: m.avatar,
+        level: m.level,
+        elo: m.elo,
+        code: m.code,
+        countryName: m.countryName,
+        isLeader: m.isLeader,
+        matches: m.matches
+      })),
+      userGamerTag: currentGamerTag,
+      userAvatar: currentAvatarUrl,
+      userElo: effectiveElo,
+      userLevel: effectiveLevel,
+      userClanTag: currentClanTag,
+      userCountry: currentCountry,
+      mapName: 'Anubis'
+    });
+
+    setCurrentBalancedMatch(generatedMatch);
+
+    // Initial accepted: any party teammates ready in the lobby (excluding user who clicks Accept)
+    const partyTeammatesReady = activePartyMembers
+      .filter(m => m.name !== currentGamerTag)
+      .map(m => ({ name: m.name, avatar: m.avatar, isUser: false }));
+
+    setAcceptedPlayerList(partyTeammatesReady);
+    setAcceptedPlayers(partyTeammatesReady.length);
   };
 
   const handleUserAcceptMatch = () => {
@@ -3105,11 +3135,28 @@ export const VortexDashboard: React.FC<VortexDashboardProps> = ({
                 {/* FIND MATCH BUTTON (CENTERED AS IN SCREENSHOT) */}
                 <div className="flex justify-center mt-6">
                   {isQueuing ? (
-                    <div className="flex flex-wrap items-center justify-center gap-4">
-                      <div className="flex items-center gap-3 px-6 py-3.5 rounded-2xl bg-[#1A130D] border border-[#FF5500]/60 text-xs font-mono shadow-lg shadow-orange-500/10">
-                        <span className="w-2.5 h-2.5 rounded-full bg-[#FF5500] animate-ping" />
-                        <span className="text-white font-bold tracking-wider">SEARCHING FOR OPPONENTS...</span>
-                        <span className="text-amber-400 font-bold font-mono">00:0{queueSeconds}</span>
+                    <div className="flex flex-col sm:flex-row items-center justify-center gap-3">
+                      <div className="flex flex-wrap items-center gap-3.5 px-6 py-3.5 rounded-2xl bg-[#1A130D] border border-[#FF5500]/60 text-xs font-mono shadow-xl shadow-orange-500/15">
+                        <span className="w-2.5 h-2.5 rounded-full bg-[#FF5500] animate-ping shrink-0" />
+                        <div>
+                          <div className="flex items-center gap-2">
+                            <span className="text-white font-black tracking-wider">SEARCHING BALANCED 5V5 MATCH...</span>
+                            <span className="text-amber-400 font-bold font-mono">00:{queueSeconds.toString().padStart(2, '0')}</span>
+                          </div>
+                          <div className="text-[10px] text-slate-400 font-mono mt-0.5 flex flex-wrap items-center gap-2">
+                            <span className="text-emerald-400 font-bold">
+                              {partySlots.filter(m => m !== null).length === 5 
+                                ? '5-Stack Clan Scrim' 
+                                : partySlots.filter(m => m !== null).length > 1 
+                                ? `${partySlots.filter(m => m !== null).length}-Player Stack` 
+                                : 'Solo Queue'}
+                            </span>
+                            <span>•</span>
+                            <span>Strict Bracket: Level {effectiveLevel} (ELO {effectiveElo - 40} - {effectiveElo + 40})</span>
+                            <span>•</span>
+                            <span className="text-white font-bold">Target: 50% / 50% Win Rate</span>
+                          </div>
+                        </div>
                       </div>
                       <button
                         onClick={() => { sound.playClick(); setIsQueuing(false); }}
@@ -6446,7 +6493,7 @@ export const VortexDashboard: React.FC<VortexDashboardProps> = ({
                 5v5 COMPETITIVE MATCH
               </h3>
               
-              {/* Only the countdown/minutes/seconds as requested (no map or server) */}
+              {/* Countdown and Fair 50/50 Balance info */}
               <div className="flex items-center justify-center gap-2 pt-1">
                 <Clock className="w-4 h-4 text-[#A3E635]" />
                 <span className="text-sm font-mono text-slate-300">
@@ -6454,6 +6501,14 @@ export const VortexDashboard: React.FC<VortexDashboardProps> = ({
                   <strong className={matchReadyCountdown <= 15 ? 'text-red-400 font-bold' : 'text-[#A3E635] font-bold'}>
                     00:{matchReadyCountdown.toString().padStart(2, '0')}
                   </strong>
+                </span>
+              </div>
+              <div className="flex flex-wrap items-center justify-center gap-2 pt-1 text-xs font-mono">
+                <span className="px-2 py-0.5 rounded bg-emerald-500/20 text-emerald-400 font-bold border border-emerald-500/30">
+                  50% vs 50% Win Rate Balance
+                </span>
+                <span className="text-slate-400 text-[11px]">
+                  {currentBalancedMatch ? `${currentBalancedMatch.team1.stackType} vs ${currentBalancedMatch.team2.stackType}` : 'Strict ELO Match'}
                 </span>
               </div>
             </div>
@@ -8750,10 +8805,25 @@ export const VortexDashboard: React.FC<VortexDashboardProps> = ({
       {/* ======================================================== */}
       {isMatchRoomOpen && (
         <VortexMatchRoom
-          matchId="VTX-89421"
+          matchId={currentBalancedMatch?.matchId || "VTX-89421"}
           currentGamerTag={currentGamerTag}
           currentAvatarUrl={currentAvatarUrl}
           partyMembers={partySlots.filter((m): m is PartySlotMember => m !== null)}
+          matchData={currentBalancedMatch || undefined}
+          onMatchFinished={(won, eloDelta) => {
+            const nextMatches = currentUserMatches + 1;
+            const nextElo = Math.max(100, currentUserElo + (won ? eloDelta : -eloDelta));
+            const nextLevel = getFaceitLevelFromElo(nextElo);
+            setCurrentUserMatches(nextMatches);
+            setCurrentUserElo(nextElo);
+            setCurrentUserLevel(nextLevel);
+            try {
+              localStorage.setItem('vortex_user_matches', nextMatches.toString());
+              localStorage.setItem('vortex_user_elo', nextElo.toString());
+              localStorage.setItem('vortex_user_level', nextLevel.toString());
+            } catch (_) {}
+            setDashboardToast(won ? `🎉 Match Won! +${eloDelta} ELO (New ELO: ${nextElo})` : `Match Finished. -${eloDelta} ELO (New ELO: ${nextElo})`);
+          }}
           onClose={() => setIsMatchRoomOpen(false)}
         />
       )}

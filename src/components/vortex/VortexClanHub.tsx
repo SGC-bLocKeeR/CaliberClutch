@@ -18,15 +18,8 @@ import {
   Flame,
   Target,
   Crosshair,
-  Award,
-  Copy,
-  Check,
-  ExternalLink,
-  Zap,
-  Radio,
-  MapPin
+  Award
 } from 'lucide-react';
-import confetti from 'canvas-confetti';
 import { sound } from '../../utils/soundEffects';
 
 export interface ClanMember {
@@ -227,15 +220,6 @@ export const VortexClanHub: React.FC<VortexClanHubProps> = ({
   const [inviteInput, setInviteInput] = useState('');
   const [selectedRoleForInvite, setSelectedRoleForInvite] = useState<ClanMember['role']>('Entry Fragger');
   const [searchClanQuery, setSearchClanQuery] = useState('');
-  const [scrimSuccessClan, setScrimSuccessClan] = useState<string | null>(null);
-  const [activeScrimClan, setActiveScrimClan] = useState<ClanData | null>(null);
-  const [scrimMap, setScrimMap] = useState<string>('de_mirage');
-  const [scrimCopied, setScrimCopied] = useState<boolean>(false);
-  const [scrimResult, setScrimResult] = useState<{
-    userScore: number;
-    opponentScore: number;
-    winner: 'user' | 'opponent';
-  } | null>(null);
 
   // Load user clan from localStorage or initialize with M14 / Caliber Clutch default
   const [userClan, setUserClan] = useState<ClanData>(() => {
@@ -437,15 +421,6 @@ export const VortexClanHub: React.FC<VortexClanHubProps> = ({
     localStorage.setItem('vortex_user_clan_data', JSON.stringify(nextClan));
   };
 
-  // Challenge Clan to Scrim
-  const handleChallengeClan = (opponentClan: ClanData) => {
-    sound.playSelect();
-    setActiveScrimClan(opponentClan);
-    setScrimResult(null);
-    setScrimCopied(false);
-    setScrimMap('de_mirage');
-  };
-
   const filteredOpponents = DEFAULT_OPPONENT_CLANS.filter(c => {
     if (!searchClanQuery.trim()) return true;
     const q = searchClanQuery.toLowerCase();
@@ -599,22 +574,6 @@ export const VortexClanHub: React.FC<VortexClanHubProps> = ({
           </button>
         )}
       </div>
-
-      {/* TOAST FEEDBACK */}
-      {scrimSuccessClan && (
-        <div className="p-4 rounded-2xl bg-emerald-500/10 border border-emerald-500/30 flex items-center justify-between gap-3 text-emerald-400 text-xs font-mono">
-          <div className="flex items-center gap-2">
-            <CheckCircle2 className="w-4 h-4 shrink-0" />
-            <span>5v5 Scrim Lobby ready against <strong>{scrimSuccessClan}</strong> on European 128-Tick MatchZy server.</span>
-          </div>
-          <button
-            onClick={() => onNavigateTab('play')}
-            className="px-3 py-1 rounded-lg bg-emerald-500 text-black font-bold hover:bg-emerald-400 cursor-pointer transition"
-          >
-            Enter Match
-          </button>
-        </div>
-      )}
 
       {/* TAB 1: CLAN DASHBOARD (OVERVIEW & PERFORMANCE) */}
       {activeTab === 'my-clan' && (
@@ -885,13 +844,10 @@ export const VortexClanHub: React.FC<VortexClanHubProps> = ({
                   </div>
                 </div>
 
-                <button
-                  onClick={() => handleChallengeClan(opponent)}
-                  className="w-full py-2.5 rounded-xl bg-gradient-to-r from-red-600/90 to-[#FF5500] hover:brightness-110 text-white font-mono font-black text-xs flex items-center justify-center gap-2 cursor-pointer transition shadow"
-                >
-                  <Swords className="w-3.5 h-3.5" />
-                  <span>Challenge to 5v5 Scrim</span>
-                </button>
+                <div className="w-full py-2 rounded-xl bg-[#141722] border border-[#232938] text-slate-300 font-mono font-bold text-xs flex items-center justify-center gap-2">
+                  <CheckCircle2 className="w-3.5 h-3.5 text-[#A3E635]" />
+                  <span>Verified 5v5 Competitive Clan</span>
+                </div>
               </div>
             ))}
           </div>
@@ -1074,235 +1030,6 @@ export const VortexClanHub: React.FC<VortexClanHubProps> = ({
         </div>
       )}
 
-      {/* 5V5 CLAN SCRIM LOBBY MODAL */}
-      {activeScrimClan && (
-        <div className="fixed inset-0 z-[150] bg-black/85 backdrop-blur-md flex items-center justify-center p-4 animate-in fade-in duration-200">
-          <div className="w-full max-w-3xl max-h-[92vh] overflow-y-auto bg-[#0C1019] border border-[#252E42] rounded-3xl p-6 sm:p-7 shadow-2xl space-y-5 text-left relative">
-            {/* Header */}
-            <div className="flex items-start justify-between border-b border-[#1E2638] pb-4">
-              <div>
-                <div className="flex flex-wrap items-center gap-2.5">
-                  <span className="px-2.5 py-0.5 rounded text-[10px] font-mono font-bold bg-[#FF5500]/15 text-[#FF5500] border border-[#FF5500]/30 uppercase">
-                    5v5 Clan Scrim Lobby
-                  </span>
-                  <span className="text-xs font-mono text-emerald-400 font-bold flex items-center gap-1.5">
-                    <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse" />
-                    MatchZy 128-Tick • Frankfurt Central (24ms)
-                  </span>
-                </div>
-                <h3 className="text-lg font-black font-display text-white mt-1">
-                  [{userClan.tag}] {userClan.name} <span className="text-slate-500 font-normal">vs</span> [{activeScrimClan.tag}] {activeScrimClan.name}
-                </h3>
-              </div>
-              <button
-                onClick={() => setActiveScrimClan(null)}
-                className="w-8 h-8 rounded-xl bg-white/5 hover:bg-white/10 text-slate-400 hover:text-white flex items-center justify-center transition cursor-pointer"
-              >
-                ✕
-              </button>
-            </div>
-
-            {/* Map Selection */}
-            <div className="space-y-2">
-              <div className="flex items-center justify-between">
-                <label className="text-[11px] font-mono uppercase tracking-wider text-slate-400 block">
-                  Select Practice Map (Active Duty Pool)
-                </label>
-                <span className="text-[10px] font-mono text-amber-400 font-bold">Selected: {scrimMap}</span>
-              </div>
-              <div className="grid grid-cols-3 sm:grid-cols-6 gap-2">
-                {[
-                  { id: 'de_mirage', name: 'Mirage' },
-                  { id: 'de_inferno', name: 'Inferno' },
-                  { id: 'de_nuke', name: 'Nuke' },
-                  { id: 'de_dust2', name: 'Dust II' },
-                  { id: 'de_ancient', name: 'Ancient' },
-                  { id: 'de_anubis', name: 'Anubis' },
-                ].map((m) => (
-                  <button
-                    key={m.id}
-                    onClick={() => {
-                      sound.playClick();
-                      setScrimMap(m.id);
-                      setScrimResult(null);
-                    }}
-                    className={`py-2 px-3 rounded-xl text-xs font-mono font-bold transition border cursor-pointer ${
-                      scrimMap === m.id
-                        ? 'bg-[#FF5500]/20 border-[#FF5500] text-[#FF5500] shadow-[0_0_12px_rgba(255,85,0,0.3)]'
-                        : 'bg-[#121520] border-[#202738] text-slate-400 hover:text-white hover:border-slate-500'
-                    }`}
-                  >
-                    {m.name}
-                  </button>
-                ))}
-              </div>
-            </div>
-
-            {/* Teams Face-Off */}
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              {/* Your Clan */}
-              <div className="p-4 rounded-2xl bg-[#101420] border border-[#202738] space-y-3">
-                <div className="flex items-center gap-3">
-                  <img src={userClan.logo} alt={userClan.name} className="w-10 h-10 rounded-xl object-contain bg-black/40 p-1 border border-white/10" />
-                  <div>
-                    <div className="flex items-center gap-1.5">
-                      <span className="font-bold font-display text-white text-sm">{userClan.name}</span>
-                      <span className="px-1.5 py-0.5 rounded text-[10px] font-mono font-bold bg-[#A3E635]/20 text-[#A3E635]">
-                        [{userClan.tag}]
-                      </span>
-                    </div>
-                    <span className="text-[11px] font-mono text-slate-400">Avg ELO: {userClan.stats.avgElo}</span>
-                  </div>
-                </div>
-                <div className="space-y-1.5 border-t border-white/5 pt-2">
-                  {userClan.members.slice(0, 5).map((m, idx) => (
-                    <div key={m.id || idx} className="flex items-center justify-between text-xs font-mono py-1 px-2 rounded-lg bg-black/30">
-                      <span className="text-white flex items-center gap-2">
-                        <span className="text-slate-500 text-[10px]">#{idx + 1}</span>
-                        <span className="font-bold">{m.name}</span>
-                      </span>
-                      <span className="text-[10px] text-amber-400">{m.role}</span>
-                    </div>
-                  ))}
-                </div>
-              </div>
-
-              {/* Rival Clan */}
-              <div className="p-4 rounded-2xl bg-[#101420] border border-[#202738] space-y-3">
-                <div className="flex items-center gap-3">
-                  <img src={activeScrimClan.logo} alt={activeScrimClan.name} className="w-10 h-10 rounded-xl object-contain bg-black/40 p-1 border border-white/10" />
-                  <div>
-                    <div className="flex items-center gap-1.5">
-                      <span className="font-bold font-display text-white text-sm">{activeScrimClan.name}</span>
-                      <span className="px-1.5 py-0.5 rounded text-[10px] font-mono font-bold bg-amber-500/20 text-amber-400">
-                        [{activeScrimClan.tag}]
-                      </span>
-                    </div>
-                    <span className="text-[11px] font-mono text-slate-400">Avg ELO: {activeScrimClan.stats.avgElo}</span>
-                  </div>
-                </div>
-                <div className="space-y-1.5 border-t border-white/5 pt-2">
-                  {activeScrimClan.members.slice(0, 5).map((m, idx) => (
-                    <div key={m.id || idx} className="flex items-center justify-between text-xs font-mono py-1 px-2 rounded-lg bg-black/30">
-                      <span className="text-slate-300 flex items-center gap-2">
-                        <span className="text-slate-500 text-[10px]">#{idx + 1}</span>
-                        <span>{m.name}</span>
-                      </span>
-                      <span className="text-[10px] text-slate-400">{m.role}</span>
-                    </div>
-                  ))}
-                </div>
-              </div>
-            </div>
-
-            {/* CS2 Connect Box */}
-            <div className="p-4 rounded-2xl bg-black/60 border border-white/10 space-y-3">
-              <div className="flex items-center justify-between">
-                <span className="text-xs font-mono text-slate-400 flex items-center gap-2">
-                  <Radio className="w-3.5 h-3.5 text-emerald-400 animate-pulse" />
-                  CS2 Dedicated Server Console Connect
-                </span>
-                <span className="text-[11px] font-mono text-emerald-400 font-bold">MR12 • 128-Tick MatchZy</span>
-              </div>
-              <div className="flex flex-col sm:flex-row items-center gap-2.5">
-                <code className="w-full sm:flex-1 px-3 py-2 rounded-xl bg-black/80 border border-white/10 text-xs font-mono text-amber-300 select-all">
-                  connect srv1.caliberclutch.gg:27015; password scrim128
-                </code>
-                <div className="flex items-center gap-2 w-full sm:w-auto">
-                  <button
-                    onClick={() => {
-                      sound.playClick();
-                      navigator.clipboard.writeText('connect srv1.caliberclutch.gg:27015; password scrim128');
-                      setScrimCopied(true);
-                      setTimeout(() => setScrimCopied(false), 3000);
-                    }}
-                    className="flex-1 sm:flex-none px-4 py-2 rounded-xl bg-white/10 hover:bg-white/20 text-white text-xs font-mono font-bold flex items-center justify-center gap-1.5 cursor-pointer transition"
-                  >
-                    {scrimCopied ? <Check className="w-3.5 h-3.5 text-emerald-400" /> : <Copy className="w-3.5 h-3.5" />}
-                    <span>{scrimCopied ? 'Copied ✓' : 'Copy'}</span>
-                  </button>
-                  <a
-                    href="steam://connect/srv1.caliberclutch.gg:27015/scrim128"
-                    onClick={() => sound.playClick()}
-                    className="flex-1 sm:flex-none px-4 py-2 rounded-xl bg-emerald-500/20 hover:bg-emerald-500/30 border border-emerald-500/40 text-emerald-400 text-xs font-mono font-bold flex items-center justify-center gap-1.5 cursor-pointer transition"
-                  >
-                    <ExternalLink className="w-3.5 h-3.5" />
-                    <span>Open CS2</span>
-                  </a>
-                </div>
-              </div>
-            </div>
-
-            {/* Match Result Simulation Banner (If finished) */}
-            {scrimResult && (
-              <div className="p-4 rounded-2xl bg-gradient-to-r from-emerald-500/20 via-[#A3E635]/15 to-transparent border border-emerald-500/40 animate-in zoom-in-95 duration-200 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
-                <div className="flex items-center gap-3">
-                  <div className="w-10 h-10 rounded-xl bg-emerald-500/20 flex items-center justify-center text-emerald-400 shrink-0">
-                    <Trophy className="w-5 h-5" />
-                  </div>
-                  <div>
-                    <div className="text-sm font-black font-display text-white">
-                      🎉 VICTORY! [{userClan.tag}] {scrimResult.userScore} - {scrimResult.opponentScore} [{activeScrimClan.tag}]
-                    </div>
-                    <div className="text-[11px] font-mono text-emerald-400 font-bold">
-                      ✓ Map: {scrimMap} • +25 Clan Rating • Recorded in Clan Stats!
-                    </div>
-                  </div>
-                </div>
-                <button
-                  onClick={() => setScrimResult(null)}
-                  className="px-3.5 py-1.5 rounded-xl bg-white/10 hover:bg-white/20 text-xs font-mono font-bold text-white transition cursor-pointer shrink-0"
-                >
-                  Play Rematch
-                </button>
-              </div>
-            )}
-
-            {/* Footer Buttons */}
-            <div className="flex flex-col sm:flex-row items-center justify-between gap-3 pt-2 border-t border-[#1E2638]">
-              <button
-                onClick={() => setActiveScrimClan(null)}
-                className="w-full sm:w-auto px-5 py-2.5 rounded-xl bg-white/10 hover:bg-white/15 text-slate-300 text-xs font-mono font-bold transition cursor-pointer"
-              >
-                Leave Scrim Lobby
-              </button>
-
-              {!scrimResult && (
-                <button
-                  onClick={() => {
-                    sound.playTournamentVictory();
-                    confetti({ particleCount: 80, spread: 80, origin: { y: 0.6 } });
-                    const userSc = 13;
-                    const oppSc = Math.floor(Math.random() * 5) + 7; // 7-11
-                    setScrimResult({ userScore: userSc, opponentScore: oppSc, winner: 'user' });
-
-                    // Update clan stats in state & localStorage
-                    const updatedClan = {
-                      ...userClan,
-                      stats: {
-                        ...userClan.stats,
-                        matches: userClan.stats.matches + 1,
-                        wins: userClan.stats.wins + 1,
-                        streak: userClan.stats.streak + 1,
-                        winrate: `${Math.round(((userClan.stats.wins + 1) / (userClan.stats.matches + 1)) * 1000) / 10}%`,
-                      }
-                    };
-                    setUserClan(updatedClan);
-                    try {
-                      localStorage.setItem('vortex_user_clan_data', JSON.stringify(updatedClan));
-                    } catch (_) {}
-                    setToast(`✓ Scrim Won! [${userClan.tag}] defeated [${activeScrimClan.tag}] (${userSc}-${oppSc}) on ${scrimMap}!`);
-                  }}
-                  className="w-full sm:w-auto px-6 py-2.5 rounded-xl bg-gradient-to-r from-[#FF5500] to-amber-500 hover:brightness-110 text-black font-display font-black text-xs uppercase tracking-wider flex items-center justify-center gap-2 cursor-pointer transition shadow-lg active:scale-95"
-                >
-                  <Zap className="w-4 h-4 fill-current" />
-                  <span>Simulate 5v5 Match (1-Click)</span>
-                </button>
-              )}
-            </div>
-          </div>
-        </div>
-      )}
     </div>
   );
 };

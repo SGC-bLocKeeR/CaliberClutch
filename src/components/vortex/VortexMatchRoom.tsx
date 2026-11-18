@@ -33,6 +33,8 @@ import {
   ImageIcon
 } from 'lucide-react';
 import { sound } from '../../utils/soundEffects';
+import confetti from 'canvas-confetti';
+import { BalancedMatch, generateBalancedMatch } from '../../utils/faceitMatchmaking';
 import { CountryFlag } from './CountryFlag';
 
 export interface FaceitMatchPlayer {
@@ -57,6 +59,7 @@ export interface FaceitMatchPlayer {
   kr: string;
   adr: string;
   badgeIndex?: number;
+  partyShape?: 'circle' | 'diamond' | 'triangle' | 'square';
 }
 
 export interface FaceitStatsRow {
@@ -141,6 +144,8 @@ interface VortexMatchRoomProps {
     countryName?: string;
     verification?: 'vip' | 'verified' | 'none';
   }>;
+  matchData?: BalancedMatch;
+  onMatchFinished?: (won: boolean, deltaElo: number) => void;
   onClose: () => void;
 }
 
@@ -325,6 +330,8 @@ export const VortexMatchRoom: React.FC<VortexMatchRoomProps> = ({
   currentGamerTag = 'M14',
   currentAvatarUrl,
   partyMembers = [],
+  matchData,
+  onMatchFinished,
   onClose
 }) => {
   // Navigation Tabs: OVERVIEW vs STATS
@@ -496,2057 +503,78 @@ export const VortexMatchRoom: React.FC<VortexMatchRoomProps> = ({
     }
   }, [teamMessages, isChatDrawerOpen]);
 
-  // Exact 1:1 FACEIT Team 1 Players (Overview Cards)
-  const team1Players: FaceitMatchPlayer[] = [
-    {
-      id: 'p1',
-      name: 'Rosen33',
-      avatar: '/images/avatar_duck_exact.png',
-      level: 9,
-      elo: 1967,
-      code: 'SE',
-      countryName: 'Sweden',
-      verified: true,
-      isCaptain: true,
-      hasPriority: true,
-      matches: 429,
-      winRate: '54%',
-      recentResults: ['W', 'W', 'W', 'L', 'W'],
-      rating: '1.16',
-      swing: '+0.96%',
-      isPositiveSwing: true,
-      kda: '17/16/5',
-      kd: '1.07',
-      kr: '0.81',
-      adr: '88.1',
-      badgeIndex: 1
-    },
-    {
-      id: 'p2',
-      name: 'stonken',
-      avatar: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?auto=format&fit=crop&w=150&q=80',
-      level: 8,
-      elo: 1589,
-      code: 'SE',
-      countryName: 'Sweden',
-      verified: true,
-      matches: 160,
-      winRate: '48%',
-      recentResults: ['W', 'W', 'L', 'L', 'W'],
-      rating: '1.00',
-      swing: '-1.82%',
-      isPositiveSwing: false,
-      kda: '14/17/5',
-      kd: '0.80',
-      kr: '0.64',
-      adr: '73.9',
-      badgeIndex: 2
-    },
-    {
-      id: 'p3',
-      name: 'wast3dtalen1',
-      avatar: 'https://images.unsplash.com/photo-1517841905240-472988babdf9?auto=format&fit=crop&w=150&q=80',
-      level: 9,
-      elo: 1780,
-      code: 'RU',
-      countryName: 'Russia',
-      verified: true,
-      hasPriority: true,
-      matches: 2085,
-      winRate: '49%',
-      recentResults: ['L', 'L', 'L', 'L', 'L'],
-      rating: '1.08',
-      swing: '-0.41%',
-      isPositiveSwing: false,
-      kda: '18/17/5',
-      kd: '1.05',
-      kr: '0.78',
-      adr: '83.4',
-      badgeIndex: 1
-    },
-    {
-      id: 'p4',
-      name: 'mxrty666',
-      avatar: 'https://images.unsplash.com/photo-1539571696357-5a69c17a67c6?auto=format&fit=crop&w=150&q=80',
-      level: 9,
-      elo: 1943,
-      code: 'SE',
-      countryName: 'Sweden',
-      verified: true,
-      matches: 1127,
-      winRate: '51%',
-      recentResults: ['W', 'L', 'W', 'W', 'L'],
-      rating: '1.20',
-      swing: '+1.58%',
-      isPositiveSwing: true,
-      kda: '18/15/5',
-      kd: '1.16',
-      kr: '0.84',
-      adr: '87.7',
-      badgeIndex: 1
-    },
-    {
-      id: 'p5',
-      name: 'zeryx666',
-      avatar: 'https://images.unsplash.com/photo-1501196354995-cbb51c65aaea?auto=format&fit=crop&w=150&q=80',
-      level: 8,
-      elo: 1573,
-      code: 'RU',
-      countryName: 'Russia',
-      verified: true,
-      matches: 989,
-      winRate: '52%',
-      recentResults: ['W', 'W', 'W', 'L', 'W'],
-      rating: '1.08',
-      swing: '-0.34%',
-      isPositiveSwing: false,
-      kda: '14/15/4',
-      kd: '0.93',
-      kr: '0.67',
-      adr: '69.9',
-      badgeIndex: 1
-    }
-  ];
+  // Fallback or passed balanced match (Fair 50% vs 50% Win Rate, Strict ELO Balancing)
+  const activeMatch = useMemo(() => {
+    if (matchData) return matchData;
+    return generateBalancedMatch({
+      partyMembers: (partyMembers || []).map(p => ({
+        id: p.id,
+        name: p.name,
+        avatar: p.avatar || '',
+        level: p.level || 3,
+        elo: p.elo || 800,
+        code: p.code || 'XK',
+        countryName: p.countryName || 'Kosovo'
+      })),
+      userGamerTag: currentGamerTag,
+      userAvatar: currentAvatarUrl,
+      userElo: partyMembers?.find(p => p.name === currentGamerTag)?.elo || 800,
+      userLevel: partyMembers?.find(p => p.name === currentGamerTag)?.level || 3,
+      mapName: 'Anubis'
+    });
+  }, [matchData, partyMembers, currentGamerTag, currentAvatarUrl]);
 
-  // Exact 1:1 FACEIT Team 2 Players (Overview Cards - Matches Reference Image)
-  const team2Players: FaceitMatchPlayer[] = [
-    {
-      id: 'op1',
-      name: 'Zalevvo',
-      avatar: '/images/avatar_ghost_exact.png',
-      level: 6,
-      elo: 1253,
-      code: 'UA',
-      countryName: 'Ukraine',
-      verified: true,
-      isCaptain: true,
-      matches: 512,
-      winRate: '50%',
-      recentResults: ['L', 'W', 'L', 'L', 'W'],
-      rating: '1.10',
-      swing: '-0.17%',
-      isPositiveSwing: false,
-      kda: '16/17/6',
-      kd: '0.93',
-      kr: '0.69',
-      adr: '81.6',
-      badgeIndex: 1
-    },
-    {
-      id: 'op2',
-      name: 'zimny',
-      avatar: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=150&q=80',
-      level: 9,
-      elo: 1840,
-      code: 'FR',
-      countryName: 'France',
-      verified: true,
-      matches: 1121,
-      winRate: '53%',
-      recentResults: ['L', 'W', 'L', 'L', 'W'],
-      rating: '1.19',
-      swing: '+1.27%',
-      isPositiveSwing: true,
-      kda: '18/17/5',
-      kd: '1.04',
-      kr: '0.79',
-      adr: '87.2',
-      badgeIndex: 1
-    },
-    {
-      id: 'op3',
-      name: 'Nascar777',
-      avatar: 'https://images.unsplash.com/photo-1522075469751-3a6694fb2f61?auto=format&fit=crop&w=150&q=80',
-      level: 10,
-      elo: 2046,
-      code: 'PL',
-      countryName: 'Poland',
-      verified: true,
-      matches: 2890,
-      winRate: '55%',
-      recentResults: ['W', 'W', 'W', 'W', 'L'],
-      rating: '1.22',
-      swing: '+2.22%',
-      isPositiveSwing: true,
-      kda: '18/15/5',
-      kd: '1.26',
-      kr: '0.84',
-      adr: '89.8',
-      badgeIndex: 1
-    },
-    {
-      id: 'op4',
-      name: 'M18',
-      avatar: '/images/faceit_m18_badge.png',
-      level: 10,
-      elo: 2175,
-      code: 'XK',
-      countryName: 'Kosovo',
-      verified: true,
-      matches: 3421,
-      winRate: '58%',
-      recentResults: ['W', 'L', 'W', 'L', 'L'],
-      rating: '1.18',
-      swing: '+1.44%',
-      isPositiveSwing: true,
-      kda: '19/16/6',
-      kd: '1.16',
-      kr: '0.82',
-      adr: '90.3',
-      badgeIndex: 69
-    },
-    {
-      id: 'op5',
-      name: currentGamerTag || 'M14',
-      avatar: currentAvatarUrl || 'https://distribution.faceit-cdn.net/images/ac453a50-dbca-4d42-a740-dac12bdc74c0.jpeg',
-      level: 7,
-      elo: 1433,
-      code: 'GY',
-      countryName: 'Guyana',
-      verified: true,
-      hasPriority: true,
-      matches: 1644,
-      winRate: '43%',
-      recentResults: ['L', 'L', 'W', 'L', 'L'],
-      rating: '0.94',
-      swing: '-2.90%',
-      isPositiveSwing: false,
-      kda: '13/17/6',
-      kd: '0.77',
-      kr: '0.58',
-      adr: '70.8',
-      badgeIndex: 1
-    }
-  ];
+  const team1Players = activeMatch.team1.players;
+  const team2Players = activeMatch.team2.players;
+  const team1StatsRows = activeMatch.team1.statsRows;
+  const team2StatsRows = activeMatch.team2.statsRows;
 
-  // Map Veto Exact List (as shown in user screenshot)
-  const vetoHistoryList = [
-    { step: 1, text: 'team_Rosen33 banned Cache', isDecided: false },
-    { step: 2, text: 'team_Zalevvo banned Inferno', isDecided: false },
-    { step: 3, text: 'team_Rosen33 banned Nuke', isDecided: false },
-    { step: 4, text: 'team_Zalevvo banned Ancient', isDecided: false },
-    { step: 5, text: 'team_Rosen33 banned Mirage', isDecided: false },
-    { step: 6, text: 'team_Zalevvo banned Dust2', isDecided: false },
-    { step: 7, text: 'Anubis picked by default', isDecided: true }
-  ];
+  // Match Simulation & Server Connect state
+  const [matchSimulatedResult, setMatchSimulatedResult] = useState<{
+    score1: number;
+    score2: number;
+    won: boolean;
+  } | null>(null);
+  const [copiedServerIp, setCopiedServerIp] = useState<boolean>(false);
 
-  // Detailed Stats Table: Team 1 (Rosen33) - All 5 Sub-Tabs
-  const team1StatsRows: FaceitStatsRow[] = [
-    {
-      id: 's1',
-      name: 'Rosen33',
-      avatar: '/images/avatar_duck_exact.png',
-      code: 'SE',
-      countryName: 'Sweden',
-      rankLevel: 9,
-      rankElo: 1993,
-      rating: '1.68',
-      ratingScore: 1.68,
-      isMvp: true,
-      team: 'team1',
-      partyShape: 'circle',
-      swing: '+9.32%',
-      isPositiveSwing: true,
-      k: 20,
-      d: 11,
-      a: 3,
-      adr: '109.6',
-      kd: '1.82',
-      kr: '1.00',
-      hs: 11,
-      hsRate: '55.0%',
-      k5: 0,
-      k4: 0,
-      k3: 2,
-      k2: 3,
-      mvps: 4,
-      // Advanced
-      rws: '17.82',
-      crosshairCode: 'CSGO-3k8qX-aB27v-85Yw3-2k9F8-3kK8A',
-      kast: '75.0%',
-      acc: '20.1%',
-      sAcc: '40.2%',
-      shots: 299,
-      hits: 60,
-      mk: 5,
-      mkRate: '25%',
-      rp: 20,
-      rs: 9,
-      // Entry
-      entryAttempts: 1,
-      entryKills: 1,
-      entryDeaths: 0,
-      entryDiff: 1,
-      entryAttemptsRate: '5%',
-      entrySuccessRate: '100%',
-      // Trade
-      tradeKills: 8,
-      deathsTraded: 2,
-      tradedEntryKills: 1,
-      tradedEntryDeaths: 0,
-      // Clutch
-      clutchWins: 3,
-      clutchRoundsLost: 1,
-      clutchSuccess: '75%',
-      c1v5: 0,
-      c1v4: 0,
-      c1v3: 0,
-      c1v2: 1,
-      c1v1: 2
-    },
-    {
-      id: 's2',
-      name: 'zeryx666',
-      avatar: 'https://images.unsplash.com/photo-1501196354995-cbb51c65aaea?auto=format&fit=crop&w=150&q=80',
-      code: 'RU',
-      countryName: 'Russia',
-      rankLevel: 8,
-      rankElo: 1599,
-      rating: '1.32',
-      ratingScore: 1.32,
-      team: 'team1',
-      partyShape: 'diamond',
-      hasPriority: true,
-      swing: '+3.32%',
-      isPositiveSwing: true,
-      k: 12,
-      d: 14,
-      a: 6,
-      adr: '73.0',
-      kd: '0.86',
-      kr: '0.60',
-      hs: 7,
-      hsRate: '58.3%',
-      k5: 0,
-      k4: 0,
-      k3: 2,
-      k2: 1,
-      mvps: 4,
-      // Advanced
-      rws: '14.74',
-      crosshairCode: 'CSGO-hQ238-wL2Fq-8oY8u-7zZp2-4vN2B',
-      kast: '60.0%',
-      acc: '26.5%',
-      sAcc: '44.7%',
-      shots: 219,
-      hits: 58,
-      mk: 3,
-      mkRate: '15%',
-      rp: 20,
-      rs: 6,
-      // Entry
-      entryAttempts: 5,
-      entryKills: 1,
-      entryDeaths: 4,
-      entryDiff: -3,
-      entryAttemptsRate: '25%',
-      entrySuccessRate: '20%',
-      // Trade
-      tradeKills: 2,
-      deathsTraded: 2,
-      tradedEntryKills: 1,
-      tradedEntryDeaths: 1,
-      // Clutch
-      clutchWins: 0,
-      clutchRoundsLost: 2,
-      clutchSuccess: '0%',
-      c1v5: 0,
-      c1v4: 0,
-      c1v3: 0,
-      c1v2: 0,
-      c1v1: 0
-    },
-    {
-      id: 's3',
-      name: 'mxrty666',
-      avatar: 'https://images.unsplash.com/photo-1539571696357-5a69c17a67c6?auto=format&fit=crop&w=150&q=80',
-      code: 'SE',
-      countryName: 'Sweden',
-      rankLevel: 9,
-      rankElo: 1968,
-      rating: '1.21',
-      ratingScore: 1.21,
-      team: 'team1',
-      partyShape: 'diamond',
-      hasPriority: true,
-      swing: '+1.45%',
-      isPositiveSwing: true,
-      k: 19,
-      d: 15,
-      a: 5,
-      adr: '91.4',
-      kd: '1.27',
-      kr: '0.95',
-      hs: 11,
-      hsRate: '57.9%',
-      k5: 0,
-      k4: 0,
-      k3: 1,
-      k2: 5,
-      mvps: 2,
-      // Advanced
-      rws: '13.36',
-      crosshairCode: 'CSGO-6vW4K-5u8zZ-x7Tq2-78uY2-2vX8C',
-      kast: '85.0%',
-      acc: '20.2%',
-      sAcc: '42.0%',
-      shots: 272,
-      hits: 55,
-      mk: 6,
-      mkRate: '30%',
-      rp: 20,
-      rs: 5,
-      // Entry
-      entryAttempts: 5,
-      entryKills: 2,
-      entryDeaths: 3,
-      entryDiff: -1,
-      entryAttemptsRate: '25%',
-      entrySuccessRate: '40%',
-      // Trade
-      tradeKills: 1,
-      deathsTraded: 7,
-      tradedEntryKills: 0,
-      tradedEntryDeaths: 3,
-      // Clutch
-      clutchWins: 1,
-      clutchRoundsLost: 1,
-      clutchSuccess: '50%',
-      c1v5: 0,
-      c1v4: 0,
-      c1v3: 0,
-      c1v2: 0,
-      c1v1: 1
-    },
-    {
-      id: 's4',
-      name: 'stonken',
-      avatar: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?auto=format&fit=crop&w=150&q=80',
-      code: 'SE',
-      countryName: 'Sweden',
-      rankLevel: 8,
-      rankElo: 1613,
-      rating: '1.17',
-      ratingScore: 1.17,
-      team: 'team1',
-      partyShape: 'circle',
-      hasPriority: true,
-      swing: '+1.41%',
-      isPositiveSwing: true,
-      k: 13,
-      d: 15,
-      a: 4,
-      adr: '67.5',
-      kd: '0.87',
-      kr: '0.65',
-      hs: 6,
-      hsRate: '46.2%',
-      k5: 0,
-      k4: 0,
-      k3: 0,
-      k2: 2,
-      mvps: 1,
-      // Advanced
-      rws: '10.90',
-      crosshairCode: 'CSGO-8yX2K-9uZ2W-3kL8q-4vT7u-8xZ9D',
-      kast: '75.0%',
-      acc: '16.4%',
-      sAcc: '25.9%',
-      shots: 268,
-      hits: 44,
-      mk: 2,
-      mkRate: '10%',
-      rp: 20,
-      rs: 5,
-      // Entry
-      entryAttempts: 3,
-      entryKills: 1,
-      entryDeaths: 2,
-      entryDiff: -1,
-      entryAttemptsRate: '15%',
-      entrySuccessRate: '33%',
-      // Trade
-      tradeKills: 2,
-      deathsTraded: 5,
-      tradedEntryKills: 1,
-      tradedEntryDeaths: 0,
-      // Clutch
-      clutchWins: 0,
-      clutchRoundsLost: 1,
-      clutchSuccess: '0%',
-      c1v5: 0,
-      c1v4: 0,
-      c1v3: 0,
-      c1v2: 0,
-      c1v1: 0
-    },
-    {
-      id: 's5',
-      name: 'wast3dtalen1',
-      avatar: 'https://images.unsplash.com/photo-1517841905240-472988babdf9?auto=format&fit=crop&w=150&q=80',
-      code: 'RU',
-      countryName: 'Russia',
-      rankLevel: 9,
-      rankElo: 1833,
-      rating: '1.02',
-      ratingScore: 1.02,
-      team: 'team1',
-      partyShape: 'circle',
-      swing: '-1.41%',
-      isPositiveSwing: false,
-      k: 12,
-      d: 14,
-      a: 2,
-      adr: '54.1',
-      kd: '0.86',
-      kr: '0.60',
-      hs: 4,
-      hsRate: '33.3%',
-      k5: 0,
-      k4: 0,
-      k3: 1,
-      k2: 0,
-      mvps: 2,
-      // Advanced
-      rws: '8.17',
-      crosshairCode: 'CSGO-4uY8Z-7xT2W-2kL9q-5vX8u-3wZ7E',
-      kast: '65.0%',
-      acc: '19.9%',
-      sAcc: '37.3%',
-      shots: 171,
-      hits: 34,
-      mk: 1,
-      mkRate: '5%',
-      rp: 20,
-      rs: 6,
-      // Entry
-      entryAttempts: 6,
-      entryKills: 4,
-      entryDeaths: 2,
-      entryDiff: 2,
-      entryAttemptsRate: '30%',
-      entrySuccessRate: '67%',
-      // Trade
-      tradeKills: 5,
-      deathsTraded: 2,
-      tradedEntryKills: 1,
-      tradedEntryDeaths: 0,
-      // Clutch
-      clutchWins: 0,
-      clutchRoundsLost: 2,
-      clutchSuccess: '0%',
-      c1v5: 0,
-      c1v4: 0,
-      c1v3: 0,
-      c1v2: 0,
-      c1v1: 0
-    }
-  ];
-
-  // Detailed Stats Table: Team 2 (Zalevvo) - All 5 Sub-Tabs
-  const team2StatsRows: FaceitStatsRow[] = [
-    {
-      id: 's6',
-      name: 'zimny',
-      avatar: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=150&q=80',
-      code: 'FR',
-      countryName: 'France',
-      rankLevel: 9,
-      rankElo: 1817,
-      rating: '1.13',
-      ratingScore: 1.13,
-      team: 'team2',
-      partyShape: 'triangle',
-      swing: '+0.97%',
-      isPositiveSwing: true,
-      k: 16,
-      d: 14,
-      a: 0,
-      adr: '80.6',
-      kd: '1.14',
-      kr: '0.80',
-      hs: 7,
-      hsRate: '43.8%',
-      k5: 0,
-      k4: 0,
-      k3: 0,
-      k2: 2,
-      mvps: 2,
-      // Advanced
-      rws: '7.64',
-      crosshairCode: 'CSGO-2zX8K-6uY9W-4kL7q-3vT8u-7wZ2F',
-      kast: '80.0%',
-      acc: '19.3%',
-      sAcc: '42.9%',
-      shots: 197,
-      hits: 38,
-      mk: 2,
-      mkRate: '10%',
-      rp: 20,
-      rs: 6,
-      // Entry
-      entryAttempts: 4,
-      entryKills: 3,
-      entryDeaths: 1,
-      entryDiff: 2,
-      entryAttemptsRate: '20%',
-      entrySuccessRate: '75%',
-      // Trade
-      tradeKills: 2,
-      deathsTraded: 1,
-      tradedEntryKills: 0,
-      tradedEntryDeaths: 0,
-      // Clutch
-      clutchWins: 1,
-      clutchRoundsLost: 2,
-      clutchSuccess: '33%',
-      c1v5: 0,
-      c1v4: 0,
-      c1v3: 0,
-      c1v2: 0,
-      c1v1: 1
-    },
-    {
-      id: 's7',
-      name: 'Zalevvo',
-      avatar: '/images/avatar_ghost_exact.png',
-      code: 'UA',
-      countryName: 'Ukraine',
-      rankLevel: 6,
-      rankElo: 1234,
-      rating: '1.12',
-      ratingScore: 1.12,
-      team: 'team2',
-      partyShape: 'triangle',
-      swing: '+0.06%',
-      isPositiveSwing: true,
-      k: 19,
-      d: 15,
-      a: 7,
-      adr: '116.4',
-      kd: '1.27',
-      kr: '0.95',
-      hs: 12,
-      hsRate: '63.2%',
-      k5: 0,
-      k4: 0,
-      k3: 1,
-      k2: 6,
-      mvps: 2,
-      // Advanced
-      rws: '7.75',
-      crosshairCode: 'CSGO-7yX9K-8uZ3W-5kL2q-6vT9u-9wZ4G',
-      kast: '85.0%',
-      acc: '20.3%',
-      sAcc: '41.1%',
-      shots: 370,
-      hits: 75,
-      mk: 7,
-      mkRate: '35%',
-      rp: 20,
-      rs: 5,
-      // Entry
-      entryAttempts: 5,
-      entryKills: 2,
-      entryDeaths: 3,
-      entryDiff: -1,
-      entryAttemptsRate: '25%',
-      entrySuccessRate: '40%',
-      // Trade
-      tradeKills: 4,
-      deathsTraded: 1,
-      tradedEntryKills: 0,
-      tradedEntryDeaths: 1,
-      // Clutch
-      clutchWins: 0,
-      clutchRoundsLost: 5,
-      clutchSuccess: '0%',
-      c1v5: 0,
-      c1v4: 0,
-      c1v3: 0,
-      c1v2: 0,
-      c1v1: 0
-    },
-    {
-      id: 's8',
-      name: 'M18',
-      avatar: '/images/faceit_m18_badge.png',
-      code: 'XK',
-      countryName: 'Kosovo',
-      rankLevel: 10,
-      rankElo: 2156,
-      rating: '0.86',
-      ratingScore: 0.86,
-      team: 'team2',
-      partyShape: 'square',
-      swing: '-4.15%',
-      isPositiveSwing: false,
-      k: 16,
-      d: 17,
-      a: 3,
-      adr: '76.0',
-      kd: '0.94',
-      kr: '0.80',
-      hs: 7,
-      hsRate: '43.8%',
-      k5: 0,
-      k4: 1,
-      k3: 0,
-      k2: 2,
-      mvps: 1,
-      // Advanced
-      rws: '8.61',
-      crosshairCode: 'CSGO-9zX4K-2uY8W-7kL3q-4vT2u-8wZ6H',
-      kast: '60.0%',
-      acc: '14.9%',
-      sAcc: '29.0%',
-      shots: 262,
-      hits: 39,
-      mk: 3,
-      mkRate: '15%',
-      rp: 20,
-      rs: 4,
-      // Entry
-      entryAttempts: 7,
-      entryKills: 5,
-      entryDeaths: 2,
-      entryDiff: 3,
-      entryAttemptsRate: '35%',
-      entrySuccessRate: '71%',
-      // Trade
-      tradeKills: 6,
-      deathsTraded: 1,
-      tradedEntryKills: 3,
-      tradedEntryDeaths: 0,
-      // Clutch
-      clutchWins: 0,
-      clutchRoundsLost: 1,
-      clutchSuccess: '0%',
-      c1v5: 0,
-      c1v4: 0,
-      c1v3: 0,
-      c1v2: 0,
-      c1v1: 0
-    },
-    {
-      id: 's9',
-      name: currentGamerTag || 'M14',
-      avatar: currentAvatarUrl || 'https://distribution.faceit-cdn.net/images/ac453a50-dbca-4d42-a740-dac12bdc74c0.jpeg',
-      code: 'XK',
-      countryName: 'Kosovo',
-      rankLevel: (() => {
-        const u = partyMembers?.find(p => p.id === 'current-user' || p.name === currentGamerTag);
-        if (u && u.level) return u.level;
-        const m = typeof window !== 'undefined' ? localStorage.getItem('vortex_user_matches') : null;
-        return m && m !== '0' ? 7 : 3;
-      })(),
-      rankElo: (() => {
-        const u = partyMembers?.find(p => p.id === 'current-user' || p.name === currentGamerTag);
-        if (u && u.elo) return u.elo;
-        const m = typeof window !== 'undefined' ? localStorage.getItem('vortex_user_matches') : null;
-        return m && m !== '0' ? 1407 : 800;
-      })(),
-      rating: '0.76',
-      ratingScore: 0.76,
-      team: 'team2',
-      partyShape: 'square',
-      swing: '-2.80%',
-      isPositiveSwing: false,
-      k: 7,
-      d: 13,
-      a: 8,
-      adr: '53.9',
-      kd: '0.54',
-      kr: '0.35',
-      hs: 4,
-      hsRate: '57.1%',
-      k5: 0,
-      k4: 0,
-      k3: 0,
-      k2: 2,
-      mvps: 1,
-      // Advanced
-      rws: '7.53',
-      crosshairCode: 'CSGO-5kL9q-3vT8u-7wZ2F-6uY9W-2zX8K',
-      kast: '65.0%',
-      acc: '13.8%',
-      sAcc: '28.2%',
-      shots: 239,
-      hits: 33,
-      mk: 2,
-      mkRate: '10%',
-      rp: 18,
-      rs: 5,
-      // Entry
-      entryAttempts: 1,
-      entryKills: 0,
-      entryDeaths: 1,
-      entryDiff: -1,
-      entryAttemptsRate: '5%',
-      entrySuccessRate: '0%',
-      // Trade
-      tradeKills: 0,
-      deathsTraded: 5,
-      tradedEntryKills: 0,
-      tradedEntryDeaths: 1,
-      // Clutch
-      clutchWins: 0,
-      clutchRoundsLost: 0,
-      clutchSuccess: '0%',
-      c1v5: 0,
-      c1v4: 0,
-      c1v3: 0,
-      c1v2: 0,
-      c1v1: 0
-    },
-    {
-      id: 's10',
-      name: 'Nascar777',
-      avatar: 'https://images.unsplash.com/photo-1522075469751-3a6694fb2f61?auto=format&fit=crop&w=150&q=80',
-      code: 'PL',
-      countryName: 'Poland',
-      rankLevel: 10,
-      rankElo: 2028,
-      rating: '0.71',
-      ratingScore: 0.71,
-      team: 'team2',
-      partyShape: 'triangle',
-      hasPriority: true,
-      swing: '-7.08%',
-      isPositiveSwing: false,
-      k: 11,
-      d: 16,
-      a: 1,
-      adr: '51.8',
-      kd: '0.69',
-      kr: '0.55',
-      hs: 2,
-      hsRate: '18.2%',
-      k5: 0,
-      k4: 0,
-      k3: 1,
-      k2: 1,
-      mvps: 1,
-      // Advanced
-      rws: '3.46',
-      crosshairCode: 'CSGO-1wZ7E-4uY8Z-7xT2W-2kL9q-5vX8u',
-      kast: '60.0%',
-      acc: '13.5%',
-      sAcc: '24.5%',
-      shots: 200,
-      hits: 27,
-      mk: 2,
-      mkRate: '10%',
-      rp: 20,
-      rs: 4,
-      // Entry
-      entryAttempts: 3,
-      entryKills: 1,
-      entryDeaths: 2,
-      entryDiff: -1,
-      entryAttemptsRate: '15%',
-      entrySuccessRate: '33%',
-      // Trade
-      tradeKills: 0,
-      deathsTraded: 3,
-      tradedEntryKills: 0,
-      tradedEntryDeaths: 1,
-      // Clutch
-      clutchWins: 0,
-      clutchRoundsLost: 5,
-      clutchSuccess: '0%',
-      c1v5: 0,
-      c1v4: 0,
-      c1v3: 0,
-      c1v2: 0,
-      c1v1: 0
-    }
-  ];
-
-  // Exact 1:1 FACEIT T-Side Match Stats (From User Reference Image)
-  const tSideStatsRows: FaceitStatsRow[] = [
-    {
-      id: 's1',
-      name: 'Rosen33',
-      avatar: '/images/avatar_duck_exact.png',
-      code: 'SE',
-      countryName: 'Sweden',
-      rankLevel: 9,
-      rankElo: 1993,
-      rating: '1.33',
-      ratingScore: 1.33,
-      isMvp: true,
-      team: 'team1',
-      partyShape: 'circle',
-      swing: '+12.90%',
-      isPositiveSwing: true,
-      k: 12,
-      d: 7,
-      a: 2,
-      adr: '103.4',
-      kd: '1.71',
-      kr: '1.00',
-      hs: 8,
-      hsRate: '66.7%',
-      k5: 0,
-      k4: 0,
-      k3: 1,
-      k2: 2,
-      mvps: 2,
-      rws: '12.45',
-      crosshairCode: 'CSGO-3k8qX-aB27v-85Yw3-2k9F8-3kK8A',
-      kast: '75.0%',
-      acc: '22.0%',
-      sAcc: '41.5%',
-      shots: 160,
-      hits: 35,
-      mk: 3,
-      mkRate: '25%',
-      rp: 8,
-      rs: 6,
-      entryAttempts: 1,
-      entryKills: 1,
-      entryDeaths: 0,
-      entryDiff: 1,
-      entryAttemptsRate: '12%',
-      entrySuccessRate: '100%',
-      tradeKills: 4,
-      deathsTraded: 1,
-      tradedEntryKills: 1,
-      tradedEntryDeaths: 0,
-      clutchWins: 2,
-      clutchRoundsLost: 1,
-      clutchSuccess: '67%',
-      c1v5: 0,
-      c1v4: 0,
-      c1v3: 0,
-      c1v2: 1,
-      c1v1: 1
-    },
-    {
-      id: 's3',
-      name: 'mxrty666',
-      avatar: 'https://images.unsplash.com/photo-1539571696357-5a69c17a67c6?auto=format&fit=crop&w=150&q=80',
-      code: 'SE',
-      countryName: 'Sweden',
-      rankLevel: 9,
-      rankElo: 1968,
-      rating: '1.26',
-      ratingScore: 1.26,
-      team: 'team1',
-      partyShape: 'diamond',
-      hasPriority: true,
-      swing: '+5.59%',
-      isPositiveSwing: true,
-      k: 13,
-      d: 9,
-      a: 4,
-      adr: '98.3',
-      kd: '1.44',
-      kr: '1.08',
-      hs: 8,
-      hsRate: '61.5%',
-      k5: 0,
-      k4: 0,
-      k3: 1,
-      k2: 3,
-      mvps: 2,
-      rws: '9.80',
-      crosshairCode: 'CSGO-6vW4K-5u8zZ-x7Tq2-78uY2-2vX8C',
-      kast: '75.0%',
-      acc: '19.5%',
-      sAcc: '40.0%',
-      shots: 155,
-      hits: 30,
-      mk: 4,
-      mkRate: '33%',
-      rp: 8,
-      rs: 3,
-      entryAttempts: 3,
-      entryKills: 1,
-      entryDeaths: 2,
-      entryDiff: -1,
-      entryAttemptsRate: '25%',
-      entrySuccessRate: '33%',
-      tradeKills: 1,
-      deathsTraded: 4,
-      tradedEntryKills: 0,
-      tradedEntryDeaths: 2,
-      clutchWins: 1,
-      clutchRoundsLost: 1,
-      clutchSuccess: '50%',
-      c1v5: 0,
-      c1v4: 0,
-      c1v3: 0,
-      c1v2: 0,
-      c1v1: 1
-    },
-    {
-      id: 's6',
-      name: 'zimny',
-      avatar: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=150&q=80',
-      code: 'FR',
-      countryName: 'France',
-      rankLevel: 9,
-      rankElo: 1817,
-      rating: '1.07',
-      ratingScore: 1.07,
-      team: 'team2',
-      partyShape: 'triangle',
-      swing: '-2.49%',
-      isPositiveSwing: false,
-      k: 5,
-      d: 8,
-      a: 0,
-      adr: '70.1',
-      kd: '0.63',
-      kr: '0.63',
-      hs: 1,
-      hsRate: '20.0%',
-      k5: 0,
-      k4: 0,
-      k3: 0,
-      k2: 0,
-      mvps: 0,
-      rws: '5.10',
-      crosshairCode: 'CSGO-2zX8K-6uY9W-4kL7q-3vT8u-7wZ2F',
-      kast: '62.5%',
-      acc: '17.0%',
-      sAcc: '38.0%',
-      shots: 110,
-      hits: 19,
-      mk: 0,
-      mkRate: '0%',
-      rp: 12,
-      rs: 3,
-      entryAttempts: 2,
-      entryKills: 1,
-      entryDeaths: 1,
-      entryDiff: 0,
-      entryAttemptsRate: '17%',
-      entrySuccessRate: '50%',
-      tradeKills: 1,
-      deathsTraded: 1,
-      tradedEntryKills: 0,
-      tradedEntryDeaths: 0,
-      clutchWins: 0,
-      clutchRoundsLost: 1,
-      clutchSuccess: '0%',
-      c1v5: 0,
-      c1v4: 0,
-      c1v3: 0,
-      c1v2: 0,
-      c1v1: 0
-    },
-    {
-      id: 's2',
-      name: 'zeryx666',
-      avatar: 'https://images.unsplash.com/photo-1501196354995-cbb51c65aaea?auto=format&fit=crop&w=150&q=80',
-      code: 'RU',
-      countryName: 'Russia',
-      rankLevel: 8,
-      rankElo: 1599,
-      rating: '1.05',
-      ratingScore: 1.05,
-      team: 'team1',
-      partyShape: 'diamond',
-      hasPriority: true,
-      swing: '-1.65%',
-      isPositiveSwing: false,
-      k: 4,
-      d: 11,
-      a: 3,
-      adr: '49.3',
-      kd: '0.36',
-      kr: '0.33',
-      hs: 2,
-      hsRate: '50.0%',
-      k5: 0,
-      k4: 0,
-      k3: 0,
-      k2: 1,
-      mvps: 2,
-      rws: '6.45',
-      crosshairCode: 'CSGO-hQ238-wL2Fq-8oY8u-7zZp2-4vN2B',
-      kast: '50.0%',
-      acc: '22.0%',
-      sAcc: '40.0%',
-      shots: 105,
-      hits: 23,
-      mk: 1,
-      mkRate: '8%',
-      rp: 8,
-      rs: 3,
-      entryAttempts: 2,
-      entryKills: 0,
-      entryDeaths: 2,
-      entryDiff: -2,
-      entryAttemptsRate: '17%',
-      entrySuccessRate: '0%',
-      tradeKills: 1,
-      deathsTraded: 1,
-      tradedEntryKills: 0,
-      tradedEntryDeaths: 1,
-      clutchWins: 0,
-      clutchRoundsLost: 1,
-      clutchSuccess: '0%',
-      c1v5: 0,
-      c1v4: 0,
-      c1v3: 0,
-      c1v2: 0,
-      c1v1: 0
-    },
-    {
-      id: 's7',
-      name: 'Zalevvo',
-      avatar: '/images/avatar_ghost_exact.png',
-      code: 'UA',
-      countryName: 'Ukraine',
-      rankLevel: 6,
-      rankElo: 1234,
-      rating: '1.04',
-      ratingScore: 1.04,
-      team: 'team2',
-      partyShape: 'triangle',
-      swing: '-2.76%',
-      isPositiveSwing: false,
-      k: 6,
-      d: 7,
-      a: 2,
-      adr: '85.0',
-      kd: '0.86',
-      kr: '0.75',
-      hs: 4,
-      hsRate: '66.7%',
-      k5: 0,
-      k4: 0,
-      k3: 0,
-      k2: 2,
-      mvps: 1,
-      rws: '5.20',
-      crosshairCode: 'CSGO-7yX9K-8uZ3W-5kL2q-6vT9u-9wZ4G',
-      kast: '75.0%',
-      acc: '19.0%',
-      sAcc: '39.0%',
-      shots: 170,
-      hits: 32,
-      mk: 2,
-      mkRate: '17%',
-      rp: 12,
-      rs: 3,
-      entryAttempts: 3,
-      entryKills: 1,
-      entryDeaths: 2,
-      entryDiff: -1,
-      entryAttemptsRate: '25%',
-      entrySuccessRate: '33%',
-      tradeKills: 2,
-      deathsTraded: 1,
-      tradedEntryKills: 0,
-      tradedEntryDeaths: 1,
-      clutchWins: 0,
-      clutchRoundsLost: 3,
-      clutchSuccess: '0%',
-      c1v5: 0,
-      c1v4: 0,
-      c1v3: 0,
-      c1v2: 0,
-      c1v1: 0
-    },
-    {
-      id: 's10',
-      name: 'Nascar777',
-      avatar: 'https://images.unsplash.com/photo-1522075469751-3a6694fb2f61?auto=format&fit=crop&w=150&q=80',
-      code: 'PL',
-      countryName: 'Poland',
-      rankLevel: 10,
-      rankElo: 2028,
-      rating: '1.03',
-      ratingScore: 1.03,
-      team: 'team2',
-      partyShape: 'triangle',
-      hasPriority: true,
-      swing: '-3.97%',
-      isPositiveSwing: false,
-      k: 4,
-      d: 7,
-      a: 0,
-      adr: '62.0',
-      kd: '0.57',
-      kr: '0.50',
-      hs: 1,
-      hsRate: '25.0%',
-      k5: 0,
-      k4: 0,
-      k3: 0,
-      k2: 1,
-      mvps: 1,
-      rws: '4.80',
-      crosshairCode: 'CSGO-1wZ7E-4uY8Z-7xT2W-2kL9q-5vX8u',
-      kast: '58.0%',
-      acc: '14.0%',
-      sAcc: '26.0%',
-      shots: 110,
-      hits: 15,
-      mk: 1,
-      mkRate: '8%',
-      rp: 12,
-      rs: 2,
-      entryAttempts: 2,
-      entryKills: 1,
-      entryDeaths: 1,
-      entryDiff: 0,
-      entryAttemptsRate: '17%',
-      entrySuccessRate: '50%',
-      tradeKills: 0,
-      deathsTraded: 2,
-      tradedEntryKills: 0,
-      tradedEntryDeaths: 1,
-      clutchWins: 0,
-      clutchRoundsLost: 0,
-      clutchSuccess: '0%',
-      c1v5: 0,
-      c1v4: 0,
-      c1v3: 0,
-      c1v2: 0,
-      c1v1: 0
-    },
-    {
-      id: 's4',
-      name: 'stonken',
-      avatar: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?auto=format&fit=crop&w=150&q=80',
-      code: 'SE',
-      countryName: 'Sweden',
-      rankLevel: 8,
-      rankElo: 1613,
-      rating: '1.01',
-      ratingScore: 1.01,
-      team: 'team1',
-      partyShape: 'circle',
-      hasPriority: true,
-      swing: '-0.77%',
-      isPositiveSwing: false,
-      k: 8,
-      d: 11,
-      a: 3,
-      adr: '74.1',
-      kd: '0.73',
-      kr: '0.67',
-      hs: 3,
-      hsRate: '37.5%',
-      k5: 0,
-      k4: 0,
-      k3: 0,
-      k2: 1,
-      mvps: 0,
-      rws: '7.10',
-      crosshairCode: 'CSGO-8yX2K-9uZ2W-3kL8q-4vT7u-8xZ9D',
-      kast: '62.5%',
-      acc: '15.5%',
-      sAcc: '24.0%',
-      shots: 140,
-      hits: 22,
-      mk: 1,
-      mkRate: '8%',
-      rp: 8,
-      rs: 2,
-      entryAttempts: 1,
-      entryKills: 0,
-      entryDeaths: 1,
-      entryDiff: -1,
-      entryAttemptsRate: '8%',
-      entrySuccessRate: '0%',
-      tradeKills: 1,
-      deathsTraded: 3,
-      tradedEntryKills: 0,
-      tradedEntryDeaths: 0,
-      clutchWins: 0,
-      clutchRoundsLost: 1,
-      clutchSuccess: '0%',
-      c1v5: 0,
-      c1v4: 0,
-      c1v3: 0,
-      c1v2: 0,
-      c1v1: 0
-    },
-    {
-      id: 's8',
-      name: 'M18',
-      avatar: '/images/faceit_m18_badge.png',
-      code: 'XK',
-      countryName: 'Kosovo',
-      rankLevel: 10,
-      rankElo: 2156,
-      rating: '0.99',
-      ratingScore: 0.99,
-      team: 'team2',
-      partyShape: 'square',
-      swing: '-4.66%',
-      isPositiveSwing: false,
-      k: 4,
-      d: 7,
-      a: 1,
-      adr: '63.4',
-      kd: '0.57',
-      kr: '0.50',
-      hs: 2,
-      hsRate: '50.0%',
-      k5: 0,
-      k4: 0,
-      k3: 0,
-      k2: 0,
-      mvps: 0,
-      rws: '5.20',
-      crosshairCode: 'CSGO-9zX4K-2uY8W-7kL3q-4vT2u-8wZ6H',
-      kast: '58.0%',
-      acc: '14.0%',
-      sAcc: '28.0%',
-      shots: 130,
-      hits: 18,
-      mk: 0,
-      mkRate: '0%',
-      rp: 12,
-      rs: 2,
-      entryAttempts: 3,
-      entryKills: 2,
-      entryDeaths: 1,
-      entryDiff: 1,
-      entryAttemptsRate: '25%',
-      entrySuccessRate: '67%',
-      tradeKills: 2,
-      deathsTraded: 1,
-      tradedEntryKills: 1,
-      tradedEntryDeaths: 0,
-      clutchWins: 0,
-      clutchRoundsLost: 1,
-      clutchSuccess: '0%',
-      c1v5: 0,
-      c1v4: 0,
-      c1v3: 0,
-      c1v2: 0,
-      c1v1: 0
-    },
-    {
-      id: 's5',
-      name: 'wast3dtalen1',
-      avatar: 'https://images.unsplash.com/photo-1517841905240-472988babdf9?auto=format&fit=crop&w=150&q=80',
-      code: 'RU',
-      countryName: 'Russia',
-      rankLevel: 9,
-      rankElo: 1833,
-      rating: '0.92',
-      ratingScore: 0.92,
-      team: 'team1',
-      partyShape: 'circle',
-      swing: '-6.73%',
-      isPositiveSwing: false,
-      k: 4,
-      d: 11,
-      a: 1,
-      adr: '41.8',
-      kd: '0.36',
-      kr: '0.33',
-      hs: 2,
-      hsRate: '50.0%',
-      k5: 0,
-      k4: 0,
-      k3: 0,
-      k2: 0,
-      mvps: 1,
-      rws: '4.60',
-      crosshairCode: 'CSGO-4uY8Z-7xT2W-2kL9q-5vX8u-3wZ7E',
-      kast: '50.0%',
-      acc: '18.0%',
-      sAcc: '35.0%',
-      shots: 95,
-      hits: 17,
-      mk: 0,
-      mkRate: '0%',
-      rp: 8,
-      rs: 2,
-      entryAttempts: 3,
-      entryKills: 1,
-      entryDeaths: 2,
-      entryDiff: -1,
-      entryAttemptsRate: '25%',
-      entrySuccessRate: '33%',
-      tradeKills: 2,
-      deathsTraded: 1,
-      tradedEntryKills: 0,
-      tradedEntryDeaths: 0,
-      clutchWins: 0,
-      clutchRoundsLost: 1,
-      clutchSuccess: '0%',
-      c1v5: 0,
-      c1v4: 0,
-      c1v3: 0,
-      c1v2: 0,
-      c1v1: 0
-    },
-    {
-      id: 's9',
-      name: currentGamerTag || 'M14',
-      avatar: currentAvatarUrl || 'https://distribution.faceit-cdn.net/images/ac453a50-dbca-4d42-a740-dac12bdc74c0.jpeg',
-      code: 'XK',
-      countryName: 'Kosovo',
-      rankLevel: (() => {
-        const u = partyMembers?.find(p => p.id === 'current-user' || p.name === currentGamerTag);
-        if (u && u.level) return u.level;
-        const m = typeof window !== 'undefined' ? localStorage.getItem('vortex_user_matches') : null;
-        return m && m !== '0' ? 7 : 3;
-      })(),
-      rankElo: (() => {
-        const u = partyMembers?.find(p => p.id === 'current-user' || p.name === currentGamerTag);
-        if (u && u.elo) return u.elo;
-        const m = typeof window !== 'undefined' ? localStorage.getItem('vortex_user_matches') : null;
-        return m && m !== '0' ? 1407 : 800;
-      })(),
-      rating: '0.88',
-      ratingScore: 0.88,
-      team: 'team2',
-      partyShape: 'square',
-      swing: '-7.35%',
-      isPositiveSwing: false,
-      k: 1,
-      d: 6,
-      a: 1,
-      adr: '34.3',
-      kd: '0.17',
-      kr: '0.13',
-      hs: 1,
-      hsRate: '100.0%',
-      k5: 0,
-      k4: 0,
-      k3: 0,
-      k2: 0,
-      mvps: 0,
-      rws: '3.10',
-      crosshairCode: 'CSGO-5kL9q-3vT8u-7wZ2F-6uY9W-2zX8K',
-      kast: '50.0%',
-      acc: '12.0%',
-      sAcc: '24.0%',
-      shots: 85,
-      hits: 10,
-      mk: 0,
-      mkRate: '0%',
-      rp: 12,
-      rs: 1,
-      entryAttempts: 1,
-      entryKills: 0,
-      entryDeaths: 1,
-      entryDiff: -1,
-      entryAttemptsRate: '8%',
-      entrySuccessRate: '0%',
-      tradeKills: 0,
-      deathsTraded: 2,
-      tradedEntryKills: 0,
-      tradedEntryDeaths: 1,
-      clutchWins: 0,
-      clutchRoundsLost: 0,
-      clutchSuccess: '0%',
-      c1v5: 0,
-      c1v4: 0,
-      c1v3: 0,
-      c1v2: 0,
-      c1v1: 0
-    }
-  ];
-
-  // Exact 1:1 FACEIT CT-Side Match Stats (From User Reference Image)
-  const ctSideStatsRows: FaceitStatsRow[] = [
-    {
-      id: 's5',
-      name: 'wast3dtalen1',
-      avatar: 'https://images.unsplash.com/photo-1517841905240-472988babdf9?auto=format&fit=crop&w=150&q=80',
-      code: 'RU',
-      countryName: 'Russia',
-      rankLevel: 9,
-      rankElo: 1833,
-      rating: '1.38',
-      ratingScore: 1.38,
-      isMvp: true,
-      team: 'team1',
-      partyShape: 'circle',
-      swing: '+6.57%',
-      isPositiveSwing: true,
-      k: 8,
-      d: 3,
-      a: 1,
-      adr: '72.4',
-      kd: '2.67',
-      kr: '1.00',
-      hs: 2,
-      hsRate: '25.0%',
-      k5: 0,
-      k4: 0,
-      k3: 1,
-      k2: 0,
-      mvps: 1,
-      rws: '11.74',
-      crosshairCode: 'CSGO-4uY8Z-7xT2W-2kL9q-5vX8u-3wZ7E',
-      kast: '75.0%',
-      acc: '21.8%',
-      sAcc: '39.6%',
-      shots: 76,
-      hits: 17,
-      mk: 1,
-      mkRate: '12%',
-      rp: 12,
-      rs: 4,
-      entryAttempts: 3,
-      entryKills: 3,
-      entryDeaths: 0,
-      entryDiff: 3,
-      entryAttemptsRate: '25%',
-      entrySuccessRate: '100%',
-      tradeKills: 3,
-      deathsTraded: 1,
-      tradedEntryKills: 1,
-      tradedEntryDeaths: 0,
-      clutchWins: 0,
-      clutchRoundsLost: 1,
-      clutchSuccess: '0%',
-      c1v5: 0,
-      c1v4: 0,
-      c1v3: 0,
-      c1v2: 0,
-      c1v1: 0
-    },
-    {
-      id: 's4',
-      name: 'stonken',
-      avatar: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?auto=format&fit=crop&w=150&q=80',
-      code: 'SE',
-      countryName: 'Sweden',
-      rankLevel: 8,
-      rankElo: 1613,
-      rating: '1.33',
-      ratingScore: 1.33,
-      team: 'team1',
-      partyShape: 'circle',
-      hasPriority: true,
-      swing: '+4.69%',
-      isPositiveSwing: true,
-      k: 5,
-      d: 4,
-      a: 1,
-      adr: '57.5',
-      kd: '1.25',
-      kr: '0.63',
-      hs: 3,
-      hsRate: '60.0%',
-      k5: 0,
-      k4: 0,
-      k3: 0,
-      k2: 1,
-      mvps: 1,
-      rws: '14.70',
-      crosshairCode: 'CSGO-8yX2K-9uZ2W-3kL8q-4vT7u-8xZ9D',
-      kast: '87.5%',
-      acc: '17.3%',
-      sAcc: '27.8%',
-      shots: 128,
-      hits: 22,
-      mk: 1,
-      mkRate: '12%',
-      rp: 12,
-      rs: 3,
-      entryAttempts: 2,
-      entryKills: 1,
-      entryDeaths: 1,
-      entryDiff: 0,
-      entryAttemptsRate: '17%',
-      entrySuccessRate: '50%',
-      tradeKills: 1,
-      deathsTraded: 2,
-      tradedEntryKills: 1,
-      tradedEntryDeaths: 0,
-      clutchWins: 0,
-      clutchRoundsLost: 0,
-      clutchSuccess: '0%',
-      c1v5: 0,
-      c1v4: 0,
-      c1v3: 0,
-      c1v2: 0,
-      c1v1: 0
-    },
-    {
-      id: 's2',
-      name: 'zeryx666',
-      avatar: 'https://images.unsplash.com/photo-1501196354995-cbb51c65aaea?auto=format&fit=crop&w=150&q=80',
-      code: 'RU',
-      countryName: 'Russia',
-      rankLevel: 8,
-      rankElo: 1599,
-      rating: '1.32',
-      ratingScore: 1.32,
-      team: 'team1',
-      partyShape: 'diamond',
-      hasPriority: true,
-      swing: '+10.77%',
-      isPositiveSwing: true,
-      k: 8,
-      d: 3,
-      a: 3,
-      adr: '108.5',
-      kd: '2.67',
-      kr: '1.00',
-      hs: 5,
-      hsRate: '62.5%',
-      k5: 0,
-      k4: 0,
-      k3: 2,
-      k2: 0,
-      mvps: 2,
-      rws: '23.03',
-      crosshairCode: 'CSGO-hQ238-wL2Fq-8oY8u-7zZp2-4vN2B',
-      kast: '70.0%',
-      acc: '31.0%',
-      sAcc: '49.4%',
-      shots: 114,
-      hits: 35,
-      mk: 2,
-      mkRate: '25%',
-      rp: 12,
-      rs: 3,
-      entryAttempts: 3,
-      entryKills: 1,
-      entryDeaths: 2,
-      entryDiff: -1,
-      entryAttemptsRate: '25%',
-      entrySuccessRate: '33%',
-      tradeKills: 1,
-      deathsTraded: 1,
-      tradedEntryKills: 1,
-      tradedEntryDeaths: 0,
-      clutchWins: 0,
-      clutchRoundsLost: 1,
-      clutchSuccess: '0%',
-      c1v5: 0,
-      c1v4: 0,
-      c1v3: 0,
-      c1v2: 0,
-      c1v1: 0
-    },
-    {
-      id: 's1',
-      name: 'Rosen33',
-      avatar: '/images/avatar_duck_exact.png',
-      code: 'SE',
-      countryName: 'Sweden',
-      rankLevel: 9,
-      rankElo: 1993,
-      rating: '1.25',
-      ratingScore: 1.25,
-      team: 'team1',
-      partyShape: 'circle',
-      swing: '+3.95%',
-      isPositiveSwing: true,
-      k: 8,
-      d: 4,
-      a: 1,
-      adr: '118.9',
-      kd: '2.00',
-      kr: '1.00',
-      hs: 3,
-      hsRate: '37.5%',
-      k5: 0,
-      k4: 0,
-      k3: 1,
-      k2: 1,
-      mvps: 2,
-      rws: '23.19',
-      crosshairCode: 'CSGO-3k8qX-aB27v-85Yw3-2k9F8-3kK8A',
-      kast: '75.0%',
-      acc: '18.0%',
-      sAcc: '38.9%',
-      shots: 139,
-      hits: 25,
-      mk: 2,
-      mkRate: '25%',
-      rp: 12,
-      rs: 3,
-      entryAttempts: 0,
-      entryKills: 0,
-      entryDeaths: 0,
-      entryDiff: 0,
-      entryAttemptsRate: '0%',
-      entrySuccessRate: '0%',
-      tradeKills: 4,
-      deathsTraded: 1,
-      tradedEntryKills: 0,
-      tradedEntryDeaths: 0,
-      clutchWins: 1,
-      clutchRoundsLost: 0,
-      clutchSuccess: '100%',
-      c1v5: 0,
-      c1v4: 0,
-      c1v3: 0,
-      c1v2: 0,
-      c1v1: 1
-    },
-    {
-      id: 's7',
-      name: 'Zalevvo',
-      avatar: '/images/avatar_ghost_exact.png',
-      code: 'UA',
-      countryName: 'Ukraine',
-      rankLevel: 6,
-      rankElo: 1234,
-      rating: '1.24',
-      ratingScore: 1.24,
-      team: 'team2',
-      partyShape: 'triangle',
-      swing: '+1.94%',
-      isPositiveSwing: true,
-      k: 13,
-      d: 8,
-      a: 5,
-      adr: '137.3',
-      kd: '1.63',
-      kr: '1.08',
-      hs: 8,
-      hsRate: '61.5%',
-      k5: 0,
-      k4: 0,
-      k3: 1,
-      k2: 4,
-      mvps: 1,
-      rws: '11.58',
-      crosshairCode: 'CSGO-7yX9K-8uZ3W-5kL2q-6vT9u-9wZ4G',
-      kast: '100.0%',
-      acc: '21.5%',
-      sAcc: '43.2%',
-      shots: 200,
-      hits: 43,
-      mk: 5,
-      mkRate: '62%',
-      rp: 8,
-      rs: 2,
-      entryAttempts: 2,
-      entryKills: 1,
-      entryDeaths: 1,
-      entryDiff: 0,
-      entryAttemptsRate: '25%',
-      entrySuccessRate: '50%',
-      tradeKills: 2,
-      deathsTraded: 0,
-      tradedEntryKills: 0,
-      tradedEntryDeaths: 0,
-      clutchWins: 0,
-      clutchRoundsLost: 2,
-      clutchSuccess: '0%',
-      c1v5: 0,
-      c1v4: 0,
-      c1v3: 0,
-      c1v2: 0,
-      c1v1: 0
-    },
-    {
-      id: 's6',
-      name: 'zimny',
-      avatar: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=150&q=80',
-      code: 'FR',
-      countryName: 'France',
-      rankLevel: 9,
-      rankElo: 1817,
-      rating: '1.17',
-      ratingScore: 1.17,
-      team: 'team2',
-      partyShape: 'triangle',
-      swing: '+3.27%',
-      isPositiveSwing: true,
-      k: 11,
-      d: 6,
-      a: 0,
-      adr: '87.5',
-      kd: '1.83',
-      kr: '0.92',
-      hs: 6,
-      hsRate: '54.5%',
-      k5: 0,
-      k4: 0,
-      k3: 0,
-      k2: 2,
-      mvps: 2,
-      rws: '11.45',
-      crosshairCode: 'CSGO-2zX8K-6uY9W-4kL7q-3vT8u-7wZ2F',
-      kast: '100.0%',
-      acc: '21.6%',
-      sAcc: '47.8%',
-      shots: 87,
-      hits: 19,
-      mk: 2,
-      mkRate: '25%',
-      rp: 8,
-      rs: 3,
-      entryAttempts: 2,
-      entryKills: 2,
-      entryDeaths: 0,
-      entryDiff: 2,
-      entryAttemptsRate: '25%',
-      entrySuccessRate: '100%',
-      tradeKills: 1,
-      deathsTraded: 0,
-      tradedEntryKills: 0,
-      tradedEntryDeaths: 0,
-      clutchWins: 1,
-      clutchRoundsLost: 1,
-      clutchSuccess: '50%',
-      c1v5: 0,
-      c1v4: 0,
-      c1v3: 0,
-      c1v2: 0,
-      c1v1: 1
-    },
-    {
-      id: 's8',
-      name: 'M18',
-      avatar: '/images/faceit_m18_badge.png',
-      code: 'XK',
-      countryName: 'Kosovo',
-      rankLevel: 10,
-      rankElo: 2156,
-      rating: '1.03',
-      ratingScore: 1.03,
-      team: 'team2',
-      partyShape: 'square',
-      swing: '-3.82%',
-      isPositiveSwing: false,
-      k: 12,
-      d: 10,
-      a: 2,
-      adr: '84.4',
-      kd: '1.20',
-      kr: '1.00',
-      hs: 5,
-      hsRate: '41.7%',
-      k5: 0,
-      k4: 1,
-      k3: 0,
-      k2: 2,
-      mvps: 1,
-      rws: '12.02',
-      crosshairCode: 'CSGO-9zX4K-2uY8W-7kL3q-4vT2u-8wZ6H',
-      kast: '62.5%',
-      acc: '15.8%',
-      sAcc: '30.0%',
-      shots: 132,
-      hits: 21,
-      mk: 3,
-      mkRate: '38%',
-      rp: 8,
-      rs: 2,
-      entryAttempts: 4,
-      entryKills: 3,
-      entryDeaths: 1,
-      entryDiff: 2,
-      entryAttemptsRate: '50%',
-      entrySuccessRate: '75%',
-      tradeKills: 4,
-      deathsTraded: 0,
-      tradedEntryKills: 2,
-      tradedEntryDeaths: 0,
-      clutchWins: 0,
-      clutchRoundsLost: 0,
-      clutchSuccess: '0%',
-      c1v5: 0,
-      c1v4: 0,
-      c1v3: 0,
-      c1v2: 0,
-      c1v1: 0
-    },
-    {
-      id: 's3',
-      name: 'mxrty666',
-      avatar: 'https://images.unsplash.com/photo-1539571696357-5a69c17a67c6?auto=format&fit=crop&w=150&q=80',
-      code: 'SE',
-      countryName: 'Sweden',
-      rankLevel: 9,
-      rankElo: 1968,
-      rating: '0.99',
-      ratingScore: 0.99,
-      team: 'team1',
-      partyShape: 'diamond',
-      hasPriority: true,
-      swing: '-4.76%',
-      isPositiveSwing: false,
-      k: 6,
-      d: 6,
-      a: 1,
-      adr: '80.9',
-      kd: '1.00',
-      kr: '0.75',
-      hs: 3,
-      hsRate: '50.0%',
-      k5: 0,
-      k4: 0,
-      k3: 0,
-      k2: 2,
-      mvps: 0,
-      rws: '16.92',
-      crosshairCode: 'CSGO-6vW4K-5u8zZ-x7Tq2-78uY2-2vX8C',
-      kast: '91.7%',
-      acc: '20.9%',
-      sAcc: '44.0%',
-      shots: 117,
-      hits: 25,
-      mk: 2,
-      mkRate: '25%',
-      rp: 12,
-      rs: 2,
-      entryAttempts: 2,
-      entryKills: 1,
-      entryDeaths: 1,
-      entryDiff: 0,
-      entryAttemptsRate: '17%',
-      entrySuccessRate: '50%',
-      tradeKills: 0,
-      deathsTraded: 3,
-      tradedEntryKills: 0,
-      tradedEntryDeaths: 1,
-      clutchWins: 0,
-      clutchRoundsLost: 0,
-      clutchSuccess: '0%',
-      c1v5: 0,
-      c1v4: 0,
-      c1v3: 0,
-      c1v2: 0,
-      c1v1: 0
-    },
-    {
-      id: 's9',
-      name: currentGamerTag || 'M14',
-      avatar: currentAvatarUrl || 'https://distribution.faceit-cdn.net/images/ac453a50-dbca-4d42-a740-dac12bdc74c0.jpeg',
-      code: 'XK',
-      countryName: 'Kosovo',
-      rankLevel: (() => {
-        const u = partyMembers?.find(p => p.id === 'current-user' || p.name === currentGamerTag);
-        if (u && u.level) return u.level;
-        const m = typeof window !== 'undefined' ? localStorage.getItem('vortex_user_matches') : null;
-        return m && m !== '0' ? 7 : 3;
-      })(),
-      rankElo: (() => {
-        const u = partyMembers?.find(p => p.id === 'current-user' || p.name === currentGamerTag);
-        if (u && u.elo) return u.elo;
-        const m = typeof window !== 'undefined' ? localStorage.getItem('vortex_user_matches') : null;
-        return m && m !== '0' ? 1407 : 800;
-      })(),
-      rating: '0.90',
-      ratingScore: 0.90,
-      team: 'team2',
-      partyShape: 'square',
-      swing: '+0.23%',
-      isPositiveSwing: true,
-      k: 6,
-      d: 7,
-      a: 7,
-      adr: '67.0',
-      kd: '0.86',
-      kr: '0.50',
-      hs: 3,
-      hsRate: '50.0%',
-      k5: 0,
-      k4: 0,
-      k3: 0,
-      k2: 2,
-      mvps: 1,
-      rws: '11.96',
-      crosshairCode: 'CSGO-5kL9q-3vT8u-7wZ2F-6uY9W-2zX8K',
-      kast: '87.5%',
-      acc: '15.6%',
-      sAcc: '31.8%',
-      shots: 154,
-      hits: 23,
-      mk: 2,
-      mkRate: '25%',
-      rp: 6,
-      rs: 4,
-      entryAttempts: 0,
-      entryKills: 0,
-      entryDeaths: 0,
-      entryDiff: 0,
-      entryAttemptsRate: '0%',
-      entrySuccessRate: '0%',
-      tradeKills: 0,
-      deathsTraded: 3,
-      tradedEntryKills: 0,
-      tradedEntryDeaths: 0,
-      clutchWins: 0,
-      clutchRoundsLost: 0,
-      clutchSuccess: '0%',
-      c1v5: 0,
-      c1v4: 0,
-      c1v3: 0,
-      c1v2: 0,
-      c1v1: 0
-    },
-    {
-      id: 's10',
-      name: 'Nascar777',
-      avatar: 'https://images.unsplash.com/photo-1522075469751-3a6694fb2f61?auto=format&fit=crop&w=150&q=80',
-      code: 'PL',
-      countryName: 'Poland',
-      rankLevel: 10,
-      rankElo: 2028,
-      rating: '0.84',
-      ratingScore: 0.84,
-      team: 'team2',
-      partyShape: 'triangle',
-      hasPriority: true,
-      swing: '-9.15%',
-      isPositiveSwing: false,
-      k: 7,
-      d: 9,
-      a: 1,
-      adr: '44.9',
-      kd: '0.78',
-      kr: '0.58',
-      hs: 1,
-      hsRate: '14.3%',
-      k5: 0,
-      k4: 0,
-      k3: 1,
-      k2: 0,
-      mvps: 0,
-      rws: '2.12',
-      crosshairCode: 'CSGO-1wZ7E-4uY8Z-7xT2W-2kL9q-5vX8u',
-      kast: '62.5%',
-      acc: '13.0%',
-      sAcc: '23.1%',
-      shots: 90,
-      hits: 12,
-      mk: 1,
-      mkRate: '12%',
-      rp: 8,
-      rs: 2,
-      entryAttempts: 1,
-      entryKills: 0,
-      entryDeaths: 1,
-      entryDiff: -1,
-      entryAttemptsRate: '12%',
-      entrySuccessRate: '0%',
-      tradeKills: 0,
-      deathsTraded: 1,
-      tradedEntryKills: 0,
-      tradedEntryDeaths: 0,
-      clutchWins: 0,
-      clutchRoundsLost: 0,
-      clutchSuccess: '0%',
-      c1v5: 0,
-      c1v4: 0,
-      c1v3: 0,
-      c1v2: 0,
-      c1v1: 0
-    }
-  ];
+  // Map Veto Exact List
+  const vetoHistoryList = useMemo(() => [
+    { step: 1, text: `${activeMatch.team1.name} banned Cache`, isDecided: false },
+    { step: 2, text: `${activeMatch.team2.name} banned Inferno`, isDecided: false },
+    { step: 3, text: `${activeMatch.team1.name} banned Nuke`, isDecided: false },
+    { step: 4, text: `${activeMatch.team2.name} banned Ancient`, isDecided: false },
+    { step: 5, text: `${activeMatch.team1.name} banned Mirage`, isDecided: false },
+    { step: 6, text: `${activeMatch.team2.name} banned Dust2`, isDecided: false },
+    { step: 7, text: `${activeMatch.map} picked by default`, isDecided: true }
+  ], [activeMatch]);
 
   // Dynamic active stats dataset based on sideFilter ('all' | 't' | 'ct')
-  const activeAllStats: FaceitStatsRow[] = sideFilter === 't'
-    ? tSideStatsRows
-    : sideFilter === 'ct'
-    ? ctSideStatsRows
-    : [...team1StatsRows, ...team2StatsRows];
+  const activeAllStats: FaceitStatsRow[] = useMemo(() => {
+    const all = [...team1StatsRows, ...team2StatsRows];
+    if (sideFilter === 't') {
+      return all.map(p => ({
+        ...p,
+        k: Math.round(p.k * 0.55),
+        d: Math.round(p.d * 0.52),
+        a: Math.round(p.a * 0.5),
+        adr: (parseFloat(p.adr) * 1.05).toFixed(1),
+        rating: (parseFloat(p.rating) * 1.02).toFixed(2),
+        ratingScore: parseFloat(p.rating) * 1.02
+      }));
+    }
+    if (sideFilter === 'ct') {
+      return all.map(p => ({
+        ...p,
+        k: Math.round(p.k * 0.45),
+        d: Math.round(p.d * 0.48),
+        a: Math.round(p.a * 0.5),
+        adr: (parseFloat(p.adr) * 0.95).toFixed(1),
+        rating: (parseFloat(p.rating) * 0.98).toFixed(2),
+        ratingScore: parseFloat(p.rating) * 0.98
+      }));
+    }
+    return all;
+  }, [team1StatsRows, team2StatsRows, sideFilter]);
 
   const activePlayersSorted: FaceitStatsRow[] = [...activeAllStats].sort((a, b) => b.ratingScore - a.ratingScore);
 
@@ -3269,89 +1297,92 @@ export const VortexMatchRoom: React.FC<VortexMatchRoomProps> = ({
               </div>
             </div>
 
-            {/* Scoreboard: Team 1 (Rosen33) 13 vs 7 Team 2 (Zalevvo) */}
+            {/* Scoreboard & Fair 50% vs 50% Win Rate Balance */}
             <div className={`grid grid-cols-1 md:grid-cols-12 items-center gap-4 ${
               activeTab === 'stats' ? 'py-1 sm:py-2' : 'py-3'
             }`}>
               
-              {/* Left Team (Rosen33 - WINNER) */}
+              {/* Left Team (Team 1) */}
               <div className="md:col-span-5 flex items-center justify-start md:justify-end gap-3.5 text-left md:text-right">
                 <div className="order-2 md:order-1">
-                  <div className="text-[10px] font-mono font-black text-emerald-400 uppercase tracking-widest">
-                    WINNER
+                  <div className="text-[10px] font-mono font-black text-emerald-400 uppercase tracking-widest flex items-center md:justify-end gap-1.5">
+                    <span>{activeMatch.team1.stackType}</span>
+                    <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />
                   </div>
                   <h2 className="text-xl font-display font-black text-white tracking-wide">
-                    team_Rosen33
+                    {activeMatch.team1.name}
                   </h2>
                   {activeTab === 'overview' && (
-                    <>
-                      <div className="text-[11px] font-mono text-slate-400 flex items-center md:justify-end gap-2 mt-0.5">
-                        <span>1,776</span>
-                        <span>•</span>
-                        <span>4,790 Matches</span>
-                      </div>
-                      {/* Detailed Team Stats Row (Only on Overview) */}
-                      <div className="hidden lg:flex items-center justify-end gap-2 text-[10px] font-mono text-slate-400 mt-1">
-                        <span>45% <span className="text-slate-500">Wins</span></span>
-                        <span>1.10 <span className="text-slate-500">Rating</span></span>
-                        <span className="text-red-400">-0.01% <span className="text-slate-500">Swing</span></span>
-                        <span>1.00 <span className="text-slate-500">K/D</span></span>
-                        <span>0.75 <span className="text-slate-500">K/R</span></span>
-                        <span>80.6 <span className="text-slate-500">ADR</span></span>
-                      </div>
-                    </>
+                    <div className="text-[11px] font-mono text-slate-400 flex items-center md:justify-end gap-2 mt-0.5">
+                      <span className="text-emerald-400 font-bold">{activeMatch.team1.avgElo.toLocaleString()} AVG ELO</span>
+                      <span>•</span>
+                      <span>Level {activeMatch.team1.avgLevel}</span>
+                    </div>
                   )}
                 </div>
 
                 <div className="order-1 md:order-2 relative w-14 h-14 rounded-full p-0.5 bg-gradient-to-r from-emerald-500 to-[#A3E635] shadow-[0_0_15px_rgba(52,211,153,0.4)] shrink-0">
                   <img 
-                    src="/images/avatar_duck_exact.png" 
-                    alt="team_Rosen33" 
+                    src={team1Players[0]?.avatar || '/images/avatar_duck_exact.png'} 
+                    alt={activeMatch.team1.name} 
                     className="w-full h-full rounded-full object-cover" 
                   />
                 </div>
               </div>
 
-              {/* Center Score */}
-              <div className="md:col-span-2 text-center py-1">
-                <div className="inline-flex items-center justify-center gap-3 px-5 py-2 rounded-2xl bg-black/60 border border-white/10 shadow-inner">
-                  <span className="text-3xl font-display font-black text-emerald-400">13</span>
+              {/* Center Match Balance & Score */}
+              <div className="md:col-span-2 text-center py-1 space-y-2">
+                <div className="inline-flex items-center justify-center gap-3 px-5 py-2 rounded-2xl bg-black/70 border border-white/10 shadow-inner">
+                  <span className="text-3xl font-display font-black text-emerald-400">
+                    {matchSimulatedResult ? matchSimulatedResult.score1 : '13'}
+                  </span>
                   <span className="text-xs font-mono uppercase text-slate-500 font-bold">vs</span>
-                  <span className="text-3xl font-display font-black text-slate-400">7</span>
+                  <span className="text-3xl font-display font-black text-slate-400">
+                    {matchSimulatedResult ? matchSimulatedResult.score2 : '11'}
+                  </span>
+                </div>
+
+                {/* FACEIT SUPER MATCH 50% vs 50% FAIR WIN PROBABILITY */}
+                <div className="p-2.5 rounded-xl bg-black/70 border border-white/10 space-y-1.5 shadow-lg">
+                  <div className="flex items-center justify-between text-[10px] font-mono font-bold">
+                    <span className="text-[#A3E635]">{activeMatch.winProbabilityTeam1}% WIN</span>
+                    <span className="text-slate-400 text-[9px]">±{activeMatch.eloGainWin} ELO</span>
+                    <span className="text-blue-400">{activeMatch.winProbabilityTeam2}% WIN</span>
+                  </div>
+                  <div className="w-full h-2 rounded-full bg-slate-800 overflow-hidden flex">
+                    <div style={{ width: `${activeMatch.winProbabilityTeam1}%` }} className="bg-gradient-to-r from-emerald-500 to-[#A3E635]" />
+                    <div style={{ width: `${activeMatch.winProbabilityTeam2}%` }} className="bg-gradient-to-r from-blue-500 to-indigo-500" />
+                  </div>
+                  <div className="text-[9px] font-mono text-emerald-400 font-bold tracking-tight">
+                    ✓ Fair ELO Balanced (Δ {activeMatch.eloDiff} ELO)
+                  </div>
                 </div>
               </div>
 
-              {/* Right Team (Zalevvo / M18 / M14) */}
+              {/* Right Team (Team 2) */}
               <div className="md:col-span-5 flex items-center justify-start gap-3.5 text-left">
                 <div className="relative w-14 h-14 rounded-full p-0.5 bg-gradient-to-r from-slate-600 to-slate-400 shrink-0">
                   <img 
-                    src="/images/avatar_ghost_exact.png" 
-                    alt="team_Zalevvo" 
+                    src={team2Players[0]?.avatar || '/images/avatar_ghost_exact.png'} 
+                    alt={activeMatch.team2.name} 
                     className="w-full h-full rounded-full object-cover" 
                   />
                 </div>
 
                 <div>
+                  <div className="text-[10px] font-mono font-black text-slate-400 uppercase tracking-widest flex items-center gap-1.5">
+                    <span>{activeMatch.team2.stackType}</span>
+                    <span className="w-1.5 h-1.5 rounded-full bg-slate-500" />
+                  </div>
                   <h2 className="text-xl font-display font-black text-white tracking-wide">
-                    team_Zalevvo
+                    {activeMatch.team2.name}
                   </h2>
                   {activeTab === 'overview' && (
-                    <>
-                      <div className="text-[11px] font-mono text-slate-400 flex items-center gap-2 mt-0.5">
-                        <span>1,749</span>
-                        <span>•</span>
-                        <span>5,325 Matches</span>
-                      </div>
-                      {/* Detailed Team Stats Row (Only on Overview) */}
-                      <div className="hidden lg:flex items-center gap-2 text-[10px] font-mono text-slate-400 mt-1">
-                        <span>56% <span className="text-slate-500">Wins</span></span>
-                        <span>1.13 <span className="text-slate-500">Rating</span></span>
-                        <span className="text-emerald-400">+0.36% <span className="text-slate-500">Swing</span></span>
-                        <span>1.03 <span className="text-slate-500">K/D</span></span>
-                        <span>0.75 <span className="text-slate-500">K/R</span></span>
-                        <span>83.8 <span className="text-slate-500">ADR</span></span>
-                      </div>
-                    </>
+                    <div className="text-[11px] font-mono text-slate-400 flex items-center gap-2 mt-0.5">
+                      <span className="text-blue-400 font-bold">{activeMatch.team2.avgElo.toLocaleString()} AVG ELO</span>
+                      <span>•</span>
+                      <span>Level {activeMatch.team2.avgLevel}</span>
+                    </div>
                   )}
                 </div>
               </div>
@@ -3460,8 +1491,73 @@ export const VortexMatchRoom: React.FC<VortexMatchRoomProps> = ({
                 </div>
               </div>
 
-              {/* Action Buttons: Watch Demo & Back to Matchmaking */}
+              {/* CS2 Server Connect & Action Buttons */}
               <div className="space-y-2 pt-1">
+                {/* Dedicated Server IP Card */}
+                <div className="p-3 rounded-xl bg-black/60 border border-white/10 space-y-1.5 text-left">
+                  <div className="flex items-center justify-between text-[10px] font-mono text-slate-400">
+                    <span className="flex items-center gap-1 text-emerald-400 font-bold">
+                      <Radio className="w-3 h-3 animate-pulse" />
+                      CS2 MatchZy 128-Tick
+                    </span>
+                    <span>Sub-Tick 24ms</span>
+                  </div>
+                  <div className="text-[11px] font-mono text-[#A3E635] truncate select-all bg-black/40 px-2 py-1 rounded border border-white/5">
+                    connect {activeMatch.serverIp}; password vortex
+                  </div>
+                  <div className="flex items-center gap-2 pt-0.5">
+                    <button
+                      onClick={() => {
+                        sound.playClick();
+                        navigator.clipboard.writeText(`connect ${activeMatch.serverIp}; password vortex`);
+                        setCopiedServerIp(true);
+                        setTimeout(() => setCopiedServerIp(false), 2000);
+                      }}
+                      className="flex-1 py-1.5 rounded-lg bg-white/10 hover:bg-white/20 text-white font-mono font-bold text-[10px] flex items-center justify-center gap-1 transition cursor-pointer"
+                    >
+                      {copiedServerIp ? <Check className="w-3 h-3 text-emerald-400" /> : <Copy className="w-3 h-3" />}
+                      <span>{copiedServerIp ? 'Copied ✓' : 'Copy Connect'}</span>
+                    </button>
+                    <a
+                      href={`steam://connect/${activeMatch.serverIp}/vortex`}
+                      onClick={() => sound.playClick()}
+                      className="flex-1 py-1.5 rounded-lg bg-emerald-500/20 hover:bg-emerald-500/30 border border-emerald-500/40 text-emerald-400 font-mono font-bold text-[10px] flex items-center justify-center gap-1 transition cursor-pointer"
+                    >
+                      <Play className="w-3 h-3 fill-current" />
+                      <span>Open CS2</span>
+                    </a>
+                  </div>
+                </div>
+
+                {/* 1-Click Match Result Simulation */}
+                {!matchSimulatedResult ? (
+                  <button
+                    onClick={() => {
+                      sound.playTournamentVictory();
+                      confetti({ particleCount: 90, spread: 80, origin: { y: 0.6 } });
+                      const s1 = 13;
+                      const s2 = Math.floor(Math.random() * 3) + 9; // 9-11 (close match)
+                      setMatchSimulatedResult({ score1: s1, score2: s2, won: true });
+                      if (onMatchFinished) {
+                        onMatchFinished(true, activeMatch.eloGainWin);
+                      }
+                    }}
+                    className="w-full py-3 rounded-lg bg-gradient-to-r from-[#FF5500] to-amber-500 hover:brightness-110 text-black font-display font-black text-xs uppercase tracking-wider transition shadow-lg flex items-center justify-center gap-2 cursor-pointer active:scale-95"
+                  >
+                    <Trophy className="w-3.5 h-3.5" />
+                    <span>Simulate Match (1-Click Result)</span>
+                  </button>
+                ) : (
+                  <div className="p-3 rounded-xl bg-emerald-500/15 border border-emerald-500/30 text-center animate-in zoom-in-95 duration-150">
+                    <div className="text-xs font-black font-display text-white">
+                      🎉 VICTORY! {activeMatch.team1.name} {matchSimulatedResult.score1} - {matchSimulatedResult.score2} {activeMatch.team2.name}
+                    </div>
+                    <div className="text-[10px] font-mono text-emerald-400 font-bold mt-0.5">
+                      ✓ +{activeMatch.eloGainWin} ELO Added • Strict 50/50 Balance Win!
+                    </div>
+                  </div>
+                )}
+
                 <button
                   onClick={() => {
                     sound.playClick();
@@ -3473,9 +1569,9 @@ export const VortexMatchRoom: React.FC<VortexMatchRoomProps> = ({
                     link.click();
                     document.body.removeChild(link);
                   }}
-                  className="w-full py-3 rounded-lg bg-[#18110E] hover:bg-[#201511] border border-[#FF5500]/20 text-[#FF5500] font-display font-bold text-xs uppercase tracking-wider transition flex items-center justify-center cursor-pointer shadow-sm active:scale-95"
+                  className="w-full py-2.5 rounded-lg bg-[#18110E] hover:bg-[#201511] border border-[#FF5500]/20 text-[#FF5500] font-display font-bold text-xs uppercase tracking-wider transition flex items-center justify-center cursor-pointer shadow-sm active:scale-95"
                 >
-                  <span>WATCH DEMO</span>
+                  <span>WATCH DEMO (.dem)</span>
                 </button>
 
                 <button
@@ -3483,7 +1579,7 @@ export const VortexMatchRoom: React.FC<VortexMatchRoomProps> = ({
                     sound.playClick();
                     onClose();
                   }}
-                  className="w-full py-3.5 rounded-lg bg-[#FF5500] hover:bg-[#FF6611] text-white font-display font-black text-xs uppercase tracking-wider transition shadow-lg shadow-orange-500/20 flex items-center justify-center cursor-pointer active:scale-95"
+                  className="w-full py-3 rounded-lg bg-white/10 hover:bg-white/20 text-white font-display font-black text-xs uppercase tracking-wider transition flex items-center justify-center cursor-pointer active:scale-95"
                 >
                   <span>BACK TO MATCHMAKING</span>
                 </button>
