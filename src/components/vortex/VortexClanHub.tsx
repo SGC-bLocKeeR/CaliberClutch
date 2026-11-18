@@ -71,12 +71,43 @@ interface VortexClanHubProps {
   setToast: (msg: string) => void;
 }
 
-const PRESET_CLAN_LOGOS = [
-  'https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?auto=format&fit=crop&w=200&q=80', // Cyber Eagle
-  'https://images.unsplash.com/photo-1579783900882-c0d3dad7b119?auto=format&fit=crop&w=200&q=80', // Golden Skull
-  'https://images.unsplash.com/photo-1563089145-599997674d42?auto=format&fit=crop&w=200&q=80', // Neon Dragon
-  'https://images.unsplash.com/photo-1550745165-9bc0b252726f?auto=format&fit=crop&w=200&q=80', // Viper Shield
-  'https://images.unsplash.com/photo-1578632767115-351597cf2477?auto=format&fit=crop&w=200&q=80', // Caliber Wolf
+export interface PresetBadge {
+  id: string;
+  name: string;
+  url: string;
+}
+
+const PRESET_CLAN_LOGOS: PresetBadge[] = [
+  {
+    id: 'caliber-neon',
+    name: 'Caliber Clutch Official Neon Crest',
+    url: '/images/clan_badges/badge_caliber_lime.svg'
+  },
+  {
+    id: 'caliber-fire',
+    name: 'Caliber Clutch Fire Strike',
+    url: '/images/clan_badges/badge_caliber_fire.svg'
+  },
+  {
+    id: 'caliber-skull',
+    name: 'Caliber Tactical Skull & Crossed Blades',
+    url: '/images/clan_badges/badge_caliber_skull.svg'
+  },
+  {
+    id: 'caliber-sniper',
+    name: 'Caliber AWP 128-Tick Scope',
+    url: '/images/clan_badges/badge_caliber_sniper.svg'
+  },
+  {
+    id: 'caliber-shield',
+    name: 'Caliber Championship Star Shield',
+    url: '/images/clan_badges/badge_caliber_shield.svg'
+  },
+  {
+    id: 'karambit-lore',
+    name: 'Caliber Clutch Karambit Lore',
+    url: '/images/karambit_lore.png'
+  }
 ];
 
 const DEFAULT_OPPONENT_CLANS: ClanData[] = [
@@ -84,7 +115,7 @@ const DEFAULT_OPPONENT_CLANS: ClanData[] = [
     id: 'bne-clan',
     name: 'Bad News Eagles Academy',
     tag: 'BNE',
-    logo: 'https://images.unsplash.com/photo-1563089145-599997674d42?auto=format&fit=crop&w=200&q=80',
+    logo: '/images/clan_badges/badge_caliber_skull.svg',
     banner: 'https://images.unsplash.com/photo-1542751371-adc38448a05e?auto=format&fit=crop&w=1200&q=80',
     description: 'Official developmental roster of Kosovo CS2 legends. Daily 128-tick pracc & tournaments.',
     country: 'Kosovo',
@@ -114,7 +145,7 @@ const DEFAULT_OPPONENT_CLANS: ClanData[] = [
     id: 'faze-balkan',
     name: 'FaZe Clan Balkan Talent',
     tag: 'FaZe',
-    logo: 'https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?auto=format&fit=crop&w=200&q=80',
+    logo: '/images/clan_badges/badge_caliber_fire.svg',
     banner: 'https://images.unsplash.com/photo-1511512578047-dfb367046420?auto=format&fit=crop&w=1200&q=80',
     description: 'Premier competitive CS2 squad for European cup circuits and cash tournaments.',
     country: 'Germany',
@@ -144,7 +175,7 @@ const DEFAULT_OPPONENT_CLANS: ClanData[] = [
     id: 'prishtina-clutch',
     name: 'Prishtina Clutch Stars',
     tag: 'PRN',
-    logo: 'https://images.unsplash.com/photo-1550745165-9bc0b252726f?auto=format&fit=crop&w=200&q=80',
+    logo: '/images/clan_badges/badge_caliber_shield.svg',
     banner: 'https://images.unsplash.com/photo-1542751371-adc38448a05e?auto=format&fit=crop&w=1200&q=80',
     description: 'Local champions competing in weekly CaliberClutch prize cups. 100% Cash focus.',
     country: 'Kosovo',
@@ -195,7 +226,15 @@ export const VortexClanHub: React.FC<VortexClanHubProps> = ({
   const [userClan, setUserClan] = useState<ClanData>(() => {
     try {
       const saved = localStorage.getItem('vortex_user_clan_data');
-      if (saved) return JSON.parse(saved);
+      if (saved) {
+        const parsed = JSON.parse(saved);
+        // Automatically migrate any legacy unsplash stock images to official Caliber Clutch badge
+        if (!parsed.logo || parsed.logo.includes('unsplash.com')) {
+          parsed.logo = '/images/clan_badges/badge_caliber_lime.svg';
+          localStorage.setItem('vortex_user_clan_data', JSON.stringify(parsed));
+        }
+        return parsed;
+      }
     } catch (_) {}
 
     const initialTag = currentClanTag || 'M14';
@@ -203,7 +242,7 @@ export const VortexClanHub: React.FC<VortexClanHubProps> = ({
       id: 'user-clan-main',
       name: `${initialTag} Competitive Squad`,
       tag: initialTag,
-      logo: 'https://images.unsplash.com/photo-1579783900882-c0d3dad7b119?auto=format&fit=crop&w=200&q=80',
+      logo: '/images/clan_badges/badge_caliber_lime.svg',
       banner: 'https://images.unsplash.com/photo-1542751371-adc38448a05e?auto=format&fit=crop&w=1200&q=80',
       description: 'Official Caliber Clutch competitive roster led by M14. Competing in European 128-tick Cash tournaments and CS2 cups.',
       country: currentCountry.name,
@@ -328,7 +367,7 @@ export const VortexClanHub: React.FC<VortexClanHubProps> = ({
       role: selectedRoleForInvite,
       level: Math.max(3, currentUserLevel + 1),
       elo: currentUserElo + 150,
-      avatar: PRESET_CLAN_LOGOS[Math.floor(Math.random() * PRESET_CLAN_LOGOS.length)],
+      avatar: PRESET_CLAN_LOGOS[Math.floor(Math.random() * PRESET_CLAN_LOGOS.length)].url,
       country: currentCountry.name,
       flag: currentCountry.flag,
     };
@@ -895,18 +934,36 @@ export const VortexClanHub: React.FC<VortexClanHubProps> = ({
               </div>
 
               <div className="space-y-2">
-                <label className="text-slate-400">Select Preset Clan Badge</label>
-                <div className="flex items-center gap-2.5">
-                  {PRESET_CLAN_LOGOS.map((logo, idx) => (
-                    <img
-                      key={idx}
-                      src={logo}
-                      alt="Preset logo"
-                      onClick={() => setDraftLogo(logo)}
-                      className={`w-12 h-12 rounded-xl object-cover cursor-pointer border-2 transition ${
-                        draftLogo === logo ? 'border-[#FF5500] scale-105' : 'border-white/10 opacity-60 hover:opacity-100'
+                <div className="flex items-center justify-between">
+                  <label className="text-slate-400">Select Preset Clan Badge (Caliber Clutch Official)</label>
+                  <span className="text-[10px] font-mono text-[#A3E635]">6 Official Badges</span>
+                </div>
+                <div className="grid grid-cols-3 sm:grid-cols-6 gap-2.5">
+                  {PRESET_CLAN_LOGOS.map((badge) => (
+                    <div
+                      key={badge.id}
+                      onClick={() => {
+                        sound.playClick();
+                        setDraftLogo(badge.url);
+                      }}
+                      title={badge.name}
+                      className={`relative rounded-2xl p-2 bg-[#12141D] cursor-pointer border-2 transition group flex flex-col items-center justify-center ${
+                        draftLogo === badge.url
+                          ? 'border-[#FF5500] shadow-[0_0_16px_rgba(255,85,0,0.45)] scale-105 bg-[#181B26]'
+                          : 'border-white/10 opacity-70 hover:opacity-100 hover:border-slate-500 hover:scale-102'
                       }`}
-                    />
+                    >
+                      <img
+                        src={badge.url}
+                        alt={badge.name}
+                        className="w-12 h-12 rounded-xl object-contain drop-shadow"
+                      />
+                      {draftLogo === badge.url && (
+                        <span className="absolute -top-1.5 -right-1.5 w-4 h-4 rounded-full bg-[#FF5500] text-black text-[9px] font-black flex items-center justify-center shadow">
+                          ✓
+                        </span>
+                      )}
+                    </div>
                   ))}
                 </div>
               </div>
