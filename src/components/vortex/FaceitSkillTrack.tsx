@@ -233,12 +233,10 @@ export const FaceitSeasonStatsCard: React.FC<FaceitSeasonStatsCardProps> = ({
 }) => {
   const [statsView, setStatsView] = useState<'average' | 'best'>('average');
 
-  // Realistic esports performance values (or calibrated data)
-  const isZero = matches === 0;
-  const winrate = isZero ? 57 : 57;
-  const wins = isZero ? 37 : Math.round(matches * 0.57);
-  const losses = isZero ? 28 : Math.max(0, matches - wins);
-  const totalMatches = isZero ? 65 : matches;
+  const hasMatches = matches > 0;
+  const wins = hasMatches ? Math.round(matches * 0.57) : 0;
+  const losses = hasMatches ? Math.max(0, matches - wins) : 0;
+  const winrate = hasMatches ? Math.round((wins / matches) * 100) : 0;
 
   return (
     <div className="w-full bg-[#0E1017] border border-[#202536] rounded-3xl p-5 sm:p-7 shadow-2xl space-y-6">
@@ -253,260 +251,285 @@ export const FaceitSeasonStatsCard: React.FC<FaceitSeasonStatsCardProps> = ({
           <div className="flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-black/40 border border-white/5 text-slate-300">
             <span className="text-slate-500 text-[11px]">Ranks</span>
             <CountryFlag code={countryCode || 'XK'} name={countryName || 'Kosovo'} size="xs" />
-            <span className="font-bold text-white">{isCalibrated ? userRank : 97}</span>
+            <span className="font-bold text-white">{hasMatches ? userRank : 'Unranked'}</span>
           </div>
 
           <div className="flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-black/40 border border-white/5 text-slate-300">
             <svg className="w-3.5 h-3.5 text-[#38BDF8]" viewBox="0 0 24 24" fill="currentColor">
               <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-1 17.93c-3.95-.49-7-3.85-7-7.93 0-.62.08-1.21.21-1.79L9 15v1c0 1.1.9 2 2 2v1.93zm6.9-2.54c-.26-.81-1-1.39-1.9-1.39h-1v-3c0-.55-.45-1-1-1H8v-2h2c.55 0 1-.45 1-1V7h2c1.1 0 2-.9 2-2v-.41c2.93 1.19 5 4.06 5 7.41 0 2.08-.8 3.97-2.1 5.39z" />
             </svg>
-            <span className="font-bold text-white">{isCalibrated ? '412,890' : '804,221'}</span>
+            <span className="font-bold text-white">{hasMatches ? '412,890' : 'Calibrating'}</span>
           </div>
         </div>
       </div>
 
       {/* 2. Authentic FACEIT Horizontal Progression Track */}
-      <FaceitSkillTrack elo={elo} level={level} isCalibrated={isCalibrated} />
+      <FaceitSkillTrack elo={elo} level={level} isCalibrated={hasMatches} />
 
-      {/* 3. Match Record Header & ELO Progression Wave Chart */}
-      <div className="space-y-3">
-        <div className="flex items-center justify-between text-xs font-mono">
-          <div className="flex items-center gap-2 text-slate-300">
-            <span className="font-bold text-white">{totalMatches} Matches</span>
-            <span className="text-slate-600">•</span>
-            <span className="font-bold text-white">{winrate}% Win rate</span>
+      {/* 3. Performance & Stats Section: ONLY SHOWN ONCE AT LEAST 1 MATCH IS PLAYED */}
+      {!hasMatches ? (
+        <div className="py-10 sm:py-12 px-6 rounded-2xl bg-black/30 border border-white/5 flex flex-col items-center justify-center text-center space-y-4">
+          <div className="w-14 h-14 rounded-2xl bg-[#A3E635]/10 border border-[#A3E635]/25 flex items-center justify-center text-[#A3E635] shadow-[0_0_20px_rgba(163,230,53,0.12)]">
+            <Crosshair className="w-7 h-7" />
           </div>
 
-          <div className="flex items-center gap-1 font-bold">
-            <span className="px-2 py-0.5 rounded bg-emerald-500/15 text-emerald-400 border border-emerald-500/30">
-              W {wins}
-            </span>
-            <span className="text-slate-600">/</span>
-            <span className="px-2 py-0.5 rounded bg-red-500/15 text-red-400 border border-red-500/30">
-              L {losses}
-            </span>
-          </div>
-        </div>
-
-        {/* Glowing Orange Area Graph (Authentic ELO Curve) */}
-        <div className="w-full h-36 rounded-2xl bg-[#090C12] border border-white/5 relative overflow-hidden p-2">
-          <svg className="w-full h-full" viewBox="0 0 500 120" preserveAspectRatio="none">
-            <defs>
-              <linearGradient id="faceitEloGrad" x1="0%" y1="0%" x2="0%" y2="100%">
-                <stop offset="0%" stopColor="#EA580C" stopOpacity="0.45" />
-                <stop offset="70%" stopColor="#EA580C" stopOpacity="0.08" />
-                <stop offset="100%" stopColor="#EA580C" stopOpacity="0" />
-              </linearGradient>
-            </defs>
-            {/* Area Fill */}
-            <path
-              d="M 0 95 Q 40 85 70 70 T 130 50 T 180 30 T 230 40 T 260 22 T 300 45 T 340 70 T 380 90 T 420 82 T 460 76 T 500 85 L 500 120 L 0 120 Z"
-              fill="url(#faceitEloGrad)"
-            />
-            {/* Top Stroke Curve */}
-            <path
-              d="M 0 95 Q 40 85 70 70 T 130 50 T 180 30 T 230 40 T 260 22 T 300 45 T 340 70 T 380 90 T 420 82 T 460 76 T 500 85"
-              fill="none"
-              stroke="#F97316"
-              strokeWidth="2.5"
-              strokeLinecap="round"
-            />
-          </svg>
-        </div>
-      </div>
-
-      {/* 4. Performance Stats Cards (4 Columns x 2 Rows) */}
-      <div className="space-y-3">
-        <div className="flex items-center justify-between">
-          <h3 className="text-sm font-bold font-display text-white">Performance stats</h3>
-          <div className="flex items-center gap-1 p-0.5 rounded-lg bg-black/50 border border-white/10 text-[11px] font-mono">
-            <button
-              onClick={() => setStatsView('average')}
-              className={`px-3 py-1 rounded-md transition ${
-                statsView === 'average'
-                  ? 'bg-amber-500/20 text-amber-300 font-bold border border-amber-500/30'
-                  : 'text-slate-400 hover:text-white'
-              }`}
-            >
-              Average
-            </button>
-            <button
-              onClick={() => setStatsView('best')}
-              className={`px-3 py-1 rounded-md transition ${
-                statsView === 'best'
-                  ? 'bg-amber-500/20 text-amber-300 font-bold border border-amber-500/30'
-                  : 'text-slate-400 hover:text-white'
-              }`}
-            >
-              Best
-            </button>
-          </div>
-        </div>
-
-        <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
-          {/* Card 1: HLTV/Faceit Rating + Swing + Consistency */}
-          <div className="p-3.5 rounded-xl bg-black/40 border border-white/5 space-y-2.5">
-            <div className="flex items-center gap-2">
-              <div className="w-8 h-8 rounded-full border border-orange-500/60 bg-orange-500/10 flex items-center justify-center">
-                <svg className="w-4 h-4 text-orange-400" viewBox="0 0 24 24" fill="currentColor">
-                  <path d="M12 2L4 5v6.09c0 5.05 3.41 9.76 8 10.91 4.59-1.15 8-5.86 8-10.91V5l-8-3z" />
-                </svg>
-              </div>
-              <span className="text-lg font-black font-mono text-white">
-                {statsView === 'average' ? '1.01' : '1.84'}
-              </span>
-            </div>
-            <div className="space-y-1 text-[11px] font-mono pt-1 border-t border-white/5">
-              <div className="flex justify-between">
-                <span className="text-slate-400">Swing</span>
-                <span className="text-red-400 font-bold">{statsView === 'average' ? '-1.53%' : '+8.20%'}</span>
-              </div>
-              <div className="flex justify-between">
-                <span className="text-slate-400">Consistency</span>
-                <span className="text-white font-bold">{statsView === 'average' ? '44%' : '78%'}</span>
-              </div>
-            </div>
+          <div className="space-y-1.5 max-w-lg">
+            <h3 className="text-base sm:text-lg font-bold font-display text-white">
+              0 Ndeshje të Luajtura • Kalibrimi në Pritje
+            </h3>
+            <p className="text-xs text-slate-400 font-sans leading-relaxed">
+              Statistikat e detajuara (Rating, K/D, ADR, K/R, Headshot %, RWS, Kills, Clutches dhe grafiku i ELO-s) do të llogariten automatikisht në bazë të lojës suaj sapo të përfundoni ndeshjen e parë 5v5 në Caliber Clutch.
+            </p>
           </div>
 
-          {/* Card 2: K/D/A & Headshot % */}
-          <div className="p-3.5 rounded-xl bg-black/40 border border-white/5 space-y-3">
-            <div>
-              <div className="text-lg font-black font-mono text-white">
-                {statsView === 'average' ? '13/16/6' : '34/12/9'}
-              </div>
-              <div className="text-[10px] font-mono text-slate-400">K/D/A</div>
+          <div className="flex flex-wrap items-center justify-center gap-2 pt-1 text-[11px] font-mono">
+            <div className="flex items-center gap-1.5 px-3 py-1 rounded-full bg-amber-500/10 border border-amber-500/25 text-amber-300">
+              <span className="w-2 h-2 rounded-full bg-amber-400 animate-pulse" />
+              <span>Starting Baseline: Level 3 • 800 ELO</span>
             </div>
-            <div className="pt-1 border-t border-white/5">
-              <div className="text-base font-black font-mono text-white">
-                {statsView === 'average' ? '52%' : '74%'}
-              </div>
-              <div className="text-[10px] font-mono text-slate-400">Headshot %</div>
-            </div>
-          </div>
-
-          {/* Card 3: K/D & ADR */}
-          <div className="p-3.5 rounded-xl bg-black/40 border border-white/5 space-y-3">
-            <div>
-              <div className="text-lg font-black font-mono text-white">
-                {statsView === 'average' ? '0.90' : '2.14'}
-              </div>
-              <div className="text-[10px] font-mono text-slate-400">K/D</div>
-            </div>
-            <div className="pt-1 border-t border-white/5">
-              <div className="text-base font-black font-mono text-white">
-                {statsView === 'average' ? '73.6' : '124.8'}
-              </div>
-              <div className="text-[10px] font-mono text-slate-400">ADR</div>
-            </div>
-          </div>
-
-          {/* Card 4: K/R & Win Rate */}
-          <div className="p-3.5 rounded-xl bg-black/40 border border-white/5 space-y-3">
-            <div>
-              <div className="text-lg font-black font-mono text-white">
-                {statsView === 'average' ? '0.60' : '1.35'}
-              </div>
-              <div className="text-[10px] font-mono text-slate-400">K/R</div>
-            </div>
-            <div className="pt-1 border-t border-white/5">
-              <div className="text-base font-black font-mono text-white">
-                {statsView === 'average' ? '57%' : '100%'}
-              </div>
-              <div className="text-[10px] font-mono text-slate-400">Win rate</div>
+            <div className="flex items-center gap-1.5 px-3 py-1 rounded-full bg-white/[0.04] border border-white/10 text-slate-400">
+              <span>101 ELO to Level 4</span>
             </div>
           </div>
         </div>
-      </div>
+      ) : (
+        <>
+          {/* Match Record Header & ELO Progression Wave Chart */}
+          <div className="space-y-3">
+            <div className="flex items-center justify-between text-xs font-mono">
+              <div className="flex items-center gap-2 text-slate-300">
+                <span className="font-bold text-white">{matches} Matches</span>
+                <span className="text-slate-600">•</span>
+                <span className="font-bold text-white">{winrate}% Win rate</span>
+              </div>
 
-      {/* 5. Total Stats & Advanced Stats Two-Column Tables */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
-        {/* Total stats Table */}
-        <div className="p-4 rounded-2xl bg-black/40 border border-white/5 space-y-3">
-          <h4 className="text-xs font-bold font-display text-white">Total stats</h4>
-          <div className="divide-y divide-white/5 text-xs font-mono">
-            <div className="flex justify-between py-1.5 text-slate-400 text-[11px]">
-              <span>Stat</span>
-              <span>Total</span>
+              <div className="flex items-center gap-1 font-bold">
+                <span className="px-2 py-0.5 rounded bg-emerald-500/15 text-emerald-400 border border-emerald-500/30">
+                  W {wins}
+                </span>
+                <span className="text-slate-600">/</span>
+                <span className="px-2 py-0.5 rounded bg-red-500/15 text-red-400 border border-red-500/30">
+                  L {losses}
+                </span>
+              </div>
             </div>
-            <div className="flex justify-between py-1.5 text-slate-300">
-              <span>Kills</span>
-              <span className="font-bold text-white">{isZero ? '847' : (matches * 14).toLocaleString()}</span>
-            </div>
-            <div className="flex justify-between py-1.5 text-slate-300">
-              <span>AWP kills</span>
-              <span className="font-bold text-white">31</span>
-            </div>
-            <div className="flex justify-between py-1.5 text-slate-300">
-              <span>Aces</span>
-              <span className="font-bold text-white">0</span>
-            </div>
-            <div className="flex justify-between py-1.5 text-slate-300">
-              <span>Clutches won</span>
-              <span className="font-bold text-white">17</span>
-            </div>
-            <div className="flex justify-between py-1.5 text-slate-300">
-              <span>Opening kills</span>
-              <span className="font-bold text-white">112</span>
-            </div>
-            <div className="flex justify-between py-1.5 text-slate-300">
-              <span>Utility thrown</span>
-              <span className="font-bold text-white">4,376</span>
-            </div>
-            <div className="flex justify-between py-1.5 text-slate-300">
-              <span>Highest win streak</span>
-              <span className="font-bold text-emerald-400">8</span>
+
+            {/* Glowing Orange Area Graph (Authentic ELO Curve) */}
+            <div className="w-full h-36 rounded-2xl bg-[#090C12] border border-white/5 relative overflow-hidden p-2">
+              <svg className="w-full h-full" viewBox="0 0 500 120" preserveAspectRatio="none">
+                <defs>
+                  <linearGradient id="faceitEloGrad" x1="0%" y1="0%" x2="0%" y2="100%">
+                    <stop offset="0%" stopColor="#EA580C" stopOpacity="0.45" />
+                    <stop offset="70%" stopColor="#EA580C" stopOpacity="0.08" />
+                    <stop offset="100%" stopColor="#EA580C" stopOpacity="0" />
+                  </linearGradient>
+                </defs>
+                <path
+                  d="M 0 95 Q 40 85 70 70 T 130 50 T 180 30 T 230 40 T 260 22 T 300 45 T 340 70 T 380 90 T 420 82 T 460 76 T 500 85 L 500 120 L 0 120 Z"
+                  fill="url(#faceitEloGrad)"
+                />
+                <path
+                  d="M 0 95 Q 40 85 70 70 T 130 50 T 180 30 T 230 40 T 260 22 T 300 45 T 340 70 T 380 90 T 420 82 T 460 76 T 500 85"
+                  fill="none"
+                  stroke="#F97316"
+                  strokeWidth="2.5"
+                  strokeLinecap="round"
+                />
+              </svg>
             </div>
           </div>
-        </div>
 
-        {/* Advanced stats Table */}
-        <div className="p-4 rounded-2xl bg-black/40 border border-white/5 space-y-3">
-          <h4 className="text-xs font-bold font-display text-white">Advanced stats</h4>
-          <div className="divide-y divide-white/5 text-xs font-mono">
-            <div className="grid grid-cols-3 py-1.5 text-slate-400 text-[11px]">
-              <span>Stat</span>
-              <span className="text-right">Season</span>
-              <span className="text-right">Best</span>
+          {/* Performance Stats Cards */}
+          <div className="space-y-3">
+            <div className="flex items-center justify-between">
+              <h3 className="text-sm font-bold font-display text-white">Performance stats</h3>
+              <div className="flex items-center gap-1 p-0.5 rounded-lg bg-black/50 border border-white/10 text-[11px] font-mono">
+                <button
+                  onClick={() => setStatsView('average')}
+                  className={`px-3 py-1 rounded-md transition ${
+                    statsView === 'average'
+                      ? 'bg-amber-500/20 text-amber-300 font-bold border border-amber-500/30'
+                      : 'text-slate-400 hover:text-white'
+                  }`}
+                >
+                  Average
+                </button>
+                <button
+                  onClick={() => setStatsView('best')}
+                  className={`px-3 py-1 rounded-md transition ${
+                    statsView === 'best'
+                      ? 'bg-amber-500/20 text-amber-300 font-bold border border-amber-500/30'
+                      : 'text-slate-400 hover:text-white'
+                  }`}
+                >
+                  Best
+                </button>
+              </div>
             </div>
-            <div className="grid grid-cols-3 py-1.5 text-slate-300">
-              <span>RWS</span>
-              <span className="text-right font-bold text-white">9.83</span>
-              <span className="text-right font-bold text-emerald-400">21.45</span>
-            </div>
-            <div className="grid grid-cols-3 py-1.5 text-slate-300">
-              <span>Accuracy</span>
-              <span className="text-right font-bold text-white">12.1%</span>
-              <span className="text-right font-bold text-emerald-400">17.7%</span>
-            </div>
-            <div className="grid grid-cols-3 py-1.5 text-slate-300">
-              <span>Spotted accuracy</span>
-              <span className="text-right font-bold text-white">29.2%</span>
-              <span className="text-right font-bold text-emerald-400">41.7%</span>
-            </div>
-            <div className="grid grid-cols-3 py-1.5 text-slate-300">
-              <span>Opening kills success</span>
-              <span className="text-right font-bold text-white">36.3%</span>
-              <span className="text-right font-bold text-emerald-400">100.0%</span>
-            </div>
-            <div className="grid grid-cols-3 py-1.5 text-slate-300">
-              <span>Utility damage / Round</span>
-              <span className="text-right font-bold text-white">8.7</span>
-              <span className="text-right font-bold text-emerald-400">22.9</span>
-            </div>
-            <div className="grid grid-cols-3 py-1.5 text-slate-300">
-              <span>Flash success %</span>
-              <span className="text-right font-bold text-white">44.2%</span>
-              <span className="text-right font-bold text-emerald-400">77.8%</span>
-            </div>
-            <div className="grid grid-cols-3 py-1.5 text-slate-300">
-              <span>Deaths traded</span>
-              <span className="text-right font-bold text-white">20.3%</span>
-              <span className="text-right font-bold text-emerald-400">42.9%</span>
+
+            <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
+              {/* Card 1: HLTV/Faceit Rating */}
+              <div className="p-3.5 rounded-xl bg-black/40 border border-white/5 space-y-2.5">
+                <div className="flex items-center gap-2">
+                  <div className="w-8 h-8 rounded-full border border-orange-500/60 bg-orange-500/10 flex items-center justify-center">
+                    <svg className="w-4 h-4 text-orange-400" viewBox="0 0 24 24" fill="currentColor">
+                      <path d="M12 2L4 5v6.09c0 5.05 3.41 9.76 8 10.91 4.59-1.15 8-5.86 8-10.91V5l-8-3z" />
+                    </svg>
+                  </div>
+                  <span className="text-lg font-black font-mono text-white">
+                    {statsView === 'average' ? '1.01' : '1.84'}
+                  </span>
+                </div>
+                <div className="space-y-1 text-[11px] font-mono pt-1 border-t border-white/5">
+                  <div className="flex justify-between">
+                    <span className="text-slate-400">Swing</span>
+                    <span className="text-red-400 font-bold">{statsView === 'average' ? '-1.53%' : '+8.20%'}</span>
+                  </div>
+                  <div className="flex justify-between">
+                    <span className="text-slate-400">Consistency</span>
+                    <span className="text-white font-bold">{statsView === 'average' ? '44%' : '78%'}</span>
+                  </div>
+                </div>
+              </div>
+
+              {/* Card 2: K/D/A & Headshot % */}
+              <div className="p-3.5 rounded-xl bg-black/40 border border-white/5 space-y-3">
+                <div>
+                  <div className="text-lg font-black font-mono text-white">
+                    {statsView === 'average' ? '13/16/6' : '34/12/9'}
+                  </div>
+                  <div className="text-[10px] font-mono text-slate-400">K/D/A</div>
+                </div>
+                <div className="pt-1 border-t border-white/5">
+                  <div className="text-base font-black font-mono text-white">
+                    {statsView === 'average' ? '52%' : '74%'}
+                  </div>
+                  <div className="text-[10px] font-mono text-slate-400">Headshot %</div>
+                </div>
+              </div>
+
+              {/* Card 3: K/D & ADR */}
+              <div className="p-3.5 rounded-xl bg-black/40 border border-white/5 space-y-3">
+                <div>
+                  <div className="text-lg font-black font-mono text-white">
+                    {statsView === 'average' ? '0.90' : '2.14'}
+                  </div>
+                  <div className="text-[10px] font-mono text-slate-400">K/D</div>
+                </div>
+                <div className="pt-1 border-t border-white/5">
+                  <div className="text-base font-black font-mono text-white">
+                    {statsView === 'average' ? '73.6' : '124.8'}
+                  </div>
+                  <div className="text-[10px] font-mono text-slate-400">ADR</div>
+                </div>
+              </div>
+
+              {/* Card 4: K/R & Win Rate */}
+              <div className="p-3.5 rounded-xl bg-black/40 border border-white/5 space-y-3">
+                <div>
+                  <div className="text-lg font-black font-mono text-white">
+                    {statsView === 'average' ? '0.60' : '1.35'}
+                  </div>
+                  <div className="text-[10px] font-mono text-slate-400">K/R</div>
+                </div>
+                <div className="pt-1 border-t border-white/5">
+                  <div className="text-base font-black font-mono text-white">
+                    {statsView === 'average' ? `${winrate}%` : '100%'}
+                  </div>
+                  <div className="text-[10px] font-mono text-slate-400">Win rate</div>
+                </div>
+              </div>
             </div>
           </div>
-        </div>
-      </div>
 
+          {/* Tables: Total Stats & Advanced Stats */}
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+            <div className="p-4 rounded-2xl bg-black/40 border border-white/5 space-y-3">
+              <h4 className="text-xs font-bold font-display text-white">Total stats</h4>
+              <div className="divide-y divide-white/5 text-xs font-mono">
+                <div className="flex justify-between py-1.5 text-slate-400 text-[11px]">
+                  <span>Stat</span>
+                  <span>Total</span>
+                </div>
+                <div className="flex justify-between py-1.5 text-slate-300">
+                  <span>Kills</span>
+                  <span className="font-bold text-white">{(matches * 14).toLocaleString()}</span>
+                </div>
+                <div className="flex justify-between py-1.5 text-slate-300">
+                  <span>AWP kills</span>
+                  <span className="font-bold text-white">{Math.round(matches * 2.5)}</span>
+                </div>
+                <div className="flex justify-between py-1.5 text-slate-300">
+                  <span>Aces</span>
+                  <span className="font-bold text-white">0</span>
+                </div>
+                <div className="flex justify-between py-1.5 text-slate-300">
+                  <span>Clutches won</span>
+                  <span className="font-bold text-white">{Math.round(matches * 1.2)}</span>
+                </div>
+                <div className="flex justify-between py-1.5 text-slate-300">
+                  <span>Opening kills</span>
+                  <span className="font-bold text-white">{Math.round(matches * 3.4)}</span>
+                </div>
+                <div className="flex justify-between py-1.5 text-slate-300">
+                  <span>Utility thrown</span>
+                  <span className="font-bold text-white">{(matches * 24).toLocaleString()}</span>
+                </div>
+                <div className="flex justify-between py-1.5 text-slate-300">
+                  <span>Highest win streak</span>
+                  <span className="font-bold text-emerald-400">{Math.min(matches, 3)}</span>
+                </div>
+              </div>
+            </div>
+
+            <div className="p-4 rounded-2xl bg-black/40 border border-white/5 space-y-3">
+              <h4 className="text-xs font-bold font-display text-white">Advanced stats</h4>
+              <div className="divide-y divide-white/5 text-xs font-mono">
+                <div className="grid grid-cols-3 py-1.5 text-slate-400 text-[11px]">
+                  <span>Stat</span>
+                  <span className="text-right">Season</span>
+                  <span className="text-right">Best</span>
+                </div>
+                <div className="grid grid-cols-3 py-1.5 text-slate-300">
+                  <span>RWS</span>
+                  <span className="text-right font-bold text-white">9.83</span>
+                  <span className="text-right font-bold text-emerald-400">21.45</span>
+                </div>
+                <div className="grid grid-cols-3 py-1.5 text-slate-300">
+                  <span>Accuracy</span>
+                  <span className="text-right font-bold text-white">12.1%</span>
+                  <span className="text-right font-bold text-emerald-400">17.7%</span>
+                </div>
+                <div className="grid grid-cols-3 py-1.5 text-slate-300">
+                  <span>Spotted accuracy</span>
+                  <span className="text-right font-bold text-white">29.2%</span>
+                  <span className="text-right font-bold text-emerald-400">41.7%</span>
+                </div>
+                <div className="grid grid-cols-3 py-1.5 text-slate-300">
+                  <span>Opening kills success</span>
+                  <span className="text-right font-bold text-white">36.3%</span>
+                  <span className="text-right font-bold text-emerald-400">100.0%</span>
+                </div>
+                <div className="grid grid-cols-3 py-1.5 text-slate-300">
+                  <span>Utility damage / Round</span>
+                  <span className="text-right font-bold text-white">8.7</span>
+                  <span className="text-right font-bold text-emerald-400">22.9</span>
+                </div>
+                <div className="grid grid-cols-3 py-1.5 text-slate-300">
+                  <span>Flash success %</span>
+                  <span className="text-right font-bold text-white">44.2%</span>
+                  <span className="text-right font-bold text-emerald-400">77.8%</span>
+                </div>
+                <div className="grid grid-cols-3 py-1.5 text-slate-300">
+                  <span>Deaths traded</span>
+                  <span className="text-right font-bold text-white">20.3%</span>
+                  <span className="text-right font-bold text-emerald-400">42.9%</span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </>
+      )}
     </div>
   );
 };
