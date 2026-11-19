@@ -2357,6 +2357,7 @@ export const VortexClanHub: React.FC<VortexClanHubProps> = ({
   const [activeTab, setActiveTab] = useState<'my-clan' | 'roster' | 'clans-list' | 'create-clan' | 'clan-rankings'>('my-clan');
   const [rankingCategory, setRankingCategory] = useState<'platform' | 'world' | 'regional' | 'valve' | 'vrs-invites'>('platform');
   const [selectedRegionalCountry, setSelectedRegionalCountry] = useState<string | null>(null);
+  const [selectedRegionalContinent, setSelectedRegionalContinent] = useState<string | null>(null);
   const [hltvSearch, setHltvSearch] = useState('');
   const [hltvRegionFilter, setHltvRegionFilter] = useState<'all' | 'Balkans' | 'Europe' | 'Nordics'>('all');
   const [expandedHltvClanId, setExpandedHltvClanId] = useState<string | null>(null);
@@ -3940,6 +3941,23 @@ export const VortexClanHub: React.FC<VortexClanHubProps> = ({
           let regList = [...circuitClans];
           if (selectedRegionalCountry) {
             regList = regList.filter(c => c.country.toLowerCase() === selectedRegionalCountry.toLowerCase());
+          } else if (selectedRegionalContinent) {
+            if (selectedRegionalContinent === 'Europe') {
+              regList = regList.filter(c => 
+                c.region === 'Europe' || 
+                c.region === 'Balkans' || 
+                c.region === 'Nordics' ||
+                ['kosovo', 'albania', 'denmark', 'finland', 'germany', 'kazakhstan', 'poland', 'portugal', 'romania', 'russia', 'sweden', 'türkiye', 'turkey', 'ukraine', 'united kingdom', 'north macedonia'].includes(c.country.toLowerCase())
+              );
+            } else if (selectedRegionalContinent === 'North America') {
+              regList = regList.filter(c => c.region === 'North America' || ['united states', 'canada', 'usa'].includes(c.country.toLowerCase()));
+            } else if (selectedRegionalContinent === 'South America') {
+              regList = regList.filter(c => c.region === 'South America' || ['brazil', 'argentina'].includes(c.country.toLowerCase()));
+            } else if (selectedRegionalContinent === 'Asia') {
+              regList = regList.filter(c => c.region === 'Asia' || ['china', 'mongolia'].includes(c.country.toLowerCase()));
+            } else if (selectedRegionalContinent === 'Oceania') {
+              regList = regList.filter(c => c.region === 'Oceania' || ['australia', 'new zealand'].includes(c.country.toLowerCase()));
+            }
           }
           displayedClans = regList.sort((a, b) => b.points - a.points).map((c, idx) => ({
             ...c,
@@ -3977,6 +3995,7 @@ export const VortexClanHub: React.FC<VortexClanHubProps> = ({
                     sound.playClick();
                     setRankingCategory('platform');
                     setSelectedRegionalCountry(null);
+                    setSelectedRegionalContinent(null);
                   }}
                   className={`px-5 py-3.5 text-xs font-mono font-bold flex items-center gap-2 border-r border-[#2b3545] transition cursor-pointer ${
                     rankingCategory === 'platform'
@@ -3994,6 +4013,7 @@ export const VortexClanHub: React.FC<VortexClanHubProps> = ({
                     sound.playClick();
                     setRankingCategory('world');
                     setSelectedRegionalCountry(null);
+                    setSelectedRegionalContinent(null);
                   }}
                   className={`px-5 py-3.5 text-xs font-mono font-bold flex items-center gap-2 border-r border-[#2b3545] transition cursor-pointer ${
                     rankingCategory === 'world'
@@ -4027,6 +4047,7 @@ export const VortexClanHub: React.FC<VortexClanHubProps> = ({
                     sound.playClick();
                     setRankingCategory('valve');
                     setSelectedRegionalCountry(null);
+                    setSelectedRegionalContinent(null);
                   }}
                   className={`px-5 py-3.5 text-xs font-mono font-bold flex items-center gap-2 border-r border-[#2b3545] transition cursor-pointer ${
                     rankingCategory === 'valve'
@@ -4046,6 +4067,7 @@ export const VortexClanHub: React.FC<VortexClanHubProps> = ({
                     sound.playClick();
                     setRankingCategory('vrs-invites');
                     setSelectedRegionalCountry(null);
+                    setSelectedRegionalContinent(null);
                   }}
                   className={`px-5 py-3.5 text-xs font-mono font-bold flex items-center gap-2 transition cursor-pointer ${
                     rankingCategory === 'vrs-invites'
@@ -4060,15 +4082,39 @@ export const VortexClanHub: React.FC<VortexClanHubProps> = ({
                 </button>
               </div>
 
-              {/* REGIONAL ACCORDION / MULTI-COLUMN MENU (Exact match to screenshot) */}
+              {/* REGIONAL ACCORDION / MULTI-COLUMN MENU (Exact match to screenshot & fully clickable continent headers) */}
               {rankingCategory === 'regional' && (
                 <div className="p-6 bg-[#202734] border-t border-[#2b3545] text-slate-200 animate-in fade-in slide-in-from-top-2 duration-150">
                   <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
                     {/* COLUMN 1 */}
                     <div className="space-y-6">
-                      {/* North America */}
+                      {/* North America Header */}
                       <div>
-                        <h4 className="text-sm font-bold text-slate-400 mb-2.5 tracking-wide">North America</h4>
+                        <button
+                          onClick={() => {
+                            sound.playClick();
+                            if (selectedRegionalContinent === 'North America') {
+                              setSelectedRegionalContinent(null);
+                            } else {
+                              setSelectedRegionalContinent('North America');
+                              setSelectedRegionalCountry(null);
+                            }
+                          }}
+                          className={`w-full flex items-center justify-between text-left text-sm font-bold mb-2.5 tracking-wide px-2.5 py-1.5 rounded-lg transition cursor-pointer group ${
+                            selectedRegionalContinent === 'North America'
+                              ? 'bg-[#38bdf8]/20 text-[#38bdf8] font-black border border-[#38bdf8]/40 shadow-sm'
+                              : 'text-slate-300 hover:text-white hover:bg-white/5'
+                          }`}
+                          title="Click to view all North American teams"
+                        >
+                          <span className="flex items-center gap-1.5">
+                            <span>North America</span>
+                            <span className="text-[10px] font-mono font-normal opacity-60 group-hover:opacity-100">
+                              (All NA)
+                            </span>
+                          </span>
+                          <ChevronRight className={`w-3.5 h-3.5 transition-transform ${selectedRegionalContinent === 'North America' ? 'text-[#38bdf8] rotate-90' : 'text-slate-500 group-hover:text-white'}`} />
+                        </button>
                         <div className="space-y-1">
                           {REGIONAL_COLUMNS.column1.northAmerica.map(c => {
                             const isSelected = selectedRegionalCountry === c.name;
@@ -4078,6 +4124,7 @@ export const VortexClanHub: React.FC<VortexClanHubProps> = ({
                                 onClick={() => {
                                   sound.playClick();
                                   setSelectedRegionalCountry(isSelected ? null : c.name);
+                                  setSelectedRegionalContinent(null);
                                 }}
                                 className={`w-full flex items-center gap-2.5 px-3 py-1.5 rounded-lg text-left transition cursor-pointer ${
                                   isSelected
@@ -4093,9 +4140,33 @@ export const VortexClanHub: React.FC<VortexClanHubProps> = ({
                         </div>
                       </div>
 
-                      {/* South America */}
+                      {/* South America Header */}
                       <div>
-                        <h4 className="text-sm font-bold text-slate-400 mb-2.5 tracking-wide">South America</h4>
+                        <button
+                          onClick={() => {
+                            sound.playClick();
+                            if (selectedRegionalContinent === 'South America') {
+                              setSelectedRegionalContinent(null);
+                            } else {
+                              setSelectedRegionalContinent('South America');
+                              setSelectedRegionalCountry(null);
+                            }
+                          }}
+                          className={`w-full flex items-center justify-between text-left text-sm font-bold mb-2.5 tracking-wide px-2.5 py-1.5 rounded-lg transition cursor-pointer group ${
+                            selectedRegionalContinent === 'South America'
+                              ? 'bg-[#38bdf8]/20 text-[#38bdf8] font-black border border-[#38bdf8]/40 shadow-sm'
+                              : 'text-slate-300 hover:text-white hover:bg-white/5'
+                          }`}
+                          title="Click to view all South American teams"
+                        >
+                          <span className="flex items-center gap-1.5">
+                            <span>South America</span>
+                            <span className="text-[10px] font-mono font-normal opacity-60 group-hover:opacity-100">
+                              (All SA)
+                            </span>
+                          </span>
+                          <ChevronRight className={`w-3.5 h-3.5 transition-transform ${selectedRegionalContinent === 'South America' ? 'text-[#38bdf8] rotate-90' : 'text-slate-500 group-hover:text-white'}`} />
+                        </button>
                         <div className="space-y-1">
                           {REGIONAL_COLUMNS.column1.southAmerica.map(c => {
                             const isSelected = selectedRegionalCountry === c.name;
@@ -4105,6 +4176,7 @@ export const VortexClanHub: React.FC<VortexClanHubProps> = ({
                                 onClick={() => {
                                   sound.playClick();
                                   setSelectedRegionalCountry(isSelected ? null : c.name);
+                                  setSelectedRegionalContinent(null);
                                 }}
                                 className={`w-full flex items-center gap-2.5 px-3 py-1.5 rounded-lg text-left transition cursor-pointer ${
                                   isSelected
@@ -4120,9 +4192,33 @@ export const VortexClanHub: React.FC<VortexClanHubProps> = ({
                         </div>
                       </div>
 
-                      {/* Europe */}
+                      {/* Europe Header */}
                       <div>
-                        <h4 className="text-sm font-bold text-slate-400 mb-2.5 tracking-wide">Europe</h4>
+                        <button
+                          onClick={() => {
+                            sound.playClick();
+                            if (selectedRegionalContinent === 'Europe') {
+                              setSelectedRegionalContinent(null);
+                            } else {
+                              setSelectedRegionalContinent('Europe');
+                              setSelectedRegionalCountry(null);
+                            }
+                          }}
+                          className={`w-full flex items-center justify-between text-left text-sm font-bold mb-2.5 tracking-wide px-2.5 py-1.5 rounded-lg transition cursor-pointer group ${
+                            selectedRegionalContinent === 'Europe'
+                              ? 'bg-[#38bdf8]/20 text-[#38bdf8] font-black border border-[#38bdf8]/40 shadow-sm'
+                              : 'text-slate-300 hover:text-white hover:bg-white/5'
+                          }`}
+                          title="Click to view all European teams"
+                        >
+                          <span className="flex items-center gap-1.5">
+                            <span>Europe</span>
+                            <span className="text-[10px] font-mono font-normal opacity-60 group-hover:opacity-100">
+                              (All EU)
+                            </span>
+                          </span>
+                          <ChevronRight className={`w-3.5 h-3.5 transition-transform ${selectedRegionalContinent === 'Europe' ? 'text-[#38bdf8] rotate-90' : 'text-slate-500 group-hover:text-white'}`} />
+                        </button>
                         <div className="space-y-1">
                           {REGIONAL_COLUMNS.column1.europe.map(c => {
                             const isSelected = selectedRegionalCountry === c.name;
@@ -4132,6 +4228,7 @@ export const VortexClanHub: React.FC<VortexClanHubProps> = ({
                                 onClick={() => {
                                   sound.playClick();
                                   setSelectedRegionalCountry(isSelected ? null : c.name);
+                                  setSelectedRegionalContinent(null);
                                 }}
                                 className={`w-full flex items-center gap-2.5 px-3 py-1.5 rounded-lg text-left transition cursor-pointer ${
                                   isSelected
@@ -4150,7 +4247,7 @@ export const VortexClanHub: React.FC<VortexClanHubProps> = ({
 
                     {/* COLUMN 2 (Europe continued) */}
                     <div>
-                      <div className="space-y-1 pt-0 md:pt-8">
+                      <div className="space-y-1 pt-0 md:pt-11">
                         {REGIONAL_COLUMNS.column2.europe.map(c => {
                           const isSelected = selectedRegionalCountry === c.name;
                           return (
@@ -4159,6 +4256,7 @@ export const VortexClanHub: React.FC<VortexClanHubProps> = ({
                               onClick={() => {
                                 sound.playClick();
                                 setSelectedRegionalCountry(isSelected ? null : c.name);
+                                setSelectedRegionalContinent(null);
                               }}
                               className={`w-full flex items-center gap-2.5 px-3 py-1.5 rounded-lg text-left transition cursor-pointer ${
                                 isSelected
@@ -4177,7 +4275,7 @@ export const VortexClanHub: React.FC<VortexClanHubProps> = ({
                     {/* COLUMN 3 (Europe end + Asia + Oceania) */}
                     <div className="space-y-6">
                       {/* Europe Part 3 */}
-                      <div className="space-y-1 pt-0 md:pt-8">
+                      <div className="space-y-1 pt-0 md:pt-11">
                         {REGIONAL_COLUMNS.column3.europe.map(c => {
                           const isSelected = selectedRegionalCountry === c.name;
                           return (
@@ -4186,6 +4284,7 @@ export const VortexClanHub: React.FC<VortexClanHubProps> = ({
                               onClick={() => {
                                 sound.playClick();
                                 setSelectedRegionalCountry(isSelected ? null : c.name);
+                                setSelectedRegionalContinent(null);
                               }}
                               className={`w-full flex items-center gap-2.5 px-3 py-1.5 rounded-lg text-left transition cursor-pointer ${
                                 isSelected
@@ -4200,9 +4299,33 @@ export const VortexClanHub: React.FC<VortexClanHubProps> = ({
                         })}
                       </div>
 
-                      {/* Asia */}
+                      {/* Asia Header */}
                       <div>
-                        <h4 className="text-sm font-bold text-slate-400 mb-2.5 tracking-wide">Asia</h4>
+                        <button
+                          onClick={() => {
+                            sound.playClick();
+                            if (selectedRegionalContinent === 'Asia') {
+                              setSelectedRegionalContinent(null);
+                            } else {
+                              setSelectedRegionalContinent('Asia');
+                              setSelectedRegionalCountry(null);
+                            }
+                          }}
+                          className={`w-full flex items-center justify-between text-left text-sm font-bold mb-2.5 tracking-wide px-2.5 py-1.5 rounded-lg transition cursor-pointer group ${
+                            selectedRegionalContinent === 'Asia'
+                              ? 'bg-[#38bdf8]/20 text-[#38bdf8] font-black border border-[#38bdf8]/40 shadow-sm'
+                              : 'text-slate-300 hover:text-white hover:bg-white/5'
+                          }`}
+                          title="Click to view all Asian teams"
+                        >
+                          <span className="flex items-center gap-1.5">
+                            <span>Asia</span>
+                            <span className="text-[10px] font-mono font-normal opacity-60 group-hover:opacity-100">
+                              (All Asia)
+                            </span>
+                          </span>
+                          <ChevronRight className={`w-3.5 h-3.5 transition-transform ${selectedRegionalContinent === 'Asia' ? 'text-[#38bdf8] rotate-90' : 'text-slate-500 group-hover:text-white'}`} />
+                        </button>
                         <div className="space-y-1">
                           {REGIONAL_COLUMNS.column3.asia.map(c => {
                             const isSelected = selectedRegionalCountry === c.name;
@@ -4212,6 +4335,7 @@ export const VortexClanHub: React.FC<VortexClanHubProps> = ({
                                 onClick={() => {
                                   sound.playClick();
                                   setSelectedRegionalCountry(isSelected ? null : c.name);
+                                  setSelectedRegionalContinent(null);
                                 }}
                                 className={`w-full flex items-center gap-2.5 px-3 py-1.5 rounded-lg text-left transition cursor-pointer ${
                                   isSelected
@@ -4227,9 +4351,33 @@ export const VortexClanHub: React.FC<VortexClanHubProps> = ({
                         </div>
                       </div>
 
-                      {/* Oceania */}
+                      {/* Oceania Header */}
                       <div>
-                        <h4 className="text-sm font-bold text-slate-400 mb-2.5 tracking-wide">Oceania</h4>
+                        <button
+                          onClick={() => {
+                            sound.playClick();
+                            if (selectedRegionalContinent === 'Oceania') {
+                              setSelectedRegionalContinent(null);
+                            } else {
+                              setSelectedRegionalContinent('Oceania');
+                              setSelectedRegionalCountry(null);
+                            }
+                          }}
+                          className={`w-full flex items-center justify-between text-left text-sm font-bold mb-2.5 tracking-wide px-2.5 py-1.5 rounded-lg transition cursor-pointer group ${
+                            selectedRegionalContinent === 'Oceania'
+                              ? 'bg-[#38bdf8]/20 text-[#38bdf8] font-black border border-[#38bdf8]/40 shadow-sm'
+                              : 'text-slate-300 hover:text-white hover:bg-white/5'
+                          }`}
+                          title="Click to view all Oceania teams"
+                        >
+                          <span className="flex items-center gap-1.5">
+                            <span>Oceania</span>
+                            <span className="text-[10px] font-mono font-normal opacity-60 group-hover:opacity-100">
+                              (All OCE)
+                            </span>
+                          </span>
+                          <ChevronRight className={`w-3.5 h-3.5 transition-transform ${selectedRegionalContinent === 'Oceania' ? 'text-[#38bdf8] rotate-90' : 'text-slate-500 group-hover:text-white'}`} />
+                        </button>
                         <div className="space-y-1">
                           {REGIONAL_COLUMNS.column3.oceania.map(c => {
                             const isSelected = selectedRegionalCountry === c.name;
@@ -4239,6 +4387,7 @@ export const VortexClanHub: React.FC<VortexClanHubProps> = ({
                                 onClick={() => {
                                   sound.playClick();
                                   setSelectedRegionalCountry(isSelected ? null : c.name);
+                                  setSelectedRegionalContinent(null);
                                 }}
                                 className={`w-full flex items-center gap-2.5 px-3 py-1.5 rounded-lg text-left transition cursor-pointer ${
                                   isSelected
@@ -4259,11 +4408,11 @@ export const VortexClanHub: React.FC<VortexClanHubProps> = ({
                   {/* Regional bottom filter action bar */}
                   <div className="mt-6 pt-4 border-t border-[#2b3545] flex items-center justify-between flex-wrap gap-3">
                     <div className="flex items-center gap-2 text-xs font-mono">
-                      <span className="text-slate-400">Selected Regional Country:</span>
+                      <span className="text-slate-400">Active Regional Filter:</span>
                       {selectedRegionalCountry ? (
                         <span className="px-3 py-1 rounded-lg bg-[#38bdf8]/15 text-[#38bdf8] border border-[#38bdf8]/30 font-bold flex items-center gap-2">
                           <CountryFlag code={getCountryCode(selectedRegionalCountry)} name={selectedRegionalCountry} size="xs" />
-                          <span>{selectedRegionalCountry}</span>
+                          <span>{selectedRegionalCountry} (National)</span>
                           <button
                             onClick={() => {
                               sound.playClick();
@@ -4275,18 +4424,34 @@ export const VortexClanHub: React.FC<VortexClanHubProps> = ({
                             ✕
                           </button>
                         </span>
+                      ) : selectedRegionalContinent ? (
+                        <span className="px-3 py-1 rounded-lg bg-[#38bdf8]/15 text-[#38bdf8] border border-[#38bdf8]/30 font-bold flex items-center gap-2">
+                          <span>{selectedRegionalContinent === 'Europe' ? '🇪🇺' : selectedRegionalContinent === 'North America' ? '🇺🇸' : selectedRegionalContinent === 'South America' ? '🇧🇷' : selectedRegionalContinent === 'Asia' ? '🌏' : '🇦🇺'}</span>
+                          <span>{selectedRegionalContinent} (Continental)</span>
+                          <button
+                            onClick={() => {
+                              sound.playClick();
+                              setSelectedRegionalContinent(null);
+                            }}
+                            className="hover:text-white cursor-pointer ml-1 text-slate-400 hover:text-white"
+                            title="Clear continent filter"
+                          >
+                            ✕
+                          </button>
+                        </span>
                       ) : (
                         <span className="text-white font-bold px-2.5 py-1 rounded bg-white/5 border border-white/10">
-                          All Regional Countries
+                          All Regional Standings (Global)
                         </span>
                       )}
                     </div>
 
-                    {selectedRegionalCountry && (
+                    {(selectedRegionalCountry || selectedRegionalContinent) && (
                       <button
                         onClick={() => {
                           sound.playClick();
                           setSelectedRegionalCountry(null);
+                          setSelectedRegionalContinent(null);
                         }}
                         className="text-xs font-mono text-[#38bdf8] hover:underline cursor-pointer"
                       >
@@ -4305,14 +4470,26 @@ export const VortexClanHub: React.FC<VortexClanHubProps> = ({
                   <span className="px-2.5 py-0.5 rounded text-[10px] font-mono font-black uppercase bg-[#A3E635] text-slate-950">
                     {rankingCategory === 'platform' && 'CALIBERCLUTCH PLATFORM LADDER'}
                     {rankingCategory === 'world' && 'GLOBAL CS2 PRO CIRCUIT'}
-                    {rankingCategory === 'regional' && `REGIONAL CIRCUIT • ${selectedRegionalCountry ? selectedRegionalCountry.toUpperCase() : 'ALL COUNTRIES'}`}
+                    {rankingCategory === 'regional' && (
+                      selectedRegionalCountry
+                        ? `REGIONAL CIRCUIT • ${selectedRegionalCountry.toUpperCase()}`
+                        : selectedRegionalContinent
+                        ? `REGIONAL CIRCUIT • ${selectedRegionalContinent.toUpperCase()}`
+                        : 'REGIONAL CIRCUIT • ALL REGIONS'
+                    )}
                     {rankingCategory === 'valve' && 'VALVE REGIONAL STANDINGS (VRS)'}
                     {rankingCategory === 'vrs-invites' && 'VALVE MAJOR INVITATIONS & SEEDING'}
                   </span>
                   <span className="px-2 py-0.5 rounded text-[10px] font-mono font-bold bg-white/10 text-slate-300">
                     {rankingCategory === 'platform' && 'Season 1 Verified'}
                     {rankingCategory === 'world' && 'Week 47 Standings'}
-                    {rankingCategory === 'regional' && (selectedRegionalCountry ? `${selectedRegionalCountry} Leaderboard` : 'All Regions')}
+                    {rankingCategory === 'regional' && (
+                      selectedRegionalCountry
+                        ? `${selectedRegionalCountry} National Standings`
+                        : selectedRegionalContinent
+                        ? `${selectedRegionalContinent} Continental Standings`
+                        : 'All Regions'
+                    )}
                     {rankingCategory === 'valve' && 'Major Invitation Cutoff'}
                     {rankingCategory === 'vrs-invites' && 'Shanghai / Austin Major 2025'}
                   </span>
@@ -4320,14 +4497,26 @@ export const VortexClanHub: React.FC<VortexClanHubProps> = ({
                 <h4 className="text-xl font-black font-display text-white">
                   {rankingCategory === 'platform' && 'Registered Platform Teams'}
                   {rankingCategory === 'world' && 'CS2 World Team Rankings'}
-                  {rankingCategory === 'regional' && (selectedRegionalCountry ? `Regional Rankings: ${selectedRegionalCountry}` : 'Regional Team Rankings (All Regions)')}
+                  {rankingCategory === 'regional' && (
+                    selectedRegionalCountry
+                      ? `Regional Rankings: ${selectedRegionalCountry}`
+                      : selectedRegionalContinent
+                      ? `${selectedRegionalContinent} Regional Rankings`
+                      : 'Regional Team Rankings (All Regions)'
+                  )}
                   {rankingCategory === 'valve' && 'Valve Major Standings (VRS)'}
                   {rankingCategory === 'vrs-invites' && 'Valve Major Official Invites & Seeds'}
                 </h4>
                 <p className="text-xs font-mono text-slate-400">
                   {rankingCategory === 'platform' && 'Teams registered on CaliberClutch competing in official 5v5 tournaments and community clan matches.'}
                   {rankingCategory === 'world' && 'Global team power rankings updated weekly based on official 5v5 tournament performance and match consistency.'}
-                  {rankingCategory === 'regional' && (selectedRegionalCountry ? `Official regional standings for active competitive teams located in ${selectedRegionalCountry}.` : 'Official regional rankings across North America, South America, Europe, Asia, and Oceania.')}
+                  {rankingCategory === 'regional' && (
+                    selectedRegionalCountry
+                      ? `Official regional standings for active competitive teams located in ${selectedRegionalCountry}.`
+                      : selectedRegionalContinent
+                      ? `Official regional power rankings for all active competitive teams across ${selectedRegionalContinent}.`
+                      : 'Official regional rankings across North America, South America, Europe, Asia, and Oceania.'
+                  )}
                   {rankingCategory === 'valve' && "Valve's official Regional Standings (VRS) determining direct invitations to RMRs and the CS2 Major Championship."}
                   {rankingCategory === 'vrs-invites' && 'Breakdown of teams qualified for direct Elimination Stage (Legends), Opening Stage (Challengers), and Closed Qualifier invites.'}
                 </p>
@@ -4628,21 +4817,22 @@ export const VortexClanHub: React.FC<VortexClanHubProps> = ({
                 );
               })}
 
-              {/* Empty state for Regional country with 0 teams */}
-              {rankingCategory === 'regional' && selectedRegionalCountry && filteredClans.length === 0 && (
+              {/* Empty state for Regional country or continent with 0 teams */}
+              {rankingCategory === 'regional' && (selectedRegionalCountry || selectedRegionalContinent) && filteredClans.length === 0 && (
                 <div className="p-8 rounded-3xl bg-[#121624] border border-dashed border-[#232B3E] text-center space-y-3">
                   <div className="w-12 h-12 rounded-full bg-[#38bdf8]/15 text-[#38bdf8] flex items-center justify-center mx-auto text-xl">
                     📍
                   </div>
-                  <h5 className="font-display font-black text-white text-base">No Teams Found for {selectedRegionalCountry}</h5>
+                  <h5 className="font-display font-black text-white text-base">No Teams Found for {selectedRegionalCountry || selectedRegionalContinent}</h5>
                   <p className="text-xs font-mono text-slate-400 max-w-md mx-auto">
-                    There are currently no ranked teams registered under {selectedRegionalCountry}. Be the first squad to register from {selectedRegionalCountry} on CaliberClutch!
+                    There are currently no ranked teams registered under {selectedRegionalCountry || selectedRegionalContinent}. Be the first squad to register from {selectedRegionalCountry || selectedRegionalContinent} on CaliberClutch!
                   </p>
                   <div className="pt-2">
                     <button
                       onClick={() => {
                         sound.playClick();
                         setSelectedRegionalCountry(null);
+                        setSelectedRegionalContinent(null);
                       }}
                       className="px-4 py-2 rounded-xl bg-[#38bdf8] hover:brightness-110 text-slate-950 font-display font-black text-xs uppercase tracking-wider transition cursor-pointer"
                     >
