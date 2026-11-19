@@ -36,6 +36,10 @@ import {
   Upload,
   ExternalLink,
   Star,
+  TrendingUp,
+  TrendingDown,
+  Minus,
+  Medal,
   X
 } from 'lucide-react';
 import confetti from 'canvas-confetti';
@@ -1400,6 +1404,220 @@ const DEFAULT_OPPONENT_CLANS: ClanData[] = [
   }
 ];
 
+export interface HltvClanEntry {
+  id: string;
+  rank: number;
+  prevRank: number;
+  name: string;
+  tag: string;
+  logo: string;
+  country: string;
+  flag: string;
+  points: number;
+  matches: number;
+  wins: number;
+  losses: number;
+  winrate: string;
+  tournamentsWon: number;
+  avgElo: number;
+  recentForm: ('W' | 'L')[];
+  region: 'Balkans' | 'Europe' | 'Nordics';
+  verified?: boolean;
+  roster: { name: string; role: string; flag: string; level: number; elo: number }[];
+}
+
+export const HLTV_CLANS_DATA: HltvClanEntry[] = [
+  {
+    id: 'bne-clan',
+    rank: 1,
+    prevRank: 1,
+    name: 'Bad News Eagles Academy',
+    tag: 'BNE',
+    logo: '/images/clan_badges/badge_caliber_skull.svg',
+    country: 'Kosovo',
+    flag: '🇽🇰',
+    points: 1000,
+    matches: 48,
+    wins: 39,
+    losses: 9,
+    winrate: '81.2%',
+    tournamentsWon: 5,
+    avgElo: 2682,
+    recentForm: ['W', 'W', 'W', 'W', 'L'],
+    region: 'Balkans',
+    verified: true,
+    roster: [
+      { name: 'rigoN-jr', role: 'IGL / Captain', flag: '🇽🇰', level: 10, elo: 2840 },
+      { name: 'juanflatro-aim', role: 'AWPer', flag: '🇽🇰', level: 10, elo: 2790 },
+      { name: 'sener1-tap', role: 'Entry Fragger', flag: '🇽🇰', level: 10, elo: 2650 },
+      { name: 'gxx-fire', role: 'Support', flag: '🇦🇱', level: 9, elo: 2420 },
+      { name: 'sinnopsyy-beast', role: 'Lurker', flag: '🇽🇰', level: 10, elo: 2710 },
+    ],
+  },
+  {
+    id: 'faze-balkan',
+    rank: 2,
+    prevRank: 3,
+    name: 'FaZe Clan Balkan Talent',
+    tag: 'FaZe',
+    logo: '/images/clan_badges/badge_caliber_fire.svg',
+    country: 'Germany',
+    flag: '🇩🇪',
+    points: 865,
+    matches: 34,
+    wins: 24,
+    losses: 10,
+    winrate: '70.5%',
+    tournamentsWon: 3,
+    avgElo: 2366,
+    recentForm: ['W', 'W', 'L', 'W', 'W'],
+    region: 'Europe',
+    verified: true,
+    roster: [
+      { name: 'ViperStrike', role: 'IGL / Captain', flag: '🇩🇪', level: 9, elo: 2310 },
+      { name: 'BrokyAWP', role: 'AWPer', flag: '🇱🇻', level: 10, elo: 2540 },
+      { name: 'Rainmaker', role: 'Entry Fragger', flag: '🇳🇴', level: 8, elo: 2080 },
+      { name: 'FrozenEcho', role: 'Support', flag: '🇸🇰', level: 9, elo: 2280 },
+      { name: 'RopzSneak', role: 'Lurker', flag: '🇪🇪', level: 10, elo: 2620 },
+    ],
+  },
+  {
+    id: 'gld-eagles',
+    rank: 3,
+    prevRank: 2,
+    name: 'Guild Eagles Contenders',
+    tag: 'GLD',
+    logo: '/images/clan_badges/badge_caliber_gold.svg',
+    country: 'Kosovo',
+    flag: '🇽🇰',
+    points: 740,
+    matches: 28,
+    wins: 19,
+    losses: 9,
+    winrate: '67.8%',
+    tournamentsWon: 2,
+    avgElo: 2240,
+    recentForm: ['L', 'W', 'W', 'W', 'L'],
+    region: 'Balkans',
+    verified: true,
+    roster: [
+      { name: 'DrenicaSniper', role: 'AWPer', flag: '🇽🇰', level: 9, elo: 2210 },
+      { name: 'Besart_CS2', role: 'IGL / Captain', flag: '🇽🇰', level: 8, elo: 1980 },
+      { name: 'Ardit_Entry', role: 'Entry Fragger', flag: '🇽🇰', level: 7, elo: 1840 },
+      { name: 'Lumi_Flash', role: 'Support', flag: '🇽🇰', level: 8, elo: 1950 },
+      { name: 'Valon_Anchor', role: 'Lurker', flag: '🇦🇱', level: 8, elo: 1910 },
+    ],
+  },
+  {
+    id: 'tirana-esports',
+    rank: 4,
+    prevRank: 6,
+    name: 'Tirana Esports Club',
+    tag: 'TEC',
+    logo: '/images/clan_badges/badge_caliber_crimson.svg',
+    country: 'Albania',
+    flag: '🇦🇱',
+    points: 590,
+    matches: 25,
+    wins: 16,
+    losses: 9,
+    winrate: '64.0%',
+    tournamentsWon: 1,
+    avgElo: 2110,
+    recentForm: ['W', 'L', 'W', 'W', 'L'],
+    region: 'Balkans',
+    verified: true,
+    roster: [
+      { name: 'Illyrian_AK', role: 'IGL / Captain', flag: '🇦🇱', level: 9, elo: 2230 },
+      { name: 'ShkodraEagle', role: 'Entry Fragger', flag: '🇦🇱', level: 8, elo: 2040 },
+      { name: 'TiranaAWP', role: 'AWPer', flag: '🇦🇱', level: 9, elo: 2180 },
+      { name: 'Vlora_Smoke', role: 'Support', flag: '🇦🇱', level: 8, elo: 1990 },
+      { name: 'Durresi_Clutch', role: 'Lurker', flag: '🇦🇱', level: 8, elo: 2010 },
+    ],
+  },
+  {
+    id: 'prishtina-clutch',
+    rank: 5,
+    prevRank: 4,
+    name: 'Prishtina Clutch Stars',
+    tag: 'PRN',
+    logo: '/images/clan_badges/badge_caliber_shield.svg',
+    country: 'Kosovo',
+    flag: '🇽🇰',
+    points: 480,
+    matches: 22,
+    wins: 15,
+    losses: 7,
+    winrate: '68.2%',
+    tournamentsWon: 1,
+    avgElo: 1978,
+    recentForm: ['W', 'W', 'L', 'L', 'W'],
+    region: 'Balkans',
+    verified: false,
+    roster: [
+      { name: 'Besart_CS2', role: 'IGL / Captain', flag: '🇽🇰', level: 8, elo: 1980 },
+      { name: 'DrenicaSniper', role: 'AWPer', flag: '🇽🇰', level: 9, elo: 2210 },
+      { name: 'Ardit_Entry', role: 'Entry Fragger', flag: '🇽🇰', level: 7, elo: 1840 },
+      { name: 'Lumi_Flash', role: 'Support', flag: '🇽🇰', level: 8, elo: 1950 },
+      { name: 'Valon_Anchor', role: 'Lurker', flag: '🇦🇱', level: 8, elo: 1910 },
+    ],
+  },
+  {
+    id: 'skopje-cyber',
+    rank: 6,
+    prevRank: 7,
+    name: 'Skopje Cyber Legion',
+    tag: 'SCL',
+    logo: '/images/clan_badges/badge_caliber_cyan.svg',
+    country: 'North Macedonia',
+    flag: '🇲🇰',
+    points: 365,
+    matches: 19,
+    wins: 11,
+    losses: 8,
+    winrate: '57.9%',
+    tournamentsWon: 0,
+    avgElo: 1890,
+    recentForm: ['L', 'W', 'L', 'W', 'W'],
+    region: 'Balkans',
+    verified: false,
+    roster: [
+      { name: 'Vardar_Aim', role: 'IGL / Captain', flag: '🇲🇰', level: 7, elo: 1860 },
+      { name: 'BitolaSniper', role: 'AWPer', flag: '🇲🇰', level: 8, elo: 1940 },
+      { name: 'Ohrid_Entry', role: 'Entry Fragger', flag: '🇲🇰', level: 7, elo: 1820 },
+      { name: 'Tetovo_Flash', role: 'Support', flag: '🇲🇰', level: 7, elo: 1790 },
+      { name: 'Gostivar_Anchor', role: 'Lurker', flag: '🇲🇰', level: 8, elo: 1910 },
+    ],
+  },
+  {
+    id: 'nordic-strike',
+    rank: 7,
+    prevRank: 7,
+    name: 'Nordic Strike Syndicate',
+    tag: 'NSS',
+    logo: '/images/clan_badges/badge_caliber_purple.svg',
+    country: 'Sweden',
+    flag: '🇸🇪',
+    points: 290,
+    matches: 25,
+    wins: 13,
+    losses: 12,
+    winrate: '52.0%',
+    tournamentsWon: 0,
+    avgElo: 1840,
+    recentForm: ['W', 'L', 'L', 'W', 'L'],
+    region: 'Nordics',
+    verified: true,
+    roster: [
+      { name: 'Stockholm_IGL', role: 'IGL / Captain', flag: '🇸🇪', level: 8, elo: 1910 },
+      { name: 'Gothenburg_AWP', role: 'AWPer', flag: '🇸🇪', level: 7, elo: 1830 },
+      { name: 'Malmo_Fragger', role: 'Entry Fragger', flag: '🇸🇪', level: 7, elo: 1790 },
+      { name: 'Uppsala_Support', role: 'Support', flag: '🇸🇪', level: 7, elo: 1780 },
+      { name: 'Kiruna_Lurk', role: 'Lurker', flag: '🇸🇪', level: 8, elo: 1890 },
+    ],
+  },
+];
+
 export const VortexClanHub: React.FC<VortexClanHubProps> = ({
   currentGamerTag,
   currentClanTag,
@@ -1411,7 +1629,10 @@ export const VortexClanHub: React.FC<VortexClanHubProps> = ({
   onNavigateTab,
   setToast,
 }) => {
-  const [activeTab, setActiveTab] = useState<'my-clan' | 'roster' | 'clans-list' | 'create-clan'>('my-clan');
+  const [activeTab, setActiveTab] = useState<'my-clan' | 'roster' | 'clans-list' | 'create-clan' | 'clan-rankings'>('my-clan');
+  const [hltvSearch, setHltvSearch] = useState('');
+  const [hltvRegionFilter, setHltvRegionFilter] = useState<'all' | 'Balkans' | 'Europe' | 'Nordics'>('all');
+  const [expandedHltvClanId, setExpandedHltvClanId] = useState<string | null>(null);
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
   const [isInviteModalOpen, setIsInviteModalOpen] = useState(false);
   const [inviteInput, setInviteInput] = useState('');
@@ -2207,10 +2428,10 @@ export const VortexClanHub: React.FC<VortexClanHubProps> = ({
             }`}
           >
             <Users className="w-3.5 h-3.5" />
-            <span>5v5 Lineup & Roster ({userClan.members.length}/6)</span>
+            <span>Team Roster ({userClan.members.length}/6)</span>
           </button>
 
-                    <button
+          <button
             onClick={() => { sound.playClick(); setActiveTab('clans-list'); }}
             className={`px-4 py-2 rounded-xl text-xs font-mono font-bold transition flex items-center gap-2 cursor-pointer ${
               activeTab === 'clans-list'
@@ -2220,6 +2441,18 @@ export const VortexClanHub: React.FC<VortexClanHubProps> = ({
           >
             <BarChart2 className="w-3.5 h-3.5" />
             <span>Clan Matches & Stats</span>
+          </button>
+
+          <button
+            onClick={() => { sound.playClick(); setActiveTab('clan-rankings'); }}
+            className={`px-4 py-2 rounded-xl text-xs font-mono font-bold transition flex items-center gap-2 cursor-pointer ${
+              activeTab === 'clan-rankings'
+                ? 'bg-[#A3E635] text-slate-950 font-black shadow-md'
+                : 'bg-[#141722] text-slate-400 hover:text-white border border-[#232938]'
+            }`}
+          >
+            <Trophy className="w-3.5 h-3.5 text-amber-400" />
+            <span>HLTV Clan Rankings</span>
           </button>
         </div>
 
@@ -2874,6 +3107,466 @@ export const VortexClanHub: React.FC<VortexClanHubProps> = ({
           </div>
         </div>
       )}
+
+      {/* TAB 4: HLTV CLAN WORLD RANKINGS */}
+      {activeTab === 'clan-rankings' && (() => {
+        const isUserRanked = userClan.stats.matches > 0;
+        const userPoints = isUserRanked
+          ? userClan.stats.wins * 45 + userClan.stats.tournamentsWon * 200 + Math.floor(userClan.stats.avgElo / 10)
+          : 0;
+
+        let allHltvClans: (HltvClanEntry & { isUserClan?: boolean })[] = HLTV_CLANS_DATA.map(c => ({ ...c }));
+
+        if (isUserRanked) {
+          allHltvClans.push({
+            id: userClan.id,
+            rank: 0,
+            prevRank: 0,
+            name: userClan.name,
+            tag: userClan.tag,
+            logo: userClan.logo,
+            country: userClan.country,
+            flag: userClan.flag,
+            points: userPoints,
+            matches: userClan.stats.matches,
+            wins: userClan.stats.wins,
+            losses: userClan.stats.losses,
+            winrate: userClan.stats.winrate,
+            tournamentsWon: userClan.stats.tournamentsWon,
+            avgElo: userClan.stats.avgElo,
+            recentForm: userClan.stats.wins >= userClan.stats.losses ? ['W', 'W', 'W', 'W', 'L'] : ['L', 'W', 'L', 'W', 'L'],
+            region: 'Balkans',
+            verified: userClan.verified,
+            isUserClan: true,
+            roster: userClan.members.slice(0, 5).map(m => ({
+              name: m.name,
+              role: m.role,
+              flag: m.flag,
+              level: m.level,
+              elo: m.elo,
+            })),
+          });
+
+          allHltvClans.sort((a, b) => b.points - a.points);
+          allHltvClans = allHltvClans.map((c, idx) => ({
+            ...c,
+            rank: idx + 1,
+            prevRank: c.prevRank || idx + 1,
+          }));
+        }
+
+        const filteredClans = allHltvClans.filter(c => {
+          if (hltvRegionFilter !== 'all' && c.region !== hltvRegionFilter) return false;
+          if (hltvSearch.trim()) {
+            const q = hltvSearch.toLowerCase();
+            const matchName = c.name.toLowerCase().includes(q);
+            const matchTag = c.tag.toLowerCase().includes(q);
+            const matchPlayer = c.roster.some(r => r.name.toLowerCase().includes(q));
+            return matchName || matchTag || matchPlayer;
+          }
+          return true;
+        });
+
+        return (
+          <div className="space-y-6 animate-in fade-in duration-200">
+            {/* Header Banner */}
+            <div className="p-6 rounded-3xl bg-gradient-to-r from-[#0F1424] via-[#090D18] to-[#0F1424] border border-[#20293D] shadow-2xl relative overflow-hidden">
+              <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-6 relative z-10">
+                <div className="space-y-2">
+                  <div className="flex items-center gap-2 flex-wrap">
+                    <span className="px-2.5 py-1 rounded-lg text-[10px] font-mono font-black bg-[#A3E635]/15 text-[#A3E635] border border-[#A3E635]/30 uppercase flex items-center gap-1.5 tracking-wider">
+                      <Trophy className="w-3.5 h-3.5 text-[#A3E635]" />
+                      HLTV OFFICIAL POWER RANKINGS
+                    </span>
+                    <span className="px-2.5 py-1 rounded-lg text-[10px] font-mono font-bold bg-amber-400/15 text-amber-300 border border-amber-400/30 uppercase tracking-wider">
+                      WEEK 47 • SEASON 1
+                    </span>
+                    <span className="px-2.5 py-1 rounded-lg text-[10px] font-mono font-bold bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 uppercase tracking-wider">
+                      100% PURE CASH CIRCUIT
+                    </span>
+                  </div>
+
+                  <h3 className="text-2xl sm:text-3xl font-black font-display text-white tracking-wide">
+                    CS2 CLAN WORLD RANKINGS
+                  </h3>
+                  <p className="text-xs font-mono text-slate-400 max-w-2xl">
+                    Official European team power rankings updated weekly. Points are awarded for official 5v5 match victories, tournament cup championships, and roster stability.
+                  </p>
+                </div>
+
+                {/* Right side stats badges */}
+                <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
+                  <div className="p-3.5 rounded-2xl bg-[#090C15] border border-[#1E2538] text-center">
+                    <span className="text-[10px] font-mono text-slate-400 uppercase block">Active Clans</span>
+                    <span className="text-xl font-black font-display text-white mt-0.5 block">{allHltvClans.length}</span>
+                    <span className="text-[9px] text-emerald-400 font-mono font-bold">European Ladder</span>
+                  </div>
+                  <div className="p-3.5 rounded-2xl bg-[#090C15] border border-[#1E2538] text-center">
+                    <span className="text-[10px] font-mono text-slate-400 uppercase block">Rank #1 Leader</span>
+                    <span className="text-xl font-black font-display text-[#A3E635] mt-0.5 block">BNE</span>
+                    <span className="text-[9px] text-slate-400 font-mono">1,000 Points</span>
+                  </div>
+                  <div className="p-3.5 rounded-2xl bg-[#090C15] border border-[#1E2538] text-center col-span-2 sm:col-span-1">
+                    <span className="text-[10px] font-mono text-slate-400 uppercase block">Next Update</span>
+                    <span className="text-xl font-black font-display text-amber-400 mt-0.5 block">Monday</span>
+                    <span className="text-[9px] text-slate-400 font-mono">18:00 CET</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            {/* YOUR CLAN STATUS HIGHLIGHT */}
+            <div className={`p-5 rounded-3xl border transition ${
+              isUserRanked
+                ? 'bg-[#0E1524] border-[#A3E635]/40 shadow-[0_0_25px_rgba(163,230,53,0.15)]'
+                : 'bg-[#0E111B] border-[#22293C]'
+            }`}>
+              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+                <div className="flex items-center gap-4">
+                  <div className="relative">
+                    <img
+                      src={userClan.logo}
+                      alt={userClan.name}
+                      className="w-14 h-14 rounded-2xl p-1 bg-[#141A29] border-2 border-[#26334D] object-contain drop-shadow"
+                    />
+                    <span className="absolute -bottom-1 -right-1 px-1.5 py-0.5 rounded-md text-[9px] font-mono font-black bg-[#A3E635] text-slate-950">
+                      [{userClan.tag}]
+                    </span>
+                  </div>
+
+                  <div>
+                    <div className="flex items-center gap-2">
+                      <span className="text-xs px-2 py-0.5 rounded font-mono font-bold bg-white/10 text-white">
+                        YOUR CLAN
+                      </span>
+                      <h4 className="font-display font-black text-white text-base sm:text-lg">
+                        {userClan.name}
+                      </h4>
+                      <span>{userClan.flag}</span>
+                    </div>
+
+                    <div className="flex items-center gap-3 text-xs font-mono text-slate-400 mt-1">
+                      <span>Roster: <strong className="text-white">{userClan.members.length} Players</strong></span>
+                      <span>•</span>
+                      {isUserRanked ? (
+                        <span>Points: <strong className="text-[#A3E635] font-black">{userPoints} pts</strong></span>
+                      ) : (
+                        <span className="text-amber-400 font-bold">Status: Unranked (In Placement)</span>
+                      )}
+                    </div>
+                  </div>
+                </div>
+
+                <div className="flex items-center gap-3 self-start sm:self-center">
+                  {!isUserRanked ? (
+                    <div className="flex flex-col sm:items-end gap-1.5">
+                      <div className="px-3 py-1 rounded-xl bg-amber-500/10 border border-amber-500/25 text-amber-300 text-xs font-mono font-bold flex items-center gap-1.5">
+                        <Sparkles className="w-3.5 h-3.5" />
+                        <span>0 / 3 Matches Played (Calibration)</span>
+                      </div>
+                      <button
+                        onClick={() => {
+                          sound.playClick();
+                          setActiveTab('clans-list');
+                        }}
+                        className="px-4 py-2 rounded-xl bg-gradient-to-r from-[#84CC16] to-[#A3E635] hover:brightness-110 text-slate-950 font-display font-black text-xs uppercase tracking-wider flex items-center gap-2 cursor-pointer shadow-lg active:scale-95 transition"
+                      >
+                        <Swords className="w-3.5 h-3.5" />
+                        <span>Play Match to Calibrate</span>
+                      </button>
+                    </div>
+                  ) : (
+                    <div className="text-right">
+                      <span className="text-xs font-mono text-slate-400 block">World Standing</span>
+                      <span className="text-2xl font-black font-display text-[#A3E635]">
+                        #{allHltvClans.find(c => c.isUserClan)?.rank || '--'}
+                      </span>
+                    </div>
+                  )}
+                </div>
+              </div>
+            </div>
+
+            {/* SEARCH & REGION FILTERS */}
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 p-4 rounded-2xl bg-[#090C15] border border-[#1E2538]">
+              {/* Region Pills */}
+              <div className="flex items-center gap-1.5 flex-wrap">
+                {(['all', 'Balkans', 'Europe', 'Nordics'] as const).map(reg => (
+                  <button
+                    key={reg}
+                    onClick={() => {
+                      sound.playClick();
+                      setHltvRegionFilter(reg);
+                    }}
+                    className={`px-3.5 py-1.5 rounded-xl text-xs font-mono font-bold transition cursor-pointer flex items-center gap-1.5 ${
+                      hltvRegionFilter === reg
+                        ? 'bg-[#A3E635] text-slate-950 font-black shadow-md'
+                        : 'bg-[#121624] text-slate-400 hover:text-white border border-[#202738]'
+                    }`}
+                  >
+                    {reg === 'all' ? (
+                      <span>All Regions</span>
+                    ) : reg === 'Balkans' ? (
+                      <span>🇽🇰 Balkans</span>
+                    ) : reg === 'Europe' ? (
+                      <span>🇪🇺 Central Europe</span>
+                    ) : (
+                      <span>🇸🇪 Nordics</span>
+                    )}
+                  </button>
+                ))}
+              </div>
+
+              {/* Search input */}
+              <div className="relative w-full sm:w-72">
+                <Search className="w-4 h-4 text-slate-400 absolute left-3 top-2.5" />
+                <input
+                  type="text"
+                  value={hltvSearch}
+                  onChange={(e) => setHltvSearch(e.target.value)}
+                  placeholder="Search clan, tag, or player..."
+                  className="w-full pl-9 pr-4 py-2 rounded-xl bg-[#121624] border border-[#202738] text-white text-xs font-mono placeholder:text-slate-500 focus:outline-none focus:border-[#A3E635]"
+                />
+              </div>
+            </div>
+
+            {/* RANKINGS LIST (HLTV STYLE) */}
+            <div className="space-y-3">
+              {filteredClans.map((clan) => {
+                const isExpanded = expandedHltvClanId === clan.id;
+                const delta = clan.prevRank - clan.rank;
+
+                return (
+                  <div
+                    key={clan.id}
+                    className={`rounded-2xl border transition overflow-hidden ${
+                      clan.isUserClan
+                        ? 'bg-gradient-to-r from-[#0F1829] via-[#0B101C] to-[#0F1829] border-[#A3E635]/60 shadow-[0_0_20px_rgba(163,230,53,0.15)]'
+                        : clan.rank === 1
+                        ? 'bg-gradient-to-r from-[#17140B] via-[#0E1018] to-[#0C0E17] border-amber-500/40'
+                        : clan.rank === 2
+                        ? 'bg-gradient-to-r from-[#131722] via-[#0E1018] to-[#0C0E17] border-slate-400/30'
+                        : clan.rank === 3
+                        ? 'bg-gradient-to-r from-[#17120B] via-[#0E1018] to-[#0C0E17] border-amber-700/30'
+                        : 'bg-[#0C0F19] border-[#1C2335] hover:border-[#2C3852]'
+                    }`}
+                  >
+                    {/* Main Row */}
+                    <div
+                      onClick={() => {
+                        sound.playClick();
+                        setExpandedHltvClanId(isExpanded ? null : clan.id);
+                      }}
+                      className="p-4 sm:p-5 flex flex-col lg:flex-row lg:items-center justify-between gap-4 cursor-pointer select-none"
+                    >
+                      {/* Left: Rank & Delta & Identity */}
+                      <div className="flex items-center gap-3.5 sm:gap-5 flex-1 min-w-0">
+                        {/* Rank Badge */}
+                        <div className="flex flex-col items-center justify-center min-w-[50px]">
+                          <div className={`text-xl sm:text-2xl font-black font-display flex items-center gap-1 ${
+                            clan.rank === 1
+                              ? 'text-amber-400 drop-shadow-[0_0_8px_rgba(245,158,11,0.5)]'
+                              : clan.rank === 2
+                              ? 'text-slate-200'
+                              : clan.rank === 3
+                              ? 'text-amber-600'
+                              : 'text-slate-400'
+                          }`}>
+                            <span>#{clan.rank}</span>
+                          </div>
+
+                          {/* Delta indicator */}
+                          <div className="flex items-center gap-0.5 text-[10px] font-mono mt-0.5">
+                            {delta > 0 ? (
+                              <span className="text-emerald-400 font-bold flex items-center">
+                                <TrendingUp className="w-3 h-3 stroke-[3]" />
+                                <span>+{delta}</span>
+                              </span>
+                            ) : delta < 0 ? (
+                              <span className="text-rose-400 font-bold flex items-center">
+                                <TrendingDown className="w-3 h-3 stroke-[3]" />
+                                <span>{delta}</span>
+                              </span>
+                            ) : (
+                              <span className="text-slate-500 font-bold flex items-center">
+                                <Minus className="w-3 h-3" />
+                              </span>
+                            )}
+                          </div>
+                        </div>
+
+                        {/* Clan Logo */}
+                        <div className="relative shrink-0">
+                          <img
+                            src={clan.logo}
+                            alt={clan.name}
+                            className="w-12 h-12 rounded-2xl p-1 bg-[#131724] border border-[#252E44] object-contain drop-shadow"
+                          />
+                        </div>
+
+                        {/* Clan Name & Country & Lineup Row */}
+                        <div className="min-w-0 flex-1 space-y-2">
+                          <div className="flex items-center gap-2 flex-wrap">
+                            <span className="font-display font-black text-white text-base hover:text-[#A3E635] transition truncate">
+                              {clan.name}
+                            </span>
+                            <span className="px-2 py-0.5 rounded text-[10px] font-mono font-bold bg-[#A3E635]/15 text-[#A3E635] border border-[#A3E635]/30">
+                              [{clan.tag}]
+                            </span>
+                            {clan.isUserClan && (
+                              <span className="px-2 py-0.5 rounded text-[9px] font-mono font-black bg-[#A3E635] text-slate-950 uppercase">
+                                YOU
+                              </span>
+                            )}
+                            <span className="flex items-center gap-1 text-xs text-slate-400 font-mono">
+                              <span>{clan.flag}</span>
+                              <span className="hidden sm:inline">{clan.country}</span>
+                            </span>
+                          </div>
+
+                          {/* 5-Player Starting Lineup (HLTV hallmark) */}
+                          <div className="flex items-center gap-1.5 flex-wrap">
+                            {clan.roster.slice(0, 5).map((member, idx) => (
+                              <span
+                                key={idx}
+                                className="px-2 py-0.5 rounded-lg bg-[#141A28] border border-[#232C40] text-[11px] font-mono text-slate-300 hover:text-white flex items-center gap-1 transition"
+                                title={`${member.name} (${member.role})`}
+                              >
+                                <span className="text-[10px]">{member.flag}</span>
+                                <span className="font-semibold">{member.name}</span>
+                              </span>
+                            ))}
+                          </div>
+                        </div>
+                      </div>
+
+                      {/* Right: HLTV Points & Stats */}
+                      <div className="flex items-center justify-between lg:justify-end gap-6 pt-3 lg:pt-0 border-t lg:border-t-0 border-white/5">
+                        {/* HLTV Points */}
+                        <div className="w-32 text-left lg:text-right">
+                          <div className="text-base font-black font-mono text-[#A3E635]">
+                            {clan.points.toLocaleString()} <span className="text-xs text-slate-400 font-normal">pts</span>
+                          </div>
+                          {/* Mini progress bar */}
+                          <div className="w-full h-1.5 rounded-full bg-black/50 border border-white/5 mt-1 overflow-hidden">
+                            <div
+                              className="h-full rounded-full bg-gradient-to-r from-emerald-500 to-[#A3E635]"
+                              style={{ width: `${Math.min(100, (clan.points / 1000) * 100)}%` }}
+                            />
+                          </div>
+                        </div>
+
+                        {/* Win Rate */}
+                        <div className="text-center min-w-[75px] hidden sm:block">
+                          <span className="text-[10px] font-mono text-slate-400 uppercase block">Win Rate</span>
+                          <span className="text-xs font-mono font-bold text-white block mt-0.5">{clan.winrate}</span>
+                          <span className="text-[10px] font-mono text-slate-400">{clan.wins}W - {clan.losses}L</span>
+                        </div>
+
+                        {/* Recent Form (5 match pills) */}
+                        <div className="text-center hidden md:block">
+                          <span className="text-[10px] font-mono text-slate-400 uppercase block mb-1">Form</span>
+                          <div className="flex items-center gap-1">
+                            {clan.recentForm.map((f, fIdx) => (
+                              <span
+                                key={fIdx}
+                                className={`w-4 h-4 rounded text-[9px] font-black font-mono flex items-center justify-center ${
+                                  f === 'W'
+                                    ? 'bg-emerald-500/20 text-emerald-400 border border-emerald-500/30'
+                                    : 'bg-rose-500/20 text-rose-400 border border-rose-500/30'
+                                }`}
+                              >
+                                {f}
+                              </span>
+                            ))}
+                          </div>
+                        </div>
+
+                        {/* Trophies */}
+                        <div className="text-center min-w-[65px] hidden sm:block">
+                          <span className="text-[10px] font-mono text-slate-400 uppercase block">Cups</span>
+                          <span className="text-xs font-mono font-black text-amber-400 flex items-center justify-center gap-1 mt-0.5">
+                            <Award className="w-3.5 h-3.5 text-amber-400" />
+                            <span>{clan.tournamentsWon}</span>
+                          </span>
+                        </div>
+
+                        {/* Expand Chevron */}
+                        <div className="p-1 rounded-lg bg-white/5 text-slate-400">
+                          {isExpanded ? <ChevronUp className="w-4 h-4" /> : <ChevronDown className="w-4 h-4" />}
+                        </div>
+                      </div>
+                    </div>
+
+                    {/* Expanded Detail Accordion */}
+                    {isExpanded && (
+                      <div className="p-5 bg-[#090D18] border-t border-[#1C2538] space-y-4 animate-in fade-in duration-200 text-left">
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                          {/* 5v5 Tactical Roles Breakdown */}
+                          <div className="space-y-2">
+                            <span className="text-xs font-mono text-slate-400 uppercase tracking-wider font-bold block">
+                              Active Roster Tactical Roles (5v5 Starting Lineup)
+                            </span>
+                            <div className="space-y-1.5">
+                              {clan.roster.slice(0, 5).map((m, idx) => (
+                                <div
+                                  key={idx}
+                                  className="p-2.5 rounded-xl bg-[#0F1424] border border-[#1E273D] flex items-center justify-between text-xs font-mono"
+                                >
+                                  <div className="flex items-center gap-2">
+                                    <span>{m.flag}</span>
+                                    <span className="font-bold text-white">{m.name}</span>
+                                    <span className="text-[10px] px-2 py-0.5 rounded bg-white/5 text-slate-400">
+                                      {m.role}
+                                    </span>
+                                  </div>
+                                  <div className="flex items-center gap-2 text-slate-400">
+                                    <span>Lvl {m.level}</span>
+                                    <span className="text-[#A3E635] font-bold">{m.elo} ELO</span>
+                                  </div>
+                                </div>
+                              ))}
+                            </div>
+                          </div>
+
+                          {/* Clan Performance Telemetry */}
+                          <div className="space-y-2">
+                            <span className="text-xs font-mono text-slate-400 uppercase tracking-wider font-bold block">
+                              Competitive Match & Circuit Telemetry
+                            </span>
+                            <div className="p-4 rounded-xl bg-[#0F1424] border border-[#1E273D] space-y-3 text-xs font-mono">
+                              <div className="flex items-center justify-between">
+                                <span className="text-slate-400">Average Squad ELO:</span>
+                                <span className="font-bold text-white">{clan.avgElo} ELO (Level {Math.min(10, Math.floor(clan.avgElo / 250) + 1)})</span>
+                              </div>
+                              <div className="flex items-center justify-between">
+                                <span className="text-slate-400">Official Tournament Titles:</span>
+                                <span className="font-bold text-amber-400">{clan.tournamentsWon} Championships</span>
+                              </div>
+                              <div className="flex items-center justify-between">
+                                <span className="text-slate-400">Total Matches Played:</span>
+                                <span className="font-bold text-white">{clan.matches} matches ({clan.wins} Wins / {clan.losses} Losses)</span>
+                              </div>
+                              <div className="flex items-center justify-between">
+                                <span className="text-slate-400">Current Competitive Region:</span>
+                                <span className="font-bold text-white">{clan.region} Online Circuit</span>
+                              </div>
+                              <div className="flex items-center justify-between pt-2 border-t border-white/5">
+                                <span className="text-slate-400">HLTV Ranking Points:</span>
+                                <span className="font-bold text-[#A3E635] text-sm">{clan.points} Points</span>
+                              </div>
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                    )}
+                  </div>
+                );
+              })}
+            </div>
+          </div>
+        );
+      })()}
 
       {/* FULL 1:1 FACEIT SCOREBOARD MODAL (EXACT REPLICA OF REFERENCE IMAGE 2 & FULLY INTERACTIVE) */}
       {selectedScoreboardMatch && (
