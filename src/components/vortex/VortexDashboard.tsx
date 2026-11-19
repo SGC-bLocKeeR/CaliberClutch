@@ -1191,7 +1191,7 @@ export const VortexDashboard: React.FC<VortexDashboardProps> = ({
   const [newTourneyStructure, setNewTourneyStructure] = useState<string>('Single Elimination');
   const [newTourneyPlayoffsFormat, setNewTourneyPlayoffsFormat] = useState<'BO1' | 'BO3'>('BO1');
   const [newTourneyFinalsFormat, setNewTourneyFinalsFormat] = useState<'BO1' | 'BO3' | 'BO5'>('BO3');
-  const [newTourneyRegion, setNewTourneyRegion] = useState('Germany (Frankfurt Central • 14ms)');
+  const [newTourneyRegion, setNewTourneyRegion] = useState('European Online Bracket');
   const [newTourneyDate, setNewTourneyDate] = useState('Starts Sunday • 19:00 CET');
   const [newTourneySkinPrize, setNewTourneySkinPrize] = useState('★ Butterfly Knife | Doppler (FN)');
   const [newTourneySkinValue, setNewTourneySkinValue] = useState<number>(1450);
@@ -3972,46 +3972,51 @@ export const VortexDashboard: React.FC<VortexDashboardProps> = ({
                         <div className="grid grid-cols-1 md:grid-cols-3 gap-4 sm:gap-6">
                           <div>
                             <label className="text-[11px] text-slate-300 uppercase tracking-wider block mb-1.5 font-bold flex items-center justify-between">
-                              <span>Total Cash Prize Pool (€)</span>
-                              <span className="text-[10px] text-[#A3E635] font-normal">Auto-Calculates All</span>
+                              <span className="truncate">Prize Pool (€)</span>
+                              <span className="text-[9px] px-1.5 py-0.5 rounded bg-[#A3E635]/15 text-[#A3E635] font-mono font-bold tracking-normal whitespace-nowrap">
+                                AUTO-CALC
+                              </span>
                             </label>
-                            <input
-                              type="text"
-                              value={newTourneyCashPrize}
-                              onChange={(e) => handleCashPrizeChange(e.target.value)}
-                              placeholder="e.g. 1000"
-                              className="w-full px-4 py-3 rounded-xl bg-[#141722] border border-[#252C3D] text-[#A3E635] font-black focus:outline-none focus:border-[#A3E635] text-sm"
-                            />
+                            <div className="relative">
+                              <input
+                                type="text"
+                                value={newTourneyCashPrize}
+                                onChange={(e) => handleCashPrizeChange(e.target.value)}
+                                placeholder="1000"
+                                className="w-full pl-8 pr-4 py-3 rounded-xl bg-[#141722] border border-[#252C3D] text-[#A3E635] font-black focus:outline-none focus:border-[#A3E635] text-sm"
+                              />
+                              <span className="absolute left-3 top-3 text-[#A3E635]/70 font-black text-sm">€</span>
+                            </div>
                           </div>
 
                           <div>
-                            <label className="text-[11px] text-slate-300 uppercase tracking-wider block mb-1.5 font-bold">
-                              Team Capacity (Max Teams)
+                            <label className="text-[11px] text-slate-300 uppercase tracking-wider block mb-1.5 font-bold whitespace-nowrap">
+                              Team Capacity
                             </label>
                             <select
                               value={newTourneyMaxTeams}
                               onChange={(e) => handleMaxTeamsChange(Number(e.target.value))}
-                              className="w-full px-4 py-3 rounded-xl bg-[#141722] border border-[#252C3D] text-white font-bold focus:outline-none focus:border-[#A3E635] cursor-pointer text-sm"
+                              className="w-full px-3 py-3 rounded-xl bg-[#141722] border border-[#252C3D] text-white font-bold focus:outline-none focus:border-[#A3E635] cursor-pointer text-xs sm:text-sm"
                             >
                               <option value={8}>8 Teams (Quarter-Finals)</option>
                               <option value={16}>16 Teams (Round of 16)</option>
-                              <option value={32}>32 Teams (Major Championship)</option>
-                              <option value={64}>64 Teams (Open Qualifier Circuit)</option>
+                              <option value={32}>32 Teams (Championship)</option>
+                              <option value={64}>64 Teams (Open Circuit)</option>
                             </select>
                           </div>
 
                           <div>
-                            <label className="text-[11px] text-slate-300 uppercase tracking-wider block mb-1.5 font-bold">
-                              Tournament Bracket Structure
+                            <label className="text-[11px] text-slate-300 uppercase tracking-wider block mb-1.5 font-bold whitespace-nowrap">
+                              Bracket Format
                             </label>
                             <select
                               value={newTourneyStructure}
                               onChange={(e) => setNewTourneyStructure(e.target.value)}
-                              className="w-full px-4 py-3 rounded-xl bg-[#141722] border border-[#252C3D] text-white font-bold focus:outline-none focus:border-[#A3E635] cursor-pointer text-sm"
+                              className="w-full px-3 py-3 rounded-xl bg-[#141722] border border-[#252C3D] text-white font-bold focus:outline-none focus:border-[#A3E635] cursor-pointer text-xs sm:text-sm"
                             >
-                              <option value="Single Elimination">5v5 Single Elimination (Knockout)</option>
-                              <option value="Double Elimination">5v5 Double Elimination (Upper & Lower)</option>
-                              <option value="GSL Group Stage + Single Elim">GSL Group Stage + Single Elim</option>
+                              <option value="Single Elimination">Single Elimination (5v5)</option>
+                              <option value="Double Elimination">Double Elimination (5v5)</option>
+                              <option value="GSL Group Stage + Single Elim">GSL Group + Single Elim</option>
                             </select>
                           </div>
                         </div>
@@ -4120,16 +4125,9 @@ export const VortexDashboard: React.FC<VortexDashboardProps> = ({
                                       <span>Auto-Calculated Fee per Team</span>
                                       <span className="text-[10px] text-[#A3E635] font-normal">Auto-Synced</span>
                                     </label>
-                                    <div className="relative">
-                                      <input
-                                        type="number"
-                                        min={1}
-                                        step={1}
-                                        value={newTourneyEntryFee}
-                                        onChange={(e) => handleEntryFeeChange(Number(e.target.value))}
-                                        className="w-full pl-8 pr-4 py-2.5 rounded-xl bg-[#0B0E16] border border-[#252C3D] text-amber-300 font-bold focus:outline-none focus:border-amber-400 text-sm"
-                                      />
-                                      <span className="absolute left-3 top-2.5 text-slate-400 font-bold">€</span>
+                                    <div className="w-full px-4 py-2.5 rounded-xl bg-[#0B0E16] border border-[#252C3D] text-amber-300 font-bold flex items-center justify-between text-sm">
+                                      <span>€{newTourneyEntryFee}</span>
+                                      <span className="text-xs text-slate-400 font-normal">€{newTourneyEntryFee} / team</span>
                                     </div>
                                   </div>
                                   <div>
