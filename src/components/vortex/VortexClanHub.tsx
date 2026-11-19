@@ -2452,7 +2452,7 @@ export const VortexClanHub: React.FC<VortexClanHubProps> = ({
             }`}
           >
             <Trophy className="w-3.5 h-3.5 text-amber-400" />
-            <span>HLTV Clan Rankings</span>
+            <span>Ranking Teams</span>
           </button>
         </div>
 
@@ -3176,7 +3176,7 @@ export const VortexClanHub: React.FC<VortexClanHubProps> = ({
                   <div className="flex items-center gap-2 flex-wrap">
                     <span className="px-2.5 py-1 rounded-lg text-[10px] font-mono font-black bg-[#A3E635]/15 text-[#A3E635] border border-[#A3E635]/30 uppercase flex items-center gap-1.5 tracking-wider">
                       <Trophy className="w-3.5 h-3.5 text-[#A3E635]" />
-                      HLTV OFFICIAL POWER RANKINGS
+                      OFFICIAL 5v5 TEAM RANKINGS
                     </span>
                     <span className="px-2.5 py-1 rounded-lg text-[10px] font-mono font-bold bg-amber-400/15 text-amber-300 border border-amber-400/30 uppercase tracking-wider">
                       WEEK 47 • SEASON 1
@@ -3187,7 +3187,7 @@ export const VortexClanHub: React.FC<VortexClanHubProps> = ({
                   </div>
 
                   <h3 className="text-2xl sm:text-3xl font-black font-display text-white tracking-wide">
-                    CS2 CLAN WORLD RANKINGS
+                    RANKING TEAMS (CS2 ESPORTS)
                   </h3>
                   <p className="text-xs font-mono text-slate-400 max-w-2xl">
                     Official European team power rankings updated weekly. Points are awarded for official 5v5 match victories, tournament cup championships, and roster stability.
@@ -3552,7 +3552,7 @@ export const VortexClanHub: React.FC<VortexClanHubProps> = ({
                                 <span className="font-bold text-white">{clan.region} Online Circuit</span>
                               </div>
                               <div className="flex items-center justify-between pt-2 border-t border-white/5">
-                                <span className="text-slate-400">HLTV Ranking Points:</span>
+                                <span className="text-slate-400">Team Ranking Points:</span>
                                 <span className="font-bold text-[#A3E635] text-sm">{clan.points} Points</span>
                               </div>
                             </div>
