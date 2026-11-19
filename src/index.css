@@ -32,23 +32,36 @@
   }
 }
 
-/* Custom Scrollbars */
+/* Custom Scrollbars - Modern CaliberClutch Theme */
+* {
+  scrollbar-width: thin;
+  scrollbar-color: #A3E635 #07090E;
+}
+
 ::-webkit-scrollbar {
-  width: 6px;
-  height: 6px;
+  width: 8px;
+  height: 8px;
 }
 
 ::-webkit-scrollbar-track {
-  background: #0A0B0E;
+  background: #07090E;
+  border-left: 1px solid rgba(255, 255, 255, 0.05);
 }
 
 ::-webkit-scrollbar-thumb {
-  background: #252B3B;
+  background: #A3E635;
   border-radius: 9999px;
+  border: 2px solid #07090E;
+  transition: background-color 0.2s, box-shadow 0.2s;
 }
 
 ::-webkit-scrollbar-thumb:hover {
-  background: #EF4444;
+  background: #bef264;
+  box-shadow: 0 0 10px rgba(163, 230, 53, 0.6);
+}
+
+::-webkit-scrollbar-thumb:active {
+  background: #84cc16;
 }
 
 /* Sleek Glowing Red Pulsing Animations */
