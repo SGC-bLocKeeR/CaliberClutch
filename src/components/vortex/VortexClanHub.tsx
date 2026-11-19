@@ -3932,32 +3932,28 @@ export const VortexClanHub: React.FC<VortexClanHubProps> = ({
               <div
                 key={member.id}
                 onClick={() => handleOpenMemberProfile(member)}
-                className={`p-4 rounded-2xl border transition flex flex-col sm:flex-row sm:items-center justify-between gap-4 cursor-pointer hover:border-[#A3E635]/60 hover:scale-[1.005] select-none ${
-                  member.isCaptain
-                    ? 'bg-[#181510] border-amber-500/30'
-                    : 'bg-[#12141D] border-[#222838]'
-                }`}
+                className="p-4 rounded-2xl border transition flex flex-col sm:flex-row sm:items-center justify-between gap-4 cursor-pointer bg-[#0B1E15] border-[#A3E635]/60 hover:border-[#A3E635] hover:bg-[#0E281C] shadow-[0_0_20px_rgba(163,230,53,0.18)] text-slate-200 select-none"
                 title={`Click to view ${member.name}'s profile card`}
               >
                 <div className="flex items-center gap-3.5">
-                  <span className="w-6 text-center text-xs font-mono font-bold text-slate-500">
+                  <div className="w-10 h-10 rounded-xl border bg-[#A3E635]/20 border-[#A3E635]/50 text-[#A3E635] flex items-center justify-center font-display font-black text-sm shrink-0">
                     #{idx + 1}
-                  </span>
+                  </div>
                   <img
                     src={member.avatar}
                     alt={member.name}
-                    className="w-11 h-11 rounded-xl object-cover border border-white/10"
+                    className="w-11 h-11 rounded-xl object-cover border border-[#A3E635]/30"
                   />
                   <div>
                     <div className="flex items-center gap-2">
                       <span className="text-sm font-black font-sans text-white">{member.name}</span>
                       {member.isUser && (
-                        <span className="px-1.5 py-0.2 rounded text-[10px] font-mono font-black bg-[#A3E635]/20 text-[#A3E635] border border-[#A3E635]/30">
+                        <span className="px-1.5 py-0.5 rounded text-[10px] font-mono font-black bg-[#A3E635] text-slate-950 uppercase shadow-sm">
                           YOU
                         </span>
                       )}
                       {member.isCaptain && (
-                        <span className="px-1.5 py-0.2 rounded text-[10px] font-mono font-black bg-amber-500/20 text-amber-300 border border-amber-500/30 flex items-center gap-1">
+                        <span className="px-1.5 py-0.5 rounded text-[10px] font-mono font-black bg-[#A3E635]/20 text-[#A3E635] border border-[#A3E635]/40 flex items-center gap-1">
                           <Crown className="w-2.5 h-2.5" /> CAPTAIN
                         </span>
                       )}
@@ -3982,7 +3978,7 @@ export const VortexClanHub: React.FC<VortexClanHubProps> = ({
                       e.stopPropagation();
                       handleChangeRole(member.id, e.target.value as ClanMember['role']);
                     }}
-                    className="px-3 py-1.5 rounded-xl bg-[#1A1E2B] border border-[#2D354A] text-xs font-mono text-slate-200 focus:outline-none focus:border-[#A3E635] cursor-pointer"
+                    className="px-3 py-1.5 rounded-xl bg-[#07130D] border border-[#A3E635]/40 text-xs font-mono font-bold text-[#A3E635] focus:outline-none focus:border-[#A3E635] cursor-pointer"
                   >
                     <option value="IGL / Captain">IGL / Captain</option>
                     <option value="AWPer">AWPer</option>
@@ -4093,35 +4089,36 @@ export const VortexClanHub: React.FC<VortexClanHubProps> = ({
               <div
                 key={`roster-open-${i}`}
                 onClick={() => { sound.playClick(); setIsInviteModalOpen(true); }}
-                className="p-4 rounded-2xl border border-dashed border-[#23293D] hover:border-[#A3E635]/60 bg-[#0A0D15]/60 hover:bg-[#101422] transition flex flex-col sm:flex-row sm:items-center justify-between gap-4 cursor-pointer group"
+                className="p-4 rounded-2xl border-2 border-dashed border-[#A3E635]/40 hover:border-[#A3E635] bg-[#0B1E15]/70 hover:bg-[#0E281C] shadow-[0_0_15px_rgba(163,230,53,0.12)] transition flex flex-col sm:flex-row sm:items-center justify-between gap-4 cursor-pointer group"
                 title="Click to invite a player to this slot"
               >
                 <div className="flex items-center gap-3.5">
-                  <span className="w-6 text-center text-xs font-mono font-bold text-slate-600">
+                  <div className="w-10 h-10 rounded-xl border border-[#A3E635]/40 bg-[#A3E635]/15 text-[#A3E635] flex items-center justify-center font-display font-black text-sm shrink-0">
                     #{userClan.members.length + pendingInvites.length + i + 1}
-                  </span>
-                  <div className="w-11 h-11 rounded-xl border border-dashed border-slate-700 bg-white/5 flex items-center justify-center text-slate-500 group-hover:text-[#A3E635] group-hover:border-[#A3E635]/50 transition shrink-0">
+                  </div>
+                  <div className="w-11 h-11 rounded-xl border border-dashed border-[#A3E635]/50 bg-[#A3E635]/15 flex items-center justify-center text-[#A3E635] transition shrink-0 shadow-sm">
                     <UserPlus className="w-5 h-5" />
                   </div>
                   <div>
-                    <div className="text-sm font-bold text-slate-400 group-hover:text-white transition flex items-center gap-2">
+                    <div className="text-sm font-black font-sans text-white transition flex items-center gap-2">
                       <span>+ Open Roster Slot</span>
                       {userClan.members.length + i === 5 && (
-                        <span className="px-1.5 py-0.2 rounded text-[10px] font-mono font-bold bg-white/5 text-slate-500">
+                        <span className="px-1.5 py-0.5 rounded text-[10px] font-mono font-bold bg-[#A3E635]/20 text-[#A3E635] border border-[#A3E635]/30">
                           BENCH / SUB
                         </span>
                       )}
                     </div>
-                    <span className="text-xs font-mono text-slate-500">
+                    <span className="text-xs font-mono text-slate-300">
                       Slot is open. Click to invite a registered teammate.
                     </span>
                   </div>
                 </div>
                 <button
                   type="button"
-                  className="px-3.5 py-1.5 rounded-xl bg-white/5 group-hover:bg-[#A3E635]/15 text-slate-400 group-hover:text-[#A3E635] border border-white/10 group-hover:border-[#A3E635]/30 text-xs font-mono font-bold transition cursor-pointer self-start sm:self-auto"
+                  className="px-4 py-2 rounded-xl bg-[#A3E635] hover:bg-[#bef264] text-slate-950 border border-[#A3E635] text-xs font-mono font-black transition cursor-pointer shadow-[0_0_12px_rgba(163,230,53,0.25)] self-start sm:self-auto flex items-center gap-1.5 active:scale-95"
                 >
-                  + Invite Player
+                  <UserPlus className="w-3.5 h-3.5" />
+                  <span>+ Invite Player</span>
                 </button>
               </div>
             ))}
@@ -5128,12 +5125,12 @@ export const VortexClanHub: React.FC<VortexClanHubProps> = ({
                           ? 'bg-[#0B1E15] border-[#A3E635] shadow-[0_0_25px_rgba(163,230,53,0.25)]'
                           : isNegative
                           ? 'bg-[#1E0D12] border-rose-500 shadow-[0_0_25px_rgba(244,63,94,0.25)]'
-                          : 'bg-[#1b2331] border-[#38bdf8]/50 shadow-xl'
+                          : 'bg-[#0B1524] border-[#38bdf8] shadow-[0_0_25px_rgba(56,189,248,0.25)]'
                         : isPositive
                         ? 'bg-[#0B1E15] border-[#A3E635]/60 hover:border-[#A3E635] hover:bg-[#0E281C] shadow-[0_0_20px_rgba(163,230,53,0.18)] text-slate-200'
                         : isNegative
                         ? 'bg-[#1E0D12] border-rose-500/60 hover:border-rose-500 hover:bg-[#281118] shadow-[0_0_20px_rgba(244,63,94,0.18)] text-slate-200'
-                        : 'bg-[#141b25] border-[#222c3c] hover:border-[#334259] hover:bg-[#18212e]'
+                        : 'bg-[#0B1524] border-[#38bdf8]/40 hover:border-[#38bdf8]/70 hover:bg-[#0E1A2E] shadow-[0_0_18px_rgba(56,189,248,0.10)] text-slate-200'
                     }`}
                   >
                     {/* Main Row matching HLTV Screenshot 1 */}
@@ -5152,7 +5149,7 @@ export const VortexClanHub: React.FC<VortexClanHubProps> = ({
                             ? 'bg-[#A3E635]/20 border-[#A3E635]/50 text-[#A3E635]'
                             : isNegative
                             ? 'bg-rose-500/20 border-rose-500/50 text-rose-300'
-                            : 'bg-[#0e141d] border-white/5 text-slate-300 group-hover:text-white'
+                            : 'bg-[#38bdf8]/15 border-[#38bdf8]/35 text-[#38bdf8]'
                         }`}>
                           #{clan.rank}
                         </div>
@@ -5208,7 +5205,7 @@ export const VortexClanHub: React.FC<VortexClanHubProps> = ({
                               {delta}
                             </span>
                           ) : (
-                            <span className="text-slate-500 font-bold px-2 py-0.5">
+                            <span className="px-2.5 py-1 rounded-lg bg-[#38bdf8]/15 border border-[#38bdf8]/35 text-[#38bdf8] font-black flex items-center justify-center shadow-sm">
                               -
                             </span>
                           )}
@@ -5227,7 +5224,7 @@ export const VortexClanHub: React.FC<VortexClanHubProps> = ({
                           ? 'border-[#A3E635]/30 bg-[#07140D]'
                           : isNegative
                           ? 'border-rose-500/30 bg-[#14080C]'
-                          : 'border-[#253245] bg-[#121924]'
+                          : 'border-[#38bdf8]/30 bg-[#070E1A]'
                       }`}>
                         {/* 5 Player Cards Grid */}
                         <div className="grid grid-cols-2 sm:grid-cols-5 gap-2.5 pt-3">
