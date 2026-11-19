@@ -1414,6 +1414,9 @@ export interface HltvClanEntry {
   country: string;
   flag: string;
   points: number;
+  vrsPoints: number;
+  valveStatus: 'Legends' | 'Challengers' | 'Contenders' | 'Open';
+  prizeEarned: number;
   matches: number;
   wins: number;
   losses: number;
@@ -1437,6 +1440,9 @@ export const HLTV_CLANS_DATA: HltvClanEntry[] = [
     country: 'Kosovo',
     flag: '🇽🇰',
     points: 1000,
+    vrsPoints: 1980,
+    valveStatus: 'Legends',
+    prizeEarned: 45000,
     matches: 48,
     wins: 39,
     losses: 9,
@@ -1464,6 +1470,9 @@ export const HLTV_CLANS_DATA: HltvClanEntry[] = [
     country: 'Germany',
     flag: '🇩🇪',
     points: 865,
+    vrsPoints: 1840,
+    valveStatus: 'Legends',
+    prizeEarned: 32000,
     matches: 34,
     wins: 24,
     losses: 10,
@@ -1491,6 +1500,9 @@ export const HLTV_CLANS_DATA: HltvClanEntry[] = [
     country: 'Kosovo',
     flag: '🇽🇰',
     points: 740,
+    vrsPoints: 1710,
+    valveStatus: 'Challengers',
+    prizeEarned: 24000,
     matches: 28,
     wins: 19,
     losses: 9,
@@ -1518,6 +1530,9 @@ export const HLTV_CLANS_DATA: HltvClanEntry[] = [
     country: 'Albania',
     flag: '🇦🇱',
     points: 590,
+    vrsPoints: 1560,
+    valveStatus: 'Challengers',
+    prizeEarned: 18000,
     matches: 25,
     wins: 16,
     losses: 9,
@@ -1545,6 +1560,9 @@ export const HLTV_CLANS_DATA: HltvClanEntry[] = [
     country: 'Kosovo',
     flag: '🇽🇰',
     points: 480,
+    vrsPoints: 1420,
+    valveStatus: 'Contenders',
+    prizeEarned: 12000,
     matches: 22,
     wins: 15,
     losses: 7,
@@ -1572,6 +1590,9 @@ export const HLTV_CLANS_DATA: HltvClanEntry[] = [
     country: 'North Macedonia',
     flag: '🇲🇰',
     points: 365,
+    vrsPoints: 1280,
+    valveStatus: 'Contenders',
+    prizeEarned: 8500,
     matches: 19,
     wins: 11,
     losses: 8,
@@ -1599,6 +1620,9 @@ export const HLTV_CLANS_DATA: HltvClanEntry[] = [
     country: 'Sweden',
     flag: '🇸🇪',
     points: 290,
+    vrsPoints: 1150,
+    valveStatus: 'Open',
+    prizeEarned: 6000,
     matches: 25,
     wins: 13,
     losses: 12,
@@ -1630,6 +1654,7 @@ export const VortexClanHub: React.FC<VortexClanHubProps> = ({
   setToast,
 }) => {
   const [activeTab, setActiveTab] = useState<'my-clan' | 'roster' | 'clans-list' | 'create-clan' | 'clan-rankings'>('my-clan');
+  const [rankingCategory, setRankingCategory] = useState<'platform' | 'world' | 'regional' | 'valve'>('platform');
   const [hltvSearch, setHltvSearch] = useState('');
   const [hltvRegionFilter, setHltvRegionFilter] = useState<'all' | 'Balkans' | 'Europe' | 'Nordics'>('all');
   const [expandedHltvClanId, setExpandedHltvClanId] = useState<string | null>(null);
@@ -2444,7 +2469,11 @@ export const VortexClanHub: React.FC<VortexClanHubProps> = ({
           </button>
 
           <button
-            onClick={() => { sound.playClick(); setActiveTab('clan-rankings'); }}
+            onClick={() => {
+              sound.playClick();
+              setRankingCategory('platform');
+              setActiveTab('clan-rankings');
+            }}
             className={`px-4 py-2 rounded-xl text-xs font-mono font-bold transition flex items-center gap-2 cursor-pointer ${
               activeTab === 'clan-rankings'
                 ? 'bg-[#A3E635] text-slate-950 font-black shadow-md'
@@ -3108,17 +3137,55 @@ export const VortexClanHub: React.FC<VortexClanHubProps> = ({
         </div>
       )}
 
-      {/* TAB 4: HLTV CLAN WORLD RANKINGS */}
+      {/* TAB 4: RANKING TEAMS (CALIBERCLUTCH TEAMS DEFAULT + WORLD / REGIONAL / VALVE) */}
       {activeTab === 'clan-rankings' && (() => {
         const isUserRanked = userClan.stats.matches > 0;
-        const userPoints = isUserRanked
-          ? userClan.stats.wins * 45 + userClan.stats.tournamentsWon * 200 + Math.floor(userClan.stats.avgElo / 10)
+        const userPlatformPoints = isUserRanked
+          ? userClan.stats.wins * 50 + userClan.stats.tournamentsWon * 200 + Math.floor(userClan.stats.avgElo / 10)
           : 0;
 
-        let allHltvClans: (HltvClanEntry & { isUserClan?: boolean })[] = HLTV_CLANS_DATA.map(c => ({ ...c }));
+        // 1. CaliberClutch Platform Registered Teams
+        const platformClans = [
+          {
+            id: userClan.id,
+            rank: 1,
+            prevRank: 1,
+            name: userClan.name,
+            tag: userClan.tag,
+            logo: userClan.logo,
+            country: userClan.country,
+            flag: userClan.flag,
+            points: userPlatformPoints,
+            vrsPoints: userPlatformPoints * 2,
+            valveStatus: 'Open' as const,
+            prizeEarned: userClan.stats.tournamentsWon * 500,
+            matches: userClan.stats.matches,
+            wins: userClan.stats.wins,
+            losses: userClan.stats.losses,
+            winrate: userClan.stats.winrate,
+            tournamentsWon: userClan.stats.tournamentsWon,
+            avgElo: userClan.stats.avgElo,
+            recentForm: userClan.stats.matches > 0
+              ? (userClan.stats.wins >= userClan.stats.losses ? ['W', 'W', 'W', 'W', 'L'] as ('W'|'L')[] : ['L', 'W', 'L', 'W', 'L'] as ('W'|'L')[])
+              : ([] as ('W'|'L')[]),
+            region: 'Balkans' as const,
+            verified: userClan.verified,
+            isUserClan: true,
+            roster: userClan.members.slice(0, 5).map(m => ({
+              name: m.name,
+              role: m.role,
+              flag: m.flag,
+              level: m.level,
+              elo: m.elo,
+            })),
+          }
+        ];
+
+        // 2. Esports & Circuit Teams
+        let circuitClans: (HltvClanEntry & { isUserClan?: boolean })[] = HLTV_CLANS_DATA.map(c => ({ ...c }));
 
         if (isUserRanked) {
-          allHltvClans.push({
+          circuitClans.push({
             id: userClan.id,
             rank: 0,
             prevRank: 0,
@@ -3127,7 +3194,10 @@ export const VortexClanHub: React.FC<VortexClanHubProps> = ({
             logo: userClan.logo,
             country: userClan.country,
             flag: userClan.flag,
-            points: userPoints,
+            points: userPlatformPoints,
+            vrsPoints: userPlatformPoints * 2,
+            valveStatus: 'Open',
+            prizeEarned: userClan.stats.tournamentsWon * 500,
             matches: userClan.stats.matches,
             wins: userClan.stats.wins,
             losses: userClan.stats.losses,
@@ -3147,16 +3217,28 @@ export const VortexClanHub: React.FC<VortexClanHubProps> = ({
             })),
           });
 
-          allHltvClans.sort((a, b) => b.points - a.points);
-          allHltvClans = allHltvClans.map((c, idx) => ({
+          circuitClans.sort((a, b) => b.points - a.points);
+          circuitClans = circuitClans.map((c, idx) => ({
             ...c,
             rank: idx + 1,
             prevRank: c.prevRank || idx + 1,
           }));
         }
 
-        const filteredClans = allHltvClans.filter(c => {
-          if (hltvRegionFilter !== 'all' && c.region !== hltvRegionFilter) return false;
+        // Active list depending on selected ranking category
+        let displayedClans = rankingCategory === 'platform' ? platformClans : circuitClans;
+
+        // Apply Valve VRS sort if in valve mode
+        if (rankingCategory === 'valve') {
+          displayedClans = [...circuitClans].sort((a, b) => b.vrsPoints - a.vrsPoints).map((c, idx) => ({
+            ...c,
+            rank: idx + 1,
+          }));
+        }
+
+        // Region / Search filters
+        const filteredClans = displayedClans.filter(c => {
+          if (rankingCategory === 'regional' && hltvRegionFilter !== 'all' && c.region !== hltvRegionFilter) return false;
           if (hltvSearch.trim()) {
             const q = hltvSearch.toLowerCase();
             const matchName = c.name.toLowerCase().includes(q);
@@ -3169,168 +3251,140 @@ export const VortexClanHub: React.FC<VortexClanHubProps> = ({
 
         return (
           <div className="space-y-6 animate-in fade-in duration-200">
-            {/* Header Banner */}
-            <div className="p-6 rounded-3xl bg-gradient-to-r from-[#0F1424] via-[#090D18] to-[#0F1424] border border-[#20293D] shadow-2xl relative overflow-hidden">
-              <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-6 relative z-10">
-                <div className="space-y-2">
-                  <div className="flex items-center gap-2 flex-wrap">
-                    <span className="px-2.5 py-1 rounded-lg text-[10px] font-mono font-black bg-[#A3E635]/15 text-[#A3E635] border border-[#A3E635]/30 uppercase flex items-center gap-1.5 tracking-wider">
-                      <Trophy className="w-3.5 h-3.5 text-[#A3E635]" />
-                      OFFICIAL 5v5 TEAM RANKINGS
-                    </span>
-                    <span className="px-2.5 py-1 rounded-lg text-[10px] font-mono font-bold bg-amber-400/15 text-amber-300 border border-amber-400/30 uppercase tracking-wider">
-                      WEEK 47 • SEASON 1
-                    </span>
-                    <span className="px-2.5 py-1 rounded-lg text-[10px] font-mono font-bold bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 uppercase tracking-wider">
-                      100% PURE CASH CIRCUIT
-                    </span>
-                  </div>
+            {/* 4 Category Navigation Switcher */}
+            <div className="flex flex-wrap items-center justify-between gap-4 p-4 rounded-3xl bg-[#0B0E17] border border-[#1E2538] shadow-xl">
+              <div>
+                <h3 className="text-lg font-black font-display text-white">Ranking Teams</h3>
+                <p className="text-xs font-mono text-slate-400">Select ranking system and competitive leaderboard</p>
+              </div>
 
-                  <h3 className="text-2xl sm:text-3xl font-black font-display text-white tracking-wide">
-                    RANKING TEAMS (CS2 ESPORTS)
-                  </h3>
-                  <p className="text-xs font-mono text-slate-400 max-w-2xl">
-                    Official European team power rankings updated weekly. Points are awarded for official 5v5 match victories, tournament cup championships, and roster stability.
-                  </p>
-                </div>
+              {/* 4 Buttons: Platform (Default) • World • Regional • Valve */}
+              <div className="flex flex-wrap items-center gap-2 p-1.5 rounded-2xl bg-[#121624] border border-[#232C42]">
+                <button
+                  onClick={() => {
+                    sound.playClick();
+                    setRankingCategory('platform');
+                  }}
+                  className={`px-3.5 py-2 rounded-xl text-xs font-mono font-bold transition flex items-center gap-2 cursor-pointer ${
+                    rankingCategory === 'platform'
+                      ? 'bg-[#A3E635] text-slate-950 font-black shadow-md'
+                      : 'text-slate-400 hover:text-white hover:bg-white/5'
+                  }`}
+                >
+                  <Shield className="w-3.5 h-3.5" />
+                  <span>CaliberClutch Teams</span>
+                </button>
 
-                {/* Right side stats badges */}
-                <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
-                  <div className="p-3.5 rounded-2xl bg-[#090C15] border border-[#1E2538] text-center">
-                    <span className="text-[10px] font-mono text-slate-400 uppercase block">Active Clans</span>
-                    <span className="text-xl font-black font-display text-white mt-0.5 block">{allHltvClans.length}</span>
-                    <span className="text-[9px] text-emerald-400 font-mono font-bold">European Ladder</span>
-                  </div>
-                  <div className="p-3.5 rounded-2xl bg-[#090C15] border border-[#1E2538] text-center">
-                    <span className="text-[10px] font-mono text-slate-400 uppercase block">Rank #1 Leader</span>
-                    <span className="text-xl font-black font-display text-[#A3E635] mt-0.5 block">BNE</span>
-                    <span className="text-[9px] text-slate-400 font-mono">1,000 Points</span>
-                  </div>
-                  <div className="p-3.5 rounded-2xl bg-[#090C15] border border-[#1E2538] text-center col-span-2 sm:col-span-1">
-                    <span className="text-[10px] font-mono text-slate-400 uppercase block">Next Update</span>
-                    <span className="text-xl font-black font-display text-amber-400 mt-0.5 block">Monday</span>
-                    <span className="text-[9px] text-slate-400 font-mono">18:00 CET</span>
-                  </div>
-                </div>
+                <button
+                  onClick={() => {
+                    sound.playClick();
+                    setRankingCategory('world');
+                  }}
+                  className={`px-3.5 py-2 rounded-xl text-xs font-mono font-bold transition flex items-center gap-2 cursor-pointer ${
+                    rankingCategory === 'world'
+                      ? 'bg-[#A3E635] text-slate-950 font-black shadow-md'
+                      : 'text-slate-400 hover:text-white hover:bg-white/5'
+                  }`}
+                >
+                  <Globe className="w-3.5 h-3.5" />
+                  <span>World Rankings</span>
+                </button>
+
+                <button
+                  onClick={() => {
+                    sound.playClick();
+                    setRankingCategory('regional');
+                  }}
+                  className={`px-3.5 py-2 rounded-xl text-xs font-mono font-bold transition flex items-center gap-2 cursor-pointer ${
+                    rankingCategory === 'regional'
+                      ? 'bg-[#A3E635] text-slate-950 font-black shadow-md'
+                      : 'text-slate-400 hover:text-white hover:bg-white/5'
+                  }`}
+                >
+                  <MapPin className="w-3.5 h-3.5" />
+                  <span>Regional Ranking</span>
+                </button>
+
+                <button
+                  onClick={() => {
+                    sound.playClick();
+                    setRankingCategory('valve');
+                  }}
+                  className={`px-3.5 py-2 rounded-xl text-xs font-mono font-bold transition flex items-center gap-2 cursor-pointer ${
+                    rankingCategory === 'valve'
+                      ? 'bg-[#A3E635] text-slate-950 font-black shadow-md'
+                      : 'text-slate-400 hover:text-white hover:bg-white/5'
+                  }`}
+                >
+                  <Trophy className="w-3.5 h-3.5 text-amber-400" />
+                  <span>Valve Ranking (VRS)</span>
+                </button>
               </div>
             </div>
 
-            {/* YOUR CLAN STATUS HIGHLIGHT */}
-            <div className={`p-5 rounded-3xl border transition ${
-              isUserRanked
-                ? 'bg-[#0E1524] border-[#A3E635]/40 shadow-[0_0_25px_rgba(163,230,53,0.15)]'
-                : 'bg-[#0E111B] border-[#22293C]'
-            }`}>
-              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-                <div className="flex items-center gap-4">
-                  <div className="relative">
-                    <img
-                      src={userClan.logo}
-                      alt={userClan.name}
-                      className="w-14 h-14 rounded-2xl p-1 bg-[#141A29] border-2 border-[#26334D] object-contain drop-shadow"
-                    />
-                    <span className="absolute -bottom-1 -right-1 px-1.5 py-0.5 rounded-md text-[9px] font-mono font-black bg-[#A3E635] text-slate-950">
-                      [{userClan.tag}]
-                    </span>
-                  </div>
+            {/* Context Sub-Header for Active Ranking Category */}
+            <div className="p-5 rounded-3xl bg-gradient-to-r from-[#0F1424] via-[#090D18] to-[#0F1424] border border-[#20293D] flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+              <div className="space-y-1.5">
+                <div className="flex items-center gap-2 flex-wrap">
+                  <span className="px-2.5 py-0.5 rounded text-[10px] font-mono font-black uppercase bg-[#A3E635] text-slate-950">
+                    {rankingCategory === 'platform' && 'CALIBERCLUTCH PLATFORM LADDER'}
+                    {rankingCategory === 'world' && 'GLOBAL CS2 PRO CIRCUIT'}
+                    {rankingCategory === 'regional' && 'BALKANS & EUROPEAN REGIONAL CIRCUIT'}
+                    {rankingCategory === 'valve' && 'VALVE REGIONAL STANDINGS (VRS)'}
+                  </span>
+                  <span className="px-2 py-0.5 rounded text-[10px] font-mono font-bold bg-white/10 text-slate-300">
+                    {rankingCategory === 'platform' && 'Season 1 Verified'}
+                    {rankingCategory === 'world' && 'Week 47 Standings'}
+                    {rankingCategory === 'regional' && 'Regional Major Slots'}
+                    {rankingCategory === 'valve' && 'Major Invitation Cutoff'}
+                  </span>
+                </div>
+                <h4 className="text-xl font-black font-display text-white">
+                  {rankingCategory === 'platform' && 'Registered Platform Teams'}
+                  {rankingCategory === 'world' && 'CS2 World Team Rankings'}
+                  {rankingCategory === 'regional' && 'Regional Team Rankings (Balkans & EU)'}
+                  {rankingCategory === 'valve' && 'Valve Major Standings (VRS)'}
+                </h4>
+                <p className="text-xs font-mono text-slate-400">
+                  {rankingCategory === 'platform' && 'Teams registered on CaliberClutch competing in official 5v5 tournaments and community clan matches.'}
+                  {rankingCategory === 'world' && 'Global team power rankings updated weekly based on official 5v5 tournament performance and match consistency.'}
+                  {rankingCategory === 'regional' && 'Official regional rankings across Kosovo, Albania, North Macedonia, and the European circuit.'}
+                  {rankingCategory === 'valve' && "Valve's official Regional Standings (VRS) determining direct invitations to RMRs and the CS2 Major Championship."}
+                </p>
+              </div>
 
-                  <div>
-                    <div className="flex items-center gap-2">
-                      <span className="text-xs px-2 py-0.5 rounded font-mono font-bold bg-white/10 text-white">
-                        YOUR CLAN
-                      </span>
-                      <h4 className="font-display font-black text-white text-base sm:text-lg">
-                        {userClan.name}
-                      </h4>
-                      <span>{userClan.flag}</span>
-                    </div>
-
-                    <div className="flex items-center gap-3 text-xs font-mono text-slate-400 mt-1">
-                      <span>Roster: <strong className="text-white">{userClan.members.length} Players</strong></span>
-                      <span>•</span>
-                      {isUserRanked ? (
-                        <span>Points: <strong className="text-[#A3E635] font-black">{userPoints} pts</strong></span>
-                      ) : (
-                        <span className="text-amber-400 font-bold">Status: Unranked (In Placement)</span>
-                      )}
-                    </div>
-                  </div>
+              {/* Search & Filter pills inside sub-header */}
+              <div className="flex flex-col sm:items-end gap-2.5 shrink-0">
+                <div className="relative w-full sm:w-64">
+                  <Search className="w-3.5 h-3.5 text-slate-400 absolute left-3 top-2.5" />
+                  <input
+                    type="text"
+                    value={hltvSearch}
+                    onChange={(e) => setHltvSearch(e.target.value)}
+                    placeholder="Search team, tag, or player..."
+                    className="w-full pl-8 pr-3 py-1.5 rounded-xl bg-[#141A28] border border-[#232D44] text-white text-xs font-mono placeholder:text-slate-500 focus:outline-none focus:border-[#A3E635]"
+                  />
                 </div>
 
-                <div className="flex items-center gap-3 self-start sm:self-center">
-                  {!isUserRanked ? (
-                    <div className="flex flex-col sm:items-end gap-1.5">
-                      <div className="px-3 py-1 rounded-xl bg-amber-500/10 border border-amber-500/25 text-amber-300 text-xs font-mono font-bold flex items-center gap-1.5">
-                        <Sparkles className="w-3.5 h-3.5" />
-                        <span>0 / 3 Matches Played (Calibration)</span>
-                      </div>
+                {rankingCategory === 'regional' && (
+                  <div className="flex items-center gap-1 bg-black/40 p-1 rounded-xl border border-white/10 text-[11px] font-mono">
+                    {(['all', 'Balkans', 'Europe', 'Nordics'] as const).map(reg => (
                       <button
-                        onClick={() => {
-                          sound.playClick();
-                          setActiveTab('clans-list');
-                        }}
-                        className="px-4 py-2 rounded-xl bg-gradient-to-r from-[#84CC16] to-[#A3E635] hover:brightness-110 text-slate-950 font-display font-black text-xs uppercase tracking-wider flex items-center gap-2 cursor-pointer shadow-lg active:scale-95 transition"
+                        key={reg}
+                        onClick={() => { sound.playClick(); setHltvRegionFilter(reg); }}
+                        className={`px-2.5 py-1 rounded-lg transition cursor-pointer ${
+                          hltvRegionFilter === reg ? 'bg-[#A3E635] text-slate-950 font-bold' : 'text-slate-400 hover:text-white'
+                        }`}
                       >
-                        <Swords className="w-3.5 h-3.5" />
-                        <span>Play Match to Calibrate</span>
+                        {reg === 'all' ? 'All' : reg}
                       </button>
-                    </div>
-                  ) : (
-                    <div className="text-right">
-                      <span className="text-xs font-mono text-slate-400 block">World Standing</span>
-                      <span className="text-2xl font-black font-display text-[#A3E635]">
-                        #{allHltvClans.find(c => c.isUserClan)?.rank || '--'}
-                      </span>
-                    </div>
-                  )}
-                </div>
+                    ))}
+                  </div>
+                )}
               </div>
             </div>
 
-            {/* SEARCH & REGION FILTERS */}
-            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 p-4 rounded-2xl bg-[#090C15] border border-[#1E2538]">
-              {/* Region Pills */}
-              <div className="flex items-center gap-1.5 flex-wrap">
-                {(['all', 'Balkans', 'Europe', 'Nordics'] as const).map(reg => (
-                  <button
-                    key={reg}
-                    onClick={() => {
-                      sound.playClick();
-                      setHltvRegionFilter(reg);
-                    }}
-                    className={`px-3.5 py-1.5 rounded-xl text-xs font-mono font-bold transition cursor-pointer flex items-center gap-1.5 ${
-                      hltvRegionFilter === reg
-                        ? 'bg-[#A3E635] text-slate-950 font-black shadow-md'
-                        : 'bg-[#121624] text-slate-400 hover:text-white border border-[#202738]'
-                    }`}
-                  >
-                    {reg === 'all' ? (
-                      <span>All Regions</span>
-                    ) : reg === 'Balkans' ? (
-                      <span>🇽🇰 Balkans</span>
-                    ) : reg === 'Europe' ? (
-                      <span>🇪🇺 Central Europe</span>
-                    ) : (
-                      <span>🇸🇪 Nordics</span>
-                    )}
-                  </button>
-                ))}
-              </div>
-
-              {/* Search input */}
-              <div className="relative w-full sm:w-72">
-                <Search className="w-4 h-4 text-slate-400 absolute left-3 top-2.5" />
-                <input
-                  type="text"
-                  value={hltvSearch}
-                  onChange={(e) => setHltvSearch(e.target.value)}
-                  placeholder="Search clan, tag, or player..."
-                  className="w-full pl-9 pr-4 py-2 rounded-xl bg-[#121624] border border-[#202738] text-white text-xs font-mono placeholder:text-slate-500 focus:outline-none focus:border-[#A3E635]"
-                />
-              </div>
-            </div>
-
-            {/* RANKINGS LIST (HLTV STYLE) */}
+            {/* RANKINGS CARDS LIST */}
             <div className="space-y-3">
               {filteredClans.map((clan) => {
                 const isExpanded = expandedHltvClanId === clan.id;
@@ -3359,7 +3413,7 @@ export const VortexClanHub: React.FC<VortexClanHubProps> = ({
                       }}
                       className="p-4 sm:p-5 flex flex-col lg:flex-row lg:items-center justify-between gap-4 cursor-pointer select-none"
                     >
-                      {/* Left: Rank & Delta & Identity */}
+                      {/* Left: Rank & Identity */}
                       <div className="flex items-center gap-3.5 sm:gap-5 flex-1 min-w-0">
                         {/* Rank Badge */}
                         <div className="flex flex-col items-center justify-center min-w-[50px]">
@@ -3404,7 +3458,7 @@ export const VortexClanHub: React.FC<VortexClanHubProps> = ({
                           />
                         </div>
 
-                        {/* Clan Name & Country & Lineup Row */}
+                        {/* Clan Name & Lineup */}
                         <div className="min-w-0 flex-1 space-y-2">
                           <div className="flex items-center gap-2 flex-wrap">
                             <span className="font-display font-black text-white text-base hover:text-[#A3E635] transition truncate">
@@ -3415,16 +3469,31 @@ export const VortexClanHub: React.FC<VortexClanHubProps> = ({
                             </span>
                             {clan.isUserClan && (
                               <span className="px-2 py-0.5 rounded text-[9px] font-mono font-black bg-[#A3E635] text-slate-950 uppercase">
-                                YOU
+                                YOUR TEAM
                               </span>
                             )}
                             <span className="flex items-center gap-1 text-xs text-slate-400 font-mono">
                               <span>{clan.flag}</span>
                               <span className="hidden sm:inline">{clan.country}</span>
                             </span>
+
+                            {/* Valve status badge if in Valve mode */}
+                            {rankingCategory === 'valve' && (
+                              <span className={`px-2 py-0.5 rounded text-[9px] font-mono font-black uppercase ${
+                                clan.valveStatus === 'Legends'
+                                  ? 'bg-amber-400/20 text-amber-300 border border-amber-400/40'
+                                  : clan.valveStatus === 'Challengers'
+                                  ? 'bg-blue-400/20 text-blue-300 border border-blue-400/40'
+                                  : clan.valveStatus === 'Contenders'
+                                  ? 'bg-purple-400/20 text-purple-300 border border-purple-400/40'
+                                  : 'bg-white/10 text-slate-400 border border-white/10'
+                              }`}>
+                                {clan.valveStatus}
+                              </span>
+                            )}
                           </div>
 
-                          {/* 5-Player Starting Lineup (HLTV hallmark) */}
+                          {/* 5-Player Starting Lineup */}
                           <div className="flex items-center gap-1.5 flex-wrap">
                             {clan.roster.slice(0, 5).map((member, idx) => (
                               <span
@@ -3440,47 +3509,57 @@ export const VortexClanHub: React.FC<VortexClanHubProps> = ({
                         </div>
                       </div>
 
-                      {/* Right: HLTV Points & Stats */}
+                      {/* Right: Points & Stats */}
                       <div className="flex items-center justify-between lg:justify-end gap-6 pt-3 lg:pt-0 border-t lg:border-t-0 border-white/5">
-                        {/* HLTV Points */}
+                        {/* Points Column */}
                         <div className="w-32 text-left lg:text-right">
                           <div className="text-base font-black font-mono text-[#A3E635]">
-                            {clan.points.toLocaleString()} <span className="text-xs text-slate-400 font-normal">pts</span>
+                            {rankingCategory === 'valve'
+                              ? `${clan.vrsPoints.toLocaleString()} VRS`
+                              : `${clan.points.toLocaleString()} pts`}
                           </div>
-                          {/* Mini progress bar */}
                           <div className="w-full h-1.5 rounded-full bg-black/50 border border-white/5 mt-1 overflow-hidden">
                             <div
                               className="h-full rounded-full bg-gradient-to-r from-emerald-500 to-[#A3E635]"
-                              style={{ width: `${Math.min(100, (clan.points / 1000) * 100)}%` }}
+                              style={{ width: `${Math.min(100, ((rankingCategory === 'valve' ? clan.vrsPoints : clan.points) / (rankingCategory === 'valve' ? 2000 : 1000)) * 100)}%` }}
                             />
                           </div>
                         </div>
 
-                        {/* Win Rate */}
+                        {/* Win Rate / Matches */}
                         <div className="text-center min-w-[75px] hidden sm:block">
                           <span className="text-[10px] font-mono text-slate-400 uppercase block">Win Rate</span>
                           <span className="text-xs font-mono font-bold text-white block mt-0.5">{clan.winrate}</span>
                           <span className="text-[10px] font-mono text-slate-400">{clan.wins}W - {clan.losses}L</span>
                         </div>
 
-                        {/* Recent Form (5 match pills) */}
-                        <div className="text-center hidden md:block">
-                          <span className="text-[10px] font-mono text-slate-400 uppercase block mb-1">Form</span>
-                          <div className="flex items-center gap-1">
-                            {clan.recentForm.map((f, fIdx) => (
-                              <span
-                                key={fIdx}
-                                className={`w-4 h-4 rounded text-[9px] font-black font-mono flex items-center justify-center ${
-                                  f === 'W'
-                                    ? 'bg-emerald-500/20 text-emerald-400 border border-emerald-500/30'
-                                    : 'bg-rose-500/20 text-rose-400 border border-rose-500/30'
-                                }`}
-                              >
-                                {f}
-                              </span>
-                            ))}
+                        {/* Recent Form or Prize Won */}
+                        {rankingCategory === 'valve' ? (
+                          <div className="text-center min-w-[85px] hidden md:block">
+                            <span className="text-[10px] font-mono text-slate-400 uppercase block">Bounty Won</span>
+                            <span className="text-xs font-mono font-bold text-amber-300 block mt-0.5">€{clan.prizeEarned.toLocaleString()}</span>
                           </div>
-                        </div>
+                        ) : (
+                          <div className="text-center hidden md:block">
+                            <span className="text-[10px] font-mono text-slate-400 uppercase block mb-1">Form</span>
+                            <div className="flex items-center gap-1">
+                              {clan.recentForm.length > 0 ? clan.recentForm.map((f, fIdx) => (
+                                <span
+                                  key={fIdx}
+                                  className={`w-4 h-4 rounded text-[9px] font-black font-mono flex items-center justify-center ${
+                                    f === 'W'
+                                      ? 'bg-emerald-500/20 text-emerald-400 border border-emerald-500/30'
+                                      : 'bg-rose-500/20 text-rose-400 border border-rose-500/30'
+                                  }`}
+                                >
+                                  {f}
+                                </span>
+                              )) : (
+                                <span className="text-[10px] text-slate-500 font-mono">--</span>
+                              )}
+                            </div>
+                          </div>
+                        )}
 
                         {/* Trophies */}
                         <div className="text-center min-w-[65px] hidden sm:block">
@@ -3532,28 +3611,30 @@ export const VortexClanHub: React.FC<VortexClanHubProps> = ({
                           {/* Clan Performance Telemetry */}
                           <div className="space-y-2">
                             <span className="text-xs font-mono text-slate-400 uppercase tracking-wider font-bold block">
-                              Competitive Match & Circuit Telemetry
+                              Circuit Standing & Placement Telemetry
                             </span>
                             <div className="p-4 rounded-xl bg-[#0F1424] border border-[#1E273D] space-y-3 text-xs font-mono">
                               <div className="flex items-center justify-between">
                                 <span className="text-slate-400">Average Squad ELO:</span>
-                                <span className="font-bold text-white">{clan.avgElo} ELO (Level {Math.min(10, Math.floor(clan.avgElo / 250) + 1)})</span>
+                                <span className="font-bold text-white">{clan.avgElo > 0 ? `${clan.avgElo} ELO` : 'Unranked'}</span>
                               </div>
                               <div className="flex items-center justify-between">
-                                <span className="text-slate-400">Official Tournament Titles:</span>
-                                <span className="font-bold text-amber-400">{clan.tournamentsWon} Championships</span>
+                                <span className="text-slate-400">Official Tournament Championships:</span>
+                                <span className="font-bold text-amber-400">{clan.tournamentsWon} Cups</span>
                               </div>
                               <div className="flex items-center justify-between">
                                 <span className="text-slate-400">Total Matches Played:</span>
-                                <span className="font-bold text-white">{clan.matches} matches ({clan.wins} Wins / {clan.losses} Losses)</span>
+                                <span className="font-bold text-white">{clan.matches} matches ({clan.wins}W / {clan.losses}L)</span>
                               </div>
                               <div className="flex items-center justify-between">
-                                <span className="text-slate-400">Current Competitive Region:</span>
-                                <span className="font-bold text-white">{clan.region} Online Circuit</span>
+                                <span className="text-slate-400">Valve Major Seed:</span>
+                                <span className="font-bold text-emerald-400">{clan.valveStatus} Status</span>
                               </div>
                               <div className="flex items-center justify-between pt-2 border-t border-white/5">
-                                <span className="text-slate-400">Team Ranking Points:</span>
-                                <span className="font-bold text-[#A3E635] text-sm">{clan.points} Points</span>
+                                <span className="text-slate-400">Active Ranking Points:</span>
+                                <span className="font-bold text-[#A3E635] text-sm">
+                                  {rankingCategory === 'valve' ? `${clan.vrsPoints} VRS` : `${clan.points} Points`}
+                                </span>
                               </div>
                             </div>
                           </div>
@@ -3563,6 +3644,39 @@ export const VortexClanHub: React.FC<VortexClanHubProps> = ({
                   </div>
                 );
               })}
+
+              {/* Special info banner for CaliberClutch Teams if only 1 team is registered */}
+              {rankingCategory === 'platform' && filteredClans.length === 1 && (
+                <div className="p-5 rounded-2xl bg-[#0B0E16] border border-dashed border-[#232B3E] text-center space-y-2">
+                  <div className="w-10 h-10 rounded-full bg-[#A3E635]/15 text-[#A3E635] flex items-center justify-center mx-auto">
+                    <Users className="w-5 h-5" />
+                  </div>
+                  <h5 className="font-display font-black text-white text-sm">No Rival Clans Registered Yet</h5>
+                  <p className="text-xs font-mono text-slate-400 max-w-md mx-auto">
+                    Your team is currently holding Rank #1 on CaliberClutch! Share your clan tag, invite other squads, and play official 5v5 matches to establish the community ladder.
+                  </p>
+                  <div className="pt-1 flex items-center justify-center gap-3">
+                    <button
+                      onClick={() => {
+                        sound.playClick();
+                        setActiveTab('roster');
+                      }}
+                      className="px-4 py-2 rounded-xl bg-white/5 hover:bg-white/10 text-white font-mono text-xs font-bold transition cursor-pointer"
+                    >
+                      Manage Roster
+                    </button>
+                    <button
+                      onClick={() => {
+                        sound.playClick();
+                        setActiveTab('clans-list');
+                      }}
+                      className="px-4 py-2 rounded-xl bg-[#A3E635] hover:brightness-110 text-slate-950 font-display font-black text-xs uppercase tracking-wider transition cursor-pointer"
+                    >
+                      Find 5v5 Clan Match
+                    </button>
+                  </div>
+                </div>
+              )}
             </div>
           </div>
         );
