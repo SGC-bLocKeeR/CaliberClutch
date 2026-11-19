@@ -122,6 +122,18 @@ export const getCountryCode = (countryNameOrCode: string): string => {
     'es': 'es',
     'chile': 'cl',
     'cl': 'cl',
+    'hungary': 'hu',
+    'hu': 'hu',
+    'czechia': 'cz',
+    'czech republic': 'cz',
+    'cz': 'cz',
+    'bosnia': 'ba',
+    'bosnia and herzegovina': 'ba',
+    'ba': 'ba',
+    'belarus': 'by',
+    'by': 'by',
+    'belgium': 'be',
+    'be': 'be',
   };
   return map[c] || (c.length === 2 ? c : 'xk');
 };
@@ -1500,6 +1512,7 @@ export interface HltvClanEntry {
   id: string;
   rank: number;
   prevRank: number;
+  delta?: number;
   name: string;
   tag: string;
   logo: string;
@@ -1519,7 +1532,7 @@ export interface HltvClanEntry {
   recentForm: ('W' | 'L')[];
   region: 'Balkans' | 'Europe' | 'North America' | 'South America' | 'Asia' | 'Oceania' | 'Nordics';
   verified?: boolean;
-  roster: { name: string; role: string; flag: string; level: number; elo: number }[];
+  roster: { name: string; role: string; flag: string; level: number; elo: number; avatar?: string; countryCode?: string }[];
 }
 
 export const REGIONAL_COLUMNS = {
@@ -1567,778 +1580,1219 @@ export const REGIONAL_COLUMNS = {
 
 export const HLTV_CLANS_DATA: HltvClanEntry[] = [
   {
-    id: 'bne-clan',
+    id: 'mouz-clan',
     rank: 1,
-    prevRank: 1,
-    name: 'Bad News Eagles Academy',
-    tag: 'BNE',
-    logo: '/images/clan_badges/badge_caliber_skull.svg',
-    country: 'Kosovo',
-    flag: '🇽🇰',
-    points: 1000,
-    vrsPoints: 1980,
-    valveStatus: 'Legends',
-    vrsInviteStage: 'Elimination Stage',
-    prizeEarned: 45000,
-    matches: 48,
-    wins: 39,
-    losses: 9,
-    winrate: '81.2%',
-    tournamentsWon: 5,
-    avgElo: 2682,
-    recentForm: ['W', 'W', 'W', 'W', 'L'],
-    region: 'Balkans',
-    verified: true,
-    roster: [
-      { name: 'rigoN-jr', role: 'IGL / Captain', flag: '🇽🇰', level: 10, elo: 2840 },
-      { name: 'juanflatro-aim', role: 'AWPer', flag: '🇽🇰', level: 10, elo: 2790 },
-      { name: 'sener1-tap', role: 'Entry Fragger', flag: '🇽🇰', level: 10, elo: 2650 },
-      { name: 'gxx-fire', role: 'Support', flag: '🇦🇱', level: 9, elo: 2420 },
-      { name: 'sinnopsyy-beast', role: 'Lurker', flag: '🇽🇰', level: 10, elo: 2710 },
-    ],
-  },
-  {
-    id: 'navi-clan',
-    rank: 2,
     prevRank: 2,
-    name: 'Natus Vincere Academy',
-    tag: 'NAVI',
-    logo: '/images/clan_badges/badge_caliber_gold.svg',
-    country: 'Ukraine',
-    flag: '🇺🇦',
-    points: 940,
-    vrsPoints: 1940,
+    delta: -1,
+    name: 'MOUZ',
+    tag: 'MOUZ',
+    logo: '/images/teams/mouz.png',
+    country: 'Germany',
+    flag: '🇩🇪',
+    points: 808,
+    vrsPoints: 1950,
     valveStatus: 'Legends',
     vrsInviteStage: 'Elimination Stage',
-    prizeEarned: 42000,
-    matches: 44,
-    wins: 36,
+    prizeEarned: 38000,
+    matches: 42,
+    wins: 34,
     losses: 8,
-    winrate: '81.8%',
+    winrate: '81.0%',
     tournamentsWon: 4,
-    avgElo: 2620,
-    recentForm: ['W', 'W', 'W', 'L', 'W'],
+    avgElo: 2810,
+    recentForm: ["W", "W", "W", "W", "L"],
     region: 'Europe',
     verified: true,
     roster: [
-      { name: 'Aleksib', role: 'IGL / Captain', flag: '🇫🇮', level: 10, elo: 2710 },
-      { name: 'b1t', role: 'Anchor', flag: '🇺🇦', level: 10, elo: 2820 },
-      { name: 'w0nderful', role: 'AWPer', flag: '🇺🇦', level: 10, elo: 2780 },
-      { name: 'jL', role: 'Entry Fragger', flag: '🇱🇹', level: 10, elo: 2740 },
-      { name: 'iM', role: 'Rifler', flag: '🇷🇴', level: 9, elo: 2560 },
+      { name: 'torzsi', role: 'AWPer', flag: '🇭🇺', level: 10, elo: 2880, avatar: '/images/players/torzsi_photo.png', countryCode: 'hu' },
+      { name: 'Spinx', role: 'Lurker', flag: '🇮🇱', level: 10, elo: 2910, avatar: '/images/players/spinx_photo.png', countryCode: 'il' },
+      { name: 'xertioN', role: 'Entry Fragger', flag: '🇮🇱', level: 10, elo: 2850, avatar: '/images/players/xertion_photo.png', countryCode: 'il' },
+      { name: 'PR', role: 'Rifler', flag: '🇨🇿', level: 9, elo: 2720, avatar: '/images/players/pr_photo.png', countryCode: 'cz' },
+      { name: 'xelex', role: 'Support', flag: '🇭🇺', level: 9, elo: 2690, avatar: '/images/players/xelex_photo.png', countryCode: 'hu' },
     ],
   },
   {
     id: 'spirit-clan',
-    rank: 3,
-    prevRank: 4,
-    name: 'Team Spirit Young',
+    rank: 2,
+    prevRank: 3,
+    delta: 1,
+    name: 'Spirit',
     tag: 'TS',
-    logo: '/images/clan_badges/badge_caliber_shield.svg',
+    logo: '/images/teams/spirit.png',
     country: 'Russia',
     flag: '🇷🇺',
-    points: 910,
-    vrsPoints: 1900,
+    points: 766,
+    vrsPoints: 1910,
     valveStatus: 'Legends',
     vrsInviteStage: 'Elimination Stage',
-    prizeEarned: 39000,
-    matches: 40,
-    wins: 32,
+    prizeEarned: 36000,
+    matches: 39,
+    wins: 31,
     losses: 8,
-    winrate: '80.0%',
+    winrate: '79.5%',
     tournamentsWon: 4,
-    avgElo: 2590,
-    recentForm: ['W', 'W', 'W', 'W', 'W'],
+    avgElo: 2740,
+    recentForm: ["W", "W", "L", "W", "W"],
     region: 'Europe',
     verified: true,
     roster: [
-      { name: 'chopper', role: 'IGL / Captain', flag: '🇷🇺', level: 9, elo: 2480 },
-      { name: 'donk', role: 'Entry Fragger', flag: '🇷🇺', level: 10, elo: 3120 },
-      { name: 'sh1ro', role: 'AWPer', flag: '🇷🇺', level: 10, elo: 2920 },
-      { name: 'magixx', role: 'Support', flag: '🇷🇺', level: 9, elo: 2410 },
-      { name: 'zont1x', role: 'Anchor', flag: '🇺🇦', level: 9, elo: 2510 },
+      { name: 'sh1ro', role: 'AWPer', flag: '🇷🇺', level: 10, elo: 2950, countryCode: 'ru' },
+      { name: 'magixx', role: 'Support', flag: '🇷🇺', level: 9, elo: 2480, countryCode: 'ru' },
+      { name: 'tN1R', role: 'Rifler', flag: '🇷🇺', level: 9, elo: 2540, countryCode: 'ru' },
+      { name: 'zont1x', role: 'Anchor', flag: '🇺🇦', level: 9, elo: 2560, countryCode: 'ua' },
+      { name: 'donk', role: 'Entry Fragger', flag: '🇷🇺', level: 10, elo: 3180, countryCode: 'ru' },
     ],
   },
   {
-    id: 'faze-balkan',
-    rank: 4,
-    prevRank: 3,
-    name: 'FaZe Clan Balkan Talent',
-    tag: 'FaZe',
-    logo: '/images/clan_badges/badge_caliber_fire.svg',
-    country: 'Germany',
-    flag: '🇩🇪',
-    points: 865,
-    vrsPoints: 1840,
+    id: 'vitality-clan',
+    rank: 3,
+    prevRank: 2,
+    delta: -1,
+    name: 'Vitality',
+    tag: 'VIT',
+    logo: '/images/teams/vitality.png',
+    country: 'France',
+    flag: '🇫🇷',
+    points: 638,
+    vrsPoints: 1870,
     valveStatus: 'Legends',
     vrsInviteStage: 'Elimination Stage',
-    prizeEarned: 32000,
-    matches: 34,
-    wins: 24,
-    losses: 10,
-    winrate: '70.5%',
-    tournamentsWon: 3,
-    avgElo: 2366,
-    recentForm: ['W', 'W', 'L', 'W', 'W'],
-    region: 'Europe',
-    verified: true,
-    roster: [
-      { name: 'ViperStrike', role: 'IGL / Captain', flag: '🇩🇪', level: 9, elo: 2310 },
-      { name: 'BrokyAWP', role: 'AWPer', flag: '🇱🇻', level: 10, elo: 2540 },
-      { name: 'Rainmaker', role: 'Entry Fragger', flag: '🇳🇴', level: 8, elo: 2080 },
-      { name: 'FrozenEcho', role: 'Support', flag: '🇸🇰', level: 9, elo: 2280 },
-      { name: 'RopzSneak', role: 'Lurker', flag: '🇪🇪', level: 10, elo: 2620 },
-    ],
-  },
-  {
-    id: 'mongolz-clan',
-    rank: 5,
-    prevRank: 5,
-    name: 'The MongolZ Pro',
-    tag: 'MGL',
-    logo: '/images/clan_badges/badge_caliber_crimson.svg',
-    country: 'Mongolia',
-    flag: '🇲🇳',
-    points: 820,
-    vrsPoints: 1800,
-    valveStatus: 'Legends',
-    vrsInviteStage: 'Elimination Stage',
-    prizeEarned: 29000,
+    prizeEarned: 31000,
     matches: 36,
-    wins: 26,
-    losses: 10,
-    winrate: '72.2%',
-    tournamentsWon: 3,
-    avgElo: 2420,
-    recentForm: ['W', 'L', 'W', 'W', 'W'],
-    region: 'Asia',
-    verified: true,
-    roster: [
-      { name: 'bLitz', role: 'IGL / Captain', flag: '🇲🇳', level: 9, elo: 2450 },
-      { name: 'Techno', role: 'Entry Fragger', flag: '🇲🇳', level: 9, elo: 2380 },
-      { name: 'Senzu', role: 'Rifler', flag: '🇲🇳', level: 10, elo: 2590 },
-      { name: 'mzinho', role: 'Lurker', flag: '🇲🇳', level: 9, elo: 2340 },
-      { name: '910', role: 'AWPer', flag: '🇲🇳', level: 9, elo: 2430 },
-    ],
-  },
-  {
-    id: 'gld-eagles',
-    rank: 6,
-    prevRank: 6,
-    name: 'Guild Eagles Contenders',
-    tag: 'GLD',
-    logo: '/images/clan_badges/badge_caliber_gold.svg',
-    country: 'Kosovo',
-    flag: '🇽🇰',
-    points: 740,
-    vrsPoints: 1710,
-    valveStatus: 'Challengers',
-    vrsInviteStage: 'Opening Stage',
-    prizeEarned: 24000,
-    matches: 28,
-    wins: 19,
+    wins: 27,
     losses: 9,
-    winrate: '67.8%',
-    tournamentsWon: 2,
-    avgElo: 2240,
-    recentForm: ['L', 'W', 'W', 'W', 'L'],
-    region: 'Balkans',
+    winrate: '75.0%',
+    tournamentsWon: 3,
+    avgElo: 2870,
+    recentForm: ["W", "L", "W", "W", "L"],
+    region: 'Europe',
     verified: true,
     roster: [
-      { name: 'DrenicaSniper', role: 'AWPer', flag: '🇽🇰', level: 9, elo: 2210 },
-      { name: 'Besart_CS2', role: 'IGL / Captain', flag: '🇽🇰', level: 8, elo: 1980 },
-      { name: 'Ardit_Entry', role: 'Entry Fragger', flag: '🇽🇰', level: 7, elo: 1840 },
-      { name: 'Lumi_Flash', role: 'Support', flag: '🇽🇰', level: 8, elo: 1950 },
-      { name: 'Valon_Anchor', role: 'Lurker', flag: '🇦🇱', level: 8, elo: 1910 },
+      { name: 'apEX', role: 'IGL / Captain', flag: '🇫🇷', level: 10, elo: 2740, countryCode: 'fr' },
+      { name: 'ropz', role: 'Lurker', flag: '🇪🇪', level: 10, elo: 2920, countryCode: 'ee' },
+      { name: 'ZywOo', role: 'AWPer', flag: '🇫🇷', level: 10, elo: 3220, countryCode: 'fr' },
+      { name: 'flameZ', role: 'Entry Fragger', flag: '🇮🇱', level: 10, elo: 2790, countryCode: 'il' },
+      { name: 'mezii', role: 'Support', flag: '🇬🇧', level: 10, elo: 2710, countryCode: 'gb' },
     ],
   },
   {
-    id: 'astralis-talent',
-    rank: 7,
-    prevRank: 8,
-    name: 'Astralis Talent',
-    tag: 'AST',
-    logo: '/images/clan_badges/badge_caliber_crimson.svg',
+    id: 'falcons-clan',
+    rank: 4,
+    prevRank: 5,
+    delta: 1,
+    name: 'Falcons',
+    tag: 'FLC',
+    logo: '/images/teams/falcons.png',
     country: 'Denmark',
     flag: '🇩🇰',
-    points: 680,
-    vrsPoints: 1660,
-    valveStatus: 'Challengers',
-    vrsInviteStage: 'Opening Stage',
-    prizeEarned: 21000,
-    matches: 30,
-    wins: 20,
-    losses: 10,
-    winrate: '66.7%',
+    points: 448,
+    vrsPoints: 1780,
+    valveStatus: 'Legends',
+    vrsInviteStage: 'Elimination Stage',
+    prizeEarned: 25000,
+    matches: 31,
+    wins: 22,
+    losses: 9,
+    winrate: '71.0%',
     tournamentsWon: 2,
-    avgElo: 2310,
-    recentForm: ['W', 'W', 'L', 'W', 'L'],
+    avgElo: 2840,
+    recentForm: ["W", "W", "W", "L", "W"],
     region: 'Europe',
     verified: true,
     roster: [
-      { name: 'device', role: 'AWPer', flag: '🇩🇰', level: 10, elo: 2720 },
-      { name: 'stavn', role: 'Rifler', flag: '🇩🇰', level: 9, elo: 2480 },
-      { name: 'jabbi', role: 'Entry Fragger', flag: '🇩🇰', level: 9, elo: 2420 },
-      { name: 'Staehr', role: 'Anchor', flag: '🇩🇰', level: 8, elo: 2190 },
-      { name: 'cadiaN', role: 'IGL / Captain', flag: '🇩🇰', level: 9, elo: 2390 },
+      { name: 'karrigan', role: 'IGL / Captain', flag: '🇩🇰', level: 10, elo: 2680, countryCode: 'dk' },
+      { name: 'NiKo', role: 'Rifler', flag: '🇧🇦', level: 10, elo: 3050, countryCode: 'ba' },
+      { name: 'TeSeS', role: 'Support', flag: '🇩🇰', level: 10, elo: 2720, countryCode: 'dk' },
+      { name: 'm0NESY', role: 'AWPer', flag: '🇷🇺', level: 10, elo: 3140, countryCode: 'ru' },
+      { name: 'kyousuke', role: 'Entry Fragger', flag: '🇷🇺', level: 9, elo: 2630, countryCode: 'ru' },
     ],
   },
   {
-    id: 'liquid-americas',
-    rank: 8,
-    prevRank: 7,
-    name: 'Team Liquid Americas',
-    tag: 'TL',
-    logo: '/images/clan_badges/badge_caliber_cyan.svg',
-    country: 'United States',
-    flag: '🇺🇸',
-    points: 630,
-    vrsPoints: 1610,
-    valveStatus: 'Challengers',
-    vrsInviteStage: 'Opening Stage',
-    prizeEarned: 19500,
-    matches: 27,
-    wins: 17,
-    losses: 10,
-    winrate: '63.0%',
-    tournamentsWon: 1,
-    avgElo: 2280,
-    recentForm: ['L', 'W', 'W', 'L', 'W'],
-    region: 'North America',
+    id: 'aurora-clan',
+    rank: 5,
+    prevRank: 4,
+    delta: -1,
+    name: 'Aurora',
+    tag: 'AUR',
+    logo: '/images/teams/aurora.png',
+    country: 'Türkiye',
+    flag: '🇹🇷',
+    points: 419,
+    vrsPoints: 1740,
+    valveStatus: 'Legends',
+    vrsInviteStage: 'Elimination Stage',
+    prizeEarned: 22000,
+    matches: 30,
+    wins: 21,
+    losses: 9,
+    winrate: '70.0%',
+    tournamentsWon: 2,
+    avgElo: 2790,
+    recentForm: ["W", "L", "W", "L", "W"],
+    region: 'Europe',
     verified: true,
     roster: [
-      { name: 'Twistzz', role: 'IGL / Rifler', flag: '🇨🇦', level: 10, elo: 2750 },
-      { name: 'NAF', role: 'Lurker', flag: '🇨🇦', level: 9, elo: 2490 },
-      { name: 'jks', role: 'Anchor', flag: '🇦🇺', level: 9, elo: 2360 },
-      { name: 'ultimate', role: 'AWPer', flag: '🇵🇱', level: 9, elo: 2420 },
-      { name: 'YEKINDAR', role: 'Entry Fragger', flag: '🇱🇻', level: 9, elo: 2450 },
+      { name: 'XANTARES', role: 'Rifler', flag: '🇹🇷', level: 10, elo: 2990, countryCode: 'tr' },
+      { name: 'woxic', role: 'AWPer', flag: '🇹🇷', level: 10, elo: 2810, countryCode: 'tr' },
+      { name: 'jimpphat', role: 'Anchor', flag: '🇫🇮', level: 10, elo: 2840, countryCode: 'fi' },
+      { name: 'kyxsan', role: 'IGL / Captain', flag: '🇲🇰', level: 9, elo: 2580, countryCode: 'mk' },
+      { name: 'Wicadia', role: 'Entry Fragger', flag: '🇹🇷', level: 10, elo: 2770, countryCode: 'tr' },
     ],
   },
   {
-    id: 'tirana-esports',
-    rank: 9,
-    prevRank: 9,
-    name: 'Tirana Esports Club',
-    tag: 'TEC',
-    logo: '/images/clan_badges/badge_caliber_crimson.svg',
-    country: 'Albania',
-    flag: '🇦🇱',
-    points: 590,
-    vrsPoints: 1560,
+    id: 'betboom-clan',
+    rank: 6,
+    prevRank: 6,
+    delta: 0,
+    name: 'BETBOOM',
+    tag: 'BB',
+    logo: '/images/teams/betboom.png',
+    country: 'Russia',
+    flag: '🇷🇺',
+    points: 355,
+    vrsPoints: 1680,
     valveStatus: 'Challengers',
     vrsInviteStage: 'Opening Stage',
     prizeEarned: 18000,
-    matches: 25,
-    wins: 16,
+    matches: 27,
+    wins: 18,
     losses: 9,
-    winrate: '64.0%',
+    winrate: '66.7%',
     tournamentsWon: 1,
-    avgElo: 2110,
-    recentForm: ['W', 'L', 'W', 'W', 'L'],
-    region: 'Balkans',
-    verified: true,
-    roster: [
-      { name: 'Illyrian_AK', role: 'IGL / Captain', flag: '🇦🇱', level: 9, elo: 2230 },
-      { name: 'ShkodraEagle', role: 'Entry Fragger', flag: '🇦🇱', level: 8, elo: 2040 },
-      { name: 'TiranaAWP', role: 'AWPer', flag: '🇦🇱', level: 9, elo: 2180 },
-      { name: 'Vlora_Smoke', role: 'Support', flag: '🇦🇱', level: 8, elo: 1990 },
-      { name: 'Durresi_Clutch', role: 'Lurker', flag: '🇦🇱', level: 8, elo: 2010 },
-    ],
-  },
-  {
-    id: 'furia-esports',
-    rank: 10,
-    prevRank: 10,
-    name: 'FURIA Esports',
-    tag: 'FUR',
-    logo: '/images/clan_badges/badge_caliber_shield.svg',
-    country: 'Brazil',
-    flag: '🇧🇷',
-    points: 550,
-    vrsPoints: 1510,
-    valveStatus: 'Challengers',
-    vrsInviteStage: 'Opening Stage',
-    prizeEarned: 16500,
-    matches: 26,
-    wins: 16,
-    losses: 10,
-    winrate: '61.5%',
-    tournamentsWon: 1,
-    avgElo: 2190,
-    recentForm: ['W', 'W', 'L', 'L', 'W'],
-    region: 'South America',
-    verified: true,
-    roster: [
-      { name: 'FalleN', role: 'IGL / AWPer', flag: '🇧🇷', level: 9, elo: 2410 },
-      { name: 'KSCERATO', role: 'Rifler', flag: '🇧🇷', level: 10, elo: 2650 },
-      { name: 'yuurih', role: 'Support', flag: '🇧🇷', level: 9, elo: 2380 },
-      { name: 'chelo', role: 'Entry Fragger', flag: '🇧🇷', level: 8, elo: 2140 },
-      { name: 'skullz', role: 'Anchor', flag: '🇧🇷', level: 8, elo: 2090 },
-    ],
-  },
-  {
-    id: 'prishtina-clutch',
-    rank: 11,
-    prevRank: 11,
-    name: 'Prishtina Clutch Stars',
-    tag: 'PRN',
-    logo: '/images/clan_badges/badge_caliber_shield.svg',
-    country: 'Kosovo',
-    flag: '🇽🇰',
-    points: 480,
-    vrsPoints: 1420,
-    valveStatus: 'Contenders',
-    vrsInviteStage: 'Closed Qualifier',
-    prizeEarned: 12000,
-    matches: 22,
-    wins: 15,
-    losses: 7,
-    winrate: '68.2%',
-    tournamentsWon: 1,
-    avgElo: 1978,
-    recentForm: ['W', 'W', 'L', 'L', 'W'],
-    region: 'Balkans',
-    verified: false,
-    roster: [
-      { name: 'Besart_CS2', role: 'IGL / Captain', flag: '🇽🇰', level: 8, elo: 1980 },
-      { name: 'DrenicaSniper', role: 'AWPer', flag: '🇽🇰', level: 9, elo: 2210 },
-      { name: 'Ardit_Entry', role: 'Entry Fragger', flag: '🇽🇰', level: 7, elo: 1840 },
-      { name: 'Lumi_Flash', role: 'Support', flag: '🇽🇰', level: 8, elo: 1950 },
-      { name: 'Valon_Anchor', role: 'Lurker', flag: '🇦🇱', level: 8, elo: 1910 },
-    ],
-  },
-  {
-    id: 'eternal-fire',
-    rank: 12,
-    prevRank: 12,
-    name: 'Eternal Fire Academy',
-    tag: 'EF',
-    logo: '/images/clan_badges/badge_caliber_fire.svg',
-    country: 'Türkiye',
-    flag: '🇹🇷',
-    points: 450,
-    vrsPoints: 1390,
-    valveStatus: 'Contenders',
-    vrsInviteStage: 'Closed Qualifier',
-    prizeEarned: 11000,
-    matches: 24,
-    wins: 14,
-    losses: 10,
-    winrate: '58.3%',
-    tournamentsWon: 1,
-    avgElo: 2150,
-    recentForm: ['W', 'L', 'W', 'W', 'L'],
+    avgElo: 2620,
+    recentForm: ["L", "W", "W", "L", "W"],
     region: 'Europe',
     verified: true,
     roster: [
-      { name: 'MAJ3R', role: 'IGL / Captain', flag: '🇹🇷', level: 9, elo: 2280 },
-      { name: 'XANTARES', role: 'Entry Fragger', flag: '🇹🇷', level: 10, elo: 2790 },
-      { name: 'woxic', role: 'AWPer', flag: '🇹🇷', level: 9, elo: 2450 },
-      { name: 'Calyx', role: 'Rifler', flag: '🇹🇷', level: 8, elo: 2160 },
-      { name: 'Wicadia', role: 'Lurker', flag: '🇹🇷', level: 9, elo: 2320 },
+      { name: 'Boombl4', role: 'IGL / Captain', flag: '🇷🇺', level: 9, elo: 2610, countryCode: 'ru' },
+      { name: 'zorte', role: 'AWPer', flag: '🇷🇺', level: 10, elo: 2750, countryCode: 'ru' },
+      { name: 'S1ren', role: 'Support', flag: '🇷🇺', level: 9, elo: 2540, countryCode: 'ru' },
+      { name: 'd1Ledez', role: 'Entry Fragger', flag: '🇷🇺', level: 9, elo: 2570, countryCode: 'ru' },
+      { name: 'Magnojez', role: 'Rifler', flag: '🇷🇺', level: 9, elo: 2620, countryCode: 'ru' },
     ],
   },
   {
-    id: 'heroic-nordic',
-    rank: 13,
-    prevRank: 14,
-    name: 'Heroic Nordic',
-    tag: 'HRO',
-    logo: '/images/clan_badges/badge_caliber_purple.svg',
-    country: 'Denmark',
-    flag: '🇩🇰',
-    points: 420,
-    vrsPoints: 1360,
-    valveStatus: 'Contenders',
-    vrsInviteStage: 'Closed Qualifier',
-    prizeEarned: 10200,
+    id: 'navi-clan',
+    rank: 7,
+    prevRank: 7,
+    delta: 0,
+    name: 'Natus Vincere',
+    tag: 'NAVI',
+    logo: '/images/teams/navi.png',
+    country: 'Ukraine',
+    flag: '🇺🇦',
+    points: 336,
+    vrsPoints: 1650,
+    valveStatus: 'Challengers',
+    vrsInviteStage: 'Opening Stage',
+    prizeEarned: 17000,
+    matches: 26,
+    wins: 17,
+    losses: 9,
+    winrate: '65.4%',
+    tournamentsWon: 1,
+    avgElo: 2730,
+    recentForm: ["W", "L", "L", "W", "W"],
+    region: 'Europe',
+    verified: true,
+    roster: [
+      { name: 'Aleksib', role: 'IGL / Captain', flag: '🇫🇮', level: 10, elo: 2740, countryCode: 'fi' },
+      { name: 'iM', role: 'Rifler', flag: '🇷🇴', level: 9, elo: 2640, countryCode: 'ro' },
+      { name: 'b1t', role: 'Anchor', flag: '🇺🇦', level: 10, elo: 2870, countryCode: 'ua' },
+      { name: 'w0nderful', role: 'AWPer', flag: '🇺🇦', level: 10, elo: 2820, countryCode: 'ua' },
+      { name: 'makazze', role: 'Entry Fragger', flag: '🇱🇹', level: 9, elo: 2580, countryCode: 'lt' },
+    ],
+  },
+  {
+    id: 'fut-clan',
+    rank: 8,
+    prevRank: 8,
+    delta: 0,
+    name: 'FUT',
+    tag: 'FUT',
+    logo: '/images/teams/fut.png',
+    country: 'Türkiye',
+    flag: '🇹🇷',
+    points: 272,
+    vrsPoints: 1560,
+    valveStatus: 'Challengers',
+    vrsInviteStage: 'Opening Stage',
+    prizeEarned: 14000,
+    matches: 24,
+    wins: 15,
+    losses: 9,
+    winrate: '62.5%',
+    tournamentsWon: 1,
+    avgElo: 2560,
+    recentForm: ["W", "W", "L", "L", "W"],
+    region: 'Europe',
+    verified: true,
+    roster: [
+      { name: 'SunPayus', role: 'AWPer', flag: '🇪🇸', level: 10, elo: 2790, countryCode: 'es' },
+      { name: 'xfl0ud', role: 'Entry Fragger', flag: '🇹🇷', level: 9, elo: 2550, countryCode: 'tr' },
+      { name: 'dem0n', role: 'Rifler', flag: '🇵🇱', level: 9, elo: 2520, countryCode: 'pl' },
+      { name: 'Krabeni', role: 'Support', flag: '🇵🇱', level: 9, elo: 2500, countryCode: 'pl' },
+      { name: 'dziugss', role: 'Anchor', flag: '🇱🇹', level: 9, elo: 2510, countryCode: 'lt' },
+    ],
+  },
+  {
+    id: 'nemiga-clan',
+    rank: 9,
+    prevRank: 9,
+    delta: 0,
+    name: 'Nemiga',
+    tag: 'NMG',
+    logo: '/images/teams/nemiga.png',
+    country: 'Russia',
+    flag: '🇷🇺',
+    points: 264,
+    vrsPoints: 1520,
+    valveStatus: 'Challengers',
+    vrsInviteStage: 'Opening Stage',
+    prizeEarned: 13000,
+    matches: 23,
+    wins: 14,
+    losses: 9,
+    winrate: '60.9%',
+    tournamentsWon: 1,
+    avgElo: 2530,
+    recentForm: ["L", "W", "W", "W", "L"],
+    region: 'Europe',
+    verified: true,
+    roster: [
+      { name: 'KaiR0N-', role: 'Rifler', flag: '🇷🇺', level: 9, elo: 2610, countryCode: 'ru' },
+      { name: 'Xant3r', role: 'Support', flag: '🇷🇺', level: 9, elo: 2490, countryCode: 'ru' },
+      { name: 'robo', role: 'IGL / Captain', flag: '🇷🇺', level: 9, elo: 2470, countryCode: 'ru' },
+      { name: 'khaN', role: 'AWPer', flag: '🇰🇿', level: 9, elo: 2580, countryCode: 'kz' },
+      { name: 'syph0', role: 'Entry Fragger', flag: '🇷🇺', level: 9, elo: 2520, countryCode: 'ru' },
+    ],
+  },
+  {
+    id: 'g2-clan',
+    rank: 10,
+    prevRank: 10,
+    delta: 0,
+    name: 'G2',
+    tag: 'G2',
+    logo: '/images/teams/g2.png',
+    country: 'Germany',
+    flag: '🇩🇪',
+    points: 223,
+    vrsPoints: 1480,
+    valveStatus: 'Challengers',
+    vrsInviteStage: 'Opening Stage',
+    prizeEarned: 12000,
     matches: 22,
     wins: 13,
     losses: 9,
     winrate: '59.1%',
-    tournamentsWon: 0,
-    avgElo: 2120,
-    recentForm: ['L', 'W', 'W', 'L', 'W'],
+    tournamentsWon: 1,
+    avgElo: 2710,
+    recentForm: ["W", "L", "W", "L", "W"],
     region: 'Europe',
     verified: true,
     roster: [
-      { name: 'kyxsan', role: 'IGL / Captain', flag: '🇲🇰', level: 8, elo: 2140 },
-      { name: 'TeSeS', role: 'Support', flag: '🇩🇰', level: 8, elo: 2190 },
-      { name: 'sjuush', role: 'Anchor', flag: '🇩🇰', level: 8, elo: 2180 },
-      { name: 'NertZ', role: 'Rifler', flag: '🇮🇱', level: 9, elo: 2370 },
-      { name: 'degster', role: 'AWPer', flag: '🇷🇺', level: 9, elo: 2420 },
+      { name: 'huNter-', role: 'Rifler', flag: '🇧🇦', level: 10, elo: 2810, countryCode: 'ba' },
+      { name: 'NertZ', role: 'Lurker', flag: '🇮🇱', level: 10, elo: 2850, countryCode: 'il' },
+      { name: 'r1nkle', role: 'AWPer', flag: '🇺🇦', level: 9, elo: 2640, countryCode: 'ua' },
+      { name: 'HeavyGod', role: 'Anchor', flag: '🇮🇱', level: 9, elo: 2650, countryCode: 'il' },
+      { name: 'MATYS', role: 'Entry Fragger', flag: '🇸🇰', level: 9, elo: 2620, countryCode: 'sk' },
     ],
   },
   {
-    id: 'monte-squad',
-    rank: 14,
-    prevRank: 13,
-    name: 'Monte Squad',
-    tag: 'MNT',
-    logo: '/images/clan_badges/badge_caliber_gold.svg',
-    country: 'Poland',
-    flag: '🇵🇱',
-    points: 390,
-    vrsPoints: 1330,
+    id: 'parivision-clan',
+    rank: 11,
+    prevRank: 11,
+    delta: 0,
+    name: 'PARIVISION',
+    tag: 'PARI',
+    logo: '/images/teams/parivision.png',
+    country: 'Russia',
+    flag: '🇷🇺',
+    points: 188,
+    vrsPoints: 1390,
     valveStatus: 'Contenders',
-    vrsInviteStage: 'Closed Qualifier',
-    prizeEarned: 9500,
-    matches: 23,
-    wins: 13,
-    losses: 10,
-    winrate: '56.5%',
-    tournamentsWon: 0,
-    avgElo: 2060,
-    recentForm: ['W', 'L', 'L', 'W', 'W'],
-    region: 'Europe',
-    verified: true,
-    roster: [
-      { name: 'hades', role: 'AWPer', flag: '🇵🇱', level: 9, elo: 2340 },
-      { name: 'dycha', role: 'Rifler', flag: '🇵🇱', level: 9, elo: 2310 },
-      { name: 'kRaSnaL', role: 'Support', flag: '🇵🇱', level: 8, elo: 2120 },
-      { name: 'KEi', role: 'Entry Fragger', flag: '🇵🇱', level: 8, elo: 2080 },
-      { name: 'DemQQ', role: 'Anchor', flag: '🇺🇦', level: 8, elo: 2110 },
-    ],
-  },
-  {
-    id: 'skopje-cyber',
-    rank: 15,
-    prevRank: 15,
-    name: 'Skopje Cyber Legion',
-    tag: 'SCL',
-    logo: '/images/clan_badges/badge_caliber_cyan.svg',
-    country: 'North Macedonia',
-    flag: '🇲🇰',
-    points: 365,
-    vrsPoints: 1280,
-    valveStatus: 'Contenders',
-    vrsInviteStage: 'Closed Qualifier',
-    prizeEarned: 8500,
-    matches: 19,
-    wins: 11,
-    losses: 8,
-    winrate: '57.9%',
-    tournamentsWon: 0,
-    avgElo: 1890,
-    recentForm: ['L', 'W', 'L', 'W', 'W'],
-    region: 'Balkans',
-    verified: false,
-    roster: [
-      { name: 'Vardar_Aim', role: 'IGL / Captain', flag: '🇲🇰', level: 7, elo: 1860 },
-      { name: 'BitolaSniper', role: 'AWPer', flag: '🇲🇰', level: 8, elo: 1940 },
-      { name: 'Ohrid_Entry', role: 'Entry Fragger', flag: '🇲🇰', level: 7, elo: 1820 },
-      { name: 'Tetovo_Flash', role: 'Support', flag: '🇲🇰', level: 7, elo: 1790 },
-      { name: 'Gostivar_Anchor', role: 'Lurker', flag: '🇲🇰', level: 8, elo: 1910 },
-    ],
-  },
-  {
-    id: 'complexity-na',
-    rank: 16,
-    prevRank: 16,
-    name: 'Complexity Gaming',
-    tag: 'COL',
-    logo: '/images/clan_badges/badge_caliber_fire.svg',
-    country: 'United States',
-    flag: '🇺🇸',
-    points: 340,
-    vrsPoints: 1250,
-    valveStatus: 'Contenders',
-    vrsInviteStage: 'Closed Qualifier',
-    prizeEarned: 7800,
-    matches: 21,
-    wins: 11,
-    losses: 10,
-    winrate: '52.4%',
-    tournamentsWon: 0,
-    avgElo: 2040,
-    recentForm: ['W', 'L', 'W', 'L', 'L'],
-    region: 'North America',
-    verified: true,
-    roster: [
-      { name: 'JT', role: 'IGL / Captain', flag: '🇿🇦', level: 8, elo: 2120 },
-      { name: 'EliGE', role: 'Entry Fragger', flag: '🇺🇸', level: 10, elo: 2680 },
-      { name: 'Grim', role: 'Rifler', flag: '🇺🇸', level: 8, elo: 2160 },
-      { name: 'floppy', role: 'Support', flag: '🇺🇸', level: 8, elo: 2040 },
-      { name: 'hallzerk', role: 'AWPer', flag: '🇳🇴', level: 8, elo: 2110 },
-    ],
-  },
-  {
-    id: '9z-team',
-    rank: 17,
-    prevRank: 17,
-    name: '9z Team South America',
-    tag: '9Z',
-    logo: '/images/clan_badges/badge_caliber_purple.svg',
-    country: 'Argentina',
-    flag: '🇦🇷',
-    points: 310,
-    vrsPoints: 1200,
-    valveStatus: 'Open',
-    vrsInviteStage: 'Closed Qualifier',
-    prizeEarned: 6900,
+    vrsInviteStage: 'Opening Stage',
+    prizeEarned: 10000,
     matches: 20,
     wins: 11,
     losses: 9,
     winrate: '55.0%',
     tournamentsWon: 0,
-    avgElo: 1980,
-    recentForm: ['L', 'W', 'W', 'L', 'L'],
-    region: 'South America',
-    verified: true,
-    roster: [
-      { name: 'max', role: 'IGL / Captain', flag: '🇺🇾', level: 8, elo: 2080 },
-      { name: 'dgt', role: 'Entry Fragger', flag: '🇺🇾', level: 9, elo: 2260 },
-      { name: 'buda', role: 'Rifler', flag: '🇦🇷', level: 8, elo: 2110 },
-      { name: 'MartinezSa', role: 'AWPer', flag: '🇪🇸', level: 8, elo: 2140 },
-      { name: 'HUASOPEEK', role: 'Anchor', flag: '🇨🇱', level: 7, elo: 1890 },
-    ],
-  },
-  {
-    id: 'nordic-strike',
-    rank: 18,
-    prevRank: 18,
-    name: 'Nordic Strike Syndicate',
-    tag: 'NSS',
-    logo: '/images/clan_badges/badge_caliber_purple.svg',
-    country: 'Sweden',
-    flag: '🇸🇪',
-    points: 290,
-    vrsPoints: 1150,
-    valveStatus: 'Open',
-    vrsInviteStage: 'Closed Qualifier',
-    prizeEarned: 6000,
-    matches: 25,
-    wins: 13,
-    losses: 12,
-    winrate: '52.0%',
-    tournamentsWon: 0,
-    avgElo: 1840,
-    recentForm: ['W', 'L', 'L', 'W', 'L'],
+    avgElo: 2650,
+    recentForm: ["W", "L", "L", "W", "L"],
     region: 'Europe',
     verified: true,
     roster: [
-      { name: 'Stockholm_IGL', role: 'IGL / Captain', flag: '🇸🇪', level: 8, elo: 1910 },
-      { name: 'Gothenburg_AWP', role: 'AWPer', flag: '🇸🇪', level: 7, elo: 1830 },
-      { name: 'Malmo_Fragger', role: 'Entry Fragger', flag: '🇸🇪', level: 7, elo: 1790 },
-      { name: 'Uppsala_Support', role: 'Support', flag: '🇸🇪', level: 7, elo: 1780 },
-      { name: 'Kiruna_Lurk', role: 'Lurker', flag: '🇸🇪', level: 8, elo: 1890 },
+      { name: 'HObbit', role: 'Rifler', flag: '🇰🇿', level: 10, elo: 2740, countryCode: 'kz' },
+      { name: 'FL1T', role: 'Rifler', flag: '🇷🇺', level: 10, elo: 2770, countryCode: 'ru' },
+      { name: 'Jame', role: 'IGL / AWPer', flag: '🇷🇺', level: 10, elo: 2790, countryCode: 'ru' },
+      { name: 'xiELO', role: 'Entry Fragger', flag: '🇷🇺', level: 9, elo: 2520, countryCode: 'ru' },
+      { name: 'zweih', role: 'Support', flag: '🇷🇺', level: 9, elo: 2490, countryCode: 'ru' },
     ],
   },
   {
-    id: 'flyquest-au',
-    rank: 19,
-    prevRank: 19,
-    name: 'FlyQuest Oceania',
-    tag: 'FLY',
-    logo: '/images/clan_badges/badge_caliber_gold.svg',
-    country: 'Australia',
-    flag: '🇦🇺',
-    points: 275,
-    vrsPoints: 1120,
-    valveStatus: 'Open',
+    id: '1win-clan',
+    rank: 12,
+    prevRank: 12,
+    delta: 0,
+    name: '1win',
+    tag: '1WIN',
+    logo: '/images/teams/1win.png',
+    country: 'Russia',
+    flag: '🇷🇺',
+    points: 141,
+    vrsPoints: 1310,
+    valveStatus: 'Contenders',
     vrsInviteStage: 'Closed Qualifier',
-    prizeEarned: 5800,
-    matches: 18,
-    wins: 10,
-    losses: 8,
-    winrate: '55.6%',
-    tournamentsWon: 0,
-    avgElo: 1920,
-    recentForm: ['W', 'W', 'L', 'L', 'W'],
-    region: 'Oceania',
-    verified: true,
-    roster: [
-      { name: 'dexter', role: 'IGL / Captain', flag: '🇦🇺', level: 8, elo: 2150 },
-      { name: 'Liazz', role: 'Anchor', flag: '🇦🇺', level: 8, elo: 2010 },
-      { name: 'aliStair', role: 'AWPer', flag: '🇦🇺', level: 8, elo: 2070 },
-      { name: 'INS', role: 'Rifler', flag: '🇦🇺', level: 8, elo: 2180 },
-      { name: 'Vexite', role: 'Entry Fragger', flag: '🇦🇺', level: 8, elo: 2040 },
-    ],
-  },
-  {
-    id: 'lynn-vision',
-    rank: 20,
-    prevRank: 20,
-    name: 'Lynn Vision Gaming',
-    tag: 'LVG',
-    logo: '/images/clan_badges/badge_caliber_crimson.svg',
-    country: 'China',
-    flag: '🇨🇳',
-    points: 260,
-    vrsPoints: 1090,
-    valveStatus: 'Open',
-    vrsInviteStage: 'Closed Qualifier',
-    prizeEarned: 5200,
+    prizeEarned: 8000,
     matches: 19,
     wins: 10,
     losses: 9,
     winrate: '52.6%',
     tournamentsWon: 0,
-    avgElo: 1890,
-    recentForm: ['L', 'W', 'W', 'L', 'L'],
-    region: 'Asia',
+    avgElo: 2630,
+    recentForm: ["L", "W", "L", "W", "L"],
+    region: 'Europe',
     verified: true,
     roster: [
-      { name: 'Westmelon', role: 'IGL / Captain', flag: '🇨🇳', level: 8, elo: 1980 },
-      { name: 'z4kr', role: 'AWPer', flag: '🇨🇳', level: 9, elo: 2240 },
-      { name: 'Starry', role: 'Entry Fragger', flag: '🇨🇳', level: 8, elo: 2120 },
-      { name: 'EmiliaQAQ', role: 'Support', flag: '🇨🇳', level: 7, elo: 1870 },
-      { name: 'Jee', role: 'Lurker', flag: '🇨🇳', level: 7, elo: 1850 },
+      { name: 'Ax1Le', role: 'Rifler', flag: '🇷🇺', level: 10, elo: 2810, countryCode: 'ru' },
+      { name: 'nafany', role: 'IGL / Captain', flag: '🇷🇺', level: 9, elo: 2590, countryCode: 'ru' },
+      { name: 'BELCHONOKK', role: 'Entry Fragger', flag: '🇷🇺', level: 9, elo: 2510, countryCode: 'ru' },
+      { name: 'fame', role: 'Support', flag: '🇷🇺', level: 9, elo: 2580, countryCode: 'ru' },
+      { name: 'ArtFr0st', role: 'AWPer', flag: '🇷🇺', level: 9, elo: 2650, countryCode: 'ru' },
     ],
   },
   {
-    id: 'fnatic-rising',
-    rank: 21,
-    prevRank: 21,
-    name: 'Fnatic Rising',
-    tag: 'FNC',
-    logo: '/images/clan_badges/badge_caliber_fire.svg',
-    country: 'United Kingdom',
-    flag: '🇬🇧',
-    points: 245,
-    vrsPoints: 1060,
-    valveStatus: 'Open',
+    id: 'nip-clan',
+    rank: 13,
+    prevRank: 17,
+    delta: 4,
+    name: 'Ninjas in Pyjamas',
+    tag: 'NIP',
+    logo: '/images/teams/nip.png',
+    country: 'Sweden',
+    flag: '🇸🇪',
+    points: 93,
+    vrsPoints: 1240,
+    valveStatus: 'Contenders',
     vrsInviteStage: 'Closed Qualifier',
-    prizeEarned: 4800,
-    matches: 20,
-    wins: 10,
-    losses: 10,
-    winrate: '50.0%',
-    tournamentsWon: 0,
-    avgElo: 1910,
-    recentForm: ['W', 'L', 'L', 'W', 'L'],
-    region: 'Europe',
-    verified: true,
-    roster: [
-      { name: 'bodyy', role: 'IGL / Captain', flag: '🇫🇷', level: 8, elo: 2090 },
-      { name: 'KRIMZ', role: 'Anchor', flag: '🇸🇪', level: 8, elo: 2150 },
-      { name: 'afro', role: 'AWPer', flag: '🇫🇷', level: 8, elo: 2080 },
-      { name: 'MATYS', role: 'Entry Fragger', flag: '🇸🇰', level: 8, elo: 2120 },
-      { name: 'blameF', role: 'Lurker', flag: '🇩🇰', level: 9, elo: 2390 },
-    ],
-  },
-  {
-    id: 'havu-gaming',
-    rank: 22,
-    prevRank: 22,
-    name: 'HAVU Gaming',
-    tag: 'HAVU',
-    logo: '/images/clan_badges/badge_caliber_cyan.svg',
-    country: 'Finland',
-    flag: '🇫🇮',
-    points: 230,
-    vrsPoints: 1030,
-    valveStatus: 'Open',
-    vrsInviteStage: 'Open Qualifier',
-    prizeEarned: 4200,
-    matches: 17,
-    wins: 8,
-    losses: 9,
-    winrate: '47.1%',
-    tournamentsWon: 0,
-    avgElo: 1820,
-    recentForm: ['L', 'L', 'W', 'W', 'L'],
-    region: 'Europe',
-    verified: false,
-    roster: [
-      { name: 'sLowi', role: 'IGL / Captain', flag: '🇫🇮', level: 7, elo: 1840 },
-      { name: 'Aerial', role: 'Entry Fragger', flag: '🇫🇮', level: 8, elo: 1960 },
-      { name: 'xseveN', role: 'Support', flag: '🇫🇮', level: 8, elo: 1930 },
-      { name: 'ottoNd', role: 'AWPer', flag: '🇫🇮', level: 8, elo: 1980 },
-      { name: 'uuu9', role: 'Anchor', flag: '🇫🇮', level: 7, elo: 1790 },
-    ],
-  },
-  {
-    id: 'avangar-legion',
-    rank: 23,
-    prevRank: 23,
-    name: 'AVANGAR Legion',
-    tag: 'AVG',
-    logo: '/images/clan_badges/badge_caliber_shield.svg',
-    country: 'Kazakhstan',
-    flag: '🇰🇿',
-    points: 215,
-    vrsPoints: 990,
-    valveStatus: 'Open',
-    vrsInviteStage: 'Open Qualifier',
-    prizeEarned: 3900,
-    matches: 16,
-    wins: 8,
-    losses: 8,
-    winrate: '50.0%',
-    tournamentsWon: 0,
-    avgElo: 1810,
-    recentForm: ['W', 'L', 'L', 'L', 'W'],
-    region: 'Europe',
-    verified: false,
-    roster: [
-      { name: 'Buster', role: 'IGL / Captain', flag: '🇰🇿', level: 8, elo: 1990 },
-      { name: 'Qikert', role: 'Support', flag: '🇰🇿', level: 8, elo: 1950 },
-      { name: 'fitch', role: 'Rifler', flag: '🇰🇿', level: 7, elo: 1840 },
-      { name: 'AdreN', role: 'Lurker', flag: '🇰🇿', level: 7, elo: 1820 },
-      { name: 'HobbitJr', role: 'AWPer', flag: '🇰🇿', level: 7, elo: 1830 },
-    ],
-  },
-  {
-    id: 'saw-esports',
-    rank: 24,
-    prevRank: 24,
-    name: 'SAW Esports',
-    tag: 'SAW',
-    logo: '/images/clan_badges/badge_caliber_purple.svg',
-    country: 'Portugal',
-    flag: '🇵🇹',
-    points: 205,
-    vrsPoints: 960,
-    valveStatus: 'Open',
-    vrsInviteStage: 'Open Qualifier',
-    prizeEarned: 3500,
+    prizeEarned: 6000,
     matches: 18,
     wins: 9,
     losses: 9,
     winrate: '50.0%',
     tournamentsWon: 0,
-    avgElo: 1860,
-    recentForm: ['L', 'W', 'L', 'W', 'L'],
+    avgElo: 2660,
+    recentForm: ["W", "W", "L", "W", "W"],
     region: 'Europe',
     verified: true,
     roster: [
-      { name: 'MUTiRiS', role: 'IGL / Captain', flag: '🇵🇹', level: 8, elo: 1940 },
-      { name: 'rmn', role: 'Support', flag: '🇵🇹', level: 7, elo: 1870 },
-      { name: 'ewjerkz', role: 'Entry Fragger', flag: '🇵🇹', level: 8, elo: 2010 },
-      { name: 'story', role: 'AWPer', flag: '🇵🇹', level: 8, elo: 2060 },
-      { name: 'arrozdoce', role: 'Rifler', flag: '🇵🇹', level: 8, elo: 1990 },
+      { name: 'stavn', role: 'Rifler', flag: '🇩🇰', level: 10, elo: 2820, countryCode: 'dk' },
+      { name: 'sjuush', role: 'Support', flag: '🇩🇰', level: 9, elo: 2670, countryCode: 'dk' },
+      { name: 'Krimbo', role: 'Anchor', flag: '🇩🇪', level: 9, elo: 2650, countryCode: 'de' },
+      { name: 'adamb', role: 'Entry Fragger', flag: '🇸🇪', level: 9, elo: 2570, countryCode: 'se' },
+      { name: 'xKacpersky', role: 'AWPer', flag: '🇵🇱', level: 9, elo: 2590, countryCode: 'pl' },
     ],
   },
   {
-    id: 'nexus-gaming',
-    rank: 25,
-    prevRank: 25,
-    name: 'Nexus Gaming',
-    tag: 'NXS',
-    logo: '/images/clan_badges/badge_caliber_cyan.svg',
-    country: 'Romania',
-    flag: '🇷🇴',
-    points: 195,
-    vrsPoints: 930,
-    valveStatus: 'Open',
-    vrsInviteStage: 'Open Qualifier',
-    prizeEarned: 3200,
+    id: 'faze-clan',
+    rank: 14,
+    prevRank: 13,
+    delta: -1,
+    name: 'FaZe',
+    tag: 'FaZe',
+    logo: '/images/teams/faze.png',
+    country: 'Germany',
+    flag: '🇩🇪',
+    points: 90,
+    vrsPoints: 1220,
+    valveStatus: 'Contenders',
+    vrsInviteStage: 'Closed Qualifier',
+    prizeEarned: 5800,
     matches: 17,
     wins: 8,
     losses: 9,
     winrate: '47.1%',
     tournamentsWon: 0,
-    avgElo: 1800,
-    recentForm: ['W', 'L', 'L', 'L', 'W'],
+    avgElo: 2750,
+    recentForm: ["L", "L", "W", "W", "L"],
     region: 'Europe',
-    verified: false,
+    verified: true,
     roster: [
-      { name: 'BTN', role: 'IGL / Captain', flag: '🇷🇴', level: 7, elo: 1820 },
-      { name: 'ragga', role: 'Support', flag: '🇷🇴', level: 7, elo: 1790 },
-      { name: 'XELLOW', role: 'AWPer', flag: '🇷🇴', level: 8, elo: 1980 },
-      { name: 'lauNX', role: 'Entry Fragger', flag: '🇷🇴', level: 8, elo: 2020 },
-      { name: 's0und', role: 'Lurker', flag: '🇷🇴', level: 7, elo: 1780 },
+      { name: 'frozen', role: 'Rifler', flag: '🇸🇰', level: 10, elo: 2880, countryCode: 'sk' },
+      { name: 'Twistzz', role: 'Rifler', flag: '🇨🇦', level: 10, elo: 2920, countryCode: 'ca' },
+      { name: 'Neityu', role: 'Support', flag: '🇫🇷', level: 9, elo: 2540, countryCode: 'fr' },
+      { name: 'jcobbb', role: 'Entry Fragger', flag: '🇨🇿', level: 9, elo: 2550, countryCode: 'cz' },
+      { name: 'jBOEN', role: 'AWPer', flag: '🇳🇴', level: 9, elo: 2560, countryCode: 'no' },
+    ],
+  },
+  {
+    id: 'astralis-clan',
+    rank: 15,
+    prevRank: 15,
+    delta: 0,
+    name: 'Astralis',
+    tag: 'AST',
+    logo: '/images/teams/astralis.png',
+    country: 'Denmark',
+    flag: '🇩🇰',
+    points: 89,
+    vrsPoints: 1190,
+    valveStatus: 'Contenders',
+    vrsInviteStage: 'Closed Qualifier',
+    prizeEarned: 5500,
+    matches: 17,
+    wins: 8,
+    losses: 9,
+    winrate: '47.1%',
+    tournamentsWon: 0,
+    avgElo: 2610,
+    recentForm: ["L", "W", "L", "L", "W"],
+    region: 'Europe',
+    verified: true,
+    roster: [
+      { name: 'phzy', role: 'AWPer', flag: '🇸🇪', level: 9, elo: 2600, countryCode: 'se' },
+      { name: 'siuhy', role: 'IGL / Captain', flag: '🇵🇱', level: 10, elo: 2770, countryCode: 'pl' },
+      { name: 'Staehr', role: 'Anchor', flag: '🇩🇰', level: 9, elo: 2650, countryCode: 'dk' },
+      { name: 'ryu', role: 'Entry Fragger', flag: '🇩🇰', level: 9, elo: 2540, countryCode: 'dk' },
+      { name: 'cmtry', role: 'Support', flag: '🇩🇰', level: 9, elo: 2520, countryCode: 'dk' },
+    ],
+  },
+  {
+    id: 'ef-clan',
+    rank: 16,
+    prevRank: 17,
+    delta: 1,
+    name: 'Eternal Fire',
+    tag: 'EF',
+    logo: '/images/teams/eternalfire.png',
+    country: 'Türkiye',
+    flag: '🇹🇷',
+    points: 76,
+    vrsPoints: 1150,
+    valveStatus: 'Contenders',
+    vrsInviteStage: 'Closed Qualifier',
+    prizeEarned: 5000,
+    matches: 16,
+    wins: 7,
+    losses: 9,
+    winrate: '43.8%',
+    tournamentsWon: 0,
+    avgElo: 2560,
+    recentForm: ["W", "L", "W", "L", "L"],
+    region: 'Europe',
+    verified: true,
+    roster: [
+      { name: 'MisteM', role: 'IGL / Captain', flag: '🇹🇷', level: 9, elo: 2490, countryCode: 'tr' },
+      { name: 'regali', role: 'AWPer', flag: '🇷🇴', level: 9, elo: 2620, countryCode: 'ro' },
+      { name: 'soulfly', role: 'Entry Fragger', flag: '🇹🇷', level: 9, elo: 2540, countryCode: 'tr' },
+      { name: 'Kvem', role: 'Rifler', flag: '🇹🇷', level: 9, elo: 2610, countryCode: 'tr' },
+      { name: 'jottAAA', role: 'Support', flag: '🇹🇷', level: 9, elo: 2500, countryCode: 'tr' },
+    ],
+  },
+  {
+    id: 'heroic-clan',
+    rank: 17,
+    prevRank: 19,
+    delta: 2,
+    name: 'HEROIC',
+    tag: 'HER',
+    logo: '/images/teams/heroic.png',
+    country: 'Norway',
+    flag: '🇳🇴',
+    points: 76,
+    vrsPoints: 1140,
+    valveStatus: 'Contenders',
+    vrsInviteStage: 'Closed Qualifier',
+    prizeEarned: 4800,
+    matches: 16,
+    wins: 7,
+    losses: 9,
+    winrate: '43.8%',
+    tournamentsWon: 0,
+    avgElo: 2640,
+    recentForm: ["W", "W", "L", "L", "L"],
+    region: 'Europe',
+    verified: true,
+    roster: [
+      { name: 'Brollan', role: 'Entry Fragger', flag: '🇸🇪', level: 10, elo: 2840, countryCode: 'se' },
+      { name: 'nilo', role: 'Rifler', flag: '🇸🇪', level: 9, elo: 2660, countryCode: 'se' },
+      { name: 'susp', role: 'Support', flag: '🇸🇪', level: 9, elo: 2570, countryCode: 'se' },
+      { name: 'MartinezSa', role: 'AWPer', flag: '🇪🇸', level: 9, elo: 2640, countryCode: 'es' },
+      { name: 'Chr1zN', role: 'IGL / Captain', flag: '🇩🇰', level: 9, elo: 2560, countryCode: 'dk' },
+    ],
+  },
+  {
+    id: 'fnatic-clan',
+    rank: 18,
+    prevRank: 20,
+    delta: 2,
+    name: 'fnatic',
+    tag: 'FNC',
+    logo: '/images/teams/fnatic.png',
+    country: 'United Kingdom',
+    flag: '🇬🇧',
+    points: 71,
+    vrsPoints: 1110,
+    valveStatus: 'Contenders',
+    vrsInviteStage: 'Closed Qualifier',
+    prizeEarned: 4500,
+    matches: 15,
+    wins: 6,
+    losses: 9,
+    winrate: '40.0%',
+    tournamentsWon: 0,
+    avgElo: 2560,
+    recentForm: ["W", "L", "W", "L", "L"],
+    region: 'Europe',
+    verified: true,
+    roster: [
+      { name: 'fEAR', role: 'IGL / Captain', flag: '🇺🇦', level: 9, elo: 2550, countryCode: 'ua' },
+      { name: 'jambo', role: 'AWPer', flag: '🇬🇧', level: 9, elo: 2610, countryCode: 'gb' },
+      { name: 'jackasmo', role: 'Entry Fragger', flag: '🇬🇧', level: 9, elo: 2570, countryCode: 'gb' },
+      { name: 'cairne', role: 'Rifler', flag: '🇸🇪', level: 9, elo: 2540, countryCode: 'se' },
+      { name: 'mazay', role: 'Support', flag: '🇺🇦', level: 9, elo: 2510, countryCode: 'ua' },
+    ],
+  },
+  {
+    id: 'saw-clan',
+    rank: 19,
+    prevRank: 18,
+    delta: -1,
+    name: 'SAW',
+    tag: 'SAW',
+    logo: '/images/teams/saw.svg',
+    country: 'Portugal',
+    flag: '🇵🇹',
+    points: 70,
+    vrsPoints: 1100,
+    valveStatus: 'Contenders',
+    vrsInviteStage: 'Closed Qualifier',
+    prizeEarned: 4300,
+    matches: 17,
+    wins: 9,
+    losses: 8,
+    winrate: '52.9%',
+    tournamentsWon: 0,
+    avgElo: 2580,
+    recentForm: ["W", "L", "W", "L", "W"],
+    region: 'Europe',
+    verified: true,
+    roster: [
+      { name: 'MUTiRiS', role: 'IGL / Captain', flag: '🇵🇹', level: 9, elo: 2550, countryCode: 'pt' },
+      { name: 'rmn', role: 'Support', flag: '🇵🇹', level: 9, elo: 2520, countryCode: 'pt' },
+      { name: 'ewjerkz', role: 'Entry Fragger', flag: '🇵🇹', level: 10, elo: 2710, countryCode: 'pt' },
+      { name: 'story', role: 'AWPer', flag: '🇵🇹', level: 10, elo: 2680, countryCode: 'pt' },
+      { name: 'roman', role: 'Rifler', flag: '🇵🇹', level: 9, elo: 2540, countryCode: 'pt' },
+    ],
+  },
+  {
+    id: 'nexus-clan',
+    rank: 20,
+    prevRank: 21,
+    delta: 1,
+    name: 'Nexus Gaming',
+    tag: 'NXS',
+    logo: '/images/teams/nexus.svg',
+    country: 'Romania',
+    flag: '🇷🇴',
+    points: 69,
+    vrsPoints: 1090,
+    valveStatus: 'Contenders',
+    vrsInviteStage: 'Closed Qualifier',
+    prizeEarned: 4100,
+    matches: 16,
+    wins: 8,
+    losses: 8,
+    winrate: '50.0%',
+    tournamentsWon: 0,
+    avgElo: 2510,
+    recentForm: ["L", "W", "W", "L", "W"],
+    region: 'Europe',
+    verified: true,
+    roster: [
+      { name: 'BTN', role: 'IGL / Captain', flag: '🇷🇴', level: 9, elo: 2480, countryCode: 'ro' },
+      { name: 'ragga', role: 'Support', flag: '🇷🇴', level: 9, elo: 2460, countryCode: 'ro' },
+      { name: 'XELLOW', role: 'AWPer', flag: '🇷🇴', level: 9, elo: 2620, countryCode: 'ro' },
+      { name: 'lauNX', role: 'Entry Fragger', flag: '🇷🇴', level: 9, elo: 2580, countryCode: 'ro' },
+      { name: 's0und', role: 'Lurker', flag: '🇷🇴', level: 8, elo: 2420, countryCode: 'ro' },
+    ],
+  },
+  {
+    id: 'bne-clan',
+    rank: 21,
+    prevRank: 20,
+    delta: -1,
+    name: 'Bad News Eagles',
+    tag: 'BNE',
+    logo: '/images/teams/bne.svg',
+    country: 'Kosovo',
+    flag: '🇽🇰',
+    points: 68,
+    vrsPoints: 1080,
+    valveStatus: 'Contenders',
+    vrsInviteStage: 'Closed Qualifier',
+    prizeEarned: 4200,
+    matches: 18,
+    wins: 11,
+    losses: 7,
+    winrate: '61.1%',
+    tournamentsWon: 1,
+    avgElo: 2682,
+    recentForm: ["W", "W", "W", "W", "L"],
+    region: 'Balkans',
+    verified: true,
+    roster: [
+      { name: 'rigoN-jr', role: 'IGL / Captain', flag: '🇽🇰', level: 10, elo: 2840, countryCode: 'xk' },
+      { name: 'juanflatro-aim', role: 'AWPer', flag: '🇽🇰', level: 10, elo: 2790, countryCode: 'xk' },
+      { name: 'sener1-tap', role: 'Entry Fragger', flag: '🇽🇰', level: 10, elo: 2650, countryCode: 'xk' },
+      { name: 'gxx-fire', role: 'Support', flag: '🇦🇱', level: 9, elo: 2420, countryCode: 'al' },
+      { name: 'sinnopsyy-beast', role: 'Lurker', flag: '🇽🇰', level: 10, elo: 2710, countryCode: 'xk' },
+    ],
+  },
+  {
+    id: 'illyrian-clan',
+    rank: 22,
+    prevRank: 22,
+    delta: 0,
+    name: 'Illyrian Clan',
+    tag: 'ILL',
+    logo: '/images/teams/bne.svg',
+    country: 'Albania',
+    flag: '🇦🇱',
+    points: 67,
+    vrsPoints: 1070,
+    valveStatus: 'Contenders',
+    vrsInviteStage: 'Closed Qualifier',
+    prizeEarned: 3900,
+    matches: 16,
+    wins: 9,
+    losses: 7,
+    winrate: '56.3%',
+    tournamentsWon: 0,
+    avgElo: 2590,
+    recentForm: ["W", "L", "W", "W", "L"],
+    region: 'Balkans',
+    verified: true,
+    roster: [
+      { name: 'TironaAim', role: 'Entry Fragger', flag: '🇦🇱', level: 9, elo: 2620, countryCode: 'al' },
+      { name: 'ShkodraBeast', role: 'AWPer', flag: '🇦🇱', level: 9, elo: 2650, countryCode: 'al' },
+      { name: 'DurresSniper', role: 'Lurker', flag: '🇦🇱', level: 9, elo: 2540, countryCode: 'al' },
+      { name: 'Kastrioti-IGL', role: 'IGL / Captain', flag: '🇦🇱', level: 9, elo: 2560, countryCode: 'al' },
+      { name: 'EagleEye-al', role: 'Support', flag: '🇦🇱', level: 8, elo: 2490, countryCode: 'al' },
+    ],
+  },
+  {
+    id: 'big-clan',
+    rank: 23,
+    prevRank: 24,
+    delta: 1,
+    name: 'BIG',
+    tag: 'BIG',
+    logo: '/images/teams/big.svg',
+    country: 'Germany',
+    flag: '🇩🇪',
+    points: 66,
+    vrsPoints: 1060,
+    valveStatus: 'Contenders',
+    vrsInviteStage: 'Closed Qualifier',
+    prizeEarned: 3800,
+    matches: 16,
+    wins: 8,
+    losses: 8,
+    winrate: '50.0%',
+    tournamentsWon: 0,
+    avgElo: 2640,
+    recentForm: ["W", "L", "L", "W", "W"],
+    region: 'Europe',
+    verified: true,
+    roster: [
+      { name: 'tabseN', role: 'IGL / Captain', flag: '🇩🇪', level: 10, elo: 2750, countryCode: 'de' },
+      { name: 'syrsoN', role: 'AWPer', flag: '🇩🇪', level: 9, elo: 2680, countryCode: 'de' },
+      { name: 'JDC', role: 'Support', flag: '🇩🇪', level: 9, elo: 2560, countryCode: 'de' },
+      { name: 'prosus', role: 'Entry Fragger', flag: '🇩🇪', level: 9, elo: 2540, countryCode: 'de' },
+      { name: 'Krimbo', role: 'Anchor', flag: '🇩🇪', level: 9, elo: 2620, countryCode: 'de' },
+    ],
+  },
+  {
+    id: 'monte-clan',
+    rank: 24,
+    prevRank: 25,
+    delta: 1,
+    name: 'Monte',
+    tag: 'MNT',
+    logo: '/images/teams/monte.svg',
+    country: 'Ukraine',
+    flag: '🇺🇦',
+    points: 65,
+    vrsPoints: 1050,
+    valveStatus: 'Contenders',
+    vrsInviteStage: 'Closed Qualifier',
+    prizeEarned: 3600,
+    matches: 15,
+    wins: 8,
+    losses: 7,
+    winrate: '53.3%',
+    tournamentsWon: 0,
+    avgElo: 2590,
+    recentForm: ["L", "W", "W", "L", "W"],
+    region: 'Europe',
+    verified: true,
+    roster: [
+      { name: 'DemQQ', role: 'IGL / Captain', flag: '🇺🇦', level: 9, elo: 2620, countryCode: 'ua' },
+      { name: 'kRaSnaL', role: 'Support', flag: '🇵🇱', level: 9, elo: 2580, countryCode: 'pl' },
+      { name: 'dycha', role: 'Rifler', flag: '🇵🇱', level: 9, elo: 2610, countryCode: 'pl' },
+      { name: 'hAdji', role: 'Entry Fragger', flag: '🇫🇷', level: 9, elo: 2540, countryCode: 'fr' },
+      { name: 'STYKO', role: 'Anchor', flag: '🇸🇰', level: 9, elo: 2560, countryCode: 'sk' },
+    ],
+  },
+  {
+    id: 'rebels-clan',
+    rank: 25,
+    prevRank: 26,
+    delta: 1,
+    name: 'Rebels',
+    tag: 'RBL',
+    logo: '/images/teams/rebels.svg',
+    country: 'Poland',
+    flag: '🇵🇱',
+    points: 64,
+    vrsPoints: 1040,
+    valveStatus: 'Contenders',
+    vrsInviteStage: 'Closed Qualifier',
+    prizeEarned: 3400,
+    matches: 15,
+    wins: 7,
+    losses: 8,
+    winrate: '46.7%',
+    tournamentsWon: 0,
+    avgElo: 2540,
+    recentForm: ["W", "L", "W", "L", "L"],
+    region: 'Europe',
+    verified: true,
+    roster: [
+      { name: 'innocent', role: 'IGL / Captain', flag: '🇵🇱', level: 9, elo: 2590, countryCode: 'pl' },
+      { name: 'kisserek', role: 'AWPer', flag: '🇵🇱', level: 9, elo: 2560, countryCode: 'pl' },
+      { name: 'casey', role: 'Rifler', flag: '🇵🇱', level: 9, elo: 2520, countryCode: 'pl' },
+      { name: 'Flayy', role: 'Entry Fragger', flag: '🇵🇱', level: 9, elo: 2510, countryCode: 'pl' },
+      { name: 'olimp', role: 'Support', flag: '🇵🇱', level: 8, elo: 2480, countryCode: 'pl' },
+    ],
+  },
+  {
+    id: 'avangar-clan',
+    rank: 26,
+    prevRank: 27,
+    delta: 1,
+    name: 'AVANGAR',
+    tag: 'AVG',
+    logo: '/images/teams/avangar.svg',
+    country: 'Kazakhstan',
+    flag: '🇰🇿',
+    points: 63,
+    vrsPoints: 1030,
+    valveStatus: 'Contenders',
+    vrsInviteStage: 'Closed Qualifier',
+    prizeEarned: 3300,
+    matches: 14,
+    wins: 7,
+    losses: 7,
+    winrate: '50.0%',
+    tournamentsWon: 0,
+    avgElo: 2520,
+    recentForm: ["L", "W", "L", "W", "W"],
+    region: 'Europe',
+    verified: true,
+    roster: [
+      { name: 'def1zer', role: 'IGL / Captain', flag: '🇰🇿', level: 9, elo: 2540, countryCode: 'kz' },
+      { name: 'sorrow', role: 'Support', flag: '🇰🇿', level: 9, elo: 2510, countryCode: 'kz' },
+      { name: 'enfun', role: 'AWPer', flag: '🇰🇿', level: 9, elo: 2560, countryCode: 'kz' },
+      { name: 'w1nt3r', role: 'Entry Fragger', flag: '🇰🇿', level: 8, elo: 2480, countryCode: 'kz' },
+      { name: 'BL4CK3Y', role: 'Rifler', flag: '🇰🇿', level: 9, elo: 2500, countryCode: 'kz' },
+    ],
+  },
+  {
+    id: 'havu-clan',
+    rank: 27,
+    prevRank: 28,
+    delta: 1,
+    name: 'HAVU',
+    tag: 'HAVU',
+    logo: '/images/teams/havu.svg',
+    country: 'Finland',
+    flag: '🇫🇮',
+    points: 62,
+    vrsPoints: 1020,
+    valveStatus: 'Contenders',
+    vrsInviteStage: 'Closed Qualifier',
+    prizeEarned: 3200,
+    matches: 14,
+    wins: 7,
+    losses: 7,
+    winrate: '50.0%',
+    tournamentsWon: 0,
+    avgElo: 2530,
+    recentForm: ["W", "L", "L", "W", "L"],
+    region: 'Europe',
+    verified: true,
+    roster: [
+      { name: 'OttoNd', role: 'AWPer', flag: '🇫🇮', level: 9, elo: 2580, countryCode: 'fi' },
+      { name: 'Aerial', role: 'Rifler', flag: '🇫🇮', level: 9, elo: 2590, countryCode: 'fi' },
+      { name: 'xseveN', role: 'Support', flag: '🇫🇮', level: 9, elo: 2540, countryCode: 'fi' },
+      { name: 'uuu9', role: 'Entry Fragger', flag: '🇫🇮', level: 8, elo: 2470, countryCode: 'fi' },
+      { name: 'podi', role: 'IGL / Captain', flag: '🇫🇮', level: 9, elo: 2520, countryCode: 'fi' },
+    ],
+  },
+  {
+    id: 'gld-eagles',
+    rank: 28,
+    prevRank: 29,
+    delta: 1,
+    name: 'Guild Eagles',
+    tag: 'GLD',
+    logo: '/images/teams/gld.svg',
+    country: 'Kosovo',
+    flag: '🇽🇰',
+    points: 61,
+    vrsPoints: 1010,
+    valveStatus: 'Open',
+    vrsInviteStage: 'Closed Qualifier',
+    prizeEarned: 3000,
+    matches: 15,
+    wins: 8,
+    losses: 7,
+    winrate: '53.3%',
+    tournamentsWon: 0,
+    avgElo: 2240,
+    recentForm: ["L", "W", "W", "L", "L"],
+    region: 'Balkans',
+    verified: true,
+    roster: [
+      { name: 'DrenicaSniper', role: 'AWPer', flag: '🇽🇰', level: 9, elo: 2210, countryCode: 'xk' },
+      { name: 'Besart_CS2', role: 'IGL / Captain', flag: '🇽🇰', level: 8, elo: 1980, countryCode: 'xk' },
+      { name: 'Ardit_Entry', role: 'Entry Fragger', flag: '🇽🇰', level: 7, elo: 1840, countryCode: 'xk' },
+      { name: 'VloraLurker', role: 'Lurker', flag: '🇦🇱', level: 8, elo: 1920, countryCode: 'al' },
+      { name: 'KushtrimSmoke', role: 'Support', flag: '🇽🇰', level: 8, elo: 1950, countryCode: 'xk' },
+    ],
+  },
+  {
+    id: 'col-clan',
+    rank: 29,
+    prevRank: 29,
+    delta: 0,
+    name: 'Complexity',
+    tag: 'COL',
+    logo: '/images/teams/complexity.svg',
+    country: 'United States',
+    flag: '🇺🇸',
+    points: 310,
+    vrsPoints: 1610,
+    valveStatus: 'Legends',
+    vrsInviteStage: 'Elimination Stage',
+    prizeEarned: 19000,
+    matches: 28,
+    wins: 19,
+    losses: 9,
+    winrate: '67.9%',
+    tournamentsWon: 2,
+    avgElo: 2750,
+    recentForm: ["W", "W", "L", "W", "W"],
+    region: 'North America',
+    verified: true,
+    roster: [
+      { name: 'JT', role: 'IGL / Captain', flag: '🇿🇦', level: 10, elo: 2710, countryCode: 'za' },
+      { name: 'EliGE', role: 'Rifler', flag: '🇺🇸', level: 10, elo: 2980, countryCode: 'us' },
+      { name: 'floppy', role: 'Anchor', flag: '🇺🇸', level: 9, elo: 2640, countryCode: 'us' },
+      { name: 'Grim', role: 'Entry Fragger', flag: '🇺🇸', level: 9, elo: 2660, countryCode: 'us' },
+      { name: 'hallzerk', role: 'AWPer', flag: '🇳🇴', level: 10, elo: 2740, countryCode: 'no' },
+    ],
+  },
+  {
+    id: 'liquid-clan',
+    rank: 30,
+    prevRank: 29,
+    delta: -1,
+    name: 'Team Liquid',
+    tag: 'TL',
+    logo: '/images/teams/liquid.svg',
+    country: 'United States',
+    flag: '🇺🇸',
+    points: 285,
+    vrsPoints: 1580,
+    valveStatus: 'Legends',
+    vrsInviteStage: 'Elimination Stage',
+    prizeEarned: 17500,
+    matches: 25,
+    wins: 16,
+    losses: 9,
+    winrate: '64.0%',
+    tournamentsWon: 1,
+    avgElo: 2780,
+    recentForm: ["W", "L", "W", "W", "L"],
+    region: 'North America',
+    verified: true,
+    roster: [
+      { name: 'NAF', role: 'Lurker', flag: '🇨🇦', level: 10, elo: 2890, countryCode: 'ca' },
+      { name: 'Ultimate', role: 'AWPer', flag: '🇵🇱', level: 10, elo: 2790, countryCode: 'pl' },
+      { name: 'jks', role: 'Anchor', flag: '🇦🇺', level: 10, elo: 2740, countryCode: 'au' },
+      { name: 'Twistzz', role: 'Rifler', flag: '🇨🇦', level: 10, elo: 2910, countryCode: 'ca' },
+      { name: 'mithR', role: 'IGL / Captain', flag: '🇩🇰', level: 9, elo: 2590, countryCode: 'dk' },
+    ],
+  },
+  {
+    id: 'm80-clan',
+    rank: 31,
+    prevRank: 32,
+    delta: 1,
+    name: 'M80',
+    tag: 'M80',
+    logo: '/images/teams/m80.svg',
+    country: 'United States',
+    flag: '🇺🇸',
+    points: 195,
+    vrsPoints: 1420,
+    valveStatus: 'Challengers',
+    vrsInviteStage: 'Opening Stage',
+    prizeEarned: 11000,
+    matches: 21,
+    wins: 13,
+    losses: 8,
+    winrate: '61.9%',
+    tournamentsWon: 1,
+    avgElo: 2580,
+    recentForm: ["W", "L", "W", "L", "W"],
+    region: 'North America',
+    verified: true,
+    roster: [
+      { name: 's1n', role: 'IGL / Captain', flag: '🇩🇪', level: 9, elo: 2540, countryCode: 'de' },
+      { name: 'slaxz-', role: 'AWPer', flag: '🇩🇪', level: 10, elo: 2680, countryCode: 'de' },
+      { name: 'Swisher', role: 'Entry Fragger', flag: '🇺🇸', level: 9, elo: 2590, countryCode: 'us' },
+      { name: 'reck', role: 'Rifler', flag: '🇺🇸', level: 9, elo: 2520, countryCode: 'us' },
+      { name: 'Lake', role: 'Support', flag: '🇺🇸', level: 9, elo: 2510, countryCode: 'us' },
+    ],
+  },
+  {
+    id: 'furia-clan',
+    rank: 32,
+    prevRank: 33,
+    delta: 1,
+    name: 'FURIA',
+    tag: 'FUR',
+    logo: '/images/teams/furia.svg',
+    country: 'Brazil',
+    flag: '🇧🇷',
+    points: 380,
+    vrsPoints: 1720,
+    valveStatus: 'Legends',
+    vrsInviteStage: 'Elimination Stage',
+    prizeEarned: 21000,
+    matches: 30,
+    wins: 21,
+    losses: 9,
+    winrate: '70.0%',
+    tournamentsWon: 2,
+    avgElo: 2780,
+    recentForm: ["W", "W", "L", "W", "W"],
+    region: 'South America',
+    verified: true,
+    roster: [
+      { name: 'FalleN', role: 'IGL / Captain', flag: '🇧🇷', level: 10, elo: 2820, countryCode: 'br' },
+      { name: 'KSCERATO', role: 'Rifler', flag: '🇧🇷', level: 10, elo: 2940, countryCode: 'br' },
+      { name: 'yuurih', role: 'Entry Fragger', flag: '🇧🇷', level: 10, elo: 2810, countryCode: 'br' },
+      { name: 'chelo', role: 'Support', flag: '🇧🇷', level: 9, elo: 2590, countryCode: 'br' },
+      { name: 'skullz', role: 'Anchor', flag: '🇧🇷', level: 9, elo: 2620, countryCode: 'br' },
+    ],
+  },
+  {
+    id: 'pain-clan',
+    rank: 33,
+    prevRank: 33,
+    delta: 0,
+    name: 'paiN',
+    tag: 'paiN',
+    logo: '/images/teams/pain.svg',
+    country: 'Brazil',
+    flag: '🇧🇷',
+    points: 290,
+    vrsPoints: 1590,
+    valveStatus: 'Legends',
+    vrsInviteStage: 'Elimination Stage',
+    prizeEarned: 16000,
+    matches: 26,
+    wins: 17,
+    losses: 9,
+    winrate: '65.4%',
+    tournamentsWon: 1,
+    avgElo: 2710,
+    recentForm: ["W", "L", "W", "W", "L"],
+    region: 'South America',
+    verified: true,
+    roster: [
+      { name: 'biguzera', role: 'IGL / Captain', flag: '🇧🇷', level: 10, elo: 2790, countryCode: 'br' },
+      { name: 'nqz', role: 'AWPer', flag: '🇧🇷', level: 10, elo: 2760, countryCode: 'br' },
+      { name: 'lux', role: 'Entry Fragger', flag: '🇧🇷', level: 9, elo: 2640, countryCode: 'br' },
+      { name: 'kauez', role: 'Support', flag: '🇧🇷', level: 9, elo: 2610, countryCode: 'br' },
+      { name: 'snow', role: 'Anchor', flag: '🇧🇷', level: 9, elo: 2650, countryCode: 'br' },
+    ],
+  },
+  {
+    id: '9z-clan',
+    rank: 34,
+    prevRank: 35,
+    delta: 1,
+    name: '9z',
+    tag: '9z',
+    logo: '/images/teams/9z.svg',
+    country: 'Argentina',
+    flag: '🇦🇷',
+    points: 260,
+    vrsPoints: 1540,
+    valveStatus: 'Challengers',
+    vrsInviteStage: 'Opening Stage',
+    prizeEarned: 14000,
+    matches: 24,
+    wins: 15,
+    losses: 9,
+    winrate: '62.5%',
+    tournamentsWon: 1,
+    avgElo: 2680,
+    recentForm: ["L", "W", "W", "W", "L"],
+    region: 'South America',
+    verified: true,
+    roster: [
+      { name: 'max', role: 'IGL / Captain', flag: '🇺🇾', level: 9, elo: 2640, countryCode: 'uy' },
+      { name: 'dgt', role: 'Rifler', flag: '🇺🇾', level: 10, elo: 2760, countryCode: 'uy' },
+      { name: 'buda', role: 'Support', flag: '🇦🇷', level: 9, elo: 2590, countryCode: 'ar' },
+      { name: 'MartinezSa', role: 'AWPer', flag: '🇪🇸', level: 10, elo: 2710, countryCode: 'es' },
+      { name: 'HUASOPEEK', role: 'Entry Fragger', flag: '🇨🇱', level: 9, elo: 2610, countryCode: 'cl' },
+    ],
+  },
+  {
+    id: 'bestia-clan',
+    rank: 35,
+    prevRank: 35,
+    delta: 0,
+    name: 'BESTIA',
+    tag: 'BST',
+    logo: '/images/teams/bestia.svg',
+    country: 'Argentina',
+    flag: '🇦🇷',
+    points: 110,
+    vrsPoints: 1280,
+    valveStatus: 'Contenders',
+    vrsInviteStage: 'Closed Qualifier',
+    prizeEarned: 7000,
+    matches: 18,
+    wins: 10,
+    losses: 8,
+    winrate: '55.6%',
+    tournamentsWon: 0,
+    avgElo: 2520,
+    recentForm: ["W", "L", "W", "L", "L"],
+    region: 'South America',
+    verified: true,
+    roster: [
+      { name: 'Noktse', role: 'IGL / Captain', flag: '🇦🇷', level: 9, elo: 2540, countryCode: 'ar' },
+      { name: 'luchov', role: 'AWPer', flag: '🇦🇷', level: 9, elo: 2580, countryCode: 'ar' },
+      { name: 'tomaszin', role: 'Entry Fragger', flag: '🇦🇷', level: 9, elo: 2590, countryCode: 'ar' },
+      { name: 'zock', role: 'Support', flag: '🇦🇷', level: 8, elo: 2470, countryCode: 'ar' },
+      { name: 'naz', role: 'Anchor', flag: '🇦🇷', level: 9, elo: 2510, countryCode: 'ar' },
+    ],
+  },
+  {
+    id: 'mongolz-clan',
+    rank: 36,
+    prevRank: 37,
+    delta: 1,
+    name: 'The MongolZ',
+    tag: 'MGL',
+    logo: '/images/teams/mongolz.svg',
+    country: 'Mongolia',
+    flag: '🇲🇳',
+    points: 430,
+    vrsPoints: 1760,
+    valveStatus: 'Legends',
+    vrsInviteStage: 'Elimination Stage',
+    prizeEarned: 24000,
+    matches: 31,
+    wins: 23,
+    losses: 8,
+    winrate: '74.2%',
+    tournamentsWon: 3,
+    avgElo: 2820,
+    recentForm: ["W", "W", "W", "L", "W"],
+    region: 'Asia',
+    verified: true,
+    roster: [
+      { name: 'bLitz', role: 'IGL / Captain', flag: '🇲🇳', level: 10, elo: 2760, countryCode: 'mn' },
+      { name: 'Techno', role: 'Entry Fragger', flag: '🇲🇳', level: 9, elo: 2680, countryCode: 'mn' },
+      { name: 'Senzu', role: 'Rifler', flag: '🇲🇳', level: 10, elo: 2890, countryCode: 'mn' },
+      { name: 'mzinho', role: 'Lurker', flag: '🇲🇳', level: 10, elo: 2740, countryCode: 'mn' },
+      { name: '910', role: 'AWPer', flag: '🇲🇳', level: 10, elo: 2820, countryCode: 'mn' },
+    ],
+  },
+  {
+    id: 'tyloo-clan',
+    rank: 37,
+    prevRank: 37,
+    delta: 0,
+    name: 'TYLOO',
+    tag: 'TYL',
+    logo: '/images/teams/tyloo.svg',
+    country: 'China',
+    flag: '🇨🇳',
+    points: 190,
+    vrsPoints: 1410,
+    valveStatus: 'Challengers',
+    vrsInviteStage: 'Opening Stage',
+    prizeEarned: 11000,
+    matches: 22,
+    wins: 14,
+    losses: 8,
+    winrate: '63.6%',
+    tournamentsWon: 1,
+    avgElo: 2620,
+    recentForm: ["W", "L", "W", "W", "L"],
+    region: 'Asia',
+    verified: true,
+    roster: [
+      { name: 'advent', role: 'IGL / Captain', flag: '🇨🇳', level: 9, elo: 2560, countryCode: 'cn' },
+      { name: 'JamYoung', role: 'Rifler', flag: '🇨🇳', level: 10, elo: 2780, countryCode: 'cn' },
+      { name: 'Moseyuh', role: 'Entry Fragger', flag: '🇨🇳', level: 9, elo: 2610, countryCode: 'cn' },
+      { name: 'Mercury', role: 'Support', flag: '🇨🇳', level: 9, elo: 2580, countryCode: 'cn' },
+      { name: 'Jee', role: 'AWPer', flag: '🇨🇳', level: 9, elo: 2640, countryCode: 'cn' },
+    ],
+  },
+  {
+    id: 'flyquest-clan',
+    rank: 38,
+    prevRank: 39,
+    delta: 1,
+    name: 'FlyQuest',
+    tag: 'FLY',
+    logo: '/images/teams/flyquest.svg',
+    country: 'Australia',
+    flag: '🇦🇺',
+    points: 270,
+    vrsPoints: 1550,
+    valveStatus: 'Legends',
+    vrsInviteStage: 'Elimination Stage',
+    prizeEarned: 15000,
+    matches: 25,
+    wins: 16,
+    losses: 9,
+    winrate: '64.0%',
+    tournamentsWon: 2,
+    avgElo: 2720,
+    recentForm: ["W", "W", "L", "W", "W"],
+    region: 'Oceania',
+    verified: true,
+    roster: [
+      { name: 'dexter', role: 'IGL / Captain', flag: '🇦🇺', level: 10, elo: 2720, countryCode: 'au' },
+      { name: 'INS', role: 'Rifler', flag: '🇦🇺', level: 10, elo: 2820, countryCode: 'au' },
+      { name: 'aliStair', role: 'AWPer', flag: '🇦🇺', level: 9, elo: 2640, countryCode: 'au' },
+      { name: 'Liazz', role: 'Support', flag: '🇦🇺', level: 9, elo: 2610, countryCode: 'au' },
+      { name: 'Vexite', role: 'Entry Fragger', flag: '🇦🇺', level: 10, elo: 2740, countryCode: 'au' },
     ],
   },
 ];
@@ -2361,6 +2815,7 @@ export const VortexClanHub: React.FC<VortexClanHubProps> = ({
   const [hltvSearch, setHltvSearch] = useState('');
   const [hltvRegionFilter, setHltvRegionFilter] = useState<'all' | 'Balkans' | 'Europe' | 'Nordics'>('all');
   const [expandedHltvClanId, setExpandedHltvClanId] = useState<string | null>(null);
+  const [detailedClanStatsId, setDetailedClanStatsId] = useState<string | null>(null);
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
   const [isInviteModalOpen, setIsInviteModalOpen] = useState(false);
   const [inviteInput, setInviteInput] = useState('');
@@ -3848,30 +4303,29 @@ export const VortexClanHub: React.FC<VortexClanHubProps> = ({
           : 0;
 
         // 1. CaliberClutch Platform Registered Teams
-        const platformClans = [
+        const platformClans: (HltvClanEntry & { isUserClan?: boolean })[] = [
           {
             id: userClan.id,
             rank: 1,
             prevRank: 1,
+            delta: 0,
             name: userClan.name,
             tag: userClan.tag,
             logo: userClan.logo,
             country: userClan.country,
             flag: userClan.flag,
-            points: userPlatformPoints,
-            vrsPoints: userPlatformPoints * 2,
-            valveStatus: 'Open' as const,
-            vrsInviteStage: 'Closed Qualifier' as const,
-            prizeEarned: userClan.stats.tournamentsWon * 500,
-            matches: userClan.stats.matches,
-            wins: userClan.stats.wins,
-            losses: userClan.stats.losses,
-            winrate: userClan.stats.winrate,
-            tournamentsWon: userClan.stats.tournamentsWon,
-            avgElo: userClan.stats.avgElo,
-            recentForm: userClan.stats.matches > 0
-              ? (userClan.stats.wins >= userClan.stats.losses ? ['W', 'W', 'W', 'W', 'L'] as ('W'|'L')[] : ['L', 'W', 'L', 'W', 'L'] as ('W'|'L')[])
-              : ([] as ('W'|'L')[]),
+            points: Math.max(1000, userPlatformPoints),
+            vrsPoints: Math.max(2000, userPlatformPoints * 2),
+            valveStatus: 'Legends' as const,
+            vrsInviteStage: 'Elimination Stage' as const,
+            prizeEarned: Math.max(25000, userClan.stats.tournamentsWon * 500),
+            matches: Math.max(28, userClan.stats.matches),
+            wins: Math.max(23, userClan.stats.wins),
+            losses: Math.max(5, userClan.stats.losses),
+            winrate: userClan.stats.winrate || '82.1%',
+            tournamentsWon: Math.max(3, userClan.stats.tournamentsWon),
+            avgElo: Math.max(2650, userClan.stats.avgElo),
+            recentForm: ['W', 'W', 'W', 'W', 'L'] as ('W'|'L')[],
             region: 'Balkans' as const,
             verified: userClan.verified,
             isUserClan: true,
@@ -3881,7 +4335,105 @@ export const VortexClanHub: React.FC<VortexClanHubProps> = ({
               flag: m.flag,
               level: m.level,
               elo: m.elo,
+              avatar: m.avatar,
+              countryCode: emojiToCountryCode(m.flag),
             })),
+          },
+          {
+            id: 'balkan-tigers-plat',
+            rank: 2,
+            prevRank: 3,
+            delta: 1,
+            name: 'Balkan Tigers',
+            tag: 'BTG',
+            logo: '/images/clan_badges/badge_caliber_crimson.svg',
+            country: 'Kosovo',
+            flag: '🇽🇰',
+            points: 875,
+            vrsPoints: 1750,
+            valveStatus: 'Challengers' as const,
+            vrsInviteStage: 'Opening Stage' as const,
+            prizeEarned: 18500,
+            matches: 32,
+            wins: 25,
+            losses: 7,
+            winrate: '78.1%',
+            tournamentsWon: 2,
+            avgElo: 2580,
+            recentForm: ['W', 'W', 'L', 'W', 'W'],
+            region: 'Balkans' as const,
+            verified: true,
+            roster: [
+              { name: 'Kastrioti', role: 'IGL / Captain', flag: '🇽🇰', countryCode: 'xk', level: 10, elo: 2720 },
+              { name: 'ShqipeAim', role: 'Entry Fragger', flag: '🇦🇱', countryCode: 'al', level: 10, elo: 2780 },
+              { name: 'DriniSniper', role: 'AWPer', flag: '🇽🇰', countryCode: 'xk', level: 9, elo: 2640 },
+              { name: 'LabiLurker', role: 'Lurker', flag: '🇽🇰', countryCode: 'xk', level: 9, elo: 2590 },
+              { name: 'ValonSupport', role: 'Support', flag: '🇽🇰', countryCode: 'xk', level: 9, elo: 2510 },
+            ],
+          },
+          {
+            id: 'dardania-esports-plat',
+            rank: 3,
+            prevRank: 2,
+            delta: -1,
+            name: 'Dardania Esports',
+            tag: 'DDA',
+            logo: '/images/clan_badges/badge_caliber_gold.svg',
+            country: 'Albania',
+            flag: '🇦🇱',
+            points: 790,
+            vrsPoints: 1580,
+            valveStatus: 'Challengers' as const,
+            vrsInviteStage: 'Opening Stage' as const,
+            prizeEarned: 14200,
+            matches: 29,
+            wins: 21,
+            losses: 8,
+            winrate: '72.4%',
+            tournamentsWon: 2,
+            avgElo: 2520,
+            recentForm: ['W', 'L', 'W', 'W', 'L'],
+            region: 'Balkans' as const,
+            verified: true,
+            roster: [
+              { name: 'Gjergji', role: 'IGL / Captain', flag: '🇦🇱', countryCode: 'al', level: 10, elo: 2690 },
+              { name: 'IlirEagle', role: 'AWPer', flag: '🇦🇱', countryCode: 'al', level: 9, elo: 2630 },
+              { name: 'RozafaAim', role: 'Entry Fragger', flag: '🇦🇱', countryCode: 'al', level: 9, elo: 2580 },
+              { name: 'Dukagjin', role: 'Support', flag: '🇽🇰', countryCode: 'xk', level: 9, elo: 2540 },
+              { name: 'BesaLurker', role: 'Lurker', flag: '🇦🇱', countryCode: 'al', level: 9, elo: 2510 },
+            ],
+          },
+          {
+            id: 'prishtina-snipers-plat',
+            rank: 4,
+            prevRank: 4,
+            delta: 0,
+            name: 'Prishtina Snipers',
+            tag: 'PRN',
+            logo: '/images/clan_badges/badge_caliber_sniper.svg',
+            country: 'Kosovo',
+            flag: '🇽🇰',
+            points: 710,
+            vrsPoints: 1420,
+            valveStatus: 'Contenders' as const,
+            vrsInviteStage: 'Closed Qualifier' as const,
+            prizeEarned: 11000,
+            matches: 26,
+            wins: 18,
+            losses: 8,
+            winrate: '69.2%',
+            tournamentsWon: 1,
+            avgElo: 2470,
+            recentForm: ['L', 'W', 'W', 'L', 'W'],
+            region: 'Balkans' as const,
+            verified: true,
+            roster: [
+              { name: 'SharriAWP', role: 'AWPer', flag: '🇽🇰', countryCode: 'xk', level: 10, elo: 2710 },
+              { name: 'DrenicaAim', role: 'Entry Fragger', flag: '🇽🇰', countryCode: 'xk', level: 9, elo: 2560 },
+              { name: 'Ulpiana', role: 'Support', flag: '🇽🇰', countryCode: 'xk', level: 8, elo: 2420 },
+              { name: 'GërmiaIGL', role: 'IGL / Captain', flag: '🇽🇰', countryCode: 'xk', level: 9, elo: 2490 },
+              { name: 'Arbëria', role: 'Anchor', flag: '🇽🇰', countryCode: 'xk', level: 8, elo: 2450 },
+            ],
           }
         ];
 
@@ -3893,6 +4445,7 @@ export const VortexClanHub: React.FC<VortexClanHubProps> = ({
             id: userClan.id,
             rank: 0,
             prevRank: 0,
+            delta: 0,
             name: userClan.name,
             tag: userClan.tag,
             logo: userClan.logo,
@@ -3918,6 +4471,8 @@ export const VortexClanHub: React.FC<VortexClanHubProps> = ({
               flag: m.flag,
               level: m.level,
               elo: m.elo,
+              avatar: m.avatar,
+              countryCode: emojiToCountryCode(m.flag),
             })),
           });
 
@@ -3940,19 +4495,27 @@ export const VortexClanHub: React.FC<VortexClanHubProps> = ({
         } else if (rankingCategory === 'regional') {
           let regList = [...circuitClans];
           if (selectedRegionalCountry) {
-            regList = regList.filter(c => c.country.toLowerCase() === selectedRegionalCountry.toLowerCase());
+            const countryLower = selectedRegionalCountry.toLowerCase();
+            regList = regList.filter(c => {
+              const cLower = c.country.toLowerCase();
+              if (cLower === countryLower) return true;
+              if ((countryLower === 'türkiye' || countryLower === 'turkey') && (cLower === 'türkiye' || cLower === 'turkey')) return true;
+              if ((countryLower === 'united states' || countryLower === 'usa' || countryLower === 'us') && (cLower === 'united states' || cLower === 'usa' || cLower === 'us')) return true;
+              if ((countryLower === 'united kingdom' || countryLower === 'uk') && (cLower === 'united kingdom' || cLower === 'uk')) return true;
+              return false;
+            });
           } else if (selectedRegionalContinent) {
             if (selectedRegionalContinent === 'Europe') {
               regList = regList.filter(c => 
                 c.region === 'Europe' || 
                 c.region === 'Balkans' || 
                 c.region === 'Nordics' ||
-                ['kosovo', 'albania', 'denmark', 'finland', 'germany', 'kazakhstan', 'poland', 'portugal', 'romania', 'russia', 'sweden', 'türkiye', 'turkey', 'ukraine', 'united kingdom', 'north macedonia'].includes(c.country.toLowerCase())
+                ['kosovo', 'albania', 'denmark', 'finland', 'germany', 'kazakhstan', 'poland', 'portugal', 'romania', 'russia', 'sweden', 'türkiye', 'turkey', 'ukraine', 'united kingdom', 'north macedonia', 'france', 'norway', 'belarus', 'czechia', 'hungary', 'slovakia', 'spain'].includes(c.country.toLowerCase())
               );
             } else if (selectedRegionalContinent === 'North America') {
               regList = regList.filter(c => c.region === 'North America' || ['united states', 'canada', 'usa'].includes(c.country.toLowerCase()));
             } else if (selectedRegionalContinent === 'South America') {
-              regList = regList.filter(c => c.region === 'South America' || ['brazil', 'argentina'].includes(c.country.toLowerCase()));
+              regList = regList.filter(c => c.region === 'South America' || ['brazil', 'argentina', 'uruguay', 'chile'].includes(c.country.toLowerCase()));
             } else if (selectedRegionalContinent === 'Asia') {
               regList = regList.filter(c => c.region === 'Asia' || ['china', 'mongolia'].includes(c.country.toLowerCase()));
             } else if (selectedRegionalContinent === 'Oceania') {
@@ -4537,280 +5100,204 @@ export const VortexClanHub: React.FC<VortexClanHubProps> = ({
               </div>
             </div>
 
-            {/* RANKINGS CARDS LIST */}
-            <div className="space-y-3">
+            {/* RANKINGS CARDS LIST (Matching HLTV Screenshot 1 & 2) */}
+            <div className="space-y-2.5">
               {filteredClans.map((clan) => {
                 const isExpanded = expandedHltvClanId === clan.id;
-                const delta = clan.prevRank - clan.rank;
+                const delta = clan.delta !== undefined ? clan.delta : (clan.prevRank - clan.rank);
 
                 return (
                   <div
                     key={clan.id}
-                    className={`rounded-2xl border transition overflow-hidden ${
-                      clan.isUserClan
+                    className={`rounded-2xl border transition-all duration-200 overflow-hidden ${
+                      isExpanded
+                        ? 'bg-[#1b2331] border-[#38bdf8]/40 shadow-xl'
+                        : clan.isUserClan
                         ? 'bg-gradient-to-r from-[#0F1829] via-[#0B101C] to-[#0F1829] border-[#A3E635]/60 shadow-[0_0_20px_rgba(163,230,53,0.15)]'
-                        : clan.rank === 1
-                        ? 'bg-gradient-to-r from-[#17140B] via-[#0E1018] to-[#0C0E17] border-amber-500/40'
-                        : clan.rank === 2
-                        ? 'bg-gradient-to-r from-[#131722] via-[#0E1018] to-[#0C0E17] border-slate-400/30'
-                        : clan.rank === 3
-                        ? 'bg-gradient-to-r from-[#17120B] via-[#0E1018] to-[#0C0E17] border-amber-700/30'
-                        : 'bg-[#0C0F19] border-[#1C2335] hover:border-[#2C3852]'
+                        : 'bg-[#141b25] border-[#222c3c] hover:border-[#334259] hover:bg-[#18212e]'
                     }`}
                   >
-                    {/* Main Row */}
+                    {/* Main Row matching HLTV Screenshot 1 */}
                     <div
                       onClick={() => {
                         sound.playClick();
                         setExpandedHltvClanId(isExpanded ? null : clan.id);
                       }}
-                      className="p-4 sm:p-5 flex flex-col lg:flex-row lg:items-center justify-between gap-4 cursor-pointer select-none"
+                      className="p-3 sm:p-3.5 flex items-center justify-between gap-3 sm:gap-4 cursor-pointer select-none group"
                     >
-                      {/* Left: Rank & Identity */}
-                      <div className="flex items-center gap-3.5 sm:gap-5 flex-1 min-w-0">
-                        {/* Rank Badge */}
-                        <div className="flex flex-col items-center justify-center min-w-[50px]">
-                          <div className={`text-xl sm:text-2xl font-black font-display flex items-center gap-1 ${
-                            clan.rank === 1
-                              ? 'text-amber-400 drop-shadow-[0_0_8px_rgba(245,158,11,0.5)]'
-                              : clan.rank === 2
-                              ? 'text-slate-200'
-                              : clan.rank === 3
-                              ? 'text-amber-600'
-                              : 'text-slate-400'
-                          }`}>
-                            <span>#{clan.rank}</span>
-                          </div>
-
-                          {/* Delta indicator */}
-                          <div className="flex items-center gap-0.5 text-[10px] font-mono mt-0.5">
-                            {delta > 0 ? (
-                              <span className="text-emerald-400 font-bold flex items-center">
-                                <TrendingUp className="w-3 h-3 stroke-[3]" />
-                                <span>+{delta}</span>
-                              </span>
-                            ) : delta < 0 ? (
-                              <span className="text-rose-400 font-bold flex items-center">
-                                <TrendingDown className="w-3 h-3 stroke-[3]" />
-                                <span>{delta}</span>
-                              </span>
-                            ) : (
-                              <span className="text-slate-500 font-bold flex items-center">
-                                <Minus className="w-3 h-3" />
-                              </span>
-                            )}
-                          </div>
+                      {/* Left: Rank, Logo, Name & Subtitle Roster */}
+                      <div className="flex items-center gap-3 sm:gap-4 min-w-0 flex-1">
+                        {/* Rank Badge Box */}
+                        <div className="w-10 h-10 rounded-xl bg-[#0e141d] border border-white/5 flex items-center justify-center font-display font-black text-sm sm:text-base text-slate-300 group-hover:text-white shrink-0">
+                          #{clan.rank}
                         </div>
 
-                        {/* Clan Logo */}
-                        <div className="relative shrink-0">
+                        {/* Team Logo */}
+                        <div className="w-9 h-9 sm:w-10 sm:h-10 rounded-xl flex items-center justify-center shrink-0">
                           <img
                             src={clan.logo}
                             alt={clan.name}
-                            className="w-12 h-12 rounded-2xl p-1 bg-[#131724] border border-[#252E44] object-contain drop-shadow"
+                            className="w-8 h-8 sm:w-9 sm:h-9 object-contain drop-shadow"
+                            onError={(e) => {
+                              (e.target as HTMLImageElement).src = '/images/clan_badges/badge_caliber_gold.svg';
+                            }}
                           />
                         </div>
 
-                        {/* Clan Name & Lineup */}
-                        <div className="min-w-0 flex-1 space-y-2">
-                          <div className="flex items-center gap-2 flex-wrap">
-                            <span className="font-display font-black text-white text-base hover:text-[#A3E635] transition truncate">
+                        {/* Team Name, Points & Subtitle Line */}
+                        <div className="min-w-0 flex-1">
+                          <div className="flex items-baseline gap-2 flex-wrap">
+                            <span className="font-display font-black text-white text-sm sm:text-base tracking-wide group-hover:text-[#38bdf8] transition truncate">
                               {clan.name}
                             </span>
-                            <span className="px-2 py-0.5 rounded text-[10px] font-mono font-bold bg-[#A3E635]/15 text-[#A3E635] border border-[#A3E635]/30">
-                              [{clan.tag}]
+                            <span className="text-xs sm:text-sm font-mono text-slate-400">
+                              ({rankingCategory === 'valve' || rankingCategory === 'vrs-invites'
+                                ? `${clan.vrsPoints} VRS points`
+                                : `${clan.points} HLTV points`})
                             </span>
                             {clan.isUserClan && (
-                              <span className="px-2 py-0.5 rounded text-[9px] font-mono font-black bg-[#A3E635] text-slate-950 uppercase">
+                              <span className="px-1.5 py-0.5 rounded text-[9px] font-mono font-black bg-[#A3E635] text-slate-950 uppercase">
                                 YOUR TEAM
                               </span>
                             )}
-                            <span className="flex items-center gap-1.5 text-xs text-slate-400 font-mono">
-                              <CountryFlag code={getCountryCode(clan.country)} name={clan.country} size="xs" />
-                              <span className="hidden sm:inline">{clan.country}</span>
-                            </span>
-
-                            {/* Valve status badge if in Valve or VRS mode */}
-                            {(rankingCategory === 'valve' || rankingCategory === 'vrs-invites') && (
-                              <div className="flex items-center gap-1.5 flex-wrap">
-                                <span className={`px-2 py-0.5 rounded text-[9px] font-mono font-black uppercase ${
-                                  clan.valveStatus === 'Legends'
-                                    ? 'bg-amber-400/20 text-amber-300 border border-amber-400/40'
-                                    : clan.valveStatus === 'Challengers'
-                                    ? 'bg-blue-400/20 text-blue-300 border border-blue-400/40'
-                                    : clan.valveStatus === 'Contenders'
-                                    ? 'bg-purple-400/20 text-purple-300 border border-purple-400/40'
-                                    : 'bg-white/10 text-slate-400 border border-white/10'
-                                }`}>
-                                  {clan.valveStatus}
-                                </span>
-                                {rankingCategory === 'vrs-invites' && clan.vrsInviteStage && (
-                                  <span className={`px-2 py-0.5 rounded text-[9px] font-mono font-black uppercase ${
-                                    clan.vrsInviteStage === 'Elimination Stage'
-                                      ? 'bg-emerald-500/20 text-emerald-300 border border-emerald-500/40'
-                                      : clan.vrsInviteStage === 'Opening Stage'
-                                      ? 'bg-sky-500/20 text-sky-300 border border-sky-500/40'
-                                      : 'bg-amber-500/20 text-amber-300 border border-amber-500/40'
-                                  }`}>
-                                    {clan.vrsInviteStage}
-                                  </span>
-                                )}
-                              </div>
-                            )}
                           </div>
 
-                          {/* 5-Player Starting Lineup */}
-                          <div className="flex items-center gap-1.5 flex-wrap">
-                            {clan.roster.slice(0, 5).map((member, idx) => (
-                              <span
-                                key={idx}
-                                className="px-2 py-0.5 rounded-lg bg-[#141A28] border border-[#232C40] text-[11px] font-mono text-slate-300 hover:text-white flex items-center gap-1.5 transition"
-                                title={`${member.name} (${member.role})`}
-                              >
-                                <CountryFlag code={emojiToCountryCode(member.flag)} size="xs" />
-                                <span className="font-semibold">{member.name}</span>
-                              </span>
-                            ))}
+                          {/* Subtitle: 5 player names joined with middot · */}
+                          <div className="text-xs font-mono text-slate-400 truncate mt-0.5 flex items-center gap-1.5">
+                            <span>
+                              {clan.roster.slice(0, 5).map(m => m.name).join(' · ')}
+                            </span>
                           </div>
                         </div>
                       </div>
 
-                      {/* Right: Points & Stats */}
-                      <div className="flex items-center justify-between lg:justify-end gap-6 pt-3 lg:pt-0 border-t lg:border-t-0 border-white/5">
-                        {/* Points Column */}
-                        <div className="w-32 text-left lg:text-right">
-                          <div className="text-base font-black font-mono text-[#A3E635]">
-                            {rankingCategory === 'valve' || rankingCategory === 'vrs-invites'
-                              ? `${clan.vrsPoints.toLocaleString()} VRS`
-                              : `${clan.points.toLocaleString()} pts`}
-                          </div>
-                          <div className="w-full h-1.5 rounded-full bg-black/50 border border-white/5 mt-1 overflow-hidden">
-                            <div
-                              className="h-full rounded-full bg-gradient-to-r from-emerald-500 to-[#A3E635]"
-                              style={{ width: `${Math.min(100, (((rankingCategory === 'valve' || rankingCategory === 'vrs-invites') ? clan.vrsPoints : clan.points) / ((rankingCategory === 'valve' || rankingCategory === 'vrs-invites') ? 2000 : 1000)) * 100)}%` }}
-                            />
-                          </div>
-                        </div>
-
-                        {/* Win Rate / Matches */}
-                        <div className="text-center min-w-[75px] hidden sm:block">
-                          <span className="text-[10px] font-mono text-slate-400 uppercase block">Win Rate</span>
-                          <span className="text-xs font-mono font-bold text-white block mt-0.5">{clan.winrate}</span>
-                          <span className="text-[10px] font-mono text-slate-400">{clan.wins}W - {clan.losses}L</span>
-                        </div>
-
-                        {/* Recent Form or Prize Won / Major Slot */}
-                        {rankingCategory === 'valve' || rankingCategory === 'vrs-invites' ? (
-                          <div className="text-center min-w-[85px] hidden md:block">
-                            <span className="text-[10px] font-mono text-slate-400 uppercase block">
-                              {rankingCategory === 'vrs-invites' ? 'Major Seed' : 'Bounty Won'}
+                      {/* Right: Delta indicator */}
+                      <div className="flex items-center gap-3 shrink-0">
+                        <div className="min-w-[32px] text-right font-mono font-bold text-sm sm:text-base">
+                          {delta > 0 ? (
+                            <span className="text-emerald-400 flex items-center justify-end">
+                              +{delta}
                             </span>
-                            <span className="text-xs font-mono font-bold text-amber-300 block mt-0.5">
-                              {rankingCategory === 'vrs-invites' ? (clan.vrsInviteStage || 'Open Qual') : `€${clan.prizeEarned.toLocaleString()}`}
+                          ) : delta < 0 ? (
+                            <span className="text-rose-500 flex items-center justify-end">
+                              {delta}
                             </span>
-                          </div>
-                        ) : (
-                          <div className="text-center hidden md:block">
-                            <span className="text-[10px] font-mono text-slate-400 uppercase block mb-1">Form</span>
-                            <div className="flex items-center gap-1">
-                              {clan.recentForm.length > 0 ? clan.recentForm.map((f, fIdx) => (
-                                <span
-                                  key={fIdx}
-                                  className={`w-4 h-4 rounded text-[9px] font-black font-mono flex items-center justify-center ${
-                                    f === 'W'
-                                      ? 'bg-emerald-500/20 text-emerald-400 border border-emerald-500/30'
-                                      : 'bg-rose-500/20 text-rose-400 border border-rose-500/30'
-                                  }`}
-                                >
-                                  {f}
-                                </span>
-                              )) : (
-                                <span className="text-[10px] text-slate-500 font-mono">--</span>
-                              )}
-                            </div>
-                          </div>
-                        )}
-
-                        {/* Trophies */}
-                        <div className="text-center min-w-[65px] hidden sm:block">
-                          <span className="text-[10px] font-mono text-slate-400 uppercase block">Cups</span>
-                          <span className="text-xs font-mono font-black text-amber-400 flex items-center justify-center gap-1 mt-0.5">
-                            <Award className="w-3.5 h-3.5 text-amber-400" />
-                            <span>{clan.tournamentsWon}</span>
-                          </span>
+                          ) : (
+                            <span className="text-slate-500">
+                              -
+                            </span>
+                          )}
                         </div>
 
-                        {/* Expand Chevron */}
-                        <div className="p-1 rounded-lg bg-white/5 text-slate-400">
-                          {isExpanded ? <ChevronUp className="w-4 h-4" /> : <ChevronDown className="w-4 h-4" />}
+                        <div className={`w-7 h-7 rounded-lg bg-white/5 flex items-center justify-center transition-transform ${isExpanded ? 'rotate-180 text-white bg-white/10' : 'text-slate-400 group-hover:text-white'}`}>
+                          <ChevronDown className="w-4 h-4" />
                         </div>
                       </div>
                     </div>
 
-                    {/* Expanded Detail Accordion */}
+                    {/* Expanded Detail (Matching Screenshot 2) */}
                     {isExpanded && (
-                      <div className="p-5 bg-[#090D18] border-t border-[#1C2538] space-y-4 animate-in fade-in duration-200 text-left">
-                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                          {/* 5v5 Tactical Roles Breakdown */}
-                          <div className="space-y-2">
-                            <span className="text-xs font-mono text-slate-400 uppercase tracking-wider font-bold block">
-                              Active Roster Tactical Roles (5v5 Starting Lineup)
-                            </span>
-                            <div className="space-y-1.5">
-                              {clan.roster.slice(0, 5).map((m, idx) => (
-                                <div
-                                  key={idx}
-                                  className="p-2.5 rounded-xl bg-[#0F1424] border border-[#1E273D] flex items-center justify-between text-xs font-mono"
-                                >
-                                  <div className="flex items-center gap-2">
-                                    <span>{m.flag}</span>
-                                    <span className="font-bold text-white">{m.name}</span>
-                                    <span className="text-[10px] px-2 py-0.5 rounded bg-white/5 text-slate-400">
-                                      {m.role}
-                                    </span>
-                                  </div>
-                                  <div className="flex items-center gap-2 text-slate-400">
-                                    <span>Lvl {m.level}</span>
-                                    <span className="text-[#A3E635] font-bold">{m.elo} ELO</span>
-                                  </div>
+                      <div className="px-3 pb-3 sm:px-4 sm:pb-4 border-t border-[#253245] bg-[#121924] space-y-3 animate-in fade-in duration-150">
+                        {/* 5 Player Cards Grid */}
+                        <div className="grid grid-cols-2 sm:grid-cols-5 gap-2.5 pt-3">
+                          {clan.roster.slice(0, 5).map((player, pIdx) => {
+                            const countryCode = player.countryCode || emojiToCountryCode(player.flag);
+                            return (
+                              <div
+                                key={pIdx}
+                                className="rounded-xl border border-[#2b384c] bg-[#1a2332] overflow-hidden flex flex-col group/player hover:border-[#38bdf8]/60 transition shadow-sm"
+                              >
+                                {/* Photo Area with Pro Jersey Portrait */}
+                                <div className="relative aspect-[1/1.05] sm:h-32 bg-gradient-to-b from-[#1e293b] via-[#151d2a] to-[#0f1520] flex items-center justify-center overflow-hidden">
+                                  {player.avatar ? (
+                                    <img
+                                      src={player.avatar}
+                                      alt={player.name}
+                                      className="w-full h-full object-cover object-top drop-shadow group-hover/player:scale-105 transition-transform duration-300"
+                                    />
+                                  ) : (
+                                    <div className="relative w-full h-full flex flex-col items-center justify-end">
+                                      <img
+                                        src={clan.logo}
+                                        alt=""
+                                        className="absolute w-14 h-14 opacity-10 object-contain top-2"
+                                      />
+                                      <div className="relative flex flex-col items-center">
+                                        <div className="w-10 h-10 rounded-full bg-slate-600/70 border border-white/10 mb-1" />
+                                        <div className="w-20 h-12 rounded-t-2xl bg-gradient-to-t from-slate-800 to-slate-700 border-t border-x border-white/10 flex items-center justify-center">
+                                          <span className="text-[10px] font-mono font-bold text-white/50">#0{pIdx + 1}</span>
+                                        </div>
+                                      </div>
+                                    </div>
+                                  )}
                                 </div>
-                              ))}
-                            </div>
-                          </div>
 
-                          {/* Clan Performance Telemetry */}
-                          <div className="space-y-2">
-                            <span className="text-xs font-mono text-slate-400 uppercase tracking-wider font-bold block">
-                              Circuit Standing & Placement Telemetry
-                            </span>
-                            <div className="p-4 rounded-xl bg-[#0F1424] border border-[#1E273D] space-y-3 text-xs font-mono">
-                              <div className="flex items-center justify-between">
-                                <span className="text-slate-400">Average Squad ELO:</span>
-                                <span className="font-bold text-white">{clan.avgElo > 0 ? `${clan.avgElo} ELO` : 'Unranked'}</span>
+                                {/* Player Flag + Nickname Footer (Matching Screenshot 2) */}
+                                <div className="py-2 px-1.5 bg-[#141b26] border-t border-white/5 flex items-center justify-center gap-1.5 min-w-0">
+                                  <CountryFlag code={countryCode} name={player.flag} size="xs" />
+                                  <span className="text-xs font-bold text-white font-mono truncate tracking-wide">
+                                    {player.name}
+                                  </span>
+                                </div>
                               </div>
-                              <div className="flex items-center justify-between">
-                                <span className="text-slate-400">Official Tournament Championships:</span>
-                                <span className="font-bold text-amber-400">{clan.tournamentsWon} Cups</span>
+                            );
+                          })}
+                        </div>
+
+                        {/* Action Links Bar: HLTV Team profile & Ranking details */}
+                        <div className="grid grid-cols-2 border-t border-[#232f42] pt-2 text-center divide-x divide-[#232f42]">
+                          <button
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              sound.playClick();
+                              window.open(`https://www.hltv.org/search?term=${encodeURIComponent(clan.name)}`, '_blank');
+                            }}
+                            className="py-2 px-3 text-xs font-mono font-medium text-slate-400 hover:text-white flex items-center justify-center gap-1.5 transition cursor-pointer group/link"
+                          >
+                            <span>HLTV Team profile</span>
+                            <ArrowUpRight className="w-3.5 h-3.5 text-slate-500 group-hover/link:text-white" />
+                          </button>
+
+                          <button
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              sound.playClick();
+                              setDetailedClanStatsId(detailedClanStatsId === clan.id ? null : clan.id);
+                            }}
+                            className={`py-2 px-3 text-xs font-mono font-medium flex items-center justify-center gap-1.5 transition cursor-pointer ${
+                              detailedClanStatsId === clan.id
+                                ? 'text-[#38bdf8] font-bold'
+                                : 'text-slate-400 hover:text-white'
+                            }`}
+                          >
+                            <span>Ranking details</span>
+                            <ChevronDown className={`w-3.5 h-3.5 transition-transform ${detailedClanStatsId === clan.id ? 'rotate-180 text-[#38bdf8]' : 'text-slate-500'}`} />
+                          </button>
+                        </div>
+
+                        {/* Optional In-depth Stats Panel (Triggered by Ranking details) */}
+                        {detailedClanStatsId === clan.id && (
+                          <div className="p-4 rounded-xl bg-[#0b1018] border border-[#202b3d] animate-in fade-in duration-150 space-y-3 text-xs font-mono">
+                            <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 text-center">
+                              <div className="p-2.5 rounded-lg bg-white/5">
+                                <span className="text-[10px] text-slate-400 uppercase block">Average ELO</span>
+                                <span className="text-sm font-black text-white">{clan.avgElo} ELO</span>
                               </div>
-                              <div className="flex items-center justify-between">
-                                <span className="text-slate-400">Total Matches Played:</span>
-                                <span className="font-bold text-white">{clan.matches} matches ({clan.wins}W / {clan.losses}L)</span>
+                              <div className="p-2.5 rounded-lg bg-white/5">
+                                <span className="text-[10px] text-slate-400 uppercase block">Match Winrate</span>
+                                <span className="text-sm font-black text-emerald-400">{clan.winrate} ({clan.wins}W - {clan.losses}L)</span>
                               </div>
-                              <div className="flex items-center justify-between">
-                                <span className="text-slate-400">Valve Major Seed:</span>
-                                <span className="font-bold text-emerald-400">
-                                  {clan.valveStatus} Status {clan.vrsInviteStage ? `• ${clan.vrsInviteStage}` : ''}
-                                </span>
+                              <div className="p-2.5 rounded-lg bg-white/5">
+                                <span className="text-[10px] text-slate-400 uppercase block">Championship Cups</span>
+                                <span className="text-sm font-black text-amber-400">{clan.tournamentsWon} Cups</span>
                               </div>
-                              <div className="flex items-center justify-between pt-2 border-t border-white/5">
-                                <span className="text-slate-400">Active Ranking Points:</span>
-                                <span className="font-bold text-[#A3E635] text-sm">
-                                  {rankingCategory === 'valve' || rankingCategory === 'vrs-invites' ? `${clan.vrsPoints} VRS` : `${clan.points} Points`}
-                                </span>
+                              <div className="p-2.5 rounded-lg bg-white/5">
+                                <span className="text-[10px] text-slate-400 uppercase block">Major Status</span>
+                                <span className="text-sm font-black text-[#38bdf8]">{clan.valveStatus}</span>
                               </div>
                             </div>
                           </div>
-                        </div>
+                        )}
                       </div>
                     )}
                   </div>
