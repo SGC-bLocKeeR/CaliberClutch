@@ -4486,63 +4486,29 @@ export const VortexClanHub: React.FC<VortexClanHubProps> = ({
           }
         ];
 
-        // 2. Esports & Circuit Teams
-        let circuitClans: (HltvClanEntry & { isUserClan?: boolean })[] = HLTV_CLANS_DATA.map(c => ({ ...c }));
-
-        if (isUserRanked) {
-          circuitClans.push({
-            id: userClan.id,
-            rank: 0,
-            prevRank: 0,
-            delta: 0,
-            name: userClan.name,
-            tag: userClan.tag,
-            logo: userClan.logo,
-            country: userClan.country,
-            flag: userClan.flag,
-            points: userPlatformPoints,
-            vrsPoints: userPlatformPoints * 2,
-            valveStatus: 'Open',
-            prizeEarned: userClan.stats.tournamentsWon * 500,
-            matches: userClan.stats.matches,
-            wins: userClan.stats.wins,
-            losses: userClan.stats.losses,
-            winrate: userClan.stats.winrate,
-            tournamentsWon: userClan.stats.tournamentsWon,
-            avgElo: userClan.stats.avgElo,
-            recentForm: userClan.stats.wins >= userClan.stats.losses ? ['W', 'W', 'W', 'W', 'L'] : ['L', 'W', 'L', 'W', 'L'],
-            region: 'Balkans',
-            verified: userClan.verified,
-            isUserClan: true,
-            roster: userClan.members.slice(0, 5).map(m => ({
-              name: m.name,
-              role: m.role,
-              flag: m.flag,
-              level: m.level,
-              elo: m.elo,
-              avatar: m.avatar,
-              countryCode: emojiToCountryCode(m.flag),
-            })),
-          });
-
-          circuitClans.sort((a, b) => b.points - a.points);
-          circuitClans = circuitClans.map((c, idx) => ({
-            ...c,
-            rank: idx + 1,
-            prevRank: c.prevRank || idx + 1,
-          }));
-        }
+        // 2. Esports & Circuit Pro Teams (Pure HLTV Teams)
+        const circuitClans: (HltvClanEntry & { isUserClan?: boolean })[] = HLTV_CLANS_DATA.map(c => ({ ...c }));
 
         // Active list depending on selected ranking category
-        let displayedClans = rankingCategory === 'platform' ? platformClans : circuitClans;
+        let displayedClans: (HltvClanEntry & { isUserClan?: boolean })[] = [];
 
-        if (rankingCategory === 'world') {
-          displayedClans = [...circuitClans].sort((a, b) => b.points - a.points).map((c, idx) => ({
-            ...c,
-            rank: idx + 1,
-          }));
+        if (rankingCategory === 'platform') {
+          // 1. CaliberClutch Platform Ladder
+          displayedClans = platformClans;
+        } else if (rankingCategory === 'world') {
+          // 2. HLTV Official World Ranking (Nov 16, 2026: #1 FURIA, #2 MOUZ, #3 Spirit, #4 Vitality...)
+          displayedClans = [...circuitClans]
+            .sort((a, b) => b.points - a.points)
+            .map((c, idx) => ({
+              ...c,
+              rank: idx + 1,
+              delta: c.delta,
+            }));
         } else if (rankingCategory === 'regional') {
+          // 3. HLTV Regional Ranking (Default to Europe: #1 MOUZ, #2 Spirit, #3 Vitality, #4 Falcons...)
+          const activeContinent = selectedRegionalContinent || (!selectedRegionalCountry ? 'Europe' : null);
           let regList = [...circuitClans];
+
           if (selectedRegionalCountry) {
             const countryLower = selectedRegionalCountry.toLowerCase();
             regList = regList.filter(c => {
@@ -4553,33 +4519,94 @@ export const VortexClanHub: React.FC<VortexClanHubProps> = ({
               if ((countryLower === 'united kingdom' || countryLower === 'uk') && (cLower === 'united kingdom' || cLower === 'uk')) return true;
               return false;
             });
-          } else if (selectedRegionalContinent) {
-            if (selectedRegionalContinent === 'Europe') {
+          } else if (activeContinent) {
+            if (activeContinent === 'Europe') {
               regList = regList.filter(c => 
                 c.region === 'Europe' || 
                 c.region === 'Balkans' || 
                 c.region === 'Nordics' ||
                 ['kosovo', 'albania', 'denmark', 'finland', 'germany', 'kazakhstan', 'poland', 'portugal', 'romania', 'russia', 'sweden', 'türkiye', 'turkey', 'ukraine', 'united kingdom', 'north macedonia', 'france', 'norway', 'belarus', 'czechia', 'hungary', 'slovakia', 'spain'].includes(c.country.toLowerCase())
               );
-            } else if (selectedRegionalContinent === 'North America') {
+            } else if (activeContinent === 'North America') {
               regList = regList.filter(c => c.region === 'North America' || ['united states', 'canada', 'usa'].includes(c.country.toLowerCase()));
-            } else if (selectedRegionalContinent === 'South America') {
+            } else if (activeContinent === 'South America') {
               regList = regList.filter(c => c.region === 'South America' || ['brazil', 'argentina', 'uruguay', 'chile'].includes(c.country.toLowerCase()));
-            } else if (selectedRegionalContinent === 'Asia') {
+            } else if (activeContinent === 'Asia') {
               regList = regList.filter(c => c.region === 'Asia' || ['china', 'mongolia'].includes(c.country.toLowerCase()));
-            } else if (selectedRegionalContinent === 'Oceania') {
+            } else if (activeContinent === 'Oceania') {
               regList = regList.filter(c => c.region === 'Oceania' || ['australia', 'new zealand'].includes(c.country.toLowerCase()));
             }
           }
-          displayedClans = regList.sort((a, b) => b.points - a.points).map((c, idx) => ({
-            ...c,
-            rank: idx + 1,
-          }));
+
+          // Exact European Deltas matching HLTV European standings screenshot
+          const europeanDeltas: Record<string, number> = {
+            'mouz-clan': -1,
+            'spirit-clan': 1,
+            'vitality-clan': -1,
+            'falcons-clan': 1,
+            'aurora-clan': -1,
+            'betboom-clan': 0,
+            'navi-clan': 0,
+            'fut-clan': 0,
+            'nemiga-clan': 0,
+            'g2-clan': 0,
+            'parivision-clan': 0,
+            '1win-clan': 0,
+            'nip-clan': 4,
+            'faze-clan': -1,
+            'astralis-clan': 0,
+            'ef-clan': 1,
+            'heroic-clan': 2,
+            'fnatic-clan': 2,
+          };
+
+          displayedClans = regList
+            .sort((a, b) => b.points - a.points)
+            .map((c, idx) => ({
+              ...c,
+              rank: idx + 1,
+              delta: activeContinent === 'Europe' && europeanDeltas[c.id] !== undefined ? europeanDeltas[c.id] : c.delta,
+            }));
         } else if (rankingCategory === 'valve' || rankingCategory === 'vrs-invites') {
-          displayedClans = [...circuitClans].sort((a, b) => b.vrsPoints - a.vrsPoints).map((c, idx) => ({
-            ...c,
-            rank: idx + 1,
-          }));
+          // 4. HLTV Valve Regional Standings (Nov 19, 2026: #1 MOUZ, #2 FURIA, #3 Vitality, #4 Spirit...)
+          const valveDeltas: Record<string, number> = {
+            'mouz-clan': 0,
+            'furia-clan': 1,
+            'vitality-clan': -1,
+            'spirit-clan': 0,
+            'falcons-clan': 1,
+            'mongolz-clan': 0,
+            'aurora-clan': -1,
+            'betboom-clan': 0,
+            'navi-clan': 0,
+            'col-clan': 0,
+            'pain-clan': 1,
+            'liquid-clan': -1,
+            'fut-clan': 0,
+            'flyquest-clan': 1,
+            '9z-clan': -1,
+            'nemiga-clan': 0,
+            'g2-clan': 0,
+            'm80-clan': 0,
+            'tyloo-clan': 0,
+            'parivision-clan': 0,
+            '1win-clan': 0,
+            'bestia-clan': 0,
+            'nip-clan': 2,
+            'faze-clan': -1,
+            'astralis-clan': -1,
+            'ef-clan': 0,
+            'heroic-clan': 0,
+            'fnatic-clan': 0,
+          };
+
+          displayedClans = [...circuitClans]
+            .sort((a, b) => b.vrsPoints - a.vrsPoints)
+            .map((c, idx) => ({
+              ...c,
+              rank: idx + 1,
+              delta: valveDeltas[c.id] !== undefined ? valveDeltas[c.id] : 0,
+            }));
         }
 
         // Region / Search filters
@@ -4642,6 +4669,8 @@ export const VortexClanHub: React.FC<VortexClanHubProps> = ({
                   onClick={() => {
                     sound.playClick();
                     setRankingCategory('regional');
+                    setSelectedRegionalContinent('Europe');
+                    setSelectedRegionalCountry(null);
                   }}
                   className={`px-5 py-3.5 text-xs font-mono font-bold flex items-center gap-2 border-r border-[#2b3545] transition cursor-pointer ${
                     rankingCategory === 'regional'
