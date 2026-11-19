@@ -46,6 +46,97 @@ import {
 import confetti from 'canvas-confetti';
 import { sound } from '../../utils/soundEffects';
 import { getUserFriends, SocialFriend } from '../../services/friendService';
+import { CountryFlag } from './CountryFlag';
+
+export const getCountryCode = (countryNameOrCode: string): string => {
+  if (!countryNameOrCode) return 'xk';
+  const c = countryNameOrCode.trim().toLowerCase();
+  const map: Record<string, string> = {
+    'kosovo': 'xk',
+    'xk': 'xk',
+    'albania': 'al',
+    'al': 'al',
+    'denmark': 'dk',
+    'dk': 'dk',
+    'united states': 'us',
+    'usa': 'us',
+    'us': 'us',
+    'germany': 'de',
+    'de': 'de',
+    'brazil': 'br',
+    'br': 'br',
+    'argentina': 'ar',
+    'ar': 'ar',
+    'finland': 'fi',
+    'fi': 'fi',
+    'kazakhstan': 'kz',
+    'kz': 'kz',
+    'poland': 'pl',
+    'pl': 'pl',
+    'portugal': 'pt',
+    'pt': 'pt',
+    'romania': 'ro',
+    'ro': 'ro',
+    'russia': 'ru',
+    'ru': 'ru',
+    'sweden': 'se',
+    'se': 'se',
+    'türkiye': 'tr',
+    'turkey': 'tr',
+    'tr': 'tr',
+    'ukraine': 'ua',
+    'ua': 'ua',
+    'united kingdom': 'gb',
+    'uk': 'gb',
+    'gb': 'gb',
+    'china': 'cn',
+    'cn': 'cn',
+    'mongolia': 'mn',
+    'mn': 'mn',
+    'australia': 'au',
+    'au': 'au',
+    'north macedonia': 'mk',
+    'mk': 'mk',
+    'macedonia': 'mk',
+    'france': 'fr',
+    'fr': 'fr',
+    'norway': 'no',
+    'no': 'no',
+    'slovakia': 'sk',
+    'sk': 'sk',
+    'estonia': 'ee',
+    'ee': 'ee',
+    'latvia': 'lv',
+    'lv': 'lv',
+    'lithuania': 'lt',
+    'lt': 'lt',
+    'canada': 'ca',
+    'ca': 'ca',
+    'israel': 'il',
+    'il': 'il',
+    'south africa': 'za',
+    'za': 'za',
+    'uruguay': 'uy',
+    'uy': 'uy',
+    'spain': 'es',
+    'es': 'es',
+    'chile': 'cl',
+    'cl': 'cl',
+  };
+  return map[c] || (c.length === 2 ? c : 'xk');
+};
+
+export const emojiToCountryCode = (emoji: string): string => {
+  if (!emoji) return 'xk';
+  const codePoints = [...emoji].map(c => c.codePointAt(0) || 0);
+  if (codePoints.length >= 2 && codePoints[0] >= 0x1F1E6 && codePoints[0] <= 0x1F1FF) {
+    return String.fromCharCode(
+      codePoints[0] - 0x1F1E6 + 65,
+      codePoints[1] - 0x1F1E6 + 65
+    ).toLowerCase();
+  }
+  return getCountryCode(emoji);
+};
 
 export interface ClanMember {
   id: string;
@@ -1434,42 +1525,42 @@ export interface HltvClanEntry {
 export const REGIONAL_COLUMNS = {
   column1: {
     northAmerica: [
-      { name: 'United States', flag: '🇺🇸', continent: 'North America' as const },
+      { name: 'United States', code: 'us', flag: '🇺🇸', continent: 'North America' as const },
     ],
     southAmerica: [
-      { name: 'Argentina', flag: '🇦🇷', continent: 'South America' as const },
-      { name: 'Brazil', flag: '🇧🇷', continent: 'South America' as const },
+      { name: 'Argentina', code: 'ar', flag: '🇦🇷', continent: 'South America' as const },
+      { name: 'Brazil', code: 'br', flag: '🇧🇷', continent: 'South America' as const },
     ],
     europe: [
-      { name: 'Kosovo', flag: '🇽🇰', continent: 'Europe' as const },
-      { name: 'Albania', flag: '🇦🇱', continent: 'Europe' as const },
+      { name: 'Kosovo', code: 'xk', flag: '🇽🇰', continent: 'Europe' as const },
+      { name: 'Albania', code: 'al', flag: '🇦🇱', continent: 'Europe' as const },
     ],
   },
   column2: {
     europe: [
-      { name: 'Denmark', flag: '🇩🇰', continent: 'Europe' as const },
-      { name: 'Finland', flag: '🇫🇮', continent: 'Europe' as const },
-      { name: 'Germany', flag: '🇩🇪', continent: 'Europe' as const },
-      { name: 'Kazakhstan', flag: '🇰🇿', continent: 'Europe' as const },
-      { name: 'Poland', flag: '🇵🇱', continent: 'Europe' as const },
-      { name: 'Portugal', flag: '🇵🇹', continent: 'Europe' as const },
-      { name: 'Romania', flag: '🇷🇴', continent: 'Europe' as const },
-      { name: 'Russia', flag: '🇷🇺', continent: 'Europe' as const },
-      { name: 'Sweden', flag: '🇸🇪', continent: 'Europe' as const },
-      { name: 'Türkiye', flag: '🇹🇷', continent: 'Europe' as const },
+      { name: 'Denmark', code: 'dk', flag: '🇩🇰', continent: 'Europe' as const },
+      { name: 'Finland', code: 'fi', flag: '🇫🇮', continent: 'Europe' as const },
+      { name: 'Germany', code: 'de', flag: '🇩🇪', continent: 'Europe' as const },
+      { name: 'Kazakhstan', code: 'kz', flag: '🇰🇿', continent: 'Europe' as const },
+      { name: 'Poland', code: 'pl', flag: '🇵🇱', continent: 'Europe' as const },
+      { name: 'Portugal', code: 'pt', flag: '🇵🇹', continent: 'Europe' as const },
+      { name: 'Romania', code: 'ro', flag: '🇷🇴', continent: 'Europe' as const },
+      { name: 'Russia', code: 'ru', flag: '🇷🇺', continent: 'Europe' as const },
+      { name: 'Sweden', code: 'se', flag: '🇸🇪', continent: 'Europe' as const },
+      { name: 'Türkiye', code: 'tr', flag: '🇹🇷', continent: 'Europe' as const },
     ],
   },
   column3: {
     europe: [
-      { name: 'Ukraine', flag: '🇺🇦', continent: 'Europe' as const },
-      { name: 'United Kingdom', flag: '🇬🇧', continent: 'Europe' as const },
+      { name: 'Ukraine', code: 'ua', flag: '🇺🇦', continent: 'Europe' as const },
+      { name: 'United Kingdom', code: 'gb', flag: '🇬🇧', continent: 'Europe' as const },
     ],
     asia: [
-      { name: 'China', flag: '🇨🇳', continent: 'Asia' as const },
-      { name: 'Mongolia', flag: '🇲🇳', continent: 'Asia' as const },
+      { name: 'China', code: 'cn', flag: '🇨🇳', continent: 'Asia' as const },
+      { name: 'Mongolia', code: 'mn', flag: '🇲🇳', continent: 'Asia' as const },
     ],
     oceania: [
-      { name: 'Australia', flag: '🇦🇺', continent: 'Oceania' as const },
+      { name: 'Australia', code: 'au', flag: '🇦🇺', continent: 'Oceania' as const },
     ],
   },
 };
@@ -2978,8 +3069,8 @@ export const VortexClanHub: React.FC<VortexClanHubProps> = ({
                     <CheckCircle2 className="w-3 h-3" /> Verified Squad
                   </span>
                 )}
-                <span className="px-2 py-0.5 rounded text-[10px] font-mono font-bold bg-white/10 text-slate-300 border border-white/10 flex items-center gap-1">
-                  <span>{userClan.flag}</span>
+                <span className="px-2 py-0.5 rounded text-[10px] font-mono font-bold bg-white/10 text-slate-300 border border-white/10 flex items-center gap-1.5">
+                  <CountryFlag code={getCountryCode(userClan.country)} name={userClan.country} size="xs" />
                   <span>{userClan.country}</span>
                 </span>
               </div>
@@ -3994,7 +4085,7 @@ export const VortexClanHub: React.FC<VortexClanHubProps> = ({
                                     : 'text-slate-300 hover:text-white hover:bg-white/5'
                                 }`}
                               >
-                                <span className="text-base leading-none">{c.flag}</span>
+                                <CountryFlag code={c.code} name={c.name} size="sm" />
                                 <span className="text-xs font-medium">{c.name}</span>
                               </button>
                             );
@@ -4021,7 +4112,7 @@ export const VortexClanHub: React.FC<VortexClanHubProps> = ({
                                     : 'text-slate-300 hover:text-white hover:bg-white/5'
                                 }`}
                               >
-                                <span className="text-base leading-none">{c.flag}</span>
+                                <CountryFlag code={c.code} name={c.name} size="sm" />
                                 <span className="text-xs font-medium">{c.name}</span>
                               </button>
                             );
@@ -4048,7 +4139,7 @@ export const VortexClanHub: React.FC<VortexClanHubProps> = ({
                                     : 'text-slate-300 hover:text-white hover:bg-white/5'
                                 }`}
                               >
-                                <span className="text-base leading-none">{c.flag}</span>
+                                <CountryFlag code={c.code} name={c.name} size="sm" />
                                 <span className="text-xs font-medium">{c.name}</span>
                               </button>
                             );
@@ -4075,7 +4166,7 @@ export const VortexClanHub: React.FC<VortexClanHubProps> = ({
                                   : 'text-slate-300 hover:text-white hover:bg-white/5'
                               }`}
                             >
-                              <span className="text-base leading-none">{c.flag}</span>
+                              <CountryFlag code={c.code} name={c.name} size="sm" />
                               <span className="text-xs font-medium">{c.name}</span>
                             </button>
                           );
@@ -4102,7 +4193,7 @@ export const VortexClanHub: React.FC<VortexClanHubProps> = ({
                                   : 'text-slate-300 hover:text-white hover:bg-white/5'
                               }`}
                             >
-                              <span className="text-base leading-none">{c.flag}</span>
+                              <CountryFlag code={c.code} name={c.name} size="sm" />
                               <span className="text-xs font-medium">{c.name}</span>
                             </button>
                           );
@@ -4128,7 +4219,7 @@ export const VortexClanHub: React.FC<VortexClanHubProps> = ({
                                     : 'text-slate-300 hover:text-white hover:bg-white/5'
                                 }`}
                               >
-                                <span className="text-base leading-none">{c.flag}</span>
+                                <CountryFlag code={c.code} name={c.name} size="sm" />
                                 <span className="text-xs font-medium">{c.name}</span>
                               </button>
                             );
@@ -4155,7 +4246,7 @@ export const VortexClanHub: React.FC<VortexClanHubProps> = ({
                                     : 'text-slate-300 hover:text-white hover:bg-white/5'
                                 }`}
                               >
-                                <span className="text-base leading-none">{c.flag}</span>
+                                <CountryFlag code={c.code} name={c.name} size="sm" />
                                 <span className="text-xs font-medium">{c.name}</span>
                               </button>
                             );
@@ -4171,6 +4262,7 @@ export const VortexClanHub: React.FC<VortexClanHubProps> = ({
                       <span className="text-slate-400">Selected Regional Country:</span>
                       {selectedRegionalCountry ? (
                         <span className="px-3 py-1 rounded-lg bg-[#38bdf8]/15 text-[#38bdf8] border border-[#38bdf8]/30 font-bold flex items-center gap-2">
+                          <CountryFlag code={getCountryCode(selectedRegionalCountry)} name={selectedRegionalCountry} size="xs" />
                           <span>{selectedRegionalCountry}</span>
                           <button
                             onClick={() => {
@@ -4344,8 +4436,8 @@ export const VortexClanHub: React.FC<VortexClanHubProps> = ({
                                 YOUR TEAM
                               </span>
                             )}
-                            <span className="flex items-center gap-1 text-xs text-slate-400 font-mono">
-                              <span>{clan.flag}</span>
+                            <span className="flex items-center gap-1.5 text-xs text-slate-400 font-mono">
+                              <CountryFlag code={getCountryCode(clan.country)} name={clan.country} size="xs" />
                               <span className="hidden sm:inline">{clan.country}</span>
                             </span>
 
@@ -4383,10 +4475,10 @@ export const VortexClanHub: React.FC<VortexClanHubProps> = ({
                             {clan.roster.slice(0, 5).map((member, idx) => (
                               <span
                                 key={idx}
-                                className="px-2 py-0.5 rounded-lg bg-[#141A28] border border-[#232C40] text-[11px] font-mono text-slate-300 hover:text-white flex items-center gap-1 transition"
+                                className="px-2 py-0.5 rounded-lg bg-[#141A28] border border-[#232C40] text-[11px] font-mono text-slate-300 hover:text-white flex items-center gap-1.5 transition"
                                 title={`${member.name} (${member.role})`}
                               >
-                                <span className="text-[10px]">{member.flag}</span>
+                                <CountryFlag code={emojiToCountryCode(member.flag)} size="xs" />
                                 <span className="font-semibold">{member.name}</span>
                               </span>
                             ))}
