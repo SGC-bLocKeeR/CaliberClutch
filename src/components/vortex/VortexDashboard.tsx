@@ -1155,10 +1155,39 @@ export const VortexDashboard: React.FC<VortexDashboardProps> = ({
   // Create tournament form state
   const [newTourneyTitle, setNewTourneyTitle] = useState('CALIBER CLUTCH Community Cup #1');
   const [newTourneyOrganizer, setNewTourneyOrganizer] = useState<string>('');
-  const [newTourneyCashPrize, setNewTourneyCashPrize] = useState('€3,000');
+  const [newTourneyCashPrize, setNewTourneyCashPrize] = useState('1000');
   const [newTourneyMaxTeams, setNewTourneyMaxTeams] = useState<number>(16);
-  const [newTourneyEntryFee, setNewTourneyEntryFee] = useState<number>(50); // €50 per team (€10 / player)
+  const [newTourneyEntryFee, setNewTourneyEntryFee] = useState<number>(74); // Auto-calculated: Math.ceil((1000 / 0.85) / 16) = 74
   const [newTourneyIsPaid, setNewTourneyIsPaid] = useState<boolean>(true);
+
+  // Auto-calculate all entry fees & platform commission when prize pool changes
+  const handleCashPrizeChange = (val: string) => {
+    setNewTourneyCashPrize(val);
+    const numeric = parseFloat(val.replace(/[^0-9.]/g, ''));
+    if (numeric && numeric > 0 && newTourneyMaxTeams > 0) {
+      const calcFee = Math.ceil((numeric / 0.85) / newTourneyMaxTeams);
+      setNewTourneyEntryFee(calcFee);
+    }
+  };
+
+  // Auto-calculate fee when team capacity changes
+  const handleMaxTeamsChange = (teams: number) => {
+    setNewTourneyMaxTeams(teams);
+    const numeric = parseFloat(newTourneyCashPrize.replace(/[^0-9.]/g, '')) || 1000;
+    if (numeric > 0 && teams > 0) {
+      const calcFee = Math.ceil((numeric / 0.85) / teams);
+      setNewTourneyEntryFee(calcFee);
+    }
+  };
+
+  // Reverse auto-calculate when fee per team is modified directly
+  const handleEntryFeeChange = (fee: number) => {
+    const safeFee = Math.max(1, fee);
+    setNewTourneyEntryFee(safeFee);
+    const totalGross = safeFee * newTourneyMaxTeams;
+    const winnersPool = Math.round(totalGross * 0.85);
+    setNewTourneyCashPrize(String(winnersPool));
+  };
   const [newTourneyStructure, setNewTourneyStructure] = useState<string>('Single Elimination');
   const [newTourneyPlayoffsFormat, setNewTourneyPlayoffsFormat] = useState<'BO1' | 'BO3'>('BO1');
   const [newTourneyFinalsFormat, setNewTourneyFinalsFormat] = useState<'BO1' | 'BO3' | 'BO5'>('BO3');
@@ -3951,14 +3980,15 @@ export const VortexDashboard: React.FC<VortexDashboardProps> = ({
                         {/* 2. Cash Prize Pool & Max Teams & Structure (3 Columns) */}
                         <div className="grid grid-cols-1 md:grid-cols-3 gap-4 sm:gap-6">
                           <div>
-                            <label className="text-[11px] text-slate-300 uppercase tracking-wider block mb-1.5 font-bold">
-                              Total Cash Prize Pool (€)
+                            <label className="text-[11px] text-slate-300 uppercase tracking-wider block mb-1.5 font-bold flex items-center justify-between">
+                              <span>Total Cash Prize Pool (€)</span>
+                              <span className="text-[10px] text-[#A3E635] font-normal">Auto-Calculates All</span>
                             </label>
                             <input
                               type="text"
                               value={newTourneyCashPrize}
-                              onChange={(e) => setNewTourneyCashPrize(e.target.value)}
-                              placeholder="e.g. €5,000"
+                              onChange={(e) => handleCashPrizeChange(e.target.value)}
+                              placeholder="e.g. 1000"
                               className="w-full px-4 py-3 rounded-xl bg-[#141722] border border-[#252C3D] text-[#A3E635] font-black focus:outline-none focus:border-[#A3E635] text-sm"
                             />
                           </div>
@@ -3969,7 +3999,7 @@ export const VortexDashboard: React.FC<VortexDashboardProps> = ({
                             </label>
                             <select
                               value={newTourneyMaxTeams}
-                              onChange={(e) => setNewTourneyMaxTeams(Number(e.target.value))}
+                              onChange={(e) => handleMaxTeamsChange(Number(e.target.value))}
                               className="w-full px-4 py-3 rounded-xl bg-[#141722] border border-[#252C3D] text-white font-bold focus:outline-none focus:border-[#A3E635] cursor-pointer text-sm"
                             >
                               <option value={8}>8 Teams (Quarter-Finals)</option>
@@ -3997,10 +4027,10 @@ export const VortexDashboard: React.FC<VortexDashboardProps> = ({
 
                         {/* 3. Pure 100% Cash Prize Distribution */}
                         {(() => {
-                          const numericPrize = parseFloat(newTourneyCashPrize.replace(/[^0-9.]/g, '')) || 3000;
+                          const numericPrize = parseFloat(String(newTourneyCashPrize).replace(/[^0-9.]/g, '')) || 1000;
                           const firstPrize = Math.round(numericPrize * 0.70);
                           const secondPrize = Math.round(numericPrize * 0.20);
-                          const thirdPrize = Math.round(numericPrize * 0.10);
+                          const thirdPrize = Math.max(0, numericPrize - firstPrize - secondPrize);
 
                           return (
                             <div className="p-4 rounded-2xl bg-black/40 border border-white/5 space-y-2.5">
@@ -4066,90 +4096,106 @@ export const VortexDashboard: React.FC<VortexDashboardProps> = ({
                         </div>
 
                         {/* 5. Entry Fee & Platform Revenue System (Mandatory Paid Buy-In) */}
-                        <div className="p-4 sm:p-5 rounded-2xl bg-[#101420] border border-[#20293D] space-y-4">
-                          <div className="flex items-center justify-between flex-wrap gap-2">
-                            <div>
-                              <label className="text-[11px] text-amber-400 uppercase tracking-wider block font-bold flex items-center gap-1.5">
-                                <Coins className="w-4 h-4 text-amber-400" />
-                                <span>Tournament Entry Fee (Mandatory Paid Buy-In & Operator Revenue)</span>
-                              </label>
-                              <span className="text-xs text-slate-400">
-                                Every team pays an entry fee. CaliberClutch collects 15% net platform profit, and 85% goes directly to the winners cash pool.
-                              </span>
-                            </div>
-                            <span className="px-3 py-1 rounded-xl bg-amber-400 text-slate-950 font-mono font-black text-xs uppercase tracking-wider shadow-md">
-                              Mandatory Buy-In (€)
-                            </span>
-                          </div>
+                        {(() => {
+                          const numericPrize = parseFloat(String(newTourneyCashPrize).replace(/[^0-9.]/g, '')) || 1000;
+                          const grossTotal = newTourneyMaxTeams * newTourneyEntryFee;
+                          const platformProfit = Math.max(0, grossTotal - numericPrize);
+                          const platformPercent = grossTotal > 0 ? ((platformProfit / grossTotal) * 100).toFixed(1) : '15.0';
+                          const firstPrize = Math.round(numericPrize * 0.70);
+                          const secondPrize = Math.round(numericPrize * 0.20);
+                          const thirdPrize = Math.max(0, numericPrize - firstPrize - secondPrize);
 
-                          <div className="space-y-4 pt-3 border-t border-white/5">
-                            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                              <div>
-                                <label className="text-[11px] text-slate-300 uppercase block mb-1.5 font-bold">
-                                  Fee per Team (€ / Team)
-                                </label>
-                                <div className="relative">
-                                  <input
-                                    type="number"
-                                    min={5}
-                                    step={5}
-                                    value={newTourneyEntryFee}
-                                    onChange={(e) => setNewTourneyEntryFee(Math.max(5, Number(e.target.value)))}
-                                    className="w-full pl-8 pr-4 py-2.5 rounded-xl bg-[#0B0E16] border border-[#252C3D] text-amber-300 font-bold focus:outline-none focus:border-amber-400 text-sm"
-                                  />
-                                  <span className="absolute left-3 top-2.5 text-slate-400 font-bold">€</span>
+                          return (
+                            <div className="p-4 sm:p-5 rounded-2xl bg-[#101420] border border-[#20293D] space-y-4">
+                              <div className="flex items-center justify-between flex-wrap gap-2">
+                                <div>
+                                  <label className="text-[11px] text-amber-400 uppercase tracking-wider block font-bold flex items-center gap-1.5">
+                                    <Coins className="w-4 h-4 text-amber-400" />
+                                    <span>Automatic Buy-In & Platform Revenue Calculation</span>
+                                  </label>
+                                  <span className="text-xs text-slate-400">
+                                    Automated financial split for €{numericPrize.toLocaleString()} prize pool across {newTourneyMaxTeams} teams.
+                                  </span>
                                 </div>
-                              </div>
-                              <div>
-                                <label className="text-[11px] text-slate-300 uppercase block mb-1.5 font-bold">
-                                  Calculated per Player (5v5 Roster)
-                                </label>
-                                <div className="w-full px-4 py-2.5 rounded-xl bg-[#0B0E16] border border-[#252C3D] text-emerald-400 font-bold flex items-center justify-between text-sm">
-                                  <span>€{(newTourneyEntryFee / 5).toFixed(2)}</span>
-                                  <span className="text-xs text-slate-400 font-normal">approx €{(newTourneyEntryFee / 5).toFixed(0)} / person</span>
-                                </div>
-                              </div>
-                            </div>
-
-                            {/* Financial Payout Breakdown */}
-                            <div className="p-4 rounded-xl bg-black/50 border border-amber-500/20 space-y-2.5 text-xs">
-                              <div className="flex items-center justify-between text-slate-300">
-                                <span>Total Buy-In Pool ({newTourneyMaxTeams} teams × €{newTourneyEntryFee}):</span>
-                                <span className="font-bold text-white font-mono">€{(newTourneyMaxTeams * newTourneyEntryFee).toFixed(2)}</span>
-                              </div>
-                              <div className="flex items-center justify-between text-amber-400 font-bold">
-                                <span className="flex items-center gap-1.5">
-                                  <ShieldCheck className="w-3.5 h-3.5 text-amber-400" />
-                                  CaliberClutch Platform Profit (15% Net Operator Revenue):
+                                <span className="px-3 py-1 rounded-xl bg-amber-400 text-slate-950 font-mono font-black text-xs uppercase tracking-wider shadow-md">
+                                  Auto 15% Platform Split
                                 </span>
-                                <span className="font-mono text-emerald-400 font-black">+€{(newTourneyMaxTeams * newTourneyEntryFee * 0.15).toFixed(2)} NET PROFIT</span>
-                              </div>
-                              <div className="flex items-center justify-between text-emerald-400 font-bold border-t border-white/10 pt-2">
-                                <span className="flex items-center gap-1.5">
-                                  <Trophy className="w-3.5 h-3.5 text-emerald-400" />
-                                  Prize Pool for Winners (85% Instant Payout):
-                                </span>
-                                <span className="font-mono text-[#A3E635] text-sm font-black">€{(newTourneyMaxTeams * newTourneyEntryFee * 0.85).toFixed(2)}</span>
                               </div>
 
-                              {/* Winner Distribution Breakdown */}
-                              <div className="grid grid-cols-3 gap-2 pt-2 border-t border-white/5 text-[11px] font-mono text-center">
-                                <div className="p-1.5 rounded-lg bg-amber-500/10 border border-amber-500/20">
-                                  <span className="text-amber-400 block font-bold">🥇 1st (70%)</span>
-                                  <span className="text-white font-bold">€{(newTourneyMaxTeams * newTourneyEntryFee * 0.85 * 0.70).toFixed(0)}</span>
+                              <div className="space-y-4 pt-3 border-t border-white/5">
+                                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                                  <div>
+                                    <label className="text-[11px] text-slate-300 uppercase block mb-1.5 font-bold flex items-center justify-between">
+                                      <span>Auto-Calculated Fee per Team</span>
+                                      <span className="text-[10px] text-[#A3E635] font-normal">Auto-Synced</span>
+                                    </label>
+                                    <div className="relative">
+                                      <input
+                                        type="number"
+                                        min={1}
+                                        step={1}
+                                        value={newTourneyEntryFee}
+                                        onChange={(e) => handleEntryFeeChange(Number(e.target.value))}
+                                        className="w-full pl-8 pr-4 py-2.5 rounded-xl bg-[#0B0E16] border border-[#252C3D] text-amber-300 font-bold focus:outline-none focus:border-amber-400 text-sm"
+                                      />
+                                      <span className="absolute left-3 top-2.5 text-slate-400 font-bold">€</span>
+                                    </div>
+                                  </div>
+                                  <div>
+                                    <label className="text-[11px] text-slate-300 uppercase block mb-1.5 font-bold">
+                                      Calculated per Player (5v5 Lineup)
+                                    </label>
+                                    <div className="w-full px-4 py-2.5 rounded-xl bg-[#0B0E16] border border-[#252C3D] text-emerald-400 font-bold flex items-center justify-between text-sm">
+                                      <span>€{(newTourneyEntryFee / 5).toFixed(2)}</span>
+                                      <span className="text-xs text-slate-400 font-normal">€{(newTourneyEntryFee / 5).toFixed(2)} / player</span>
+                                    </div>
+                                  </div>
                                 </div>
-                                <div className="p-1.5 rounded-lg bg-slate-400/10 border border-slate-400/20">
-                                  <span className="text-slate-300 block font-bold">🥈 2nd (20%)</span>
-                                  <span className="text-white font-bold">€{(newTourneyMaxTeams * newTourneyEntryFee * 0.85 * 0.20).toFixed(0)}</span>
-                                </div>
-                                <div className="p-1.5 rounded-lg bg-amber-700/10 border border-amber-700/20">
-                                  <span className="text-amber-500 block font-bold">🥉 3rd (10%)</span>
-                                  <span className="text-white font-bold">€{(newTourneyMaxTeams * newTourneyEntryFee * 0.85 * 0.10).toFixed(0)}</span>
+
+                                {/* Financial Payout Breakdown */}
+                                <div className="p-4 rounded-xl bg-black/50 border border-amber-500/20 space-y-2.5 text-xs font-mono">
+                                  <div className="flex items-center justify-between text-slate-300">
+                                    <span>Total Buy-In Pool ({newTourneyMaxTeams} teams × €{newTourneyEntryFee}):</span>
+                                    <span className="font-bold text-white">€{grossTotal.toFixed(2)}</span>
+                                  </div>
+                                  <div className="flex items-center justify-between text-amber-400 font-bold">
+                                    <span className="flex items-center gap-1.5">
+                                      <ShieldCheck className="w-3.5 h-3.5 text-amber-400" />
+                                      CaliberClutch Platform Profit ({platformPercent}% Net Commission):
+                                    </span>
+                                    <span className="font-mono text-emerald-400 font-black">+€{platformProfit.toFixed(2)} NET PROFIT</span>
+                                  </div>
+                                  <div className="flex items-center justify-between text-emerald-400 font-bold border-t border-white/10 pt-2">
+                                    <span className="flex items-center gap-1.5 text-amber-300">
+                                      <Trophy className="w-3.5 h-3.5 text-amber-400" />
+                                      Prize Pool for Winners (100% Instant Payout):
+                                    </span>
+                                    <span className="font-mono text-[#A3E635] text-sm font-black">€{numericPrize.toLocaleString()}</span>
+                                  </div>
+
+                                  {/* Winner Distribution Breakdown */}
+                                  <div className="grid grid-cols-3 gap-2 pt-2 border-t border-white/5 text-[11px] font-mono text-center">
+                                    <div className="p-2 rounded-xl bg-amber-500/10 border border-amber-500/20">
+                                      <span className="text-amber-400 block font-bold">🥇 1st Place (70%)</span>
+                                      <span className="text-white font-bold block mt-0.5">€{firstPrize.toLocaleString()}</span>
+                                      <span className="text-[9px] text-slate-400">€{(firstPrize / 5).toFixed(0)}/player</span>
+                                    </div>
+                                    <div className="p-2 rounded-xl bg-slate-400/10 border border-slate-400/20">
+                                      <span className="text-slate-300 block font-bold">🥈 2nd Place (20%)</span>
+                                      <span className="text-white font-bold block mt-0.5">€{secondPrize.toLocaleString()}</span>
+                                      <span className="text-[9px] text-slate-400">€{(secondPrize / 5).toFixed(0)}/player</span>
+                                    </div>
+                                    <div className="p-2 rounded-xl bg-amber-700/10 border border-amber-700/20">
+                                      <span className="text-amber-500 block font-bold">🥉 3rd Place (10%)</span>
+                                      <span className="text-white font-bold block mt-0.5">€{thirdPrize.toLocaleString()}</span>
+                                      <span className="text-[9px] text-slate-400">€{(thirdPrize / 5).toFixed(0)}/player</span>
+                                    </div>
+                                  </div>
                                 </div>
                               </div>
                             </div>
-                          </div>
-                        </div>
+                          );
+                        })()}
 
                         {/* 6. Schedule & Start Time */}
                         <div>
