@@ -4359,7 +4359,7 @@ export const VortexDashboard: React.FC<VortexDashboardProps> = ({
                 <div className="p-3 rounded-xl bg-black/40 border border-white/5">
                   <div className="text-[10px] font-mono text-slate-400 uppercase">Active Cash Pools</div>
                   <div className="text-xl font-mono font-black text-[#A3E635]">
-                    €{(1250 + customTournaments.reduce((acc: number, t: any) => acc + (parseInt(String(t.cashPrize).replace(/[^0-9]/g, ''), 10) || 0), 0)).toLocaleString()}
+                    €{customTournaments.reduce((acc: number, t: any) => acc + (parseInt(String(t.cashPrize).replace(/[^0-9]/g, ''), 10) || 0), 0).toLocaleString()}
                   </div>
                 </div>
                 <div className="p-3 rounded-xl bg-black/40 border border-white/5">
@@ -4383,9 +4383,9 @@ export const VortexDashboard: React.FC<VortexDashboardProps> = ({
               <div className="flex flex-wrap items-center justify-between gap-4">
                 <div className="flex flex-wrap items-center gap-2">
                   {[
-                    { id: 'all', label: `All Tournaments (${2 + customTournaments.length})` },
-                    { id: 'live', label: '🔴 Live Now (0)' },
-                    { id: 'open', label: `⚡ Open Registration (${2 + customTournaments.length})` },
+                    { id: 'all', label: `All Tournaments (${customTournaments.length})` },
+                    { id: 'live', label: `🔴 Live Now (${customTournaments.filter((t: any) => t.isLive).length})` },
+                    { id: 'open', label: `⚡ Open Registration (${customTournaments.filter((t: any) => t.isOpen).length})` },
                     { id: 'registered', label: `✓ My Registered (${registeredTourneys.length})` }
                   ].map(tab => (
                     <button
@@ -4428,56 +4428,52 @@ export const VortexDashboard: React.FC<VortexDashboardProps> = ({
               </div>
 
               {/* Tournament Cards with 100% Pure Cash Prize Breakdown */}
-              <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-                {[
-                  ...customTournaments,
-                  {
-                    id: 'cc-cash-cup-1',
-                    title: 'CALIBER CLUTCH 5v5 Open Cash Cup #1',
-                    organizer: 'CaliberClutch Official',
-                    cashPrize: '€1,000',
-                    teams: `${registeredTourneys.includes('CALIBER CLUTCH 5v5 Open Cash Cup #1') ? '1 / 16' : '0 / 16'}`,
-                    playoffsFormat: 'BO1',
-                    finalsFormat: 'BO3',
-                    structure: 'Single Elimination',
-                    region: 'European Online Bracket',
-                    date: 'Registration Open',
-                    status: 'OPEN',
-                    badge: 'bg-emerald-500/15 text-emerald-400 border-emerald-500/30',
-                    isLive: false,
-                    isOpen: true
-                  },
-                  {
-                    id: 'cc-weekly-scrim-1',
-                    title: 'CALIBER CLUTCH Weekly 5v5 Scrimfest #1',
-                    organizer: 'CaliberClutch Community',
-                    cashPrize: '€250',
-                    teams: `${registeredTourneys.includes('CALIBER CLUTCH Weekly 5v5 Scrimfest #1') ? '1 / 8' : '0 / 8'}`,
-                    playoffsFormat: 'BO1',
-                    finalsFormat: 'BO1',
-                    structure: 'Single Elimination',
-                    region: 'European Online Bracket',
-                    date: 'Registration Open',
-                    status: 'OPEN',
-                    badge: 'bg-lime-500/15 text-lime-400 border-lime-500/30',
-                    isLive: false,
-                    isOpen: true
+              {(() => {
+                const filteredTournaments = customTournaments.filter((t: any) => {
+                  if (tourneyFilter === 'live' && !t.isLive) return false;
+                  if (tourneyFilter === 'open' && !t.isOpen) return false;
+                  if (tourneyFilter === 'registered' && !registeredTourneys.includes(t.title)) return false;
+                  if (tourneySearchQuery.trim()) {
+                    const q = tourneySearchQuery.toLowerCase().trim();
+                    return t.title.toLowerCase().includes(q) || (t.cashPrize && t.cashPrize.toLowerCase().includes(q));
                   }
-                ]
-                  .filter(t => {
-                    if (tourneyFilter === 'live' && !t.isLive) return false;
-                    if (tourneyFilter === 'open' && !t.isOpen) return false;
-                    if (tourneyFilter === 'registered' && !registeredTourneys.includes(t.title)) return false;
-                    if (tourneySearchQuery.trim()) {
-                      const q = tourneySearchQuery.toLowerCase().trim();
-                      return t.title.toLowerCase().includes(q) || t.cashPrize.toLowerCase().includes(q);
-                    }
-                    return true;
-                  })
-                  .map((t, idx) => {
-                    const isRegistered = registeredTourneys.includes(t.title);
+                  return true;
+                });
 
-                    return (
+                if (filteredTournaments.length === 0) {
+                  return (
+                    <div className="p-12 rounded-3xl bg-[#090C12] border border-dashed border-white/10 text-center space-y-4">
+                      <div className="w-16 h-16 rounded-2xl bg-white/5 border border-white/10 flex items-center justify-center mx-auto text-slate-500">
+                        <Trophy className="w-8 h-8 text-slate-500" />
+                      </div>
+                      <div className="max-w-md mx-auto space-y-1.5">
+                        <h4 className="text-base font-black font-display text-white">No Tournaments Currently Online</h4>
+                        <p className="text-xs font-mono text-slate-400">
+                          {tourneyFilter === 'registered' 
+                            ? "You haven't enrolled in any tournament yet. Browse active tournaments or host your own."
+                            : "There are no mock tournaments online. Only real Caliber Clutch tournaments hosted by administrators and verified organizers appear here."}
+                        </p>
+                      </div>
+                      <button
+                        onClick={() => {
+                          sound.playSelect();
+                          setTourneyTabMode('create');
+                        }}
+                        className="px-5 py-2.5 rounded-xl bg-gradient-to-r from-[#84CC16] to-[#A3E635] hover:brightness-110 text-slate-950 font-mono font-black text-xs uppercase tracking-wider transition shadow-md cursor-pointer active:scale-95 inline-flex items-center gap-2"
+                      >
+                        <Plus className="w-4 h-4 stroke-[3]" />
+                        <span>+ Host New Cup</span>
+                      </button>
+                    </div>
+                  );
+                }
+
+                return (
+                  <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                    {filteredTournaments.map((t: any, idx: number) => {
+                      const isRegistered = registeredTourneys.includes(t.title);
+
+                      return (
                       <div key={idx} className="p-6 rounded-3xl bg-[#12141C] border border-[#23293B] hover:border-amber-400/50 transition flex flex-col justify-between gap-5 group shadow-lg">
                         <div className="space-y-4">
                           <div className="flex items-start justify-between">
@@ -4640,7 +4636,9 @@ export const VortexDashboard: React.FC<VortexDashboardProps> = ({
                       </div>
                     );
                   })}
-              </div>
+                  </div>
+                );
+              })()}
 
               {/* Legal & Regulatory Esports Compliance Footer */}
               <div className="p-4 rounded-2xl bg-black/40 border border-white/5 flex flex-col sm:flex-row sm:items-center justify-between gap-3 text-xs font-mono text-slate-400">
