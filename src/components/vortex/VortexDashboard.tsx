@@ -3907,18 +3907,9 @@ export const VortexDashboard: React.FC<VortexDashboardProps> = ({
                         HOST A CS2 TOURNAMENT & CLAN SETUP
                       </h3>
                       <p className="text-xs font-mono text-slate-400">
-                        Configure championship formats, official clan rules, and pure cash prize pools on dedicated 128-tick match servers.
+                        Configure championship formats, official clan rules, and pure cash prize pools for European online competitive brackets.
                       </p>
                     </div>
-                    <button
-                      onClick={() => {
-                        sound.playClick();
-                        setTourneyTabMode('browse');
-                      }}
-                      className="px-4 py-2.5 rounded-xl bg-white/5 hover:bg-white/10 text-xs font-mono text-slate-300 hover:text-white border border-white/10 transition cursor-pointer self-start sm:self-center flex items-center gap-2"
-                    >
-                      <span>← Back to Tournament List</span>
-                    </button>
                   </div>
 
                   {/* STACKED LAYOUT: TOP WINDOW (TOURNAMENT SETUP) • BOTTOM WINDOW (OFFICIAL RULEBOOK) */}
@@ -3937,7 +3928,7 @@ export const VortexDashboard: React.FC<VortexDashboardProps> = ({
                         <div className="flex items-center gap-2">
                           <span className="px-3 py-1 rounded-xl text-[10px] font-mono font-bold bg-[#A3E635]/15 text-[#A3E635] border border-[#A3E635]/30 flex items-center gap-1.5">
                             <span className="w-1.5 h-1.5 rounded-full bg-[#A3E635] animate-pulse" />
-                            128-Tick Match Servers
+                            Verified 5v5 Competitive
                           </span>
                           <span className="px-3 py-1 rounded-xl text-[10px] font-mono font-bold bg-emerald-400/15 text-emerald-300 border border-emerald-400/30">
                             Instant Payout
