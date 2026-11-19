@@ -13,6 +13,7 @@ export const CountryFlag: React.FC<CountryFlagProps> = ({
   className = '',
   size = 'md'
 }) => {
+  const [useRemote, setUseRemote] = useState(false);
   const [hasError, setHasError] = useState(false);
   const cleanCode = (code || 'XK').toUpperCase().trim();
   const lowerCode = cleanCode.toLowerCase();
@@ -72,14 +73,24 @@ export const CountryFlag: React.FC<CountryFlagProps> = ({
     );
   }
 
+  const src = useRemote 
+    ? `https://flagcdn.com/w40/${lowerCode}.png`
+    : `/images/flags/${lowerCode}.png`;
+
   return (
     <img
-      src={`https://flagcdn.com/w40/${lowerCode}.png`}
-      srcSet={`https://flagcdn.com/w80/${lowerCode}.png 2x`}
+      src={src}
+      srcSet={useRemote ? `https://flagcdn.com/w80/${lowerCode}.png 2x` : undefined}
       alt={name || cleanCode}
       title={name || cleanCode}
       loading="lazy"
-      onError={() => setHasError(true)}
+      onError={() => {
+        if (!useRemote) {
+          setUseRemote(true);
+        } else {
+          setHasError(true);
+        }
+      }}
       className={`inline-block object-cover border border-white/15 shadow-sm align-middle shrink-0 ${sizeClasses} ${className}`}
     />
   );

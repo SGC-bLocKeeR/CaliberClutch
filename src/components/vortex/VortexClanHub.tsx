@@ -150,6 +150,55 @@ export const emojiToCountryCode = (emoji: string): string => {
   return getCountryCode(emoji);
 };
 
+export const HLTV_TEAM_PROFILES: Record<string, string> = {
+  'furia': 'https://www.hltv.org/team/8297/furia',
+  'mouz': 'https://www.hltv.org/team/4494/mouz',
+  'spirit': 'https://www.hltv.org/team/7020/spirit',
+  'vitality': 'https://www.hltv.org/team/9565/vitality',
+  'falcons': 'https://www.hltv.org/team/11283/falcons',
+  'aurora': 'https://www.hltv.org/team/11861/aurora',
+  'betboom': 'https://www.hltv.org/team/11880/betboom',
+  'natus vincere': 'https://www.hltv.org/team/4608/natus-vincere',
+  'navi': 'https://www.hltv.org/team/4608/natus-vincere',
+  'fut': 'https://www.hltv.org/team/11796/fut',
+  'the mongolz': 'https://www.hltv.org/team/6248/the-mongolz',
+  'mongolz': 'https://www.hltv.org/team/6248/the-mongolz',
+  'nemiga': 'https://www.hltv.org/team/7969/nemiga',
+  'g2': 'https://www.hltv.org/team/5995/g2',
+  'parivision': 'https://www.hltv.org/team/12467/parivision',
+  '1win': 'https://www.hltv.org/team/10621/1win',
+  'team liquid': 'https://www.hltv.org/team/5973/liquid',
+  'liquid': 'https://www.hltv.org/team/5973/liquid',
+  'ninjas in pyjamas': 'https://www.hltv.org/team/4411/ninjas-in-pyjamas',
+  'nip': 'https://www.hltv.org/team/4411/ninjas-in-pyjamas',
+  'faze': 'https://www.hltv.org/team/6667/faze',
+  'astralis': 'https://www.hltv.org/team/6665/astralis',
+  'complexity': 'https://www.hltv.org/team/5005/complexity',
+  'flyquest': 'https://www.hltv.org/team/12774/flyquest',
+  'pain': 'https://www.hltv.org/team/4773/pain',
+  'eternal fire': 'https://www.hltv.org/team/11251/eternal-fire',
+  'heroic': 'https://www.hltv.org/team/7175/heroic',
+  '9z': 'https://www.hltv.org/team/9996/9z',
+  'fnatic': 'https://www.hltv.org/team/4991/fnatic',
+  'saw': 'https://www.hltv.org/team/10567/saw',
+  'nexus gaming': 'https://www.hltv.org/team/6457/nexus',
+  'bad news eagles': 'https://www.hltv.org/team/11518/bad-news-eagles',
+  'bne': 'https://www.hltv.org/team/11518/bad-news-eagles',
+  'big': 'https://www.hltv.org/team/7532/big',
+  'monte': 'https://www.hltv.org/team/11811/monte',
+  'rebels': 'https://www.hltv.org/team/12560/rebels',
+  'avangar': 'https://www.hltv.org/team/8120/avangar',
+  'havu': 'https://www.hltv.org/team/7865/havu',
+  'm80': 'https://www.hltv.org/team/12376/m80',
+  'tyloo': 'https://www.hltv.org/team/4863/tyloo',
+  'bestia': 'https://www.hltv.org/team/12144/bestia',
+};
+
+export const getHltvProfileUrl = (clanName: string): string => {
+  const key = clanName.trim().toLowerCase();
+  return HLTV_TEAM_PROFILES[key] || `https://www.hltv.org/search?term=${encodeURIComponent(clanName)}`;
+};
+
 export interface ClanMember {
   id: string;
   name: string;
@@ -1581,8 +1630,8 @@ export const REGIONAL_COLUMNS = {
 export const HLTV_CLANS_DATA: HltvClanEntry[] = [
   {
     id: 'mouz-clan',
-    rank: 1,
-    prevRank: 2,
+    rank: 2,
+    prevRank: 1,
     delta: -1,
     name: 'MOUZ',
     tag: 'MOUZ',
@@ -1590,7 +1639,7 @@ export const HLTV_CLANS_DATA: HltvClanEntry[] = [
     country: 'Germany',
     flag: '🇩🇪',
     points: 808,
-    vrsPoints: 1950,
+    vrsPoints: 1954,
     valveStatus: 'Legends',
     vrsInviteStage: 'Elimination Stage',
     prizeEarned: 38000,
@@ -1613,8 +1662,8 @@ export const HLTV_CLANS_DATA: HltvClanEntry[] = [
   },
   {
     id: 'spirit-clan',
-    rank: 2,
-    prevRank: 3,
+    rank: 3,
+    prevRank: 4,
     delta: 1,
     name: 'Spirit',
     tag: 'TS',
@@ -1622,7 +1671,7 @@ export const HLTV_CLANS_DATA: HltvClanEntry[] = [
     country: 'Russia',
     flag: '🇷🇺',
     points: 766,
-    vrsPoints: 1910,
+    vrsPoints: 1850,
     valveStatus: 'Legends',
     vrsInviteStage: 'Elimination Stage',
     prizeEarned: 36000,
@@ -1645,8 +1694,8 @@ export const HLTV_CLANS_DATA: HltvClanEntry[] = [
   },
   {
     id: 'vitality-clan',
-    rank: 3,
-    prevRank: 2,
+    rank: 4,
+    prevRank: 3,
     delta: -1,
     name: 'Vitality',
     tag: 'VIT',
@@ -1654,7 +1703,7 @@ export const HLTV_CLANS_DATA: HltvClanEntry[] = [
     country: 'France',
     flag: '🇫🇷',
     points: 638,
-    vrsPoints: 1870,
+    vrsPoints: 1879,
     valveStatus: 'Legends',
     vrsInviteStage: 'Elimination Stage',
     prizeEarned: 31000,
@@ -1677,8 +1726,8 @@ export const HLTV_CLANS_DATA: HltvClanEntry[] = [
   },
   {
     id: 'falcons-clan',
-    rank: 4,
-    prevRank: 5,
+    rank: 5,
+    prevRank: 6,
     delta: 1,
     name: 'Falcons',
     tag: 'FLC',
@@ -1709,8 +1758,8 @@ export const HLTV_CLANS_DATA: HltvClanEntry[] = [
   },
   {
     id: 'aurora-clan',
-    rank: 5,
-    prevRank: 4,
+    rank: 6,
+    prevRank: 5,
     delta: -1,
     name: 'Aurora',
     tag: 'AUR',
@@ -1741,8 +1790,8 @@ export const HLTV_CLANS_DATA: HltvClanEntry[] = [
   },
   {
     id: 'betboom-clan',
-    rank: 6,
-    prevRank: 6,
+    rank: 7,
+    prevRank: 7,
     delta: 0,
     name: 'BETBOOM',
     tag: 'BB',
@@ -1773,8 +1822,8 @@ export const HLTV_CLANS_DATA: HltvClanEntry[] = [
   },
   {
     id: 'navi-clan',
-    rank: 7,
-    prevRank: 7,
+    rank: 8,
+    prevRank: 8,
     delta: 0,
     name: 'Natus Vincere',
     tag: 'NAVI',
@@ -1805,8 +1854,8 @@ export const HLTV_CLANS_DATA: HltvClanEntry[] = [
   },
   {
     id: 'fut-clan',
-    rank: 8,
-    prevRank: 8,
+    rank: 9,
+    prevRank: 9,
     delta: 0,
     name: 'FUT',
     tag: 'FUT',
@@ -1837,9 +1886,9 @@ export const HLTV_CLANS_DATA: HltvClanEntry[] = [
   },
   {
     id: 'nemiga-clan',
-    rank: 9,
-    prevRank: 9,
-    delta: 0,
+    rank: 11,
+    prevRank: 10,
+    delta: -1,
     name: 'Nemiga',
     tag: 'NMG',
     logo: '/images/teams/nemiga.png',
@@ -1869,9 +1918,9 @@ export const HLTV_CLANS_DATA: HltvClanEntry[] = [
   },
   {
     id: 'g2-clan',
-    rank: 10,
-    prevRank: 10,
-    delta: 0,
+    rank: 12,
+    prevRank: 11,
+    delta: -1,
     name: 'G2',
     tag: 'G2',
     logo: '/images/teams/g2.png',
@@ -1901,8 +1950,8 @@ export const HLTV_CLANS_DATA: HltvClanEntry[] = [
   },
   {
     id: 'parivision-clan',
-    rank: 11,
-    prevRank: 11,
+    rank: 13,
+    prevRank: 13,
     delta: 0,
     name: 'PARIVISION',
     tag: 'PARI',
@@ -1933,8 +1982,8 @@ export const HLTV_CLANS_DATA: HltvClanEntry[] = [
   },
   {
     id: '1win-clan',
-    rank: 12,
-    prevRank: 12,
+    rank: 14,
+    prevRank: 14,
     delta: 0,
     name: '1win',
     tag: '1WIN',
@@ -1965,8 +2014,8 @@ export const HLTV_CLANS_DATA: HltvClanEntry[] = [
   },
   {
     id: 'nip-clan',
-    rank: 13,
-    prevRank: 17,
+    rank: 16,
+    prevRank: 20,
     delta: 4,
     name: 'Ninjas in Pyjamas',
     tag: 'NIP',
@@ -1997,8 +2046,8 @@ export const HLTV_CLANS_DATA: HltvClanEntry[] = [
   },
   {
     id: 'faze-clan',
-    rank: 14,
-    prevRank: 13,
+    rank: 17,
+    prevRank: 16,
     delta: -1,
     name: 'FaZe',
     tag: 'FaZe',
@@ -2029,8 +2078,8 @@ export const HLTV_CLANS_DATA: HltvClanEntry[] = [
   },
   {
     id: 'astralis-clan',
-    rank: 15,
-    prevRank: 15,
+    rank: 18,
+    prevRank: 18,
     delta: 0,
     name: 'Astralis',
     tag: 'AST',
@@ -2061,8 +2110,8 @@ export const HLTV_CLANS_DATA: HltvClanEntry[] = [
   },
   {
     id: 'ef-clan',
-    rank: 16,
-    prevRank: 17,
+    rank: 22,
+    prevRank: 23,
     delta: 1,
     name: 'Eternal Fire',
     tag: 'EF',
@@ -2093,8 +2142,8 @@ export const HLTV_CLANS_DATA: HltvClanEntry[] = [
   },
   {
     id: 'heroic-clan',
-    rank: 17,
-    prevRank: 19,
+    rank: 23,
+    prevRank: 25,
     delta: 2,
     name: 'HEROIC',
     tag: 'HER',
@@ -2125,8 +2174,8 @@ export const HLTV_CLANS_DATA: HltvClanEntry[] = [
   },
   {
     id: 'fnatic-clan',
-    rank: 18,
-    prevRank: 20,
+    rank: 25,
+    prevRank: 27,
     delta: 2,
     name: 'fnatic',
     tag: 'FNC',
@@ -2157,9 +2206,9 @@ export const HLTV_CLANS_DATA: HltvClanEntry[] = [
   },
   {
     id: 'saw-clan',
-    rank: 19,
-    prevRank: 18,
-    delta: -1,
+    rank: 26,
+    prevRank: 26,
+    delta: 0,
     name: 'SAW',
     tag: 'SAW',
     logo: '/images/teams/saw.svg',
@@ -2189,9 +2238,9 @@ export const HLTV_CLANS_DATA: HltvClanEntry[] = [
   },
   {
     id: 'nexus-clan',
-    rank: 20,
-    prevRank: 21,
-    delta: 1,
+    rank: 27,
+    prevRank: 27,
+    delta: 0,
     name: 'Nexus Gaming',
     tag: 'NXS',
     logo: '/images/teams/nexus.svg',
@@ -2221,9 +2270,9 @@ export const HLTV_CLANS_DATA: HltvClanEntry[] = [
   },
   {
     id: 'bne-clan',
-    rank: 21,
-    prevRank: 20,
-    delta: -1,
+    rank: 28,
+    prevRank: 28,
+    delta: 0,
     name: 'Bad News Eagles',
     tag: 'BNE',
     logo: '/images/teams/bne.svg',
@@ -2253,8 +2302,8 @@ export const HLTV_CLANS_DATA: HltvClanEntry[] = [
   },
   {
     id: 'illyrian-clan',
-    rank: 22,
-    prevRank: 22,
+    rank: 29,
+    prevRank: 29,
     delta: 0,
     name: 'Illyrian Clan',
     tag: 'ILL',
@@ -2285,9 +2334,9 @@ export const HLTV_CLANS_DATA: HltvClanEntry[] = [
   },
   {
     id: 'big-clan',
-    rank: 23,
-    prevRank: 24,
-    delta: 1,
+    rank: 30,
+    prevRank: 30,
+    delta: 0,
     name: 'BIG',
     tag: 'BIG',
     logo: '/images/teams/big.svg',
@@ -2317,9 +2366,9 @@ export const HLTV_CLANS_DATA: HltvClanEntry[] = [
   },
   {
     id: 'monte-clan',
-    rank: 24,
-    prevRank: 25,
-    delta: 1,
+    rank: 31,
+    prevRank: 31,
+    delta: 0,
     name: 'Monte',
     tag: 'MNT',
     logo: '/images/teams/monte.svg',
@@ -2349,9 +2398,9 @@ export const HLTV_CLANS_DATA: HltvClanEntry[] = [
   },
   {
     id: 'rebels-clan',
-    rank: 25,
-    prevRank: 26,
-    delta: 1,
+    rank: 32,
+    prevRank: 32,
+    delta: 0,
     name: 'Rebels',
     tag: 'RBL',
     logo: '/images/teams/rebels.svg',
@@ -2381,9 +2430,9 @@ export const HLTV_CLANS_DATA: HltvClanEntry[] = [
   },
   {
     id: 'avangar-clan',
-    rank: 26,
-    prevRank: 27,
-    delta: 1,
+    rank: 33,
+    prevRank: 33,
+    delta: 0,
     name: 'AVANGAR',
     tag: 'AVG',
     logo: '/images/teams/avangar.svg',
@@ -2413,9 +2462,9 @@ export const HLTV_CLANS_DATA: HltvClanEntry[] = [
   },
   {
     id: 'havu-clan',
-    rank: 27,
-    prevRank: 28,
-    delta: 1,
+    rank: 34,
+    prevRank: 34,
+    delta: 0,
     name: 'HAVU',
     tag: 'HAVU',
     logo: '/images/teams/havu.svg',
@@ -2445,9 +2494,9 @@ export const HLTV_CLANS_DATA: HltvClanEntry[] = [
   },
   {
     id: 'gld-eagles',
-    rank: 28,
-    prevRank: 29,
-    delta: 1,
+    rank: 35,
+    prevRank: 35,
+    delta: 0,
     name: 'Guild Eagles',
     tag: 'GLD',
     logo: '/images/teams/gld.svg',
@@ -2477,15 +2526,15 @@ export const HLTV_CLANS_DATA: HltvClanEntry[] = [
   },
   {
     id: 'col-clan',
-    rank: 29,
-    prevRank: 29,
+    rank: 19,
+    prevRank: 19,
     delta: 0,
     name: 'Complexity',
     tag: 'COL',
     logo: '/images/teams/complexity.svg',
     country: 'United States',
     flag: '🇺🇸',
-    points: 310,
+    points: 85,
     vrsPoints: 1610,
     valveStatus: 'Legends',
     vrsInviteStage: 'Elimination Stage',
@@ -2509,15 +2558,15 @@ export const HLTV_CLANS_DATA: HltvClanEntry[] = [
   },
   {
     id: 'liquid-clan',
-    rank: 30,
-    prevRank: 29,
-    delta: -1,
+    rank: 15,
+    prevRank: 16,
+    delta: 1,
     name: 'Team Liquid',
     tag: 'TL',
     logo: '/images/teams/liquid.svg',
     country: 'United States',
     flag: '🇺🇸',
-    points: 285,
+    points: 128,
     vrsPoints: 1580,
     valveStatus: 'Legends',
     vrsInviteStage: 'Elimination Stage',
@@ -2541,15 +2590,15 @@ export const HLTV_CLANS_DATA: HltvClanEntry[] = [
   },
   {
     id: 'm80-clan',
-    rank: 31,
-    prevRank: 32,
-    delta: 1,
+    rank: 36,
+    prevRank: 36,
+    delta: 0,
     name: 'M80',
     tag: 'M80',
     logo: '/images/teams/m80.svg',
     country: 'United States',
     flag: '🇺🇸',
-    points: 195,
+    points: 58,
     vrsPoints: 1420,
     valveStatus: 'Challengers',
     vrsInviteStage: 'Opening Stage',
@@ -2573,16 +2622,16 @@ export const HLTV_CLANS_DATA: HltvClanEntry[] = [
   },
   {
     id: 'furia-clan',
-    rank: 32,
-    prevRank: 33,
-    delta: 1,
+    rank: 1,
+    prevRank: 3,
+    delta: 2,
     name: 'FURIA',
     tag: 'FUR',
     logo: '/images/teams/furia.svg',
     country: 'Brazil',
     flag: '🇧🇷',
-    points: 380,
-    vrsPoints: 1720,
+    points: 960,
+    vrsPoints: 1934,
     valveStatus: 'Legends',
     vrsInviteStage: 'Elimination Stage',
     prizeEarned: 21000,
@@ -2605,15 +2654,15 @@ export const HLTV_CLANS_DATA: HltvClanEntry[] = [
   },
   {
     id: 'pain-clan',
-    rank: 33,
-    prevRank: 33,
+    rank: 21,
+    prevRank: 21,
     delta: 0,
     name: 'paiN',
     tag: 'paiN',
     logo: '/images/teams/pain.svg',
     country: 'Brazil',
     flag: '🇧🇷',
-    points: 290,
+    points: 78,
     vrsPoints: 1590,
     valveStatus: 'Legends',
     vrsInviteStage: 'Elimination Stage',
@@ -2637,15 +2686,15 @@ export const HLTV_CLANS_DATA: HltvClanEntry[] = [
   },
   {
     id: '9z-clan',
-    rank: 34,
-    prevRank: 35,
-    delta: 1,
+    rank: 24,
+    prevRank: 24,
+    delta: 0,
     name: '9z',
     tag: '9z',
     logo: '/images/teams/9z.svg',
     country: 'Argentina',
     flag: '🇦🇷',
-    points: 260,
+    points: 75,
     vrsPoints: 1540,
     valveStatus: 'Challengers',
     vrsInviteStage: 'Opening Stage',
@@ -2669,15 +2718,15 @@ export const HLTV_CLANS_DATA: HltvClanEntry[] = [
   },
   {
     id: 'bestia-clan',
-    rank: 35,
-    prevRank: 35,
+    rank: 38,
+    prevRank: 38,
     delta: 0,
     name: 'BESTIA',
     tag: 'BST',
     logo: '/images/teams/bestia.svg',
     country: 'Argentina',
     flag: '🇦🇷',
-    points: 110,
+    points: 50,
     vrsPoints: 1280,
     valveStatus: 'Contenders',
     vrsInviteStage: 'Closed Qualifier',
@@ -2701,15 +2750,15 @@ export const HLTV_CLANS_DATA: HltvClanEntry[] = [
   },
   {
     id: 'mongolz-clan',
-    rank: 36,
-    prevRank: 37,
-    delta: 1,
+    rank: 10,
+    prevRank: 12,
+    delta: 2,
     name: 'The MongolZ',
     tag: 'MGL',
     logo: '/images/teams/mongolz.svg',
     country: 'Mongolia',
     flag: '🇲🇳',
-    points: 430,
+    points: 267,
     vrsPoints: 1760,
     valveStatus: 'Legends',
     vrsInviteStage: 'Elimination Stage',
@@ -2741,7 +2790,7 @@ export const HLTV_CLANS_DATA: HltvClanEntry[] = [
     logo: '/images/teams/tyloo.svg',
     country: 'China',
     flag: '🇨🇳',
-    points: 190,
+    points: 55,
     vrsPoints: 1410,
     valveStatus: 'Challengers',
     vrsInviteStage: 'Opening Stage',
@@ -2765,15 +2814,15 @@ export const HLTV_CLANS_DATA: HltvClanEntry[] = [
   },
   {
     id: 'flyquest-clan',
-    rank: 38,
-    prevRank: 39,
+    rank: 20,
+    prevRank: 21,
     delta: 1,
     name: 'FlyQuest',
     tag: 'FLY',
     logo: '/images/teams/flyquest.svg',
     country: 'Australia',
     flag: '🇦🇺',
-    points: 270,
+    points: 80,
     vrsPoints: 1550,
     valveStatus: 'Legends',
     vrsInviteStage: 'Elimination Stage',
@@ -4643,6 +4692,39 @@ export const VortexClanHub: React.FC<VortexClanHubProps> = ({
                   </div>
                   <span>VRS Invites</span>
                 </button>
+
+                {/* Right side of tab bar: Official HLTV Direct Link */}
+                {rankingCategory !== 'platform' && (
+                  <div className="ml-auto flex items-center px-4 py-2 border-l border-[#2b3545]">
+                    <a
+                      href={
+                        rankingCategory === 'world'
+                          ? 'https://www.hltv.org/ranking/teams/2026/november/16'
+                          : rankingCategory === 'regional'
+                          ? (selectedRegionalCountry
+                              ? `https://www.hltv.org/ranking/teams/2026/november/16/country/${encodeURIComponent(selectedRegionalCountry)}`
+                              : selectedRegionalContinent === 'Europe' || !selectedRegionalContinent
+                              ? 'https://www.hltv.org/ranking/teams/2026/november/16/country/Europe'
+                              : `https://www.hltv.org/ranking/teams/2026/november/16/country/${encodeURIComponent(selectedRegionalContinent === 'North America' ? 'United States' : selectedRegionalContinent === 'South America' ? 'Brazil' : selectedRegionalContinent === 'Asia' ? 'Mongolia' : 'Australia')}`)
+                          : 'https://www.hltv.org/valve-ranking/teams/2026/november/19'
+                      }
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-[#202b3d] hover:bg-[#2b3a54] text-[#38bdf8] hover:text-white border border-[#38bdf8]/30 hover:border-[#38bdf8]/60 text-xs font-mono font-bold transition shadow-sm group"
+                      title="Open official HLTV ranking source"
+                    >
+                      <ExternalLink className="w-3.5 h-3.5 text-[#38bdf8] group-hover:text-white" />
+                      <span className="hidden sm:inline">
+                        {rankingCategory === 'world' && 'HLTV World Ranking (Nov 16, 2026)'}
+                        {rankingCategory === 'regional' && (selectedRegionalCountry ? `HLTV ${selectedRegionalCountry} (Nov 16, 2026)` : 'HLTV Regional Standings (Nov 16, 2026)')}
+                        {rankingCategory === 'valve' && 'HLTV Valve Ranking (Nov 19, 2026)'}
+                        {rankingCategory === 'vrs-invites' && 'HLTV VRS Standings (Nov 19, 2026)'}
+                      </span>
+                      <span className="sm:hidden">HLTV.org</span>
+                      <ArrowUpRight className="w-3 h-3 text-slate-400 group-hover:text-white" />
+                    </a>
+                  </div>
+                )}
               </div>
 
               {/* REGIONAL ACCORDION / MULTI-COLUMN MENU (Exact match to screenshot & fully clickable continent headers) */}
@@ -5045,17 +5127,41 @@ export const VortexClanHub: React.FC<VortexClanHubProps> = ({
                   </span>
                   <span className="px-2 py-0.5 rounded text-[10px] font-mono font-bold bg-white/10 text-slate-300">
                     {rankingCategory === 'platform' && 'Season 1 Verified'}
-                    {rankingCategory === 'world' && 'Week 47 Standings'}
+                    {rankingCategory === 'world' && 'HLTV Cutoff • November 16, 2026'}
                     {rankingCategory === 'regional' && (
                       selectedRegionalCountry
-                        ? `${selectedRegionalCountry} National Standings`
+                        ? `${selectedRegionalCountry} Standings • Nov 16, 2026`
                         : selectedRegionalContinent
-                        ? `${selectedRegionalContinent} Continental Standings`
-                        : 'All Regions'
+                        ? `${selectedRegionalContinent} Standings • Nov 16, 2026`
+                        : 'HLTV Regional • Nov 16, 2026'
                     )}
-                    {rankingCategory === 'valve' && 'Major Invitation Cutoff'}
-                    {rankingCategory === 'vrs-invites' && 'Shanghai / Austin Major 2025'}
+                    {rankingCategory === 'valve' && 'Official Valve Cutoff • November 19, 2026'}
+                    {rankingCategory === 'vrs-invites' && 'Official Valve Cutoff • November 19, 2026'}
                   </span>
+
+                  {/* HLTV Source Badge link */}
+                  {rankingCategory !== 'platform' && (
+                    <a
+                      href={
+                        rankingCategory === 'world'
+                          ? 'https://www.hltv.org/ranking/teams/2026/november/16'
+                          : rankingCategory === 'regional'
+                          ? (selectedRegionalCountry
+                              ? `https://www.hltv.org/ranking/teams/2026/november/16/country/${encodeURIComponent(selectedRegionalCountry)}`
+                              : selectedRegionalContinent === 'Europe' || !selectedRegionalContinent
+                              ? 'https://www.hltv.org/ranking/teams/2026/november/16/country/Europe'
+                              : `https://www.hltv.org/ranking/teams/2026/november/16/country/${encodeURIComponent(selectedRegionalContinent === 'North America' ? 'United States' : selectedRegionalContinent === 'South America' ? 'Brazil' : selectedRegionalContinent === 'Asia' ? 'Mongolia' : 'Australia')}`)
+                          : 'https://www.hltv.org/valve-ranking/teams/2026/november/19'
+                      }
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded text-[10px] font-mono font-bold bg-[#38bdf8]/15 hover:bg-[#38bdf8]/30 text-[#38bdf8] border border-[#38bdf8]/30 transition"
+                      title="Open HLTV official standings"
+                    >
+                      <ExternalLink className="w-3 h-3" />
+                      <span>Official HLTV Link ↗</span>
+                    </a>
+                  )}
                 </div>
                 <h4 className="text-xl font-black font-display text-white">
                   {rankingCategory === 'platform' && 'Registered Platform Teams'}
@@ -5151,10 +5257,25 @@ export const VortexClanHub: React.FC<VortexClanHubProps> = ({
                               {clan.name}
                             </span>
                             <span className="text-xs sm:text-sm font-mono text-slate-400">
-                              ({rankingCategory === 'valve' || rankingCategory === 'vrs-invites'
-                                ? `${clan.vrsPoints} VRS points`
-                                : `${clan.points} HLTV points`})
+                              ({rankingCategory === 'valve'
+                                ? `${clan.vrsPoints.toLocaleString()} Valve points`
+                                : rankingCategory === 'vrs-invites'
+                                ? `${clan.vrsPoints.toLocaleString()} VRS points`
+                                : rankingCategory === 'platform'
+                                ? `${clan.points.toLocaleString()} Caliber points`
+                                : `${clan.points.toLocaleString()} HLTV points`})
                             </span>
+                            {(rankingCategory === 'valve' || rankingCategory === 'vrs-invites') && (
+                              <span className={`px-2 py-0.5 rounded text-[10px] font-mono font-black ${
+                                clan.valveStatus === 'Legends' || clan.vrsInviteStage === 'Elimination Stage'
+                                  ? 'bg-emerald-500/15 text-emerald-400 border border-emerald-500/30'
+                                  : clan.valveStatus === 'Challengers' || clan.vrsInviteStage === 'Opening Stage'
+                                  ? 'bg-sky-500/15 text-sky-400 border border-sky-500/30'
+                                  : 'bg-amber-500/15 text-amber-400 border border-amber-500/30'
+                              }`}>
+                                {clan.vrsInviteStage || clan.valveStatus}
+                              </span>
+                            )}
                             {clan.isUserClan && (
                               <span className="px-1.5 py-0.5 rounded text-[9px] font-mono font-black bg-[#A3E635] text-slate-950 uppercase">
                                 YOUR TEAM
@@ -5244,39 +5365,43 @@ export const VortexClanHub: React.FC<VortexClanHubProps> = ({
                           })}
                         </div>
 
-                        {/* Action Links Bar: HLTV Team profile & Ranking details */}
-                        <div className="grid grid-cols-2 border-t border-[#232f42] pt-2 text-center divide-x divide-[#232f42]">
-                          <button
-                            onClick={(e) => {
-                              e.stopPropagation();
-                              sound.playClick();
-                              window.open(`https://www.hltv.org/search?term=${encodeURIComponent(clan.name)}`, '_blank');
-                            }}
-                            className="py-2 px-3 text-xs font-mono font-medium text-slate-400 hover:text-white flex items-center justify-center gap-1.5 transition cursor-pointer group/link"
-                          >
-                            <span>HLTV Team profile</span>
-                            <ArrowUpRight className="w-3.5 h-3.5 text-slate-500 group-hover/link:text-white" />
-                          </button>
+                        {/* Action Links Bar: ONLY show for pro circuit / HLTV teams, NOT for CaliberClutch Teams */}
+                        {rankingCategory !== 'platform' && !clan.isUserClan && (
+                          <div className="grid grid-cols-2 border-t border-[#232f42] pt-2 text-center divide-x divide-[#232f42]">
+                            <a
+                              href={getHltvProfileUrl(clan.name)}
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                sound.playClick();
+                              }}
+                              className="py-2 px-3 text-xs font-mono font-medium text-slate-400 hover:text-white flex items-center justify-center gap-1.5 transition cursor-pointer group/link"
+                            >
+                              <span>HLTV Team profile</span>
+                              <ArrowUpRight className="w-3.5 h-3.5 text-slate-500 group-hover/link:text-white" />
+                            </a>
 
-                          <button
-                            onClick={(e) => {
-                              e.stopPropagation();
-                              sound.playClick();
-                              setDetailedClanStatsId(detailedClanStatsId === clan.id ? null : clan.id);
-                            }}
-                            className={`py-2 px-3 text-xs font-mono font-medium flex items-center justify-center gap-1.5 transition cursor-pointer ${
-                              detailedClanStatsId === clan.id
-                                ? 'text-[#38bdf8] font-bold'
-                                : 'text-slate-400 hover:text-white'
-                            }`}
-                          >
-                            <span>Ranking details</span>
-                            <ChevronDown className={`w-3.5 h-3.5 transition-transform ${detailedClanStatsId === clan.id ? 'rotate-180 text-[#38bdf8]' : 'text-slate-500'}`} />
-                          </button>
-                        </div>
+                            <button
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                sound.playClick();
+                                setDetailedClanStatsId(detailedClanStatsId === clan.id ? null : clan.id);
+                              }}
+                              className={`py-2 px-3 text-xs font-mono font-medium flex items-center justify-center gap-1.5 transition cursor-pointer ${
+                                detailedClanStatsId === clan.id
+                                  ? 'text-[#38bdf8] font-bold'
+                                  : 'text-slate-400 hover:text-white'
+                              }`}
+                            >
+                              <span>Ranking details</span>
+                              <ChevronDown className={`w-3.5 h-3.5 transition-transform ${detailedClanStatsId === clan.id ? 'rotate-180 text-[#38bdf8]' : 'text-slate-500'}`} />
+                            </button>
+                          </div>
+                        )}
 
                         {/* Optional In-depth Stats Panel (Triggered by Ranking details) */}
-                        {detailedClanStatsId === clan.id && (
+                        {rankingCategory !== 'platform' && !clan.isUserClan && detailedClanStatsId === clan.id && (
                           <div className="p-4 rounded-xl bg-[#0b1018] border border-[#202b3d] animate-in fade-in duration-150 space-y-3 text-xs font-mono">
                             <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 text-center">
                               <div className="p-2.5 rounded-lg bg-white/5">
@@ -5295,6 +5420,22 @@ export const VortexClanHub: React.FC<VortexClanHubProps> = ({
                                 <span className="text-[10px] text-slate-400 uppercase block">Major Status</span>
                                 <span className="text-sm font-black text-[#38bdf8]">{clan.valveStatus}</span>
                               </div>
+                            </div>
+                            <div className="pt-2 border-t border-white/5 flex items-center justify-between text-[11px] text-slate-400">
+                              <span>Official Ranking Source:</span>
+                              <a
+                                href={
+                                  rankingCategory === 'valve' || rankingCategory === 'vrs-invites'
+                                    ? 'https://www.hltv.org/valve-ranking/teams/2026/november/19'
+                                    : 'https://www.hltv.org/ranking/teams/2026/november/16'
+                                }
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                className="text-[#38bdf8] hover:underline flex items-center gap-1 font-bold"
+                              >
+                                <span>HLTV.org Standings</span>
+                                <ExternalLink className="w-3 h-3" />
+                              </a>
                             </div>
                           </div>
                         )}
