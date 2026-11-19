@@ -5136,22 +5136,13 @@ export const VortexClanHub: React.FC<VortexClanHubProps> = ({
                         : 'bg-[#141b25] border-[#222c3c] hover:border-[#334259] hover:bg-[#18212e]'
                     }`}
                   >
-                    {/* Left indicator accent stripe (identical to Clan Matches & Stats) */}
-                    {(isPositive || isNegative) && (
-                      <div
-                        className={`absolute left-0 top-0 bottom-0 w-1.5 z-10 ${
-                          isPositive ? 'bg-[#A3E635]' : 'bg-rose-500'
-                        }`}
-                      />
-                    )}
-
                     {/* Main Row matching HLTV Screenshot 1 */}
                     <div
                       onClick={() => {
                         sound.playClick();
                         setExpandedHltvClanId(isExpanded ? null : clan.id);
                       }}
-                      className="p-3 sm:p-3.5 pl-4 sm:pl-5 flex items-center justify-between gap-3 sm:gap-4 cursor-pointer select-none group"
+                      className="p-3 sm:p-3.5 flex items-center justify-between gap-3 sm:gap-4 cursor-pointer select-none group"
                     >
                       {/* Left: Rank, Logo, Name & Subtitle Roster */}
                       <div className="flex items-center gap-3 sm:gap-4 min-w-0 flex-1">
