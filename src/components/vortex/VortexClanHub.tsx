@@ -5116,15 +5116,25 @@ export const VortexClanHub: React.FC<VortexClanHubProps> = ({
               {filteredClans.map((clan) => {
                 const isExpanded = expandedHltvClanId === clan.id;
                 const delta = clan.delta !== undefined ? clan.delta : (clan.prevRank - clan.rank);
+                const isPositive = delta > 0;
+                const isNegative = delta < 0;
 
                 return (
                   <div
                     key={clan.id}
-                    className={`rounded-2xl border transition-all duration-200 overflow-hidden ${
+                    className={`rounded-2xl border transition-all duration-200 overflow-hidden relative ${
                       isExpanded
-                        ? 'bg-[#1b2331] border-[#38bdf8]/40 shadow-xl'
+                        ? isPositive
+                          ? 'bg-[#0B1E15] border-[#A3E635] shadow-[0_0_25px_rgba(163,230,53,0.25)]'
+                          : isNegative
+                          ? 'bg-[#1E0D12] border-rose-500 shadow-[0_0_25px_rgba(244,63,94,0.25)]'
+                          : 'bg-[#1b2331] border-[#38bdf8]/50 shadow-xl'
                         : clan.isUserClan
-                        ? 'bg-gradient-to-r from-[#0F1829] via-[#0B101C] to-[#0F1829] border-[#A3E635]/60 shadow-[0_0_20px_rgba(163,230,53,0.15)]'
+                        ? 'bg-gradient-to-r from-[#0F1829] via-[#0B101C] to-[#0F1829] border-[#A3E635]/70 shadow-[0_0_20px_rgba(163,230,53,0.18)]'
+                        : isPositive
+                        ? 'bg-gradient-to-r from-[#0B1E15]/70 via-[#10241A]/50 to-[#0B1E15]/70 border-[#A3E635]/60 hover:border-[#A3E635] hover:bg-[#0E281C]/90 shadow-[0_0_15px_rgba(163,230,53,0.12)]'
+                        : isNegative
+                        ? 'bg-gradient-to-r from-[#1E0D12]/70 via-[#261017]/50 to-[#1E0D12]/70 border-rose-500/60 hover:border-rose-500 hover:bg-[#281118]/90 shadow-[0_0_15px_rgba(244,63,94,0.12)]'
                         : 'bg-[#141b25] border-[#222c3c] hover:border-[#334259] hover:bg-[#18212e]'
                     }`}
                   >
@@ -5139,7 +5149,15 @@ export const VortexClanHub: React.FC<VortexClanHubProps> = ({
                       {/* Left: Rank, Logo, Name & Subtitle Roster */}
                       <div className="flex items-center gap-3 sm:gap-4 min-w-0 flex-1">
                         {/* Rank Badge Box */}
-                        <div className="w-10 h-10 rounded-xl bg-[#0e141d] border border-white/5 flex items-center justify-center font-display font-black text-sm sm:text-base text-slate-300 group-hover:text-white shrink-0">
+                        <div className={`w-10 h-10 rounded-xl border flex items-center justify-center font-display font-black text-sm sm:text-base shrink-0 transition-colors ${
+                          clan.isUserClan
+                            ? 'bg-[#A3E635]/15 border-[#A3E635]/40 text-[#A3E635]'
+                            : isPositive
+                            ? 'bg-[#A3E635]/15 border-[#A3E635]/40 text-[#A3E635]'
+                            : isNegative
+                            ? 'bg-rose-500/15 border-rose-500/40 text-rose-400'
+                            : 'bg-[#0e141d] border-white/5 text-slate-300 group-hover:text-white'
+                        }`}>
                           #{clan.rank}
                         </div>
 
@@ -5184,17 +5202,17 @@ export const VortexClanHub: React.FC<VortexClanHubProps> = ({
 
                       {/* Right: Delta indicator */}
                       <div className="flex items-center gap-3 shrink-0">
-                        <div className="min-w-[32px] text-right font-mono font-bold text-sm sm:text-base">
+                        <div className="min-w-[42px] text-right font-mono font-bold text-sm sm:text-base">
                           {delta > 0 ? (
-                            <span className="text-[#A3E635] flex items-center justify-end font-black">
+                            <span className="px-2.5 py-1 rounded-lg bg-[#A3E635]/20 border border-[#A3E635]/50 text-[#A3E635] font-black flex items-center justify-center shadow-[0_0_10px_rgba(163,230,53,0.2)]">
                               +{delta}
                             </span>
                           ) : delta < 0 ? (
-                            <span className="text-rose-500 flex items-center justify-end font-black">
+                            <span className="px-2.5 py-1 rounded-lg bg-rose-500/20 border border-rose-500/50 text-rose-400 font-black flex items-center justify-center shadow-[0_0_10px_rgba(244,63,94,0.2)]">
                               {delta}
                             </span>
                           ) : (
-                            <span className="text-slate-500 font-bold">
+                            <span className="text-slate-500 font-bold px-2 py-0.5">
                               -
                             </span>
                           )}
@@ -5208,7 +5226,13 @@ export const VortexClanHub: React.FC<VortexClanHubProps> = ({
 
                     {/* Expanded Detail (Matching Screenshot 2) */}
                     {isExpanded && (
-                      <div className="px-3 pb-3 sm:px-4 sm:pb-4 border-t border-[#253245] bg-[#121924] space-y-3 animate-in fade-in duration-150">
+                      <div className={`px-3 pb-3 sm:px-4 sm:pb-4 border-t space-y-3 animate-in fade-in duration-150 ${
+                        isPositive
+                          ? 'border-[#A3E635]/30 bg-[#07140D]'
+                          : isNegative
+                          ? 'border-rose-500/30 bg-[#14080C]'
+                          : 'border-[#253245] bg-[#121924]'
+                      }`}>
                         {/* 5 Player Cards Grid */}
                         <div className="grid grid-cols-2 sm:grid-cols-5 gap-2.5 pt-3">
                           {clan.roster.slice(0, 5).map((player, pIdx) => {
