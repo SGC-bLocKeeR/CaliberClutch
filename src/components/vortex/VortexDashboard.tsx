@@ -1081,6 +1081,17 @@ export const VortexDashboard: React.FC<VortexDashboardProps> = ({
       const saved = localStorage.getItem('vortex_user_clan_data');
       if (saved) {
         const parsed = JSON.parse(saved);
+        if (parsed.stats && (parsed.stats.matches > 0 || parsed.stats.tournamentsWon > 0 || parsed.stats.streak > 0 || parsed.stats.avgElo > 0 || parsed.stats.winrate !== '0%')) {
+          parsed.stats = {
+            matches: 0,
+            wins: 0,
+            losses: 0,
+            winrate: '0%',
+            avgElo: 0,
+            tournamentsWon: 0,
+            streak: 0,
+          };
+        }
         if (parsed.members && !parsed.members.some((m: any) => ['vortex_ghost', 'silent_clutcher', 'shadowstrike'].includes(m.name?.toLowerCase()))) {
           return parsed;
         }
@@ -1094,13 +1105,13 @@ export const VortexDashboard: React.FC<VortexDashboardProps> = ({
         { id: '1', name: currentGamerTag, role: 'IGL / Captain' },
       ],
       stats: {
-        matches: 14,
-        wins: 11,
-        losses: 3,
-        winrate: '78.6%',
-        avgElo: Math.round((currentUserElo * 5 + 1300) / 5),
-        tournamentsWon: 2,
-        streak: 4,
+        matches: 0,
+        wins: 0,
+        losses: 0,
+        winrate: '0%',
+        avgElo: 0,
+        tournamentsWon: 0,
+        streak: 0,
       }
     };
   }, [currentClanTag, currentGamerTag, currentUserElo]);

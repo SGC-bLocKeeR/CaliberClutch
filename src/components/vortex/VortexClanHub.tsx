@@ -1810,6 +1810,24 @@ export const VortexClanHub: React.FC<VortexClanHubProps> = ({
           parsed.logo = '/images/clan_badges/badge_caliber_lime.svg';
           modified = true;
         }
+        // Clean legacy fake 128-tick description
+        if (parsed.description && parsed.description.includes('128-tick')) {
+          parsed.description = parsed.description.replace(/128-tick\s*/gi, '');
+          modified = true;
+        }
+        // Reset fake / mock clan stats to clean slate (0 matches, 0 streak, 0 cups, unranked elo)
+        if (!parsed.stats || parsed.stats.matches > 0 || parsed.stats.tournamentsWon > 0 || parsed.stats.streak > 0 || parsed.stats.avgElo > 0 || parsed.stats.winrate !== '0%') {
+          parsed.stats = {
+            matches: 0,
+            wins: 0,
+            losses: 0,
+            winrate: '0%',
+            avgElo: 0,
+            tournamentsWon: 0,
+            streak: 0,
+          };
+          modified = true;
+        }
         // Reset clan members to ONLY registered users (no fake un-registered pros or bots)
         const hasUnregisteredMembers = parsed.members && (
           parsed.members.length > 1 && parsed.members.some((m: any) => 
@@ -1849,7 +1867,7 @@ export const VortexClanHub: React.FC<VortexClanHubProps> = ({
       tag: initialTag,
       logo: '/images/clan_badges/badge_caliber_lime.svg',
       banner: 'https://images.unsplash.com/photo-1542751371-adc38448a05e?auto=format&fit=crop&w=1200&q=80',
-      description: 'Official Caliber Clutch competitive roster led by M14. Competing in European 128-tick Cash tournaments and CS2 cups.',
+      description: 'Official Caliber Clutch competitive roster led by M14. Competing in European Cash tournaments and CS2 cups.',
       country: currentCountry.name,
       flag: currentCountry.flag,
       captainId: 'current-user',
@@ -1869,13 +1887,13 @@ export const VortexClanHub: React.FC<VortexClanHubProps> = ({
         }
       ],
       stats: {
-        matches: 14,
-        wins: 11,
-        losses: 3,
-        winrate: '78.6%',
-        avgElo: Math.round((currentUserElo * 5 + 1300) / 5),
-        tournamentsWon: 2,
-        streak: 4,
+        matches: 0,
+        wins: 0,
+        losses: 0,
+        winrate: '0%',
+        avgElo: 0,
+        tournamentsWon: 0,
+        streak: 0,
       },
       verified: true,
     };
@@ -1986,7 +2004,9 @@ export const VortexClanHub: React.FC<VortexClanHubProps> = ({
     };
 
     const nextMembers = [...userClan.members, newMember];
-    const avg = Math.round(nextMembers.slice(0, 5).reduce((acc, m) => acc + m.elo, 0) / Math.min(5, nextMembers.length));
+    const avg = userClan.stats.matches > 0 
+      ? Math.round(nextMembers.slice(0, 5).reduce((acc, m) => acc + m.elo, 0) / Math.min(5, nextMembers.length))
+      : 0;
     const nextClan: ClanData = {
       ...userClan,
       members: nextMembers,
@@ -2036,7 +2056,9 @@ export const VortexClanHub: React.FC<VortexClanHubProps> = ({
       return;
     }
     const nextMembers = userClan.members.filter(m => m.id !== memberId);
-    const avg = Math.round(nextMembers.slice(0, 5).reduce((acc, m) => acc + m.elo, 0) / Math.min(5, nextMembers.length || 1));
+    const avg = userClan.stats.matches > 0 && nextMembers.length > 0
+      ? Math.round(nextMembers.slice(0, 5).reduce((acc, m) => acc + m.elo, 0) / Math.min(5, nextMembers.length))
+      : 0;
     const nextClan: ClanData = {
       ...userClan,
       members: nextMembers,
@@ -2123,9 +2145,11 @@ export const VortexClanHub: React.FC<VortexClanHubProps> = ({
                 </span>
                 <span>•</span>
                 <span className="flex items-center gap-1.5">
-                  <Trophy className="w-3.5 h-3.5 text-[#A3E635]" />
+                  <Trophy className="w-3.5 h-3.5 text-slate-400" />
                   <span>Team ELO:</span>
-                  <strong className="text-[#A3E635]">{userClan.stats.avgElo}</strong>
+                  <strong className={userClan.stats.avgElo > 0 ? "text-[#A3E635]" : "text-slate-400"}>
+                    {userClan.stats.avgElo > 0 ? userClan.stats.avgElo : 'Unranked'}
+                  </strong>
                 </span>
               </div>
             </div>
@@ -2223,26 +2247,38 @@ export const VortexClanHub: React.FC<VortexClanHubProps> = ({
                 <Trophy className="w-3.5 h-3.5 text-amber-400" />
                 Team Win Rate
               </span>
-              <div className="text-2xl font-black font-display text-white">{userClan.stats.winrate}</div>
-              <p className="text-[10px] font-mono text-emerald-400 font-bold">{userClan.stats.wins}W - {userClan.stats.losses}L Record</p>
+              <div className="text-2xl font-black font-display text-white">
+                {userClan.stats.matches > 0 ? userClan.stats.winrate : '0%'}
+              </div>
+              <p className="text-[10px] font-mono text-slate-400 font-bold">
+                {userClan.stats.matches > 0 ? `${userClan.stats.wins}W - ${userClan.stats.losses}L Record` : '0W - 0L Record'}
+              </p>
             </div>
 
             <div className="p-4 rounded-2xl bg-[#0E1017] border border-[#202536] space-y-1">
               <span className="text-[10px] font-mono text-slate-400 uppercase tracking-wider flex items-center gap-1.5">
-                <Flame className="w-3.5 h-3.5 text-[#A3E635]" />
+                <Flame className="w-3.5 h-3.5 text-slate-400" />
                 Current Streak
               </span>
-              <div className="text-2xl font-black font-display text-[#A3E635]">{userClan.stats.streak} Wins</div>
-              <p className="text-[10px] font-mono text-slate-400">Competitive Momentum</p>
+              <div className={`text-2xl font-black font-display ${userClan.stats.streak > 0 ? 'text-[#A3E635]' : 'text-slate-300'}`}>
+                {userClan.stats.streak > 0 ? `${userClan.stats.streak} Wins` : '0 Wins'}
+              </div>
+              <p className="text-[10px] font-mono text-slate-400">
+                {userClan.stats.streak > 0 ? 'Competitive Momentum' : 'No Active Streak'}
+              </p>
             </div>
 
             <div className="p-4 rounded-2xl bg-[#0E1017] border border-[#202536] space-y-1">
               <span className="text-[10px] font-mono text-slate-400 uppercase tracking-wider flex items-center gap-1.5">
-                <Award className="w-3.5 h-3.5 text-[#A3E635]" />
+                <Award className="w-3.5 h-3.5 text-slate-400" />
                 Tournament Cups
               </span>
-              <div className="text-2xl font-black font-display text-[#A3E635]">{userClan.stats.tournamentsWon} Trophies</div>
-              <p className="text-[10px] font-mono text-slate-400">CaliberClutch Circuit</p>
+              <div className={`text-2xl font-black font-display ${userClan.stats.tournamentsWon > 0 ? 'text-[#A3E635]' : 'text-slate-300'}`}>
+                {userClan.stats.tournamentsWon > 0 ? `${userClan.stats.tournamentsWon} Trophies` : '0 Trophies'}
+              </div>
+              <p className="text-[10px] font-mono text-slate-400">
+                {userClan.stats.tournamentsWon > 0 ? 'CaliberClutch Circuit' : 'No Trophies Won'}
+              </p>
             </div>
 
             <div className="p-4 rounded-2xl bg-[#0E1017] border border-[#202536] space-y-1">
@@ -2250,8 +2286,12 @@ export const VortexClanHub: React.FC<VortexClanHubProps> = ({
                 <Users className="w-3.5 h-3.5 text-blue-400" />
                 Squad Average ELO
               </span>
-              <div className="text-2xl font-black font-display text-white">{userClan.stats.avgElo}</div>
-              <p className="text-[10px] font-mono text-blue-400 font-bold">Level {Math.min(10, Math.floor(userClan.stats.avgElo / 250) + 1)} Bracket</p>
+              <div className="text-2xl font-black font-display text-white">
+                {userClan.stats.avgElo > 0 ? userClan.stats.avgElo : 'Unranked'}
+              </div>
+              <p className="text-[10px] font-mono text-slate-400 font-bold">
+                {userClan.stats.avgElo > 0 ? `Level ${Math.min(10, Math.floor(userClan.stats.avgElo / 250) + 1)} Bracket` : 'Unranked Placement'}
+              </p>
             </div>
           </div>
 
