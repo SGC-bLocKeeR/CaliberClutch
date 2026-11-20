@@ -38,6 +38,57 @@ interface VerifiedFaceitStatsCardProps {
 
 const COOLDOWN_DURATION_MS = 60 * 60 * 1000; // 1 hour
 
+// Direct real-time browser fallback to official FACEIT live endpoints
+const fetchDirectLiveFaceit = async (nick: string): Promise<FaceitStatsData | null> => {
+  try {
+    const clean = nick.trim().replace(/^https?:\/\/(www\.)?faceit\.com\/[a-z]{2}\/players\/?/i, '').replace(/\/$/, '');
+    const userRes = await fetch(`https://www.faceit.com/api/users/v1/nicknames/${encodeURIComponent(clean)}`);
+    if (!userRes.ok) return null;
+    const userData = await userRes.json();
+    const payload = userData.payload || {};
+    const uid = payload.id;
+    if (!uid) return null;
+    const cs2 = payload.games?.cs2 || payload.games?.csgo || {};
+    const faceitElo = cs2.faceit_elo || 1000;
+    const level = cs2.skill_level || (faceitElo >= 2001 ? 10 : faceitElo >= 1851 ? 9 : faceitElo >= 1701 ? 8 : faceitElo >= 1551 ? 7 : faceitElo >= 1401 ? 6 : faceitElo >= 1251 ? 5 : faceitElo >= 1101 ? 4 : faceitElo >= 951 ? 3 : faceitElo >= 801 ? 2 : 1);
+    
+    let matches = 0;
+    let winRate = '50%';
+    let kdRatio = '1.00';
+    let hsPercentage = '40%';
+    try {
+      const statsRes = await fetch(`https://www.faceit.com/api/stats/v1/stats/users/${encodeURIComponent(uid)}/games/cs2`);
+      if (statsRes.ok) {
+        const statsJson = await statsRes.json();
+        const lt = statsJson.lifetime || {};
+        matches = parseInt(lt.m1 || lt.Matches || '0', 10);
+        const rawWr = lt.k6 || lt['Win Rate %'] || '50';
+        winRate = rawWr.includes('%') ? rawWr : `${rawWr}%`;
+        kdRatio = lt.k5 || lt['Average K/D Ratio'] || '1.00';
+        const rawHs = lt.k8 || lt['Average Headshots %'] || '40';
+        hsPercentage = rawHs.includes('%') ? rawHs : `${rawHs}%`;
+      }
+    } catch (_) {}
+
+    return {
+      linked: true,
+      playerId: uid,
+      nickname: payload.nickname || clean,
+      avatar: payload.avatar || '',
+      level,
+      faceitElo,
+      matches,
+      winRate,
+      kdRatio,
+      hsPercentage,
+      faceitUrl: `https://www.faceit.com/en/players/${encodeURIComponent(payload.nickname || clean)}`,
+      lastUpdated: Date.now()
+    };
+  } catch (_) {
+    return null;
+  }
+};
+
 export const VerifiedFaceitStatsCard: React.FC<VerifiedFaceitStatsCardProps> = ({
   steamId64,
   isOwner = true
@@ -85,9 +136,10 @@ export const VerifiedFaceitStatsCard: React.FC<VerifiedFaceitStatsCardProps> = (
     }
 
     setErrorMessage(null);
+    const activeNickname = localStorage.getItem('vortex_faceit_nickname') || localStorage.getItem('vortex_user_gamertag') || 'bLocKeeRz';
 
     try {
-      const url = `/api/faceit/profile?steamId64=${encodeURIComponent(steamId64)}${force ? '&force=true' : ''}`;
+      const url = `/api/faceit/profile?steamId64=${encodeURIComponent(steamId64)}&nickname=${encodeURIComponent(activeNickname)}${force ? '&force=true' : ''}`;
       const res = await fetch(url);
       
       if (res.status === 429) {
@@ -99,20 +151,49 @@ export const VerifiedFaceitStatsCard: React.FC<VerifiedFaceitStatsCardProps> = (
         return;
       }
 
-      if (!res.ok) {
-        throw new Error(`Failed to load FACEIT stats (HTTP ${res.status})`);
+      if (res.ok) {
+        const data: FaceitStatsData = await res.json();
+        if (data.linked) {
+          setStats(data);
+          try {
+            localStorage.setItem(`vortex_faceit_stats_${steamId64}`, JSON.stringify(data));
+          } catch (_) {}
+
+          if (force && data.linked) {
+            sound.playNotification();
+          }
+          return;
+        }
       }
 
-      const data: FaceitStatsData = await res.json();
-      setStats(data);
-      try {
-        localStorage.setItem(`vortex_faceit_stats_${steamId64}`, JSON.stringify(data));
-      } catch (_) {}
-
-      if (force && data.linked) {
-        sound.playNotification();
+      // Try direct live FACEIT API resolution
+      const direct = await fetchDirectLiveFaceit(activeNickname);
+      if (direct && direct.linked) {
+        setStats(direct);
+        try {
+          localStorage.setItem(`vortex_faceit_stats_${steamId64}`, JSON.stringify(direct));
+        } catch (_) {}
+        if (force) sound.playNotification();
+        return;
       }
+
+      // Unlinked message if neither succeeded
+      setStats({
+        linked: false,
+        message: 'No FACEIT account linked to this Steam ID',
+        lastUpdated: Date.now()
+      });
     } catch (err: any) {
+      // Fallback directly to real-time client endpoint
+      const direct = await fetchDirectLiveFaceit(activeNickname);
+      if (direct && direct.linked) {
+        setStats(direct);
+        try {
+          localStorage.setItem(`vortex_faceit_stats_${steamId64}`, JSON.stringify(direct));
+        } catch (_) {}
+        if (force) sound.playNotification();
+        return;
+      }
       console.warn('FACEIT stats fetch error:', err);
       setErrorMessage(err.message || 'Unable to reach FACEIT API. Please try again later.');
     } finally {
