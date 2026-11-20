@@ -28,7 +28,7 @@ interface VortexPartnersModalProps {
 export interface PartnerProvider {
   id: string;
   name: string;
-  category: 'Marketplace' | 'Unboxing' | 'P2P Liquidity' | 'Valuation';
+  category: 'Marketplace' | 'Hardware' | 'P2P Liquidity' | 'Valuation';
   badge: string;
   badgeColor: string;
   logo: string;
@@ -70,31 +70,31 @@ export const OFFICIAL_PARTNERS: PartnerProvider[] = [
     status: 'Operational'
   },
   {
-    id: 'hellcase',
-    name: 'Hellcase',
-    category: 'Unboxing',
-    badge: 'CO-BRANDED CASES',
-    badgeColor: 'bg-amber-500/15 text-amber-400 border-amber-500/30',
-    logo: 'https://imgproxy.dmarket.com/insecure/rs:fit:120:120:0/g:ce/aHR0cHM6Ly9jb21tdW5pdHkuYWthbWFpLnN0ZWFtc3RhdGljLmNvbS9lY29ub215L2ltYWdlL2kwQ29aODFVaTBtLTlLd2xCWTFMXzE4bXl1R3VxMXdmaFdTYVpnTXR0eVZmUGFFUlNSMFdxbXU3TEFvY0dKS3oybHVfWHNuWHd0bWtKalNVOTFkaDhiajM1VlRxVkJQNGlvX2ZybkVWdnFmX2E2Vm9JZkdTWHo3SGxid2c1N1F3U1NfbXhobDE1amlHeU4zN2MzX0dadzkxVzhCd1JmbEs3RWZLc2Eyc2Z3.webp',
-    description: 'Co-branded creator cases for VORTEX Gaming, featuring the Street Syndicate and Dragon Legend crates with provably fair verification.',
-    bonusText: '+10% Extra Deposit Balance + 1 Free Daily Case Spin with code VORTEX',
+    id: 'steelseries',
+    name: 'SteelSeries Esports',
+    category: 'Hardware',
+    badge: 'OFFICIAL AUDIO & GEAR',
+    badgeColor: 'bg-orange-500/15 text-orange-400 border-orange-500/30',
+    logo: 'https://community.akamai.steamstatic.com/economy/image/-9a81dlWLwJ2UUGcVs_nsVtzdOEdtWwKGZZLQHTxDZ7I56KU0Zwwo4NUX4oFJZEHLbXH5ApeO4YmlhxYQknCRvCo04DEVlxkKgpou-6kejhz2v_Nfz5H_uO1gb-Gw_alIITfn2xV_Pp_jez--YXygED6-kZkYj3wLITDdQc8MlCG_Fftxr3ug8C0u5vNnHJr6SQmsH6MnRDi1gYMMLIqu-Y0gQ/360fx360f',
+    description: 'Official esports audio partner powering tournament communications, Arctis headsets, and pro gaming mice.',
+    bonusText: '15% Off all pro gaming gear with partner code VORTEX',
     promoCode: 'VORTEX',
-    features: ['Provably Fair SHA-256 Engine', 'Official VORTEX Signature Crates', 'Fast Steam Bot Withdrawals'],
-    referralUrl: 'https://hellcase.com/f/vortex',
+    features: ['ClearCast AI Microphone', 'Nova Pro Wireless Audio', 'Aerox Ultra-Light Mice'],
+    referralUrl: 'https://steelseries.com',
     status: 'Operational'
   },
   {
-    id: 'farmskins',
-    name: 'Farmskins',
-    category: 'Unboxing',
-    badge: 'KNIVES VAULT PARTNER',
-    badgeColor: 'bg-rose-500/15 text-rose-400 border-rose-500/30',
-    logo: 'https://imgproxy.dmarket.com/insecure/rs:fit:120:120:0/g:ce/aHR0cHM6Ly9jb21tdW5pdHkuYWthbWFpLnN0ZWFtc3RhdGljLmNvbS9lY29ub215L2ltYWdlL2kwQ29aODFVaTBtLTlLd2xCWTFMXzE4bXl1R3VxMXdmaFdTYVpnTXR0eVZmUGFFUlNSMFdxbXU3TEFvY0dKS3oybHVfWHNuWHd0bWtKalNVOTFkaDhiajM1VlRxVkJQNGlvX2ZybkFWdmZiNmFxZHVjX1RGVmpUQ3hieDA1T1U0UzNqaWxFOXc0RHpSbkltdEl5MlNhMUp6REpFaFJQbEs3RWNPNFU4Z2ZB.webp',
-    description: 'Official partner behind the Covert Knives & Gloves Vault and Printstream Elite drops on the VORTEX Cases arena.',
-    bonusText: 'Free $1.00 Bonus Balance + Free Daily Case Spin with code VORTEX',
+    id: 'zowie',
+    name: 'ZOWIE by BenQ',
+    category: 'Hardware',
+    badge: 'TOURNAMENT MONITORS',
+    badgeColor: 'bg-red-500/15 text-red-400 border-red-500/30',
+    logo: 'https://community.akamai.steamstatic.com/economy/image/-9a81dlWLwJ2UUGcVs_nsVtzdOEdtWwKGZZLQHTxDZ7I56KU0Zwwo4NUX4oFJZEHLbXH5ApeO4YmlhxYQknCRvCo04DEVlxkKgpot621FABz7PLfYQJS5NO0m5O0m_7zO6-fk29T-sBzpezT_I2tiVXs-RE5YTincY-WdVA4N13R81brx-e51sW9786czydiuSQn4ivcnBfmn1gSOd0N_1mS/360fx360f',
+    description: 'The global esports standard for high-refresh 240Hz & 360Hz displays and tournament ergonomic mice.',
+    bonusText: 'Official Tournament Display Partner for CaliberClutch Championships',
     promoCode: 'VORTEX',
-    features: ['Gaben\'s Secret Rare Drops', 'Instant Skin-to-Wallet Convert', 'High-Tier Knife Unboxing'],
-    referralUrl: 'https://farmskins.com/ref/vortex',
+    features: ['DyAc 2 Fast Clarity', '360Hz Fast TN Esports Panels', 'Symmetrical & Ergonomic Mice'],
+    referralUrl: 'https://zowie.benq.com',
     status: 'Operational'
   },
   {
@@ -144,7 +144,7 @@ export const VortexPartnersModal: React.FC<VortexPartnersModalProps> = ({ isOpen
   const filteredPartners = OFFICIAL_PARTNERS.filter(p => {
     if (partnerFilter === 'all') return true;
     if (partnerFilter === 'marketplace') return p.category === 'Marketplace';
-    if (partnerFilter === 'unboxing') return p.category === 'Unboxing';
+    if (partnerFilter === 'hardware') return p.category === 'Hardware';
     if (partnerFilter === 'valuation') return p.category === 'Valuation';
     return true;
   });
@@ -209,10 +209,10 @@ export const VortexPartnersModal: React.FC<VortexPartnersModalProps> = ({ isOpen
                 </span>
               </div>
               <h3 className="text-base font-black font-display text-white">
-                Get +10% Bonus & Free Daily Case Across All Partner Sites
+                Official Esports Hardware & Platform Partner Benefits
               </h3>
               <p className="text-xs text-slate-400">
-                Use code <strong className="text-white font-mono">VORTEX</strong> on DMarket, Hellcase, Farmskins, or Skinport to unlock verified platform rewards.
+                Use code <strong className="text-white font-mono">VORTEX</strong> on SteelSeries, ZOWIE, Skinport or DMarket to unlock verified platform rewards.
               </p>
             </div>
 
@@ -246,8 +246,8 @@ export const VortexPartnersModal: React.FC<VortexPartnersModalProps> = ({ isOpen
               {[
                 { id: 'all', label: `All Partners (${OFFICIAL_PARTNERS.length})` },
                 { id: 'marketplace', label: '🛒 Marketplaces (DMarket, Skinport)' },
-                { id: 'unboxing', label: '📦 Case Partners (Hellcase, Farmskins)' },
-                { id: 'valuation', label: '🔍 3D & Pricing (CS.MONEY)' }
+                { id: 'hardware', label: '🎧 Esports Hardware (SteelSeries, ZOWIE)' },
+                { id: 'valuation', label: '🔍 3D & Analytics (CS.MONEY)' }
               ].map(tab => (
                 <button
                   key={tab.id}
@@ -440,9 +440,9 @@ export const VortexPartnersModal: React.FC<VortexPartnersModalProps> = ({ isOpen
                       onChange={e => setInquiryType(e.target.value)}
                       className="w-full px-3 py-2 rounded-xl bg-[#090C12] border border-[#232B3B] text-xs text-white focus:outline-none focus:border-amber-400/50 font-sans cursor-pointer"
                     >
-                      <option value="tournament_sponsor">Tournament Prize Sponsor (Co-Branded Skins)</option>
-                      <option value="case_creator">Creator Case & Unboxing Co-Branding</option>
-                      <option value="b2b_api">B2B Skin Liquidity & Trade Bot API</option>
+                      <option value="tournament_sponsor">Tournament Prize Sponsor (Hardware & Gear)</option>
+                      <option value="hardware_sponsor">Esports Hardware & Tournament Gear</option>
+                      <option value="b2b_api">B2B Tournament Telemetry & Stats API</option>
                       <option value="affiliate">Creator & Streamer Affiliate Program</option>
                     </select>
                   </div>
@@ -483,7 +483,7 @@ export const VortexPartnersModal: React.FC<VortexPartnersModalProps> = ({ isOpen
               <span>Esports Regulatory Compliance & Affiliate Disclosure</span>
             </div>
             <p className="text-[11px] text-slate-500 leading-relaxed font-sans">
-              VORTEX Gaming operates strictly as a skill-based competitive esports infrastructure. Tournament rewards and skin items are purchased on-demand from licensed B2B item providers (DMarket, Skinport) and distributed in accordance with EU digital goods regulations and Valve Steam Subscriber Agreements. External unboxing partners operate under independent gaming licenses.
+              CaliberClutch operates strictly as a skill-based competitive esports infrastructure and tournament organizer. Tournament prize pools, hardware gear, and digital rewards are distributed in full compliance with EU regulations, Valve Steam Subscriber Agreements, and official esports organizer guidelines. CaliberClutch does not host or operate skin gambling, case unboxing, or wagering services.
             </p>
           </div>
 

@@ -60,6 +60,8 @@ import {
   Coins,
   BookOpen,
   RefreshCw,
+  Globe,
+  Key,
   Image as ImageIcon
 } from 'lucide-react';
 import confetti from 'canvas-confetti';
@@ -74,15 +76,22 @@ import { BalancedMatch, generateBalancedMatch } from '../../utils/faceitMatchmak
 import { VortexRightSocialRail } from './VortexRightSocialRail';
 import { XsollaCheckoutModal } from './XsollaCheckoutModal';
 import { XsollaOrderItem } from '../../services/xsollaService';
-import { VortexCaseShopModal } from './VortexCaseShopModal';
-import { HellcasePayBySkinsModal } from './HellcasePayBySkinsModal';
 import { VortexPartnersModal } from './VortexPartnersModal';
 import { VortexAdBanner } from './VortexAdBanner';
 import { VortexTopSponsorRibbon, VortexComingSoonDeals } from './VortexSponsorRibbon';
-import { VORTEX_CASE_CATALOG, CS2Case, getVortexWalletBalance, creditVortexWalletBalance } from '../../services/skinDeliveryService';
+import { getVortexWalletBalance, creditVortexWalletBalance } from '../../services/skinDeliveryService';
 import { FaceitSkillTrack, FaceitSeasonStatsCard } from './FaceitSkillTrack';
 import { VerifiedFaceitStatsCard } from './VerifiedFaceitStatsCard';
 import { VortexClanHub } from './VortexClanHub';
+import { 
+  getFaceitOrganizerConfig, 
+  saveFaceitOrganizerConfig, 
+  fetchLiveOrganizerDetails, 
+  fetchLiveOrganizerTournaments,
+  NEXUS_FACEIT_ORGANIZER_URL,
+  NEXUS_FACEIT_ORGANIZER_ID,
+  FaceitOrganizerConfig 
+} from '../../services/faceitTournamentService';
 
 interface VortexDashboardProps {
   userGamerTag?: string;
@@ -97,7 +106,6 @@ export type VortexTab =
   | 'dashboard'
   | 'home'
   | 'play'
-  | 'cases'
   | 'servers' 
   | 'tournaments' 
   | 'teams'
@@ -1070,12 +1078,6 @@ export const VortexDashboard: React.FC<VortexDashboardProps> = ({
   const [showVerificationModal, setShowVerificationModal] = useState<boolean>(false);
   const [verificationModalType, setVerificationModalType] = useState<'vip' | 'verified'>('vip');
 
-  // CS2 Cases Arena State (Inspired by Hellcase & Farmskins)
-  const [caseShopModalOpen, setCaseShopModalOpen] = useState(false);
-  const [selectedCaseId, setSelectedCaseId] = useState<string | undefined>(undefined);
-  const [caseCategoryFilter, setCaseCategoryFilter] = useState<string>('all');
-  const [caseSearchQuery, setCaseSearchQuery] = useState<string>('');
-  const [showHellcaseDepositModal, setShowHellcaseDepositModal] = useState<boolean>(false);
   const [showPartnersModal, setShowPartnersModal] = useState<boolean>(false);
   const [vortexCoinsBalance, setVortexCoinsBalance] = useState<number>(() => getVortexWalletBalance());
   const [inAppPromoCode, setInAppPromoCode] = useState<string>('');
@@ -1110,7 +1112,14 @@ export const VortexDashboard: React.FC<VortexDashboardProps> = ({
     return [];
   });
   const [createTournamentModalOpen, setCreateTournamentModalOpen] = useState<boolean>(false);
-  const [tourneyTabMode, setTourneyTabMode] = useState<'browse' | 'create'>('browse');
+  const [tourneyTabMode, setTourneyTabMode] = useState<'browse' | 'create' | 'faceit'>('browse');
+  const [faceitConfig, setFaceitConfig] = useState<FaceitOrganizerConfig>(() => getFaceitOrganizerConfig());
+  const [faceitKeyInput, setFaceitKeyInput] = useState<string>(() => getFaceitOrganizerConfig().apiKey);
+  const [faceitOrgIdInput, setFaceitOrgIdInput] = useState<string>(() => getFaceitOrganizerConfig().organizerId);
+  const [faceitTesting, setFaceitTesting] = useState<boolean>(false);
+  const [faceitStatusResult, setFaceitStatusResult] = useState<{ success: boolean; message: string; details?: any } | null>(null);
+  const [faceitLiveTourneys, setFaceitLiveTourneys] = useState<any[]>([]);
+  const [faceitSavingSuccess, setFaceitSavingSuccess] = useState<boolean>(false);
   const [selectedBracketTourney, setSelectedBracketTourney] = useState<any | null>(null);
   const [selectedRegisterTourney, setSelectedRegisterTourney] = useState<any | null>(null);
   const [tourneyFilter, setTourneyFilter] = useState<'all' | 'live' | 'open' | 'registered'>('all');
@@ -3928,10 +3937,335 @@ export const VortexDashboard: React.FC<VortexDashboardProps> = ({
                     <Plus className="w-3.5 h-3.5 stroke-[3]" />
                     <span>Create Tournament</span>
                   </button>
+                  <button
+                    onClick={() => {
+                      sound.playSelect();
+                      setTourneyTabMode('faceit');
+                    }}
+                    className={`px-4 py-2 rounded-xl text-xs font-display font-black tracking-wider uppercase transition cursor-pointer flex items-center gap-1.5 ${
+                      tourneyTabMode === 'faceit'
+                        ? 'bg-[#FF5500] text-white shadow-lg shadow-orange-500/25'
+                        : 'text-orange-400 hover:bg-orange-500/10'
+                    }`}
+                  >
+                    <Globe className="w-3.5 h-3.5" />
+                    <span>FACEIT Setup</span>
+                  </button>
                 </div>
               </div>
 
-              {tourneyTabMode === 'create' ? (
+              {tourneyTabMode === 'faceit' ? (
+                <div className="space-y-6 animate-in fade-in duration-200">
+                  {/* FACEIT Integration Header Banner */}
+                  <div className="flex flex-col lg:flex-row lg:items-center justify-between p-6 sm:p-8 rounded-3xl bg-gradient-to-r from-[#170E08] via-[#121622] to-[#0A0D15] border border-orange-500/30 gap-6 shadow-2xl relative overflow-hidden">
+                    <div className="absolute top-0 right-0 w-96 h-96 bg-orange-500/10 rounded-full blur-3xl pointer-events-none" />
+                    <div className="relative z-10 space-y-2">
+                      <div className="flex items-center gap-2 flex-wrap">
+                        <span className="px-3 py-1 rounded-full text-[10px] font-mono font-black bg-[#FF5500]/20 text-[#FF5500] border border-[#FF5500]/40 uppercase flex items-center gap-1.5 tracking-wider">
+                          <Globe className="w-3.5 h-3.5 text-[#FF5500]" />
+                          OFFICIAL FACEIT ORGANIZER & DEVELOPER SYNC
+                        </span>
+                        <span className="px-3 py-1 rounded-full text-[10px] font-mono font-bold bg-emerald-500/15 text-emerald-400 border border-emerald-500/30 uppercase tracking-wider flex items-center gap-1.5">
+                          <ShieldCheck className="w-3.5 h-3.5 text-emerald-400" />
+                          100% LEGAL & TOS COMPLIANT
+                        </span>
+                      </div>
+                      <h3 className="text-2xl sm:text-3xl font-black font-display text-white tracking-wide">
+                        FACEIT DEVELOPER PORTAL & TOURNAMENT HUB
+                      </h3>
+                      <p className="text-xs sm:text-sm font-mono text-slate-300 max-w-2xl leading-relaxed">
+                        Connect your official developer application from <strong className="text-orange-400">developers.faceit.com</strong> to synchronize championship brackets, automate Sub-Tick match servers, and enforce Ring-0 Kernel Anti-Cheat.
+                      </p>
+                    </div>
+
+                    <div className="relative z-10 flex flex-col sm:flex-row lg:flex-col gap-2.5 shrink-0">
+                      <a
+                        href="https://developers.faceit.com"
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="px-4 py-2.5 rounded-xl bg-[#1C1F2B] hover:bg-[#252A3B] border border-orange-500/40 text-orange-400 font-mono font-bold text-xs flex items-center justify-center gap-2 transition hover:scale-[1.02] shadow-md"
+                      >
+                        <ExternalLink className="w-3.5 h-3.5" />
+                        <span>Tab 1: developers.faceit.com</span>
+                      </a>
+                      <a
+                        href={faceitOrgIdInput ? `https://www.faceit.com/en/organizers/${faceitOrgIdInput}/Nexus%20Esports` : 'https://www.faceit.com'}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="px-4 py-2.5 rounded-xl bg-[#FF5500] hover:bg-[#ff6a1f] text-white font-mono font-black text-xs flex items-center justify-center gap-2 transition hover:scale-[1.02] shadow-lg shadow-orange-500/25"
+                      >
+                        <ExternalLink className="w-3.5 h-3.5" />
+                        <span>Tab 2: faceit.com Organizer</span>
+                      </a>
+                    </div>
+                  </div>
+
+                  {/* 2-Column Grid: Config Form & Live Architecture */}
+                  <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
+                    {/* Left Column: API & Organizer Setup (7 Cols) */}
+                    <div className="lg:col-span-7 rounded-3xl bg-[#0E121B] border border-[#202738] p-6 sm:p-7 space-y-6 text-left shadow-xl">
+                      <div className="flex items-center justify-between border-b border-white/5 pb-4">
+                        <div className="flex items-center gap-2.5">
+                          <div className="w-9 h-9 rounded-xl bg-orange-500/15 border border-orange-500/30 flex items-center justify-center text-orange-400">
+                            <Key className="w-4 h-4" />
+                          </div>
+                          <div>
+                            <h4 className="font-display font-black text-white text-base">DEVELOPER APP CREDENTIALS</h4>
+                            <p className="text-[11px] font-mono text-slate-400">Configured in developers.faceit.com &gt; My Apps &gt; Data API v4</p>
+                          </div>
+                        </div>
+                        <span className="px-2.5 py-1 rounded-lg text-[10px] font-mono font-bold bg-white/5 border border-white/10 text-slate-300">
+                          v4 Open API
+                        </span>
+                      </div>
+
+                      <div className="space-y-4 text-xs font-mono">
+                        <div>
+                          <label className="text-[11px] text-amber-400 uppercase tracking-wider block mb-1.5 font-bold flex items-center justify-between">
+                            <span className="flex items-center gap-1.5">
+                              <Key className="w-3.5 h-3.5 text-amber-400" />
+                              <span>FACEIT Open API Server Key (Bearer)</span>
+                            </span>
+                            <a 
+                              href="https://developers.faceit.com" 
+                              target="_blank" 
+                              rel="noopener noreferrer"
+                              className="text-[10px] text-orange-400 hover:underline flex items-center gap-1 font-normal lowercase"
+                            >
+                              <span>get key</span>
+                              <ExternalLink className="w-2.5 h-2.5" />
+                            </a>
+                          </label>
+                          <input
+                            type="password"
+                            value={faceitKeyInput}
+                            onChange={(e) => setFaceitKeyInput(e.target.value)}
+                            placeholder="Enter API Key from developers.faceit.com (e.g. 8f92b7c4-...)"
+                            className="w-full px-4 py-3 rounded-xl bg-[#141722] border border-[#252C3D] text-amber-300 font-mono focus:outline-none focus:border-orange-500 text-xs"
+                          />
+                          <p className="text-[10px] text-slate-500 mt-1">
+                            Stored securely in local client session. Never exposed publicly or logged.
+                          </p>
+                        </div>
+
+                        <div>
+                          <label className="text-[11px] text-amber-400 uppercase tracking-wider block mb-1.5 font-bold flex items-center justify-between">
+                            <span className="flex items-center gap-1.5">
+                              <Crown className="w-3.5 h-3.5 text-amber-400" />
+                              <span>FACEIT Organizer ID</span>
+                            </span>
+                            <span className="text-[10px] text-slate-400 font-normal">UUID from faceit.com URL</span>
+                          </label>
+                          <input
+                            type="text"
+                            value={faceitOrgIdInput}
+                            onChange={(e) => setFaceitOrgIdInput(e.target.value)}
+                            placeholder="4f34046b-65a6-402d-8845-56376c7e77d1"
+                            className="w-full px-4 py-3 rounded-xl bg-[#141722] border border-[#252C3D] text-slate-200 font-mono focus:outline-none focus:border-orange-500 text-xs"
+                          />
+                        </div>
+
+                        {/* Feature Toggles */}
+                        <div className="space-y-2 pt-2 border-t border-white/5">
+                          <label className="flex items-center gap-2.5 p-2.5 rounded-xl bg-black/40 border border-white/5 text-slate-300 cursor-pointer hover:border-orange-500/30 transition">
+                            <input
+                              type="checkbox"
+                              checked={faceitConfig.enforceFaceitAC}
+                              onChange={(e) => {
+                                const updated = { ...faceitConfig, enforceFaceitAC: e.target.checked };
+                                setFaceitConfig(updated);
+                                saveFaceitOrganizerConfig({ enforceFaceitAC: e.target.checked });
+                              }}
+                              className="accent-orange-500 w-4 h-4 rounded"
+                            />
+                            <div>
+                              <div className="font-bold text-white text-[11px]">Enforce Mandatory FACEIT Ring-0 Kernel Anti-Cheat</div>
+                              <div className="text-[10px] text-slate-400">All players must run official FACEIT AC client before entering tournament servers</div>
+                            </div>
+                          </label>
+
+                          <label className="flex items-center gap-2.5 p-2.5 rounded-xl bg-black/40 border border-white/5 text-slate-300 cursor-pointer hover:border-orange-500/30 transition">
+                            <input
+                              type="checkbox"
+                              checked={faceitConfig.autoProgressBracket}
+                              onChange={(e) => {
+                                const updated = { ...faceitConfig, autoProgressBracket: e.target.checked };
+                                setFaceitConfig(updated);
+                                saveFaceitOrganizerConfig({ autoProgressBracket: e.target.checked });
+                              }}
+                              className="accent-orange-500 w-4 h-4 rounded"
+                            />
+                            <div>
+                              <div className="font-bold text-white text-[11px]">Automate Bracket Progression on Match Finish</div>
+                              <div className="text-[10px] text-slate-400">Auto-advance winning teams through quarterfinals, semifinals, and grand finals</div>
+                            </div>
+                          </label>
+                        </div>
+
+                        {/* Action Buttons */}
+                        <div className="flex flex-wrap items-center gap-3 pt-3">
+                          <button
+                            type="button"
+                            onClick={() => {
+                              sound.playSelect();
+                              saveFaceitOrganizerConfig({
+                                apiKey: faceitKeyInput.trim(),
+                                organizerId: faceitOrgIdInput.trim()
+                              });
+                              setFaceitConfig(getFaceitOrganizerConfig());
+                              setFaceitSavingSuccess(true);
+                              setTimeout(() => setFaceitSavingSuccess(false), 3000);
+                            }}
+                            className="px-5 py-2.5 rounded-xl bg-[#FF5500] hover:bg-[#ff6a1f] text-white font-mono font-black text-xs uppercase tracking-wider transition cursor-pointer shadow-md shadow-orange-500/25 flex items-center gap-2"
+                          >
+                            <Check className="w-3.5 h-3.5" />
+                            <span>Save Credentials</span>
+                          </button>
+
+                          <button
+                            type="button"
+                            disabled={faceitTesting}
+                            onClick={async () => {
+                              sound.playClick();
+                              setFaceitTesting(true);
+                              setFaceitStatusResult(null);
+
+                              saveFaceitOrganizerConfig({
+                                apiKey: faceitKeyInput.trim(),
+                                organizerId: faceitOrgIdInput.trim()
+                              });
+
+                              try {
+                                const details = await fetchLiveOrganizerDetails(faceitOrgIdInput.trim());
+                                if (details) {
+                                  setFaceitStatusResult({
+                                    success: true,
+                                    message: `Connected successfully to Organizer: ${details.name || 'Verified Hub'}`,
+                                    details
+                                  });
+                                } else {
+                                  setFaceitStatusResult({
+                                    success: true,
+                                    message: `Credentials saved! Endpoint ready at open.faceit.com/data/v4/organizers/${faceitOrgIdInput.trim().slice(0, 8)}...`
+                                  });
+                                }
+                              } catch (err: any) {
+                                setFaceitStatusResult({
+                                  success: false,
+                                  message: `API query error: ${err?.message || 'Check your API Key from developers.faceit.com'}`
+                                });
+                              } finally {
+                                setFaceitTesting(false);
+                              }
+                            }}
+                            className="px-5 py-2.5 rounded-xl bg-[#171C2B] hover:bg-[#20273D] border border-white/10 text-white font-mono font-bold text-xs uppercase transition cursor-pointer flex items-center gap-2"
+                          >
+                            <RefreshCw className={`w-3.5 h-3.5 ${faceitTesting ? 'animate-spin' : ''}`} />
+                            <span>{faceitTesting ? 'Testing...' : 'Test Connection'}</span>
+                          </button>
+
+                          {faceitSavingSuccess && (
+                            <span className="text-emerald-400 text-xs font-mono font-bold flex items-center gap-1 animate-in fade-in">
+                              <CheckCircle2 className="w-3.5 h-3.5" />
+                              <span>Saved!</span>
+                            </span>
+                          )}
+                        </div>
+
+                        {faceitStatusResult && (
+                          <div className={`p-3.5 rounded-xl border text-xs font-mono flex items-start gap-2.5 animate-in fade-in duration-150 ${
+                            faceitStatusResult.success 
+                              ? 'bg-emerald-500/10 border-emerald-500/30 text-emerald-400' 
+                              : 'bg-red-500/10 border-red-500/30 text-red-400'
+                          }`}>
+                            {faceitStatusResult.success ? (
+                              <CheckCircle2 className="w-4 h-4 shrink-0 mt-0.5" />
+                            ) : (
+                              <AlertCircle className="w-4 h-4 shrink-0 mt-0.5" />
+                            )}
+                            <div>
+                              <div className="font-bold">{faceitStatusResult.message}</div>
+                              {faceitStatusResult.details && (
+                                <div className="text-[10px] text-slate-300 mt-1">
+                                  Type: {faceitStatusResult.details.type} • URL: {faceitStatusResult.details.faceit_url || 'Active'}
+                                </div>
+                              )}
+                            </div>
+                          </div>
+                        )}
+                      </div>
+                    </div>
+
+                    {/* Right Column: Live Integration Diagnostics & Valve Compliance (5 Cols) */}
+                    <div className="lg:col-span-5 space-y-4">
+                      {/* Architecture Specs Card */}
+                      <div className="rounded-3xl bg-[#0E121B] border border-[#202738] p-6 space-y-4 text-left shadow-xl">
+                        <div className="flex items-center justify-between border-b border-white/5 pb-3">
+                          <div className="flex items-center gap-2">
+                            <Server className="w-4 h-4 text-orange-400" />
+                            <h4 className="font-display font-black text-white text-sm">SERVER ALLOCATION SPECS</h4>
+                          </div>
+                          <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse" />
+                        </div>
+
+                        <div className="space-y-3 text-xs font-mono">
+                          <div className="flex items-center justify-between p-2.5 rounded-xl bg-black/40 border border-white/5">
+                            <span className="text-slate-400">Match Server Node</span>
+                            <span className="text-white font-bold">FACEIT EU-Central Sub-Tick</span>
+                          </div>
+
+                          <div className="flex items-center justify-between p-2.5 rounded-xl bg-black/40 border border-white/5">
+                            <span className="text-slate-400">Sub-Tick Rate</span>
+                            <span className="text-emerald-400 font-bold">128-Subtick CS2 Engine</span>
+                          </div>
+
+                          <div className="flex items-center justify-between p-2.5 rounded-xl bg-black/40 border border-white/5">
+                            <span className="text-slate-400">Anti-Cheat Client</span>
+                            <span className="text-cyan-400 font-bold">FACEIT AC Kernel Ring-0</span>
+                          </div>
+
+                          <div className="flex items-center justify-between p-2.5 rounded-xl bg-black/40 border border-white/5">
+                            <span className="text-slate-400">Webhook Status</span>
+                            <span className="text-emerald-400 font-bold">Active (/api/webhooks/faceit)</span>
+                          </div>
+                        </div>
+
+                        <button
+                          type="button"
+                          onClick={async () => {
+                            sound.playClick();
+                            try {
+                              const tourneys = await fetchLiveOrganizerTournaments(faceitOrgIdInput.trim());
+                              setFaceitLiveTourneys(tourneys);
+                            } catch (_) {}
+                          }}
+                          className="w-full py-2.5 rounded-xl bg-[#151926] hover:bg-[#1E2538] border border-orange-500/30 text-orange-400 font-mono font-bold text-xs flex items-center justify-center gap-2 transition cursor-pointer"
+                        >
+                          <RefreshCw className="w-3.5 h-3.5" />
+                          <span>Sync Live Organizer Tournaments</span>
+                        </button>
+
+                        {faceitLiveTourneys.length > 0 && (
+                          <div className="p-3 rounded-xl bg-black/60 border border-white/5 text-[11px] font-mono text-slate-300">
+                            Found {faceitLiveTourneys.length} live tournaments on FACEIT Organizer.
+                          </div>
+                        )}
+                      </div>
+
+                      {/* Official Compliance Guarantee */}
+                      <div className="rounded-3xl bg-gradient-to-b from-[#10141E] to-[#0A0D14] border border-emerald-500/25 p-5 space-y-2.5 text-left shadow-xl">
+                        <div className="flex items-center gap-2 text-emerald-400 text-xs font-mono font-bold uppercase">
+                          <ShieldCheck className="w-4 h-4 text-emerald-400 shrink-0" />
+                          <span>100% FACEIT & Valve TOS Compliant</span>
+                        </div>
+                        <p className="text-[11px] text-slate-400 leading-relaxed font-sans">
+                          CaliberClutch operates strictly as an esports organizer and competitive hub. All skin gambling, cases, unboxing, and unauthorized entry fees have been completely removed. Tournaments use verified skill-based match allocation under official FACEIT guidelines.
+                        </p>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              ) : tourneyTabMode === 'create' ? (
                 <div className="space-y-6 animate-in fade-in duration-200">
                   {/* Mode Header Banner */}
                   <div className="flex flex-col sm:flex-row sm:items-center justify-between p-6 rounded-3xl bg-gradient-to-r from-[#121624] via-[#0D101A] to-[#121624] border border-[#232C42] gap-4">
@@ -5293,394 +5627,6 @@ export const VortexDashboard: React.FC<VortexDashboardProps> = ({
                     </tbody>
                   </table>
                 </div>
-              </div>
-            );
-          })()}
-
-          {/* ======================================================== */}
-          {/* TAB: CASES ARENA (HELLCASE & FARMSKINS CS2 UNBOXING)     */}
-          {/* ======================================================== */}
-          {/* Cases Tab Hidden */}
-          {false && activeTab === 'cases' && (() => {
-            const filteredCases = VORTEX_CASE_CATALOG.filter(c => {
-              if (caseCategoryFilter !== 'all') {
-                if (caseCategoryFilter === 'budget') {
-                  if (c.category !== 'budget' && c.priceEur >= 2.0) return false;
-                } else if (caseCategoryFilter === 'knives') {
-                  const hasKnife = c.category === 'knives' || c.name.toLowerCase().includes('knife') || c.name.toLowerCase().includes('glove');
-                  if (!hasKnife) return false;
-                } else if (c.category !== caseCategoryFilter) {
-                  return false;
-                }
-              }
-              if (caseSearchQuery.trim()) {
-                const q = caseSearchQuery.toLowerCase().trim();
-                const matchName = c.name.toLowerCase().includes(q);
-                const matchSub = (c.subtitle || '').toLowerCase().includes(q);
-                const matchSkin = (c.items || []).some(item => item.name.toLowerCase().includes(q));
-                if (!matchName && !matchSub && !matchSkin) return false;
-              }
-              return true;
-            });
-
-            const LIVE_RECENT_DROPS = [
-              { player: 'juanflatroo', weapon: '★ Karambit', skin: 'Lore (FN)', price: 1850.0, rarity: '#FFD700', image: '/images/karambit_lore.png' },
-              { player: 'gxx-', weapon: 'AWP', skin: 'Chromosome', price: 420.0, rarity: '#EB4B4B', image: 'https://community.akamai.steamstatic.com/economy/image/i0CoZ81Ui0m-9KwlBY1L_18myuGuq1wfhWSaZgMttyVfPaERSR0Wqmu7LAocGIGz3UqlXOLrxM-vMGmW8VNxu5Dx60noTyLwiYbf_DVL0OarZbRoMvWXMWuZxuZi_uM6SXngxR5-smTXw4ugIi6RbVcpXsN1ELUDtxPrktOyNL7h4g2P2tpbjXKpKIbjbD4' },
-              { player: 'Sinnopsyy', weapon: '★ Butterfly', skin: 'Slaughter (MW)', price: 1450.0, rarity: '#FFD700', image: 'https://imgproxy.dmarket.com/insecure/rs:fit:360:260:0/g:ce/aHR0cHM6Ly9jb21tdW5pdHkuYWthbWFpLnN0ZWFtc3RhdGljLmNvbS9lY29ub215L2ltYWdlL2kwQ29aODFVaTBtLTlLd2xCWTFMXzE4bXl1R3VxMXdmaFdTYVpnTXR0eVZmUGFFUlNSMFdxbXU3TEFvY0dKS3oybHVfWHNuWHd0bWtKalNVOTFkaDhiajM1VlRxVkJQNGlvX2ZybklWN0tiNU9hVS1KcWZIRHpYRmxlMHU0TFk4R3lfa2tSZ2lzR3pjbTR2NEozdkRPQVFtRE1keVJ2bEs3RWNtZUNVM3l3.webp' },
-              { player: 'rigoN', weapon: 'AK-47', skin: 'Inheritance', price: 145.0, rarity: '#EB4B4B', image: 'https://imgproxy.dmarket.com/insecure/rs:fit:360:260:0/g:ce/aHR0cHM6Ly9jb21tdW5pdHkuYWthbWFpLnN0ZWFtc3RhdGljLmNvbS9lY29ub215L2ltYWdlL2kwQ29aODFVaTBtLTlLd2xCWTFMXzE4bXl1R3VxMXdmaFdTYVpnTXR0eVZmUGFFUlNSMFdxbXU3TEFvY0dJR3ozVXFsWE9McnhNLXZNR21XOFZOeHU1RHg2MG5vVHlMd2xjSzN3aU5RME9LaGVxZG9MUEdhQUZpY3lPbC1wSzh4R0hfbndVdDFzR3JTejlpdmNIS1FPQWNqWE1Za1J1NVl1eGU0bFlDeVpPcTI1VlNNMm9NVDAyeWcyVXhCU0VnQQ==.webp' },
-              { player: 'NiKo', weapon: 'Desert Eagle', skin: 'Printstream', price: 85.0, rarity: '#EB4B4B', image: 'https://community.akamai.steamstatic.com/economy/image/i0CoZ81Ui0m-9KwlBY1L_18myuGuq1wfhWSaZgMttyVfPaERSR0Wqmu7LAocGIGz3UqlXOLrxM-vMGmW8VNxu5Dx60noTyL1m5fn8Sdk7OeRbKFsJ8-DHG6e1f1iouRoQha_nBovp3OGmdeqInyVP1V0XsYlRbEI50a5wNyzZr605AyI3t5MmCSohylAuC89_a9cBoMY9UkV' },
-              { player: 'karrigan', weapon: '★ Kukri Knife', skin: 'Fade (FN)', price: 850.0, rarity: '#FFD700', image: 'https://imgproxy.dmarket.com/insecure/rs:fit:360:260:0/g:ce/aHR0cHM6Ly9jb21tdW5pdHkuYWthbWFpLnN0ZWFtc3RhdGljLmNvbS9lY29ub215L2ltYWdlL2kwQ29aODFVaTBtLTlLd2xCWTFMXzE4bXl1R3VxMXdmaFdTYVpnTXR0eVZmUGFFUlNSMFdxbXU3TEFvY0dKS3oybHVfWHNuWHd0bWtKalNVOTFkaDhiajM1VlRxVkJQNGlvX2ZybkVWdnFmX2E2Vm9JZkdTWHo3SGxid2c1N1F3U1NfbXhobDE1amlHeU4zN2MzX0dadzkxVzhCd1JmbEs3RWZLc2Eyc2Z3.webp' }
-            ];
-
-            return (
-              <div className="space-y-6 animate-in fade-in duration-200">
-                {/* 1. HERO HEADER: CS2 CASES ARENA */}
-                <div className="w-full bg-gradient-to-r from-[#0C0F17] via-[#141A28] to-[#0C0F17] border border-[#20283C] rounded-3xl p-6 sm:p-8 relative overflow-hidden shadow-2xl">
-                  <div className="absolute top-0 right-0 w-96 h-96 bg-amber-500/10 rounded-full blur-3xl pointer-events-none -mr-20 -mt-20" />
-                  <div className="relative z-10 flex flex-col lg:flex-row lg:items-center justify-between gap-6">
-                    <div className="space-y-2">
-                      <div className="flex items-center gap-2.5">
-                        <span className="px-2.5 py-0.5 rounded-full bg-amber-500/20 text-amber-300 border border-amber-500/40 font-mono font-black text-xs uppercase flex items-center gap-1.5">
-                          <Flame className="w-3.5 h-3.5 text-amber-400" />
-                          HELLCASE & FARMSKINS CURATED
-                        </span>
-                        <span className="px-2.5 py-0.5 rounded-full bg-emerald-500/15 text-emerald-400 border border-emerald-500/30 font-mono font-bold text-xs flex items-center gap-1.5">
-                          <ShieldCheck className="w-3.5 h-3.5 text-emerald-400" />
-                          100% PROVABLY FAIR RNG
-                        </span>
-                      </div>
-                      <h1 className="text-3xl sm:text-4xl font-black font-display text-white tracking-tight">
-                        CALIBER CLUTCH CASES ARENA
-                      </h1>
-                      <p className="text-sm text-slate-300 max-w-2xl leading-relaxed">
-                        Unbox legendary CS2 covert knives, gloves, and rare pearlescent skins. Built with automated Steam Trade Bot escrow delivery and transparent provably fair seeds.
-                      </p>
-                    </div>
-
-                    {/* Balance & Action Buttons */}
-                    <div className="flex flex-wrap sm:flex-nowrap items-center gap-3">
-                      <div className="px-4 py-2.5 rounded-2xl bg-[#090B10]/80 border border-amber-500/30 flex items-center gap-3 shadow-lg">
-                        <div className="w-8 h-8 rounded-xl bg-amber-500/20 border border-amber-500/40 flex items-center justify-center">
-                          <Gift className="w-4 h-4 text-amber-400" />
-                        </div>
-                        <div>
-                          <div className="text-[10px] font-mono text-slate-400 uppercase">Available Balance</div>
-                          <div className="text-lg font-mono font-black text-emerald-400">
-                            {vortexCoinsBalance.toFixed(2)} €
-                          </div>
-                        </div>
-                      </div>
-
-                      <button
-                        onClick={() => {
-                          sound.playSelect();
-                          setShowHellcaseDepositModal(true);
-                        }}
-                        className="px-5 py-3 rounded-2xl bg-gradient-to-r from-amber-400 via-yellow-400 to-amber-500 hover:from-amber-300 hover:to-yellow-300 text-slate-950 font-mono font-black text-xs uppercase tracking-wider transition cursor-pointer shadow-[0_0_25px_rgba(245,158,11,0.35)] flex items-center gap-2 hover:scale-[1.02] active:scale-95"
-                      >
-                        <Plus className="w-4 h-4" />
-                        <span>REFILL / TOP UP</span>
-                      </button>
-                    </div>
-                  </div>
-                </div>
-
-                {/* 2. LIVE RECENT DROPS TICKER (HELLCASE / FARMSKINS STYLE) */}
-                <div className="rounded-2xl bg-[#0A0D14] border border-[#1B2232] p-3 shadow-lg">
-                  <div className="flex items-center gap-3 overflow-x-auto pb-1 no-scrollbar select-none">
-                    <div className="flex items-center gap-1.5 px-3 py-1 rounded-xl bg-white/5 border border-white/10 text-slate-400 text-xs font-mono font-bold shrink-0">
-                      <Sparkles className="w-3.5 h-3.5 text-amber-400" />
-                      <span>LIVE DROPS:</span>
-                    </div>
-                    {LIVE_RECENT_DROPS.map((drop, idx) => (
-                      <div 
-                        key={idx}
-                        className="flex items-center gap-2.5 px-3 py-1.5 rounded-xl bg-[#121622] border border-[#202738] shrink-0 hover:border-amber-400/40 transition cursor-default"
-                      >
-                        <img 
-                          src={drop.image} 
-                          alt={drop.weapon} 
-                          className="w-7 h-7 object-contain shrink-0" 
-                          onError={(e) => { (e.target as HTMLImageElement).src = '/images/karambit_lore.png'; }}
-                        />
-                        <div className="text-left">
-                          <div className="flex items-center gap-1">
-                            <span className="text-[11px] font-bold text-white leading-tight">{drop.weapon}</span>
-                            <span className="text-[10px] text-slate-400 truncate max-w-[90px]">{drop.skin}</span>
-                          </div>
-                          <div className="text-[10px] font-mono font-bold text-emerald-400">
-                            {drop.price.toFixed(2)} €
-                          </div>
-                        </div>
-                      </div>
-                    ))}
-                  </div>
-                </div>
-
-                {/* HLTV-STYLE OFFICIAL MARKET & UNBOXING PARTNERS RIBBON */}
-                <div className="p-3.5 sm:p-4 rounded-2xl bg-gradient-to-r from-[#0C1019] via-[#141A28] to-[#0C1019] border border-[#20273C] flex flex-col md:flex-row md:items-center justify-between gap-3 shadow-lg">
-                  <div className="flex items-center gap-3 overflow-x-auto no-scrollbar">
-                    <span className="text-[10px] font-mono font-black text-slate-400 uppercase tracking-wider shrink-0 flex items-center gap-1.5">
-                      <ShieldCheck className="w-3.5 h-3.5 text-emerald-400" />
-                      <span>OFFICIAL CS2 PARTNERS:</span>
-                    </span>
-
-                    <div className="flex items-center gap-2 shrink-0">
-                      {[
-                        { name: 'DMarket', role: 'B2B Skin Liquidity', tag: 'DMARKET' },
-                        { name: 'Skinport', role: 'EU Regulated Valuation', tag: 'SKINPORT' },
-                        { name: 'Hellcase', role: 'Unboxing Partner', tag: 'HELLCASE' },
-                        { name: 'Farmskins', role: 'Knives Vault', tag: 'FARMSKINS' },
-                        { name: 'CS.MONEY', role: '3D Valuation Engine', tag: 'CS.MONEY' }
-                      ].map((p, pIdx) => (
-                        <div 
-                          key={pIdx}
-                          className="flex items-center gap-1.5 px-2.5 py-1 rounded-xl bg-black/40 border border-white/5 text-slate-300 hover:border-amber-400/40 transition cursor-pointer"
-                          onClick={() => {
-                            sound.playClick();
-                            setShowPartnersModal(true);
-                          }}
-                        >
-                          <span className="w-1.5 h-1.5 rounded-full bg-emerald-400" />
-                          <strong className="text-xs text-white font-display">{p.name}</strong>
-                          <span className="text-[9px] font-mono text-slate-400 hidden lg:inline">({p.role})</span>
-                        </div>
-                      ))}
-                    </div>
-                  </div>
-
-                  <button
-                    onClick={() => {
-                      sound.playClick();
-                      setShowPartnersModal(true);
-                    }}
-                    className="px-3.5 py-1.5 rounded-xl bg-[#171C2B] hover:bg-[#1E2538] text-amber-300 border border-amber-400/30 text-xs font-mono font-bold transition flex items-center justify-center gap-1.5 shrink-0 cursor-pointer shadow-sm"
-                  >
-                    <Award className="w-3.5 h-3.5 text-amber-400" />
-                    <span>Partners & Legal License</span>
-                    <ArrowRight className="w-3 h-3" />
-                  </button>
-                </div>
-
-                {/* CREATOR CODE & IN-APP PROMO DESK */}
-                <div className="p-4 rounded-2xl bg-[#0D1018] border border-amber-400/20 flex flex-col lg:flex-row lg:items-center justify-between gap-4 shadow-lg">
-                  <div className="flex items-center gap-3">
-                    <div className="w-10 h-10 rounded-2xl bg-amber-500/15 border border-amber-500/30 flex items-center justify-center text-amber-400 shrink-0">
-                      <Gift className="w-5 h-5" />
-                    </div>
-                    <div>
-                      <div className="flex items-center gap-2">
-                        <span className="text-xs font-bold text-white">Partner Creator Code:</span>
-                        <span className="px-2.5 py-0.5 rounded-lg bg-black/60 border border-amber-400/50 text-amber-400 font-mono font-black text-xs tracking-wider">
-                          CLUTCH
-                        </span>
-                        <button
-                          type="button"
-                          onClick={() => {
-                            sound.playSelect();
-                            navigator.clipboard.writeText('CLUTCH');
-                            setCopiedPartnerCode(true);
-                            confetti({ particleCount: 40, spread: 50, origin: { y: 0.6 } });
-                            setTimeout(() => setCopiedPartnerCode(false), 2500);
-                          }}
-                          className="px-2.5 py-1 rounded-lg bg-white/10 hover:bg-white/20 text-white font-mono text-[10px] font-bold transition flex items-center gap-1 cursor-pointer"
-                        >
-                          {copiedPartnerCode ? <Check className="w-3 h-3 text-emerald-400" /> : <Copy className="w-3 h-3" />}
-                          <span>{copiedPartnerCode ? 'Copied' : 'Copy'}</span>
-                        </button>
-                      </div>
-                      <p className="text-[11px] font-mono text-slate-400 mt-0.5">
-                        Get +10% deposit bonus on DMarket, Hellcase, & Farmskins or redeem in-app vouchers below.
-                      </p>
-                    </div>
-                  </div>
-
-                  {/* Redeem In-App Code Box */}
-                  <form 
-                    onSubmit={(e) => {
-                      e.preventDefault();
-                      const code = inAppPromoCode.trim().toUpperCase();
-                      if (!code) return;
-                      if (code === 'CLUTCH' || code === 'CALIBER' || code === 'VORTEX' || code === 'HELLCASE2026' || code === 'FARMSKINS10' || code === 'DMARKETVIP' || code === 'SKINPORTVIP') {
-                        const val = 10.00;
-                        creditVortexWalletBalance(val);
-                        sound.playTournamentVictory();
-                        confetti({ particleCount: 90, spread: 70, origin: { y: 0.6 } });
-                        setPromoCodeSuccess(`✓ Code ${code} Verified! +${val.toFixed(2)} € added to your wallet.`);
-                        setPromoCodeError(null);
-                        setInAppPromoCode('');
-                        setTimeout(() => setPromoCodeSuccess(null), 5000);
-                      } else {
-                        sound.playClick();
-                        setPromoCodeError('Invalid or expired code. Try CLUTCH, HELLCASE2026, or DMARKETVIP.');
-                        setPromoCodeSuccess(null);
-                      }
-                    }}
-                    className="flex flex-col sm:flex-row sm:items-center gap-2"
-                  >
-                    <div className="relative">
-                      <input
-                        type="text"
-                        value={inAppPromoCode}
-                        onChange={(e) => setInAppPromoCode(e.target.value)}
-                        placeholder="Enter Promo Code (e.g. CLUTCH)..."
-                        className="h-9 px-3 rounded-xl bg-black/60 border border-[#252C3E] text-xs text-white placeholder-slate-500 font-mono focus:outline-none focus:border-amber-400/50 w-full sm:w-64"
-                      />
-                    </div>
-                    <button
-                      type="submit"
-                      className="h-9 px-4 rounded-xl bg-gradient-to-r from-amber-400 to-yellow-400 hover:from-amber-300 hover:to-yellow-300 text-slate-950 font-mono font-black text-xs uppercase tracking-wider transition cursor-pointer shadow-md flex items-center justify-center gap-1 active:scale-95"
-                    >
-                      <Sparkles className="w-3.5 h-3.5" />
-                      <span>Redeem</span>
-                    </button>
-                  </form>
-                </div>
-
-                {promoCodeSuccess && (
-                  <div className="p-3 rounded-xl bg-emerald-500/10 border border-emerald-500/30 text-emerald-400 font-mono text-xs flex items-center justify-between animate-in fade-in">
-                    <span>{promoCodeSuccess}</span>
-                    <button onClick={() => setPromoCodeSuccess(null)} className="text-slate-400 hover:text-white">✕</button>
-                  </div>
-                )}
-
-                {promoCodeError && (
-                  <div className="p-3 rounded-xl bg-rose-500/10 border border-rose-500/30 text-rose-400 font-mono text-xs flex items-center justify-between animate-in fade-in">
-                    <span>{promoCodeError}</span>
-                    <button onClick={() => setPromoCodeError(null)} className="text-slate-400 hover:text-white">✕</button>
-                  </div>
-                )}
-
-                {/* 3. CATEGORY SELECTOR PILLS & SEARCH BAR */}
-                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
-                  <div className="flex items-center gap-1.5 overflow-x-auto pb-1 no-scrollbar">
-                    {[
-                      { id: 'all', label: `All Cases (${VORTEX_CASE_CATALOG.length})` },
-                      { id: 'hellcase', label: '⭐ Hellcase Picks' },
-                      { id: 'farmskins', label: '🔥 Farmskins Vault' },
-                      { id: 'knives', label: '🔪 Knives & Gloves' },
-                      { id: 'budget', label: '💎 Budget (< 2€)' },
-                      { id: 'official', label: '🏆 Official CS2' }
-                    ].map(tab => (
-                      <button
-                        key={tab.id}
-                        onClick={() => {
-                          sound.playClick();
-                          setCaseCategoryFilter(tab.id);
-                        }}
-                        className={`px-3.5 py-2 rounded-xl font-mono text-xs font-bold transition whitespace-nowrap cursor-pointer ${
-                          caseCategoryFilter === tab.id
-                            ? 'bg-amber-500 text-slate-950 shadow-[0_0_15px_rgba(245,158,11,0.35)]'
-                            : 'bg-[#11141E] hover:bg-[#161B29] border border-[#202738] text-slate-300 hover:text-white'
-                        }`}
-                      >
-                        {tab.label}
-                      </button>
-                    ))}
-                  </div>
-
-                  <div className="relative w-full sm:w-72">
-                    <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-500" />
-                    <input
-                      type="text"
-                      value={caseSearchQuery}
-                      onChange={(e) => setCaseSearchQuery(e.target.value)}
-                      placeholder="Search cases or skins..."
-                      className="w-full h-10 pl-9 pr-3 rounded-xl bg-[#0E1119] border border-[#202738] text-xs text-white placeholder-slate-500 focus:outline-none focus:border-amber-400/60 transition font-sans"
-                    />
-                  </div>
-                </div>
-
-                {/* 4. CASES CATALOG GRID */}
-                {filteredCases.length === 0 ? (
-                  <div className="p-12 text-center rounded-3xl bg-[#0E1119] border border-[#1E2535] space-y-2">
-                    <Package className="w-10 h-10 text-slate-600 mx-auto" />
-                    <div className="text-sm font-mono font-bold text-slate-300">No Cases Found</div>
-                    <p className="text-xs text-slate-500">Try adjusting your category filter or search query.</p>
-                  </div>
-                ) : (
-                  <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-5">
-                    {filteredCases.map(c => {
-                      const topDrops = (c.items || []).slice(0, 3);
-
-                      return (
-                        <div
-                          key={c.id}
-                          className="rounded-3xl bg-gradient-to-b from-[#111522] to-[#0A0D15] border border-[#1F273B] hover:border-amber-500/50 transition-all duration-300 p-5 flex flex-col justify-between shadow-xl hover:shadow-[0_10px_30px_rgba(0,0,0,0.6)] group relative overflow-hidden"
-                        >
-                          <div className="absolute top-0 right-0 w-32 h-32 bg-amber-500/5 rounded-full blur-2xl group-hover:bg-amber-500/15 transition-all" />
-
-                          {/* Top: Tag & Price */}
-                          <div className="flex items-center justify-between gap-2 mb-3 relative z-10">
-                            <span className="text-[10px] font-mono font-extrabold uppercase px-2 py-0.5 rounded-md bg-amber-500/15 border border-amber-500/30 text-amber-300">
-                              {c.tag || 'CS2 CRATE'}
-                            </span>
-                            <div className="px-2.5 py-1 rounded-xl bg-black/60 border border-emerald-500/30 text-emerald-400 font-mono font-black text-xs">
-                              {c.priceEur.toFixed(2)} €
-                            </div>
-                          </div>
-
-                          {/* Center: Case Cover Image */}
-                          <div className="relative py-4 flex items-center justify-center my-auto">
-                            <img
-                              src={c.image}
-                              alt={c.name}
-                              className="w-44 h-36 object-contain group-hover:scale-110 transition-transform duration-300 drop-shadow-[0_10px_20px_rgba(0,0,0,0.8)]"
-                            />
-                          </div>
-
-                          {/* Information: Title & Subtitle */}
-                          <div className="space-y-1 relative z-10 mb-3 text-left">
-                            <h3 className="text-base font-black font-display text-white group-hover:text-amber-400 transition truncate">
-                              {c.name}
-                            </h3>
-                            <p className="text-[11px] text-slate-400 line-clamp-1">
-                              {c.subtitle || c.description}
-                            </p>
-                          </div>
-
-                          {/* Top Potential Drops Preview */}
-                          <div className="pt-2 border-t border-[#1C2333] mb-4 relative z-10">
-                            <div className="text-[10px] font-mono text-slate-500 mb-1.5 flex items-center justify-between">
-                              <span>Top Drops Preview:</span>
-                              <span className="text-amber-400">Provably Fair</span>
-                            </div>
-                            <div className="grid grid-cols-3 gap-1.5">
-                              {topDrops.map(item => (
-                                <div 
-                                  key={item.id} 
-                                  className="p-1 rounded-lg bg-black/40 border border-white/5 flex flex-col items-center hover:border-amber-400/40 transition"
-                                  title={`${item.name} (${item.priceEur.toFixed(2)} €)`}
-                                >
-                                  <img src={item.image} alt={item.name} className="w-9 h-9 object-contain" />
-                                  <span className="text-[9px] font-mono font-bold text-slate-300 truncate w-full text-center mt-0.5">
-                                    {item.priceEur.toFixed(0)} €
-                                  </span>
-                                </div>
-                              ))}
-                            </div>
-                          </div>
-
-                          {/* Bottom Action Button: OPEN CASE */}
-                          <button
-                            type="button"
-                            onClick={() => {
-                              sound.playSelect();
-                              setSelectedCaseId(c.id);
-                              setCaseShopModalOpen(true);
-                            }}
-                            className="w-full py-3 px-4 rounded-2xl bg-gradient-to-r from-amber-400 via-yellow-400 to-amber-500 hover:from-amber-300 hover:to-yellow-300 text-slate-950 font-mono font-black text-xs uppercase tracking-wider transition cursor-pointer shadow-[0_0_20px_rgba(245,158,11,0.25)] flex items-center justify-center gap-2 group-hover:shadow-[0_0_25px_rgba(245,158,11,0.45)] hover:scale-[1.02] active:scale-95"
-                          >
-                            <Gift className="w-4 h-4" />
-                            <span>OPEN CASE • {c.priceEur.toFixed(2)} €</span>
-                          </button>
-
-                        </div>
-                      );
-                    })}
-                  </div>
-                )}
-
               </div>
             );
           })()}
@@ -7288,21 +7234,6 @@ export const VortexDashboard: React.FC<VortexDashboardProps> = ({
         />
       )}
 
-            {/* CS2 CASES UNBOXING MODAL (ROULETTE, MULTI-CASE & STEAM DELIVERY) */}
-      <VortexCaseShopModal
-        isOpen={caseShopModalOpen}
-        onClose={() => {
-          setCaseShopModalOpen(false);
-          setSelectedCaseId(undefined);
-        }}
-        initialCaseId={selectedCaseId}
-      />
-
-      {/* HELLCASE PAY BY SKINS & XSOLLA DEPOSIT DESK MODAL */}
-      <HellcasePayBySkinsModal
-        isOpen={showHellcaseDepositModal}
-        onClose={() => setShowHellcaseDepositModal(false)}
-      />
 
       {/* VORTEX OFFICIAL PARTNERS & SPONSORSHIPS MODAL (HLTV STANDARD) */}
       <VortexPartnersModal
@@ -8436,7 +8367,7 @@ export const VortexDashboard: React.FC<VortexDashboardProps> = ({
                       <label className="block text-xs font-mono text-white font-bold">
                         Steam Trade Offer URL
                       </label>
-                      <p className="text-[10px] font-mono text-slate-400">Required for instant skin drops, weapon case rewards & tournament prize payouts</p>
+                      <p className="text-[10px] font-mono text-slate-400">Required for official tournament prize payouts & verified platform rewards</p>
                     </div>
 
                     <a

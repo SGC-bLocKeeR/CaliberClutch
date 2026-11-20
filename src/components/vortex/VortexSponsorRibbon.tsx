@@ -36,52 +36,40 @@ export const VortexComingSoonDeals: React.FC<VortexComingSoonDealsProps> = ({
 
   const DEALS = [
     {
-      id: 'hellcase',
-      name: 'Hellcase',
-      tagline: 'CS2 Case Opening & Upgrader',
-      bonus: '+10% DEPOSIT BONUS + FREE CRATE',
+      id: 'steelseries',
+      name: 'SteelSeries Esports',
+      tagline: 'Official Pro Gaming Headsets & Esports Gear',
+      bonus: '15% OFF PRO GAMING GEAR WITH CODE CLUTCH',
       promoCode: 'CLUTCH',
-      buttonText: 'Claim Free Crate',
-      url: 'https://hellcase.com/f/vortex',
-      color: '#F59E0B',
-      accentBg: 'rgba(245, 158, 11, 0.12)',
-      badge: 'TOP UNBOXING PARTNER'
+      buttonText: 'Claim Pro Gear',
+      url: 'https://steelseries.com',
+      color: '#FF5500',
+      accentBg: 'rgba(255, 85, 0, 0.12)',
+      badge: 'OFFICIAL ESPORTS GEAR'
     },
     {
-      id: 'dmarket',
-      name: 'DMarket',
-      tagline: 'Instant CS2 Skin Marketplace & Cashout',
-      bonus: 'LOWEST TRADING FEES + INSTANT BOT',
+      id: 'zowie',
+      name: 'ZOWIE by BenQ',
+      tagline: 'Tournament Standard 240Hz/360Hz Monitors & Mice',
+      bonus: 'OFFICIAL TOURNAMENT ESPORTS HARDWARE',
       promoCode: 'CLUTCH',
-      buttonText: 'Trade Skins Now',
-      url: 'https://dmarket.com?ref=vortex',
-      color: '#10B981',
-      accentBg: 'rgba(16, 185, 129, 0.12)',
-      badge: 'OFFICIAL SKIN VAULT'
+      buttonText: 'View Esports Displays',
+      url: 'https://zowie.benq.com',
+      color: '#EF4444',
+      accentBg: 'rgba(239, 68, 68, 0.12)',
+      badge: 'TOURNAMENT MONITOR PARTNER'
     },
     {
-      id: 'farmskins',
-      name: 'Farmskins',
-      tagline: 'Covert Knives & Gloves Vault',
-      bonus: 'FREE $1.00 BALANCE + DAILY KNIFE SPIN',
+      id: 'logitech',
+      name: 'Logitech G PRO',
+      tagline: 'Wireless Esports Mice, Keyboards & Audio',
+      bonus: 'VERIFIED TOURNAMENT COMPETITIVE PERIPHERALS',
       promoCode: 'CLUTCH',
-      buttonText: 'Get $1.00 Free',
-      url: 'https://farmskins.com/ref/vortex',
-      color: '#F43F5E',
-      accentBg: 'rgba(244, 63, 94, 0.12)',
-      badge: 'KNIFE VAULT SPONSOR'
-    },
-    {
-      id: 'vortex-smartlink',
-      name: 'Clutch Direct Loot',
-      tagline: 'Instant CS2 Skin Rewards & Partner Offers',
-      bonus: 'DAILY BONUS OFFERS + INSTANT CASHOUT',
-      promoCode: 'CLUTCH',
-      buttonText: 'Claim Free Loot',
-      url: 'https://uplcm.com/4/12281615',
-      color: '#A855F7',
-      accentBg: 'rgba(168, 85, 247, 0.12)',
-      badge: 'MONETAG SMART REWARD'
+      buttonText: 'Explore Pro Line',
+      url: 'https://www.logitechg.com',
+      color: '#0284C7',
+      accentBg: 'rgba(2, 132, 199, 0.12)',
+      badge: 'OFFICIAL PERIPHERAL PARTNER'
     }
   ];
 
@@ -224,7 +212,7 @@ export const VortexTopSponsorRibbon: React.FC<{ onOpenPartnersModal: () => void 
         </span>
 
         <p className="text-xs text-slate-200 font-sans">
-          Use creator code <strong className="text-amber-400 font-mono">CLUTCH</strong> on <span className="text-white font-semibold">Hellcase & DMarket</span> for <strong className="text-emerald-400">+10% Extra Deposit Balance & Free Daily Case</strong>.
+          Use partner code <strong className="text-amber-400 font-mono">CLUTCH</strong> on <span className="text-white font-semibold">SteelSeries & ZOWIE</span> for <strong className="text-emerald-400">official esports gear discounts & verified tournament partner benefits</strong>.
         </p>
       </div>
 

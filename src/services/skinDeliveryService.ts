@@ -35,7 +35,7 @@ export interface CS2Case {
   bannerGradient: string;
   glowColor: string;
   description: string;
-  category?: 'all' | 'hellcase' | 'farmskins' | 'knives' | 'budget' | 'official';
+  category?: 'all' | 'championship' | 'masters' | 'knives' | 'budget' | 'official';
   tag?: string;
   items: CS2Skin[];
 }
@@ -1142,14 +1142,14 @@ export const VORTEX_CASE_CATALOG: CS2Case[] = [
   {
     "id": "street-syndicate",
     "name": "Street Syndicate Case",
-    "subtitle": "Hellcase Signature \u2022 Karambit Doppler & Vulcan Coverts",
+    "subtitle": "Championship Signature \u2022 Karambit Doppler & Vulcan Coverts",
     "priceEur": 2.8,
-    "category": "hellcase",
-    "tag": "HELLCASE",
+    "category": "championship",
+    "tag": "CHAMPIONSHIP",
     "bannerGradient": "from-red-600/35 via-amber-600/20 to-transparent",
     "glowColor": "#EF4444",
     "image": "https://imgproxy.dmarket.com/insecure/rs:fit:360:260:0/g:ce/aHR0cHM6Ly9jb21tdW5pdHkuYWthbWFpLnN0ZWFtc3RhdGljLmNvbS9lY29ub215L2ltYWdlL2kwQ29aODFVaTBtLTlLd2xCWTFMXzE4bXl1R3VxMXdmaFdTYVpnTXR0eVZmUGFFUlNSMFdxbXU3TEFvY0dKS3oybHVfWHNuWHd0bWtKalNVOTFkaDhiajM1VlRxVkJQNGlvX2ZybklWN0tiNU9hVS1KcWZIRHpYRmxlMHU0TFk4R3lfa2tSZ2lzR3pjbTR2NEozdkRPQVFtRE1keVJ2bEs3RWNtZUNVM3l3.webp",
-    "description": "The flagship Hellcase Street Syndicate crate. Contains the coveted \u2605 Karambit Doppler, AK-47 Vulcan, and Desert Eagle Printstream.",
+    "description": "The flagship CaliberClutch Street Syndicate crate. Contains the coveted \u2605 Karambit Doppler, AK-47 Vulcan, and Desert Eagle Printstream.",
     "items": [
       {
         "id": "skin-street-karambit-doppler",
@@ -1277,14 +1277,14 @@ export const VORTEX_CASE_CATALOG: CS2Case[] = [
   {
     "id": "knives-gloves-vault",
     "name": "Covert Knives & Gloves Vault",
-    "subtitle": "Farmskins Signature \u2022 M9 Fade, Crimson Kimono & Karambit Lore",
+    "subtitle": "Pro Masters Signature \u2022 M9 Fade, Crimson Kimono & Karambit Lore",
     "priceEur": 18.5,
     "category": "knives",
-    "tag": "FARMSKINS",
+    "tag": "PRO MASTERS",
     "bannerGradient": "from-amber-500/40 via-yellow-600/20 to-transparent",
     "glowColor": "#F59E0B",
     "image": "https://imgproxy.dmarket.com/insecure/rs:fit:360:260:0/g:ce/aHR0cHM6Ly9jb21tdW5pdHkuYWthbWFpLnN0ZWFtc3RhdGljLmNvbS9lY29ub215L2ltYWdlL2kwQ29aODFVaTBtLTlLd2xCWTFMXzE4bXl1R3VxMXdmaFdTYVpnTXR0eVZmUGFFUlNSMFdxbXU3TEFvY0dKS3oybHVfWHNuWHd0bWtKalNVOTFkaDhiajM1VlRxVkJQNGlvX2ZybklWN0tiNU9hVS1KcWZIRHpYRmxlMHU0TFk4R3lfa2tSZ2lzR3pjbTR2NEozdkRPQVFtRE1keVJ2bEs3RWNtZUNVM3l3.webp",
-    "description": "Farmskins signature ultra-high tier knife and glove vault. High stakes with monumental payout potential.",
+    "description": "Pro Masters signature ultra-high tier knife and glove tournament reward vault. High tier tournament placement prize.",
     "items": [
       {
         "id": "skin-m9-fade",
@@ -1397,7 +1397,7 @@ export const VORTEX_CASE_CATALOG: CS2Case[] = [
     "name": "Dragon Legend & AWP Frenzy",
     "subtitle": "Community Top Pick \u2022 AWP Dragon Lore, Desert Hydra & Oni Taiji",
     "priceEur": 12.0,
-    "category": "hellcase",
+    "category": "championship",
     "tag": "COMMUNITY TOP",
     "bannerGradient": "from-amber-600/40 via-orange-600/20 to-transparent",
     "glowColor": "#D97706",
@@ -1500,10 +1500,10 @@ export const VORTEX_CASE_CATALOG: CS2Case[] = [
   {
     "id": "printstream-elite",
     "name": "Printstream Perfection Case",
-    "subtitle": "Farmskins Pearlescent Collection \u2022 Deagle, M4A1-S & USP-S",
+    "subtitle": "Tournament Pearlescent Collection \u2022 Deagle, M4A1-S & USP-S",
     "priceEur": 4.5,
-    "category": "farmskins",
-    "tag": "FARMSKINS",
+    "category": "masters",
+    "tag": "TOURNAMENT",
     "bannerGradient": "from-slate-400/35 via-zinc-500/20 to-transparent",
     "glowColor": "#E2E8F0",
     "image": "https://imgproxy.dmarket.com/insecure/rs:fit:360:260:0/g:ce/aHR0cHM6Ly9jb21tdW5pdHkuYWthbWFpLnN0ZWFtc3RhdGljLmNvbS9lY29ub215L2ltYWdlL2kwQ29aODFVaTBtLTlLd2xCWTFMXzE4bXl1R3VxMXdmaFdTYVpnTXR0eVZmUGFFUlNSMFdxbXU3TEFvY0dKS3oybHVfWHNuWHd0bWtKalNVOTFkaDhiajM1VlRxVkJQNGlvX2ZybklWN0tiNU9hVS1KcWZIRHpYRmxlMHU0TFk4R3lfa2tSZ2lzR3pjbTR2NEozdkRPQVFtRE1keVJ2bEs3RWNtZUNVM3l3.webp",

@@ -41,9 +41,7 @@ import confetti from 'canvas-confetti';
 import { sound } from '../../utils/soundEffects';
 import { CountryFlag } from './CountryFlag';
 import { FaceitVerificationBadge } from './VortexDashboard';
-import { VortexCaseShopModal } from './VortexCaseShopModal';
 import { XsollaCheckoutModal } from './XsollaCheckoutModal';
-import { HellcasePayBySkinsModal } from './HellcasePayBySkinsModal';
 import { VortexWithdrawModal } from './VortexWithdrawModal';
 import { getVortexWalletBalance } from '../../services/skinDeliveryService';
 import {
@@ -142,10 +140,8 @@ export const VortexRightSocialRail: React.FC<VortexRightSocialRailProps> = ({
     countryName?: string;
   } | null>(null);
 
-  // In-Platform White-Label CS2 Cases Store State
-  const [showCaseShopModal, setShowCaseShopModal] = useState(false);
+  // Modals & Wallet State
   const [showXsollaTopUp, setShowXsollaTopUp] = useState(false);
-  const [showHellcaseModal, setShowHellcaseModal] = useState(false);
   const [showWithdrawModal, setShowWithdrawModal] = useState(false);
   const [vortexBalance, setVortexBalance] = useState<number>(() => getVortexWalletBalance());
 
@@ -196,24 +192,24 @@ export const VortexRightSocialRail: React.FC<VortexRightSocialRailProps> = ({
 
   const CS2_PARTNERS = [
     {
-      id: 'key-drop',
-      name: 'Key-Drop CS2',
-      tagline: 'Best Case Battles & Upgrade System',
-      bonus: '+10% Deposit Bonus + Free Gold Case',
-      url: 'https://key-drop.com/?code=VORTEX',
-      badgeColor: '#EAB308',
-      image: 'https://community.akamai.steamstatic.com/economy/image/-9a81dlWLwJ2UUGcVs_nsVtzdOEdtWwKGZZLQHTxDZ7I56KU0Zwwo4NUX4oFJZEHLbXH5ApeO4YmlhxYQknCRvCo04DEVlxkKgpovbssLQJf2OD3fm5b09mJmYm0m_7zO6-fzj9V7cAl2eyVpIrz2FKx_0FtZ2D1cIGRcQRsYQ7Q81W3lOjxxcjr3M4pYjY/360fx360f',
-      features: ['Instant Steam Bot Trades', 'Daily Free Crates', 'Provably Fair 100%']
+      id: 'steelseries',
+      name: 'SteelSeries Esports',
+      tagline: 'Official Pro Gaming Headsets & Gear',
+      bonus: '15% Off with code VORTEX',
+      url: 'https://steelseries.com',
+      badgeColor: '#FF5500',
+      image: 'https://community.akamai.steamstatic.com/economy/image/-9a81dlWLwJ2UUGcVs_nsVtzdOEdtWwKGZZLQHTxDZ7I56KU0Zwwo4NUX4oFJZEHLbXH5ApeO4YmlhxYQknCRvCo04DEVlxkKgpou-6kejhz2v_Nfz5H_uO1gb-Gw_alIITfn2xV_Pp_jez--YXygED6-kZkYj3wLITDdQc8MlCG_Fftxr3ug8C0u5vNnHJr6SQmsH6MnRDi1gYMMLIqu-Y0gQ/360fx360f',
+      features: ['ClearCast AI Microphone', 'Nova Pro Wireless Audio', 'Aerox Ultra-Light Mice']
     },
     {
-      id: 'hellcase',
-      name: 'Hellcase CS2',
-      tagline: 'World Leading CS2 Crate Platform',
-      bonus: '+10% Bonus + Free $0.70 Starter Case',
-      url: 'https://hellcase.com/f/VORTEX',
+      id: 'zowie',
+      name: 'ZOWIE by BenQ',
+      tagline: 'Tournament Standard 240Hz/360Hz Monitors',
+      bonus: 'Official Tournament Display Partner',
+      url: 'https://zowie.benq.com',
       badgeColor: '#EF4444',
       image: 'https://community.akamai.steamstatic.com/economy/image/-9a81dlWLwJ2UUGcVs_nsVtzdOEdtWwKGZZLQHTxDZ7I56KU0Zwwo4NUX4oFJZEHLbXH5ApeO4YmlhxYQknCRvCo04DEVlxkKgpot621FABz7PLfYQJS5NO0m5O0m_7zO6-fk29T-sBzpezT_I2tiVXs-RE5YTincY-WdVA4N13R81brx-e51sW9786czydiuSQn4ivcnBfmn1gSOd0N_1mS/360fx360f',
-      features: ['Covert Knife Crates', 'Contracts & Upgrades', '10M+ Users Worldwide']
+      features: ['DyAc 2 Fast Clarity', '360Hz Fast TN Esports Panels', 'Symmetrical & Ergonomic Mice']
     },
     {
       id: 'skinport',
@@ -624,38 +620,23 @@ export const VortexRightSocialRail: React.FC<VortexRightSocialRailProps> = ({
         {/* MIDDLE SECTION: Notifications • Social • Party Capsule */}
         <div className={`flex-col gap-3 w-full flex-1 pt-3 overflow-y-auto ${mobileCollapsed ? 'hidden' : 'flex'} lg:flex`}>
           
-          {/* AUTHENTIC VORTEX COIN BALANCE & REFILL BAR (PLACED DIRECTLY ABOVE NOTIFICATIONS) */}
-          <div className="w-full px-2 py-1.5 rounded-2xl bg-gradient-to-r from-[#0C101A] via-[#121726] to-[#0C101A] border border-emerald-500/35 hover:border-emerald-400/50 shadow-[0_4px_20px_rgba(16,185,129,0.12)] flex items-center justify-between gap-1.5 transition select-none">
-            {/* Clickable Single Vortex Coin Balance Pill */}
-            <button
-              type="button"
-              onClick={() => {
-                sound.playSelect();
-                setShowHellcaseModal(true);
-              }}
-              className="flex items-center gap-1.5 px-2 py-1 rounded-xl bg-black/60 hover:bg-black/90 border border-amber-500/30 hover:border-amber-400/60 shadow-[0_0_10px_rgba(245,158,11,0.12)] transition cursor-pointer group active:scale-95 shrink-0"
-              title="Caliber Clutch Balance • Click to top up / refill"
+          {/* AUTHENTIC VORTEX WALLET BALANCE BAR */}
+          <div className="w-full px-2.5 py-1.5 rounded-2xl bg-gradient-to-r from-[#0C101A] via-[#121726] to-[#0C101A] border border-emerald-500/35 shadow-[0_4px_20px_rgba(16,185,129,0.12)] flex items-center justify-between gap-1.5 select-none">
+            <div
+              className="flex items-center gap-1.5 px-2 py-1 rounded-xl bg-black/60 border border-emerald-500/30 shrink-0"
+              title="Caliber Clutch Official Balance"
             >
-              <div className="w-4 h-4 rounded-full bg-amber-500/20 border border-amber-500/40 flex items-center justify-center shrink-0">
-                <Coins className="w-2.5 h-2.5 text-amber-400 group-hover:scale-110 transition-transform drop-shadow-[0_0_4px_rgba(245,158,11,0.5)]" />
+              <div className="w-4 h-4 rounded-full bg-emerald-500/20 border border-emerald-500/40 flex items-center justify-center shrink-0">
+                <Coins className="w-2.5 h-2.5 text-emerald-400" />
               </div>
-              <span className="font-mono font-black text-xs text-emerald-400 group-hover:text-emerald-300 tracking-tight whitespace-nowrap">
+              <span className="font-mono font-black text-xs text-emerald-400 tracking-tight whitespace-nowrap">
                 {vortexBalance.toFixed(2)} €
               </span>
-            </button>
+            </div>
 
-            {/* REFILL Button matching Hellcase Screenshot (Compact & Clean) */}
-            <button
-              type="button"
-              onClick={() => {
-                sound.playSelect();
-                setShowHellcaseModal(true);
-              }}
-              className="px-2.5 py-1 rounded-lg bg-gradient-to-r from-emerald-500 to-teal-400 hover:from-emerald-400 hover:to-teal-300 text-slate-950 font-mono font-black text-[10px] leading-none transition cursor-pointer shadow-[0_0_10px_rgba(16,185,129,0.3)] flex items-center justify-center shrink-0 hover:scale-105 active:scale-95"
-              title="Filling up the balance • Pay by Skins, Crypto & Cards"
-            >
-              <span className="tracking-tight">REFILL</span>
-            </button>
+            <span className="px-2 py-0.5 rounded-md bg-emerald-500/15 border border-emerald-500/30 text-emerald-400 font-mono text-[9px] font-bold uppercase tracking-wider">
+              WALLET
+            </span>
           </div>
 
           {/* Notifications Button */}
@@ -836,23 +817,18 @@ export const VortexRightSocialRail: React.FC<VortexRightSocialRailProps> = ({
             {/* Wallet Balance & Action Buttons */}
             <div className="space-y-2 pt-1">
               <div 
-                onClick={() => {
-                  sound.playSelect();
-                  setShowHellcaseModal(true);
-                }}
-                className="flex items-center justify-between text-xs font-mono font-bold text-slate-200 bg-white/[0.04] hover:bg-white/[0.08] px-3 py-1.5 rounded-xl border border-white/5 hover:border-amber-400/40 cursor-pointer transition select-none"
-                title="Filling up the balance • Pay by Skins, Crypto & Cards"
+                className="flex items-center justify-between text-xs font-mono font-bold text-slate-200 bg-white/[0.04] px-3 py-1.5 rounded-xl border border-white/5 select-none"
               >
                 <div className="flex items-center gap-1.5">
                   <Coins className="w-3.5 h-3.5 text-amber-400" />
                   <span className="text-emerald-400 font-black">{vortexBalance.toFixed(2)} €</span>
                 </div>
-                <span className="text-[9px] text-emerald-400 font-black uppercase bg-emerald-500/15 border border-emerald-500/30 px-1.5 py-0.5 rounded">
-                  +TOP UP
+                <span className="text-[9px] text-slate-400 font-mono font-bold uppercase bg-white/5 border border-white/10 px-1.5 py-0.5 rounded">
+                  WALLET
                 </span>
               </div>
 
-              {/* Single Full-Width Action: WITHDRAW */}
+              {/* Single Full-Width Action: CLAIM PRIZES */}
               <div className="pt-1">
                 <button
                   type="button"
@@ -861,9 +837,9 @@ export const VortexRightSocialRail: React.FC<VortexRightSocialRailProps> = ({
                     setShowWithdrawModal(true);
                   }}
                   className="w-full py-2 px-2.5 rounded-xl bg-amber-500/10 hover:bg-amber-500/20 border border-amber-500/30 text-amber-400 font-mono text-xs font-bold transition cursor-pointer flex items-center justify-center gap-1.5 hover:scale-[1.01] active:scale-95"
-                  title="Withdraw won CS2 skins to Steam or Cashout to Crypto"
+                  title="Claim official tournament prize rewards & cashouts"
                 >
-                  <span>WITHDRAW SKINS & CASH</span>
+                  <span>CLAIM TOURNAMENT PRIZES</span>
                   <ArrowUpRight className="w-3.5 h-3.5" />
                 </button>
               </div>
@@ -1607,17 +1583,17 @@ export const VortexRightSocialRail: React.FC<VortexRightSocialRailProps> = ({
                     </div>
                     <div className="min-w-0 flex-1 text-xs">
                       <p className="text-slate-200">
-                        <strong className="text-white font-bold">You</strong> received 50 FACEIT Points from your FACEIT Case.
+                        <strong className="text-white font-bold">You</strong> received 50 FACEIT Points from Daily Ladder Mission.
                       </p>
-                      <button 
-                        onClick={() => {
-                          sound.playSelect();
-                          setShowCaseShopModal(true);
-                        }}
-                        className="text-orange-500 hover:text-orange-400 font-bold mt-0.5 inline-block cursor-pointer"
+                      <a 
+                        href="https://www.faceit.com/en/shop"
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="text-orange-500 hover:text-orange-400 font-bold mt-0.5 inline-flex items-center gap-1 cursor-pointer"
                       >
-                        Explore the shop.
-                      </button>
+                        <span>Redeem in FACEIT Shop</span>
+                        <ExternalLink className="w-2.5 h-2.5" />
+                      </a>
                       <div className="flex items-center gap-1 text-[10px] text-slate-500 mt-1 font-mono">
                         <ShoppingBag className="w-3 h-3" />
                         <span>13:20 GMT+1</span>
@@ -1632,7 +1608,7 @@ export const VortexRightSocialRail: React.FC<VortexRightSocialRailProps> = ({
                     </div>
                     <div className="min-w-0 flex-1 text-xs">
                       <p className="text-slate-200">
-                        <strong className="text-white font-bold">You</strong> received 1 Access Token from your FACEIT Case
+                        <strong className="text-white font-bold">You</strong> received 1 Access Token from Tournament Mission.
                       </p>
                       <div className="flex items-center gap-1 text-[10px] text-slate-500 mt-1 font-mono">
                         <ShoppingBag className="w-3 h-3" />
@@ -1641,24 +1617,24 @@ export const VortexRightSocialRail: React.FC<VortexRightSocialRailProps> = ({
                     </div>
                   </div>
 
-                  {/* Case 100 Points */}
+                  {/* 100 Points */}
                   <div className="flex items-start gap-3 p-2 rounded-xl hover:bg-white/[0.03] transition cursor-pointer">
                     <div className="w-9 h-9 rounded-full bg-[#151722] border border-[#222533] flex items-center justify-center shrink-0">
                       <span className="text-orange-500 font-black text-xs">◀</span>
                     </div>
                     <div className="min-w-0 flex-1 text-xs">
                       <p className="text-slate-200">
-                        <strong className="text-white font-bold">You</strong> received 100 FACEIT Points from your FACEIT Case.
+                        <strong className="text-white font-bold">You</strong> received 100 FACEIT Points from Weekly Scrim Series.
                       </p>
-                      <button 
-                        onClick={() => {
-                          sound.playSelect();
-                          setShowCaseShopModal(true);
-                        }}
-                        className="text-orange-500 hover:text-orange-400 font-bold mt-0.5 inline-block cursor-pointer"
+                      <a 
+                        href="https://www.faceit.com/en/shop"
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="text-orange-500 hover:text-orange-400 font-bold mt-0.5 inline-flex items-center gap-1 cursor-pointer"
                       >
-                        Explore the shop.
-                      </button>
+                        <span>Redeem in FACEIT Shop</span>
+                        <ExternalLink className="w-2.5 h-2.5" />
+                      </a>
                       <div className="flex items-center gap-1 text-[10px] text-slate-500 mt-1 font-mono">
                         <ShoppingBag className="w-3 h-3" />
                         <span>13:19 GMT+1</span>
@@ -1666,24 +1642,24 @@ export const VortexRightSocialRail: React.FC<VortexRightSocialRailProps> = ({
                     </div>
                   </div>
 
-                  {/* Case 80 Points */}
+                  {/* 80 Points */}
                   <div className="flex items-start gap-3 p-2 rounded-xl hover:bg-white/[0.03] transition cursor-pointer">
                     <div className="w-9 h-9 rounded-full bg-[#151722] border border-[#222533] flex items-center justify-center shrink-0">
                       <span className="text-orange-500 font-black text-xs">◀</span>
                     </div>
                     <div className="min-w-0 flex-1 text-xs">
                       <p className="text-slate-200">
-                        <strong className="text-white font-bold">You</strong> received 80 FACEIT Points from your FACEIT Case.
+                        <strong className="text-white font-bold">You</strong> received 80 FACEIT Points from Match MVP Award.
                       </p>
-                      <button 
-                        onClick={() => {
-                          sound.playSelect();
-                          setShowCaseShopModal(true);
-                        }}
-                        className="text-orange-500 hover:text-orange-400 font-bold mt-0.5 inline-block cursor-pointer"
+                      <a 
+                        href="https://www.faceit.com/en/shop"
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="text-orange-500 hover:text-orange-400 font-bold mt-0.5 inline-flex items-center gap-1 cursor-pointer"
                       >
-                        Explore the shop.
-                      </button>
+                        <span>Redeem in FACEIT Shop</span>
+                        <ExternalLink className="w-2.5 h-2.5" />
+                      </a>
                       <div className="flex items-center gap-1 text-[10px] text-slate-500 mt-1 font-mono">
                         <ShoppingBag className="w-3 h-3" />
                         <span>13:19 GMT+1</span>
@@ -1691,24 +1667,24 @@ export const VortexRightSocialRail: React.FC<VortexRightSocialRailProps> = ({
                     </div>
                   </div>
 
-                  {/* Case 500 Points */}
+                  {/* 500 Points */}
                   <div className="flex items-start gap-3 p-2 rounded-xl hover:bg-white/[0.03] transition cursor-pointer">
                     <div className="w-9 h-9 rounded-full bg-[#151722] border border-[#222533] flex items-center justify-center shrink-0">
                       <span className="text-orange-500 font-black text-xs">◀</span>
                     </div>
                     <div className="min-w-0 flex-1 text-xs">
                       <p className="text-slate-200">
-                        <strong className="text-white font-bold">You</strong> received 500 FACEIT Points from your FACEIT Case.
+                        <strong className="text-white font-bold">You</strong> received 500 FACEIT Points from Division Championship Placement.
                       </p>
-                      <button 
-                        onClick={() => {
-                          sound.playSelect();
-                          setShowCaseShopModal(true);
-                        }}
-                        className="text-orange-500 hover:text-orange-400 font-bold mt-0.5 inline-block cursor-pointer"
+                      <a 
+                        href="https://www.faceit.com/en/shop"
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="text-orange-500 hover:text-orange-400 font-bold mt-0.5 inline-flex items-center gap-1 cursor-pointer"
                       >
-                        Explore the shop.
-                      </button>
+                        <span>Redeem in FACEIT Shop</span>
+                        <ExternalLink className="w-2.5 h-2.5" />
+                      </a>
                       <div className="flex items-center gap-1 text-[10px] text-slate-500 mt-1 font-mono">
                         <ShoppingBag className="w-3 h-3" />
                         <span>13:14 GMT+1</span>
@@ -2174,7 +2150,7 @@ export const VortexRightSocialRail: React.FC<VortexRightSocialRailProps> = ({
                 >
                   <div className="flex items-center gap-2 text-amber-400">
                     <ArrowUpRight className="w-4 h-4 group-hover:scale-110 transition-transform" />
-                    <span>Withdraw Skins & Crypto</span>
+                    <span>Tournament Rewards & Payouts</span>
                   </div>
                   <span className="text-[10px] font-mono text-amber-400 uppercase font-bold tracking-wider">CASHOUT →</span>
                 </button>
@@ -2391,23 +2367,6 @@ export const VortexRightSocialRail: React.FC<VortexRightSocialRailProps> = ({
           <span>{spectateToast}</span>
         </div>
       )}
-
-      {/* ======================================================== */}
-      {/* 7. VORTEX WHITE-LABEL CS2 CASES & STEAM TRADE BOT MODAL   */}
-      {/* ======================================================== */}
-      <VortexCaseShopModal 
-        isOpen={showCaseShopModal} 
-        onClose={() => setShowCaseShopModal(false)} 
-      />
-
-      {/* ======================================================== */}
-      {/* 8. HELLCASE PAY BY SKINS & FILLING UP THE BALANCE MODAL   */}
-      {/* ======================================================== */}
-      <HellcasePayBySkinsModal
-        isOpen={showHellcaseModal}
-        onClose={() => setShowHellcaseModal(false)}
-        initialMethod="overview"
-      />
 
       {/* ======================================================== */}
       {/* 8.5 VORTEX STEAM TRADE OFFER & CRYPTO WITHDRAWAL MODAL    */}

@@ -637,17 +637,17 @@ export const VortexPureHtmlLanding: React.FC<VortexPureHtmlLandingProps> = ({
                 <div>
                   <div className="flex items-center gap-2 mb-2.5">
                     <span className="px-2 py-0.5 rounded text-[10px] font-mono font-bold tracking-wider uppercase bg-[#18210C] text-[#A3E635] border border-[#A3E635]/40">
-                      INSTANT STEAM P2P
+                      VERIFIED TOURNAMENT
                     </span>
                     <span className="text-[10px] font-mono font-bold tracking-wider text-slate-400 uppercase">
-                      SKIN DROPS
+                      PRIZE REWARDS
                     </span>
                   </div>
                   <div className="text-2xl font-black font-display text-white tracking-wide uppercase">
-                    SKINS & PRIZE POOLS
+                    ESPORTS & PRIZE POOLS
                   </div>
                   <p className="text-sm text-[#94A3B8] mt-2.5 leading-relaxed">
-                    Compete for real prize pools awarded instantly to your wallet. Unlock daily free CS2 weapon cases and withdraw rare knives and skins directly to your Steam Trade URL.
+                    Compete for real tournament prize pools awarded directly to verified winners. Earn season rank points, climb competitive divisions, and qualify for official CaliberClutch championships.
                   </p>
                 </div>
 
@@ -832,11 +832,11 @@ export const VortexPureHtmlLanding: React.FC<VortexPureHtmlLandingProps> = ({
                     </li>
                     <li className="flex items-center gap-3">
                       <Check className="w-4 h-4 text-[#A3E635] shrink-0" />
-                      <span>2x Clutch Coin Drops & Daily Free Weapon Case</span>
+                      <span>2x Season Point Multiplier & Verified Scrim Access</span>
                     </li>
                     <li className="flex items-center gap-3">
                       <Check className="w-4 h-4 text-[#A3E635] shrink-0" />
-                      <span>0% Fee on P2P Skin Market Withdrawals</span>
+                      <span>Zero Platform Fees on Tournament Prize Payouts</span>
                     </li>
                   </ul>
                 </div>
@@ -899,7 +899,7 @@ export const VortexPureHtmlLanding: React.FC<VortexPureHtmlLandingProps> = ({
                     </li>
                     <li className="flex items-center gap-3">
                       <Check className="w-4 h-4 text-cyan-400 shrink-0" />
-                      <span>5x Daily Weapon Cases & 2x Knife Drop Multiplier</span>
+                      <span>5x Season Point Multiplier & Dedicated GOTV Demo Storage</span>
                     </li>
                     <li className="flex items-center gap-3">
                       <Check className="w-4 h-4 text-cyan-400 shrink-0" />

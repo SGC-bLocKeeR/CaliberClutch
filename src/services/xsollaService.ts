@@ -99,7 +99,7 @@ export const XSOLLA_WALLET_PACKAGES: XsollaOrderItem[] = [
     id: 'topup-100',
     sku: 'VTX-WAL-100',
     title: '100.00 € Vortex High-Roller Funds (+10% Extra)',
-    description: 'Includes 10.00 € complimentary deposit bonus and VIP case opening privileges.',
+    description: 'Includes 10.00 € complimentary deposit bonus and VIP tournament privileges.',
     amountEur: 100.00,
     type: 'wallet_topup',
   },
