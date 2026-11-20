@@ -30,7 +30,9 @@ import {
   Flame,
   Award,
   Smile,
-  ImageIcon
+  ImageIcon,
+  Sparkles,
+  Ban
 } from 'lucide-react';
 import { sound } from '../../utils/soundEffects';
 import confetti from 'canvas-confetti';
@@ -325,6 +327,27 @@ const FaceitPriorityStar: React.FC<{ size?: number; className?: string }> = ({ s
   </div>
 );
 
+export const CS2_ACTIVE_DUTY_MAPS = [
+  { id: 'mirage', name: 'Mirage', image: '/images/maps/cs2_mirage.png', desc: 'Tactical Middle' },
+  { id: 'inferno', name: 'Inferno', image: '/images/maps/cs2_inferno.png', desc: 'Banana & Church' },
+  { id: 'nuke', name: 'Nuke', image: '/images/maps/cs2_nuke.png', desc: 'Vertical Reactor' },
+  { id: 'dust2', name: 'Dust II', image: '/images/maps/cs2_dust2.png', desc: 'Long A & Catwalk' },
+  { id: 'ancient', name: 'Ancient', image: '/images/maps/cs2_ancient.png', desc: 'Ruins & Mid' },
+  { id: 'anubis', name: 'Anubis', image: '/images/maps/cs2_anubis.png', desc: 'Canals & Temples' },
+  { id: 'vertigo', name: 'Vertigo', image: '/images/maps/cs2_vertigo.png', desc: 'High-Rise Construction' },
+];
+
+export const getMapImage = (name: string): string => {
+  const norm = (name || '').toLowerCase().replace(/[\s_]/g, '');
+  if (norm.includes('mirage')) return '/images/maps/cs2_mirage.png';
+  if (norm.includes('inferno')) return '/images/maps/cs2_inferno.png';
+  if (norm.includes('nuke')) return '/images/maps/cs2_nuke.png';
+  if (norm.includes('dust')) return '/images/maps/cs2_dust2.png';
+  if (norm.includes('ancient')) return '/images/maps/cs2_ancient.png';
+  if (norm.includes('vertigo')) return '/images/maps/cs2_vertigo.png';
+  return '/images/maps/cs2_anubis.png';
+};
+
 export const VortexMatchRoom: React.FC<VortexMatchRoomProps> = ({
   matchId = 'VTX-89421',
   currentGamerTag = 'M14',
@@ -537,16 +560,124 @@ export const VortexMatchRoom: React.FC<VortexMatchRoomProps> = ({
   } | null>(null);
   const [copiedServerIp, setCopiedServerIp] = useState<boolean>(false);
 
-  // Map Veto Exact List
-  const vetoHistoryList = useMemo(() => [
-    { step: 1, text: `${activeMatch.team1.name} banned Cache`, isDecided: false },
-    { step: 2, text: `${activeMatch.team2.name} banned Inferno`, isDecided: false },
-    { step: 3, text: `${activeMatch.team1.name} banned Nuke`, isDecided: false },
-    { step: 4, text: `${activeMatch.team2.name} banned Ancient`, isDecided: false },
-    { step: 5, text: `${activeMatch.team1.name} banned Mirage`, isDecided: false },
-    { step: 6, text: `${activeMatch.team2.name} banned Dust2`, isDecided: false },
-    { step: 7, text: `${activeMatch.map} picked by default`, isDecided: true }
-  ], [activeMatch]);
+  // Dynamic Interactive Map Veto State
+  const [currentSelectedMap, setCurrentSelectedMap] = useState<string>(activeMatch.map || 'Anubis');
+  const [isInteractiveVetoOpen, setIsInteractiveVetoOpen] = useState<boolean>(false);
+  const [bannedMapIds, setBannedMapIds] = useState<string[]>([]);
+  const [vetoHistory, setVetoHistory] = useState<Array<{ step: number; text: string; isDecided: boolean; team: string; mapName: string }>>([]);
+  const [isOpponentBanning, setIsOpponentBanning] = useState<boolean>(false);
+
+  const remainingMaps = CS2_ACTIVE_DUTY_MAPS.filter(m => !bannedMapIds.includes(m.id));
+  const isVetoCompleted = remainingMaps.length === 1;
+
+  const handleUserBanMap = (mapId: string) => {
+    if (bannedMapIds.includes(mapId) || isOpponentBanning || remainingMaps.length <= 1) return;
+
+    sound.playMapBan();
+    const bannedMap = CS2_ACTIVE_DUTY_MAPS.find(m => m.id === mapId);
+    if (!bannedMap) return;
+
+    const nextBanned = [...bannedMapIds, mapId];
+    setBannedMapIds(nextBanned);
+
+    const stepNum = vetoHistory.length + 1;
+    const userBanEntry = {
+      step: stepNum,
+      text: `${activeMatch.team1.name} banned ${bannedMap.name}`,
+      isDecided: false,
+      team: activeMatch.team1.name,
+      mapName: bannedMap.name
+    };
+
+    const newHistory = [...vetoHistory, userBanEntry];
+    setVetoHistory(newHistory);
+
+    const leftAfterUser = CS2_ACTIVE_DUTY_MAPS.filter(m => !nextBanned.includes(m.id));
+
+    if (leftAfterUser.length === 1) {
+      const winner = leftAfterUser[0];
+      setCurrentSelectedMap(winner.name);
+      sound.playMapPick();
+      confetti({ particleCount: 80, spread: 70 });
+      setVetoHistory([
+        ...newHistory,
+        {
+          step: stepNum + 1,
+          text: `${winner.name} picked as final competitive map`,
+          isDecided: true,
+          team: 'System',
+          mapName: winner.name
+        }
+      ]);
+      return;
+    }
+
+    // Opponent's turn to ban
+    setIsOpponentBanning(true);
+    setTimeout(() => {
+      const remainingForOpponent = CS2_ACTIVE_DUTY_MAPS.filter(m => !nextBanned.includes(m.id));
+      if (remainingForOpponent.length > 1) {
+        const randomIndex = Math.floor(Math.random() * remainingForOpponent.length);
+        const opponentBanned = remainingForOpponent[randomIndex];
+        sound.playMapBan();
+
+        const updatedBanned = [...nextBanned, opponentBanned.id];
+        setBannedMapIds(updatedBanned);
+
+        const oppStepNum = newHistory.length + 1;
+        const oppEntry = {
+          step: oppStepNum,
+          text: `${activeMatch.team2.name} banned ${opponentBanned.name}`,
+          isDecided: false,
+          team: activeMatch.team2.name,
+          mapName: opponentBanned.name
+        };
+
+        const leftAfterOpp = CS2_ACTIVE_DUTY_MAPS.filter(m => !updatedBanned.includes(m.id));
+        if (leftAfterOpp.length === 1) {
+          const finalMap = leftAfterOpp[0];
+          setCurrentSelectedMap(finalMap.name);
+          sound.playMapPick();
+          confetti({ particleCount: 80, spread: 70 });
+          setVetoHistory([
+            ...newHistory,
+            oppEntry,
+            {
+              step: oppStepNum + 1,
+              text: `${finalMap.name} picked as final competitive map`,
+              isDecided: true,
+              team: 'System',
+              mapName: finalMap.name
+            }
+          ]);
+        } else {
+          setVetoHistory([...newHistory, oppEntry]);
+        }
+      }
+      setIsOpponentBanning(false);
+    }, 700);
+  };
+
+  const handleResetVeto = () => {
+    sound.playClick();
+    setBannedMapIds([]);
+    setVetoHistory([]);
+    setIsOpponentBanning(false);
+  };
+
+  // Map Veto List for Tooltip (combining live history or baseline)
+  const vetoHistoryList = useMemo(() => {
+    if (vetoHistory.length > 0) return vetoHistory;
+    return [
+      { step: 1, text: `${activeMatch.team1.name} banned Cache`, isDecided: false },
+      { step: 2, text: `${activeMatch.team2.name} banned Inferno`, isDecided: false },
+      { step: 3, text: `${activeMatch.team1.name} banned Nuke`, isDecided: false },
+      { step: 4, text: `${activeMatch.team2.name} banned Ancient`, isDecided: false },
+      { step: 5, text: `${activeMatch.team1.name} banned Mirage`, isDecided: false },
+      { step: 6, text: `${activeMatch.team2.name} banned Dust2`, isDecided: false },
+      { step: 7, text: `${currentSelectedMap} picked by default`, isDecided: true }
+    ];
+  }, [vetoHistory, activeMatch, currentSelectedMap]);
 
   // Dynamic active stats dataset based on sideFilter ('all' | 't' | 'ct')
   const activeAllStats: FaceitStatsRow[] = useMemo(() => {
@@ -1266,12 +1397,12 @@ export const VortexMatchRoom: React.FC<VortexMatchRoomProps> = ({
       <div className="max-w-[1400px] w-full mx-auto px-4 sm:px-6 pt-4 pb-2">
         <div className="relative rounded-2xl overflow-hidden border border-[#232530] shadow-2xl bg-[#13141B]">
           
-          {/* Authentic CS2 Anubis Panoramic Map Background */}
+          {/* Authentic CS2 Panoramic Map Background */}
           <div className="absolute inset-0 z-0">
             <img 
-              src="/images/maps/de_anubis_2.png" 
-              alt="Anubis" 
-              className="w-full h-full object-cover opacity-60 filter blur-[0.5px]" 
+              src={getMapImage(currentSelectedMap)} 
+              alt={currentSelectedMap} 
+              className="w-full h-full object-cover opacity-60 filter blur-[0.5px] transition-all duration-700" 
             />
             <div className="absolute inset-0 bg-gradient-to-r from-[#111218]/90 via-[#111218]/65 to-[#111218]/90" />
             <div className="absolute inset-0 bg-gradient-to-b from-[#111218]/40 via-transparent to-[#111218]/85" />
@@ -1290,7 +1421,7 @@ export const VortexMatchRoom: React.FC<VortexMatchRoomProps> = ({
                 </span>
               </div>
               <div className="flex items-center gap-2.5">
-                <span className="text-slate-300 font-bold">Anubis</span>
+                <span className="text-emerald-400 font-black">{currentSelectedMap}</span>
                 <span>•</span>
                 <span>10 Nov</span>
                 <CountryFlag code="DE" name="Germany" size="xs" />
@@ -1429,25 +1560,37 @@ export const VortexMatchRoom: React.FC<VortexMatchRoomProps> = ({
                   </div>
                 </div>
 
-              {/* Map Card with ⓘ Veto Popover */}
+              {/* Map Card with Interactive Veto Modal Trigger & History */}
               <div className="p-3.5 rounded-xl bg-[#14151D] border border-[#212330] space-y-2 relative">
                 <div className="flex items-center justify-between">
-                  <div className="text-[10px] font-mono uppercase text-slate-400 font-bold">Map</div>
+                  <div className="text-[10px] font-mono uppercase text-slate-400 font-bold">Map Selection</div>
 
-                  {/* THE ⓘ VETO BUTTON */}
-                  <div className="relative">
+                  {/* INTERACTIVE VETO BUTTON */}
+                  <div className="flex items-center gap-1.5">
+                    <button
+                      onClick={() => {
+                        sound.playSelect();
+                        setIsInteractiveVetoOpen(true);
+                      }}
+                      className="flex items-center gap-1 text-xs font-mono font-bold text-[#A3E635] hover:text-white transition cursor-pointer px-2.5 py-1 rounded-lg bg-[#A3E635]/10 hover:bg-[#A3E635]/20 border border-[#A3E635]/30 shadow-sm"
+                      title="Launch Captain Active Duty Map Veto"
+                    >
+                      <Ban className="w-3.5 h-3.5 text-[#A3E635]" />
+                      <span>{isVetoCompleted ? 'View Veto Log' : 'Start Map Veto'}</span>
+                    </button>
+
                     <button
                       onClick={() => {
                         sound.playClick();
                         setIsVetoTooltipOpen(!isVetoTooltipOpen);
                       }}
-                      className="flex items-center gap-1 text-xs font-mono text-slate-400 hover:text-white transition cursor-pointer px-2 py-0.5 rounded-md hover:bg-white/[0.06]"
+                      className="flex items-center text-xs font-mono text-slate-400 hover:text-white transition cursor-pointer p-1 rounded-md hover:bg-white/[0.06]"
+                      title="Quick summary"
                     >
-                      <Info className="w-3.5 h-3.5 text-slate-400" />
-                      <span>Veto</span>
+                      <Info className="w-3.5 h-3.5" />
                     </button>
 
-                    {/* FLOATING VETO TOOLTIP (ONLY ON CLICK) */}
+                    {/* FLOATING VETO TOOLTIP */}
                     {isVetoTooltipOpen && (
                       <>
                         <div 
@@ -1457,6 +1600,9 @@ export const VortexMatchRoom: React.FC<VortexMatchRoomProps> = ({
                         <div 
                           className="absolute right-0 top-full mt-2 w-72 p-3.5 rounded-xl bg-[#101117] border border-[#2B2D3C] shadow-2xl z-50 text-xs font-mono space-y-1 animate-in fade-in zoom-in-95 duration-100"
                         >
+                          <div className="text-[10px] uppercase font-bold text-slate-400 border-b border-white/10 pb-1 mb-1.5">
+                            Active Duty Veto Progression
+                          </div>
                           {vetoHistoryList.map(item => (
                             <div 
                               key={item.step} 
@@ -1473,19 +1619,24 @@ export const VortexMatchRoom: React.FC<VortexMatchRoomProps> = ({
 
                 {/* Map Thumbnail & Name */}
                 <div className="flex items-center gap-3">
-                  <div className="w-16 h-10 rounded-lg overflow-hidden border border-white/10 shrink-0">
+                  <div className="w-16 h-10 rounded-lg overflow-hidden border border-white/10 shrink-0 shadow-sm">
                     <img 
-                      src="/images/maps/de_anubis.png" 
-                      alt="Anubis" 
-                      className="w-full h-full object-cover" 
+                      src={getMapImage(currentSelectedMap)} 
+                      alt={currentSelectedMap} 
+                      className="w-full h-full object-cover transition-all duration-500" 
                     />
                   </div>
                   <div>
-                    <div className="font-display font-black text-white text-base leading-tight">
-                      Anubis
+                    <div className="font-display font-black text-white text-base leading-tight flex items-center gap-1.5">
+                      <span>{currentSelectedMap}</span>
+                      {isVetoCompleted && (
+                        <span className="text-[9px] font-mono px-1.5 py-0.5 rounded bg-emerald-500/20 text-emerald-400 border border-emerald-500/30 uppercase font-bold">
+                          Decided
+                        </span>
+                      )}
                     </div>
                     <div className="text-[10px] font-mono text-slate-400">
-                      Active Duty Active Map
+                      Valve Active Duty Competitive Map
                     </div>
                   </div>
                 </div>
@@ -2566,6 +2717,222 @@ export const VortexMatchRoom: React.FC<VortexMatchRoomProps> = ({
               </div>
             )}
 
+          </div>
+        </div>
+      )}
+
+      {/* ======================================================== */}
+      {/* INTERACTIVE CS2 ACTIVE DUTY MAP VETO MODAL               */}
+      {/* ======================================================== */}
+      {isInteractiveVetoOpen && (
+        <div className="fixed inset-0 z-50 bg-black/85 backdrop-blur-md flex items-center justify-center p-4 animate-in fade-in duration-200">
+          <div 
+            className="fixed inset-0" 
+            onClick={() => setIsInteractiveVetoOpen(false)} 
+          />
+          <div className="relative z-10 w-full max-w-4xl bg-[#0E1017] border border-[#23293B] rounded-3xl p-6 sm:p-8 shadow-2xl space-y-6 max-h-[92vh] overflow-y-auto">
+            {/* Header */}
+            <div className="flex items-start justify-between border-b border-white/10 pb-4">
+              <div>
+                <div className="flex items-center gap-2.5 flex-wrap">
+                  <h3 className="text-xl sm:text-2xl font-black font-display text-white tracking-wide flex items-center gap-2">
+                    <Ban className="w-5 h-5 text-red-500" />
+                    <span>CS2 ACTIVE DUTY MAP VETO</span>
+                  </h3>
+                  <span className="px-2.5 py-0.5 rounded-full bg-emerald-500/15 border border-emerald-500/30 text-emerald-400 font-mono text-[10px] font-bold">
+                    VALVE BO1 FORMAT
+                  </span>
+                </div>
+                <p className="text-xs font-mono text-slate-400 mt-1">
+                  Both team captains take turns banning maps until 1 decisive map remains for the match.
+                </p>
+              </div>
+
+              <div className="flex items-center gap-2">
+                <button
+                  onClick={handleResetVeto}
+                  className="px-3 py-1.5 rounded-xl bg-white/5 hover:bg-white/10 border border-white/10 text-slate-300 text-xs font-mono transition flex items-center gap-1.5 cursor-pointer"
+                  title="Reset and start veto from scratch"
+                >
+                  <RotateCcw className="w-3.5 h-3.5" />
+                  <span className="hidden sm:inline">Reset</span>
+                </button>
+                <button
+                  onClick={() => setIsInteractiveVetoOpen(false)}
+                  className="p-1.5 rounded-xl bg-white/5 hover:bg-white/10 text-slate-400 hover:text-white transition cursor-pointer"
+                >
+                  <X className="w-5 h-5" />
+                </button>
+              </div>
+            </div>
+
+            {/* Turn Status Banner */}
+            <div className={`p-4 rounded-2xl border text-xs font-mono font-bold flex items-center justify-between gap-3 ${
+              isVetoCompleted
+                ? 'bg-emerald-500/15 border-emerald-500/40 text-emerald-400'
+                : isOpponentBanning
+                ? 'bg-amber-500/15 border-amber-500/40 text-amber-300 animate-pulse'
+                : 'bg-[#A3E635]/15 border-[#A3E635]/40 text-[#A3E635]'
+            }`}>
+              <div className="flex items-center gap-2">
+                {isVetoCompleted ? (
+                  <>
+                    <CheckCircle2 className="w-4 h-4 text-emerald-400 shrink-0" />
+                    <span>VETO COMPLETED • <strong className="text-white underline">{currentSelectedMap}</strong> SELECTED AS THE COMPETITIVE MAP!</span>
+                  </>
+                ) : isOpponentBanning ? (
+                  <>
+                    <Clock className="w-4 h-4 text-amber-400 shrink-0 animate-spin" />
+                    <span>OPPONENT'S TURN • {activeMatch.team2.name} is choosing a map to ban...</span>
+                  </>
+                ) : (
+                  <>
+                    <Flame className="w-4 h-4 text-[#A3E635] shrink-0" />
+                    <span>YOUR TURN (CAPTAIN) • {activeMatch.team1.name} — Select a map below to BAN ({remainingMaps.length - 1} bans remaining)</span>
+                  </>
+                )}
+              </div>
+
+              <div className="shrink-0 text-[11px] font-black uppercase tracking-wider px-2.5 py-1 rounded-lg bg-black/40 border border-white/10">
+                {isVetoCompleted ? 'DECIDED' : `${remainingMaps.length} MAPS LEFT`}
+              </div>
+            </div>
+
+            {/* 7 Maps Grid */}
+            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
+              {CS2_ACTIVE_DUTY_MAPS.map((map) => {
+                const isBanned = bannedMapIds.includes(map.id);
+                const isDecided = isVetoCompleted && remainingMaps[0]?.id === map.id;
+                const banRecord = vetoHistory.find(h => h.mapName.toLowerCase() === map.name.toLowerCase() && !h.isDecided);
+
+                return (
+                  <div
+                    key={map.id}
+                    className={`rounded-2xl border overflow-hidden relative transition-all duration-200 flex flex-col justify-between ${
+                      isDecided
+                        ? 'bg-[#18210C] border-emerald-400 shadow-[0_0_25px_rgba(16,185,129,0.3)] ring-2 ring-emerald-400/50 scale-[1.02]'
+                        : isBanned
+                        ? 'bg-black/60 border-red-500/25 opacity-40 grayscale filter'
+                        : 'bg-[#13151F] border-[#222738] hover:border-[#A3E635]/60 hover:shadow-lg'
+                    }`}
+                  >
+                    {/* Thumbnail Image */}
+                    <div className="h-28 w-full relative overflow-hidden bg-black/40">
+                      <img 
+                        src={map.image} 
+                        alt={map.name} 
+                        className="w-full h-full object-cover object-center" 
+                      />
+                      <div className="absolute inset-0 bg-gradient-to-t from-[#0E1017] via-transparent to-black/40" />
+
+                      {/* Map Status Badge */}
+                      <div className="absolute top-2 left-2">
+                        {isDecided ? (
+                          <span className="px-2 py-0.5 rounded-md bg-emerald-500 text-slate-950 font-mono font-black text-[10px] uppercase shadow-lg flex items-center gap-1">
+                            <Sparkles className="w-3 h-3" />
+                            SELECTED MAP
+                          </span>
+                        ) : isBanned ? (
+                          <span className="px-2 py-0.5 rounded-md bg-red-600/90 text-white font-mono font-bold text-[10px] uppercase flex items-center gap-1">
+                            <Ban className="w-3 h-3" />
+                            BANNED
+                          </span>
+                        ) : (
+                          <span className="px-2 py-0.5 rounded-md bg-black/60 backdrop-blur-xs text-slate-300 font-mono text-[10px] border border-white/10 uppercase">
+                            Available
+                          </span>
+                        )}
+                      </div>
+
+                      {/* Diagonal Banned Overlay */}
+                      {isBanned && (
+                        <div className="absolute inset-0 bg-red-950/70 backdrop-blur-[1px] flex items-center justify-center p-2 text-center">
+                          <div className="text-red-400 font-mono text-[11px] font-bold uppercase tracking-wider flex items-center gap-1">
+                            <Ban className="w-4 h-4 text-red-500" />
+                            <span>Banned by {banRecord?.team || 'Team'}</span>
+                          </div>
+                        </div>
+                      )}
+                    </div>
+
+                    {/* Card Body */}
+                    <div className="p-3.5 space-y-2.5">
+                      <div>
+                        <h4 className="font-display font-black text-white text-base leading-tight">
+                          {map.name}
+                        </h4>
+                        <p className="text-[10px] font-mono text-slate-400">
+                          {map.desc}
+                        </p>
+                      </div>
+
+                      {/* Action Button */}
+                      {!isBanned && !isDecided && (
+                        <button
+                          disabled={isOpponentBanning || remainingMaps.length <= 1}
+                          onClick={() => handleUserBanMap(map.id)}
+                          className={`w-full py-2 rounded-xl text-xs font-mono font-black uppercase tracking-wider transition flex items-center justify-center gap-1.5 cursor-pointer ${
+                            isOpponentBanning
+                              ? 'bg-white/5 text-slate-500 cursor-not-allowed border border-white/5'
+                              : 'bg-red-500/15 hover:bg-red-500 border border-red-500/40 text-red-400 hover:text-white shadow-sm active:scale-95'
+                          }`}
+                        >
+                          <Ban className="w-3.5 h-3.5" />
+                          <span>Ban {map.name}</span>
+                        </button>
+                      )}
+
+                      {isDecided && (
+                        <div className="py-2 rounded-xl bg-emerald-500/20 border border-emerald-500/40 text-emerald-300 text-center text-xs font-mono font-bold flex items-center justify-center gap-1.5">
+                          <Check className="w-3.5 h-3.5" />
+                          <span>Competitive Match Map</span>
+                        </div>
+                      )}
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+
+            {/* Veto Timeline History */}
+            {vetoHistory.length > 0 && (
+              <div className="p-4 rounded-2xl bg-black/40 border border-white/10 space-y-2">
+                <div className="text-[10px] font-mono uppercase font-bold text-slate-400 tracking-wider">
+                  Veto Step Log
+                </div>
+                <div className="flex items-center gap-2 flex-wrap">
+                  {vetoHistory.map((item, idx) => (
+                    <span 
+                      key={idx} 
+                      className={`px-2.5 py-1 rounded-lg text-xs font-mono flex items-center gap-1.5 border ${
+                        item.isDecided
+                          ? 'bg-emerald-500/20 text-emerald-300 border-emerald-500/40 font-bold'
+                          : 'bg-white/5 text-slate-300 border-white/10'
+                      }`}
+                    >
+                      <span className="text-slate-500 font-bold">{item.step}.</span>
+                      <span>{item.text}</span>
+                    </span>
+                  ))}
+                </div>
+              </div>
+            )}
+
+            {/* Footer Actions */}
+            <div className="flex items-center justify-between pt-2 border-t border-white/10">
+              <span className="text-xs font-mono text-slate-400">
+                Official Caliber Clutch Esports Sub-Tick Server Architecture
+              </span>
+              <button
+                onClick={() => {
+                  sound.playSelect();
+                  setIsInteractiveVetoOpen(false);
+                }}
+                className="px-5 py-2.5 rounded-xl bg-[#A3E635] hover:bg-[#bef264] text-slate-950 font-mono font-black text-xs uppercase tracking-wider transition shadow-md cursor-pointer"
+              >
+                {isVetoCompleted ? 'Confirm & Return to Match' : 'Close Veto View'}
+              </button>
+            </div>
           </div>
         </div>
       )}
