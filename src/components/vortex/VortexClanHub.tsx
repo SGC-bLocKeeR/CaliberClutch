@@ -41,12 +41,21 @@ import {
   Minus,
   Medal,
   Gauge,
-  X
+  X,
+  Database,
+  RefreshCw,
+  Cloud
 } from 'lucide-react';
 import confetti from 'canvas-confetti';
 import { sound } from '../../utils/soundEffects';
 import { getUserFriends, SocialFriend } from '../../services/friendService';
 import { CountryFlag } from './CountryFlag';
+import { 
+  saveClanToCloud, 
+  fetchClanFromCloud, 
+  ClanSyncStatus, 
+  getLocalClanSyncStatus 
+} from '../../services/clanSupabaseService';
 
 export const getCountryCode = (countryNameOrCode: string): string => {
   if (!countryNameOrCode) return 'xk';
@@ -2045,8 +2054,33 @@ export const VortexClanHub: React.FC<VortexClanHubProps> = ({
   const [draftDesc, setDraftDesc] = useState(userClan.description);
   const [draftLogo, setDraftLogo] = useState(userClan.logo);
 
+  // Supabase Cloud Sync State
+  const [syncStatus, setSyncStatus] = useState<ClanSyncStatus>(() => getLocalClanSyncStatus(userClan));
+  const [isSyncing, setIsSyncing] = useState<boolean>(false);
+
+  useEffect(() => {
+    fetchClanFromCloud(userClan.tag).then(cloudData => {
+      if (cloudData) {
+        setUserClan(cloudData);
+        setSyncStatus(getLocalClanSyncStatus(cloudData));
+      }
+    });
+  }, []);
+
+  const handleManualCloudSync = async () => {
+    setIsSyncing(true);
+    sound.playSelect();
+    const result = await saveClanToCloud(userClan);
+    setSyncStatus(getLocalClanSyncStatus(userClan));
+    setIsSyncing(false);
+    if (result.syncedToCloud) {
+      sound.playTournamentVictory();
+    }
+    setToast(result.message);
+  };
+
   // Save changes to user clan
-  const saveClanChanges = () => {
+  const saveClanChanges = async () => {
     sound.playTournamentVictory();
     const cleanTag = draftTag.replace(/[^A-Za-z0-9_-]/g, '').slice(0, 5).toUpperCase() || 'CC';
     const updated: ClanData = {
@@ -2057,10 +2091,13 @@ export const VortexClanHub: React.FC<VortexClanHubProps> = ({
       logo: draftLogo,
     };
     setUserClan(updated);
-    localStorage.setItem('vortex_user_clan_data', JSON.stringify(updated));
     onUpdateClanTag(cleanTag);
     setIsEditModalOpen(false);
-    setToast(`✓ Clan details updated! Clan Tag set to [${cleanTag}].`);
+
+    // Persist to LocalStorage and Supabase Database
+    const res = await saveClanToCloud(updated);
+    setSyncStatus(getLocalClanSyncStatus(updated));
+    setToast(res.message);
   };
 
   // Send Clan Roster Invitation to friend (Pending Confirmation)
@@ -2208,7 +2245,7 @@ export const VortexClanHub: React.FC<VortexClanHubProps> = ({
       },
     };
     setUserClan(nextClan);
-    localStorage.setItem('vortex_user_clan_data', JSON.stringify(nextClan));
+    saveClanToCloud(nextClan);
     setToast(`✓ Player removed from [${userClan.tag}] roster.`);
   };
 
@@ -2265,6 +2302,15 @@ export const VortexClanHub: React.FC<VortexClanHubProps> = ({
                   <CountryFlag code={getCountryCode(userClan.country)} name={userClan.country} size="xs" />
                   <span>{userClan.country}</span>
                 </span>
+                <button
+                  onClick={handleManualCloudSync}
+                  disabled={isSyncing}
+                  className="px-2.5 py-0.5 rounded text-[10px] font-mono font-bold bg-emerald-500/15 hover:bg-emerald-500/25 text-emerald-400 border border-emerald-500/30 flex items-center gap-1.5 transition cursor-pointer"
+                  title="Click to sync clan details and members with Supabase Cloud Database"
+                >
+                  <Database className={`w-3 h-3 text-emerald-400 ${isSyncing ? 'animate-spin' : ''}`} />
+                  <span>{isSyncing ? 'Syncing...' : 'Supabase Cloud Synced'}</span>
+                </button>
               </div>
 
               <p className="text-xs text-slate-300 font-sans max-w-xl line-clamp-2">
@@ -2306,6 +2352,15 @@ export const VortexClanHub: React.FC<VortexClanHubProps> = ({
             >
               <Edit3 className="w-3.5 h-3.5 text-[#A3E635]" />
               <span>Edit Clan Profile</span>
+            </button>
+
+            <button
+              onClick={handleManualCloudSync}
+              disabled={isSyncing}
+              className="px-4 py-2 rounded-xl bg-emerald-500/10 hover:bg-emerald-500/20 border border-emerald-500/30 text-emerald-300 text-xs font-mono font-bold flex items-center justify-center gap-2 cursor-pointer transition"
+            >
+              <RefreshCw className={`w-3.5 h-3.5 text-emerald-400 ${isSyncing ? 'animate-spin' : ''}`} />
+              <span>{isSyncing ? 'Syncing with Cloud...' : 'Sync with Supabase'}</span>
             </button>
 
             <button
