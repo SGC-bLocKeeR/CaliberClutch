@@ -4,7 +4,7 @@
 - When starting or provisioning any competitive match (5v5 Tactical Matchmaking, Tournaments, Scrims):
   - Dedicated match servers are provisioned via the **FACEIT API** backend infrastructure.
   - Public UI branding must remain 100% **CaliberClutch** (do not display FACEIT logos or third-party server tags on the user-facing UI, as requested by the founder: only the developer and founder know it is powered by FACEIT API under the hood).
-  - Server tick-rate is 128-tick with lowest latency European regions (Frankfurt, Stockholm, London, Paris, etc.).
+  - Server architecture is official CS2 Sub-Tick Dedicated with lowest latency European regions (Frankfurt, Stockholm, London, Paris, etc.).
 
 ## 2. Anti-Cheat Enforcement (FACEIT AC / Ring-0 Kernel)
 - Every competitive match strictly mandates and enforces **FACEIT Anti-Cheat (Faceit AC)**:

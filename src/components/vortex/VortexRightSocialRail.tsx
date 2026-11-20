@@ -821,7 +821,7 @@ export const VortexRightSocialRail: React.FC<VortexRightSocialRailProps> = ({
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-1.5 text-xs font-bold text-white font-sans">
                 <Gift className="w-3.5 h-3.5 text-amber-400 group-hover:scale-110 transition" />
-                <span>CALIBER CLUTCH Cases</span>
+                <span>CALIBER CLUTCH WALLET</span>
               </div>
               <span className="text-[9px] font-mono font-bold bg-emerald-500/15 text-emerald-400 border border-emerald-500/30 px-1.5 py-0.5 rounded uppercase flex items-center gap-1">
                 <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />
@@ -830,7 +830,7 @@ export const VortexRightSocialRail: React.FC<VortexRightSocialRailProps> = ({
             </div>
 
             <p className="text-[11px] text-slate-400 leading-snug">
-              Open official crates & win CS2 knives and rare skins. Instant automated Steam Bot delivery.
+              Competitive tournament winnings, skin rewards, and instant automated Steam Bot payouts.
             </p>
 
             {/* Wallet Balance & Action Buttons */}
@@ -852,32 +852,19 @@ export const VortexRightSocialRail: React.FC<VortexRightSocialRailProps> = ({
                 </span>
               </div>
 
-              {/* 2-Button Action Grid: WITHDRAW + Open Cases */}
-              <div className="grid grid-cols-2 gap-2">
+              {/* Single Full-Width Action: WITHDRAW */}
+              <div className="pt-1">
                 <button
                   type="button"
                   onClick={() => {
                     sound.playSelect();
                     setShowWithdrawModal(true);
                   }}
-                  className="py-2 px-2.5 rounded-xl bg-amber-500/10 hover:bg-amber-500/20 border border-amber-500/30 text-amber-400 font-mono text-xs font-bold transition cursor-pointer flex items-center justify-center gap-1.5 hover:scale-[1.02] active:scale-95"
+                  className="w-full py-2 px-2.5 rounded-xl bg-amber-500/10 hover:bg-amber-500/20 border border-amber-500/30 text-amber-400 font-mono text-xs font-bold transition cursor-pointer flex items-center justify-center gap-1.5 hover:scale-[1.01] active:scale-95"
                   title="Withdraw won CS2 skins to Steam or Cashout to Crypto"
                 >
-                  <span>WITHDRAW</span>
+                  <span>WITHDRAW SKINS & CASH</span>
                   <ArrowUpRight className="w-3.5 h-3.5" />
-                </button>
-
-                <button
-                  type="button"
-                  onClick={() => {
-                    sound.playSelect();
-                    setShowCaseShopModal(true);
-                  }}
-                  className="py-2 px-2.5 rounded-xl font-mono font-black text-xs text-slate-950 bg-gradient-to-r from-amber-400 to-yellow-500 hover:from-amber-300 hover:to-yellow-400 transition cursor-pointer shadow-[0_0_15px_rgba(245,158,11,0.25)] flex items-center justify-center gap-1 hover:scale-[1.02] active:scale-95"
-                  title="Open Caliber Clutch CS2 Case Shop"
-                >
-                  <span>Open Cases</span>
-                  <ChevronRight className="w-3.5 h-3.5" />
                 </button>
               </div>
             </div>
@@ -2039,7 +2026,7 @@ export const VortexRightSocialRail: React.FC<VortexRightSocialRailProps> = ({
                 <Headphones className="w-12 h-12 text-[#A3E635] mx-auto mt-4" />
                 <h4 className="font-display font-bold text-white text-base">Voice Comms Ready</h4>
                 <p className="text-xs font-mono text-slate-400">
-                  Connect your headset for low-latency 128-tick in-game tactical comms.
+                  Connect your headset for low-latency CS2 in-game tactical comms.
                 </p>
                 <button
                   onClick={() => sound.playTournamentVictory()}

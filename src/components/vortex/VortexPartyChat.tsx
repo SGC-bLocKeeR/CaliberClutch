@@ -82,7 +82,7 @@ export const VortexPartyChat: React.FC<PartyChatProps> = ({
     {
       id: 'sys-1',
       sender: 'SYSTEM',
-      text: 'Party formed. Voice comms connected (128-tick encrypted).',
+      text: 'Party formed. Voice comms connected (CS2 sub-tick encrypted).',
       timestamp: 'Just now',
       isSystem: true
     },

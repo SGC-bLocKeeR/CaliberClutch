@@ -42,6 +42,24 @@ export const convertSteam64ToSteam2 = (steamId64: string): string => {
 };
 
 /**
+ * Converts standard CS2 SteamID2 format (e.g. STEAM_0:1:25987717)
+ * into a 64-bit Steam ID (e.g. 76561198012241163).
+ */
+export const convertSteam2ToSteam64 = (steam2: string): string => {
+  try {
+    const match = steam2.trim().match(/^STEAM_[0-5]:([0-1]):(\d+)$/i);
+    if (!match) return steam2;
+    const y = BigInt(match[1]);
+    const z = BigInt(match[2]);
+    const base = 76561197960265728n;
+    const idBig = base + (z * 2n) + y;
+    return idBig.toString();
+  } catch {
+    return steam2;
+  }
+};
+
+/**
  * Sanitizes Steam personaName.
  * Preserves authentic team/domain tags (e.g. "M14 | caliberclutch.vercel.app").
  * Replaces legacy placeholders or blocked names with authentic Steam gamer tag.

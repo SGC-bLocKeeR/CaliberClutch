@@ -8,7 +8,7 @@
 
 ## ⚡ Overview
 
-**VORTEX Gaming** is an independent, high-performance web platform built for Counter-Strike 2 players, tournament organizers, and competitive communities. Powered by low-latency 128-tick server routing and automated FACEIT Open API v4 integrations.
+**VORTEX Gaming** is an independent, high-performance web platform built for Counter-Strike 2 players, tournament organizers, and competitive communities. Powered by low-latency CS2 Sub-Tick server routing and automated FACEIT Open API v4 integrations.
 
 - **Independent Project**: Completely separate repository, design language, and architecture from NEXUS.
 - **Visual Identity**: Obsidian Onyx Black (`#0A0B0E`), Crimson Red (`#EF4444` / `#DC2626`), and Deep Graphite panels (`#12141C`).
@@ -22,7 +22,7 @@
 - **Cinematic CS2 Tactical Hero Banner**: Atmospheric panoramic battlefield with glowing red volumetric lighting.
 - **Dynamic 3D Map Carousel**: Interactive Inferno, Mirage (red neon glow), and Nuke cards with native SVG country flags.
 - **One-Click Steam Authentication**: Fast OpenID Steam login flow.
-- **Esports Capabilities**: 128-Tick matchmaking, competitive tournaments, anti-cheat protection, and active player community.
+- **Esports Capabilities**: CS2 Sub-Tick matchmaking, competitive tournaments, anti-cheat protection, and active player community.
 
 ### 2. Dashboard (After Login)
 - **Personalized Gamer Passport**: Live match stats, win rates, and synchronized FACEIT ELO.

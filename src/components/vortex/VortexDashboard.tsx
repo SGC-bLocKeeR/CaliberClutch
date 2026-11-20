@@ -59,11 +59,12 @@ import {
   AlertCircle,
   Coins,
   BookOpen,
+  RefreshCw,
   Image as ImageIcon
 } from 'lucide-react';
 import confetti from 'canvas-confetti';
 import { sound } from '../../utils/soundEffects';
-import { cleanGamerTag } from '../../utils/steamAuth';
+import { cleanGamerTag, convertSteam2ToSteam64 } from '../../utils/steamAuth';
 import { VortexBrandLogo } from './VortexLandingPage';
 import { CountryFlag } from './CountryFlag';
 import { ALL_COUNTRIES, getCountryByCode, Country } from '../../data/countries';
@@ -80,6 +81,7 @@ import { VortexAdBanner } from './VortexAdBanner';
 import { VortexTopSponsorRibbon, VortexComingSoonDeals } from './VortexSponsorRibbon';
 import { VORTEX_CASE_CATALOG, CS2Case, getVortexWalletBalance, creditVortexWalletBalance } from '../../services/skinDeliveryService';
 import { FaceitSkillTrack, FaceitSeasonStatsCard } from './FaceitSkillTrack';
+import { VerifiedFaceitStatsCard } from './VerifiedFaceitStatsCard';
 import { VortexClanHub } from './VortexClanHub';
 
 interface VortexDashboardProps {
@@ -160,17 +162,17 @@ const COMING_SOON_TABS: Record<string, ComingSoonData> = {
     title: 'Rikthimi i Arenës Scrims Hub (5v5)',
     badge: 'RI-HAPJA SË SHPEJTI • PRACC LOBBIES',
     subtitle: 'Ndeshje Stërvitore & Matchmaking midis Skuadrave',
-    announcement: 'Arena e Scrims Hub po përgatitet për rikthimin e saj të fuqishëm për të gjitha skuadrat dhe klanet e organizuara. Po vendosen servera privatë 128-tick me ping ultra të ulët (Frankfurt, Stockholm, London), sistem i plotë vetoje hartash dhe kapitenësh, si dhe regjistrim automatik i GOTV demove pas çdo ndeshjeje për analiza taktike. Dyert do të hapen shumë shpejt!',
+    announcement: 'Arena e Scrims Hub po përgatitet për rikthimin e saj të fuqishëm për të gjitha skuadrat dhe klanet e organizuara. Po vendosen servera privatë CS2 Sub-Tick me ping ultra të ulët (Frankfurt, Stockholm, London), sistem i plotë vetoje hartash dhe kapitenësh, si dhe regjistrim automatik i GOTV demove pas çdo ndeshjeje për analiza taktike. Dyert do të hapen shumë shpejt!',
     desc: 'Hapësira e dedikuar për pracc dhe stërvitje taktike midis 5v5 skuadrave të organizuara është në përgatitjet finale.',
     progress: 82,
-    phase: 'Faza 4/5: Testimi i Serverave 128-Tick',
+    phase: 'Faza 4/5: Testimi i Serverave CS2 Sub-Tick',
     icon: Swords,
     color: '#A3E635',
     accentRgb: '163, 230, 53',
     highlights: [
       { title: 'Lobi i Dedikuar midis Skuadrave', desc: 'Gjetje e balancuar e kundërshtarëve sipas nivelit ELO të ekipit.' },
       { title: 'Sistem Vetoje për Kapitenët', desc: 'Zgjedhje zyrtare hartash dhe anësh (CT/T side knife round).' },
-      { title: 'Servera Privatë 128-Tick', desc: 'Performancë maksimale me sub-tick routing pa humbje paketash.' },
+      { title: 'Servera Privatë CS2 Sub-Tick', desc: 'Performancë maksimale me sub-tick routing pa humbje paketash.' },
       { title: 'Shkarkim GOTV Demo', desc: 'Qasje e menjëhershme në skedarët .dem për analizë raundi pas raundi.' }
     ]
   },
@@ -585,14 +587,16 @@ export const CS2GameIcon: React.FC<{ className?: string }> = ({ className = "w-6
 );
 
 const PRESET_AVATARS = [
+  { id: 'caliber-lime', name: 'CaliberClutch Neon Tactical Crosshair', url: '/images/clan_badges/badge_caliber_lime.svg' },
+  { id: 'caliber-cyan', name: 'CaliberClutch Cyber Apex Hexagon', url: '/images/clan_badges/badge_caliber_cyan.svg' },
+  { id: 'caliber-gold', name: 'CaliberClutch Champion Star Shield', url: '/images/clan_badges/badge_caliber_gold.svg' },
+  { id: 'caliber-crimson', name: 'CaliberClutch Strike Combat Diamond', url: '/images/clan_badges/badge_caliber_crimson.svg' },
+  { id: 'caliber-purple', name: 'CaliberClutch Stealth Wing Crest', url: '/images/clan_badges/badge_caliber_purple.svg' },
   { id: 'm14', name: 'M14 Official', url: 'https://distribution.faceit-cdn.net/images/ac453a50-dbca-4d42-a740-dac12bdc74c0.jpeg' },
   { id: 'cyber', name: 'Cyber Operator', url: 'https://images.unsplash.com/photo-1566492031773-4f4e44671857?auto=format&fit=crop&w=250&q=80' },
   { id: 'stealth', name: 'Stealth Specialist', url: 'https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?auto=format&fit=crop&w=250&q=80' },
   { id: 'entry', name: 'Pro Entry Fragger', url: 'https://images.unsplash.com/photo-1570295999919-56ceb5ecca61?auto=format&fit=crop&w=250&q=80' },
-  { id: 'sniper', name: 'Tactical Sniper', url: 'https://images.unsplash.com/photo-1527980965255-d3b416303d12?auto=format&fit=crop&w=250&q=80' },
-  { id: 'neon', name: 'Neon Striker', url: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=250&q=80' },
-  { id: 'sentinel', name: 'Vortex Sentinel', url: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?auto=format&fit=crop&w=250&q=80' },
-  { id: 'shadow', name: 'Shadow Infiltrator', url: 'https://images.unsplash.com/photo-1500648767791-00dcc994a43e?auto=format&fit=crop&w=250&q=80' }
+  { id: 'sniper', name: 'Tactical Sniper', url: 'https://images.unsplash.com/photo-1527980965255-d3b416303d12?auto=format&fit=crop&w=250&q=80' }
 ];
 
 const PRESET_COUNTRIES = ALL_COUNTRIES;
@@ -2142,7 +2146,7 @@ export const VortexDashboard: React.FC<VortexDashboardProps> = ({
     setDownloadDemoToast(`GOTV Demo: ${matchName}.dem`);
     setTimeout(() => setDownloadDemoToast(null), 3000);
     try {
-      const demoBlob = new Blob([`HLTV/GOTV CS2 Official Demo File - Match: ${matchName}\nServer: 128 Tick CS2 Competitive Arena\nRecorded live via Valve GOTV Broadcast.`], { type: 'application/octet-stream' });
+      const demoBlob = new Blob([`Official CS2 Sub-Tick GOTV Demo File - Match: ${matchName}\nServer: CS2 Sub-Tick Dedicated Arena\nRecorded live via Valve GOTV Broadcast.`], { type: 'application/octet-stream' });
       const demoUrl = URL.createObjectURL(demoBlob);
       const downloadLink = document.createElement('a');
       downloadLink.href = demoUrl;
@@ -2160,7 +2164,7 @@ export const VortexDashboard: React.FC<VortexDashboardProps> = ({
     {
       id: 'play' as VortexTab,
       label: 'Play',
-      desc: isVisitorMode ? 'Season 1 • Launching Soon' : 'Ranked 128-tick matchmaking',
+      desc: isVisitorMode ? 'Season 1 • Launching Soon' : 'Ranked CS2 Sub-Tick matchmaking',
       icon: Play,
       badge: isVisitorMode
         ? 'COMING SOON'
@@ -2200,16 +2204,6 @@ export const VortexDashboard: React.FC<VortexDashboardProps> = ({
       badgeColor: isVisitorMode
         ? 'bg-amber-500/15 text-amber-400 border border-amber-500/30 font-bold'
         : 'bg-[#FF5500]/15 text-[#FF5500] border border-[#FF5500]/30 font-bold'
-    },
-    {
-      id: 'cases' as VortexTab,
-      label: 'Cases',
-      desc: isVisitorMode ? 'CS2 Unboxing' : 'Hellcase & Farmskins CS2 Unboxing',
-      icon: Package,
-      badge: isVisitorMode ? 'COMING SOON' : 'HOT',
-      badgeColor: isVisitorMode
-        ? 'bg-amber-500/15 text-amber-400 border border-amber-500/30 font-bold'
-        : 'bg-gradient-to-r from-amber-500/20 to-orange-500/20 text-amber-300 border border-amber-500/40 font-bold'
     },
     {
       id: 'anticheat' as VortexTab,
@@ -2307,7 +2301,7 @@ export const VortexDashboard: React.FC<VortexDashboardProps> = ({
                       { tag: 'M14', level: 'Level 7', elo: '1,407 ELO', code: 'XK', action: () => { setActiveTab('profile'); setSidebarSearchOpen(false); } },
                       { tag: 'juanflatroo', level: 'Level 10', elo: '3,890 ELO', code: 'XK', action: () => { setActiveTab('rankings'); setSidebarSearchOpen(false); } },
                       { tag: 'gxx-', level: 'Level 10', elo: '3,420 ELO', code: 'XK', action: () => { setActiveTab('rankings'); setSidebarSearchOpen(false); } },
-                      { tag: 'Play 5v5 Queue', level: '128-Tick', elo: 'Matchmaking', icon: '🎮', action: () => { setActiveTab('play'); setSidebarSearchOpen(false); } },
+                      { tag: 'Play 5v5 Queue', level: 'Sub-Tick', elo: 'Matchmaking', icon: '🎮', action: () => { setActiveTab('play'); setSidebarSearchOpen(false); } },
                       { tag: 'Platform Rankings', level: 'Ladder', elo: 'Leaderboard', icon: '🏆', action: () => { setActiveTab('rankings'); setSidebarSearchOpen(false); } },
                     ]
                       .filter(item => item.tag.toLowerCase().includes(sidebarSearchQuery.toLowerCase()))
@@ -2672,7 +2666,7 @@ export const VortexDashboard: React.FC<VortexDashboardProps> = ({
                             CALIBER CLUTCH
                           </h1>
                           <p className="text-sm font-mono text-slate-300 max-w-2xl">
-                            Competitive Counter-Strike 2 arena with dedicated European 128-tick servers, tournament prize pools, and official leaderboards.
+                            Competitive Counter-Strike 2 arena with dedicated European CS2 Sub-Tick servers, tournament prize pools, and official leaderboards.
                           </p>
                         </div>
                       </div>
@@ -2688,7 +2682,7 @@ export const VortexDashboard: React.FC<VortexDashboardProps> = ({
                           <Play className="w-5 h-5 fill-[#A3E635]" />
                         </div>
                         <h4 className="text-sm font-black font-display text-white uppercase tracking-wider">Play 5v5 Matchmaking</h4>
-                        <p className="text-xs text-slate-400 mt-1">128-tick dedicated Europe queue.</p>
+                        <p className="text-xs text-slate-400 mt-1">CS2 Sub-Tick dedicated Europe queue.</p>
                       </div>
 
                       <div 
@@ -3353,7 +3347,7 @@ export const VortexDashboard: React.FC<VortexDashboardProps> = ({
                           </div>
                           <div className="p-2 rounded-xl bg-black/40 border border-white/5 flex items-center gap-2 text-slate-300">
                             <Wifi className="w-3.5 h-3.5 text-slate-400 shrink-0" />
-                            <span className="truncate">128-Tick Standard</span>
+                            <span className="truncate">CS2 Sub-Tick Standard</span>
                           </div>
                           <div className="p-2 rounded-xl bg-black/40 border border-white/5 flex items-center gap-2 text-slate-300">
                             <ShieldAlert className="w-3.5 h-3.5 text-emerald-400 shrink-0" />
@@ -4380,13 +4374,24 @@ export const VortexDashboard: React.FC<VortexDashboardProps> = ({
                         </div>
 
                         {/* Rule 7 */}
-                        <div className="p-4 rounded-2xl bg-black/40 border border-white/5 space-y-2 hover:border-emerald-500/30 transition md:col-span-2 lg:col-span-3">
+                        <div className="p-4 rounded-2xl bg-black/40 border border-white/5 space-y-2 hover:border-emerald-500/30 transition">
                           <div className="flex items-center gap-2 text-white font-bold">
                             <CheckCircle2 className="w-4 h-4 text-emerald-400 shrink-0" />
                             <span>7. Sportsmanship & Fair Play</span>
                           </div>
                           <p className="text-[11px] text-slate-400 pl-6 leading-relaxed">
                             Each clan is allowed 1 tactical pause (30 seconds) per half. Toxicity, abusive in-game or chat behavior, or exploiting map glitches will result in immediate match forfeit and tournament suspension.
+                          </p>
+                        </div>
+
+                        {/* Rule 8: Valve CS2 Tournament Standards & Sub-Tick Dedicated Architecture */}
+                        <div className="p-4 rounded-2xl bg-black/40 border border-white/5 space-y-2 hover:border-sky-400/30 transition md:col-span-2 lg:col-span-2">
+                          <div className="flex items-center gap-2 text-white font-bold">
+                            <Radio className="w-4 h-4 text-sky-400 shrink-0" />
+                            <span>8. Valve Tournament Standards & Sub-Tick Integrity</span>
+                          </div>
+                          <p className="text-[11px] text-slate-400 pl-6 leading-relaxed">
+                            All tournament matches run strictly on dedicated European CS2 Sub-Tick servers in full compliance with Valve Corporation's official Tournament Limited License regulations. Hardcoded uniform sub-tick packet timing guarantees genuine bullet registration and eliminates arbitrary tickrate discrepancies. In strict compliance with Valve regulations, CaliberClutch enforces an open ecosystem with zero unregulated skin gambling or illicit betting sponsorships.
                           </p>
                         </div>
                       </div>
@@ -5258,7 +5263,8 @@ export const VortexDashboard: React.FC<VortexDashboardProps> = ({
           {/* ======================================================== */}
           {/* TAB: CASES ARENA (HELLCASE & FARMSKINS CS2 UNBOXING)     */}
           {/* ======================================================== */}
-          {activeTab === 'cases' && (() => {
+          {/* Cases Tab Hidden */}
+          {false && activeTab === 'cases' && (() => {
             const filteredCases = VORTEX_CASE_CATALOG.filter(c => {
               if (caseCategoryFilter !== 'all') {
                 if (caseCategoryFilter === 'budget') {
@@ -5728,6 +5734,9 @@ export const VortexDashboard: React.FC<VortexDashboardProps> = ({
             const displayKd = (viewedPlayer && viewedPlayer.matches > 0) ? viewedPlayer.kd : (displayMatches > 0 ? '0.00' : '--');
             const displayHs = (viewedPlayer && viewedPlayer.matches > 0) ? (viewedPlayer.hs || '--') : (displayMatches > 0 ? '0.0%' : '--');
             const displaySteamId = viewedPlayer ? (viewedPlayer.steamId || 'STEAM_0:1:88291039') : 'STEAM_0:1:43918293';
+            const activeSteamId64 = !isViewingOther
+              ? (localStorage.getItem('vortex_steam_id64') || convertSteam2ToSteam64(displaySteamId) || '76561198089448834')
+              : (convertSteam2ToSteam64(displaySteamId) || '76561198089448834');
             const displayCrosshairCode = viewedPlayer ? (viewedPlayer.crosshairCode || 'CSGO-vortx-CS299-PRO88-MATCH') : currentCrosshairCode;
             const displaySens = viewedPlayer ? (viewedPlayer.sens || '800 DPI • 1.15 Sens • 1280x960 4:3') : '800 DPI • 1.15 Sens • 1280x960 4:3 Stretched';
 
@@ -5898,6 +5907,12 @@ export const VortexDashboard: React.FC<VortexDashboardProps> = ({
                   </div>
                 </div>
 
+                {/* DEDICATED VERIFIED FACEIT STATS CARD (INTEGRATED VIA STEAMID64) */}
+                <VerifiedFaceitStatsCard
+                  steamId64={activeSteamId64}
+                  isOwner={!isViewingOther}
+                />
+
                 {/* AUTHENTIC FACEIT SEASON STATS & PERFORMANCE DASHBOARD ("JA KOMPLET PAMJA") */}
                 <FaceitSeasonStatsCard
                   gamerTag={displayTag}
@@ -6045,7 +6060,7 @@ export const VortexDashboard: React.FC<VortexDashboardProps> = ({
                     <div className="flex items-center justify-between pb-3 border-b border-white/[0.06]">
                       <div>
                         <h3 className="text-lg font-black font-display text-white">Competitive Map Performance</h3>
-                        <p className="text-xs text-slate-400">Telemetry across official 128-tick ranked pool</p>
+                        <p className="text-xs text-slate-400">Telemetry across official CS2 Sub-Tick ranked pool</p>
                       </div>
                       <span className="text-xs font-mono text-[#A3E635]">Season 1</span>
                     </div>
@@ -6157,7 +6172,7 @@ export const VortexDashboard: React.FC<VortexDashboardProps> = ({
                   <div className="flex items-center justify-between pb-3 border-b border-white/[0.06]">
                     <div>
                       <h3 className="text-xl font-bold font-sans text-white tracking-tight">Recent matches</h3>
-                      <p className="text-xs text-[#94A3B8]">Verified 128-tick ranked competitive match history & GOTV replays</p>
+                      <p className="text-xs text-[#94A3B8]">Verified CS2 Sub-Tick ranked competitive match history & GOTV replays</p>
                     </div>
                     {displayMatches > 0 && (
                       <button
@@ -7351,7 +7366,7 @@ export const VortexDashboard: React.FC<VortexDashboardProps> = ({
                     {selectedBracketTourney.title}
                   </h3>
                   <p className="text-xs font-mono text-slate-400">
-                    Valve MR12 Ruleset • CaliberClutch European Competitive Matchmaking (128-Tick)
+                    Valve MR12 Ruleset • CaliberClutch European Competitive Matchmaking (CS2 Sub-Tick)
                   </p>
                 </div>
                 <button
@@ -7413,7 +7428,7 @@ export const VortexDashboard: React.FC<VortexDashboardProps> = ({
                 <div className="flex items-center gap-2.5">
                   <span className="w-2.5 h-2.5 rounded-full bg-emerald-400 animate-ping shrink-0" />
                   <span className="text-xs font-mono text-emerald-400 font-bold">
-                    LIVE GOTV BROADCAST (0% Jitter • 128-Tick)
+                    LIVE GOTV BROADCAST (0% Jitter • CS2 Sub-Tick)
                   </span>
                 </div>
                 <div className="flex items-center gap-2">
@@ -8104,28 +8119,41 @@ export const VortexDashboard: React.FC<VortexDashboardProps> = ({
 
                   {/* Mode 1: Presets Grid */}
                   {avatarUploadMode === 'presets' && (
-                    <div className="grid grid-cols-4 sm:grid-cols-8 gap-2.5 flex-1">
-                      {PRESET_AVATARS.map((av) => (
-                        <button
-                          key={av.id}
-                          type="button"
-                          onClick={() => {
-                            sound.playClick();
-                            setDraftAvatarUrl(av.url);
-                          }}
-                          className={`relative rounded-xl overflow-hidden aspect-square border-2 transition cursor-pointer group ${
-                            draftAvatarUrl === av.url ? 'border-[#A3E635] ring-2 ring-[#A3E635]/40 scale-105' : 'border-white/10 hover:border-white/30'
-                          }`}
-                          title={av.name}
-                        >
-                          <img src={av.url} alt={av.name} className="w-full h-full object-cover group-hover:scale-110 transition duration-200" />
-                          {draftAvatarUrl === av.url && (
-                            <div className="absolute inset-0 bg-[#A3E635]/25 flex items-center justify-center">
-                              <Check className="w-4 h-4 text-[#A3E635] stroke-[3]" />
-                            </div>
-                          )}
-                        </button>
-                      ))}
+                    <div className="grid grid-cols-5 sm:grid-cols-10 gap-2.5 flex-1">
+                      {PRESET_AVATARS.map((av) => {
+                        const isSvg = av.url.endsWith('.svg');
+                        return (
+                          <button
+                            key={av.id}
+                            type="button"
+                            onClick={() => {
+                              sound.playClick();
+                              setDraftAvatarUrl(av.url);
+                            }}
+                            className={`relative rounded-2xl overflow-visible aspect-square border-2 transition cursor-pointer group p-1.5 ${
+                              isSvg ? 'bg-[#12141D]' : 'bg-[#0A0D14]'
+                            } ${
+                              draftAvatarUrl === av.url
+                                ? 'border-[#A3E635] shadow-[0_0_16px_rgba(163,230,53,0.45)] scale-105 bg-[#0F1626]'
+                                : 'border-white/10 hover:border-white/30 hover:scale-102 opacity-80 hover:opacity-100'
+                            }`}
+                            title={av.name}
+                          >
+                            <img
+                              src={av.url}
+                              alt={av.name}
+                              className={`w-full h-full rounded-xl transition duration-200 ${
+                                isSvg ? 'object-contain drop-shadow' : 'object-cover'
+                              }`}
+                            />
+                            {draftAvatarUrl === av.url && (
+                              <span className="absolute -top-1.5 -right-1.5 w-4 h-4 rounded-full bg-[#A3E635] text-slate-950 text-[9px] font-black flex items-center justify-center shadow z-10">
+                                ✓
+                              </span>
+                            )}
+                          </button>
+                        );
+                      })}
                     </div>
                   )}
 
@@ -8397,77 +8425,83 @@ export const VortexDashboard: React.FC<VortexDashboardProps> = ({
                   </div>
                 </div>
 
-                {/* FACEIT Account Connection (Linked Profile, Level & ELO Sync) */}
-                <div className="pt-3 border-t border-white/[0.06] space-y-2">
+                {/* Verified via FACEIT Telemetry Sync (Automatic SteamID64 Sync) */}
+                <div className="pt-3 border-t border-white/[0.06] space-y-3">
                   <div className="flex items-center justify-between">
                     <div>
                       <div className="flex items-center gap-2">
                         <label className="block text-xs font-mono text-white font-bold">
-                          FACEIT Account Connection
+                          FACEIT Competitive Sync
                         </label>
-                        {faceitConnected && (
-                          <span className="text-[10px] font-mono font-bold text-[#FF5500] bg-[#FF5500]/10 border border-[#FF5500]/30 px-1.5 py-0.2 rounded">
-                            LINKED • LEVEL {currentUserLevel} ({currentUserElo} ELO)
-                          </span>
-                        )}
+                        <span className="px-2 py-0.5 rounded text-[10px] font-mono font-black uppercase bg-[#A3E635]/15 text-[#A3E635] border border-[#A3E635]/35 shadow-sm">
+                          Verified via FACEIT
+                        </span>
                       </div>
-                      <p className="text-[10px] font-mono text-slate-400">
-                        Connect your official FACEIT profile to synchronize your CS2 Level, ELO rating, and unlock verified matchmaking.
+                      <p className="text-[10px] font-mono text-slate-400 mt-0.5">
+                        Synchronized automatically via your SteamID64. Level, FACEIT ELO, K/D, and match stats are fetched directly.
                       </p>
                     </div>
-
-                    <a
-                      href="https://www.faceit.com/en/settings/integrations"
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-[#2A1608] hover:bg-[#FF5500] text-[#FF5500] hover:text-white border border-[#FF5500]/40 text-xs font-mono font-bold transition shadow-sm cursor-pointer group shrink-0"
-                      title="Open FACEIT to find your profile"
-                    >
-                      <ExternalLink className="w-3.5 h-3.5 group-hover:translate-x-0.5 group-hover:-translate-y-0.5 transition-transform" />
-                      <span>FACEIT PORTAL</span>
-                    </a>
                   </div>
 
-                  <div className="flex items-center gap-2">
-                    <div className="relative flex-1">
-                      <span className="absolute left-3.5 top-1/2 -translate-y-1/2 text-xs font-mono font-black text-[#FF5500]">
-                        ⚡
-                      </span>
-                      <input
-                        type="text"
-                        value={draftFaceitNickname}
-                        onChange={(e) => {
-                          setDraftFaceitNickname(e.target.value);
-                          setFaceitSyncError(null);
-                        }}
-                        placeholder="Enter FACEIT Nickname or Profile URL (e.g. M14)"
-                        className="w-full pl-9 pr-4 py-2.5 rounded-xl bg-[#0A0D14] border border-white/10 focus:border-[#FF5500] text-white text-xs font-mono outline-none"
-                      />
+                  <div className="p-3.5 rounded-2xl bg-[#090C14] border border-[#A3E635]/30 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+                    <div className="flex items-center gap-2.5 font-mono text-xs">
+                      <div className="w-8 h-8 rounded-xl bg-[#A3E635]/15 border border-[#A3E635]/35 flex items-center justify-center text-[#A3E635] shrink-0 font-bold">
+                        ID
+                      </div>
+                      <div>
+                        <span className="text-slate-400 text-[10px] uppercase block">SteamID64 Linked:</span>
+                        <span className="text-white font-bold">{localStorage.getItem('vortex_steam_id64') || convertSteam2ToSteam64(localStorage.getItem('vortex_steam_id') || 'STEAM_0:1:43918293') || '76561198089448834'}</span>
+                      </div>
                     </div>
 
                     <button
                       type="button"
-                      onClick={handleSyncFaceit}
+                      onClick={async () => {
+                        sound.playSelect();
+                        setIsSyncingFaceit(true);
+                        setFaceitSyncError(null);
+                        setFaceitSyncSuccess(null);
+                        try {
+                          const sid = localStorage.getItem('vortex_steam_id64') || convertSteam2ToSteam64(localStorage.getItem('vortex_steam_id') || 'STEAM_0:1:43918293') || '76561198089448834';
+                          const res = await fetch(`/api/faceit/profile?steamId64=${encodeURIComponent(sid)}&force=true`);
+                          if (res.status === 429) {
+                            const err = await res.json();
+                            setFaceitSyncError(err.message || '1-hour cooldown active between stat refreshes.');
+                            return;
+                          }
+                          const data = await res.json();
+                          if (data.linked) {
+                            localStorage.setItem(`vortex_faceit_stats_${sid}`, JSON.stringify(data));
+                            setFaceitConnected(true);
+                            if (data.level) setCurrentUserLevel(data.level);
+                            if (data.faceitElo) setCurrentUserElo(data.faceitElo);
+                            if (data.nickname) {
+                              setFaceitNickname(data.nickname);
+                              localStorage.setItem('vortex_faceit_nickname', data.nickname);
+                            }
+                            setFaceitSyncSuccess(`✓ Synchronized with FACEIT: ${data.nickname} (Level ${data.level} • ${data.faceitElo} ELO)`);
+                            sound.playTournamentVictory();
+                          } else {
+                            setFaceitSyncError(data.message || 'No FACEIT account linked to this Steam ID.');
+                          }
+                        } catch (err: any) {
+                          setFaceitSyncError(err.message || 'Network error syncing FACEIT stats.');
+                        } finally {
+                          setIsSyncingFaceit(false);
+                        }
+                      }}
                       disabled={isSyncingFaceit}
-                      className={`px-4 py-2.5 rounded-xl font-mono font-black text-xs transition cursor-pointer flex items-center gap-1.5 shrink-0 ${
-                        faceitConnected
-                          ? 'bg-emerald-500/15 hover:bg-emerald-500/25 border border-emerald-500/40 text-emerald-400'
-                          : 'bg-[#FF5500] hover:bg-[#FF6A1A] text-white shadow-md shadow-orange-600/30'
-                      }`}
+                      className="px-4 py-2 rounded-xl bg-[#A3E635] hover:bg-[#bef264] text-slate-950 font-display font-black text-xs uppercase tracking-wider transition cursor-pointer shadow-md shadow-[#A3E635]/25 flex items-center justify-center gap-1.5 shrink-0 active:scale-95 disabled:opacity-50"
                     >
                       {isSyncingFaceit ? (
                         <>
-                          <span className="w-3.5 h-3.5 border-2 border-white/20 border-t-white rounded-full animate-spin" />
+                          <span className="w-3.5 h-3.5 border-2 border-slate-950/30 border-t-slate-950 rounded-full animate-spin" />
                           <span>Syncing...</span>
-                        </>
-                      ) : faceitConnected ? (
-                        <>
-                          <Check className="w-3.5 h-3.5" />
-                          <span>SYNC STATS</span>
                         </>
                       ) : (
                         <>
-                          <span>LINK FACEIT</span>
+                          <RefreshCw className="w-3.5 h-3.5 stroke-[2.5]" />
+                          <span>Sync Telemetry</span>
                         </>
                       )}
                     </button>

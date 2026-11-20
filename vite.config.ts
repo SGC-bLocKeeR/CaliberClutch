@@ -16,7 +16,9 @@ function devApiEndpointsPlugin() {
           '/api/trade-deposit': './api/trade-deposit.js',
           '/api/trade-withdraw': './api/trade-withdraw.js',
           '/api/trade-status': './api/trade-status.js',
-          '/api/steam-profile': './api/steam-profile.js'
+          '/api/steam-profile': './api/steam-profile.js',
+          '/api/faceit/profile': './api/faceit-profile.js',
+          '/api/faceit-player': './api/faceit-player.js'
         };
 
         const targetFile = endpoints[pathname];

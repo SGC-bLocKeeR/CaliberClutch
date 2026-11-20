@@ -280,7 +280,7 @@ export async function createFaceitTournament(options: FaceitTournamentOptions): 
           success: true,
           tournamentId: data.tournament_id || faceitTournamentId,
           faceitUrl: `https://www.faceit.com/en/championship/${data.tournament_id}`,
-          serverNode: 'FACEIT EU Central (Frankfurt 128-tick Dedicated)',
+          serverNode: 'FACEIT EU Central (Frankfurt Sub-Tick Dedicated)',
           anticheatEnforced: true,
           isRealTime: true
         };
@@ -298,7 +298,7 @@ export async function createFaceitTournament(options: FaceitTournamentOptions): 
     success: true,
     tournamentId: faceitTournamentId,
     faceitUrl: `https://www.faceit.com/en/organizers/${config.organizerId}/Nexus%20Esports`,
-    serverNode: 'FACEIT 128-Tick Cloud (EU Central / Frankfurt)',
+    serverNode: 'FACEIT Sub-Tick Cloud (EU Central / Frankfurt)',
     anticheatEnforced: options.anticheatRequired,
     isRealTime: Boolean(authHeader)
   };

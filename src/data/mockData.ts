@@ -209,7 +209,7 @@ export const INITIAL_TOURNAMENTS: Tournament[] = [
     rules: [
       'VORTEX PRO or ELITE Membership Required for Squad Leader',
       'Instant $10,000 cash prize distributed same-day with 0% fee',
-      'Exclusive 128-tick private European servers'
+      'Exclusive CS2 Sub-Tick private European servers'
     ],
     matches: [],
     isRegistered: false
@@ -402,7 +402,7 @@ export const INITIAL_SCRIMS: ScrimLobby[] = [
     },
     tier: 'Tier 1 (Semi-Pro)',
     format: 'BO3',
-    region: 'EU Central (Frankfurt 128-tick)',
+    region: 'EU Central (Frankfurt Sub-Tick)',
     maps: ['Mirage', 'Ancient', 'Nuke', 'Inferno', 'Dust II'],
     serverLocation: 'VORTEX Dedicated Frankfurt #04',
     antiCheatRequired: true,
@@ -446,7 +446,7 @@ export const INITIAL_SCRIMS: ScrimLobby[] = [
     },
     tier: 'Tier 1 (Semi-Pro)',
     format: 'BO3',
-    region: 'EU Central (Frankfurt 128-tick)',
+    region: 'EU Central (Frankfurt Sub-Tick)',
     maps: ['Nuke', 'Mirage', 'Ancient'],
     serverLocation: 'VORTEX Dedicated Frankfurt #09',
     antiCheatRequired: true,
@@ -470,7 +470,7 @@ export const INITIAL_SCRIMS: ScrimLobby[] = [
     },
     tier: 'Tier 1 (Semi-Pro)',
     format: 'BO3',
-    region: 'EU West (Paris 128-tick)',
+    region: 'EU West (Paris Sub-Tick)',
     maps: ['Haven', 'Ascent', 'Sunset', 'Abyss', 'Lotus'],
     serverLocation: 'Riot Custom Lobby (Paris)',
     antiCheatRequired: true,

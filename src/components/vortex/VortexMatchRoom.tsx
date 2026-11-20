@@ -1498,7 +1498,7 @@ export const VortexMatchRoom: React.FC<VortexMatchRoomProps> = ({
                   <div className="flex items-center justify-between text-[10px] font-mono text-slate-400">
                     <span className="flex items-center gap-1 text-emerald-400 font-bold">
                       <Radio className="w-3 h-3 animate-pulse" />
-                      CS2 MatchZy 128-Tick
+                      CS2 MatchZy Sub-Tick
                     </span>
                     <span>Sub-Tick 24ms</span>
                   </div>

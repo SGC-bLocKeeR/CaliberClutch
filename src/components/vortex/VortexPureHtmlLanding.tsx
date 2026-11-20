@@ -316,7 +316,7 @@ export const VortexPureHtmlLanding: React.FC<VortexPureHtmlLandingProps> = ({
                     <Zap className="w-3.5 h-3.5 text-[#A3E635]" />
                   </div>
                   <div>
-                    <p className="font-bold text-xs text-white leading-tight">128-Tick</p>
+                    <p className="font-bold text-xs text-white leading-tight">Sub-Tick</p>
                     <p className="text-[10px] text-slate-400">Servers</p>
                   </div>
                 </div>
@@ -565,7 +565,7 @@ export const VortexPureHtmlLanding: React.FC<VortexPureHtmlLandingProps> = ({
                 </span>
                 <span className="flex items-center gap-1.5 text-[#A3E635] font-semibold">
                   <Zap className="w-3.5 h-3.5" />
-                  <span>128-TICK SUB-TICK</span>
+                  <span>CS2 DEDICATED SUB-TICK</span>
                 </span>
                 <span className="flex items-center gap-1.5">
                   <Cpu className="w-3.5 h-3.5 text-[#A3E635]" />
@@ -584,7 +584,7 @@ export const VortexPureHtmlLanding: React.FC<VortexPureHtmlLandingProps> = ({
             {/* 3 Bespoke Tactical Pillars */}
             <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
               
-              {/* Pillar 1: 128-Tick */}
+              {/* Pillar 1: Sub-Tick */}
               <div className="relative p-8 rounded-3xl bg-[#0A0E07]/80 backdrop-blur-xl border border-[#233013]/90 hover:border-[#A3E635]/70 hover:shadow-[0_0_35px_rgba(163,230,53,0.22)] transition-all duration-300 group shadow-2xl flex flex-col justify-between gap-6 overflow-hidden">
                 <div className="absolute -top-12 -right-12 w-32 h-32 bg-[#A3E635]/10 rounded-full blur-2xl group-hover:bg-[#A3E635]/25 transition-all pointer-events-none" />
                 
@@ -593,7 +593,7 @@ export const VortexPureHtmlLanding: React.FC<VortexPureHtmlLandingProps> = ({
                 </div>
 
                 <div>
-                  <div className="text-2xl font-black font-display text-white tracking-wide">Dedicated 128-Tick</div>
+                  <div className="text-2xl font-black font-display text-white tracking-wide">Dedicated Sub-Tick</div>
                   <p className="text-sm text-[#94A3B8] mt-2.5 leading-relaxed">
                     Frankfurt, Vienna & Stockholm nodes running customized sub-tick optimizations for seamless bullet registration.
                   </p>
@@ -682,7 +682,7 @@ export const VortexPureHtmlLanding: React.FC<VortexPureHtmlLandingProps> = ({
                 CALIBER CLUTCH PREMIUM & VIP PASS
               </h2>
               <p className="mt-3 text-sm text-slate-400 max-w-xl mx-auto">
-                Choose the competitive tier that fits your ambition. From free official matchmaking to private 128-tick team scrims and monthly €5,000 cash prize cups.
+                Choose the competitive tier that fits your ambition. From free official matchmaking to private CS2 Sub-Tick team scrims and monthly €5,000 cash prize cups.
               </p>
 
               {/* Billing Toggle (Monthly / Yearly) */}
@@ -747,7 +747,7 @@ export const VortexPureHtmlLanding: React.FC<VortexPureHtmlLandingProps> = ({
                     </li>
                     <li className="flex items-center gap-3">
                       <Check className="w-4 h-4 text-emerald-400 shrink-0" />
-                      <span>128-Tick Frankfurt Dedicated Nodes</span>
+                      <span>Frankfurt Sub-Tick Dedicated Nodes</span>
                     </li>
                     <li className="flex items-center gap-3">
                       <Check className="w-4 h-4 text-emerald-400 shrink-0" />
@@ -871,7 +871,7 @@ export const VortexPureHtmlLanding: React.FC<VortexPureHtmlLandingProps> = ({
                   </div>
 
                   <h3 className="text-2xl font-black font-display text-white mb-2">CALIBER VIP ELITE</h3>
-                  <p className="text-xs text-slate-400 mb-6">On-demand 128-tick private scrim servers and instant bank/crypto cashouts.</p>
+                  <p className="text-xs text-slate-400 mb-6">On-demand CS2 Sub-Tick private scrim servers and instant bank/crypto cashouts.</p>
 
                   <div className="flex items-baseline gap-1.5 mb-8">
                     <span className="text-4xl font-black font-display text-cyan-400">
@@ -883,7 +883,7 @@ export const VortexPureHtmlLanding: React.FC<VortexPureHtmlLandingProps> = ({
                   <ul className="space-y-3.5 text-xs text-slate-200 font-sans">
                     <li className="flex items-center gap-3">
                       <Check className="w-4 h-4 text-cyan-400 shrink-0" />
-                      <span className="font-bold">Private Dedicated 128-Tick Scrim Server</span>
+                      <span className="font-bold">Private Dedicated CS2 Sub-Tick Scrim Server</span>
                     </li>
                     <li className="flex items-center gap-3">
                       <Check className="w-4 h-4 text-cyan-400 shrink-0" />
@@ -1122,7 +1122,7 @@ export const VortexPureHtmlLanding: React.FC<VortexPureHtmlLandingProps> = ({
           <div className="flex flex-col items-center md:items-start gap-2">
             <VortexBrandLogo />
             <p className="text-xs text-slate-500 font-mono mt-1">
-              Next-generation CS2 competitive platform • 128-Tick Subtick Optimized.
+              Next-generation CS2 competitive platform • CS2 Sub-Tick Architecture.
             </p>
           </div>
 

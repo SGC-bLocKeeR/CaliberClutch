@@ -67,8 +67,8 @@ export const SCHEDULED_TOURNAMENTS: ScheduledCircuitEvent[] = [
     tournamentId: 'tourney-pro-special',
     prizePool: 25000,
     format: '5v5 Double Elimination Bracket',
-    location: 'Frankfurt Dedicated 128-Tick',
-    liveMatchDescription: 'Semifinals Decider Match (128-Tick)'
+    location: 'Frankfurt Dedicated Sub-Tick',
+    liveMatchDescription: 'Semifinals Decider Match (CS2 Sub-Tick)'
   },
   {
     id: 'pgl-major-1',

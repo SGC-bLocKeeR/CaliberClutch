@@ -383,7 +383,7 @@ export const generateBalancedMatch = (params: MatchmakingParams): BalancedMatch 
     eloLossDefeat: eloLoss1,
     eloDiff,
     map: mapName,
-    server: 'Frankfurt Central (24ms) • 128-Tick MatchZy',
+    server: 'Frankfurt Central (24ms) • CS2 Sub-Tick MatchZy',
     serverIp: 'srv1.caliberclutch.gg:27015',
     isFiveStack,
     partySize

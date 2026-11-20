@@ -25,5 +25,5 @@
   <line x1="80" y1="98" x2="80" y2="136" stroke="#06B6D4" stroke-width="2.5" stroke-linecap="round"/>
   <!-- Center Bullet Pin -->
   <circle cx="80" cy="80" r="3" fill="#FFFFFF"/>
-  <text x="80" y="132" text-anchor="middle" fill="#06B6D4" font-family="monospace" font-size="9" font-weight="900" letter-spacing="3">128-TICK</text>
+  <text x="80" y="132" text-anchor="middle" fill="#06B6D4" font-family="monospace" font-size="9" font-weight="900" letter-spacing="3">SUB-TICK</text>
 </svg>
