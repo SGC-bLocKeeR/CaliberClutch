@@ -377,88 +377,100 @@ export const VerifiedFaceitStatsCard: React.FC<VerifiedFaceitStatsCardProps> = (
           <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3">
             
             {/* 1. Skill Level */}
-            <div className="p-4 rounded-2xl bg-[#12151F] border border-white/5 space-y-1 hover:border-[#A3E635]/30 transition group">
-              <div className="flex items-center justify-between text-slate-400 text-[11px] font-mono uppercase">
-                <span>Skill Level</span>
-                <Trophy className="w-3.5 h-3.5 text-amber-400" />
+            <div className="p-4 rounded-2xl bg-[#12151F] border border-white/5 space-y-1 hover:border-[#A3E635]/30 transition group flex flex-col justify-between">
+              <div>
+                <div className="flex items-center justify-between text-slate-400 text-[10px] sm:text-[11px] font-mono uppercase tracking-wider">
+                  <span>Skill Level</span>
+                  <Trophy className="w-3.5 h-3.5 text-amber-400 shrink-0" />
+                </div>
+                <div className="flex items-baseline gap-1.5 mt-1">
+                  <span className="text-2xl font-black font-display text-white">
+                    Lvl {stats.level || 1}
+                  </span>
+                  <span className="text-[10px] font-mono text-slate-400">/ 10</span>
+                </div>
               </div>
-              <div className="flex items-baseline gap-1.5">
-                <span className="text-2xl font-black font-display text-white">
-                  Lvl {stats.level || 1}
-                </span>
-                <span className="text-[10px] font-mono text-slate-400">/ 10</span>
-              </div>
-              <span className="text-[10px] font-mono text-slate-400 block truncate">Official Skill Tier</span>
+              <span className="text-[10px] font-mono text-slate-400 block leading-tight mt-1">Skill Tier</span>
             </div>
 
             {/* 2. FACEIT ELO */}
-            <div className="p-4 rounded-2xl bg-[#12151F] border border-white/5 space-y-1 hover:border-[#A3E635]/30 transition group">
-              <div className="flex items-center justify-between text-slate-400 text-[11px] font-mono uppercase">
-                <span>FACEIT ELO</span>
-                <Flame className="w-3.5 h-3.5 text-orange-400" />
+            <div className="p-4 rounded-2xl bg-[#12151F] border border-white/5 space-y-1 hover:border-[#A3E635]/30 transition group flex flex-col justify-between">
+              <div>
+                <div className="flex items-center justify-between text-slate-400 text-[10px] sm:text-[11px] font-mono uppercase tracking-wider">
+                  <span>FACEIT ELO</span>
+                  <Flame className="w-3.5 h-3.5 text-orange-400 shrink-0" />
+                </div>
+                <div className="flex items-baseline gap-1 mt-1">
+                  <span className="text-2xl font-black font-display text-[#A3E635]">
+                    {stats.faceitElo?.toLocaleString() || 800}
+                  </span>
+                </div>
               </div>
-              <div className="flex items-baseline gap-1">
-                <span className="text-2xl font-black font-display text-[#A3E635]">
-                  {stats.faceitElo?.toLocaleString() || 800}
-                </span>
-              </div>
-              <span className="text-[10px] font-mono text-slate-400 block truncate">Separate from Caliber ELO</span>
+              <span className="text-[10px] font-mono text-slate-400 block leading-tight mt-1">CS2 Live ELO</span>
             </div>
 
             {/* 3. Average K/D Ratio */}
-            <div className="p-4 rounded-2xl bg-[#12151F] border border-white/5 space-y-1 hover:border-emerald-500/30 transition group">
-              <div className="flex items-center justify-between text-slate-400 text-[11px] font-mono uppercase">
-                <span>K/D Ratio</span>
-                <Target className="w-3.5 h-3.5 text-emerald-400" />
+            <div className="p-4 rounded-2xl bg-[#12151F] border border-white/5 space-y-1 hover:border-emerald-500/30 transition group flex flex-col justify-between">
+              <div>
+                <div className="flex items-center justify-between text-slate-400 text-[10px] sm:text-[11px] font-mono uppercase tracking-wider">
+                  <span>K/D Ratio</span>
+                  <Target className="w-3.5 h-3.5 text-emerald-400 shrink-0" />
+                </div>
+                <div className="flex items-baseline gap-1 mt-1">
+                  <span className="text-2xl font-black font-display text-white">
+                    {stats.kdRatio || '1.00'}
+                  </span>
+                </div>
               </div>
-              <div className="flex items-baseline gap-1">
-                <span className="text-2xl font-black font-display text-white">
-                  {stats.kdRatio || '1.00'}
-                </span>
-              </div>
-              <span className="text-[10px] font-mono text-slate-400 block truncate">Lifetime Average</span>
+              <span className="text-[10px] font-mono text-slate-400 block leading-tight mt-1">Career Ratio</span>
             </div>
 
             {/* 4. Win Rate % */}
-            <div className="p-4 rounded-2xl bg-[#12151F] border border-white/5 space-y-1 hover:border-sky-400/30 transition group">
-              <div className="flex items-center justify-between text-slate-400 text-[11px] font-mono uppercase">
-                <span>Win Rate</span>
-                <Percent className="w-3.5 h-3.5 text-sky-400" />
+            <div className="p-4 rounded-2xl bg-[#12151F] border border-white/5 space-y-1 hover:border-sky-400/30 transition group flex flex-col justify-between">
+              <div>
+                <div className="flex items-center justify-between text-slate-400 text-[10px] sm:text-[11px] font-mono uppercase tracking-wider">
+                  <span>Win Rate</span>
+                  <Percent className="w-3.5 h-3.5 text-sky-400 shrink-0" />
+                </div>
+                <div className="flex items-baseline gap-1 mt-1">
+                  <span className="text-2xl font-black font-display text-sky-400">
+                    {stats.winRate || '50%'}
+                  </span>
+                </div>
               </div>
-              <div className="flex items-baseline gap-1">
-                <span className="text-2xl font-black font-display text-sky-400">
-                  {stats.winRate || '50%'}
-                </span>
-              </div>
-              <span className="text-[10px] font-mono text-slate-400 block truncate">5v5 Match Winrate</span>
+              <span className="text-[10px] font-mono text-slate-400 block leading-tight mt-1">5v5 Win Rate</span>
             </div>
 
             {/* 5. Headshots % */}
-            <div className="p-4 rounded-2xl bg-[#12151F] border border-white/5 space-y-1 hover:border-purple-400/30 transition group">
-              <div className="flex items-center justify-between text-slate-400 text-[11px] font-mono uppercase">
-                <span>Headshots %</span>
-                <Sparkles className="w-3.5 h-3.5 text-purple-400" />
+            <div className="p-4 rounded-2xl bg-[#12151F] border border-white/5 space-y-1 hover:border-purple-400/30 transition group flex flex-col justify-between">
+              <div>
+                <div className="flex items-center justify-between text-slate-400 text-[10px] sm:text-[11px] font-mono uppercase tracking-wider">
+                  <span>Headshots</span>
+                  <Sparkles className="w-3.5 h-3.5 text-purple-400 shrink-0" />
+                </div>
+                <div className="flex items-baseline gap-1 mt-1">
+                  <span className="text-2xl font-black font-display text-purple-300">
+                    {stats.hsPercentage || '45%'}
+                  </span>
+                </div>
               </div>
-              <div className="flex items-baseline gap-1">
-                <span className="text-2xl font-black font-display text-purple-300">
-                  {stats.hsPercentage || '45%'}
-                </span>
-              </div>
-              <span className="text-[10px] font-mono text-slate-400 block truncate">Average Precision</span>
+              <span className="text-[10px] font-mono text-slate-400 block leading-tight mt-1">HS Accuracy</span>
             </div>
 
             {/* 6. Total Matches */}
-            <div className="p-4 rounded-2xl bg-[#12151F] border border-white/5 space-y-1 hover:border-amber-400/30 transition group">
-              <div className="flex items-center justify-between text-slate-400 text-[11px] font-mono uppercase">
-                <span>Total Matches</span>
-                <Swords className="w-3.5 h-3.5 text-amber-400" />
+            <div className="p-4 rounded-2xl bg-[#12151F] border border-white/5 space-y-1 hover:border-amber-400/30 transition group flex flex-col justify-between">
+              <div>
+                <div className="flex items-center justify-between text-slate-400 text-[10px] sm:text-[11px] font-mono uppercase tracking-wider">
+                  <span>Total Matches</span>
+                  <Swords className="w-3.5 h-3.5 text-amber-400 shrink-0" />
+                </div>
+                <div className="flex items-baseline gap-1 mt-1">
+                  <span className="text-2xl font-black font-display text-amber-400">
+                    {stats.matches?.toLocaleString() || 0}
+                  </span>
+                </div>
               </div>
-              <div className="flex items-baseline gap-1">
-                <span className="text-2xl font-black font-display text-amber-400">
-                  {stats.matches?.toLocaleString() || 0}
-                </span>
-              </div>
-              <span className="text-[10px] font-mono text-slate-400 block truncate">Competitive Matches</span>
+              <span className="text-[10px] font-mono text-slate-400 block leading-tight mt-1">Total Matches</span>
             </div>
 
           </div>
