@@ -1214,6 +1214,58 @@ export const VortexDashboard: React.FC<VortexDashboardProps> = ({
     });
   };
 
+  // Auto-sync live FACEIT championships from CaliberClutch organizer
+  useEffect(() => {
+    if (activeTab !== 'tournaments') return;
+    const config = getFaceitOrganizerConfig();
+    if (!config.apiKey || !config.organizerId) return;
+
+    fetchLiveOrganizerTournaments(config.organizerId, config.apiKey)
+      .then(res => {
+        if (res.success && Array.isArray(res.items) && res.items.length > 0) {
+          setFaceitLiveTourneys(res.items);
+          const mapped = res.items.map((fi: any) => ({
+            id: `faceit-${fi.championship_id || fi.id || Math.random()}`,
+            title: fi.name || 'CaliberClutch FACEIT Championship',
+            type: 'FACEIT OFFICIAL CHAMPIONSHIP',
+            game: 'CS2 5v5 Tactical',
+            cashPrize: fi.prize_type === 'cash' ? `€${(fi.total_prize || 1000).toLocaleString()}` : '€1,000 Cash Pool',
+            teams: `${fi.current_subscriptions || 0} / ${fi.total_groups || fi.max_match || 16}`,
+            maxTeams: fi.max_match || 16,
+            registeredTeamsCount: fi.current_subscriptions || 0,
+            date: fi.championship_start ? new Date(fi.championship_start).toLocaleDateString() : 'Live on FACEIT Hub',
+            status: fi.status === 'ongoing' ? 'LIVE NOW' : fi.status === 'finished' ? 'COMPLETED' : 'REGISTRATION OPEN',
+            badge: 'bg-[#FF5500]/20 text-[#FF5500] border-[#FF5500]/40',
+            isLive: fi.status === 'ongoing',
+            isOpen: fi.status === 'join' || fi.status === 'open' || !fi.status,
+            isCustom: false,
+            isFaceitOfficial: true,
+            faceitUrl: fi.faceit_url ? (fi.faceit_url.replace('{lang}', 'en')) : `https://www.faceit.com/en/championship/${fi.championship_id || fi.id}`,
+            organizer: 'CaliberClutch (FACEIT Hub)',
+            creator: 'CaliberClutch',
+            entryFee: 0,
+            structure: fi.type || 'Single Elimination',
+            region: 'FACEIT EU-Central Sub-Tick (Frankfurt)',
+            payout1st: '70% Cash Pool',
+            payout2nd: '20% Cash Pool',
+            payout3rd: '10% Cash Pool'
+          }));
+
+          setCustomTournaments(prev => {
+            const existingIds = new Set(prev.map((p: any) => p.id));
+            const newItems = mapped.filter((m: any) => !existingIds.has(m.id));
+            if (newItems.length === 0) return prev;
+            const updated = [...newItems, ...prev];
+            try {
+              localStorage.setItem('vortex_custom_tournaments', JSON.stringify(updated));
+            } catch (_) {}
+            return updated;
+          });
+        }
+      })
+      .catch(() => {});
+  }, [activeTab]);
+
   // Create tournament form state
   const [newTourneyTitle, setNewTourneyTitle] = useState('CALIBER CLUTCH Community Cup #1');
   const [newTourneyOrganizer, setNewTourneyOrganizer] = useState<string>('');
@@ -4279,10 +4331,48 @@ export const VortexDashboard: React.FC<VortexDashboardProps> = ({
                               const res = await fetchLiveOrganizerTournaments(faceitOrgIdInput.trim(), faceitKeyInput.trim());
                               if (res.success) {
                                 setFaceitLiveTourneys(res.items);
+                                if (res.items.length > 0) {
+                                  const mapped = res.items.map((fi: any) => ({
+                                    id: `faceit-${fi.championship_id || fi.id || Math.random()}`,
+                                    title: fi.name || 'CaliberClutch FACEIT Championship',
+                                    type: 'FACEIT OFFICIAL CHAMPIONSHIP',
+                                    game: 'CS2 5v5 Tactical',
+                                    cashPrize: fi.prize_type === 'cash' ? `€${(fi.total_prize || 1000).toLocaleString()}` : '€1,000 Cash Pool',
+                                    teams: `${fi.current_subscriptions || 0} / ${fi.total_groups || fi.max_match || 16}`,
+                                    maxTeams: fi.max_match || 16,
+                                    registeredTeamsCount: fi.current_subscriptions || 0,
+                                    date: fi.championship_start ? new Date(fi.championship_start).toLocaleDateString() : 'Live on FACEIT Hub',
+                                    status: fi.status === 'ongoing' ? 'LIVE NOW' : fi.status === 'finished' ? 'COMPLETED' : 'REGISTRATION OPEN',
+                                    badge: 'bg-[#FF5500]/20 text-[#FF5500] border-[#FF5500]/40',
+                                    isLive: fi.status === 'ongoing',
+                                    isOpen: fi.status === 'join' || fi.status === 'open' || !fi.status,
+                                    isCustom: false,
+                                    isFaceitOfficial: true,
+                                    faceitUrl: fi.faceit_url ? (fi.faceit_url.replace('{lang}', 'en')) : `https://www.faceit.com/en/championship/${fi.championship_id || fi.id}`,
+                                    organizer: 'CaliberClutch (FACEIT Hub)',
+                                    creator: 'CaliberClutch',
+                                    entryFee: 0,
+                                    structure: fi.type || 'Single Elimination',
+                                    region: 'FACEIT EU-Central Sub-Tick (Frankfurt)',
+                                    payout1st: '70% Cash Pool',
+                                    payout2nd: '20% Cash Pool',
+                                    payout3rd: '10% Cash Pool'
+                                  }));
+
+                                  setCustomTournaments(prev => {
+                                    const existingIds = new Set(prev.map((p: any) => p.id));
+                                    const newItems = mapped.filter((m: any) => !existingIds.has(m.id));
+                                    const updated = [...newItems, ...prev];
+                                    try {
+                                      localStorage.setItem('vortex_custom_tournaments', JSON.stringify(updated));
+                                    } catch (_) {}
+                                    return updated;
+                                  });
+                                }
                                 setFaceitStatusResult({
                                   success: true,
                                   message: res.items.length > 0 
-                                    ? `U sinkronizuan ${res.items.length} kampionate live nga FACEIT!` 
+                                    ? `U sinkronizuan ${res.items.length} kampionate live nga FACEIT në platformë!` 
                                     : 'Lidhja me FACEIT është aktive! Asnjë kampionat publik nuk është krijuar ende te CaliberClutch në faceit.com (Tab 2).'
                                 });
                               } else {
@@ -5096,6 +5186,17 @@ export const VortexDashboard: React.FC<VortexDashboardProps> = ({
                           </div>
 
                           <div className="flex items-center gap-2">
+                            {t.faceitUrl && (
+                              <a
+                                href={t.faceitUrl}
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                className="px-3.5 py-2 rounded-full bg-[#FF5500]/15 hover:bg-[#FF5500]/25 text-[#FF5500] border border-[#FF5500]/40 font-mono font-bold text-xs flex items-center gap-1.5 transition hover:scale-105 shadow-sm"
+                              >
+                                <ExternalLink className="w-3.5 h-3.5" />
+                                <span>FACEIT Hub</span>
+                              </a>
+                            )}
                             {isRegistered ? (
                               <button
                                 onClick={() => {

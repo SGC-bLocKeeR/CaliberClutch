@@ -19,8 +19,10 @@ export default async function handler(req, res) {
     const baseUrl = 'https://open.faceit.com/data/v4';
     let targetUrl = `${baseUrl}/organizers/${encodeURIComponent(organizerId)}`;
 
-    if (action === 'tournaments' || action === 'championships') {
-      targetUrl = `${baseUrl}/championships?game=cs2&type=all&limit=20`;
+    if (action === 'tournaments') {
+      targetUrl = `${baseUrl}/organizers/${encodeURIComponent(organizerId)}/tournaments`;
+    } else if (action === 'championships') {
+      targetUrl = `${baseUrl}/organizers/${encodeURIComponent(organizerId)}/championships`;
     }
 
     const faceitRes = await fetch(targetUrl, {

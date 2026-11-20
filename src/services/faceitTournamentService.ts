@@ -247,8 +247,23 @@ export async function fetchLiveOrganizerTournaments(organizerId = CALIBER_FACEIT
 
   // 2. Direct fallback
   try {
-    const url = `${getOpenFaceitBaseUrl()}/tournaments?organizer_id=${encodeURIComponent(organizerId)}&limit=20`;
-    const res = await fetch(url, {
+    let url = `${getOpenFaceitBaseUrl()}/organizers/${encodeURIComponent(organizerId)}/tournaments`;
+    let res = await fetch(url, {
+      headers: {
+        'Authorization': `Bearer ${apiKey}`,
+        'Accept': 'application/json'
+      }
+    });
+    if (res.ok) {
+      const data = await res.json();
+      if (Array.isArray(data.items) && data.items.length > 0) {
+        return { success: true, items: data.items };
+      }
+    }
+
+    // Try championships endpoint
+    url = `${getOpenFaceitBaseUrl()}/organizers/${encodeURIComponent(organizerId)}/championships`;
+    res = await fetch(url, {
       headers: {
         'Authorization': `Bearer ${apiKey}`,
         'Accept': 'application/json'
