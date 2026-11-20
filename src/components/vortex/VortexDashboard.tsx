@@ -3949,10 +3949,10 @@ export const VortexDashboard: React.FC<VortexDashboardProps> = ({
           {/* ======================================================== */}
           {activeTab === 'tournaments' && SHOW_TOURNAMENTS_LIVE && (
             <div className="bg-[#0E1017] border border-[#202536] rounded-3xl p-6 md:p-8 shadow-xl space-y-6">
-              <div className="flex flex-col sm:flex-row sm:items-center justify-between pb-4 border-b border-[#1E2333] gap-4">
-                <div>
-                  <div className="flex items-center gap-2.5">
-                    <h2 className="text-2xl font-black font-display text-white">CALIBER CLUTCH CS2 TOURNAMENT CIRCUIT</h2>
+              <div className="flex flex-col xl:flex-row xl:items-center justify-between pb-4 border-b border-[#1E2333] gap-4">
+                <div className="min-w-0">
+                  <div className="flex items-center gap-2.5 flex-wrap">
+                    <h2 className="text-xl sm:text-2xl font-black font-display text-white tracking-tight">CALIBER CLUTCH CS2 TOURNAMENT CIRCUIT</h2>
                     <span className="px-2.5 py-0.5 rounded-full bg-emerald-500/15 border border-emerald-500/30 text-emerald-400 font-mono text-[10px] font-bold animate-pulse">
                       SEASON 1 LIVE
                     </span>
@@ -3961,7 +3961,7 @@ export const VortexDashboard: React.FC<VortexDashboardProps> = ({
                     Official European competitive circuit • 100% Cash Prize Pools & Ring-0 Kernel Anti-Cheat protection
                   </p>
                 </div>
-                <div className="flex items-center gap-2 p-1 rounded-2xl bg-[#090C12] border border-white/10 shrink-0">
+                <div className="flex items-center flex-wrap gap-2 p-1 rounded-2xl bg-[#090C12] border border-white/10 shrink-0 max-w-full">
                   <button
                     onClick={() => {
                       sound.playClick();
@@ -4989,7 +4989,7 @@ export const VortexDashboard: React.FC<VortexDashboardProps> = ({
                     className="px-3.5 py-1.5 rounded-xl bg-[#A3E635]/15 hover:bg-[#A3E635]/25 border border-[#A3E635]/40 text-[#A3E635] text-xs font-mono font-bold flex items-center gap-1.5 cursor-pointer transition hover:scale-105 active:scale-95"
                   >
                     <Plus className="w-3.5 h-3.5 text-[#A3E635]" />
-                    <span>+ Host Cup</span>
+                    <span>Host Cup</span>
                   </button>
 
                   <div className="relative">
@@ -5040,7 +5040,7 @@ export const VortexDashboard: React.FC<VortexDashboardProps> = ({
                         className="px-5 py-2.5 rounded-xl bg-gradient-to-r from-[#84CC16] to-[#A3E635] hover:brightness-110 text-slate-950 font-mono font-black text-xs uppercase tracking-wider transition shadow-md cursor-pointer active:scale-95 inline-flex items-center gap-2"
                       >
                         <Plus className="w-4 h-4 stroke-[3]" />
-                        <span>+ Host New Cup</span>
+                        <span>Host New Cup</span>
                       </button>
                     </div>
                   );
