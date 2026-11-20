@@ -122,52 +122,141 @@ export interface FaceitRealOrganizer {
 /**
  * Fetch real-time live Organizer details from FACEIT Open API v4
  */
-export async function fetchLiveOrganizerDetails(organizerId = CALIBER_FACEIT_ORGANIZER_ID): Promise<FaceitRealOrganizer | null> {
-  const auth = formatBearerAuth();
-  if (!auth) return null;
+export async function fetchLiveOrganizerDetails(organizerId = CALIBER_FACEIT_ORGANIZER_ID, key?: string): Promise<FaceitRealOrganizer | null> {
+  const result = await testLiveFaceitConnection(organizerId, key);
+  return result.organizer || null;
+}
 
+/**
+ * Real live connection test against FACEIT Data API v4.
+ * Returns true live status or real failure reason.
+ */
+export async function testLiveFaceitConnection(organizerId = CALIBER_FACEIT_ORGANIZER_ID, key?: string): Promise<{
+  success: boolean;
+  live: boolean;
+  organizer?: FaceitRealOrganizer;
+  error?: string;
+}> {
+  const apiKey = (key !== undefined ? key : getFaceitOrganizerConfig().apiKey || '').trim();
+  if (!apiKey) {
+    return {
+      success: false,
+      live: false,
+      error: 'Ju lutem vendosni API Key-in nga Tab 1 (developers.faceit.com). Nuk mund të lidhemi me serverat live pa një çelës të vlefshëm.'
+    };
+  }
+
+  // 1. First try via our backend dev API proxy
   try {
-    const url = `${getOpenFaceitBaseUrl()}/organizers/${organizerId}`;
-    const res = await fetch(url, {
+    const res = await fetch(`/api/faceit-organizer?organizerId=${encodeURIComponent(organizerId)}`, {
       headers: {
-        'Authorization': auth,
+        'Authorization': `Bearer ${apiKey}`,
         'Accept': 'application/json'
       }
     });
 
-    if (res.ok) {
-      return await res.json();
+    const json = await res.json().catch(() => ({}));
+    if (res.ok && json.success && json.data) {
+      return {
+        success: true,
+        live: true,
+        organizer: json.data
+      };
     }
-  } catch (err) {
-    console.warn('Real-time FACEIT Organizer query error:', err);
+    if (json.error) {
+      return {
+        success: false,
+        live: true,
+        error: json.error
+      };
+    }
+  } catch (_) {}
+
+  // 2. Direct fallback to open.faceit.com
+  try {
+    const directUrl = `${getOpenFaceitBaseUrl()}/organizers/${encodeURIComponent(organizerId)}`;
+    const directRes = await fetch(directUrl, {
+      headers: {
+        'Authorization': `Bearer ${apiKey}`,
+        'Accept': 'application/json'
+      }
+    });
+
+    if (directRes.ok) {
+      const data = await directRes.json();
+      return {
+        success: true,
+        live: true,
+        organizer: data
+      };
+    } else {
+      const errJson = await directRes.json().catch(() => ({}));
+      const msg = errJson?.errors?.[0]?.message || `HTTP ${directRes.status}`;
+      return {
+        success: false,
+        live: true,
+        error: `FACEIT refuzoi çelësin (${directRes.status}): ${msg}. Kontrolloni lejet në developers.faceit.com.`
+      };
+    }
+  } catch (err: any) {
+    return {
+      success: false,
+      live: false,
+      error: `Nuk mund të kontaktohej FACEIT API: ${err?.message || 'Kontrolloni lidhjen e internetit ose API Key'}`
+    };
   }
-  return null;
 }
 
 /**
  * Fetch real-time live tournaments under this Organizer from FACEIT Open API v4
  */
-export async function fetchLiveOrganizerTournaments(organizerId = CALIBER_FACEIT_ORGANIZER_ID): Promise<any[]> {
-  const auth = formatBearerAuth();
-  if (!auth) return [];
+export async function fetchLiveOrganizerTournaments(organizerId = CALIBER_FACEIT_ORGANIZER_ID, key?: string): Promise<{
+  success: boolean;
+  items: any[];
+  error?: string;
+}> {
+  const apiKey = (key !== undefined ? key : getFaceitOrganizerConfig().apiKey || '').trim();
+  if (!apiKey) {
+    return {
+      success: false,
+      items: [],
+      error: 'Ju lutem vendosni API Key-in për të sinkronizuar turnetë nga FACEIT.'
+    };
+  }
 
+  // 1. Try proxy
   try {
-    const url = `${getOpenFaceitBaseUrl()}/tournaments?organizer_id=${organizerId}&limit=20`;
-    const res = await fetch(url, {
+    const res = await fetch(`/api/faceit-organizer?action=tournaments&organizerId=${encodeURIComponent(organizerId)}`, {
       headers: {
-        'Authorization': auth,
+        'Authorization': `Bearer ${apiKey}`,
         'Accept': 'application/json'
       }
     });
+    const json = await res.json().catch(() => ({}));
+    if (res.ok && json.success && Array.isArray(json.data?.items)) {
+      return { success: true, items: json.data.items };
+    }
+    if (json.error) {
+      return { success: false, items: [], error: json.error };
+    }
+  } catch (_) {}
 
+  // 2. Direct fallback
+  try {
+    const url = `${getOpenFaceitBaseUrl()}/tournaments?organizer_id=${encodeURIComponent(organizerId)}&limit=20`;
+    const res = await fetch(url, {
+      headers: {
+        'Authorization': `Bearer ${apiKey}`,
+        'Accept': 'application/json'
+      }
+    });
     if (res.ok) {
       const data = await res.json();
-      return data.items || [];
+      return { success: true, items: data.items || [] };
     }
-  } catch (err) {
-    console.warn('Real-time FACEIT Tournaments query error:', err);
-  }
-  return [];
+  } catch (_) {}
+
+  return { success: false, items: [], error: 'Nuk u morën dot turnetë nga FACEIT Organizer.' };
 }
 
 /**

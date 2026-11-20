@@ -88,6 +88,7 @@ import {
   saveFaceitOrganizerConfig, 
   fetchLiveOrganizerDetails, 
   fetchLiveOrganizerTournaments,
+  testLiveFaceitConnection,
   CALIBER_FACEIT_ORGANIZER_URL,
   CALIBER_FACEIT_ORGANIZER_ID,
   FaceitOrganizerConfig 
@@ -4130,29 +4131,38 @@ export const VortexDashboard: React.FC<VortexDashboardProps> = ({
                               setFaceitTesting(true);
                               setFaceitStatusResult(null);
 
+                              if (!faceitKeyInput.trim()) {
+                                setFaceitStatusResult({
+                                  success: false,
+                                  message: '⚠️ Mungon FACEIT API Key! Shkoni te Tab 1 (developers.faceit.com) > My Apps > API Keys, gjeneroni Server API Key dhe vendoseni këtu për t\'u lidhur me serverat live.'
+                                });
+                                setFaceitTesting(false);
+                                return;
+                              }
+
                               saveFaceitOrganizerConfig({
                                 apiKey: faceitKeyInput.trim(),
                                 organizerId: faceitOrgIdInput.trim()
                               });
 
                               try {
-                                const details = await fetchLiveOrganizerDetails(faceitOrgIdInput.trim());
-                                if (details) {
+                                const result = await testLiveFaceitConnection(faceitOrgIdInput.trim(), faceitKeyInput.trim());
+                                if (result.success && result.organizer) {
                                   setFaceitStatusResult({
                                     success: true,
-                                    message: `Connected successfully to Organizer: ${details.name || 'Verified Hub'}`,
-                                    details
+                                    message: `🟢 Lidhja LIVE me FACEIT u konfirmua! Organizatori: ${result.organizer.name || 'CaliberClutch'}`,
+                                    details: result.organizer
                                   });
                                 } else {
                                   setFaceitStatusResult({
-                                    success: true,
-                                    message: `Credentials saved! Endpoint ready at open.faceit.com/data/v4/organizers/${faceitOrgIdInput.trim().slice(0, 8)}...`
+                                    success: false,
+                                    message: result.error || 'Nuk mund të kryhet lidhja live me FACEIT. Kontrolloni API Key-in te developers.faceit.com.'
                                   });
                                 }
                               } catch (err: any) {
                                 setFaceitStatusResult({
                                   success: false,
-                                  message: `API query error: ${err?.message || 'Check your API Key from developers.faceit.com'}`
+                                  message: `API query error: ${err?.message || 'Kontrolloni API Key-in nga developers.faceit.com'}`
                                 });
                               } finally {
                                 setFaceitTesting(false);
@@ -4161,13 +4171,13 @@ export const VortexDashboard: React.FC<VortexDashboardProps> = ({
                             className="px-5 py-2.5 rounded-xl bg-[#171C2B] hover:bg-[#20273D] border border-white/10 text-white font-mono font-bold text-xs uppercase transition cursor-pointer flex items-center gap-2"
                           >
                             <RefreshCw className={`w-3.5 h-3.5 ${faceitTesting ? 'animate-spin' : ''}`} />
-                            <span>{faceitTesting ? 'Testing...' : 'Test Connection'}</span>
+                            <span>{faceitTesting ? 'Duke testuar live...' : 'Test Connection'}</span>
                           </button>
 
                           {faceitSavingSuccess && (
                             <span className="text-emerald-400 text-xs font-mono font-bold flex items-center gap-1 animate-in fade-in">
                               <CheckCircle2 className="w-3.5 h-3.5" />
-                              <span>Saved!</span>
+                              <span>U Ruajtën me Sukses!</span>
                             </span>
                           )}
                         </div>
@@ -4187,7 +4197,7 @@ export const VortexDashboard: React.FC<VortexDashboardProps> = ({
                               <div className="font-bold">{faceitStatusResult.message}</div>
                               {faceitStatusResult.details && (
                                 <div className="text-[10px] text-slate-300 mt-1">
-                                  Type: {faceitStatusResult.details.type} • URL: {faceitStatusResult.details.faceit_url || 'Active'}
+                                  Emri: {faceitStatusResult.details.name} • Tipi: {faceitStatusResult.details.type || 'Organizer Hub'} • URL: {faceitStatusResult.details.faceit_url || 'https://www.faceit.com/en/organizers/4f34046b-65a6-402d-8845-56376c7e77d1/CaliberClutch'}
                                 </div>
                               )}
                             </div>
@@ -4205,10 +4215,24 @@ export const VortexDashboard: React.FC<VortexDashboardProps> = ({
                             <Server className="w-4 h-4 text-orange-400" />
                             <h4 className="font-display font-black text-white text-sm">SERVER ALLOCATION SPECS</h4>
                           </div>
-                          <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse" />
+                          <span className={`w-2.5 h-2.5 rounded-full ${faceitStatusResult?.success ? 'bg-emerald-400 animate-pulse' : faceitKeyInput.trim() ? 'bg-amber-400' : 'bg-red-400'}`} />
                         </div>
 
                         <div className="space-y-3 text-xs font-mono">
+                          <div className="flex items-center justify-between p-2.5 rounded-xl bg-black/40 border border-white/5">
+                            <span className="text-slate-400">Statusi i Lidhjes</span>
+                            {faceitStatusResult?.success ? (
+                              <span className="text-emerald-400 font-bold flex items-center gap-1.5">
+                                <span className="w-2 h-2 rounded-full bg-emerald-400 animate-ping" />
+                                LIVE ONLINE (Frankfurt EU)
+                              </span>
+                            ) : faceitKeyInput.trim() ? (
+                              <span className="text-amber-400 font-bold">Çelësi i Ruajtur (Kliko Test)</span>
+                            ) : (
+                              <span className="text-rose-400 font-bold">Mungon API Key</span>
+                            )}
+                          </div>
+
                           <div className="flex items-center justify-between p-2.5 rounded-xl bg-black/40 border border-white/5">
                             <span className="text-slate-400">Match Server Node</span>
                             <span className="text-white font-bold">FACEIT EU-Central Sub-Tick</span>
@@ -4225,8 +4249,16 @@ export const VortexDashboard: React.FC<VortexDashboardProps> = ({
                           </div>
 
                           <div className="flex items-center justify-between p-2.5 rounded-xl bg-black/40 border border-white/5">
-                            <span className="text-slate-400">Webhook Status</span>
-                            <span className="text-emerald-400 font-bold">Active (/api/webhooks/faceit)</span>
+                            <span className="text-slate-400">Hub Organizer</span>
+                            <a 
+                              href="https://www.faceit.com/en/organizers/4f34046b-65a6-402d-8845-56376c7e77d1/CaliberClutch"
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              className="text-orange-400 font-bold hover:underline flex items-center gap-1"
+                            >
+                              <span>CaliberClutch</span>
+                              <ExternalLink className="w-3 h-3" />
+                            </a>
                           </div>
                         </div>
 
@@ -4234,10 +4266,35 @@ export const VortexDashboard: React.FC<VortexDashboardProps> = ({
                           type="button"
                           onClick={async () => {
                             sound.playClick();
+                            if (!faceitKeyInput.trim()) {
+                              setFaceitStatusResult({
+                                success: false,
+                                message: '⚠️ Vendosni API Key-in nga Tab 1 për të tërhequr turnetë live nga FACEIT.'
+                              });
+                              return;
+                            }
                             try {
-                              const tourneys = await fetchLiveOrganizerTournaments(faceitOrgIdInput.trim());
-                              setFaceitLiveTourneys(tourneys);
-                            } catch (_) {}
+                              const res = await fetchLiveOrganizerTournaments(faceitOrgIdInput.trim(), faceitKeyInput.trim());
+                              if (res.success) {
+                                setFaceitLiveTourneys(res.items);
+                                setFaceitStatusResult({
+                                  success: true,
+                                  message: res.items.length > 0 
+                                    ? `U sinkronizuan ${res.items.length} kampionate live nga FACEIT!` 
+                                    : 'Lidhja me FACEIT është aktive! Asnjë kampionat publik nuk është krijuar ende te CaliberClutch në faceit.com (Tab 2).'
+                                });
+                              } else {
+                                setFaceitStatusResult({
+                                  success: false,
+                                  message: res.error || 'Nuk u sinkronizuan dot turnetë nga FACEIT.'
+                                });
+                              }
+                            } catch (err: any) {
+                              setFaceitStatusResult({
+                                success: false,
+                                message: `Gabim gjatë sinkronizimit: ${err?.message || 'Kontrolloni API Key'}`
+                              });
+                            }
                           }}
                           className="w-full py-2.5 rounded-xl bg-[#151926] hover:bg-[#1E2538] border border-orange-500/30 text-orange-400 font-mono font-bold text-xs flex items-center justify-center gap-2 transition cursor-pointer"
                         >
@@ -4245,11 +4302,21 @@ export const VortexDashboard: React.FC<VortexDashboardProps> = ({
                           <span>Sync Live Organizer Tournaments</span>
                         </button>
 
-                        {faceitLiveTourneys.length > 0 && (
-                          <div className="p-3 rounded-xl bg-black/60 border border-white/5 text-[11px] font-mono text-slate-300">
-                            Found {faceitLiveTourneys.length} live tournaments on FACEIT Organizer.
+                        {faceitLiveTourneys.length > 0 ? (
+                          <div className="p-3 rounded-xl bg-black/60 border border-white/5 space-y-2">
+                            <div className="text-[11px] font-mono font-bold text-emerald-400">
+                              ✓ {faceitLiveTourneys.length} Turne Live te CaliberClutch në FACEIT:
+                            </div>
+                            <div className="space-y-1.5 max-h-48 overflow-y-auto">
+                              {faceitLiveTourneys.map((t, idx) => (
+                                <div key={idx} className="p-2 rounded bg-white/5 flex items-center justify-between text-[10px] font-mono">
+                                  <span className="text-white font-bold truncate max-w-[180px]">{t.name || `Tournament #${idx + 1}`}</span>
+                                  <span className="text-amber-400">{t.status || 'Active'}</span>
+                                </div>
+                              ))}
+                            </div>
                           </div>
-                        )}
+                        ) : null}
                       </div>
 
                       {/* Official Compliance Guarantee */}
