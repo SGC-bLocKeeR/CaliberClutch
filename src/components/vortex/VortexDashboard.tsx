@@ -8462,16 +8462,15 @@ export const VortexDashboard: React.FC<VortexDashboardProps> = ({
                   </div>
                 </div>
 
-                {/* Verified via FACEIT Telemetry Sync (Automatic SteamID64 Sync & Direct Profile Link) */}
+                {/* Verified via FACEIT Telemetry Sync (Automatic SteamID64 Sync) */}
                 <div className="pt-3 border-t border-white/[0.06] space-y-3">
                   {(() => {
                     const activeFaceitNick = (draftFaceitNickname || faceitNickname || localStorage.getItem('vortex_faceit_nickname') || 'bLocKeeRz').trim().replace(/^https?:\/\/(www\.)?faceit\.com\/[a-z]{2}\/players\/?/i, '').replace(/\/$/, '');
                     const activeSteamId = localStorage.getItem('vortex_steam_id64') || convertSteam2ToSteam64(localStorage.getItem('vortex_steam_id') || 'STEAM_0:1:43918293') || '76561198012241163';
-                    const faceitProfileUrl = `https://www.faceit.com/en/players/${encodeURIComponent(activeFaceitNick)}`;
 
                     return (
                       <>
-                        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+                        <div className="flex items-center justify-between">
                           <div>
                             <div className="flex items-center gap-2">
                               <label className="block text-xs font-mono text-white font-bold">
@@ -8482,20 +8481,9 @@ export const VortexDashboard: React.FC<VortexDashboardProps> = ({
                               </span>
                             </div>
                             <p className="text-[10px] font-mono text-slate-400 mt-0.5">
-                              Lidhja zyrtare me FACEIT CS2. Niveli, ELO dhe statistikat sinkronizohen në kohë reale via SteamID64 & Nickname.
+                              Sinkronizimi zyrtar me FACEIT CS2. Niveli, ELO dhe statistikat sinkronizohen në kohë reale.
                             </p>
                           </div>
-
-                          <a
-                            href={faceitProfileUrl}
-                            target="_blank"
-                            rel="noopener noreferrer"
-                            className="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-xl bg-[#18210C] hover:bg-[#84CC16] text-[#A3E635] hover:text-slate-950 border border-[#A3E635]/40 text-xs font-mono font-bold transition shadow-sm cursor-pointer group shrink-0"
-                            title="Hap profilin zyrtar në faceit.com"
-                          >
-                            <ExternalLink className="w-3.5 h-3.5 group-hover:translate-x-0.5 group-hover:-translate-y-0.5 transition-transform" />
-                            <span>Hap Profilin në FACEIT</span>
-                          </a>
                         </div>
 
                         {/* FACEIT Connection Status & Telemetry Sync Card */}
@@ -8543,33 +8531,22 @@ export const VortexDashboard: React.FC<VortexDashboardProps> = ({
                           </button>
                         </div>
 
-                        {/* FACEIT Nickname / Profile URL Editable Field */}
+                        {/* FACEIT Nickname Editable Field */}
                         <div className="space-y-1.5">
-                          <div className="flex items-center justify-between">
-                            <label className="block text-[11px] font-mono font-bold text-slate-300">
-                              Lidhja e FACEIT (Nickname ose Profile Link):
-                            </label>
-                            <a
-                              href={faceitProfileUrl}
-                              target="_blank"
-                              rel="noopener noreferrer"
-                              className="text-[10px] font-mono text-[#A3E635] hover:underline flex items-center gap-1"
-                            >
-                              <span>faceit.com/en/players/{activeFaceitNick}</span>
-                              <ExternalLink className="w-2.5 h-2.5" />
-                            </a>
-                          </div>
+                          <label className="block text-[11px] font-mono font-bold text-slate-300">
+                            FACEIT Nickname:
+                          </label>
                           <div className="relative">
                             <input
                               type="text"
                               value={draftFaceitNickname}
                               onChange={(e) => setDraftFaceitNickname(e.target.value)}
-                              placeholder="bLocKeeRz ose https://www.faceit.com/en/players/bLocKeeRz"
+                              placeholder="bLocKeeRz"
                               className="w-full px-4 py-2.5 rounded-xl bg-[#0A0D14] border border-white/10 focus:border-[#A3E635] text-white text-xs font-mono outline-none"
                             />
                           </div>
                           <p className="text-[10px] font-mono text-slate-500">
-                            Mund të shkruani emrin ose linkun tuaj në FACEIT për sinkronizim të menjëhershëm të ELO-s dhe nivelit.
+                            Shkruani nickname-in tuaj në FACEIT për sinkronizim të menjëhershëm të ELO-s dhe nivelit.
                           </p>
                         </div>
                       </>

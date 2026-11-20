@@ -256,21 +256,8 @@ export const VerifiedFaceitStatsCard: React.FC<VerifiedFaceitStatsCardProps> = (
           </div>
         </div>
 
-        {/* Action Controls: Refresh Stats & External FACEIT Link */}
+        {/* Action Controls: Refresh Stats */}
         <div className="flex items-center gap-2.5 self-start sm:self-auto">
-          {stats?.linked && stats.faceitUrl && (
-            <a
-              href={stats.faceitUrl}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="px-3.5 py-1.5 rounded-xl bg-[#141722] hover:bg-[#1A1F30] border border-white/10 hover:border-sky-400/40 text-sky-400 hover:text-sky-300 text-xs font-mono font-bold transition flex items-center gap-1.5 cursor-pointer shadow-sm group"
-              title="Open official player profile on faceit.com"
-            >
-              <span>View on FACEIT</span>
-              <ExternalLink className="w-3.5 h-3.5 group-hover:translate-x-0.5 group-hover:-translate-y-0.5 transition-transform" />
-            </a>
-          )}
-
           {isOwner && (
             <button
               onClick={() => fetchFaceitStats(true)}
@@ -328,17 +315,6 @@ export const VerifiedFaceitStatsCard: React.FC<VerifiedFaceitStatsCardProps> = (
             <p className="text-xs font-mono text-slate-400 max-w-md mx-auto leading-relaxed">
               Steam ID <span className="text-slate-300 font-bold">{steamId64}</span> is not currently registered or linked to any public FACEIT profile for Counter-Strike 2.
             </p>
-          </div>
-          <div className="pt-2 flex items-center gap-3">
-            <a
-              href="https://www.faceit.com/"
-              target="_blank"
-              rel="noopener noreferrer"
-              className="px-4 py-2 rounded-xl bg-white/10 hover:bg-white/15 text-white border border-white/15 text-xs font-mono font-bold transition flex items-center gap-1.5"
-            >
-              <span>Connect on FACEIT</span>
-              <ExternalLink className="w-3.5 h-3.5" />
-            </a>
           </div>
         </div>
       )}
