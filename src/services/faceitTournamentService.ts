@@ -46,13 +46,14 @@ export interface FaceitOrganizerConfig {
 
 export const CALIBER_FACEIT_ORGANIZER_ID = '4f34046b-65a6-402d-8845-56376c7e77d1';
 export const CALIBER_FACEIT_ORGANIZER_URL = 'https://www.faceit.com/en/organizers/4f34046b-65a6-402d-8845-56376c7e77d1/CaliberClutch';
+export const CALIBER_FACEIT_DEFAULT_API_KEY = '415f900d-b6bb-44d1-84a5-558df86204b9';
 
 // Backwards-compatible aliases
 export const NEXUS_FACEIT_ORGANIZER_ID = CALIBER_FACEIT_ORGANIZER_ID;
 export const NEXUS_FACEIT_ORGANIZER_URL = CALIBER_FACEIT_ORGANIZER_URL;
 
 const DEFAULT_ORGANIZER_CONFIG: FaceitOrganizerConfig = {
-  apiKey: '',
+  apiKey: CALIBER_FACEIT_DEFAULT_API_KEY,
   organizerId: CALIBER_FACEIT_ORGANIZER_ID,
   hubId: 'caliber-clutch-hub',
   autoProgressBracket: true,
@@ -70,6 +71,9 @@ export const getFaceitOrganizerConfig = (): FaceitOrganizerConfig => {
       }
       if (parsed.hubId === 'vortex-global-cs2-hub' || parsed.hubId === 'nexus-hub') {
         parsed.hubId = 'caliber-clutch-hub';
+      }
+      if (!parsed.apiKey || !parsed.apiKey.trim()) {
+        parsed.apiKey = CALIBER_FACEIT_DEFAULT_API_KEY;
       }
       return { ...DEFAULT_ORGANIZER_CONFIG, ...parsed };
     }

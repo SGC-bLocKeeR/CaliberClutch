@@ -9,32 +9,26 @@ export default async function handler(req, res) {
 
   const query = req.query || {};
   const organizerId = (query.organizerId || '4f34046b-65a6-402d-8845-56376c7e77d1').trim();
-  const action = query.action || 'details'; // 'details' | 'tournaments'
+  const action = query.action || 'details'; // 'details' | 'tournaments' | 'championships'
 
-  // Extract API key from Authorization header or query param
+  // Extract API key from Authorization header, query param, or fallback to real registered key
   const authHeader = req.headers['authorization'] || '';
-  const apiKey = (authHeader.replace(/^Bearer\s+/i, '') || query.apiKey || '').trim();
-
-  if (!apiKey) {
-    return res.status(400).json({
-      success: false,
-      live: false,
-      error: 'Mungon FACEIT API Key! Shkoni te Tab 1 (developers.faceit.com) > My Apps > API Keys, gjeneroni Server API Key dhe vendoseni këtu.'
-    });
-  }
+  const apiKey = (authHeader.replace(/^Bearer\s+/i, '') || query.apiKey || '415f900d-b6bb-44d1-84a5-558df86204b9').trim();
 
   try {
     const baseUrl = 'https://open.faceit.com/data/v4';
-    const targetUrl = action === 'tournaments'
-      ? `${baseUrl}/tournaments?organizer_id=${encodeURIComponent(organizerId)}&limit=20`
-      : `${baseUrl}/organizers/${encodeURIComponent(organizerId)}`;
+    let targetUrl = `${baseUrl}/organizers/${encodeURIComponent(organizerId)}`;
+
+    if (action === 'tournaments' || action === 'championships') {
+      targetUrl = `${baseUrl}/championships?game=cs2&type=all&limit=20`;
+    }
 
     const faceitRes = await fetch(targetUrl, {
       method: 'GET',
       headers: {
         'Authorization': `Bearer ${apiKey}`,
         'Accept': 'application/json',
-        'User-Agent': 'CaliberClutch-Platform/1.0'
+        'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) CaliberClutch/1.0'
       }
     });
 
@@ -46,7 +40,7 @@ export default async function handler(req, res) {
         success: false,
         live: true,
         statusCode: faceitRes.status,
-        error: `FACEIT API Refuzoi Lidhjen (${faceitRes.status}): ${errMsg}. Kontrolloni nëse API Key te developers.faceit.com ka lejet e duhura.`
+        error: `FACEIT API: ${errMsg}`
       });
     }
 
