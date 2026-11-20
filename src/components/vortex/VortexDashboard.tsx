@@ -3365,30 +3365,30 @@ export const VortexDashboard: React.FC<VortexDashboardProps> = ({
                         </div>
 
                         {/* Perk Pills Grid */}
-                        <div className="grid grid-cols-2 gap-2 text-xs font-mono pt-1">
-                          <div className="px-2.5 py-1.5 rounded-xl bg-black/40 border border-white/5 flex items-center gap-1.5 text-slate-300">
-                            <Users className="w-3.5 h-3.5 text-slate-400 shrink-0" />
-                            <span className="text-[11px] font-mono leading-tight whitespace-nowrap">All Parties</span>
+                        <div className="grid grid-cols-2 gap-1.5 pt-1">
+                          <div className="px-2 py-1.5 rounded-xl bg-black/50 border border-white/10 flex items-center gap-1 text-slate-300 min-w-0 overflow-hidden">
+                            <Users className="w-3 h-3 text-slate-400 shrink-0" />
+                            <span className="text-[10px] font-sans font-semibold tracking-tight whitespace-nowrap">All Parties</span>
                           </div>
-                          <div className="px-2.5 py-1.5 rounded-xl bg-black/40 border border-white/5 flex items-center gap-1.5 text-slate-300">
-                            <Star className="w-3.5 h-3.5 text-[#A3E635] fill-[#A3E635] shrink-0" />
-                            <span className="text-[11px] font-mono leading-tight whitespace-nowrap">Verified</span>
+                          <div className="px-2 py-1.5 rounded-xl bg-black/50 border border-white/10 flex items-center gap-1 text-slate-300 min-w-0 overflow-hidden">
+                            <Star className="w-3 h-3 text-[#A3E635] fill-[#A3E635] shrink-0" />
+                            <span className="text-[10px] font-sans font-semibold tracking-tight whitespace-nowrap">Verified</span>
                           </div>
-                          <div className="px-2.5 py-1.5 rounded-xl bg-black/40 border border-white/5 flex items-center gap-1.5 text-slate-300">
-                            <TrendingUp className="w-3.5 h-3.5 text-slate-400 shrink-0" />
-                            <span className="text-[11px] font-mono leading-tight whitespace-nowrap">Open ELO</span>
+                          <div className="px-2 py-1.5 rounded-xl bg-black/50 border border-white/10 flex items-center gap-1 text-slate-300 min-w-0 overflow-hidden">
+                            <TrendingUp className="w-3 h-3 text-slate-400 shrink-0" />
+                            <span className="text-[10px] font-sans font-semibold tracking-tight whitespace-nowrap">Open ELO</span>
                           </div>
-                          <div className="px-2.5 py-1.5 rounded-xl bg-black/40 border border-white/5 flex items-center gap-1.5 text-slate-300">
-                            <Star className="w-3.5 h-3.5 text-[#A3E635] fill-[#A3E635] shrink-0" />
-                            <span className="text-[11px] font-mono leading-tight whitespace-nowrap">Veteran</span>
+                          <div className="px-2 py-1.5 rounded-xl bg-black/50 border border-white/10 flex items-center gap-1 text-slate-300 min-w-0 overflow-hidden">
+                            <Star className="w-3 h-3 text-[#A3E635] fill-[#A3E635] shrink-0" />
+                            <span className="text-[10px] font-sans font-semibold tracking-tight whitespace-nowrap">Veteran</span>
                           </div>
-                          <div className="px-2.5 py-1.5 rounded-xl bg-black/40 border border-white/5 flex items-center gap-1.5 text-slate-300">
-                            <Wifi className="w-3.5 h-3.5 text-slate-400 shrink-0" />
-                            <span className="text-[11px] font-mono leading-tight whitespace-nowrap">Sub-Tick</span>
+                          <div className="px-2 py-1.5 rounded-xl bg-black/50 border border-white/10 flex items-center gap-1 text-slate-300 min-w-0 overflow-hidden">
+                            <Wifi className="w-3 h-3 text-slate-400 shrink-0" />
+                            <span className="text-[10px] font-sans font-semibold tracking-tight whitespace-nowrap">Sub-Tick</span>
                           </div>
-                          <div className="px-2.5 py-1.5 rounded-xl bg-black/40 border border-white/5 flex items-center gap-1.5 text-slate-300">
-                            <ShieldAlert className="w-3.5 h-3.5 text-emerald-400 shrink-0" />
-                            <span className="text-[11px] font-mono leading-tight whitespace-nowrap">Anti-Cheat</span>
+                          <div className="px-2 py-1.5 rounded-xl bg-black/50 border border-white/10 flex items-center gap-1 text-slate-300 min-w-0 overflow-hidden">
+                            <ShieldAlert className="w-3 h-3 text-emerald-400 shrink-0" />
+                            <span className="text-[10px] font-sans font-semibold tracking-tight whitespace-nowrap">Anti-Cheat</span>
                           </div>
                         </div>
                       </div>
@@ -3438,30 +3438,30 @@ export const VortexDashboard: React.FC<VortexDashboardProps> = ({
                         </div>
 
                         {/* Perk Pills Grid */}
-                        <div className="grid grid-cols-2 gap-2 text-xs font-mono pt-1">
-                          <div className="px-2.5 py-1.5 rounded-xl bg-black/40 border border-white/5 flex items-center gap-1.5 text-slate-300">
-                            <Users className="w-3.5 h-3.5 text-amber-400 shrink-0" />
-                            <span className="text-[11px] font-mono leading-tight whitespace-nowrap">Solo/Duo/Trio</span>
+                        <div className="grid grid-cols-2 gap-1.5 pt-1">
+                          <div className="px-2 py-1.5 rounded-xl bg-black/50 border border-white/10 flex items-center gap-1 text-slate-300 min-w-0 overflow-hidden">
+                            <Users className="w-3 h-3 text-amber-400 shrink-0" />
+                            <span className="text-[10px] font-sans font-semibold tracking-tight whitespace-nowrap">Solo/Duo</span>
                           </div>
-                          <div className="px-2.5 py-1.5 rounded-xl bg-black/40 border border-white/5 flex items-center gap-1.5 text-slate-300">
-                            <Star className="w-3.5 h-3.5 text-amber-400 fill-amber-400 shrink-0" />
-                            <span className="text-[11px] font-mono leading-tight whitespace-nowrap">Verified</span>
+                          <div className="px-2 py-1.5 rounded-xl bg-black/50 border border-white/10 flex items-center gap-1 text-slate-300 min-w-0 overflow-hidden">
+                            <Star className="w-3 h-3 text-amber-400 fill-amber-400 shrink-0" />
+                            <span className="text-[10px] font-sans font-semibold tracking-tight whitespace-nowrap">Verified</span>
                           </div>
-                          <div className="px-2.5 py-1.5 rounded-xl bg-black/40 border border-white/5 flex items-center gap-1.5 text-slate-300">
-                            <TrendingUp className="w-3.5 h-3.5 text-amber-400 shrink-0" />
-                            <span className="text-[11px] font-mono leading-tight whitespace-nowrap">±250 ELO</span>
+                          <div className="px-2 py-1.5 rounded-xl bg-black/50 border border-white/10 flex items-center gap-1 text-slate-300 min-w-0 overflow-hidden">
+                            <TrendingUp className="w-3 h-3 text-amber-400 shrink-0" />
+                            <span className="text-[10px] font-sans font-semibold tracking-tight whitespace-nowrap">±250 ELO</span>
                           </div>
-                          <div className="px-2.5 py-1.5 rounded-xl bg-black/40 border border-white/5 flex items-center gap-1.5 text-slate-300">
-                            <Star className="w-3.5 h-3.5 text-amber-400 fill-amber-400 shrink-0" />
-                            <span className="text-[11px] font-mono leading-tight whitespace-nowrap">Veteran</span>
+                          <div className="px-2 py-1.5 rounded-xl bg-black/50 border border-white/10 flex items-center gap-1 text-slate-300 min-w-0 overflow-hidden">
+                            <Star className="w-3 h-3 text-amber-400 fill-amber-400 shrink-0" />
+                            <span className="text-[10px] font-sans font-semibold tracking-tight whitespace-nowrap">Veteran</span>
                           </div>
-                          <div className="px-2.5 py-1.5 rounded-xl bg-black/40 border border-white/5 flex items-center gap-1.5 text-slate-300">
-                            <Crown className="w-3.5 h-3.5 text-amber-400 shrink-0" />
-                            <span className="text-[11px] font-mono leading-tight whitespace-nowrap">Captain Pick</span>
+                          <div className="px-2 py-1.5 rounded-xl bg-black/50 border border-white/10 flex items-center gap-1 text-slate-300 min-w-0 overflow-hidden">
+                            <Crown className="w-3 h-3 text-amber-400 shrink-0" />
+                            <span className="text-[10px] font-sans font-semibold tracking-tight whitespace-nowrap">Captains</span>
                           </div>
-                          <div className="px-2.5 py-1.5 rounded-xl bg-black/40 border border-white/5 flex items-center gap-1.5 text-slate-300">
-                            <Zap className="w-3.5 h-3.5 text-amber-400 shrink-0" />
-                            <span className="text-[11px] font-mono leading-tight whitespace-nowrap">Anti-Smurf</span>
+                          <div className="px-2 py-1.5 rounded-xl bg-black/50 border border-white/10 flex items-center gap-1 text-slate-300 min-w-0 overflow-hidden">
+                            <Zap className="w-3 h-3 text-amber-400 shrink-0" />
+                            <span className="text-[10px] font-sans font-semibold tracking-tight whitespace-nowrap">Anti-Smurf</span>
                           </div>
                         </div>
                       </div>
@@ -3518,30 +3518,30 @@ export const VortexDashboard: React.FC<VortexDashboardProps> = ({
                         </div>
 
                         {/* Perk Pills Grid */}
-                        <div className="grid grid-cols-2 gap-2 text-xs font-mono pt-1">
-                          <div className="px-2.5 py-1.5 rounded-xl bg-black/40 border border-white/5 flex items-center gap-1.5 text-slate-300">
-                            <Crosshair className="w-3.5 h-3.5 text-purple-400 shrink-0" />
-                            <span className="text-[11px] font-mono leading-tight whitespace-nowrap">Solo / Duo</span>
+                        <div className="grid grid-cols-2 gap-1.5 pt-1">
+                          <div className="px-2 py-1.5 rounded-xl bg-black/50 border border-white/10 flex items-center gap-1 text-slate-300 min-w-0 overflow-hidden">
+                            <Crosshair className="w-3 h-3 text-purple-400 shrink-0" />
+                            <span className="text-[10px] font-sans font-semibold tracking-tight whitespace-nowrap">Solo/Duo</span>
                           </div>
-                          <div className="px-2.5 py-1.5 rounded-xl bg-black/40 border border-white/5 flex items-center gap-1.5 text-slate-300">
-                            <ShieldCheck className="w-3.5 h-3.5 text-purple-400 shrink-0" />
-                            <span className="text-[11px] font-mono leading-tight whitespace-nowrap">Verified ⭐</span>
+                          <div className="px-2 py-1.5 rounded-xl bg-black/50 border border-white/10 flex items-center gap-1 text-slate-300 min-w-0 overflow-hidden">
+                            <ShieldCheck className="w-3 h-3 text-purple-400 shrink-0" />
+                            <span className="text-[10px] font-sans font-semibold tracking-tight whitespace-nowrap">Verified</span>
                           </div>
-                          <div className="px-2.5 py-1.5 rounded-xl bg-black/40 border border-white/5 flex items-center gap-1.5 text-slate-300">
-                            <TrendingUp className="w-3.5 h-3.5 text-purple-400 shrink-0" />
-                            <span className="text-[11px] font-mono leading-tight whitespace-nowrap">±150 ELO</span>
+                          <div className="px-2 py-1.5 rounded-xl bg-black/50 border border-white/10 flex items-center gap-1 text-slate-300 min-w-0 overflow-hidden">
+                            <TrendingUp className="w-3 h-3 text-purple-400 shrink-0" />
+                            <span className="text-[10px] font-sans font-semibold tracking-tight whitespace-nowrap">±150 ELO</span>
                           </div>
-                          <div className="px-2.5 py-1.5 rounded-xl bg-black/40 border border-white/5 flex items-center gap-1.5 text-slate-300">
-                            <Film className="w-3.5 h-3.5 text-purple-400 shrink-0" />
-                            <span className="text-[11px] font-mono leading-tight whitespace-nowrap">GOTV Demos</span>
+                          <div className="px-2 py-1.5 rounded-xl bg-black/50 border border-white/10 flex items-center gap-1 text-slate-300 min-w-0 overflow-hidden">
+                            <Film className="w-3 h-3 text-purple-400 shrink-0" />
+                            <span className="text-[10px] font-sans font-semibold tracking-tight whitespace-nowrap">GOTV VOD</span>
                           </div>
-                          <div className="px-2.5 py-1.5 rounded-xl bg-black/40 border border-white/5 flex items-center gap-1.5 text-slate-300">
-                            <Sparkles className="w-3.5 h-3.5 text-amber-300 shrink-0" />
-                            <span className="text-[11px] font-mono leading-tight whitespace-nowrap">2x Points</span>
+                          <div className="px-2 py-1.5 rounded-xl bg-black/50 border border-white/10 flex items-center gap-1 text-slate-300 min-w-0 overflow-hidden">
+                            <Sparkles className="w-3 h-3 text-amber-300 shrink-0" />
+                            <span className="text-[10px] font-sans font-semibold tracking-tight whitespace-nowrap">2x Points</span>
                           </div>
-                          <div className="px-2.5 py-1.5 rounded-xl bg-black/40 border border-white/5 flex items-center gap-1.5 text-slate-300">
-                            <Flame className="w-3.5 h-3.5 text-amber-400 shrink-0" />
-                            <span className="text-[11px] font-mono leading-tight whitespace-nowrap">High Stakes</span>
+                          <div className="px-2 py-1.5 rounded-xl bg-black/50 border border-white/10 flex items-center gap-1 text-slate-300 min-w-0 overflow-hidden">
+                            <Flame className="w-3 h-3 text-amber-400 shrink-0" />
+                            <span className="text-[10px] font-sans font-semibold tracking-tight whitespace-nowrap">High Stakes</span>
                           </div>
                         </div>
                       </div>
