@@ -88,8 +88,8 @@ import {
   saveFaceitOrganizerConfig, 
   fetchLiveOrganizerDetails, 
   fetchLiveOrganizerTournaments,
-  NEXUS_FACEIT_ORGANIZER_URL,
-  NEXUS_FACEIT_ORGANIZER_ID,
+  CALIBER_FACEIT_ORGANIZER_URL,
+  CALIBER_FACEIT_ORGANIZER_ID,
   FaceitOrganizerConfig 
 } from '../../services/faceitTournamentService';
 
@@ -3989,13 +3989,13 @@ export const VortexDashboard: React.FC<VortexDashboardProps> = ({
                         <span>Tab 1: developers.faceit.com</span>
                       </a>
                       <a
-                        href={faceitOrgIdInput ? `https://www.faceit.com/en/organizers/${faceitOrgIdInput}/Nexus%20Esports` : 'https://www.faceit.com'}
+                        href={faceitOrgIdInput ? `https://www.faceit.com/en/organizers/${faceitOrgIdInput}/CaliberClutch` : 'https://www.faceit.com/en/organizers/4f34046b-65a6-402d-8845-56376c7e77d1/CaliberClutch'}
                         target="_blank"
                         rel="noopener noreferrer"
                         className="px-4 py-2.5 rounded-xl bg-[#FF5500] hover:bg-[#ff6a1f] text-white font-mono font-black text-xs flex items-center justify-center gap-2 transition hover:scale-[1.02] shadow-lg shadow-orange-500/25"
                       >
                         <ExternalLink className="w-3.5 h-3.5" />
-                        <span>Tab 2: faceit.com Organizer</span>
+                        <span>Tab 2: faceit.com/en/organizers/.../CaliberClutch</span>
                       </a>
                     </div>
                   </div>

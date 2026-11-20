@@ -7,7 +7,7 @@ export interface HltvEvent {
     text: string;
     color?: string;
   };
-  logoType: 'iem' | 'blast' | 'pgl' | 'nexus';
+  logoType: 'iem' | 'blast' | 'pgl' | 'caliber' | 'nexus';
   status: 'live' | 'upcoming' | 'over';
   tournamentId?: string;
 }
@@ -18,7 +18,7 @@ export interface ScheduledCircuitEvent {
   name: string;
   startDate: string; // ISO Date YYYY-MM-DD
   endDate: string;   // ISO Date YYYY-MM-DD
-  logoType: 'iem' | 'blast' | 'pgl' | 'nexus';
+  logoType: 'iem' | 'blast' | 'pgl' | 'caliber' | 'nexus';
   tournamentId: string;
   prizePool: number;
   format: string;
@@ -27,7 +27,7 @@ export interface ScheduledCircuitEvent {
 }
 
 /**
- * Official Pro Circuit & Nexus Tournament Calendar.
+ * Official Pro Circuit & Caliber Clutch Tournament Calendar.
  * Events automatically transition through their lifecycle:
  * 1. UPCOMING: Countdown in days/hours
  * 2. LIVE: Shows LIVE badge and active match room
@@ -60,10 +60,10 @@ export const SCHEDULED_TOURNAMENTS: ScheduledCircuitEvent[] = [
   },
   {
     id: 'vortex-global',
-    name: 'Vortex Global Circuit Season 4',
+    name: 'Caliber Clutch Global Circuit Season 1',
     startDate: '2026-11-14T16:00:00Z',
     endDate: '2026-11-18T22:00:00Z',
-    logoType: 'nexus',
+    logoType: 'caliber',
     tournamentId: 'tourney-pro-special',
     prizePool: 25000,
     format: '5v5 Double Elimination Bracket',

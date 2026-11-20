@@ -4,7 +4,7 @@ class SoundSynthesizer {
 
   constructor() {
     // Check localStorage preference
-    const saved = localStorage.getItem('nexus_sound_enabled');
+    const saved = localStorage.getItem('caliber_sound_enabled') || localStorage.getItem('nexus_sound_enabled');
     if (saved !== null) {
       this.soundEnabled = saved === 'true';
     }
@@ -16,7 +16,8 @@ class SoundSynthesizer {
 
   public toggleSound(): boolean {
     this.soundEnabled = !this.soundEnabled;
-    localStorage.setItem('nexus_sound_enabled', String(this.soundEnabled));
+    localStorage.setItem('caliber_sound_enabled', String(this.soundEnabled));
+    localStorage.removeItem('nexus_sound_enabled');
     if (this.soundEnabled) {
       this.playSelect();
     }

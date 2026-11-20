@@ -147,7 +147,8 @@ export interface GamerPassport {
   bio: string;
   level: number;
   membershipTier: MembershipTier;
-  nexusRating: number;
+  caliberRating?: number;
+  nexusRating?: number;
   lftStatus: LFTStatus;
   primaryGame: GameId;
   primaryRole: string;

@@ -44,25 +44,32 @@ export interface FaceitOrganizerConfig {
   enforceFaceitAC: boolean;
 }
 
-export const NEXUS_FACEIT_ORGANIZER_ID = '4f34046b-65a6-402d-8845-56376c7e77d1';
-export const NEXUS_FACEIT_ORGANIZER_URL = 'https://www.faceit.com/en/organizers/4f34046b-65a6-402d-8845-56376c7e77d1/Nexus%20Esports';
+export const CALIBER_FACEIT_ORGANIZER_ID = '4f34046b-65a6-402d-8845-56376c7e77d1';
+export const CALIBER_FACEIT_ORGANIZER_URL = 'https://www.faceit.com/en/organizers/4f34046b-65a6-402d-8845-56376c7e77d1/CaliberClutch';
+
+// Backwards-compatible aliases
+export const NEXUS_FACEIT_ORGANIZER_ID = CALIBER_FACEIT_ORGANIZER_ID;
+export const NEXUS_FACEIT_ORGANIZER_URL = CALIBER_FACEIT_ORGANIZER_URL;
 
 const DEFAULT_ORGANIZER_CONFIG: FaceitOrganizerConfig = {
   apiKey: '',
-  organizerId: NEXUS_FACEIT_ORGANIZER_ID,
-  hubId: 'vortex-global-cs2-hub',
+  organizerId: CALIBER_FACEIT_ORGANIZER_ID,
+  hubId: 'caliber-clutch-hub',
   autoProgressBracket: true,
   enforceFaceitAC: true,
 };
 
 export const getFaceitOrganizerConfig = (): FaceitOrganizerConfig => {
   try {
-    const saved = localStorage.getItem('nexus_faceit_organizer_config');
+    const saved = localStorage.getItem('caliber_faceit_organizer_config') || localStorage.getItem('nexus_faceit_organizer_config');
     if (saved) {
       const parsed = JSON.parse(saved);
-      // Ensure real organizerId takes precedence over older placeholder
-      if (!parsed.organizerId || parsed.organizerId === 'nexus-esports-org') {
-        parsed.organizerId = NEXUS_FACEIT_ORGANIZER_ID;
+      // Ensure real CaliberClutch organizerId takes precedence
+      if (!parsed.organizerId || parsed.organizerId.toLowerCase().includes('nexus') || parsed.organizerId === 'nexus-esports-org') {
+        parsed.organizerId = CALIBER_FACEIT_ORGANIZER_ID;
+      }
+      if (parsed.hubId === 'vortex-global-cs2-hub' || parsed.hubId === 'nexus-hub') {
+        parsed.hubId = 'caliber-clutch-hub';
       }
       return { ...DEFAULT_ORGANIZER_CONFIG, ...parsed };
     }
@@ -74,7 +81,8 @@ export const saveFaceitOrganizerConfig = (config: Partial<FaceitOrganizerConfig>
   try {
     const current = getFaceitOrganizerConfig();
     const updated = { ...current, ...config };
-    localStorage.setItem('nexus_faceit_organizer_config', JSON.stringify(updated));
+    localStorage.setItem('caliber_faceit_organizer_config', JSON.stringify(updated));
+    localStorage.removeItem('nexus_faceit_organizer_config');
   } catch (_) {}
 };
 
@@ -114,7 +122,7 @@ export interface FaceitRealOrganizer {
 /**
  * Fetch real-time live Organizer details from FACEIT Open API v4
  */
-export async function fetchLiveOrganizerDetails(organizerId = NEXUS_FACEIT_ORGANIZER_ID): Promise<FaceitRealOrganizer | null> {
+export async function fetchLiveOrganizerDetails(organizerId = CALIBER_FACEIT_ORGANIZER_ID): Promise<FaceitRealOrganizer | null> {
   const auth = formatBearerAuth();
   if (!auth) return null;
 
@@ -139,7 +147,7 @@ export async function fetchLiveOrganizerDetails(organizerId = NEXUS_FACEIT_ORGAN
 /**
  * Fetch real-time live tournaments under this Organizer from FACEIT Open API v4
  */
-export async function fetchLiveOrganizerTournaments(organizerId = NEXUS_FACEIT_ORGANIZER_ID): Promise<any[]> {
+export async function fetchLiveOrganizerTournaments(organizerId = CALIBER_FACEIT_ORGANIZER_ID): Promise<any[]> {
   const auth = formatBearerAuth();
   if (!auth) return [];
 
@@ -297,7 +305,7 @@ export async function createFaceitTournament(options: FaceitTournamentOptions): 
   return {
     success: true,
     tournamentId: faceitTournamentId,
-    faceitUrl: `https://www.faceit.com/en/organizers/${config.organizerId}/Nexus%20Esports`,
+    faceitUrl: `https://www.faceit.com/en/organizers/${config.organizerId}/Caliber%20Clutch`,
     serverNode: 'FACEIT Sub-Tick Cloud (EU Central / Frankfurt)',
     anticheatEnforced: options.anticheatRequired,
     isRealTime: Boolean(authHeader)

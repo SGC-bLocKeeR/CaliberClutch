@@ -40,7 +40,7 @@ export const SUPPORTED_GAMES: GameInfo[] = [
     banner: 'https://images.unsplash.com/photo-1560253023-3ec5d502959f?q=80&w=1200&auto=format&fit=crop',
     icon: '🔮',
     playerCount: '3.8M Active',
-    color: 'var(--nexus-primary)',
+    color: '#FF5500',
     roles: ['Top Laner', 'Jungler', 'Mid Laner', 'ADC / Bot Carry', 'Support']
   },
   {
@@ -601,7 +601,7 @@ export const CURRENT_USER_PASSPORT: GamerPassport = {
   bio: 'Competitive CS2 Rifler & Faceit Level 7 Player from Ferizaj, Kosovo. In-game: M14. Member since Dec 2019 with 840+ CS2 matches.',
   level: 28,
   membershipTier: 'pro',
-  nexusRating: 1394,
+  caliberRating: 1394,
   lftStatus: 'actively_looking',
   primaryGame: 'cs2',
   primaryRole: 'Rifler / Entry Fragger',
@@ -648,7 +648,7 @@ export const CURRENT_USER_PASSPORT: GamerPassport = {
       id: 'b1',
       name: 'Faceit Level 7 Verified',
       icon: '⚡',
-      color: 'var(--nexus-primary)',
+      color: '#FF5500',
       description: 'Verified 1,394 Faceit CS2 ELO & Anti-Cheat Enforced.'
     },
     {
@@ -700,7 +700,7 @@ export const SCOUTING_PLAYERS: GamerPassport[] = [
     bio: 'Aggressive Entry Fragger in CS2. High first-bullet accuracy and unshakeable confidence in tight sites.',
     level: 31,
     membershipTier: 'pro',
-    nexusRating: 2620,
+    caliberRating: 2620,
     lftStatus: 'open_to_offers',
     primaryGame: 'cs2',
     primaryRole: 'Entry Fragger (AK-47 / Galil)',
@@ -721,7 +721,7 @@ export const SCOUTING_PLAYERS: GamerPassport[] = [
     eloHistory: [],
     connectedServices: [],
     badges: [
-      { id: 'b1', name: 'Faceit 10 Pro', icon: '🛡️', color: 'var(--nexus-primary)', description: 'Verified 2,900+ ELO' },
+      { id: 'b1', name: 'Faceit 10 Pro', icon: '🛡️', color: '#FF5500', description: 'Verified 2,900+ ELO' },
       { id: 'b3', name: 'Headshot Machine (68%)', icon: '🎯', color: '#EF4444', description: 'Average HS% over 65%' }
     ],
     hardwareSpecs: {
@@ -746,7 +746,7 @@ export const SCOUTING_PLAYERS: GamerPassport[] = [
     bio: 'Dedicated Controller / Smoke anchor player in Valorant. Strategic macro caller with international LAN experience.',
     level: 28,
     membershipTier: 'pro',
-    nexusRating: 2410,
+    caliberRating: 2410,
     lftStatus: 'actively_looking',
     primaryGame: 'valorant',
     primaryRole: 'Controller (Omen / Viper / Astra)',
@@ -767,7 +767,7 @@ export const SCOUTING_PLAYERS: GamerPassport[] = [
     eloHistory: [],
     connectedServices: [],
     badges: [
-      { id: 'b1', name: 'VORTEX Verified', icon: '🛡️', color: 'var(--nexus-primary)', description: 'Verified player' },
+      { id: 'b1', name: 'VORTEX Verified', icon: '🛡️', color: '#FF5500', description: 'Verified player' },
       { id: 'b2', name: 'LAN Veteran', icon: '🎖️', color: '#8B5CF6', description: 'Competed in DreamHack Open' }
     ],
     hardwareSpecs: {
@@ -792,7 +792,7 @@ export const SCOUTING_PLAYERS: GamerPassport[] = [
     bio: 'High challenger Mid Laner & Shotcaller in League of Legends. Specializing in assassin roam and late-game macro.',
     level: 26,
     membershipTier: 'free',
-    nexusRating: 2320,
+    caliberRating: 2320,
     lftStatus: 'actively_looking',
     primaryGame: 'lol',
     primaryRole: 'Mid Laner (Orianna, Azir, Yone)',
@@ -812,7 +812,7 @@ export const SCOUTING_PLAYERS: GamerPassport[] = [
     eloHistory: [],
     connectedServices: [],
     badges: [
-      { id: 'b1', name: 'VORTEX Verified', icon: '🛡️', color: 'var(--nexus-primary)', description: 'Verified' },
+      { id: 'b1', name: 'VORTEX Verified', icon: '🛡️', color: '#FF5500', description: 'Verified' },
       { id: 'b4', name: 'SoloQ Prodigy', icon: '✨', color: '#F59E0B', description: 'Top 50 EUW SoloQ' }
     ],
     hardwareSpecs: {
