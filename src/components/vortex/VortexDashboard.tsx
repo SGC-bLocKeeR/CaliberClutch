@@ -3938,24 +3938,26 @@ export const VortexDashboard: React.FC<VortexDashboardProps> = ({
                     <Plus className="w-3.5 h-3.5 stroke-[3]" />
                     <span>Create Tournament</span>
                   </button>
-                  <button
-                    onClick={() => {
-                      sound.playSelect();
-                      setTourneyTabMode('faceit');
-                    }}
-                    className={`px-4 py-2 rounded-xl text-xs font-display font-black tracking-wider uppercase transition cursor-pointer flex items-center gap-1.5 ${
-                      tourneyTabMode === 'faceit'
-                        ? 'bg-[#FF5500] text-white shadow-lg shadow-orange-500/25'
-                        : 'text-orange-400 hover:bg-orange-500/10'
-                    }`}
-                  >
-                    <Globe className="w-3.5 h-3.5" />
-                    <span>FACEIT Setup</span>
-                  </button>
+                  {isProjectAdmin && (
+                    <button
+                      onClick={() => {
+                        sound.playSelect();
+                        setTourneyTabMode('faceit');
+                      }}
+                      className={`px-4 py-2 rounded-xl text-xs font-display font-black tracking-wider uppercase transition cursor-pointer flex items-center gap-1.5 ${
+                        tourneyTabMode === 'faceit'
+                          ? 'bg-[#FF5500] text-white shadow-lg shadow-orange-500/25'
+                          : 'text-orange-400 hover:bg-orange-500/10'
+                      }`}
+                    >
+                      <Globe className="w-3.5 h-3.5" />
+                      <span>FACEIT Admin Setup</span>
+                    </button>
+                  )}
                 </div>
               </div>
 
-              {tourneyTabMode === 'faceit' ? (
+              {tourneyTabMode === 'faceit' && isProjectAdmin ? (
                 <div className="space-y-6 animate-in fade-in duration-200">
                   {/* FACEIT Integration Header Banner */}
                   <div className="flex flex-col lg:flex-row lg:items-center justify-between p-6 sm:p-8 rounded-3xl bg-gradient-to-r from-[#170E08] via-[#121622] to-[#0A0D15] border border-orange-500/30 gap-6 shadow-2xl relative overflow-hidden">
