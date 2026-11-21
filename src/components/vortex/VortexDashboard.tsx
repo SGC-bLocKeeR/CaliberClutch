@@ -1545,7 +1545,7 @@ export const VortexDashboard: React.FC<VortexDashboardProps> = ({
   const [newTourneyOrganizer, setNewTourneyOrganizer] = useState<string>('');
   const [newTourneyCashPrize, setNewTourneyCashPrize] = useState('1000');
   const [newTourneyMaxTeams, setNewTourneyMaxTeams] = useState<number>(16);
-  const [newTourneyEntryFee, setNewTourneyEntryFee] = useState<number>(69); // Auto-calculated: Math.ceil((1000 * 1.10) / 16) = 69
+  const [newTourneyEntryFee, setNewTourneyEntryFee] = useState<number>(68.75); // Auto-calculated: (1000 * 1.10) / 16 = 68.75
   const [newTourneyIsPaid, setNewTourneyIsPaid] = useState<boolean>(true);
   const [revealTournamentStreamIp, setRevealTournamentStreamIp] = useState<boolean>(false);
 
@@ -1555,7 +1555,7 @@ export const VortexDashboard: React.FC<VortexDashboardProps> = ({
     const numeric = parseFloat(val.replace(/[^0-9.]/g, ''));
     if (numeric && numeric > 0 && newTourneyMaxTeams > 0) {
       const totalFund = numeric * 1.10;
-      const calcFee = Math.ceil(totalFund / newTourneyMaxTeams);
+      const calcFee = parseFloat((totalFund / newTourneyMaxTeams).toFixed(2));
       setNewTourneyEntryFee(calcFee);
     }
   };
@@ -1566,17 +1566,17 @@ export const VortexDashboard: React.FC<VortexDashboardProps> = ({
     const numeric = parseFloat(newTourneyCashPrize.replace(/[^0-9.]/g, '')) || 1000;
     if (numeric > 0 && teams > 0) {
       const totalFund = numeric * 1.10;
-      const calcFee = Math.ceil(totalFund / teams);
+      const calcFee = parseFloat((totalFund / teams).toFixed(2));
       setNewTourneyEntryFee(calcFee);
     }
   };
 
   // Reverse auto-calculate when fee per team is modified directly
   const handleEntryFeeChange = (fee: number) => {
-    const safeFee = Math.max(1, fee);
+    const safeFee = Math.max(0.01, fee);
     setNewTourneyEntryFee(safeFee);
     const totalFund = safeFee * newTourneyMaxTeams;
-    const prizePool = Math.round(totalFund / 1.10);
+    const prizePool = parseFloat((totalFund / 1.10).toFixed(2));
     setNewTourneyCashPrize(String(prizePool));
   };
   const [newTourneyStructure, setNewTourneyStructure] = useState<string>('Single Elimination');
@@ -4932,10 +4932,14 @@ export const VortexDashboard: React.FC<VortexDashboardProps> = ({
                           {/* Auto-Calculated Entry Fees - Directly Under Prize Pool & Capacity */}
                           {(() => {
                             const poolNumeric = parseFloat(String(newTourneyCashPrize).replace(/[^0-9.]/g, '')) || 1000;
-                            const prizePool = poolNumeric > 0 ? poolNumeric : Math.round((newTourneyMaxTeams * newTourneyEntryFee) / 1.10);
-                            const totalCollected = prizePool * 1.10;
-                            const feePerTeam = Math.ceil(totalCollected / newTourneyMaxTeams);
-                            const feePerPlayer = (feePerTeam / 5).toFixed(2);
+                            const prizePool = poolNumeric > 0 ? poolNumeric : ((newTourneyMaxTeams * newTourneyEntryFee) / 1.10);
+                            const hostFee = prizePool * 0.05;
+                            const adminFee = prizePool * 0.05;
+                            const totalCollected = prizePool + hostFee + adminFee; // P + 5% + 5% = P * 1.10
+                            const feePerTeamNum = newTourneyMaxTeams > 0 ? totalCollected / newTourneyMaxTeams : 0;
+                            const feePerPlayerNum = feePerTeamNum / 5;
+                            const feePerTeamStr = (feePerTeamNum % 1 !== 0) ? feePerTeamNum.toFixed(2) : feePerTeamNum.toFixed(2);
+                            const feePerPlayerStr = (feePerPlayerNum % 1 !== 0) ? feePerPlayerNum.toFixed(2) : feePerPlayerNum.toFixed(2);
 
                             return (
                               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 pt-1">
@@ -4945,8 +4949,8 @@ export const VortexDashboard: React.FC<VortexDashboardProps> = ({
                                     <span className="text-[10px] text-[#A3E635] font-normal">Auto-Synced</span>
                                   </label>
                                   <div className="w-full px-4 py-2.5 rounded-xl bg-[#0B0E16] border border-[#252C3D] text-amber-300 font-bold flex items-center justify-between text-sm font-mono">
-                                    <span>€{feePerTeam}</span>
-                                    <span className="text-xs text-slate-400 font-normal">€{feePerTeam} / team</span>
+                                    <span>€{feePerTeamStr}</span>
+                                    <span className="text-xs text-slate-400 font-normal">€{feePerTeamStr} / team</span>
                                   </div>
                                 </div>
                                 <div>
@@ -4954,8 +4958,8 @@ export const VortexDashboard: React.FC<VortexDashboardProps> = ({
                                     Calculated per Player (5v5 Lineup)
                                   </label>
                                   <div className="w-full px-4 py-2.5 rounded-xl bg-[#0B0E16] border border-[#252C3D] text-emerald-400 font-bold flex items-center justify-between text-sm font-mono">
-                                    <span>€{feePerPlayer}</span>
-                                    <span className="text-xs text-slate-400 font-normal">€{feePerPlayer} / player</span>
+                                    <span>€{feePerPlayerStr}</span>
+                                    <span className="text-xs text-slate-400 font-normal">€{feePerPlayerStr} / player</span>
                                   </div>
                                 </div>
                               </div>
@@ -4966,15 +4970,18 @@ export const VortexDashboard: React.FC<VortexDashboardProps> = ({
                         {/* 3. AUTOMATED FINANCIAL SPLIT (100% Pure Untouched Prize Pool + Participant-Funded 5% Fees) */}
                         {(() => {
                           const poolNumeric = parseFloat(String(newTourneyCashPrize).replace(/[^0-9.]/g, '')) || 1000;
-                          const prizePool = poolNumeric > 0 ? poolNumeric : Math.round((newTourneyMaxTeams * newTourneyEntryFee) / 1.10);
+                          const prizePool = poolNumeric > 0 ? poolNumeric : ((newTourneyMaxTeams * newTourneyEntryFee) / 1.10);
                           const platformFee = prizePool * 0.05;
                           const organizerFee = prizePool * 0.05;
                           const totalCollected = prizePool + platformFee + organizerFee; // 100% prize + 5% platform + 5% organizer
                           const firstPrize = Math.round(prizePool * 0.70);
                           const secondPrize = Math.round(prizePool * 0.20);
                           const thirdPrize = Math.max(0, prizePool - firstPrize - secondPrize);
-                          const feePerTeam = Math.ceil(totalCollected / newTourneyMaxTeams);
-                          const feePerPlayer = (feePerTeam / 5).toFixed(2);
+                          const feePerTeamNum = newTourneyMaxTeams > 0 ? totalCollected / newTourneyMaxTeams : 0;
+                          const feePerPlayerNum = feePerTeamNum / 5;
+                          const feePerTeamStr = (feePerTeamNum % 1 !== 0) ? feePerTeamNum.toFixed(2) : feePerTeamNum.toFixed(2);
+                          const feePerPlayerStr = (feePerPlayerNum % 1 !== 0) ? feePerPlayerNum.toFixed(2) : feePerPlayerNum.toFixed(2);
+                          const totalCollectedStr = totalCollected.toLocaleString(undefined, { minimumFractionDigits: totalCollected % 1 !== 0 ? 2 : 0, maximumFractionDigits: 2 });
 
                           return (
                             <div className="p-4 sm:p-5 rounded-2xl bg-[#101420] border border-[#20293D] space-y-4 w-full max-w-full overflow-hidden">
@@ -5018,7 +5025,7 @@ export const VortexDashboard: React.FC<VortexDashboardProps> = ({
                                 </div>
                                 <div className="p-3 rounded-xl bg-white/5 border border-white/10 text-center">
                                   <div className="text-[10px] font-mono text-slate-400 uppercase font-bold">Total Entry Fund</div>
-                                  <div className="text-sm sm:text-base font-black font-mono text-white mt-0.5">€{totalCollected.toLocaleString()}</div>
+                                  <div className="text-sm sm:text-base font-black font-mono text-white mt-0.5">€{totalCollectedStr}</div>
                                   <div className="text-[9px] font-mono text-slate-400">Total Entrant Pool</div>
                                 </div>
                               </div>
@@ -5140,11 +5147,12 @@ export const VortexDashboard: React.FC<VortexDashboardProps> = ({
                             }
 
                             const poolNumeric = parseFloat(String(newTourneyCashPrize).replace(/[^0-9.]/g, '')) || 1000;
-                            const prizePool = poolNumeric > 0 ? poolNumeric : Math.round((newTourneyMaxTeams * newTourneyEntryFee) / 1.10);
+                            const prizePool = poolNumeric > 0 ? poolNumeric : ((newTourneyMaxTeams * newTourneyEntryFee) / 1.10);
                             const adminProfit = prizePool * 0.05;
                             const organizerReward = prizePool * 0.05;
                             const totalCollected = prizePool + adminProfit + organizerReward;
-                            const feePerTeam = Math.ceil(totalCollected / newTourneyMaxTeams);
+                            const feePerTeam = parseFloat((totalCollected / newTourneyMaxTeams).toFixed(2));
+                            const feePerPlayer = parseFloat((feePerTeam / 5).toFixed(2));
                             const firstPrize = Math.round(prizePool * 0.70);
                             const secondPrize = Math.round(prizePool * 0.20);
                             const thirdPrize = Math.max(0, prizePool - firstPrize - secondPrize);
@@ -5171,7 +5179,7 @@ export const VortexDashboard: React.FC<VortexDashboardProps> = ({
                               creatorClan: userClanData.tag || 'COMM',
                               creatorGamerTag: currentGamerTag,
                               entryFee: feePerTeam,
-                              entryFeePerPlayer: feePerTeam / 5,
+                              entryFeePerPlayer: feePerPlayer,
                               isPaidEntry: true,
                               platformCommission: 0.05,
                               organizerCommission: 0.05,
@@ -5543,7 +5551,7 @@ export const VortexDashboard: React.FC<VortexDashboardProps> = ({
                                 {t.entryFee ? (
                                   <span className="px-2 py-0.5 rounded text-[10px] font-mono font-bold bg-amber-500/15 text-amber-300 border border-amber-500/30 flex items-center gap-1">
                                     <Coins className="w-3 h-3 text-amber-400" />
-                                    €{t.entryFee} / Team (€{(t.entryFee / 5).toFixed(0)}/player)
+                                    €{typeof t.entryFee === 'number' && t.entryFee % 1 !== 0 ? t.entryFee.toFixed(2) : t.entryFee} / Team (€{(Number(t.entryFee) / 5).toFixed(2)}/player)
                                   </span>
                                 ) : (
                                   <span className="px-2 py-0.5 rounded text-[10px] font-mono font-bold bg-emerald-500/10 text-emerald-400 border border-emerald-500/20">
@@ -8864,8 +8872,8 @@ export const VortexDashboard: React.FC<VortexDashboardProps> = ({
                         <span className="font-bold text-white text-xs">Tournament Entry Fee (Team Buy-In)</span>
                       </div>
                       <div className="text-right">
-                        <div className="font-display font-black text-amber-400 text-sm">€{entryFee} / Team</div>
-                        <div className="text-[10px] text-slate-400">€{(entryFee / 5).toFixed(0)} per player (5v5)</div>
+                        <div className="font-display font-black text-amber-400 text-sm">€{entryFee % 1 !== 0 ? entryFee.toFixed(2) : entryFee} / Team</div>
+                        <div className="text-[10px] text-slate-400">€{(entryFee / 5).toFixed(2)} per player (5v5)</div>
                       </div>
                     </div>
 
@@ -9022,13 +9030,13 @@ export const VortexDashboard: React.FC<VortexDashboardProps> = ({
                         });
                         setSelectedRegisterTourney(null);
                         confetti({ particleCount: 90, spread: 80, origin: { y: 0.6 } });
-                        setDashboardToast(`✓ Payment €${entryFee} deducted from wallet! [${userClanData.tag}] registered in ${tourneyTitle}.`);
+                        setDashboardToast(`✓ Payment €${entryFee % 1 !== 0 ? entryFee.toFixed(2) : entryFee} deducted from wallet! [${userClanData.tag}] registered in ${tourneyTitle}.`);
                         setTimeout(() => setDashboardToast(null), 5000);
                       }}
                       className="w-full sm:w-auto px-6 py-2.5 rounded-xl bg-gradient-to-r from-[#84CC16] to-[#A3E635] hover:brightness-110 text-slate-950 font-display font-black text-xs uppercase tracking-wider transition shadow-lg cursor-pointer active:scale-95 flex items-center justify-center gap-2"
                     >
                       <Crown className="w-4 h-4 text-slate-950" />
-                      <span>Pay €{entryFee} from Wallet & Lock 5-Stack</span>
+                      <span>Pay €{entryFee % 1 !== 0 ? entryFee.toFixed(2) : entryFee} from Wallet & Lock 5-Stack</span>
                     </button>
                   ) : (
                     <button
