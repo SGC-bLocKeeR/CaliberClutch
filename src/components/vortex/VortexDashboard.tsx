@@ -1125,6 +1125,24 @@ export const VortexDashboard: React.FC<VortexDashboardProps> = ({
   const [selectedRegisterTourney, setSelectedRegisterTourney] = useState<any | null>(null);
   const [tourneyFilter, setTourneyFilter] = useState<'all' | 'live' | 'open' | 'registered'>('all');
   const [tourneySearchQuery, setTourneySearchQuery] = useState<string>('');
+  const [captainDeniedModal, setCaptainDeniedModal] = useState<{
+    open: boolean;
+    tourneyTitle?: string;
+    captainName?: string;
+    teamTag?: string;
+  } | null>(null);
+
+  // Real-time Clan Sync Revision
+  const [clanRevision, setClanRevision] = useState(0);
+  useEffect(() => {
+    const handleClanUpdate = () => setClanRevision(prev => prev + 1);
+    window.addEventListener('vortex_clan_updated', handleClanUpdate);
+    window.addEventListener('storage', handleClanUpdate);
+    return () => {
+      window.removeEventListener('vortex_clan_updated', handleClanUpdate);
+      window.removeEventListener('storage', handleClanUpdate);
+    };
+  }, []);
 
   // User Clan Data sync for Tournaments & Leaderboards
   const userClanData = useMemo(() => {
@@ -1152,8 +1170,10 @@ export const VortexDashboard: React.FC<VortexDashboardProps> = ({
       name: `${currentClanTag || 'M14'} Competitive Squad`,
       tag: currentClanTag || 'M14',
       logo: '/images/clan_badges/badge_caliber_lime.svg',
+      captainId: 'current-user',
+      captainName: currentGamerTag,
       members: [
-        { id: '1', name: currentGamerTag, role: 'IGL / Captain' },
+        { id: '1', name: currentGamerTag, role: 'IGL / Captain', isCaptain: true, isUser: true },
       ],
       stats: {
         matches: 0,
@@ -1165,7 +1185,44 @@ export const VortexDashboard: React.FC<VortexDashboardProps> = ({
         streak: 0,
       }
     };
-  }, [currentClanTag, currentGamerTag, currentUserElo]);
+  }, [currentClanTag, currentGamerTag, currentUserElo, clanRevision]);
+
+  // Enforce Team Leader / Captain permission for tournament registration
+  const isUserTeamCaptain = useMemo(() => {
+    if (!userClanData) return false;
+    const curTag = (currentGamerTag || '').toLowerCase().trim();
+    const capName = (userClanData.captainName || '').toLowerCase().trim();
+
+    if (capName && capName === curTag) return true;
+    if (userClanData.captainId === 'current-user') return true;
+
+    if (Array.isArray(userClanData.members)) {
+      const userMember = userClanData.members.find((m: any) => 
+        m.isUser === true || (m.name && m.name.toLowerCase().trim() === curTag)
+      );
+      if (userMember) {
+        if (userMember.isCaptain === true) return true;
+        if (userMember.role === 'IGL / Captain') return true;
+        return false;
+      }
+      if (userClanData.members.length === 1 && userClanData.members[0].name?.toLowerCase().trim() === curTag) {
+        return true;
+      }
+    }
+    return false;
+  }, [userClanData, currentGamerTag]);
+
+  const currentUserRole = useMemo(() => {
+    if (!userClanData || !Array.isArray(userClanData.members)) return 'Member';
+    const curTag = (currentGamerTag || '').toLowerCase().trim();
+    const userMember = userClanData.members.find((m: any) => 
+      m.isUser === true || (m.name && m.name.toLowerCase().trim() === curTag)
+    );
+    if (userMember) {
+      return userMember.role || (userMember.isCaptain ? 'IGL / Captain' : 'Team Member');
+    }
+    return isUserTeamCaptain ? 'IGL / Captain' : 'Team Member';
+  }, [userClanData, currentGamerTag, isUserTeamCaptain]);
 
   // Tournament Bracket Simulation & Match Engine State
   const [bracketStates, setBracketStates] = useState<Record<string, {
@@ -4885,10 +4942,10 @@ export const VortexDashboard: React.FC<VortexDashboardProps> = ({
                         <div className="p-4 rounded-2xl bg-black/40 border border-white/5 space-y-2 hover:border-purple-400/30 transition">
                           <div className="flex items-center gap-2 text-white font-bold">
                             <Users className="w-4 h-4 text-purple-400 shrink-0" />
-                            <span>5. Rosters & Stand-Ins (5 Starters + 1 Sub)</span>
+                            <span>5. Rosters & Captain Authority (5 Starters + 1 Sub)</span>
                           </div>
                           <p className="text-[11px] text-slate-400 pl-6 leading-relaxed">
-                            Each clan roster must contain 5 starting players and at most 1 registered substitute (stand-in). Rosters are locked 30 minutes before tournament start; unregistered players are strictly prohibited from connecting.
+                            Each clan roster must contain 5 starting players and at most 1 registered substitute (stand-in). <strong>Vetëm Lideri i Ekipit (Kapiteni)</strong> ka autoritetin ligjor dhe sportiv për të regjistruar dhe kyçur formacionin në turne zyrtare.
                           </p>
                         </div>
 
@@ -4955,6 +5012,45 @@ export const VortexDashboard: React.FC<VortexDashboardProps> = ({
                     <span>Ring-0 AC</span>
                   </div>
                 </div>
+              </div>
+
+              {/* Team Captain Roster Clearance Bar */}
+              <div className="p-4 rounded-2xl bg-[#0C1019] border border-[#222B3D] flex flex-col sm:flex-row sm:items-center justify-between gap-3 text-xs font-mono shadow-lg">
+                <div className="flex items-center gap-3">
+                  <div className={`w-9 h-9 rounded-xl flex items-center justify-center shrink-0 ${isUserTeamCaptain ? 'bg-[#A3E635]/15 border border-[#A3E635]/30 text-[#A3E635]' : 'bg-amber-500/15 border border-amber-500/30 text-amber-400'}`}>
+                    {isUserTeamCaptain ? <Crown className="w-5 h-5 text-[#A3E635]" /> : <Lock className="w-4 h-4 text-amber-400" />}
+                  </div>
+                  <div>
+                    <div className="flex flex-wrap items-center gap-2">
+                      <span className="font-bold text-white">Ekipi Yt: [{userClanData.tag}] {userClanData.name}</span>
+                      {isUserTeamCaptain ? (
+                        <span className="px-2 py-0.5 rounded-md bg-[#A3E635]/15 text-[#A3E635] border border-[#A3E635]/30 text-[10px] font-black uppercase flex items-center gap-1">
+                          <Crown className="w-3 h-3 text-[#A3E635]" />
+                          Ti je Lideri (Kapiteni)
+                        </span>
+                      ) : (
+                        <span className="px-2 py-0.5 rounded-md bg-amber-500/15 text-amber-300 border border-amber-500/30 text-[10px] font-bold flex items-center gap-1">
+                          <Lock className="w-3 h-3 text-amber-400" />
+                          Roli Yt: {currentUserRole}
+                        </span>
+                      )}
+                    </div>
+                    <p className="text-[11px] text-slate-400 mt-1">
+                      {isUserTeamCaptain 
+                        ? `✓ Autorizim i Plotë: Si Kapiten, ju keni të drejtën ligjore për ta futur ekipin në turne me çmime cash.` 
+                        : `⚠️ Kufizim Zyrtar: Vetëm Kapiteni i ekipit (${userClanData.captainName || 'Team Leader'}) ka të drejtë të regjistrojë ekipin në turne.`}
+                    </p>
+                  </div>
+                </div>
+                <button
+                  type="button"
+                  onClick={() => setActiveTab('teams')}
+                  className="px-3.5 py-2 rounded-xl bg-white/5 hover:bg-white/10 text-slate-300 hover:text-white border border-white/10 text-xs font-mono transition cursor-pointer self-start sm:self-auto flex items-center gap-1.5 shrink-0"
+                >
+                  <Users className="w-3.5 h-3.5 text-slate-400" />
+                  <span>Menaxho Ekipin</span>
+                  <ChevronRight className="w-3.5 h-3.5 text-slate-500" />
+                </button>
               </div>
 
               {/* Tournament Filters & Search Bar */}
@@ -5208,7 +5304,7 @@ export const VortexDashboard: React.FC<VortexDashboardProps> = ({
                                 <CheckCircle2 className="w-4 h-4" />
                                 <span>Team Enrolled</span>
                               </button>
-                            ) : (
+                            ) : isUserTeamCaptain ? (
                               <button
                                 onClick={() => {
                                   sound.playSelect();
@@ -5216,8 +5312,27 @@ export const VortexDashboard: React.FC<VortexDashboardProps> = ({
                                 }}
                                 className="px-5 py-2.5 rounded-full bg-gradient-to-r from-[#84CC16] to-[#A3E635] hover:brightness-110 text-slate-950 font-display font-black text-xs uppercase tracking-wider transition shadow-md cursor-pointer active:scale-95 flex items-center gap-1.5"
                               >
-                                <Trophy className="w-4 h-4" />
+                                <Crown className="w-4 h-4 text-slate-950" />
                                 <span>Register Team</span>
+                              </button>
+                            ) : (
+                              <button
+                                onClick={() => {
+                                  sound.playClick();
+                                  setCaptainDeniedModal({
+                                    open: true,
+                                    tourneyTitle: t.title,
+                                    captainName: userClanData.captainName || 'Team Captain',
+                                    teamTag: userClanData.tag || 'Squad'
+                                  });
+                                  setDashboardToast(`⚠️ Vetëm lideri i ekipit (${userClanData.captainName || 'Kapiteni'}) mund ta regjistrojë ekipin në turne.`);
+                                  setTimeout(() => setDashboardToast(null), 4500);
+                                }}
+                                className="px-4 py-2.5 rounded-full bg-amber-500/10 hover:bg-amber-500/20 text-amber-300 border border-amber-500/30 font-display font-black text-xs uppercase tracking-wider transition cursor-pointer flex items-center gap-1.5 shadow-sm group"
+                                title="Vetëm Lideri i Ekipit (Kapiteni) ka të drejtë të regjistrojë ekipin"
+                              >
+                                <Lock className="w-3.5 h-3.5 text-amber-400 group-hover:scale-110 transition" />
+                                <span>Captain Only</span>
                               </button>
                             )}
                           </div>
@@ -7547,15 +7662,35 @@ export const VortexDashboard: React.FC<VortexDashboardProps> = ({
                       <CheckCircle2 className="w-3.5 h-3.5" />
                       5v5 Roster Locked & Enrolled
                     </span>
-                  ) : (
+                  ) : isUserTeamCaptain ? (
                     <button
                       onClick={() => {
                         sound.playSelect();
                         setSelectedRegisterTourney(selectedBracketTourney);
                       }}
-                      className="px-3.5 py-1.5 rounded-xl bg-[#A3E635] hover:bg-[#84CC16] text-slate-950 font-mono font-black text-xs cursor-pointer transition shadow"
+                      className="px-3.5 py-1.5 rounded-xl bg-[#A3E635] hover:bg-[#84CC16] text-slate-950 font-mono font-black text-xs cursor-pointer transition shadow flex items-center gap-1.5"
                     >
-                      + Enroll [{userClanData.tag}] Roster
+                      <Crown className="w-3.5 h-3.5 text-slate-950" />
+                      <span>+ Enroll [{userClanData.tag}] Roster</span>
+                    </button>
+                  ) : (
+                    <button
+                      onClick={() => {
+                        sound.playClick();
+                        setCaptainDeniedModal({
+                          open: true,
+                          tourneyTitle: selectedBracketTourney.title,
+                          captainName: userClanData.captainName || 'Team Captain',
+                          teamTag: userClanData.tag || 'Squad'
+                        });
+                        setDashboardToast(`⚠️ Vetëm lideri i ekipit (${userClanData.captainName || 'Kapiteni'}) mund ta regjistrojë ekipin.`);
+                        setTimeout(() => setDashboardToast(null), 4500);
+                      }}
+                      className="px-3.5 py-1.5 rounded-xl bg-amber-500/15 hover:bg-amber-500/25 text-amber-300 border border-amber-500/30 font-mono font-bold text-xs cursor-pointer transition flex items-center gap-1.5"
+                      title="Vetëm Lideri i Ekipit ka të drejtë të regjistrojë"
+                    >
+                      <Lock className="w-3.5 h-3.5 text-amber-400" />
+                      <span>Captain Only ({userClanData.captainName})</span>
                     </button>
                   )}
                 </div>
@@ -7951,13 +8086,34 @@ export const VortexDashboard: React.FC<VortexDashboardProps> = ({
                   {selectedRegisterTourney.title}
                 </h3>
               </div>
-              <button
-                onClick={() => setSelectedRegisterTourney(null)}
-                className="w-7 h-7 rounded-lg bg-white/5 hover:bg-white/10 text-slate-400 hover:text-white flex items-center justify-center transition cursor-pointer"
-              >
-                ✕
-              </button>
             </div>
+
+            {/* Captaincy Authority Status Banner */}
+            {isUserTeamCaptain ? (
+              <div className="p-3.5 rounded-2xl bg-emerald-500/10 border border-emerald-500/30 flex items-center gap-3 text-xs font-mono">
+                <div className="w-8 h-8 rounded-xl bg-emerald-500/20 text-emerald-400 flex items-center justify-center shrink-0">
+                  <Crown className="w-4 h-4 text-emerald-400" />
+                </div>
+                <div>
+                  <span className="font-bold text-emerald-300 block">✓ CAPTAIN CLEARANCE VERIFIED</span>
+                  <p className="text-[11px] text-slate-300 mt-0.5">
+                    Përshëndetje Kapiten {currentGamerTag}. Keni të drejtën e plotë zyrtare për të kyçur formacionin dhe regjistruar [{userClanData.tag}].
+                  </p>
+                </div>
+              </div>
+            ) : (
+              <div className="p-3.5 rounded-2xl bg-amber-500/10 border border-amber-500/30 flex items-center gap-3 text-xs font-mono">
+                <div className="w-8 h-8 rounded-xl bg-amber-500/20 text-amber-400 flex items-center justify-center shrink-0">
+                  <Lock className="w-4 h-4 text-amber-400" />
+                </div>
+                <div>
+                  <span className="font-bold text-amber-300 block">⛔ VETËM LIDERI I EKIPIT KA TË DREJTË TË REGJISTROJË</span>
+                  <p className="text-[11px] text-slate-300 mt-0.5">
+                    Kapiteni zyrtar i ekipit është <strong>{userClanData.captainName}</strong>. Roli yt: {currentUserRole}. Vetëm kapiteni mund të konfirmojë regjistrimin.
+                  </p>
+                </div>
+              </div>
+            )}
 
             {/* Team Info Form */}
             <div className="space-y-3 text-xs font-mono">
@@ -8045,25 +8201,112 @@ export const VortexDashboard: React.FC<VortexDashboardProps> = ({
               >
                 Cancel
               </button>
+              {isUserTeamCaptain ? (
+                <button
+                  type="button"
+                  onClick={() => {
+                    sound.playSelect();
+                    const tourneyTitle = selectedRegisterTourney.title;
+                    setRegisteredTourneys(prev => {
+                      const next = Array.from(new Set([...prev, tourneyTitle]));
+                      try {
+                        localStorage.setItem('vortex_registered_tournaments', JSON.stringify(next));
+                      } catch (_) {}
+                      return next;
+                    });
+                    setSelectedRegisterTourney(null);
+                    setDashboardToast(`✓ [${userClanData.tag}] u regjistrua me sukses në ${tourneyTitle} nga Kapiteni ${currentGamerTag}!`);
+                    setTimeout(() => setDashboardToast(null), 4000);
+                  }}
+                  className="px-6 py-2.5 rounded-xl bg-gradient-to-r from-[#84CC16] to-[#A3E635] hover:brightness-110 text-slate-950 font-display font-black text-xs uppercase tracking-wider transition shadow-lg cursor-pointer active:scale-95 flex items-center gap-2"
+                >
+                  <Crown className="w-4 h-4 text-slate-950" />
+                  <span>Confirm & Lock Roster (Captain)</span>
+                </button>
+              ) : (
+                <button
+                  type="button"
+                  disabled
+                  className="px-6 py-2.5 rounded-xl bg-slate-800 text-slate-500 font-display font-black text-xs uppercase tracking-wider cursor-not-allowed opacity-60 flex items-center gap-2"
+                >
+                  <Lock className="w-3.5 h-3.5 text-slate-500" />
+                  <span>Locked: Captain Only ({userClanData.captainName})</span>
+                </button>
+              )}
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* CAPTAIN DENIED PERMISSION MODAL */}
+      {captainDeniedModal?.open && (
+        <div className="fixed inset-0 z-[140] bg-black/85 backdrop-blur-md flex items-center justify-center p-4 animate-in fade-in duration-200">
+          <div className="w-full max-w-md bg-[#0C1019] border border-amber-500/40 rounded-3xl p-6 sm:p-7 shadow-[0_25px_70px_rgba(0,0,0,0.9)] space-y-5 text-left relative overflow-hidden">
+            <div className="flex items-center gap-3 border-b border-[#1E2638] pb-4">
+              <div className="w-12 h-12 rounded-2xl bg-amber-500/15 border border-amber-500/30 flex items-center justify-center text-amber-400 shrink-0 shadow-lg shadow-amber-500/10">
+                <ShieldAlert className="w-6 h-6 text-amber-400" />
+              </div>
+              <div>
+                <span className="text-[10px] font-mono font-black uppercase text-amber-400 tracking-wider">
+                  Tournament Security Regulation
+                </span>
+                <h3 className="text-base font-black font-display text-white">
+                  Vetëm Lideri i Ekipit mund të Regjistrojë
+                </h3>
+              </div>
+            </div>
+
+            <p className="text-xs font-mono text-slate-300 leading-relaxed">
+              Sipas rregullores zyrtare të turneve në <strong>Caliber Clutch</strong>, vetëm <strong>Lideri i Ekipit (Kapiteni)</strong> ka autoritetin për të futur dhe kyçur ekipin në turne.
+            </p>
+
+            <div className="p-3.5 rounded-2xl bg-black/50 border border-white/10 space-y-2 text-xs font-mono">
+              <div className="flex items-center justify-between">
+                <span className="text-slate-400">Turneu:</span>
+                <span className="text-white font-bold truncate max-w-[200px]">{captainDeniedModal.tourneyTitle}</span>
+              </div>
+              <div className="flex items-center justify-between">
+                <span className="text-slate-400">Ekipi Yt:</span>
+                <span className="text-white font-bold">[{captainDeniedModal.teamTag || userClanData.tag}] {userClanData.name}</span>
+              </div>
+              <div className="flex items-center justify-between border-t border-white/5 pt-2">
+                <span className="text-amber-400 font-bold flex items-center gap-1">
+                  <Crown className="w-3.5 h-3.5 text-amber-400" />
+                  Kapiteni Zyrtar:
+                </span>
+                <span className="text-amber-300 font-black">{captainDeniedModal.captainName || userClanData.captainName || 'Team Leader'}</span>
+              </div>
+              <div className="flex items-center justify-between">
+                <span className="text-slate-400">Roli Yt Aktual:</span>
+                <span className="text-slate-300 font-semibold">{currentUserRole} (Jo Kapiten)</span>
+              </div>
+            </div>
+
+            <div className="p-3 rounded-xl bg-amber-500/10 border border-amber-500/20 text-[11px] font-mono text-amber-300/90 leading-normal flex items-start gap-2">
+              <Info className="w-4 h-4 text-amber-400 shrink-0 mt-0.5" />
+              <span>
+                Nëse dëshironi ta regjistroni ekipin, kërkoni nga Kapiteni <strong>{captainDeniedModal.captainName || userClanData.captainName}</strong> ta bëjë regjistrimin, ose merrni të drejtat e kapitenit tek tab-i "Teams".
+              </span>
+            </div>
+
+            <div className="pt-2 flex flex-col sm:flex-row items-center justify-end gap-3">
+              <button
+                type="button"
+                onClick={() => setCaptainDeniedModal(null)}
+                className="w-full sm:w-auto px-4 py-2.5 rounded-xl bg-white/5 hover:bg-white/10 text-xs font-mono text-slate-300 transition cursor-pointer"
+              >
+                Kuptova (Mbyll)
+              </button>
               <button
                 type="button"
                 onClick={() => {
-                  sound.playSelect();
-                  const tourneyTitle = selectedRegisterTourney.title;
-                  setRegisteredTourneys(prev => {
-                    const next = Array.from(new Set([...prev, tourneyTitle]));
-                    try {
-                      localStorage.setItem('vortex_registered_tournaments', JSON.stringify(next));
-                    } catch (_) {}
-                    return next;
-                  });
-                  setSelectedRegisterTourney(null);
-                  setDashboardToast(`✓ [${userClanData.tag}] registered for ${tourneyTitle}. Roster confirmed.`);
-                  setTimeout(() => setDashboardToast(null), 4000);
+                  setCaptainDeniedModal(null);
+                  setActiveTab('teams');
                 }}
-                className="px-6 py-2.5 rounded-xl bg-gradient-to-r from-[#84CC16] to-[#A3E635] hover:brightness-110 text-slate-950 font-display font-black text-xs uppercase tracking-wider transition shadow-lg cursor-pointer active:scale-95"
+                className="w-full sm:w-auto px-5 py-2.5 rounded-xl bg-gradient-to-r from-amber-500 to-amber-600 hover:brightness-110 text-slate-950 font-display font-black text-xs uppercase tracking-wider transition shadow-lg cursor-pointer flex items-center justify-center gap-1.5"
               >
-                Confirm & Lock Roster
+                <Users className="w-3.5 h-3.5 text-slate-950" />
+                <span>Kalo tek Ekipi (Teams Hub)</span>
               </button>
             </div>
           </div>

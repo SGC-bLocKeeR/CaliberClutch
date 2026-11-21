@@ -291,23 +291,20 @@ export const VortexLandingPage: React.FC<VortexLandingPageProps> = ({
               </div>
             </div>
 
-            {/* Right Column: Standalone Tactical Card Exactly like in photo */}
+            {/* Right Column: Standalone Tactical Card */}
             <div className="lg:col-span-5">
-              <div className="relative rounded-2xl bg-[#0B0E14] border border-white/10 p-7 sm:p-9 shadow-2xl overflow-hidden group hover:border-[#A3E635]/40 transition-all duration-300">
-                
-                {/* Geometric Chevron lines in top-right corner like photo */}
-                <div className="absolute top-0 right-0 w-32 h-32 pointer-events-none overflow-hidden opacity-25">
-                  <div className="absolute top-3 right-3 w-24 h-24 border-r-2 border-t-2 border-white/40 transform rotate-45" />
-                  <div className="absolute top-6 right-6 w-16 h-16 border-r-2 border-t-2 border-[#A3E635] transform rotate-45" />
-                </div>
+              <div className="relative rounded-3xl bg-[#0B0E14] border border-white/10 p-7 sm:p-9 shadow-2xl overflow-hidden group hover:border-[#A3E635]/40 transition-all duration-300">
 
                 {/* Card Header */}
-                <div className="flex items-center justify-between pb-4 border-b border-white/[0.06] relative z-10">
-                  <span className="font-mono text-[10px] font-bold text-slate-400 tracking-wider uppercase">
-                    TEAM FINDER // SQUAD RADAR
-                  </span>
-                  <div className="flex items-center gap-1.5 font-mono text-[10px] font-bold text-[#A3E635]">
-                    <span className="w-2 h-2 rounded-full bg-[#A3E635] animate-ping" />
+                <div className="flex items-center justify-between pb-4 border-b border-white/[0.08] relative z-10">
+                  <div className="flex items-center gap-2">
+                    <span className="w-1.5 h-1.5 rounded-full bg-[#A3E635]" />
+                    <span className="font-mono text-[11px] font-bold text-slate-300 tracking-wider uppercase">
+                      TEAM FINDER // SQUAD RADAR
+                    </span>
+                  </div>
+                  <div className="px-2.5 py-1 rounded-full bg-[#A3E635]/10 border border-[#A3E635]/30 flex items-center gap-1.5 font-mono text-[10px] font-bold text-[#A3E635]">
+                    <span className="w-1.5 h-1.5 rounded-full bg-[#A3E635] animate-pulse" />
                     <span>5V5 SOLO</span>
                   </div>
                 </div>
@@ -325,29 +322,29 @@ export const VortexLandingPage: React.FC<VortexLandingPageProps> = ({
                 {/* 5 Player Slot Outlined Boxes in a row */}
                 <div className="grid grid-cols-5 gap-2.5 my-2 relative z-10">
                   {/* Slot 01: You */}
-                  <div className="aspect-square rounded-xl bg-[#18210C] border border-[#A3E635] flex flex-col items-center justify-center p-2 text-center group-hover:scale-105 transition shadow-[0_0_15px_rgba(163,230,53,0.25)]">
+                  <div className="aspect-square rounded-2xl bg-[#18210C] border border-[#A3E635] flex flex-col items-center justify-center p-2 text-center group-hover:scale-105 transition shadow-[0_0_20px_rgba(163,230,53,0.2)]">
                     <Target className="w-5 h-5 text-[#A3E635] mb-1.5" />
-                    <span className="font-sans font-black text-[10px] text-[#A3E635]">01</span>
+                    <span className="font-mono font-black text-[11px] text-[#A3E635]">01</span>
                   </div>
                   {/* Slot 02 */}
-                  <div className="aspect-square rounded-xl bg-[#07090D] border border-white/10 hover:border-white/20 flex flex-col items-center justify-center p-2 text-center transition">
+                  <div className="aspect-square rounded-2xl bg-[#0F131C]/60 border border-white/10 hover:border-white/20 flex flex-col items-center justify-center p-2 text-center transition">
                     <Users className="w-5 h-5 text-slate-400 mb-1.5" />
-                    <span className="font-sans font-black text-[10px] text-slate-400">02</span>
+                    <span className="font-mono font-bold text-[11px] text-slate-400">02</span>
                   </div>
                   {/* Slot 03 */}
-                  <div className="aspect-square rounded-xl bg-[#07090D] border border-white/10 hover:border-white/20 flex flex-col items-center justify-center p-2 text-center transition">
+                  <div className="aspect-square rounded-2xl bg-[#0F131C]/60 border border-white/10 hover:border-white/20 flex flex-col items-center justify-center p-2 text-center transition">
                     <Users className="w-5 h-5 text-slate-400 mb-1.5" />
-                    <span className="font-sans font-black text-[10px] text-slate-400">03</span>
+                    <span className="font-mono font-bold text-[11px] text-slate-400">03</span>
                   </div>
                   {/* Slot 04 */}
-                  <div className="aspect-square rounded-xl bg-[#07090D] border border-white/10 hover:border-white/20 flex flex-col items-center justify-center p-2 text-center transition">
+                  <div className="aspect-square rounded-2xl bg-[#0F131C]/60 border border-white/10 hover:border-white/20 flex flex-col items-center justify-center p-2 text-center transition">
                     <Users className="w-5 h-5 text-slate-400 mb-1.5" />
-                    <span className="font-sans font-black text-[10px] text-slate-400">04</span>
+                    <span className="font-mono font-bold text-[11px] text-slate-400">04</span>
                   </div>
                   {/* Slot 05 */}
-                  <div className="aspect-square rounded-xl bg-[#07090D] border border-white/10 hover:border-white/20 flex flex-col items-center justify-center p-2 text-center transition">
+                  <div className="aspect-square rounded-2xl bg-[#0F131C]/60 border border-white/10 hover:border-white/20 flex flex-col items-center justify-center p-2 text-center transition">
                     <Users className="w-5 h-5 text-slate-400 mb-1.5" />
-                    <span className="font-sans font-black text-[10px] text-slate-400">05</span>
+                    <span className="font-mono font-bold text-[11px] text-slate-400">05</span>
                   </div>
                 </div>
 

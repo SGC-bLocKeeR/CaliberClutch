@@ -2233,11 +2233,23 @@ export const VortexClanHub: React.FC<VortexClanHubProps> = ({
       return;
     }
     const nextMembers = userClan.members.filter(m => m.id !== memberId);
+    let nextCaptainId = userClan.captainId;
+    let nextCaptainName = userClan.captainName;
+    if (userClan.captainId === memberId) {
+      nextCaptainId = 'current-user';
+      nextCaptainName = currentGamerTag;
+      const userIdx = nextMembers.findIndex(m => m.id === 'current-user' || m.isUser);
+      if (userIdx !== -1) {
+        nextMembers[userIdx] = { ...nextMembers[userIdx], isCaptain: true, role: 'IGL / Captain' };
+      }
+    }
     const avg = userClan.stats.matches > 0 && nextMembers.length > 0
       ? Math.round(nextMembers.slice(0, 5).reduce((acc, m) => acc + m.elo, 0) / Math.min(5, nextMembers.length))
       : 0;
     const nextClan: ClanData = {
       ...userClan,
+      captainId: nextCaptainId,
+      captainName: nextCaptainName,
       members: nextMembers,
       stats: {
         ...userClan.stats,
@@ -2245,17 +2257,76 @@ export const VortexClanHub: React.FC<VortexClanHubProps> = ({
       },
     };
     setUserClan(nextClan);
+    try {
+      localStorage.setItem('vortex_user_clan_data', JSON.stringify(nextClan));
+      window.dispatchEvent(new Event('vortex_clan_updated'));
+    } catch (_) {}
     saveClanToCloud(nextClan);
     setToast(`✓ Player removed from [${userClan.tag}] roster.`);
+  };
+
+  // Transfer Captaincy (Leader rights for tournament entry)
+  const handleTransferCaptain = (memberId: string) => {
+    sound.playSelect();
+    const targetMember = userClan.members.find(m => m.id === memberId);
+    if (!targetMember) return;
+
+    const nextMembers = userClan.members.map(m => {
+      if (m.id === memberId) {
+        return {
+          ...m,
+          isCaptain: true,
+          role: 'IGL / Captain' as ClanMember['role']
+        };
+      }
+      return {
+        ...m,
+        isCaptain: false,
+        role: m.role === 'IGL / Captain' ? ('Support' as ClanMember['role']) : m.role
+      };
+    });
+
+    const nextClan: ClanData = {
+      ...userClan,
+      captainId: targetMember.id,
+      captainName: targetMember.name,
+      members: nextMembers
+    };
+
+    setUserClan(nextClan);
+    try {
+      localStorage.setItem('vortex_user_clan_data', JSON.stringify(nextClan));
+      window.dispatchEvent(new Event('vortex_clan_updated'));
+    } catch (_) {}
+    saveClanToCloud(nextClan);
+
+    if (targetMember.name.toLowerCase() === currentGamerTag.toLowerCase() || targetMember.id === 'current-user') {
+      setToast(`👑 Ju tani jeni Kapiteni Zyrtar i [${userClan.tag}]! Keni të drejtën e plotë për të regjistruar ekipin në turne.`);
+    } else {
+      setToast(`👑 Statusi i Kapitenit iu transferua ${targetMember.name}! Vetëm ${targetMember.name} tani mund ta fusë ekipin në turne.`);
+    }
   };
 
   // Change role
   const handleChangeRole = (memberId: string, newRole: ClanMember['role']) => {
     sound.playSelect();
-    const nextMembers = userClan.members.map(m => (m.id === memberId ? { ...m, role: newRole } : m));
+    if (newRole === 'IGL / Captain') {
+      handleTransferCaptain(memberId);
+      return;
+    }
+    const nextMembers = userClan.members.map(m => {
+      if (m.id === memberId) {
+        return { ...m, role: newRole, isCaptain: false };
+      }
+      return m;
+    });
     const nextClan = { ...userClan, members: nextMembers };
     setUserClan(nextClan);
-    localStorage.setItem('vortex_user_clan_data', JSON.stringify(nextClan));
+    try {
+      localStorage.setItem('vortex_user_clan_data', JSON.stringify(nextClan));
+      window.dispatchEvent(new Event('vortex_clan_updated'));
+    } catch (_) {}
+    saveClanToCloud(nextClan);
   };
 
   const filteredOpponents = DEFAULT_OPPONENT_CLANS.filter(c => {
@@ -2710,7 +2781,28 @@ export const VortexClanHub: React.FC<VortexClanHubProps> = ({
                   </div>
                 </div>
 
-                <div className="flex items-center gap-3 self-end sm:self-center">
+                <div className="flex flex-wrap items-center gap-2.5 self-end sm:self-center">
+                  {/* CAPTAINCY BADGE OR TRANSFER BUTTON */}
+                  {member.isCaptain ? (
+                    <span className="px-2.5 py-1.5 rounded-xl bg-amber-500/20 text-amber-300 border border-amber-500/40 text-[11px] font-mono font-black flex items-center gap-1.5 shadow-sm">
+                      <Crown className="w-3.5 h-3.5 text-amber-400 fill-current" />
+                      <span>Kapiten Zyrtar</span>
+                    </span>
+                  ) : (
+                    <button
+                      type="button"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        handleTransferCaptain(member.id);
+                      }}
+                      className="px-2.5 py-1.5 rounded-xl bg-amber-500/10 hover:bg-amber-500/25 text-amber-300 border border-amber-500/30 text-[11px] font-mono font-bold flex items-center gap-1.5 transition cursor-pointer active:scale-95"
+                      title={member.isUser ? "Rimerr të drejtat e Kapitenit" : `Bëje ${member.name} Kapiten të ekipit`}
+                    >
+                      <Crown className="w-3.5 h-3.5 text-amber-400" />
+                      <span>{member.isUser ? 'Bëhu Kapiten' : 'Bëje Kapiten'}</span>
+                    </button>
+                  )}
+
                   {/* ROLE SELECTOR DROPDOWN */}
                   <select
                     value={member.role}
