@@ -1254,12 +1254,6 @@ export const VortexPureHtmlLanding: React.FC<VortexPureHtmlLandingProps> = ({
                   </p>
                 </div>
               </div>
-              <button 
-                onClick={() => { sound.playClick(); setShowHowItWorksModal(false); }}
-                className="p-2 rounded-xl bg-white/5 hover:bg-white/10 text-slate-400 hover:text-white transition cursor-pointer"
-              >
-                <X className="w-5 h-5" />
-              </button>
             </div>
 
             {/* Modal 4 Steps Grid */}
@@ -1386,12 +1380,6 @@ export const VortexPureHtmlLanding: React.FC<VortexPureHtmlLandingProps> = ({
                   </p>
                 </div>
               </div>
-              <button 
-                onClick={() => { sound.playClick(); setActiveLegalModal(null); }}
-                className="p-2 rounded-xl bg-white/5 hover:bg-white/10 text-slate-400 hover:text-white transition cursor-pointer"
-              >
-                <X className="w-5 h-5" />
-              </button>
             </div>
 
             {/* Sub-tab Switcher */}
@@ -1518,12 +1506,6 @@ export const VortexPureHtmlLanding: React.FC<VortexPureHtmlLandingProps> = ({
                   </p>
                 </div>
               </div>
-              <button 
-                onClick={() => { sound.playClick(); setShowServersModal(false); }}
-                className="p-2 rounded-xl bg-white/5 hover:bg-white/10 text-slate-400 hover:text-white transition cursor-pointer"
-              >
-                <X className="w-5 h-5" />
-              </button>
             </div>
 
             {/* Server Nodes Grid */}
