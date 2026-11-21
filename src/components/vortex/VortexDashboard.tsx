@@ -1540,6 +1540,53 @@ export const VortexDashboard: React.FC<VortexDashboardProps> = ({
       .catch(() => {});
   }, [activeTab]);
 
+  // Robust European & US currency parser (supports "10.000", "1.000", "10,000", "1000", "68.75", "10.000,50", etc.)
+  const parseCurrencyInput = (raw: string | number | undefined | null): number => {
+    if (raw === undefined || raw === null) return 0;
+    if (typeof raw === 'number') return isNaN(raw) ? 0 : raw;
+    const str = String(raw).trim();
+    if (!str) return 0;
+
+    const cleaned = str.replace(/[^0-9.,]/g, '');
+    if (!cleaned) return 0;
+
+    if (cleaned.includes('.') && cleaned.includes(',')) {
+      const lastDot = cleaned.lastIndexOf('.');
+      const lastComma = cleaned.lastIndexOf(',');
+      if (lastComma > lastDot) {
+        return parseFloat(cleaned.replace(/\./g, '').replace(',', '.')) || 0;
+      } else {
+        return parseFloat(cleaned.replace(/,/g, '')) || 0;
+      }
+    }
+
+    if (cleaned.includes('.') && !cleaned.includes(',')) {
+      const parts = cleaned.split('.');
+      if (parts.length > 2) {
+        return parseFloat(cleaned.replace(/\./g, '')) || 0;
+      }
+      if (parts[1].length === 3) {
+        return parseFloat(cleaned.replace(/\./g, '')) || 0;
+      } else {
+        return parseFloat(cleaned) || 0;
+      }
+    }
+
+    if (cleaned.includes(',') && !cleaned.includes('.')) {
+      const parts = cleaned.split(',');
+      if (parts.length > 2) {
+        return parseFloat(cleaned.replace(/,/g, '')) || 0;
+      }
+      if (parts[1].length === 3) {
+        return parseFloat(cleaned.replace(/,/g, '')) || 0;
+      } else {
+        return parseFloat(cleaned.replace(',', '.')) || 0;
+      }
+    }
+
+    return parseFloat(cleaned) || 0;
+  };
+
   // Create tournament form state
   const [newTourneyTitle, setNewTourneyTitle] = useState('CALIBER CLUTCH Community Cup #1');
   const [newTourneyOrganizer, setNewTourneyOrganizer] = useState<string>('');
@@ -1552,7 +1599,7 @@ export const VortexDashboard: React.FC<VortexDashboardProps> = ({
   // Auto-calculate all entry fees & financial model (100% Untouched Cash Prize + Participant-Funded 5% Fees)
   const handleCashPrizeChange = (val: string) => {
     setNewTourneyCashPrize(val);
-    const numeric = parseFloat(val.replace(/[^0-9.]/g, ''));
+    const numeric = parseCurrencyInput(val);
     if (numeric && numeric > 0 && newTourneyMaxTeams > 0) {
       const totalFund = numeric * 1.10;
       const calcFee = parseFloat((totalFund / newTourneyMaxTeams).toFixed(2));
@@ -1563,7 +1610,7 @@ export const VortexDashboard: React.FC<VortexDashboardProps> = ({
   // Auto-calculate fee when team capacity changes
   const handleMaxTeamsChange = (teams: number) => {
     setNewTourneyMaxTeams(teams);
-    const numeric = parseFloat(newTourneyCashPrize.replace(/[^0-9.]/g, '')) || 1000;
+    const numeric = parseCurrencyInput(newTourneyCashPrize) || 1000;
     if (numeric > 0 && teams > 0) {
       const totalFund = numeric * 1.10;
       const calcFee = parseFloat((totalFund / teams).toFixed(2));
@@ -4931,7 +4978,7 @@ export const VortexDashboard: React.FC<VortexDashboardProps> = ({
 
                           {/* Auto-Calculated Entry Fees - Directly Under Prize Pool & Capacity */}
                           {(() => {
-                            const poolNumeric = parseFloat(String(newTourneyCashPrize).replace(/[^0-9.]/g, '')) || 1000;
+                            const poolNumeric = parseCurrencyInput(newTourneyCashPrize) || 1000;
                             const prizePool = poolNumeric > 0 ? poolNumeric : ((newTourneyMaxTeams * newTourneyEntryFee) / 1.10);
                             const hostFee = prizePool * 0.05;
                             const adminFee = prizePool * 0.05;
@@ -4969,7 +5016,7 @@ export const VortexDashboard: React.FC<VortexDashboardProps> = ({
 
                         {/* 3. AUTOMATED FINANCIAL SPLIT (100% Pure Untouched Prize Pool + Participant-Funded 5% Fees) */}
                         {(() => {
-                          const poolNumeric = parseFloat(String(newTourneyCashPrize).replace(/[^0-9.]/g, '')) || 1000;
+                          const poolNumeric = parseCurrencyInput(newTourneyCashPrize) || 1000;
                           const prizePool = poolNumeric > 0 ? poolNumeric : ((newTourneyMaxTeams * newTourneyEntryFee) / 1.10);
                           const platformFee = prizePool * 0.05;
                           const organizerFee = prizePool * 0.05;
@@ -5146,7 +5193,7 @@ export const VortexDashboard: React.FC<VortexDashboardProps> = ({
                               return;
                             }
 
-                            const poolNumeric = parseFloat(String(newTourneyCashPrize).replace(/[^0-9.]/g, '')) || 1000;
+                            const poolNumeric = parseCurrencyInput(newTourneyCashPrize) || 1000;
                             const prizePool = poolNumeric > 0 ? poolNumeric : ((newTourneyMaxTeams * newTourneyEntryFee) / 1.10);
                             const adminProfit = prizePool * 0.05;
                             const organizerReward = prizePool * 0.05;
@@ -5348,7 +5395,7 @@ export const VortexDashboard: React.FC<VortexDashboardProps> = ({
                 <div className="p-3 rounded-xl bg-black/40 border border-white/5">
                   <div className="text-[10px] font-mono text-slate-400 uppercase">Active Cash Pools</div>
                   <div className="text-xl font-mono font-black text-[#A3E635]">
-                    €{customTournaments.reduce((acc: number, t: any) => acc + (parseInt(String(t.cashPrize).replace(/[^0-9]/g, ''), 10) || 0), 0).toLocaleString()}
+                    €{customTournaments.reduce((acc: number, t: any) => acc + (parseCurrencyInput(t.cashPrize) || 0), 0).toLocaleString()}
                   </div>
                 </div>
                 <div className="p-3 rounded-xl bg-black/40 border border-white/5">
@@ -5604,7 +5651,7 @@ export const VortexDashboard: React.FC<VortexDashboardProps> = ({
 
                           {/* Official 100% Cash Prize Pool Distribution (No Skins) */}
                           {(() => {
-                            const numeric = parseFloat(String(t.cashPrize).replace(/[^0-9.]/g, '')) || 3000;
+                            const numeric = parseCurrencyInput(t.cashPrize) || 3000;
                             const firstCash = Math.round(numeric * 0.70);
                             const secondCash = Math.round(numeric * 0.20);
                             const thirdCash = Math.round(numeric * 0.10);
@@ -7971,7 +8018,7 @@ export const VortexDashboard: React.FC<VortexDashboardProps> = ({
         const isBo1Playoffs = pFormat === 'BO1';
         const isBo5Final = fFormat === 'BO5';
         const prizeRaw = selectedBracketTourney.cashPrize || '€3,000';
-        const prizeNum = parseInt(prizeRaw.replace(/[^0-9]/g, ''), 10) || 1500;
+        const prizeNum = parseCurrencyInput(prizeRaw) || 1500;
 
         const currentTeams = getTourneyTeams(tourneyKey);
         const approvedTeams = currentTeams.filter(t => t.status === 'approved');
