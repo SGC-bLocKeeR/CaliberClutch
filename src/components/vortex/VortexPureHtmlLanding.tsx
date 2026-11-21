@@ -25,7 +25,16 @@ import {
   Sun,
   Moon,
   Volume2,
-  Lock
+  Lock,
+  HelpCircle,
+  CheckCircle2,
+  Wallet,
+  Landmark,
+  Activity,
+  Wifi,
+  FileText,
+  MessageSquare,
+  Layers
 } from 'lucide-react';
 import { sound } from '../../utils/soundEffects';
 import { CyberGridOverlay } from './CyberGridOverlay';
@@ -122,6 +131,23 @@ export const VortexPureHtmlLanding: React.FC<VortexPureHtmlLandingProps> = ({
   const [showTrailerModal, setShowTrailerModal] = useState<boolean>(false);
   const [authRequiredModal, setAuthRequiredModal] = useState<{ open: boolean; tier: 'premium' | 'vip' | null }>({ open: false, tier: null });
 
+  // Interactive Live Online Counter & Functional Modal States
+  const [onlineCount, setOnlineCount] = useState<number>(122719);
+  const [showHowItWorksModal, setShowHowItWorksModal] = useState<boolean>(false);
+  const [activeLegalModal, setActiveLegalModal] = useState<'privacy' | 'terms' | null>(null);
+  const [showServersModal, setShowServersModal] = useState<boolean>(false);
+
+  React.useEffect(() => {
+    // Dynamic ticker: fluctuates realistically every 4.5 seconds like Hellcase / Steam
+    const interval = setInterval(() => {
+      setOnlineCount((prev) => {
+        const delta = Math.floor(Math.random() * 21) - 10;
+        return Math.max(118500, prev + delta);
+      });
+    }, 4500);
+    return () => clearInterval(interval);
+  }, []);
+
   const handleMapSelect = (mapId: string) => {
     sound.playSelect();
     setSelectedMapId(mapId);
@@ -134,14 +160,23 @@ export const VortexPureHtmlLanding: React.FC<VortexPureHtmlLandingProps> = ({
       {/* 1. TOP NAVIGATION BAR (100% Real HTML & Responsive)      */}
       {/* ======================================================== */}
       <header className="w-full border-b border-white/[0.06] bg-[#07080B]/90 backdrop-blur-md sticky top-0 z-50">
-        <div className="max-w-[1720px] mx-auto px-4 sm:px-8 lg:px-12 h-18 flex items-center justify-between">
+        <div className="max-w-[1720px] mx-auto px-4 sm:px-8 lg:px-12 h-18 flex items-center justify-between gap-4">
           
-          {/* Brand Logo */}
-          <div 
-            onClick={() => { sound.playClick(); setActiveTab('home'); }} 
-            className="cursor-pointer transition hover:opacity-90 flex items-center"
-          >
-            <VortexBrandLogo />
+          {/* Brand Logo & Live Player Counter */}
+          <div className="flex items-center gap-4">
+            <div 
+              onClick={() => { sound.playClick(); setActiveTab('home'); }} 
+              className="cursor-pointer transition hover:opacity-90 flex items-center shrink-0"
+            >
+              <VortexBrandLogo />
+            </div>
+
+            {/* Live Online Player Counter Badge (Like Hellcase / Steam) */}
+            <div className="hidden lg:flex items-center gap-2 px-3 py-1.5 rounded-full bg-[#0E121B] border border-emerald-500/30 text-xs font-mono font-bold shadow-[0_0_15px_rgba(16,185,129,0.15)]">
+              <span className="w-2.5 h-2.5 rounded-full bg-[#22C55E] shadow-[0_0_8px_#22C55E] animate-pulse" />
+              <span className="text-white font-extrabold">{onlineCount.toLocaleString()}</span>
+              <span className="text-slate-400 font-sans">players online right now</span>
+            </div>
           </div>
 
           {/* Nav Links */}
@@ -258,13 +293,20 @@ export const VortexPureHtmlLanding: React.FC<VortexPureHtmlLandingProps> = ({
             {/* ---------------------------------------------------- */}
             <div className="lg:col-span-5 xl:col-span-5 flex flex-col items-start text-left z-20">
               
-              {/* Category Tracker Badge */}
-              <div className="flex items-center gap-3 mb-4">
+              {/* Category Tracker Badge & Live Player Counter */}
+              <div className="flex flex-wrap items-center gap-3 mb-4">
                 <span className="text-[#A3E635] font-mono font-bold tracking-[0.25em] text-xs uppercase flex items-center gap-2 select-text drop-shadow-[0_2px_8px_rgba(0,0,0,1)]">
                   <span className="w-2 h-2 rounded-full bg-[#A3E635] shadow-[0_0_12px_#A3E635] animate-pulse" />
                   COUNTER-STRIKE 2 PLATFORM
                 </span>
-                <div className="h-[1px] w-14 bg-gradient-to-r from-[#A3E635]/60 to-transparent" />
+                <div className="h-[1px] w-10 bg-gradient-to-r from-[#A3E635]/60 to-transparent hidden sm:block" />
+
+                {/* Live Online Counter (Exact Match to User's Uploaded Indicator) */}
+                <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-black/60 border border-white/10 text-xs font-mono shadow-[0_0_16px_rgba(0,0,0,0.8)] backdrop-blur-md">
+                  <span className="w-2 h-2 rounded-full bg-[#22C55E] shadow-[0_0_8px_#22C55E] animate-pulse shrink-0" />
+                  <span className="font-extrabold text-white">{onlineCount.toLocaleString()}</span>
+                  <span className="text-slate-300 font-sans">players online right now</span>
+                </div>
               </div>
 
               {/* Massive Bold Headline with Heavy Layered Shadows */}
@@ -299,13 +341,13 @@ export const VortexPureHtmlLanding: React.FC<VortexPureHtmlLandingProps> = ({
                   <span>LOGIN WITH STEAM</span>
                 </button>
 
-                {/* Secondary Glassmorphism CTA: Learn More */}
+                {/* Secondary Glassmorphism CTA: HOW IT WORKS */}
                 <button
-                  onClick={() => { sound.playSelect(); setShowTrailerModal(true); }}
+                  onClick={() => { sound.playSelect(); setShowHowItWorksModal(true); }}
                   className="px-6 py-3.5 rounded-full bg-[#0E1017]/90 hover:bg-[#1E232E] text-white font-bold uppercase tracking-wider text-xs sm:text-sm border border-white/20 hover:border-white/40 shadow-[0_4px_20px_rgba(0,0,0,0.6)] flex items-center gap-2.5 hover:scale-105 active:scale-95 transition-all duration-200 cursor-pointer backdrop-blur-md"
                 >
-                  <Play className="w-4 h-4 fill-white" />
-                  <span>LEARN MORE</span>
+                  <HelpCircle className="w-4 h-4 text-[#A3E635]" />
+                  <span>HOW IT WORKS</span>
                 </button>
               </div>
 
@@ -808,7 +850,7 @@ export const VortexPureHtmlLanding: React.FC<VortexPureHtmlLandingProps> = ({
 
                   <div className="flex items-baseline gap-1.5 mb-8">
                     <span className="text-4xl font-black font-display text-[#A3E635]">
-                      {billingCycle === 'monthly' ? '€6.99' : '€5.49'}
+                      {billingCycle === 'monthly' ? '€5.99' : '€4.79'}
                     </span>
                     <span className="text-xs font-mono text-slate-400">/ month</span>
                   </div>
@@ -875,7 +917,7 @@ export const VortexPureHtmlLanding: React.FC<VortexPureHtmlLandingProps> = ({
 
                   <div className="flex items-baseline gap-1.5 mb-8">
                     <span className="text-4xl font-black font-display text-cyan-400">
-                      {billingCycle === 'monthly' ? '€14.99' : '€11.99'}
+                      {billingCycle === 'monthly' ? '€12.99' : '€9.99'}
                     </span>
                     <span className="text-xs font-mono text-slate-400">/ month</span>
                   </div>
@@ -1069,7 +1111,7 @@ export const VortexPureHtmlLanding: React.FC<VortexPureHtmlLandingProps> = ({
                   ? 'bg-cyan-500/20 text-cyan-400 border border-cyan-500/40'
                   : 'bg-[#A3E635]/20 text-[#A3E635] border border-[#A3E635]/40'
               }`}>
-                {authRequiredModal.tier === 'vip' ? '€14.99 / mo' : '€6.99 / mo'}
+                {authRequiredModal.tier === 'vip' ? '€12.99 / mo' : '€5.99 / mo'}
               </span>
             </div>
 
@@ -1127,10 +1169,34 @@ export const VortexPureHtmlLanding: React.FC<VortexPureHtmlLandingProps> = ({
           </div>
 
           <div className="flex items-center gap-6 text-xs font-mono text-slate-400">
-            <button onClick={() => sound.playClick()} className="hover:text-[#A3E635] transition cursor-pointer">PRIVACY</button>
-            <button onClick={() => sound.playClick()} className="hover:text-[#A3E635] transition cursor-pointer">TERMS</button>
-            <button onClick={() => sound.playClick()} className="hover:text-[#A3E635] transition cursor-pointer">SERVERS STATUS</button>
-            <button onClick={() => sound.playClick()} className="hover:text-[#A3E635] transition cursor-pointer">DISCORD</button>
+            <button 
+              onClick={() => { sound.playClick(); setActiveLegalModal('privacy'); }} 
+              className="hover:text-[#A3E635] transition cursor-pointer"
+            >
+              PRIVACY
+            </button>
+            <button 
+              onClick={() => { sound.playClick(); setActiveLegalModal('terms'); }} 
+              className="hover:text-[#A3E635] transition cursor-pointer"
+            >
+              TERMS
+            </button>
+            <button 
+              onClick={() => { sound.playClick(); setShowServersModal(true); }} 
+              className="hover:text-[#A3E635] transition cursor-pointer"
+            >
+              SERVERS STATUS
+            </button>
+            <button 
+              onClick={() => { 
+                sound.playClick(); 
+                window.open('https://discord.gg/caliberclutch', '_blank', 'noopener,noreferrer'); 
+              }} 
+              className="hover:text-[#A3E635] transition cursor-pointer flex items-center gap-1.5"
+            >
+              <MessageSquare className="w-3.5 h-3.5 text-indigo-400" />
+              <span>DISCORD</span>
+            </button>
           </div>
 
           <p className="text-[11px] font-mono text-slate-600">
@@ -1138,6 +1204,369 @@ export const VortexPureHtmlLanding: React.FC<VortexPureHtmlLandingProps> = ({
           </p>
         </div>
       </footer>
+
+      {/* ======================================================== */}
+      {/* MODAL 1: HOW IT WORKS WALKTHROUGH                        */}
+      {/* ======================================================== */}
+      {showHowItWorksModal && (
+        <div className="fixed inset-0 z-[120] flex items-center justify-center p-3 sm:p-5 select-none animate-in fade-in duration-200">
+          <div 
+            onClick={() => { sound.playClick(); setShowHowItWorksModal(false); }} 
+            className="fixed inset-0 bg-black/85 backdrop-blur-md" 
+          />
+          <div className="relative w-full max-w-3xl max-h-[92vh] bg-[#0A0D14] border border-[#202738] rounded-3xl shadow-[0_20px_60px_rgba(0,0,0,0.85)] flex flex-col overflow-hidden z-10 animate-in zoom-in-95">
+            {/* Modal Header */}
+            <div className="px-5 sm:px-7 py-5 border-b border-white/10 bg-[#0F1420]/90 flex items-center justify-between gap-3 shrink-0">
+              <div className="flex items-center gap-3">
+                <div className="w-10 h-10 rounded-2xl bg-[#A3E635]/15 border border-[#A3E635]/30 flex items-center justify-center text-[#A3E635] shadow-[0_0_15px_rgba(163,230,53,0.2)]">
+                  <HelpCircle className="w-5 h-5" />
+                </div>
+                <div>
+                  <div className="flex items-center gap-2">
+                    <h3 className="font-display font-black text-base sm:text-lg text-white">HOW CALIBER CLUTCH WORKS</h3>
+                    <span className="px-2 py-0.5 rounded-full bg-[#A3E635]/15 border border-[#A3E635]/30 text-[#A3E635] font-mono text-[9px] font-bold">
+                      100% FAIR ESPORTS
+                    </span>
+                  </div>
+                  <p className="text-xs text-slate-400 font-sans">
+                    A simple, transparent competitive ecosystem built for amateur teams & aspiring solo players.
+                  </p>
+                </div>
+              </div>
+              <button 
+                onClick={() => { sound.playClick(); setShowHowItWorksModal(false); }}
+                className="p-2 rounded-xl bg-white/5 hover:bg-white/10 text-slate-400 hover:text-white transition cursor-pointer"
+              >
+                <X className="w-5 h-5" />
+              </button>
+            </div>
+
+            {/* Modal 4 Steps Grid */}
+            <div className="p-5 sm:p-7 overflow-y-auto space-y-4">
+              {/* Step 1 */}
+              <div className="p-4 sm:p-5 rounded-2xl bg-[#0E1320] border border-white/5 flex gap-4 items-start hover:border-[#A3E635]/30 transition group">
+                <div className="w-10 h-10 rounded-xl bg-[#A3E635]/10 border border-[#A3E635]/30 flex items-center justify-center text-[#A3E635] font-mono font-black text-sm shrink-0 group-hover:scale-105 transition">
+                  01
+                </div>
+                <div className="space-y-1">
+                  <div className="flex items-center gap-2">
+                    <h4 className="font-display font-black text-white text-sm sm:text-base">Quick Steam Authentication</h4>
+                    <span className="text-[10px] font-mono bg-white/5 px-2 py-0.5 rounded text-slate-400">1-CLICK LOGIN</span>
+                  </div>
+                  <p className="text-xs text-slate-300 leading-relaxed font-sans">
+                    Sign in securely via official Valve Steam OpenID. Zero passwords, zero credentials stored. Your verified CS2 stats, skill badge, and match level synchronize automatically.
+                  </p>
+                </div>
+              </div>
+
+              {/* Step 2 */}
+              <div className="p-4 sm:p-5 rounded-2xl bg-[#0E1320] border border-white/5 flex gap-4 items-start hover:border-cyan-500/30 transition group">
+                <div className="w-10 h-10 rounded-xl bg-cyan-500/10 border border-cyan-500/30 flex items-center justify-center text-cyan-400 font-mono font-black text-sm shrink-0 group-hover:scale-105 transition">
+                  02
+                </div>
+                <div className="space-y-1">
+                  <div className="flex items-center gap-2">
+                    <h4 className="font-display font-black text-white text-sm sm:text-base">Form or Join a 5v5 Squad (Solo-to-Team)</h4>
+                    <span className="text-[10px] font-mono bg-cyan-500/15 text-cyan-400 px-2 py-0.5 rounded border border-cyan-500/30">COMMUNITY HUB</span>
+                  </div>
+                  <p className="text-xs text-slate-300 leading-relaxed font-sans">
+                    Solo player? Use our Player Finder to recruit like-minded teammates and establish your official clan. Already have 4 friends? Register your dedicated 5-man roster with a custom clan tag [CC] and team banner.
+                  </p>
+                </div>
+              </div>
+
+              {/* Step 3 */}
+              <div className="p-4 sm:p-5 rounded-2xl bg-[#0E1320] border border-white/5 flex gap-4 items-start hover:border-amber-500/30 transition group">
+                <div className="w-10 h-10 rounded-xl bg-amber-500/10 border border-amber-500/30 flex items-center justify-center text-amber-400 font-mono font-black text-sm shrink-0 group-hover:scale-105 transition">
+                  03
+                </div>
+                <div className="space-y-1">
+                  <div className="flex items-center gap-2">
+                    <h4 className="font-display font-black text-white text-sm sm:text-base">Enter Tournaments & Interactive Map Veto</h4>
+                    <span className="text-[10px] font-mono bg-amber-500/15 text-amber-400 px-2 py-0.5 rounded border border-amber-500/30">ACTIVE DUTY CS2</span>
+                  </div>
+                  <p className="text-xs text-slate-300 leading-relaxed font-sans">
+                    Enlist in open cash cups. Captains enter the turn-based Active Duty Map Veto (Mirage, Inferno, Nuke, Dust II, Ancient, Anubis, Vertigo) with dedicated European Sub-Tick servers and anti-cheat enforcement.
+                  </p>
+                </div>
+              </div>
+
+              {/* Step 4 */}
+              <div className="p-4 sm:p-5 rounded-2xl bg-[#0E1320] border border-white/5 flex gap-4 items-start hover:border-emerald-500/30 transition group">
+                <div className="w-10 h-10 rounded-xl bg-emerald-500/10 border border-emerald-500/30 flex items-center justify-center text-emerald-400 font-mono font-black text-sm shrink-0 group-hover:scale-105 transition">
+                  04
+                </div>
+                <div className="space-y-1">
+                  <div className="flex items-center gap-2">
+                    <h4 className="font-display font-black text-white text-sm sm:text-base">100% Guaranteed Cash Prize Payouts</h4>
+                    <span className="text-[10px] font-mono bg-emerald-500/15 text-emerald-400 px-2 py-0.5 rounded border border-emerald-500/30">INSTANT DISPATCH</span>
+                  </div>
+                  <p className="text-xs text-slate-300 leading-relaxed font-sans">
+                    Tournament winnings disburse straight to your Caliber Clutch wallet. Withdraw instantly to your bank account via European SEPA/IBAN wire transfer or directly to Crypto (USDT TRC20, BTC, ETH) with 0% platform fees.
+                  </p>
+                </div>
+              </div>
+            </div>
+
+            {/* Modal Actions */}
+            <div className="px-5 sm:px-7 py-4 border-t border-white/10 bg-[#0C101A] flex flex-col sm:flex-row items-center justify-between gap-3 shrink-0">
+              <span className="text-xs font-mono text-slate-400 flex items-center gap-2">
+                <span className="w-2 h-2 rounded-full bg-[#22C55E] animate-pulse" />
+                {onlineCount.toLocaleString()} players online now
+              </span>
+              <div className="flex items-center gap-3 w-full sm:w-auto">
+                <button
+                  onClick={() => { sound.playClick(); setShowHowItWorksModal(false); }}
+                  className="flex-1 sm:flex-none px-4 py-2.5 rounded-xl bg-white/5 hover:bg-white/10 text-slate-300 font-mono text-xs transition cursor-pointer"
+                >
+                  Close & Explore
+                </button>
+                <button
+                  onClick={() => {
+                    sound.playTournamentVictory();
+                    setShowHowItWorksModal(false);
+                    onLoginWithSteam();
+                  }}
+                  className="flex-1 sm:flex-none px-6 py-2.5 rounded-xl bg-[#A3E635] hover:bg-[#BEF264] text-black font-display font-black text-xs uppercase tracking-wider transition shadow-lg shadow-lime-500/30 cursor-pointer flex items-center justify-center gap-2"
+                >
+                  <SteamIcon className="w-4 h-4 fill-black" />
+                  <span>LOGIN WITH STEAM</span>
+                  <ArrowRight className="w-4 h-4" />
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* ======================================================== */}
+      {/* MODAL 2: PRIVACY POLICY & TERMS OF SERVICE               */}
+      {/* ======================================================== */}
+      {activeLegalModal && (
+        <div className="fixed inset-0 z-[120] flex items-center justify-center p-3 sm:p-5 select-none animate-in fade-in duration-200">
+          <div 
+            onClick={() => { sound.playClick(); setActiveLegalModal(null); }} 
+            className="fixed inset-0 bg-black/85 backdrop-blur-md" 
+          />
+          <div className="relative w-full max-w-3xl max-h-[92vh] bg-[#0A0D14] border border-[#202738] rounded-3xl shadow-[0_20px_60px_rgba(0,0,0,0.85)] flex flex-col overflow-hidden z-10 animate-in zoom-in-95">
+            <div className="px-5 sm:px-7 py-5 border-b border-white/10 bg-[#0F1420]/90 flex items-center justify-between gap-3 shrink-0">
+              <div className="flex items-center gap-3">
+                <div className="w-10 h-10 rounded-2xl bg-white/5 border border-white/10 flex items-center justify-center text-white">
+                  <FileText className="w-5 h-5 text-[#A3E635]" />
+                </div>
+                <div>
+                  <h3 className="font-display font-black text-base sm:text-lg text-white uppercase">
+                    {activeLegalModal === 'privacy' ? 'Caliber Clutch Privacy Policy' : 'Terms of Service & Tournament Rules'}
+                  </h3>
+                  <p className="text-xs text-slate-400 font-sans">
+                    {activeLegalModal === 'privacy' 
+                      ? 'Transparent data protection, Steam OpenID identity & privacy framework' 
+                      : 'Esports competitive integrity, anti-cheat policy & prize distribution'}
+                  </p>
+                </div>
+              </div>
+              <button 
+                onClick={() => { sound.playClick(); setActiveLegalModal(null); }}
+                className="p-2 rounded-xl bg-white/5 hover:bg-white/10 text-slate-400 hover:text-white transition cursor-pointer"
+              >
+                <X className="w-5 h-5" />
+              </button>
+            </div>
+
+            {/* Sub-tab Switcher */}
+            <div className="px-5 sm:px-7 pt-3 pb-2 bg-[#0C101A] border-b border-white/5 flex items-center gap-2">
+              <button
+                onClick={() => { sound.playClick(); setActiveLegalModal('privacy'); }}
+                className={`px-4 py-1.5 rounded-xl font-mono text-xs font-bold transition cursor-pointer ${
+                  activeLegalModal === 'privacy'
+                    ? 'bg-[#A3E635]/15 border border-[#A3E635]/40 text-[#A3E635]'
+                    : 'text-slate-400 hover:text-white'
+                }`}
+              >
+                Privacy Policy
+              </button>
+              <button
+                onClick={() => { sound.playClick(); setActiveLegalModal('terms'); }}
+                className={`px-4 py-1.5 rounded-xl font-mono text-xs font-bold transition cursor-pointer ${
+                  activeLegalModal === 'terms'
+                    ? 'bg-[#A3E635]/15 border border-[#A3E635]/40 text-[#A3E635]'
+                    : 'text-slate-400 hover:text-white'
+                }`}
+              >
+                Terms of Service & Rules
+              </button>
+            </div>
+
+            {/* Modal Content */}
+            <div className="p-5 sm:p-7 overflow-y-auto space-y-4 text-xs font-sans text-slate-300 leading-relaxed">
+              {activeLegalModal === 'privacy' ? (
+                <>
+                  <div className="p-4 rounded-xl bg-white/[0.02] border border-white/5 space-y-1">
+                    <h5 className="font-bold text-white text-sm">1. Steam OpenID 2.0 Identity Protocol</h5>
+                    <p className="text-slate-400">
+                      Caliber Clutch authenticates users strictly through Valve Corporation's official Steam OpenID 2.0 protocol. We never receive, request, or store your Steam password, email, or Steam Guard codes. We solely store your public Steam 64-bit ID, public persona name, and avatar to construct your player profile.
+                    </p>
+                  </div>
+                  <div className="p-4 rounded-xl bg-white/[0.02] border border-white/5 space-y-1">
+                    <h5 className="font-bold text-white text-sm">2. Anti-Cheat & Tournament Telemetry</h5>
+                    <p className="text-slate-400">
+                      To preserve competitive fairness across community cups, heartbeat telemetry, match event logs, and IP connectivity signals are processed during active match sessions to verify server connections, prevent ban evasions, and resolve match disputes.
+                    </p>
+                  </div>
+                  <div className="p-4 rounded-xl bg-white/[0.02] border border-white/5 space-y-1">
+                    <h5 className="font-bold text-white text-sm">3. Financial Data & Payout Protection</h5>
+                    <p className="text-slate-400">
+                      All fiat transactions, deposits, and subscriptions are handled by licensed merchants (Xsolla Inc.). Banking details for prize payouts (such as SEPA/IBAN numbers) are utilized exclusively for clearing bank wire transfers and are never sold or shared with third-party advertisers.
+                    </p>
+                  </div>
+                  <div className="p-4 rounded-xl bg-white/[0.02] border border-white/5 space-y-1">
+                    <h5 className="font-bold text-white text-sm">4. Cookies & Client Storage</h5>
+                    <p className="text-slate-400">
+                      Local browser storage is used exclusively for maintaining active session tokens, tournament veto choices, and audio preferences. No third-party tracking or behavioral ad profiling cookies are deployed.
+                    </p>
+                  </div>
+                </>
+              ) : (
+                <>
+                  <div className="p-4 rounded-xl bg-white/[0.02] border border-white/5 space-y-1">
+                    <h5 className="font-bold text-white text-sm">1. Competitive Integrity & Zero-Tolerance Anti-Cheat</h5>
+                    <p className="text-slate-400">
+                      Any use of external software, wallhacks, aim assistance, radar injectors, scripting macros, or memory tampering results in immediate hardware and Steam ID ban. Offending squads are disqualified immediately, and prize pools are reallocated to legitimate runners-up.
+                    </p>
+                  </div>
+                  <div className="p-4 rounded-xl bg-white/[0.02] border border-white/5 space-y-1">
+                    <h5 className="font-bold text-white text-sm">2. Pure Skill-Based Competition (No Gambling)</h5>
+                    <p className="text-slate-400">
+                      Caliber Clutch operates 100% as a skill-based esports organizer under European tournament standards. The platform strictly excludes lootboxes, random crate unboxings, skin wagering, or chance games. All prizes are predetermined tournament cash pools won through competitive CS2 gameplay.
+                    </p>
+                  </div>
+                  <div className="p-4 rounded-xl bg-white/[0.02] border border-white/5 space-y-1">
+                    <h5 className="font-bold text-white text-sm">3. Tournament Prize Distribution & Payouts</h5>
+                    <p className="text-slate-400">
+                      Prizes won in verified tournaments are disbursed to the captain and team balance within minutes of the official match finalization. Payouts can be cashed out via direct European SEPA/IBAN wire transfer (0% fee) or major cryptocurrencies (USDT TRC20, BTC, ETH).
+                    </p>
+                  </div>
+                  <div className="p-4 rounded-xl bg-white/[0.02] border border-white/5 space-y-1">
+                    <h5 className="font-bold text-white text-sm">4. Smurfing & Multi-Accounting Policy</h5>
+                    <p className="text-slate-400">
+                      Players must compete on their primary, verified CS2 account. Creating smurf accounts to manipulate amateur brackets or bypass ELO balancing will result in tournament forfeiture and permanent account suspension.
+                    </p>
+                  </div>
+                </>
+              )}
+            </div>
+
+            <div className="px-5 sm:px-7 py-4 border-t border-white/10 bg-[#0C101A] flex items-center justify-between shrink-0">
+              <span className="text-[11px] font-mono text-slate-500">© 2026 CALIBER CLUTCH. ALL RIGHTS RESERVED.</span>
+              <button
+                onClick={() => { sound.playClick(); setActiveLegalModal(null); }}
+                className="px-5 py-2 rounded-xl bg-white/10 hover:bg-white/15 text-white font-mono text-xs font-bold transition cursor-pointer"
+              >
+                Acknowledge & Close
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* ======================================================== */}
+      {/* MODAL 3: LIVE SERVERS STATUS & CS2 SUB-TICK NODES        */}
+      {/* ======================================================== */}
+      {showServersModal && (
+        <div className="fixed inset-0 z-[120] flex items-center justify-center p-3 sm:p-5 select-none animate-in fade-in duration-200">
+          <div 
+            onClick={() => { sound.playClick(); setShowServersModal(false); }} 
+            className="fixed inset-0 bg-black/85 backdrop-blur-md" 
+          />
+          <div className="relative w-full max-w-3xl max-h-[92vh] bg-[#0A0D14] border border-[#202738] rounded-3xl shadow-[0_20px_60px_rgba(0,0,0,0.85)] flex flex-col overflow-hidden z-10 animate-in zoom-in-95">
+            <div className="px-5 sm:px-7 py-5 border-b border-white/10 bg-[#0F1420]/90 flex items-center justify-between gap-3 shrink-0">
+              <div className="flex items-center gap-3">
+                <div className="w-10 h-10 rounded-2xl bg-emerald-500/15 border border-emerald-500/30 flex items-center justify-center text-emerald-400 shadow-[0_0_15px_rgba(16,185,129,0.2)]">
+                  <Activity className="w-5 h-5" />
+                </div>
+                <div>
+                  <div className="flex items-center gap-2">
+                    <h3 className="font-display font-black text-base sm:text-lg text-white">CALIBER CLUTCH SERVER NETWORK</h3>
+                    <span className="px-2 py-0.5 rounded-full bg-emerald-500/15 border border-emerald-500/30 text-emerald-400 font-mono text-[9px] font-bold flex items-center gap-1">
+                      <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />
+                      ALL SYSTEMS OPERATIONAL
+                    </span>
+                  </div>
+                  <p className="text-xs text-slate-400 font-sans">
+                    Live European CS2 Dedicated Sub-Tick Match Infrastructure & Anti-Cheat Nodes.
+                  </p>
+                </div>
+              </div>
+              <button 
+                onClick={() => { sound.playClick(); setShowServersModal(false); }}
+                className="p-2 rounded-xl bg-white/5 hover:bg-white/10 text-slate-400 hover:text-white transition cursor-pointer"
+              >
+                <X className="w-5 h-5" />
+              </button>
+            </div>
+
+            {/* Server Nodes Grid */}
+            <div className="p-5 sm:p-7 overflow-y-auto space-y-3">
+              {[
+                { name: 'Frankfurt Node #01 (Primary Matchmaker)', loc: 'Frankfurt, Germany', ping: '18 - 24 ms', load: '38%', status: 'Operational', primary: true },
+                { name: 'Frankfurt Node #02 (Tournament Cup Backup)', loc: 'Frankfurt, Germany', ping: '19 - 25 ms', load: '19%', status: 'Operational', primary: false },
+                { name: 'Stockholm Node #01 (Nordic CS2 Hub)', loc: 'Stockholm, Sweden', ping: '28 - 34 ms', load: '26%', status: 'Operational', primary: false },
+                { name: 'Warsaw Node #01 (Eastern EU Cluster)', loc: 'Warsaw, Poland', ping: '22 - 30 ms', load: '31%', status: 'Operational', primary: false },
+              ].map((s, idx) => (
+                <div key={idx} className="p-4 rounded-2xl bg-[#0E1320] border border-white/5 flex flex-col sm:flex-row sm:items-center justify-between gap-3 hover:border-emerald-500/30 transition">
+                  <div className="flex items-center gap-3">
+                    <div className="w-9 h-9 rounded-xl bg-black/40 border border-white/10 flex items-center justify-center font-mono text-xs text-white">
+                      <Wifi className="w-4 h-4 text-emerald-400" />
+                    </div>
+                    <div>
+                      <div className="flex items-center gap-2">
+                        <h5 className="font-display font-bold text-white text-xs sm:text-sm">{s.name}</h5>
+                        {s.primary && (
+                          <span className="px-1.5 py-0.2 rounded text-[9px] font-mono font-bold bg-[#A3E635]/20 text-[#A3E635] border border-[#A3E635]/40">
+                            PRIMARY
+                          </span>
+                        )}
+                      </div>
+                      <span className="text-[11px] font-mono text-slate-400">{s.loc} • 128 Sub-Tick Valve Engine</span>
+                    </div>
+                  </div>
+
+                  <div className="flex items-center gap-4 text-xs font-mono">
+                    <div className="text-right">
+                      <div className="text-slate-400 text-[10px]">Average Ping</div>
+                      <div className="text-emerald-400 font-bold">{s.ping}</div>
+                    </div>
+                    <div className="text-right">
+                      <div className="text-slate-400 text-[10px]">Server Load</div>
+                      <div className="text-slate-200 font-bold">{s.load}</div>
+                    </div>
+                    <span className="px-2.5 py-1 rounded-lg bg-emerald-500/15 border border-emerald-500/30 text-emerald-400 text-[10px] font-bold">
+                      {s.status}
+                    </span>
+                  </div>
+                </div>
+              ))}
+
+              <div className="p-4 rounded-xl bg-black/40 border border-white/5 flex flex-col sm:flex-row items-center justify-between gap-2 text-xs font-mono text-slate-400">
+                <span className="flex items-center gap-2">
+                  <ShieldCheck className="w-4 h-4 text-[#A3E635]" />
+                  Protected by Cloudflare Magic Transit DDoS Mitigation & Kernel AC
+                </span>
+                <span className="text-slate-300 font-bold">Global Uptime: 99.98%</span>
+              </div>
+            </div>
+
+            <div className="px-5 sm:px-7 py-4 border-t border-white/10 bg-[#0C101A] flex items-center justify-end shrink-0">
+              <button
+                onClick={() => { sound.playClick(); setShowServersModal(false); }}
+                className="px-5 py-2 rounded-xl bg-white/10 hover:bg-white/15 text-white font-mono text-xs font-bold transition cursor-pointer"
+              >
+                Close Status
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
 
     </div>
   );

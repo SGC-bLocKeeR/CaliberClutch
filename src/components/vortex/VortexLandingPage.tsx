@@ -624,7 +624,7 @@ export const VortexLandingPage: React.FC<VortexLandingPageProps> = ({
 
                   <div className="flex items-baseline gap-1.5 mb-8">
                     <span className="text-4xl font-black font-display text-[#A3E635]">
-                      {billingCycle === 'monthly' ? '€6.99' : '€5.49'}
+                      {billingCycle === 'monthly' ? '€5.99' : '€4.79'}
                     </span>
                     <span className="text-xs font-mono text-slate-400">/ month</span>
                   </div>
@@ -691,7 +691,7 @@ export const VortexLandingPage: React.FC<VortexLandingPageProps> = ({
 
                   <div className="flex items-baseline gap-1.5 mb-8">
                     <span className="text-4xl font-black font-display text-cyan-400">
-                      {billingCycle === 'monthly' ? '€14.99' : '€11.99'}
+                      {billingCycle === 'monthly' ? '€12.99' : '€9.99'}
                     </span>
                     <span className="text-xs font-mono text-slate-400">/ month</span>
                   </div>
@@ -906,7 +906,7 @@ export const VortexLandingPage: React.FC<VortexLandingPageProps> = ({
                   ? 'bg-cyan-500/20 text-cyan-400 border border-cyan-500/40'
                   : 'bg-[#A3E635]/20 text-[#A3E635] border border-[#A3E635]/40'
               }`}>
-                {authRequiredModal.tier === 'vip' ? '€14.99 / mo' : '€6.99 / mo'}
+                {authRequiredModal.tier === 'vip' ? '€12.99 / mo' : '€5.99 / mo'}
               </span>
             </div>
 
