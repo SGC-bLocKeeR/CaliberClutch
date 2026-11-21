@@ -2667,7 +2667,7 @@ export const VortexMatchRoom: React.FC<VortexMatchRoomProps> = ({
                   {[
                     'Server Unresponsive / Severe Packet Loss (EU-04)',
                     'Player Never Connected / AFK',
-                    'VORTEX Anti-Cheat Integrity Issue',
+                    'CALIBER CLUTCH Anti-Cheat Integrity Issue',
                     'Report Match Problem'
                   ].map((issue, idx) => (
                     <div

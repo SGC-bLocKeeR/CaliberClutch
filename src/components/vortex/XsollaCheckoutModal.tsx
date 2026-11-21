@@ -383,7 +383,7 @@ export const XsollaCheckoutModal: React.FC<XsollaCheckoutModalProps> = ({
                   </span>
                 </div>
                 <div className="text-[10px] font-mono text-slate-400 mt-0.5">
-                  VORTEX Gaming (Merchant #{config.merchantId}) • VORTEX Gaming #{config.projectId}
+                  Caliber Clutch (Merchant #{config.merchantId}) • Caliber Clutch #{config.projectId}
                 </div>
               </div>
             </div>
@@ -608,7 +608,7 @@ export const XsollaCheckoutModal: React.FC<XsollaCheckoutModalProps> = ({
                       {selectedItem.title}
                     </div>
                     <div className="text-[11px] font-mono text-slate-400">
-                      SKU: {selectedItem.sku || 'VTX-ORD-EUR'} • Merchant: Vortex Gaming Ltd.
+                      SKU: {selectedItem.sku || 'CC-ORD-EUR'} • Merchant: Caliber Clutch Ltd.
                     </div>
                   </div>
                 </div>

@@ -1,18 +1,16 @@
-# 🔴 VORTEX GAMING // CS2 Esports Platform
+# 🛡️ CALIBER CLUTCH // CS2 Esports Platform
 
-> Next-Generation Counter-Strike 2 Competitive Esports Hub with Obsidian Black & Crimson Red Tactical Identity.
-
-![VORTEX Banner](/public/images/vortex_reference.jpg)
+> Next-Generation Counter-Strike 2 Competitive Esports Hub with Obsidian Black & Tactical Neon Identity.
 
 ---
 
 ## ⚡ Overview
 
-**VORTEX Gaming** is an independent, high-performance web platform built for Counter-Strike 2 players, tournament organizers, and competitive communities. Powered by low-latency CS2 Sub-Tick server routing and automated FACEIT Open API v4 integrations.
+**Caliber Clutch** is an independent, high-performance web platform built for Counter-Strike 2 players, tournament organizers, and competitive communities. Powered by low-latency CS2 Sub-Tick server routing and automated FACEIT Open API v4 integrations.
 
-- **Independent Project**: Completely separate repository, design language, and architecture from NEXUS.
-- **Visual Identity**: Obsidian Onyx Black (`#0A0B0E`), Crimson Red (`#EF4444` / `#DC2626`), and Deep Graphite panels (`#12141C`).
-- **Tactical Atmosphere**: Custom Counter-Strike 2 operator visuals, glowing 3D map carousel cards, and esports tournament brackets.
+- **Independent Project**: Official Caliber Clutch competitive esports arena.
+- **Visual Identity**: Obsidian Onyx Black (`#0A0B0E`), Electric Lime / Emerald (`#A3E635` / `#10B981`), and Deep Graphite panels (`#12141C`).
+- **Tactical Atmosphere**: Custom Counter-Strike 2 operator visuals, interactive map veto, and esports tournament brackets.
 
 ---
 

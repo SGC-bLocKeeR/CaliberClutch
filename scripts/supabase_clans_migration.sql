@@ -1,5 +1,5 @@
 -- ========================================================
--- CALIBER CLUTCH & VORTEX GAMING - SUPABASE DATABASE SCHEMA
+-- CALIBER CLUTCH - SUPABASE DATABASE SCHEMA
 -- Run this script in your Supabase SQL Editor:
 -- https://supabase.com/dashboard/project/awxmcphoobeavlgxlasj/sql
 -- ========================================================

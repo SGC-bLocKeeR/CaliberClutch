@@ -1,5 +1,5 @@
 /**
- * VORTEX & CALIBER CLUTCH - SUPABASE CLAN & TEAM PERSISTENCE SERVICE
+ * CALIBER CLUTCH - SUPABASE CLAN & TEAM PERSISTENCE SERVICE
  * Official PostgreSQL Cloud Database Sync for 5v5 Rosters & Competitive Clans
  */
 

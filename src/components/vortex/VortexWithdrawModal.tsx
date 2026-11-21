@@ -193,7 +193,7 @@ export const VortexWithdrawModal: React.FC<VortexWithdrawModalProps> = ({
             <div className="min-w-0">
               <div className="flex items-center gap-1.5 sm:gap-2">
                 <h2 className="font-display font-black text-sm sm:text-lg text-white tracking-wide truncate">
-                  VORTEX WITHDRAW
+                  CALIBER CLUTCH WITHDRAW
                 </h2>
                 <span className="px-2 py-0.5 rounded-full bg-emerald-500/15 border border-emerald-500/30 text-emerald-400 font-mono text-[9px] sm:text-[10px] font-bold">
                   LIVE
@@ -836,7 +836,7 @@ export const VortexWithdrawModal: React.FC<VortexWithdrawModalProps> = ({
         <div className="px-5 py-3 border-t border-white/5 bg-[#0C101A] flex items-center justify-between text-[11px] font-mono text-slate-500 shrink-0">
           <div className="flex items-center gap-1.5 text-emerald-400/80">
             <ShieldCheck className="w-4 h-4 text-emerald-400" />
-            <span>VORTEX Direct P2P & Steam Escrow Protection Active</span>
+            <span>CALIBER CLUTCH Direct P2P & Steam Escrow Protection Active</span>
           </div>
 
           <div className="text-slate-400">

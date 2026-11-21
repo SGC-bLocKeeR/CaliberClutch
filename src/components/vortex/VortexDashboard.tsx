@@ -1371,7 +1371,7 @@ export const VortexDashboard: React.FC<VortexDashboardProps> = ({
     {
       id: 'notif-3',
       type: 'tournament',
-      title: 'VORTEX CS2 Global Open ($25,000)',
+      title: 'CALIBER CLUTCH CS2 Global Open ($25,000)',
       subtitle: 'Bracket check-in opens in 1h 45m. Make sure all 5 players have Anti-Cheat active.',
       time: '42m ago',
       read: false,
@@ -6796,9 +6796,9 @@ export const VortexDashboard: React.FC<VortexDashboardProps> = ({
       {/* Dashboard General Action Toast Notification (Centered & Clean Neutral Theme - Never Behind Sidebar) */}
       {dashboardToast && (
         <div className="fixed top-6 left-1/2 -translate-x-1/2 z-[100] animate-in fade-in slide-in-from-top-4 flex items-center gap-3 bg-[#12141D] border border-white/15 px-5 py-3 rounded-2xl shadow-2xl">
-          <Sparkles className="w-4 h-4 text-slate-300" />
+          <Sparkles className="w-4 h-4 text-[#A3E635]" />
           <div className="text-xs font-mono">
-            <div className="text-white font-bold">VORTEX COMMAND TELEMETRY</div>
+            <div className="text-white font-bold">CALIBER CLUTCH TELEMETRY</div>
             <div className="text-slate-300 text-[11px]">{dashboardToast}</div>
           </div>
           <button onClick={() => setDashboardToast(null)} className="ml-2 text-slate-400 hover:text-white p-1 cursor-pointer" title="Dismiss">
@@ -8125,7 +8125,7 @@ export const VortexDashboard: React.FC<VortexDashboardProps> = ({
                     <span className="text-[10px] font-mono text-amber-400 bg-amber-500/20 px-1.5 py-0.5 rounded border border-amber-500/40 font-black">ELITE</span>
                   </div>
                   <p className="text-xs text-slate-300 leading-relaxed font-sans">
-                    Elite tier verification for esports professionals, verified tournament champions, and Vortex VIP Elite Pass holders. Unlocks automated GOTV recordings, strict ±150 ELO matchmaking, and priority map vetoes.
+                    Elite tier verification for esports professionals, verified tournament champions, and Caliber Clutch VIP Elite Pass holders. Unlocks automated GOTV recordings, strict ±150 ELO matchmaking, and priority map vetoes.
                   </p>
                 </div>
               </div>
@@ -8150,8 +8150,8 @@ export const VortexDashboard: React.FC<VortexDashboardProps> = ({
                     sound.playSelect();
                     setXsollaCheckoutItem({
                       id: 'sub-vip',
-                      sku: 'VTX-SUB-VIP',
-                      title: 'Vortex VIP Elite Pass (1 Month)',
+                      sku: 'CC-SUB-VIP',
+                      title: 'Caliber Clutch VIP Elite Pass (1 Month)',
                       description: 'VIP Match queue, ultra-strict ±150 ELO, automated GOTV demo recording, 2x Points.',
                       amountEur: 12.99,
                       type: 'membership_vip'
