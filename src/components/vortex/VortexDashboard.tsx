@@ -5475,7 +5475,7 @@ export const VortexDashboard: React.FC<VortexDashboardProps> = ({
                       const isRegistered = registeredTourneys.includes(t.title);
 
                       return (
-                      <div key={idx} className="p-6 rounded-3xl bg-[#12141C] border border-[#23293B] hover:border-amber-400/50 transition flex flex-col justify-between gap-5 group shadow-lg">
+                      <div key={idx} className="p-6 rounded-3xl bg-[#12141C] border border-[#23293B] hover:border-amber-400/50 transition flex flex-col justify-between gap-5 group shadow-lg overflow-hidden w-full max-w-full">
                         <div className="space-y-4">
                           <div className="flex items-start justify-between">
                             <div>
@@ -5604,71 +5604,77 @@ export const VortexDashboard: React.FC<VortexDashboardProps> = ({
                           })()}
                         </div>
 
-                        <div className="flex flex-wrap items-center justify-between pt-4 border-t border-[#1C2233] gap-3">
-                          <div className="flex items-center gap-2.5">
-                            <span className="text-xs font-mono text-slate-300">Slots: {t.teams}</span>
-                            <span className="text-slate-600">•</span>
-                            <button
-                              type="button"
-                              onClick={() => {
-                                sound.playSelect();
-                                setTourneyModalTab('bracket');
-                                setSelectedBracketTourney(t);
-                              }}
-                              className="px-3 py-1.5 rounded-xl bg-white/5 hover:bg-white/10 text-xs font-mono text-slate-200 hover:text-white border border-white/10 transition cursor-pointer flex items-center gap-1.5"
-                            >
-                              <Eye className="w-3.5 h-3.5 text-amber-400" />
-                              <span>View Bracket</span>
-                            </button>
-                            {(() => {
-                              const isHost = isProjectAdmin || 
-                                (t.creator && t.creator.toLowerCase() === currentGamerTag.toLowerCase()) ||
-                                (t.creatorClan && userClanData?.tag && t.creatorClan.toLowerCase() === userClanData.tag.toLowerCase()) ||
-                                (t.organizer && t.organizer.toLowerCase().includes(currentGamerTag.toLowerCase()));
-                              if (!isHost) return null;
-                              return (
-                                <>
-                                  <span className="text-slate-600">•</span>
-                                  <button
-                                    type="button"
-                                    onClick={() => {
-                                      sound.playSelect();
-                                      setTourneyModalTab('teams');
-                                      setSelectedBracketTourney(t);
-                                    }}
-                                    className="px-3 py-1.5 rounded-xl bg-amber-500/15 hover:bg-amber-500/25 text-xs font-mono text-amber-300 hover:text-white border border-amber-500/30 transition cursor-pointer flex items-center gap-1.5"
-                                  >
-                                    <Users className="w-3.5 h-3.5 text-amber-400" />
-                                    <span>Manage Teams</span>
-                                  </button>
-                                  <span className="text-slate-600">•</span>
-                                  <button
-                                    type="button"
-                                    onClick={() => {
-                                      sound.playSelect();
-                                      setTourneyModalTab('admin');
-                                      setSelectedBracketTourney(t);
-                                    }}
-                                    className="px-3 py-1.5 rounded-xl bg-cyan-500/15 hover:bg-cyan-500/25 text-xs font-mono text-cyan-300 hover:text-white border border-cyan-500/30 transition cursor-pointer flex items-center gap-1.5"
-                                  >
-                                    <Radio className="w-3.5 h-3.5 text-cyan-400 animate-pulse" />
-                                    <span>Caster & Admin IP</span>
-                                  </button>
-                                </>
-                              );
-                            })()}
+                        <div className="pt-4 border-t border-[#1C2233] space-y-3 w-full max-w-full">
+                          {/* Top Row: Slots Counter & Organizer/Caster Utility Tools */}
+                          <div className="flex flex-wrap items-center justify-between gap-2 w-full">
+                            <div className="flex items-center gap-2 text-xs font-mono text-slate-300 font-bold shrink-0">
+                              <span className="w-2 h-2 rounded-full bg-[#A3E635] animate-pulse" />
+                              <span>Slots: {t.teams}</span>
+                            </div>
+
+                            <div className="flex flex-wrap items-center gap-1.5">
+                              <button
+                                type="button"
+                                onClick={() => {
+                                  sound.playSelect();
+                                  setTourneyModalTab('bracket');
+                                  setSelectedBracketTourney(t);
+                                }}
+                                className="px-2.5 py-1.5 rounded-xl bg-white/5 hover:bg-white/10 text-xs font-mono text-slate-200 hover:text-white border border-white/10 transition cursor-pointer flex items-center gap-1.5"
+                              >
+                                <Eye className="w-3.5 h-3.5 text-amber-400" />
+                                <span>Bracket</span>
+                              </button>
+
+                              {(() => {
+                                const isHost = isProjectAdmin || 
+                                  (t.creator && t.creator.toLowerCase() === currentGamerTag.toLowerCase()) ||
+                                  (t.creatorClan && userClanData?.tag && t.creatorClan.toLowerCase() === userClanData.tag.toLowerCase()) ||
+                                  (t.organizer && t.organizer.toLowerCase().includes(currentGamerTag.toLowerCase()));
+                                if (!isHost) return null;
+                                return (
+                                  <>
+                                    <button
+                                      type="button"
+                                      onClick={() => {
+                                        sound.playSelect();
+                                        setTourneyModalTab('teams');
+                                        setSelectedBracketTourney(t);
+                                      }}
+                                      className="px-2.5 py-1.5 rounded-xl bg-amber-500/15 hover:bg-amber-500/25 text-xs font-mono text-amber-300 hover:text-white border border-amber-500/30 transition cursor-pointer flex items-center gap-1.5"
+                                    >
+                                      <Users className="w-3.5 h-3.5 text-amber-400" />
+                                      <span>Manage</span>
+                                    </button>
+                                    <button
+                                      type="button"
+                                      onClick={() => {
+                                        sound.playSelect();
+                                        setTourneyModalTab('admin');
+                                        setSelectedBracketTourney(t);
+                                      }}
+                                      className="px-2.5 py-1.5 rounded-xl bg-cyan-500/15 hover:bg-cyan-500/25 text-xs font-mono text-cyan-300 hover:text-white border border-cyan-500/30 transition cursor-pointer flex items-center gap-1.5"
+                                    >
+                                      <Radio className="w-3.5 h-3.5 text-cyan-400 animate-pulse" />
+                                      <span>Caster & Admin IP</span>
+                                    </button>
+                                  </>
+                                );
+                              })()}
+                            </div>
                           </div>
 
-                          <div className="flex items-center gap-2">
+                          {/* Bottom Row: Primary Registration / Enrollment Action Button */}
+                          <div className="flex items-center gap-2 w-full pt-0.5">
                             {t.faceitUrl && (
                               <a
                                 href={t.faceitUrl}
                                 target="_blank"
                                 rel="noopener noreferrer"
-                                className="px-3.5 py-2 rounded-full bg-[#FF5500]/15 hover:bg-[#FF5500]/25 text-[#FF5500] border border-[#FF5500]/40 font-mono font-bold text-xs flex items-center gap-1.5 transition hover:scale-105 shadow-sm"
+                                className="px-3 py-2 rounded-xl bg-[#FF5500]/15 hover:bg-[#FF5500]/25 text-[#FF5500] border border-[#FF5500]/40 font-mono font-bold text-xs flex items-center justify-center gap-1.5 transition hover:scale-105 shadow-sm shrink-0"
                               >
                                 <ExternalLink className="w-3.5 h-3.5" />
-                                <span>FACEIT Hub</span>
+                                <span>FACEIT</span>
                               </a>
                             )}
                             {isRegistered ? (
@@ -5677,7 +5683,7 @@ export const VortexDashboard: React.FC<VortexDashboardProps> = ({
                                   sound.playSelect();
                                   setSelectedRegisterTourney(t);
                                 }}
-                                className="px-4 py-2 rounded-full bg-emerald-500/20 text-emerald-400 border border-emerald-500/40 font-display font-black text-xs uppercase tracking-wider transition hover:bg-emerald-500/30 cursor-pointer flex items-center gap-1.5"
+                                className="flex-1 py-2.5 rounded-xl bg-emerald-500/20 text-emerald-400 border border-emerald-500/40 font-display font-black text-xs uppercase tracking-wider transition hover:bg-emerald-500/30 cursor-pointer flex items-center justify-center gap-1.5"
                               >
                                 <CheckCircle2 className="w-4 h-4" />
                                 <span>Team Enrolled</span>
@@ -5689,7 +5695,7 @@ export const VortexDashboard: React.FC<VortexDashboardProps> = ({
                                     sound.playClick();
                                     setSelectedRegisterTourney(t);
                                   }}
-                                  className="px-4 py-2.5 rounded-full bg-rose-500/10 hover:bg-rose-500/20 text-rose-300 border border-rose-500/30 font-display font-black text-xs uppercase tracking-wider transition cursor-pointer flex items-center gap-1.5 shadow-sm group"
+                                  className="flex-1 py-2.5 rounded-xl bg-rose-500/10 hover:bg-rose-500/20 text-rose-300 border border-rose-500/30 font-display font-black text-xs uppercase tracking-wider transition cursor-pointer flex items-center justify-center gap-1.5 shadow-sm group"
                                   title="Complete 5-Stack roster required for tournament registration"
                                 >
                                   <AlertTriangle className="w-3.5 h-3.5 text-rose-400 group-hover:scale-110 transition" />
@@ -5701,7 +5707,7 @@ export const VortexDashboard: React.FC<VortexDashboardProps> = ({
                                     sound.playSelect();
                                     setSelectedRegisterTourney(t);
                                   }}
-                                  className="px-5 py-2.5 rounded-full bg-gradient-to-r from-[#84CC16] to-[#A3E635] hover:brightness-110 text-slate-950 font-display font-black text-xs uppercase tracking-wider transition shadow-md cursor-pointer active:scale-95 flex items-center gap-1.5"
+                                  className="flex-1 py-2.5 rounded-xl bg-gradient-to-r from-[#84CC16] to-[#A3E635] hover:brightness-110 text-slate-950 font-display font-black text-xs uppercase tracking-wider transition shadow-md cursor-pointer active:scale-95 flex items-center justify-center gap-1.5"
                                 >
                                   <Crown className="w-4 h-4 text-slate-950" />
                                   <span>Register Team</span>
@@ -5720,7 +5726,7 @@ export const VortexDashboard: React.FC<VortexDashboardProps> = ({
                                   setDashboardToast(`⚠️ Only Team Captain (${userClanData.captainName || 'Captain'}) can register squad in official tournaments.`);
                                   setTimeout(() => setDashboardToast(null), 4500);
                                 }}
-                                className="px-4 py-2.5 rounded-full bg-amber-500/10 hover:bg-amber-500/20 text-amber-300 border border-amber-500/30 font-display font-black text-xs uppercase tracking-wider transition cursor-pointer flex items-center gap-1.5 shadow-sm group"
+                                className="flex-1 py-2.5 rounded-xl bg-amber-500/10 hover:bg-amber-500/20 text-amber-300 border border-amber-500/30 font-display font-black text-xs uppercase tracking-wider transition cursor-pointer flex items-center justify-center gap-1.5 shadow-sm group"
                                 title="Only Team Captain can register squad"
                               >
                                 <Lock className="w-3.5 h-3.5 text-amber-400 group-hover:scale-110 transition" />
