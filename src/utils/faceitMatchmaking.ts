@@ -12,6 +12,7 @@ export interface BalancedMatchTeam {
 
 export interface BalancedMatch {
   matchId: string;
+  id?: string;
   team1: BalancedMatchTeam;
   team2: BalancedMatchTeam;
   winProbabilityTeam1: number;
@@ -360,6 +361,7 @@ export const generateBalancedMatch = (params: MatchmakingParams): BalancedMatch 
 
   return {
     matchId: 'CC-89421',
+    id: 'CC-89421',
     team1: {
       name: team1Name,
       tag: userClanTag,

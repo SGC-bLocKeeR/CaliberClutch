@@ -97,6 +97,7 @@ import {
   CALIBER_FACEIT_ORGANIZER_ID,
   FaceitOrganizerConfig 
 } from '../../services/faceitTournamentService';
+import { realtimeMatchmaking, RealtimeQueuePlayer } from '../../services/realtimeMatchmakingService';
 
 interface VortexDashboardProps {
   userGamerTag?: string;
@@ -1091,7 +1092,6 @@ export const VortexDashboard: React.FC<VortexDashboardProps> = ({
   const [promoCodeError, setPromoCodeError] = useState<string | null>(null);
   const [promoCodeSuccess, setPromoCodeSuccess] = useState<string | null>(null);
   const [copiedPartnerCode, setCopiedPartnerCode] = useState<boolean>(false);
-  const [simulatedBotOffer, setSimulatedBotOffer] = useState<{ tournament: string; skinName: string; price: number } | null>(null);
   const [isSubscribedNotify, setIsSubscribedNotify] = useState<boolean>(() => {
     return localStorage.getItem('vortex_notified_coming_soon') === 'true';
   });
@@ -1717,7 +1717,6 @@ export const VortexDashboard: React.FC<VortexDashboardProps> = ({
         else if (selectedBracketTourney) setSelectedBracketTourney(null);
         else if (captainDeniedModal?.open) setCaptainDeniedModal(null);
         else if (showVerificationModal) setShowVerificationModal(false);
-        else if (simulatedBotOffer) setSimulatedBotOffer(null);
         else if (inviteModalOpen) setInviteModalOpen(false);
       }
     };
@@ -1728,7 +1727,6 @@ export const VortexDashboard: React.FC<VortexDashboardProps> = ({
     selectedBracketTourney, 
     captainDeniedModal, 
     showVerificationModal, 
-    simulatedBotOffer, 
     inviteModalOpen
   ]);
 
@@ -2199,6 +2197,7 @@ export const VortexDashboard: React.FC<VortexDashboardProps> = ({
   // Matchmaking Queue State
   const [isQueuing, setIsQueuing] = useState(false);
   const [queueSeconds, setQueueSeconds] = useState(0);
+  const [realtimeQueuePlayers, setRealtimeQueuePlayers] = useState<RealtimeQueuePlayer[]>([]);
   const [matchFoundModal, setMatchFoundModal] = useState(false);
   const [acceptedPlayers, setAcceptedPlayers] = useState(3);
   const [userHasAccepted, setUserHasAccepted] = useState(false);
@@ -2262,23 +2261,53 @@ export const VortexDashboard: React.FC<VortexDashboardProps> = ({
     });
   }, [currentGamerTag, currentClanTag, currentAvatarUrl, currentVerification, currentCountry, effectiveLevel, effectiveElo]);
 
-  // Queue Interval Timer
+  // Queue Interval Timer - Tracks authentic search duration
   useEffect(() => {
     let interval: ReturnType<typeof setInterval>;
     if (isQueuing) {
       interval = setInterval(() => {
-        setQueueSeconds(prev => {
-          const next = prev + 1;
-          if (next >= 4) {
-            triggerMatchFound();
-            return 0;
-          }
-          return next;
-        });
+        setQueueSeconds(prev => prev + 1);
       }, 1000);
     }
     return () => clearInterval(interval);
   }, [isQueuing]);
+
+  // Real-time Supabase Matchmaking Queue Subscription
+  useEffect(() => {
+    if (!isQueuing) {
+      setRealtimeQueuePlayers([]);
+      return;
+    }
+
+    const currentPlayer: RealtimeQueuePlayer = {
+      id: currentGamerTag || 'Player',
+      name: currentGamerTag || 'Player',
+      avatar: currentAvatarUrl,
+      level: effectiveLevel,
+      elo: effectiveElo,
+      countryCode: currentCountry.code,
+      isCaptain: true,
+      joinedAt: Date.now()
+    };
+
+    realtimeMatchmaking.subscribeToQueue(
+      currentPlayer,
+      (players) => {
+        setRealtimeQueuePlayers(players);
+        // Automatically start match when 10 real players are queued
+        if (players.length >= 10) {
+          triggerMatchFound();
+        }
+      },
+      (matchPayload) => {
+        triggerMatchFound();
+      }
+    );
+
+    return () => {
+      realtimeMatchmaking.leaveQueue(currentGamerTag);
+    };
+  }, [isQueuing, currentGamerTag, effectiveLevel, effectiveElo, currentCountry.code, currentAvatarUrl]);
 
   // Match Ready Countdown Timer
   useEffect(() => {
@@ -2370,6 +2399,7 @@ export const VortexDashboard: React.FC<VortexDashboardProps> = ({
     });
 
     setCurrentBalancedMatch(generatedMatch);
+    realtimeMatchmaking.broadcastMatchFound({ matchId: generatedMatch.matchId || generatedMatch.id });
 
     // Initial accepted: any party teammates ready in the lobby (excluding user who clicks Accept)
     const partyTeammatesReady = activePartyMembers
@@ -3187,10 +3217,10 @@ export const VortexDashboard: React.FC<VortexDashboardProps> = ({
                         triggerMatchFound();
                       }}
                       className="px-3.5 py-1.5 rounded-xl bg-amber-500/15 hover:bg-amber-500/25 border border-amber-500/40 text-amber-300 hover:text-white font-bold transition flex items-center gap-1.5 shadow-sm cursor-pointer text-xs"
-                      title="Test CS2 5v5 Match Ready Check (30s Acceptance Phase)"
+                      title="Trigger CS2 5v5 Scrim Ready Check (30s Acceptance Phase)"
                     >
                       <Bell className="w-3.5 h-3.5 text-amber-400" />
-                      <span>TEST READY CHECK</span>
+                      <span>READY CHECK (SCRIM)</span>
                     </button>
                     <button
                       onClick={() => {
@@ -3534,25 +3564,40 @@ export const VortexDashboard: React.FC<VortexDashboardProps> = ({
                           </div>
                           <div className="text-[10px] text-slate-400 font-mono mt-0.5 flex flex-wrap items-center gap-2">
                             <span className="text-emerald-400 font-bold">
-                              {partySlots.filter(m => m !== null).length === 5 
-                                ? '5-Stack Clan Scrim' 
-                                : partySlots.filter(m => m !== null).length > 1 
-                                ? `${partySlots.filter(m => m !== null).length}-Player Stack` 
-                                : 'Solo Queue'}
+                              {realtimeQueuePlayers.length > 0 ? `${realtimeQueuePlayers.length}/10 Active Queued` : '1/10 Searching'}
                             </span>
                             <span>•</span>
-                            <span>Strict Bracket: Level {effectiveLevel} (ELO {effectiveElo - 40} - {effectiveElo + 40})</span>
+                            <span className="text-[#A3E635] font-bold">Real-time Supabase Presence</span>
                             <span>•</span>
-                            <span className="text-white font-bold">Target: 50% / 50% Win Rate</span>
+                            <span>Strict Bracket: Level {effectiveLevel} (ELO {effectiveElo - 40} - {effectiveElo + 40})</span>
                           </div>
                         </div>
                       </div>
-                      <button
-                        onClick={() => { sound.playClick(); setIsQueuing(false); }}
-                        className="px-5 py-3.5 rounded-2xl bg-red-500/15 hover:bg-red-500/25 border border-red-500/40 text-red-400 text-xs font-mono font-bold cursor-pointer transition shadow-md"
-                      >
-                        CANCEL
-                      </button>
+                      <div className="flex items-center gap-2">
+                        {isProjectAdmin && (
+                          <button
+                            onClick={() => {
+                              sound.playMatchFound();
+                              triggerMatchFound();
+                            }}
+                            className="px-4 py-3.5 rounded-2xl bg-gradient-to-r from-emerald-500 to-green-600 hover:brightness-110 text-slate-950 text-xs font-mono font-black uppercase cursor-pointer transition shadow-md flex items-center gap-1.5"
+                            title="Administrator shortcut: immediately trigger match ready check"
+                          >
+                            <Zap className="w-4 h-4 fill-slate-950" />
+                            <span>LAUNCH SCRIM NOW</span>
+                          </button>
+                        )}
+                        <button
+                          onClick={() => {
+                            sound.playClick();
+                            realtimeMatchmaking.leaveQueue(currentGamerTag);
+                            setIsQueuing(false);
+                          }}
+                          className="px-5 py-3.5 rounded-2xl bg-red-500/15 hover:bg-red-500/25 border border-red-500/40 text-red-400 text-xs font-mono font-bold cursor-pointer transition shadow-md"
+                        >
+                          CANCEL
+                        </button>
+                      </div>
                     </div>
                   ) : selectedMatchTier === 'premium' && userMembershipTier === 'free' ? (
                     <button
@@ -7320,12 +7365,6 @@ export const VortexDashboard: React.FC<VortexDashboardProps> = ({
                     <h4 className="text-xs font-bold text-slate-300 font-mono uppercase">All Caught Up!</h4>
                     <p className="text-[11px] text-slate-500 max-w-xs mt-1">No pending notifications in this category. You are ready to compete.</p>
                   </div>
-                  <button
-                    onClick={handleTriggerTestNotif}
-                    className="mt-2 px-3 py-1.5 rounded-xl bg-[#1B2213] border border-[#A3E635]/40 text-[#A3E635] text-xs font-mono font-bold hover:bg-[#283519] transition cursor-pointer flex items-center gap-1.5"
-                  >
-                    <Plus className="w-3.5 h-3.5" /> Simulate 5v5 Ready Notification
-                  </button>
                 </div>
               ) : (
                 filteredNotifications.map((n) => (
@@ -7516,14 +7555,6 @@ export const VortexDashboard: React.FC<VortexDashboardProps> = ({
                   <Users className="w-3 h-3 text-[#A3E635]" />
                   <span>Show Party Invite</span>
                 </button>
-                <button
-                  onClick={handleTriggerTestNotif}
-                  className="text-slate-400 hover:text-white transition flex items-center gap-1 cursor-pointer"
-                  title="Send incoming 5v5 match ready alert"
-                >
-                  <Plus className="w-3 h-3 text-[#A3E635]" />
-                  <span>5v5 Alert</span>
-                </button>
               </div>
               <button
                 onClick={() => setNotificationsOpen(false)}
@@ -7711,58 +7742,6 @@ export const VortexDashboard: React.FC<VortexDashboardProps> = ({
               </div>
             </div>
 
-            {/* Quick Testing Simulator Bar */}
-            <div className="pt-2 border-t border-white/[0.08] flex items-center justify-between text-xs font-mono">
-              <span className="text-slate-500">Simulate Account Tier:</span>
-              <div className="flex items-center gap-2">
-                <button
-                  onClick={() => {
-                    sound.playClick();
-                    setUserMembershipTier('free');
-                    setDashboardToast('Account switched to Free tier.');
-                    setTimeout(() => setDashboardToast(null), 2500);
-                  }}
-                  className={`px-3 py-1 rounded-lg transition cursor-pointer ${
-                    userMembershipTier === 'free'
-                      ? 'bg-white/20 text-white font-bold'
-                      : 'bg-white/5 text-slate-400 hover:text-white'
-                  }`}
-                >
-                  Free
-                </button>
-                <button
-                  onClick={() => {
-                    sound.playClick();
-                    setUserMembershipTier('premium');
-                    setDashboardToast('Account switched to Premium tier.');
-                    setTimeout(() => setDashboardToast(null), 2500);
-                  }}
-                  className={`px-3 py-1 rounded-lg transition cursor-pointer ${
-                    userMembershipTier === 'premium'
-                      ? 'bg-amber-500 text-slate-950 font-bold'
-                      : 'bg-white/5 text-slate-400 hover:text-white'
-                  }`}
-                >
-                  Premium
-                </button>
-                <button
-                  onClick={() => {
-                    sound.playClick();
-                    setUserMembershipTier('vip');
-                    setDashboardToast('Account switched to VIP Elite tier.');
-                    setTimeout(() => setDashboardToast(null), 2500);
-                  }}
-                  className={`px-3 py-1 rounded-lg transition cursor-pointer ${
-                    userMembershipTier === 'vip'
-                      ? 'bg-purple-500 text-white font-bold'
-                      : 'bg-white/5 text-slate-400 hover:text-white'
-                  }`}
-                >
-                  VIP Elite
-                </button>
-              </div>
-            </div>
-
           </div>
         </div>
       )}
@@ -7812,77 +7791,6 @@ export const VortexDashboard: React.FC<VortexDashboardProps> = ({
         isOpen={showPartnersModal}
         onClose={() => setShowPartnersModal(false)}
       />
-
-      {/* TOURNAMENT PRIZE STEAM BOT DISPATCH SIMULATOR MODAL */}
-      {simulatedBotOffer && (
-        <div 
-          onClick={() => {
-            sound.playClick();
-            setSimulatedBotOffer(null);
-          }}
-          className="fixed inset-0 z-[130] bg-black/85 backdrop-blur-md flex items-center justify-center p-4 animate-in fade-in duration-200 cursor-pointer overflow-y-auto"
-        >
-          <div 
-            onClick={(e) => e.stopPropagation()}
-            className="w-full max-w-md bg-[#0C1019] border border-[#252E42] rounded-3xl p-6 shadow-2xl space-y-4 relative overflow-hidden cursor-default my-auto"
-          >
-            <div className="flex items-center justify-between border-b border-[#1E2638] pb-3">
-              <div className="flex items-center gap-2.5">
-                <div className="w-8 h-8 rounded-xl bg-emerald-500/20 border border-emerald-500/40 flex items-center justify-center text-emerald-400">
-                  <ShieldCheck className="w-4 h-4" />
-                </div>
-                <div>
-                  <h3 className="text-sm font-black font-display text-white">DMarket B2B Steam Bot #04</h3>
-                  <p className="text-[10px] font-mono text-emerald-400">Automated Instant Prize Trade Dispatch</p>
-                </div>
-              </div>
-              <button 
-                onClick={() => setSimulatedBotOffer(null)}
-                className="w-7 h-7 rounded-lg bg-white/5 hover:bg-white/10 text-slate-400 hover:text-white flex items-center justify-center transition cursor-pointer"
-              >
-                ✕
-              </button>
-            </div>
-
-            <div className="p-4 rounded-2xl bg-black/50 border border-white/5 space-y-2 text-center">
-              <span className="text-[10px] font-mono text-slate-400 uppercase">{simulatedBotOffer.tournament}</span>
-              <div className="text-base font-black font-display text-amber-400">{simulatedBotOffer.skinName}</div>
-              <div className="text-xs font-mono font-bold text-emerald-400">Estimated Market Value: {simulatedBotOffer.price.toFixed(2)} €</div>
-            </div>
-
-            <div className="space-y-1.5 text-xs font-mono text-slate-300">
-              <div className="flex justify-between">
-                <span className="text-slate-400">Recipient Trade URL:</span>
-                <span className="text-white">Connected ✓</span>
-              </div>
-              <div className="flex justify-between">
-                <span className="text-slate-400">Trade Hold / Escrow:</span>
-                <span className="text-emerald-400 font-bold">0 Days (Instant)</span>
-              </div>
-              <div className="flex justify-between">
-                <span className="text-slate-400">Delivery Status:</span>
-                <span className="text-emerald-400 font-bold flex items-center gap-1">
-                  <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse" />
-                  Ready on Steam
-                </span>
-              </div>
-            </div>
-
-            <button
-              onClick={() => {
-                sound.playSelect();
-                const currentSkin = simulatedBotOffer.skinName;
-                setSimulatedBotOffer(null);
-                setDashboardToast(`✓ Verified! Steam trade offer simulated successfully for ${currentSkin}.`);
-                setTimeout(() => setDashboardToast(null), 4000);
-              }}
-              className="w-full py-2.5 rounded-xl bg-gradient-to-r from-emerald-400 to-green-500 hover:from-emerald-300 hover:to-green-400 text-slate-950 font-mono font-black text-xs uppercase tracking-wider transition cursor-pointer shadow-lg"
-            >
-              Confirm Steam Trade Verification
-            </button>
-          </div>
-        </div>
-      )}
 
       {/* CALIBER CLUTCH CS2 TOURNAMENT BRACKET & MATCHES VIEWER MODAL */}
       {selectedBracketTourney && (() => {

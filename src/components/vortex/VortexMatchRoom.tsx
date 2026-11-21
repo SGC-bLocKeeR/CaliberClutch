@@ -41,6 +41,7 @@ import { sound } from '../../utils/soundEffects';
 import confetti from 'canvas-confetti';
 import { BalancedMatch, generateBalancedMatch } from '../../utils/faceitMatchmaking';
 import { CountryFlag } from './CountryFlag';
+import { realtimeMatchmaking, RealtimeVetoAction, RealtimeSideAction } from '../../services/realtimeMatchmakingService';
 
 export interface FaceitMatchPlayer {
   id: string;
@@ -591,6 +592,65 @@ export const VortexMatchRoom: React.FC<VortexMatchRoomProps> = ({
 
   const remainingMaps = CS2_ACTIVE_DUTY_MAPS.filter(m => !bannedMapIds.includes(m.id));
   const isVetoCompleted = remainingMaps.length === 1;
+  const matchIdString = activeMatch.matchId || activeMatch.id || 'CC-89421';
+
+  // Real-time synchronization for Map Veto and Captain Side Choice via Supabase
+  useEffect(() => {
+    if (!matchIdString) return;
+
+    realtimeMatchmaking.connectToVetoRoom(
+      matchIdString,
+      (action: RealtimeVetoAction) => {
+        setBannedMapIds(prev => {
+          if (prev.includes(action.bannedMapId)) return prev;
+          const updated = [...prev, action.bannedMapId];
+          const remaining = CS2_ACTIVE_DUTY_MAPS.filter(m => !updated.includes(m.id));
+          if (remaining.length === 1) {
+            setCurrentSelectedMap(remaining[0].name);
+            sound.playMapPick();
+            confetti({ particleCount: 80, spread: 70 });
+          }
+          return updated;
+        });
+
+        setVetoHistory(prev => {
+          if (prev.some(h => h.step === action.step && h.mapName === action.bannedMapName)) return prev;
+          sound.playMapBan();
+          return [
+            ...prev,
+            {
+              step: action.step,
+              text: `${action.team} banned ${action.bannedMapName}`,
+              isDecided: false,
+              team: action.team,
+              mapName: action.bannedMapName
+            }
+          ];
+        });
+      },
+      (sideAction: RealtimeSideAction) => {
+        sound.playClick();
+        setSelectedStartingSide(sideAction.side);
+      }
+    );
+
+    return () => {
+      realtimeMatchmaking.disconnectVetoRoom();
+    };
+  }, [matchIdString]);
+
+  const handleSelectStartingSide = (side: 'ct' | 't' | 'knife') => {
+    sound.playClick();
+    setSelectedStartingSide(side);
+    if (matchIdString) {
+      realtimeMatchmaking.broadcastSideSelection({
+        matchId: matchIdString,
+        side,
+        team: activeMatch.team1.name,
+        timestamp: Date.now()
+      });
+    }
+  };
 
   const handleUserBanMap = (mapId: string) => {
     if (bannedMapIds.includes(mapId) || isOpponentBanning || remainingMaps.length <= 1) return;
@@ -613,6 +673,18 @@ export const VortexMatchRoom: React.FC<VortexMatchRoomProps> = ({
 
     const newHistory = [...vetoHistory, userBanEntry];
     setVetoHistory(newHistory);
+
+    // Broadcast user ban live across Supabase Realtime channel
+    if (matchIdString) {
+      realtimeMatchmaking.broadcastMapBan({
+        matchId: matchIdString,
+        step: stepNum,
+        bannedMapId: mapId,
+        bannedMapName: bannedMap.name,
+        team: activeMatch.team1.name,
+        timestamp: Date.now()
+      });
+    }
 
     const leftAfterUser = CS2_ACTIVE_DUTY_MAPS.filter(m => !nextBanned.includes(m.id));
 
@@ -654,6 +726,18 @@ export const VortexMatchRoom: React.FC<VortexMatchRoomProps> = ({
           team: activeMatch.team2.name,
           mapName: opponentBanned.name
         };
+
+        // Broadcast opponent ban live
+        if (matchIdString) {
+          realtimeMatchmaking.broadcastMapBan({
+            matchId: matchIdString,
+            step: oppStepNum,
+            bannedMapId: opponentBanned.id,
+            bannedMapName: opponentBanned.name,
+            team: activeMatch.team2.name,
+            timestamp: Date.now()
+          });
+        }
 
         const leftAfterOpp = CS2_ACTIVE_DUTY_MAPS.filter(m => !updatedBanned.includes(m.id));
         if (leftAfterOpp.length === 1) {
@@ -2888,6 +2972,10 @@ export const VortexMatchRoom: React.FC<VortexMatchRoomProps> = ({
                   <span className="px-2.5 py-0.5 rounded-full bg-emerald-500/15 border border-emerald-500/30 text-emerald-400 font-mono text-[10px] font-bold">
                     VALVE BO1 FORMAT
                   </span>
+                  <span className="px-2.5 py-0.5 rounded-full bg-lime-500/15 border border-lime-500/30 text-[#A3E635] font-mono text-[10px] font-bold flex items-center gap-1.5">
+                    <span className="w-1.5 h-1.5 rounded-full bg-[#A3E635] animate-ping" />
+                    REAL-TIME SUPABASE SYNC
+                  </span>
                 </div>
                 <p className="text-xs font-mono text-slate-400 mt-1">
                   Both team captains take turns banning maps until 1 decisive map remains for the match.
@@ -2952,10 +3040,7 @@ export const VortexMatchRoom: React.FC<VortexMatchRoomProps> = ({
                 </div>
                 <div className="grid grid-cols-1 sm:grid-cols-3 gap-2.5">
                   <button
-                    onClick={() => {
-                      sound.playClick();
-                      setSelectedStartingSide('ct');
-                    }}
+                    onClick={() => handleSelectStartingSide('ct')}
                     className={`p-3 rounded-xl border font-mono text-xs font-bold flex items-center justify-center gap-2 transition cursor-pointer ${
                       selectedStartingSide === 'ct'
                         ? 'bg-blue-600/30 border-blue-400 text-blue-300 shadow-md ring-2 ring-blue-500/40'
@@ -2966,10 +3051,7 @@ export const VortexMatchRoom: React.FC<VortexMatchRoomProps> = ({
                     <span>START AS CT (DEFENDERS)</span>
                   </button>
                   <button
-                    onClick={() => {
-                      sound.playClick();
-                      setSelectedStartingSide('t');
-                    }}
+                    onClick={() => handleSelectStartingSide('t')}
                     className={`p-3 rounded-xl border font-mono text-xs font-bold flex items-center justify-center gap-2 transition cursor-pointer ${
                       selectedStartingSide === 't'
                         ? 'bg-amber-600/30 border-amber-400 text-amber-300 shadow-md ring-2 ring-amber-500/40'
@@ -2980,10 +3062,7 @@ export const VortexMatchRoom: React.FC<VortexMatchRoomProps> = ({
                     <span>START AS T (ATTACKERS)</span>
                   </button>
                   <button
-                    onClick={() => {
-                      sound.playClick();
-                      setSelectedStartingSide('knife');
-                    }}
+                    onClick={() => handleSelectStartingSide('knife')}
                     className={`p-3 rounded-xl border font-mono text-xs font-bold flex items-center justify-center gap-2 transition cursor-pointer ${
                       selectedStartingSide === 'knife'
                         ? 'bg-purple-600/30 border-purple-400 text-purple-300 shadow-md ring-2 ring-purple-500/40'
