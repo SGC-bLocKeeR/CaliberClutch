@@ -806,7 +806,7 @@ export const VortexRightSocialRail: React.FC<VortexRightSocialRailProps> = ({
               </div>
               <span className="text-[9px] font-mono font-bold bg-emerald-500/15 text-emerald-400 border border-emerald-500/30 px-1.5 py-0.5 rounded uppercase flex items-center gap-1">
                 <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />
-                STEAM BOT LIVE
+                INSTANT PAYOUT
               </span>
             </div>
 

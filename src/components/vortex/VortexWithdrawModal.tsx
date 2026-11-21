@@ -35,9 +35,22 @@ export const VortexWithdrawModal: React.FC<VortexWithdrawModalProps> = ({
   onClose,
   initialTab = 'crypto'
 }) => {
-  const [activeTab, setActiveTab] = useState<'crypto' | 'bank' | 'history'>(initialTab);
+  const [activeTab, setActiveTab] = useState<'crypto' | 'bank' | 'history'>(() => {
+    return (initialTab === 'bank' || initialTab === 'history') ? initialTab : 'crypto';
+  });
+  const currentTab = (activeTab === 'bank' || activeTab === 'history') ? activeTab : 'crypto';
   const [walletBalance, setWalletBalance] = useState<number>(() => getVortexWalletBalance());
   const [history, setHistory] = useState<WithdrawalHistoryItem[]>(() => getWithdrawalHistory());
+
+  React.useEffect(() => {
+    if (isOpen) {
+      setWalletBalance(getVortexWalletBalance());
+      setHistory(getWithdrawalHistory());
+      if (activeTab !== 'crypto' && activeTab !== 'bank' && activeTab !== 'history') {
+        setActiveTab('crypto');
+      }
+    }
+  }, [isOpen, activeTab]);
 
   // Crypto Cashout State
   const [cryptoCurrency, setCryptoCurrency] = useState<'USDT' | 'BTC' | 'ETH' | 'SOL'>('USDT');
@@ -209,7 +222,7 @@ export const VortexWithdrawModal: React.FC<VortexWithdrawModalProps> = ({
             <button
               onClick={() => { sound.playClick(); setActiveTab('crypto'); }}
               className={`px-4 py-2 rounded-xl font-mono text-xs font-bold transition cursor-pointer flex items-center gap-2 shrink-0 ${
-                activeTab === 'crypto'
+                currentTab === 'crypto'
                   ? 'bg-emerald-500/15 border border-emerald-500/50 text-emerald-400 shadow-sm'
                   : 'text-slate-400 hover:text-white hover:bg-white/5 border border-transparent'
               }`}
@@ -221,7 +234,7 @@ export const VortexWithdrawModal: React.FC<VortexWithdrawModalProps> = ({
             <button
               onClick={() => { sound.playClick(); setActiveTab('bank'); }}
               className={`px-4 py-2 rounded-xl font-mono text-xs font-bold transition cursor-pointer flex items-center gap-2 shrink-0 ${
-                activeTab === 'bank'
+                currentTab === 'bank'
                   ? 'bg-blue-500/15 border border-blue-500/50 text-blue-400 shadow-sm'
                   : 'text-slate-400 hover:text-white hover:bg-white/5 border border-transparent'
               }`}
@@ -233,7 +246,7 @@ export const VortexWithdrawModal: React.FC<VortexWithdrawModalProps> = ({
             <button
               onClick={() => { sound.playClick(); setActiveTab('history'); }}
               className={`px-4 py-2 rounded-xl font-mono text-xs font-bold transition cursor-pointer flex items-center gap-2 shrink-0 ${
-                activeTab === 'history'
+                currentTab === 'history'
                   ? 'bg-purple-500/15 border border-purple-500/50 text-purple-400 shadow-sm'
                   : 'text-slate-400 hover:text-white hover:bg-white/5 border border-transparent'
               }`}
@@ -260,7 +273,7 @@ export const VortexWithdrawModal: React.FC<VortexWithdrawModalProps> = ({
           {/* ========================================================= */}
           {/* TAB 1: CRYPTO CASHOUT (USDT / BTC / ETH / SOL)            */}
           {/* ========================================================= */}
-          {activeTab === 'crypto' && (
+          {currentTab === 'crypto' && (
             <div className="space-y-5 animate-in fade-in duration-150 max-w-xl mx-auto">
               
               {/* Crypto Currency Selector */}
@@ -423,7 +436,7 @@ export const VortexWithdrawModal: React.FC<VortexWithdrawModalProps> = ({
           {/* ========================================================= */}
           {/* TAB 2: BANK & SEPA / IBAN WIRE TRANSFER                   */}
           {/* ========================================================= */}
-          {activeTab === 'bank' && (
+          {currentTab === 'bank' && (
             <div className="space-y-5 animate-in fade-in duration-150 max-w-xl mx-auto">
               <div className="p-5 rounded-2xl bg-[#0E1320] border border-white/10 space-y-4">
                 <div className="flex items-center gap-3 pb-3 border-b border-white/10">
@@ -526,7 +539,7 @@ export const VortexWithdrawModal: React.FC<VortexWithdrawModalProps> = ({
           {/* ========================================================= */}
           {/* TAB 3: PAYOUT & PRIZE HISTORY                             */}
           {/* ========================================================= */}
-          {activeTab === 'history' && (
+          {currentTab === 'history' && (
             <div className="space-y-3 animate-in fade-in duration-150 max-w-2xl mx-auto">
               <div className="flex items-center justify-between text-xs font-mono text-slate-400 pb-2 border-b border-white/5">
                 <span>Total Disbursed Transfers: <strong>{history.length}</strong></span>

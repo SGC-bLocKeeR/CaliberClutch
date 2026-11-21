@@ -348,7 +348,7 @@ export const generateBalancedMatch = (params: MatchmakingParams): BalancedMatch 
 
   // Stack Type descriptions
   let stack1Desc = 'Solo Queue';
-  if (isFiveStack) stack1Desc = `5-Stack Clan Team [${userClanTag || 'VTX'}]`;
+  if (isFiveStack) stack1Desc = `5-Stack Clan Team [${userClanTag || 'CC'}]`;
   else if (partySize === 4) stack1Desc = '4-Stack + 1 Solo';
   else if (partySize === 3) stack1Desc = '3-Stack + 2 Solos';
   else if (partySize === 2) stack1Desc = 'Duo Stack + 3 Solos';
@@ -359,7 +359,7 @@ export const generateBalancedMatch = (params: MatchmakingParams): BalancedMatch 
   const team2Name = `team_${team2Players[0].name.split('_')[0]}`;
 
   return {
-    matchId: 'VTX-89421',
+    matchId: 'CC-89421',
     team1: {
       name: team1Name,
       tag: userClanTag,
