@@ -8205,17 +8205,6 @@ export const VortexDashboard: React.FC<VortexDashboardProps> = ({
                   {selectedRegisterTourney.title}
                 </h3>
               </div>
-              <button
-                type="button"
-                onClick={() => {
-                  sound.playClick();
-                  setSelectedRegisterTourney(null);
-                }}
-                className="w-8 h-8 rounded-xl bg-white/5 hover:bg-white/10 text-slate-400 hover:text-white flex items-center justify-center transition cursor-pointer shrink-0 border border-white/5"
-                title="Close"
-              >
-                <X className="w-4 h-4" />
-              </button>
             </div>
 
             {/* Captaincy & 5-Stack Status Banner */}
@@ -8564,31 +8553,18 @@ export const VortexDashboard: React.FC<VortexDashboardProps> = ({
             onClick={(e) => e.stopPropagation()}
             className="w-full max-w-md bg-[#0C1019] border border-amber-500/40 rounded-3xl p-6 sm:p-7 shadow-[0_25px_70px_rgba(0,0,0,0.9)] space-y-5 text-left relative overflow-hidden cursor-default my-auto"
           >
-            <div className="flex items-center justify-between border-b border-[#1E2638] pb-4">
-              <div className="flex items-center gap-3">
-                <div className="w-12 h-12 rounded-2xl bg-amber-500/15 border border-amber-500/30 flex items-center justify-center text-amber-400 shrink-0 shadow-lg shadow-amber-500/10">
-                  <ShieldAlert className="w-6 h-6 text-amber-400" />
-                </div>
-                <div>
-                  <span className="text-[10px] font-mono font-black uppercase text-amber-400 tracking-wider">
-                    Tournament Security Regulation
-                  </span>
-                  <h3 className="text-base font-black font-display text-white">
-                    TOURNAMENT ENTRY RESTRICTED: TEAM CAPTAIN ONLY
-                  </h3>
-                </div>
+            <div className="flex items-center gap-3 border-b border-[#1E2638] pb-4">
+              <div className="w-12 h-12 rounded-2xl bg-amber-500/15 border border-amber-500/30 flex items-center justify-center text-amber-400 shrink-0 shadow-lg shadow-amber-500/10">
+                <ShieldAlert className="w-6 h-6 text-amber-400" />
               </div>
-              <button
-                type="button"
-                onClick={() => {
-                  sound.playClick();
-                  setCaptainDeniedModal(null);
-                }}
-                className="w-8 h-8 rounded-xl bg-white/5 hover:bg-white/10 text-slate-400 hover:text-white flex items-center justify-center transition cursor-pointer shrink-0 border border-white/5"
-                title="Close"
-              >
-                <X className="w-4 h-4" />
-              </button>
+              <div>
+                <span className="text-[10px] font-mono font-black uppercase text-amber-400 tracking-wider">
+                  Tournament Security Regulation
+                </span>
+                <h3 className="text-base font-black font-display text-white">
+                  TOURNAMENT ENTRY RESTRICTED: TEAM CAPTAIN ONLY
+                </h3>
+              </div>
             </div>
 
             <p className="text-xs font-mono text-slate-300 leading-relaxed">
