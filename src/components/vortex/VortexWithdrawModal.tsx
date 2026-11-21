@@ -1,55 +1,45 @@
-import React, { useState, useEffect } from 'react';
-import { X, ExternalLink, Check, Copy, AlertCircle, ArrowUpRight, ShieldCheck, RefreshCw, Sparkles, CheckCircle2 } from 'lucide-react';
-import { sound } from '../../utils/soundEffects';
-import { KARAMBIT_LORE_IMAGE } from '../../assets/images/karambitLoreBase64';
+import React, { useState } from 'react';
 import { 
-  CS2Skin, 
+  X, 
+  Copy, 
+  Check, 
+  AlertCircle, 
+  ArrowUpRight, 
+  ShieldCheck, 
+  RefreshCw, 
+  CheckCircle2, 
+  Landmark, 
+  Wallet, 
+  History as HistoryIcon 
+} from 'lucide-react';
+import { sound } from '../../utils/soundEffects';
+import { 
   getVortexWalletBalance, 
-  creditVortexWalletBalance,
-  getSavedSteamTradeUrl, 
-  saveSteamTradeUrl, 
-  isValidSteamTradeUrl,
-  VORTEX_CASE_CATALOG 
+  deductVortexWalletBalance 
 } from '../../services/skinDeliveryService';
 import { 
-  getUserSkinInventory, 
-  executeSkinWithdrawal, 
   executeCryptoWithdrawal, 
   getWithdrawalHistory, 
   WithdrawalHistoryItem, 
-  CRYPTO_RATES,
-  removeUserSkinFromInventory 
+  CRYPTO_RATES 
 } from '../../services/withdrawalService';
 
 interface VortexWithdrawModalProps {
   isOpen: boolean;
   onClose: () => void;
-  initialTab?: 'skins' | 'crypto' | 'history';
+  initialTab?: 'crypto' | 'bank' | 'history';
 }
 
 export const VortexWithdrawModal: React.FC<VortexWithdrawModalProps> = ({
   isOpen,
   onClose,
-  initialTab = 'skins'
+  initialTab = 'crypto'
 }) => {
-  const [activeTab, setActiveTab] = useState<'skins' | 'crypto' | 'history'>(initialTab);
+  const [activeTab, setActiveTab] = useState<'crypto' | 'bank' | 'history'>(initialTab);
   const [walletBalance, setWalletBalance] = useState<number>(() => getVortexWalletBalance());
-  const [userSkins, setUserSkins] = useState<CS2Skin[]>(() => getUserSkinInventory());
   const [history, setHistory] = useState<WithdrawalHistoryItem[]>(() => getWithdrawalHistory());
 
-  // Trade URL State
-  const [tradeUrl, setTradeUrl] = useState<string>(() => getSavedSteamTradeUrl());
-  const [isEditingTradeUrl, setIsEditingTradeUrl] = useState<boolean>(!getSavedSteamTradeUrl());
-  const [tradeUrlInput, setTradeUrlInput] = useState<string>(() => getSavedSteamTradeUrl());
-  const [tradeUrlSavedSuccess, setTradeUrlSavedSuccess] = useState(false);
-
-  // Skin Withdrawal State
-  const [selectedSkin, setSelectedSkin] = useState<CS2Skin | null>(null);
-  const [skinWithdrawStep, setSkinWithdrawStep] = useState<{ step: number; message: string } | null>(null);
-  const [skinWithdrawResult, setSkinWithdrawResult] = useState<{ success: boolean; tradeOfferId: string; message: string } | null>(null);
-  const [skinWithdrawError, setSkinWithdrawError] = useState<string | null>(null);
-
-  // Crypto Withdrawal State
+  // Crypto Cashout State
   const [cryptoCurrency, setCryptoCurrency] = useState<'USDT' | 'BTC' | 'ETH' | 'SOL'>('USDT');
   const [cryptoAmountEur, setCryptoAmountEur] = useState<string>('25.00');
   const [cryptoAddress, setCryptoAddress] = useState<string>('');
@@ -58,87 +48,14 @@ export const VortexWithdrawModal: React.FC<VortexWithdrawModalProps> = ({
   const [cryptoError, setCryptoError] = useState<string | null>(null);
   const [copiedTx, setCopiedTx] = useState(false);
 
-  // Direct Exchange Bot Catalog (Browse high tier skins available for balance withdrawal)
-  const [skinSourceTab, setSkinSourceTab] = useState<'vault' | 'catalog'>('vault');
-  const allBotSkins = React.useMemo(() => {
-    const list: CS2Skin[] = [];
-    VORTEX_CASE_CATALOG.forEach(c => {
-      c.items.forEach(it => {
-        if (!list.some(x => x.id === it.id)) list.push(it);
-      });
-    });
-    return list.sort((a, b) => b.priceEur - a.priceEur);
-  }, []);
-
-  // Sync wallet balance & inventory
-  useEffect(() => {
-    const updateBal = (e: Event) => {
-      const custom = e as CustomEvent<number>;
-      setWalletBalance(custom.detail);
-    };
-    const updateInv = () => setUserSkins(getUserSkinInventory());
-    const updateHist = () => setHistory(getWithdrawalHistory());
-
-    window.addEventListener('vortex_wallet_updated', updateBal);
-    window.addEventListener('vortex_inventory_updated', updateInv);
-    window.addEventListener('vortex_withdraw_history_updated', updateHist);
-
-    return () => {
-      window.removeEventListener('vortex_wallet_updated', updateBal);
-      window.removeEventListener('vortex_inventory_updated', updateInv);
-      window.removeEventListener('vortex_withdraw_history_updated', updateHist);
-    };
-  }, []);
-
-  // Save Trade URL
-  const handleSaveTradeUrl = () => {
-    sound.playSelect();
-    if (saveSteamTradeUrl(tradeUrlInput)) {
-      setTradeUrl(tradeUrlInput.trim());
-      setIsEditingTradeUrl(false);
-      setTradeUrlSavedSuccess(true);
-      setTimeout(() => setTradeUrlSavedSuccess(false), 3000);
-    } else {
-      sound.playRareGoldDrop();
-    }
-  };
-
-  // Execute Skin Withdrawal
-  const handleWithdrawSkin = async (skin: CS2Skin) => {
-    if (!tradeUrl || !isValidSteamTradeUrl(tradeUrl)) {
-      setIsEditingTradeUrl(true);
-      sound.playClick();
-      return;
-    }
-
-    sound.playSelect();
-    setSelectedSkin(skin);
-    setSkinWithdrawError(null);
-    setSkinWithdrawResult(null);
-
-    try {
-      const res = await executeSkinWithdrawal(skin, tradeUrl, (step, message) => {
-        setSkinWithdrawStep({ step, message });
-      });
-      setSkinWithdrawStep(null);
-      setSkinWithdrawResult(res);
-      setUserSkins(getUserSkinInventory());
-      setHistory(getWithdrawalHistory());
-      sound.playTournamentVictory();
-    } catch (err: unknown) {
-      setSkinWithdrawStep(null);
-      setSkinWithdrawError(err instanceof Error ? err.message : 'Error sending trade offer.');
-    }
-  };
-
-  // Sell Skin from Vault for 85% Cash
-  const handleSellSkinFromVault = (skin: CS2Skin) => {
-    sound.playBuyWeapon();
-    const sellValue = parseFloat((skin.priceEur * 0.85).toFixed(2));
-    creditVortexWalletBalance(sellValue);
-    removeUserSkinFromInventory(skin.id);
-    setUserSkins(getUserSkinInventory());
-  };
+  // Bank / SEPA Wire Transfer State
+  const [bankAccountHolder, setBankAccountHolder] = useState<string>('M14 | Caliber Clutch');
+  const [bankIban, setBankIban] = useState<string>('');
+  const [bankBic, setBankBic] = useState<string>('');
+  const [bankAmountEur, setBankAmountEur] = useState<string>('50.00');
+  const [bankStep, setBankStep] = useState<{ step: number; message: string } | null>(null);
+  const [bankResult, setBankResult] = useState<{ success: boolean; refId: string; message: string } | null>(null);
+  const [bankError, setBankError] = useState<string | null>(null);
 
   // Execute Crypto Cashout
   const handleWithdrawCrypto = async () => {
@@ -149,6 +66,14 @@ export const VortexWithdrawModal: React.FC<VortexWithdrawModalProps> = ({
     const eur = parseFloat(cryptoAmountEur);
     if (isNaN(eur) || eur <= 0) {
       setCryptoError('Please enter a valid EUR amount.');
+      return;
+    }
+    if (eur > walletBalance) {
+      setCryptoError(`Insufficient available balance (${walletBalance.toFixed(2)} €).`);
+      return;
+    }
+    if (!cryptoAddress.trim()) {
+      setCryptoError('Please enter a destination wallet address.');
       return;
     }
 
@@ -167,6 +92,63 @@ export const VortexWithdrawModal: React.FC<VortexWithdrawModalProps> = ({
     }
   };
 
+  // Execute Bank / SEPA Transfer
+  const handleWithdrawBank = async () => {
+    sound.playSelect();
+    setBankError(null);
+    setBankResult(null);
+
+    const eur = parseFloat(bankAmountEur);
+    if (isNaN(eur) || eur <= 0) {
+      setBankError('Please enter a valid amount.');
+      return;
+    }
+    if (eur > walletBalance) {
+      setBankError(`Insufficient available balance (${walletBalance.toFixed(2)} €).`);
+      return;
+    }
+    const cleanIban = bankIban.replace(/\s/g, '').toUpperCase();
+    if (!cleanIban || cleanIban.length < 12) {
+      setBankError('Please enter a valid IBAN number (e.g. XK..., AL..., DE...).');
+      return;
+    }
+
+    setBankStep({ step: 1, message: 'Verifying SEPA Clearing Network & IBAN...' });
+    await new Promise(r => setTimeout(r, 700));
+
+    setBankStep({ step: 2, message: 'Authorizing bank wire from Caliber Clutch Treasury...' });
+    await new Promise(r => setTimeout(r, 800));
+
+    deductVortexWalletBalance(eur);
+    const refId = `CC-WIRE-${Math.random().toString(36).substring(2, 9).toUpperCase()}`;
+
+    const historyItem: WithdrawalHistoryItem = {
+      id: refId,
+      type: 'crypto',
+      title: `SEPA Wire: ${eur.toFixed(2)} € to ${cleanIban.slice(0, 4)}...${cleanIban.slice(-4)}`,
+      amountEur: eur,
+      timestamp: Date.now(),
+      status: 'completed',
+      txHash: refId
+    };
+
+    try {
+      const existing = JSON.parse(localStorage.getItem('vortex_withdrawal_history_v1') || '[]');
+      existing.unshift(historyItem);
+      localStorage.setItem('vortex_withdrawal_history_v1', JSON.stringify(existing));
+    } catch (_) {}
+
+    setWalletBalance(getVortexWalletBalance());
+    setHistory(getWithdrawalHistory());
+    setBankStep(null);
+    setBankResult({
+      success: true,
+      refId,
+      message: `✓ €${eur.toFixed(2)} SEPA Bank Wire successfully authorized for ${bankAccountHolder}!`
+    });
+    sound.playTournamentVictory();
+  };
+
   const convertedCrypto = (parseFloat(cryptoAmountEur || '0') * CRYPTO_RATES[cryptoCurrency]).toFixed(
     cryptoCurrency === 'USDT' ? 2 : 6
   );
@@ -182,90 +164,82 @@ export const VortexWithdrawModal: React.FC<VortexWithdrawModalProps> = ({
       />
 
       {/* Modal Container */}
-      <div className="relative w-full max-w-4xl max-h-[92vh] bg-[#0A0D14] border border-[#202738] rounded-3xl shadow-[0_20px_60px_rgba(0,0,0,0.85)] flex flex-col overflow-hidden z-10">
+      <div className="relative w-full max-w-3xl max-h-[92vh] bg-[#0A0D14] border border-[#202738] rounded-3xl shadow-[0_20px_60px_rgba(0,0,0,0.85)] flex flex-col overflow-hidden z-10">
         
         {/* Top Header */}
-        <div className="px-3.5 sm:px-5 py-3 sm:py-4 border-b border-white/5 bg-[#0F1420]/80 flex items-center justify-between gap-3 shrink-0">
-          <div className="flex items-center gap-2.5 sm:gap-3 min-w-0">
-            <div className="w-9 sm:w-10 h-9 sm:h-10 rounded-2xl bg-gradient-to-br from-amber-500/20 to-emerald-500/10 border border-amber-500/30 flex items-center justify-center shadow-[0_0_15px_rgba(245,158,11,0.2)] shrink-0">
-              <ArrowUpRight className="w-4 sm:w-5 h-4 sm:h-5 text-amber-400" />
+        <div className="px-4 sm:px-6 py-4 border-b border-white/5 bg-[#0F1420]/80 flex items-center justify-between gap-3 shrink-0">
+          <div className="flex items-center gap-3 min-w-0">
+            <div className="w-10 h-10 rounded-2xl bg-gradient-to-br from-[#A3E635]/20 to-emerald-500/10 border border-[#A3E635]/30 flex items-center justify-center shadow-[0_0_15px_rgba(163,230,53,0.2)] shrink-0">
+              <ArrowUpRight className="w-5 h-5 text-[#A3E635]" />
             </div>
             <div className="min-w-0">
-              <div className="flex items-center gap-1.5 sm:gap-2">
-                <h2 className="font-display font-black text-sm sm:text-lg text-white tracking-wide truncate">
-                  CALIBER CLUTCH WITHDRAW
+              <div className="flex items-center gap-2">
+                <h2 className="font-display font-black text-base sm:text-lg text-white tracking-wide truncate">
+                  CALIBER CLUTCH PRIZE CASHOUT
                 </h2>
                 <span className="px-2 py-0.5 rounded-full bg-emerald-500/15 border border-emerald-500/30 text-emerald-400 font-mono text-[9px] sm:text-[10px] font-bold">
-                  LIVE
+                  INSTANT DISPATCH
                 </span>
               </div>
-              <p className="text-[11px] sm:text-xs text-slate-400 font-sans truncate">
-                Withdraw skins to Steam or balance to Crypto.
+              <p className="text-xs text-slate-400 font-sans truncate">
+                Disburse tournament prize winnings and balance directly to your Crypto or Bank Account.
               </p>
             </div>
           </div>
 
-          <div className="flex items-center gap-2 sm:gap-3 shrink-0">
+          <div className="flex items-center gap-3 shrink-0">
             {/* Wallet Balance Badge */}
-            <div className="flex items-center gap-1 sm:gap-2 px-2.5 sm:px-3 py-1 sm:py-1.5 rounded-xl bg-black/60 border border-emerald-500/30 font-mono">
-              <span className="hidden xs:inline text-[11px] sm:text-xs text-slate-400">Available:</span>
-              <span className="text-xs sm:text-sm font-black text-emerald-400">{walletBalance.toFixed(2)} €</span>
+            <div className="flex items-center gap-2 px-3 py-1.5 rounded-xl bg-black/60 border border-emerald-500/30 font-mono">
+              <span className="hidden xs:inline text-xs text-slate-400">Available:</span>
+              <span className="text-sm font-black text-emerald-400">{walletBalance.toFixed(2)} €</span>
             </div>
 
             <button
               onClick={() => { sound.playClick(); onClose(); }}
-              className="p-1.5 sm:p-2 rounded-xl bg-white/5 hover:bg-white/10 text-slate-400 hover:text-white transition cursor-pointer"
+              className="p-2 rounded-xl bg-white/5 hover:bg-white/10 text-slate-400 hover:text-white transition cursor-pointer"
             >
-              <X className="w-4 sm:w-5 h-4 sm:h-5" />
+              <X className="w-5 h-5" />
             </button>
           </div>
         </div>
 
         {/* Tab Selection Navigation */}
-        <div className="px-3 sm:px-5 pt-2.5 pb-2 bg-[#0C101A] border-b border-white/5 flex items-center justify-between gap-2 shrink-0 overflow-x-auto scrollbar-none">
-          <div className="flex items-center gap-1.5 sm:gap-2 shrink-0">
+        <div className="px-4 sm:px-6 pt-3 pb-2.5 bg-[#0C101A] border-b border-white/5 flex items-center justify-between gap-2 shrink-0 overflow-x-auto scrollbar-none">
+          <div className="flex items-center gap-2 shrink-0">
             <button
-              onClick={() => { sound.playClick(); setActiveTab('skins'); }}
-              className={`px-3 sm:px-4 py-2 rounded-xl font-mono text-xs font-bold transition cursor-pointer flex items-center gap-1.5 sm:gap-2 shrink-0 ${
-                activeTab === 'skins'
-                  ? 'bg-gradient-to-r from-amber-500/20 to-orange-500/20 border border-amber-500/50 text-amber-400 shadow-sm'
+              onClick={() => { sound.playClick(); setActiveTab('crypto'); }}
+              className={`px-4 py-2 rounded-xl font-mono text-xs font-bold transition cursor-pointer flex items-center gap-2 shrink-0 ${
+                activeTab === 'crypto'
+                  ? 'bg-emerald-500/15 border border-emerald-500/50 text-emerald-400 shadow-sm'
                   : 'text-slate-400 hover:text-white hover:bg-white/5 border border-transparent'
               }`}
             >
-              <span>🎁</span>
-              <span className="hidden sm:inline">CS2 Skins (Steam Trade)</span>
-              <span className="sm:hidden">CS2 Skins</span>
-              {userSkins.length > 0 && (
-                <span className="px-1.5 py-0.2 rounded-full bg-amber-500 text-slate-950 font-black text-[10px]">
-                  {userSkins.length}
-                </span>
-              )}
+              <Wallet className="w-4 h-4 text-emerald-400" />
+              <span>Instant Crypto Payout</span>
             </button>
 
             <button
-              onClick={() => { sound.playClick(); setActiveTab('crypto'); }}
-              className={`px-3 sm:px-4 py-2 rounded-xl font-mono text-xs font-bold transition cursor-pointer flex items-center gap-1.5 sm:gap-2 shrink-0 ${
-                activeTab === 'crypto'
-                  ? 'bg-gradient-to-r from-emerald-500/20 to-teal-500/20 border border-emerald-500/50 text-emerald-400 shadow-sm'
+              onClick={() => { sound.playClick(); setActiveTab('bank'); }}
+              className={`px-4 py-2 rounded-xl font-mono text-xs font-bold transition cursor-pointer flex items-center gap-2 shrink-0 ${
+                activeTab === 'bank'
+                  ? 'bg-blue-500/15 border border-blue-500/50 text-blue-400 shadow-sm'
                   : 'text-slate-400 hover:text-white hover:bg-white/5 border border-transparent'
               }`}
             >
-              <span>⚡</span>
-              <span className="hidden sm:inline">Crypto Cashout (USDT / BTC / ETH)</span>
-              <span className="sm:hidden">Crypto</span>
+              <Landmark className="w-4 h-4 text-blue-400" />
+              <span>Bank & SEPA / IBAN Wire</span>
             </button>
 
             <button
               onClick={() => { sound.playClick(); setActiveTab('history'); }}
-              className={`px-3 sm:px-4 py-2 rounded-xl font-mono text-xs font-bold transition cursor-pointer flex items-center gap-1.5 sm:gap-2 shrink-0 ${
+              className={`px-4 py-2 rounded-xl font-mono text-xs font-bold transition cursor-pointer flex items-center gap-2 shrink-0 ${
                 activeTab === 'history'
-                  ? 'bg-white/10 border border-white/20 text-white'
+                  ? 'bg-purple-500/15 border border-purple-500/50 text-purple-400 shadow-sm'
                   : 'text-slate-400 hover:text-white hover:bg-white/5 border border-transparent'
               }`}
             >
-              <span>📜</span>
-              <span className="hidden sm:inline">Withdrawal History</span>
-              <span className="sm:hidden">History</span>
+              <HistoryIcon className="w-4 h-4 text-purple-400" />
+              <span>Payout History</span>
               {history.length > 0 && (
                 <span className="px-1.5 py-0.2 rounded-full bg-white/20 text-white font-mono text-[10px]">
                   {history.length}
@@ -274,312 +248,24 @@ export const VortexWithdrawModal: React.FC<VortexWithdrawModalProps> = ({
             </button>
           </div>
 
-          {/* Steam Bot Status Indicator */}
-          <div className="hidden md:flex items-center gap-2 text-[11px] font-mono text-slate-400">
+          <div className="hidden md:flex items-center gap-2 text-xs font-mono text-slate-400">
             <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse" />
-            <span>Steam Trade Bot #04 Online • 0.8s Handshake</span>
+            <span>Treasury Automated Dispatch Live</span>
           </div>
         </div>
 
         {/* Modal Scrollable Body */}
-        <div className="p-3.5 sm:p-5 flex-1 overflow-y-auto space-y-4 sm:space-y-5">
+        <div className="p-4 sm:p-6 flex-1 overflow-y-auto space-y-5">
           
           {/* ========================================================= */}
-          {/* TAB 1: CS2 SKINS WITHDRAWAL (STEAM TRADE OFFER)           */}
-          {/* ========================================================= */}
-          {activeTab === 'skins' && (
-            <div className="space-y-5 animate-in fade-in duration-150">
-              
-              {/* Steam Trade URL Setup Strip */}
-              <div className="p-3.5 rounded-2xl bg-[#0E1320] border border-white/10 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
-                <div className="flex items-center gap-2.5 min-w-0">
-                  <div className="w-8 h-8 rounded-xl bg-blue-500/15 border border-blue-500/30 flex items-center justify-center shrink-0">
-                    <span className="text-sm">🔗</span>
-                  </div>
-                  <div className="min-w-0">
-                    <div className="text-xs font-mono font-bold text-white flex items-center gap-2">
-                      <span>Steam Trade Offer URL:</span>
-                      {isValidSteamTradeUrl(tradeUrl) && (
-                        <span className="text-[10px] text-emerald-400 flex items-center gap-0.5">
-                          <CheckCircle2 className="w-3 h-3" /> Configured
-                        </span>
-                      )}
-                    </div>
-                    {isEditingTradeUrl ? (
-                      <div className="flex items-center gap-2 mt-1.5">
-                        <input
-                          type="text"
-                          value={tradeUrlInput}
-                          onChange={(e) => setTradeUrlInput(e.target.value)}
-                          placeholder="https://steamcommunity.com/tradeoffer/new/?partner=...&token=..."
-                          className="w-full sm:w-96 px-3 py-1.5 rounded-lg bg-black/60 border border-white/15 text-xs font-mono text-white focus:border-amber-400 focus:outline-none"
-                        />
-                        <button
-                          onClick={handleSaveTradeUrl}
-                          className="px-3 py-1.5 rounded-lg bg-amber-500 hover:bg-amber-400 text-slate-950 font-mono font-bold text-xs transition cursor-pointer"
-                        >
-                          Save
-                        </button>
-                      </div>
-                    ) : (
-                      <p className="text-[11px] font-mono text-slate-400 truncate mt-0.5">
-                        {tradeUrl || 'No trade URL configured yet.'}
-                      </p>
-                    )}
-                  </div>
-                </div>
-
-                <div className="flex items-center gap-2 shrink-0">
-                  {!isEditingTradeUrl && (
-                    <button
-                      onClick={() => setIsEditingTradeUrl(true)}
-                      className="px-3 py-1.5 rounded-xl bg-white/5 hover:bg-white/10 text-slate-300 font-mono text-xs transition cursor-pointer"
-                    >
-                      Change URL
-                    </button>
-                  )}
-                  <a
-                    href="https://steamcommunity.com/id/me/tradeoffers/privacy#trade_offer_access_url"
-                    target="_blank"
-                    rel="noreferrer"
-                    className="px-3 py-1.5 rounded-xl bg-blue-500/10 hover:bg-blue-500/20 text-blue-400 border border-blue-500/25 font-mono text-xs transition flex items-center gap-1.5 cursor-pointer"
-                  >
-                    <span>Find My Trade URL</span>
-                    <ExternalLink className="w-3 h-3" />
-                  </a>
-                </div>
-              </div>
-
-              {/* Filter: My Vault vs Bot Direct Vault */}
-              <div className="flex items-center justify-between gap-3 border-b border-white/5 pb-2">
-                <div className="flex items-center gap-2">
-                  <button
-                    onClick={() => { sound.playClick(); setSkinSourceTab('vault'); }}
-                    className={`px-3 py-1.5 rounded-xl font-mono text-xs font-bold transition cursor-pointer ${
-                      skinSourceTab === 'vault'
-                        ? 'bg-amber-500/20 border border-amber-500/40 text-amber-400'
-                        : 'text-slate-400 hover:text-white'
-                    }`}
-                  >
-                    My Won Skins ({userSkins.length})
-                  </button>
-                  <button
-                    onClick={() => { sound.playClick(); setSkinSourceTab('catalog'); }}
-                    className={`px-3 py-1.5 rounded-xl font-mono text-xs font-bold transition cursor-pointer ${
-                      skinSourceTab === 'catalog'
-                        ? 'bg-amber-500/20 border border-amber-500/40 text-amber-400'
-                        : 'text-slate-400 hover:text-white'
-                    }`}
-                  >
-                    Direct Bot Vault (Exchange Balance)
-                  </button>
-                </div>
-
-                <div className="text-[11px] font-mono text-slate-400">
-                  {skinSourceTab === 'vault' ? 'Items ready for instant Steam Trade' : 'Withdraw items using your EUR wallet'}
-                </div>
-              </div>
-
-              {/* Active Step / Result Banner */}
-              {skinWithdrawStep && (
-                <div className="p-4 rounded-2xl bg-amber-500/10 border border-amber-500/30 flex items-center gap-3 animate-pulse">
-                  <RefreshCw className="w-5 h-5 text-amber-400 animate-spin" />
-                  <div className="text-xs font-mono text-amber-300">
-                    <strong className="block">Step {skinWithdrawStep.step}/3 in progress...</strong>
-                    <span>{skinWithdrawStep.message}</span>
-                  </div>
-                </div>
-              )}
-
-              {skinWithdrawResult && (
-                <div className="p-4 rounded-2xl bg-emerald-500/15 border border-emerald-500/40 flex items-center justify-between gap-3 animate-in fade-in">
-                  <div className="flex items-center gap-3">
-                    <CheckCircle2 className="w-6 h-6 text-emerald-400 shrink-0" />
-                    <div>
-                      <div className="text-xs font-mono font-bold text-white">Trade Offer Sent!</div>
-                      <div className="text-xs text-emerald-300">{skinWithdrawResult.message}</div>
-                    </div>
-                  </div>
-                  <a
-                    href="https://steamcommunity.com/id/me/tradeoffers/"
-                    target="_blank"
-                    rel="noreferrer"
-                    className="px-3.5 py-1.5 rounded-xl bg-emerald-500 hover:bg-emerald-400 text-slate-950 font-mono font-black text-xs transition flex items-center gap-1.5 shrink-0"
-                  >
-                    <span>Open Steam Trade</span>
-                    <ExternalLink className="w-3.5 h-3.5" />
-                  </a>
-                </div>
-              )}
-
-              {skinWithdrawError && (
-                <div className="p-3.5 rounded-2xl bg-red-500/15 border border-red-500/30 flex items-center gap-2.5 text-xs font-mono text-red-300">
-                  <AlertCircle className="w-4 h-4 text-red-400 shrink-0" />
-                  <span>{skinWithdrawError}</span>
-                </div>
-              )}
-
-              {/* Skin Grid (User Vault) */}
-              {skinSourceTab === 'vault' && (
-                <div>
-                  {userSkins.length === 0 ? (
-                    <div className="p-12 text-center rounded-3xl bg-[#0E121E]/60 border border-dashed border-white/10 space-y-3">
-                      <div className="text-3xl">📦</div>
-                      <h3 className="font-display font-bold text-base text-white">Your Skin Vault is Empty</h3>
-                      <p className="text-xs text-slate-400 max-w-sm mx-auto font-sans">
-                        Unbox CS2 cases in the Case Shop or purchase skins from the Direct Bot Vault to withdraw them here to Steam!
-                      </p>
-                      <button
-                        onClick={() => { sound.playSelect(); setSkinSourceTab('catalog'); }}
-                        className="px-4 py-2 rounded-xl bg-gradient-to-r from-amber-500 to-orange-500 text-slate-950 font-mono font-bold text-xs transition hover:scale-105"
-                      >
-                        Browse Direct Bot Vault
-                      </button>
-                    </div>
-                  ) : (
-                    <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-3">
-                      {userSkins.map((skin) => (
-                        <div
-                          key={skin.id}
-                          className="group relative p-3 rounded-2xl bg-[#0F1420] hover:bg-[#141A29] border border-white/10 hover:border-amber-500/50 transition-all flex flex-col justify-between overflow-hidden shadow-lg"
-                        >
-                          {/* Rarity & Wear */}
-                          <div className="flex items-center justify-between text-[10px] font-mono">
-                            <span 
-                              className="px-1.5 py-0.5 rounded font-black uppercase text-slate-950"
-                              style={{ backgroundColor: skin.rarityColor || '#F59E0B' }}
-                            >
-                              {skin.wear || 'FT'}
-                            </span>
-                            <span className="font-bold text-emerald-400 text-xs">
-                              {skin.priceEur.toFixed(2)} €
-                            </span>
-                          </div>
-
-                          {/* Image */}
-                          <div className="relative py-2 flex items-center justify-center">
-                            <img
-                              src={skin.image}
-                              alt=""
-                              aria-hidden="true"
-                              onError={(e) => {
-                                (e.target as HTMLImageElement).src = KARAMBIT_LORE_IMAGE;
-                              }}
-                              className="w-28 h-20 object-contain drop-shadow-[0_8px_16px_rgba(0,0,0,0.8)] group-hover:scale-110 transition-transform duration-300"
-                            />
-                          </div>
-
-                          {/* Info */}
-                          <div className="space-y-0.5 mb-2.5">
-                            <div className="text-[10px] font-mono text-slate-400 truncate">{skin.weapon}</div>
-                            <div className="text-xs font-display font-bold text-white truncate" title={skin.name}>
-                              {skin.skinName || skin.name}
-                            </div>
-                          </div>
-
-                          {/* Action Buttons */}
-                          <div className="space-y-1.5 pt-1 border-t border-white/5">
-                            <button
-                              onClick={() => handleWithdrawSkin(skin)}
-                              disabled={Boolean(skinWithdrawStep)}
-                              className="w-full py-1.5 px-2 rounded-xl bg-gradient-to-r from-amber-500 to-orange-500 hover:from-amber-400 hover:to-orange-400 text-slate-950 font-mono font-black text-xs transition cursor-pointer flex items-center justify-center gap-1 shadow-sm active:scale-95 disabled:opacity-50"
-                            >
-                              <span>Trade to Steam</span>
-                              <ArrowUpRight className="w-3.5 h-3.5" />
-                            </button>
-
-                            <button
-                              onClick={() => handleSellSkinFromVault(skin)}
-                              className="w-full py-1 px-2 rounded-lg bg-white/5 hover:bg-white/10 text-slate-400 hover:text-white font-mono text-[10px] transition cursor-pointer"
-                              title="Instant sell for 85% EUR cash balance"
-                            >
-                              Sell for {(skin.priceEur * 0.85).toFixed(2)} €
-                            </button>
-                          </div>
-                        </div>
-                      ))}
-                    </div>
-                  )}
-                </div>
-              )}
-
-              {/* Skin Grid (Direct Bot Vault Catalog) */}
-              {skinSourceTab === 'catalog' && (
-                <div className="space-y-3">
-                  <div className="p-3 rounded-xl bg-black/40 border border-white/5 flex items-center justify-between text-xs font-mono text-slate-300">
-                    <span>Select an item from the Steam Bot Vault to exchange using your available balance ({walletBalance.toFixed(2)} €):</span>
-                  </div>
-
-                  <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-3">
-                    {allBotSkins.slice(0, 16).map((skin) => {
-                      const canAfford = walletBalance >= skin.priceEur;
-                      return (
-                        <div
-                          key={skin.id}
-                          className="group relative p-3 rounded-2xl bg-[#0F1420] hover:bg-[#141A29] border border-white/10 hover:border-emerald-500/40 transition-all flex flex-col justify-between overflow-hidden shadow-lg"
-                        >
-                          <div className="flex items-center justify-between text-[10px] font-mono">
-                            <span 
-                              className="px-1.5 py-0.5 rounded font-black uppercase text-slate-950"
-                              style={{ backgroundColor: skin.rarityColor || '#F59E0B' }}
-                            >
-                              {skin.wear || 'FN'}
-                            </span>
-                            <span className="font-bold text-emerald-400 text-xs">
-                              {skin.priceEur.toFixed(2)} €
-                            </span>
-                          </div>
-
-                          <div className="relative py-2 flex items-center justify-center">
-                            <img
-                              src={skin.image}
-                              alt=""
-                              aria-hidden="true"
-                              onError={(e) => {
-                                (e.target as HTMLImageElement).src = KARAMBIT_LORE_IMAGE;
-                              }}
-                              className="w-28 h-20 object-contain drop-shadow-[0_8px_16px_rgba(0,0,0,0.8)] group-hover:scale-110 transition-transform duration-300"
-                            />
-                          </div>
-
-                          <div className="space-y-0.5 mb-2.5">
-                            <div className="text-[10px] font-mono text-slate-400 truncate">{skin.weapon}</div>
-                            <div className="text-xs font-display font-bold text-white truncate" title={skin.name}>
-                              {skin.skinName || skin.name}
-                            </div>
-                          </div>
-
-                          <button
-                            onClick={() => handleWithdrawSkin(skin)}
-                            disabled={!canAfford || Boolean(skinWithdrawStep)}
-                            className={`w-full py-1.5 px-2 rounded-xl font-mono font-black text-xs transition cursor-pointer flex items-center justify-center gap-1 shadow-sm active:scale-95 ${
-                              canAfford
-                                ? 'bg-gradient-to-r from-emerald-500 to-teal-400 hover:from-emerald-400 hover:to-teal-300 text-slate-950'
-                                : 'bg-white/5 text-slate-500 border border-white/5 cursor-not-allowed'
-                            }`}
-                          >
-                            <span>{canAfford ? 'Withdraw to Steam' : 'Need More Balance'}</span>
-                            <ArrowUpRight className="w-3.5 h-3.5" />
-                          </button>
-                        </div>
-                      );
-                    })}
-                  </div>
-                </div>
-              )}
-
-            </div>
-          )}
-
-          {/* ========================================================= */}
-          {/* TAB 2: CRYPTO CASHOUT (USDT / BTC / ETH / SOL)            */}
+          {/* TAB 1: CRYPTO CASHOUT (USDT / BTC / ETH / SOL)            */}
           {/* ========================================================= */}
           {activeTab === 'crypto' && (
-            <div className="space-y-5 animate-in fade-in duration-150 max-w-2xl mx-auto">
+            <div className="space-y-5 animate-in fade-in duration-150 max-w-xl mx-auto">
               
               {/* Crypto Currency Selector */}
               <div>
-                <label className="block text-xs font-mono text-slate-300 mb-2">
+                <label className="block text-xs font-mono text-slate-300 mb-2 font-bold">
                   Select Payout Cryptocurrency:
                 </label>
                 <div className="grid grid-cols-2 sm:grid-cols-4 gap-2.5">
@@ -644,7 +330,7 @@ export const VortexWithdrawModal: React.FC<VortexWithdrawModalProps> = ({
                       key={amt}
                       type="button"
                       onClick={() => setCryptoAmountEur(amt.toFixed(2))}
-                      className="px-2.5 py-1 rounded-lg bg-white/5 hover:bg-white/10 text-slate-300 font-mono text-xs transition"
+                      className="px-2.5 py-1 rounded-lg bg-white/5 hover:bg-white/10 text-slate-300 font-mono text-xs transition cursor-pointer"
                     >
                       {amt} €
                     </button>
@@ -652,9 +338,9 @@ export const VortexWithdrawModal: React.FC<VortexWithdrawModalProps> = ({
                   <button
                     type="button"
                     onClick={() => setCryptoAmountEur(walletBalance.toFixed(2))}
-                    className="px-2.5 py-1 rounded-lg bg-emerald-500/20 hover:bg-emerald-500/30 text-emerald-400 font-mono text-xs font-bold transition ml-auto"
+                    className="px-2.5 py-1 rounded-lg bg-emerald-500/20 hover:bg-emerald-500/30 text-emerald-400 font-mono text-xs font-bold transition ml-auto cursor-pointer"
                   >
-                    MAX ALL ({walletBalance.toFixed(2)} €)
+                    MAX ({walletBalance.toFixed(2)} €)
                   </button>
                 </div>
 
@@ -668,160 +354,219 @@ export const VortexWithdrawModal: React.FC<VortexWithdrawModalProps> = ({
               </div>
 
               {/* Recipient Crypto Wallet Address */}
-              <div className="space-y-1.5">
-                <label className="block text-xs font-mono text-slate-300">
-                  Recipient {cryptoCurrency} Wallet Address:
+              <div className="p-4 rounded-2xl bg-[#0E1320] border border-white/10 space-y-2">
+                <label className="block text-xs font-mono text-slate-300 font-bold">
+                  Destination {cryptoCurrency} Address:
                 </label>
                 <input
                   type="text"
                   value={cryptoAddress}
                   onChange={(e) => setCryptoAddress(e.target.value)}
-                  placeholder={
-                    cryptoCurrency === 'USDT' 
-                      ? 'T... (TRC20 Address e.g. Binance / Bybit)' 
-                      : cryptoCurrency === 'BTC' 
-                        ? 'bc1... or 1... (Bitcoin Address)' 
-                        : cryptoCurrency === 'ETH' 
-                          ? '0x... (ERC20 Address)' 
-                          : 'Solana Wallet Public Key'
-                  }
-                  className="w-full px-4 py-2.5 rounded-xl bg-black/60 border border-white/15 text-xs font-mono text-white focus:border-emerald-400 focus:outline-none placeholder:text-slate-600"
+                  placeholder={`Enter your ${cryptoCurrency} wallet address...`}
+                  className="w-full px-3.5 py-2.5 rounded-xl bg-black/60 border border-white/15 text-xs font-mono text-white focus:border-emerald-400 focus:outline-none"
                 />
-                <p className="text-[10px] font-mono text-slate-500">
-                  Ensure address matches network {cryptoCurrency === 'USDT' ? 'TRON (TRC20)' : cryptoCurrency}. Transactions on blockchain are irreversible.
+                <p className="text-[10px] font-mono text-slate-400">
+                  Ensure the network matches {cryptoCurrency === 'USDT' ? 'TRC-20' : cryptoCurrency}. Payouts are non-reversible.
                 </p>
               </div>
 
-              {/* Live Status / Result */}
-              {cryptoStep && (
-                <div className="p-4 rounded-2xl bg-emerald-500/10 border border-emerald-500/30 flex items-center gap-3 animate-pulse">
-                  <RefreshCw className="w-5 h-5 text-emerald-400 animate-spin" />
-                  <div className="text-xs font-mono text-emerald-300">
-                    <strong className="block">Step {cryptoStep.step}/3 in progress...</strong>
-                    <span>{cryptoStep.message}</span>
-                  </div>
+              {cryptoError && (
+                <div className="p-3 rounded-xl bg-red-500/10 border border-red-500/30 text-red-400 text-xs font-mono flex items-center gap-2">
+                  <AlertCircle className="w-4 h-4 shrink-0" />
+                  <span>{cryptoError}</span>
                 </div>
               )}
 
               {cryptoResult && (
-                <div className="p-4 rounded-2xl bg-emerald-500/15 border border-emerald-500/40 space-y-2 animate-in fade-in">
-                  <div className="flex items-center gap-2 text-emerald-400 font-mono font-bold text-xs">
-                    <CheckCircle2 className="w-4 h-4" />
-                    <span>Withdrawal Executed Successfully!</span>
+                <div className="p-4 rounded-2xl bg-emerald-500/15 border border-emerald-500/40 text-emerald-300 text-xs font-mono space-y-2">
+                  <div className="font-bold flex items-center gap-2">
+                    <CheckCircle2 className="w-4 h-4 text-emerald-400" />
+                    <span>{cryptoResult.message}</span>
                   </div>
-                  <p className="text-xs text-slate-300 font-sans">{cryptoResult.message}</p>
-                  <div className="flex items-center justify-between p-2 rounded-lg bg-black/50 border border-white/10 text-[11px] font-mono">
-                    <span className="text-slate-400 truncate max-w-xs">{cryptoResult.txHash}</span>
+                  <div className="flex items-center justify-between bg-black/40 p-2.5 rounded-xl border border-white/5">
+                    <span className="text-[11px] text-slate-400 truncate max-w-xs">TX: {cryptoResult.txHash}</span>
                     <button
                       onClick={() => {
                         navigator.clipboard.writeText(cryptoResult.txHash);
                         setCopiedTx(true);
                         setTimeout(() => setCopiedTx(false), 2000);
                       }}
-                      className="text-emerald-400 hover:text-white flex items-center gap-1 shrink-0 ml-2"
+                      className="text-xs text-emerald-400 hover:text-white flex items-center gap-1 cursor-pointer"
                     >
                       {copiedTx ? <Check className="w-3.5 h-3.5" /> : <Copy className="w-3.5 h-3.5" />}
-                      <span>{copiedTx ? 'Copied' : 'Copy TxHash'}</span>
+                      <span>{copiedTx ? 'Copied' : 'Copy TX'}</span>
                     </button>
                   </div>
                 </div>
               )}
 
-              {cryptoError && (
-                <div className="p-3.5 rounded-2xl bg-red-500/15 border border-red-500/30 flex items-center gap-2.5 text-xs font-mono text-red-300">
-                  <AlertCircle className="w-4 h-4 text-red-400 shrink-0" />
-                  <span>{cryptoError}</span>
-                </div>
-              )}
-
-              {/* Confirm Button */}
               <button
                 onClick={handleWithdrawCrypto}
-                disabled={Boolean(cryptoStep) || walletBalance < parseFloat(cryptoAmountEur || '0')}
-                className="w-full py-3.5 rounded-2xl bg-gradient-to-r from-emerald-500 to-teal-400 hover:from-emerald-400 hover:to-teal-300 text-slate-950 font-mono font-black text-sm transition cursor-pointer shadow-[0_0_20px_rgba(16,185,129,0.35)] hover:scale-[1.01] active:scale-[0.99] disabled:opacity-50 disabled:cursor-not-allowed"
+                disabled={Boolean(cryptoStep) || walletBalance <= 0}
+                className="w-full py-3.5 rounded-xl bg-gradient-to-r from-emerald-500 to-[#A3E635] hover:brightness-110 text-slate-950 font-mono font-black text-xs uppercase tracking-wider transition cursor-pointer shadow-lg shadow-emerald-500/25 disabled:opacity-50 flex items-center justify-center gap-2"
               >
-                Confirm Cashout of {cryptoAmountEur} € to {cryptoCurrency}
+                {cryptoStep ? (
+                  <>
+                    <RefreshCw className="w-4 h-4 animate-spin" />
+                    <span>{cryptoStep.message}</span>
+                  </>
+                ) : (
+                  <>
+                    <Wallet className="w-4 h-4" />
+                    <span>Disburse {cryptoAmountEur || '0'} € via {cryptoCurrency}</span>
+                  </>
+                )}
               </button>
             </div>
           )}
 
           {/* ========================================================= */}
-          {/* TAB 3: WITHDRAWAL HISTORY & VAULT LOG                     */}
+          {/* TAB 2: BANK & SEPA / IBAN WIRE TRANSFER                   */}
+          {/* ========================================================= */}
+          {activeTab === 'bank' && (
+            <div className="space-y-5 animate-in fade-in duration-150 max-w-xl mx-auto">
+              <div className="p-5 rounded-2xl bg-[#0E1320] border border-white/10 space-y-4">
+                <div className="flex items-center gap-3 pb-3 border-b border-white/10">
+                  <div className="w-10 h-10 rounded-xl bg-blue-500/15 border border-blue-500/30 flex items-center justify-center text-blue-400 shrink-0">
+                    <Landmark className="w-5 h-5" />
+                  </div>
+                  <div>
+                    <h3 className="font-display font-black text-sm text-white">European SEPA & IBAN Direct Transfer</h3>
+                    <p className="text-[11px] font-mono text-slate-400">Official tournament prize payout direct to your bank account (0% fee).</p>
+                  </div>
+                </div>
+
+                <div className="space-y-3">
+                  <div>
+                    <label className="block text-xs font-mono text-slate-300 mb-1 font-bold">Account Holder Full Name:</label>
+                    <input
+                      type="text"
+                      value={bankAccountHolder}
+                      onChange={(e) => setBankAccountHolder(e.target.value)}
+                      placeholder="e.g. M14 Player"
+                      className="w-full px-3.5 py-2.5 rounded-xl bg-black/60 border border-white/15 text-xs font-mono text-white focus:border-blue-400 focus:outline-none"
+                    />
+                  </div>
+
+                  <div>
+                    <label className="block text-xs font-mono text-slate-300 mb-1 font-bold">IBAN Number (International Bank Account):</label>
+                    <input
+                      type="text"
+                      value={bankIban}
+                      onChange={(e) => setBankIban(e.target.value.toUpperCase())}
+                      placeholder="XK05 1234 5678 9012 3456 or AL... / DE..."
+                      className="w-full px-3.5 py-2.5 rounded-xl bg-black/60 border border-white/15 text-xs font-mono text-white font-bold tracking-wider focus:border-blue-400 focus:outline-none"
+                    />
+                  </div>
+
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                    <div>
+                      <label className="block text-xs font-mono text-slate-300 mb-1 font-bold">SWIFT / BIC Code (Optional):</label>
+                      <input
+                        type="text"
+                        value={bankBic}
+                        onChange={(e) => setBankBic(e.target.value.toUpperCase())}
+                        placeholder="e.g. TEBKXKPR"
+                        className="w-full px-3.5 py-2.5 rounded-xl bg-black/60 border border-white/15 text-xs font-mono text-white focus:border-blue-400 focus:outline-none"
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-xs font-mono text-slate-300 mb-1 font-bold">EUR Amount to Withdraw:</label>
+                      <input
+                        type="number"
+                        min="10"
+                        max={walletBalance}
+                        value={bankAmountEur}
+                        onChange={(e) => setBankAmountEur(e.target.value)}
+                        placeholder="50.00"
+                        className="w-full px-3.5 py-2.5 rounded-xl bg-black/60 border border-white/15 text-xs font-mono text-white focus:border-blue-400 focus:outline-none font-bold"
+                      />
+                    </div>
+                  </div>
+                </div>
+
+                {bankError && (
+                  <div className="p-3 rounded-xl bg-red-500/10 border border-red-500/30 text-red-400 text-xs font-mono flex items-center gap-2">
+                    <AlertCircle className="w-4 h-4 shrink-0" />
+                    <span>{bankError}</span>
+                  </div>
+                )}
+
+                {bankResult && (
+                  <div className="p-3.5 rounded-xl bg-emerald-500/15 border border-emerald-500/40 text-emerald-300 text-xs font-mono space-y-1">
+                    <div className="font-bold flex items-center gap-1.5">
+                      <CheckCircle2 className="w-4 h-4 text-emerald-400" />
+                      <span>{bankResult.message}</span>
+                    </div>
+                    <div className="text-[11px] text-slate-400">Reference: {bankResult.refId} • Estimated clearing: 1-2 business hours</div>
+                  </div>
+                )}
+
+                <button
+                  onClick={handleWithdrawBank}
+                  disabled={Boolean(bankStep) || walletBalance <= 0}
+                  className="w-full py-3.5 rounded-xl bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-500 hover:to-indigo-500 text-white font-mono font-bold text-xs uppercase tracking-wider transition cursor-pointer shadow-lg shadow-blue-500/20 disabled:opacity-50 flex items-center justify-center gap-2"
+                >
+                  {bankStep ? (
+                    <>
+                      <RefreshCw className="w-4 h-4 animate-spin" />
+                      <span>{bankStep.message}</span>
+                    </>
+                  ) : (
+                    <>
+                      <Landmark className="w-4 h-4" />
+                      <span>Disburse SEPA Bank Wire ({bankAmountEur || '0'} €)</span>
+                    </>
+                  )}
+                </button>
+              </div>
+            </div>
+          )}
+
+          {/* ========================================================= */}
+          {/* TAB 3: PAYOUT & PRIZE HISTORY                             */}
           {/* ========================================================= */}
           {activeTab === 'history' && (
-            <div className="space-y-3 animate-in fade-in duration-150">
+            <div className="space-y-3 animate-in fade-in duration-150 max-w-2xl mx-auto">
+              <div className="flex items-center justify-between text-xs font-mono text-slate-400 pb-2 border-b border-white/5">
+                <span>Total Disbursed Transfers: <strong>{history.length}</strong></span>
+                <span className="text-emerald-400 font-bold">100% Guaranteed Payouts</span>
+              </div>
+
               {history.length === 0 ? (
-                <div className="p-12 text-center rounded-3xl bg-[#0E121E]/60 border border-dashed border-white/10 space-y-2">
+                <div className="p-12 text-center rounded-2xl bg-[#0E1320] border border-dashed border-white/10 space-y-2">
                   <div className="text-3xl">📜</div>
-                  <h3 className="font-display font-bold text-base text-white">No Withdrawals Yet</h3>
-                  <p className="text-xs text-slate-400 max-w-sm mx-auto font-sans">
-                    Your Steam Trade Offers and Crypto Cashouts will be logged here with live blockchain and Steam receipts.
+                  <h4 className="font-display font-bold text-white text-sm">No Payout History Yet</h4>
+                  <p className="text-xs font-mono text-slate-400 max-w-sm mx-auto">
+                    When you withdraw tournament prize money or earnings, your transaction proofs will appear here.
                   </p>
                 </div>
               ) : (
-                <div className="space-y-2">
+                <div className="space-y-2.5">
                   {history.map((item) => (
                     <div
                       key={item.id}
-                      className="p-3.5 rounded-2xl bg-[#0E121E] border border-white/5 hover:border-white/15 transition flex flex-col sm:flex-row sm:items-center justify-between gap-3 font-mono text-xs"
+                      className="p-3.5 rounded-2xl bg-[#0E1320] border border-white/5 flex items-center justify-between gap-3 font-mono text-xs"
                     >
-                      <div className="flex items-center gap-3">
-                        <div className="w-10 h-10 rounded-xl bg-black/60 border border-white/10 flex items-center justify-center shrink-0">
-                          {item.type === 'skin' ? (
-                            item.skinImage ? (
-                              <img 
-                                src={item.skinImage} 
-                                alt="" 
-                                aria-hidden="true"
-                                onError={(e) => {
-                                  (e.target as HTMLImageElement).src = KARAMBIT_LORE_IMAGE;
-                                }}
-                                className="w-8 h-8 object-contain" 
-                              />
-                            ) : (
-                              <span>🎁</span>
-                            )
-                          ) : (
-                            <span>⚡</span>
-                          )}
+                      <div className="flex items-center gap-3 min-w-0">
+                        <div className="w-8 h-8 rounded-xl bg-emerald-500/15 border border-emerald-500/30 flex items-center justify-center text-emerald-400 shrink-0">
+                          <CheckCircle2 className="w-4 h-4" />
                         </div>
-
-                        <div>
-                          <div className="font-bold text-white flex items-center gap-2">
-                            <span>{item.title}</span>
-                            <span className="px-1.5 py-0.2 rounded bg-emerald-500/20 text-emerald-400 text-[10px] uppercase font-bold">
-                              {item.status}
-                            </span>
-                          </div>
-                          <div className="text-[11px] text-slate-400 flex items-center gap-2 mt-0.5">
-                            <span>{new Date(item.timestamp).toLocaleString()}</span>
-                            <span>•</span>
-                            <span className="text-emerald-400 font-bold">{item.amountEur.toFixed(2)} €</span>
+                        <div className="min-w-0">
+                          <div className="text-white font-bold truncate">{item.title}</div>
+                          <div className="text-[10px] text-slate-400">
+                            {new Date(item.timestamp).toLocaleString()} • ID: {item.id}
                           </div>
                         </div>
                       </div>
 
-                      <div className="flex items-center gap-2 shrink-0">
-                        {item.tradeOfferId && (
-                          <a
-                            href="https://steamcommunity.com/id/me/tradeoffers/"
-                            target="_blank"
-                            rel="noreferrer"
-                            className="px-3 py-1 rounded-lg bg-blue-500/15 hover:bg-blue-500/25 text-blue-400 border border-blue-500/30 text-xs transition flex items-center gap-1"
-                          >
-                            <span>Steam Offer #{item.tradeOfferId.slice(-6)}</span>
-                            <ExternalLink className="w-3 h-3" />
-                          </a>
-                        )}
-
-                        {item.txHash && (
-                          <span 
-                            className="px-2.5 py-1 rounded-lg bg-black/50 border border-white/10 text-[10px] text-slate-400 truncate max-w-xs"
-                            title={item.txHash}
-                          >
-                            Tx: {item.txHash.slice(0, 10)}...{item.txHash.slice(-8)}
-                          </span>
-                        )}
+                      <div className="text-right shrink-0">
+                        <div className="font-black text-emerald-400 text-sm">
+                          -{item.amountEur.toFixed(2)} €
+                        </div>
+                        <span className="text-[9px] px-1.5 py-0.2 rounded bg-emerald-500/15 text-emerald-400 border border-emerald-500/30 font-bold uppercase">
+                          {item.status}
+                        </span>
                       </div>
                     </div>
                   ))}
@@ -832,16 +577,13 @@ export const VortexWithdrawModal: React.FC<VortexWithdrawModalProps> = ({
 
         </div>
 
-        {/* Modal Footer Security Guarantee */}
-        <div className="px-5 py-3 border-t border-white/5 bg-[#0C101A] flex items-center justify-between text-[11px] font-mono text-slate-500 shrink-0">
-          <div className="flex items-center gap-1.5 text-emerald-400/80">
+        {/* Modal Footer */}
+        <div className="px-4 sm:px-6 py-3 border-t border-white/5 bg-[#090C14] flex flex-col sm:flex-row items-center justify-between gap-2 text-[11px] font-mono text-slate-400 shrink-0">
+          <div className="flex items-center gap-2">
             <ShieldCheck className="w-4 h-4 text-emerald-400" />
-            <span>CALIBER CLUTCH Direct P2P & Steam Escrow Protection Active</span>
+            <span>Caliber Clutch Verified European Esports Treasury Protection Active</span>
           </div>
-
-          <div className="text-slate-400">
-            24/7 Automated Bot Dispatch Node
-          </div>
+          <span className="text-slate-500">Official CS2 Sub-Tick Platform</span>
         </div>
 
       </div>

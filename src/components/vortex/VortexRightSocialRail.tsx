@@ -811,7 +811,7 @@ export const VortexRightSocialRail: React.FC<VortexRightSocialRailProps> = ({
             </div>
 
             <p className="text-[11px] text-slate-400 leading-snug">
-              Competitive tournament winnings, skin rewards, and instant automated Steam Bot payouts.
+              Competitive tournament cash prizes, platform balance, and automated prize payouts.
             </p>
 
             {/* Wallet Balance & Action Buttons */}
@@ -839,7 +839,7 @@ export const VortexRightSocialRail: React.FC<VortexRightSocialRailProps> = ({
                   className="w-full py-2 px-2.5 rounded-xl bg-amber-500/10 hover:bg-amber-500/20 border border-amber-500/30 text-amber-400 font-mono text-xs font-bold transition cursor-pointer flex items-center justify-center gap-1.5 hover:scale-[1.01] active:scale-95"
                   title="Claim official tournament prize rewards & cashouts"
                 >
-                  <span>CLAIM TOURNAMENT PRIZES</span>
+                  <span>CASHOUT TOURNAMENT PRIZES</span>
                   <ArrowUpRight className="w-3.5 h-3.5" />
                 </button>
               </div>
@@ -2369,12 +2369,12 @@ export const VortexRightSocialRail: React.FC<VortexRightSocialRailProps> = ({
       )}
 
       {/* ======================================================== */}
-      {/* 8.5 VORTEX STEAM TRADE OFFER & CRYPTO WITHDRAWAL MODAL    */}
+      {/* 8.5 CALIBER CLUTCH PRIZE & BALANCE CASHOUT MODAL          */}
       {/* ======================================================== */}
       <VortexWithdrawModal
         isOpen={showWithdrawModal}
         onClose={() => setShowWithdrawModal(false)}
-        initialTab="skins"
+        initialTab="crypto"
       />
 
       {/* ======================================================== */}
@@ -2385,9 +2385,9 @@ export const VortexRightSocialRail: React.FC<VortexRightSocialRailProps> = ({
         onClose={() => setShowXsollaTopUp(false)}
         initialItem={{
           id: 'topup-25',
-          sku: 'VTX-WAL-25',
-          title: '25.00 € Vortex Wallet Funds',
-          description: 'Instant credit for official CS2 cases and weapon market withdrawals.',
+          sku: 'CC-WAL-25',
+          title: '25.00 € Caliber Clutch Wallet Funds',
+          description: 'Instant credit for CS2 tournament buy-ins, wager matches, and premium matchmaking.',
           amountEur: 25.00,
           type: 'wallet_topup'
         }}
