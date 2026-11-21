@@ -1559,6 +1559,29 @@ export const VortexDashboard: React.FC<VortexDashboardProps> = ({
   // Pending outgoing invitations by slot index: slotIndex -> PartySlotMember
   const [pendingSlotInvites, setPendingSlotInvites] = useState<Record<number, PartySlotMember>>({});
 
+  // Global Escape keydown listener to close modals
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') {
+        if (selectedRegisterTourney) setSelectedRegisterTourney(null);
+        else if (selectedBracketTourney) setSelectedBracketTourney(null);
+        else if (captainDeniedModal?.open) setCaptainDeniedModal(null);
+        else if (showVerificationModal) setShowVerificationModal(false);
+        else if (simulatedBotOffer) setSimulatedBotOffer(null);
+        else if (inviteModalOpen) setInviteModalOpen(false);
+      }
+    };
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [
+    selectedRegisterTourney, 
+    selectedBracketTourney, 
+    captainDeniedModal, 
+    showVerificationModal, 
+    simulatedBotOffer, 
+    inviteModalOpen
+  ]);
+
   const filteredInvitablePlayers = SUGGESTED_TEAMMATES.filter((p) => {
     const matchesSearch =
       p.name.toLowerCase().includes(inviteSearchQuery.toLowerCase()) ||
@@ -7583,8 +7606,17 @@ export const VortexDashboard: React.FC<VortexDashboardProps> = ({
 
       {/* TOURNAMENT PRIZE STEAM BOT DISPATCH SIMULATOR MODAL */}
       {simulatedBotOffer && (
-        <div className="fixed inset-0 z-[130] bg-black/85 backdrop-blur-md flex items-center justify-center p-4 animate-in fade-in duration-200">
-          <div className="w-full max-w-md bg-[#0C1019] border border-[#252E42] rounded-3xl p-6 shadow-2xl space-y-4 relative overflow-hidden">
+        <div 
+          onClick={() => {
+            sound.playClick();
+            setSimulatedBotOffer(null);
+          }}
+          className="fixed inset-0 z-[130] bg-black/85 backdrop-blur-md flex items-center justify-center p-4 animate-in fade-in duration-200 cursor-pointer overflow-y-auto"
+        >
+          <div 
+            onClick={(e) => e.stopPropagation()}
+            className="w-full max-w-md bg-[#0C1019] border border-[#252E42] rounded-3xl p-6 shadow-2xl space-y-4 relative overflow-hidden cursor-default my-auto"
+          >
             <div className="flex items-center justify-between border-b border-[#1E2638] pb-3">
               <div className="flex items-center gap-2.5">
                 <div className="w-8 h-8 rounded-xl bg-emerald-500/20 border border-emerald-500/40 flex items-center justify-center text-emerald-400">
@@ -7657,8 +7689,17 @@ export const VortexDashboard: React.FC<VortexDashboardProps> = ({
         const prizeNum = parseInt(prizeRaw.replace(/[^0-9]/g, ''), 10) || 1500;
 
         return (
-          <div className="fixed inset-0 z-[130] bg-black/85 backdrop-blur-md flex items-center justify-center p-4 animate-in fade-in duration-200">
-            <div className="w-full max-w-4xl max-h-[90vh] overflow-y-auto bg-[#0C1019] border border-[#252E42] rounded-3xl p-6 sm:p-8 shadow-2xl space-y-6 text-left relative">
+          <div 
+            onClick={() => {
+              sound.playClick();
+              setSelectedBracketTourney(null);
+            }}
+            className="fixed inset-0 z-[130] bg-black/85 backdrop-blur-md flex items-center justify-center p-4 animate-in fade-in duration-200 cursor-pointer overflow-y-auto"
+          >
+            <div 
+              onClick={(e) => e.stopPropagation()}
+              className="w-full max-w-4xl max-h-[90vh] overflow-y-auto bg-[#0C1019] border border-[#252E42] rounded-3xl p-6 sm:p-8 shadow-2xl space-y-6 text-left relative cursor-default my-auto"
+            >
               {/* Modal Header */}
               <div className="flex items-start justify-between border-b border-[#1E2638] pb-4">
                 <div className="space-y-1">
@@ -8141,8 +8182,17 @@ export const VortexDashboard: React.FC<VortexDashboardProps> = ({
 
       {/* TEAM REGISTRATION & ROSTER LOCK MODAL */}
       {selectedRegisterTourney && (
-        <div className="fixed inset-0 z-[130] bg-black/85 backdrop-blur-md flex items-center justify-center p-4 animate-in fade-in duration-200">
-          <div className="w-full max-w-lg bg-[#0C1019] border border-[#252E42] rounded-3xl p-6 sm:p-7 shadow-2xl space-y-5 text-left relative overflow-hidden">
+        <div 
+          onClick={() => {
+            sound.playClick();
+            setSelectedRegisterTourney(null);
+          }}
+          className="fixed inset-0 z-[130] bg-black/85 backdrop-blur-md flex items-center justify-center p-4 animate-in fade-in duration-200 cursor-pointer overflow-y-auto"
+        >
+          <div 
+            onClick={(e) => e.stopPropagation()}
+            className="w-full max-w-lg bg-[#0C1019] border border-[#252E42] rounded-3xl p-6 sm:p-7 shadow-2xl space-y-5 text-left relative overflow-hidden cursor-default my-auto"
+          >
             <div className="flex items-start justify-between border-b border-[#1E2638] pb-3">
               <div className="space-y-1">
                 <div className="flex items-center gap-2">
@@ -8155,6 +8205,17 @@ export const VortexDashboard: React.FC<VortexDashboardProps> = ({
                   {selectedRegisterTourney.title}
                 </h3>
               </div>
+              <button
+                type="button"
+                onClick={() => {
+                  sound.playClick();
+                  setSelectedRegisterTourney(null);
+                }}
+                className="w-8 h-8 rounded-xl bg-white/5 hover:bg-white/10 text-slate-400 hover:text-white flex items-center justify-center transition cursor-pointer shrink-0 border border-white/5"
+                title="Close"
+              >
+                <X className="w-4 h-4" />
+              </button>
             </div>
 
             {/* Captaincy & 5-Stack Status Banner */}
@@ -8492,20 +8553,42 @@ export const VortexDashboard: React.FC<VortexDashboardProps> = ({
 
       {/* CAPTAIN DENIED PERMISSION MODAL */}
       {captainDeniedModal?.open && (
-        <div className="fixed inset-0 z-[140] bg-black/85 backdrop-blur-md flex items-center justify-center p-4 animate-in fade-in duration-200">
-          <div className="w-full max-w-md bg-[#0C1019] border border-amber-500/40 rounded-3xl p-6 sm:p-7 shadow-[0_25px_70px_rgba(0,0,0,0.9)] space-y-5 text-left relative overflow-hidden">
-            <div className="flex items-center gap-3 border-b border-[#1E2638] pb-4">
-              <div className="w-12 h-12 rounded-2xl bg-amber-500/15 border border-amber-500/30 flex items-center justify-center text-amber-400 shrink-0 shadow-lg shadow-amber-500/10">
-                <ShieldAlert className="w-6 h-6 text-amber-400" />
+        <div 
+          onClick={() => {
+            sound.playClick();
+            setCaptainDeniedModal(null);
+          }}
+          className="fixed inset-0 z-[140] bg-black/85 backdrop-blur-md flex items-center justify-center p-4 animate-in fade-in duration-200 cursor-pointer overflow-y-auto"
+        >
+          <div 
+            onClick={(e) => e.stopPropagation()}
+            className="w-full max-w-md bg-[#0C1019] border border-amber-500/40 rounded-3xl p-6 sm:p-7 shadow-[0_25px_70px_rgba(0,0,0,0.9)] space-y-5 text-left relative overflow-hidden cursor-default my-auto"
+          >
+            <div className="flex items-center justify-between border-b border-[#1E2638] pb-4">
+              <div className="flex items-center gap-3">
+                <div className="w-12 h-12 rounded-2xl bg-amber-500/15 border border-amber-500/30 flex items-center justify-center text-amber-400 shrink-0 shadow-lg shadow-amber-500/10">
+                  <ShieldAlert className="w-6 h-6 text-amber-400" />
+                </div>
+                <div>
+                  <span className="text-[10px] font-mono font-black uppercase text-amber-400 tracking-wider">
+                    Tournament Security Regulation
+                  </span>
+                  <h3 className="text-base font-black font-display text-white">
+                    TOURNAMENT ENTRY RESTRICTED: TEAM CAPTAIN ONLY
+                  </h3>
+                </div>
               </div>
-              <div>
-                <span className="text-[10px] font-mono font-black uppercase text-amber-400 tracking-wider">
-                  Tournament Security Regulation
-                </span>
-                <h3 className="text-base font-black font-display text-white">
-                  TOURNAMENT ENTRY RESTRICTED: TEAM CAPTAIN ONLY
-                </h3>
-              </div>
+              <button
+                type="button"
+                onClick={() => {
+                  sound.playClick();
+                  setCaptainDeniedModal(null);
+                }}
+                className="w-8 h-8 rounded-xl bg-white/5 hover:bg-white/10 text-slate-400 hover:text-white flex items-center justify-center transition cursor-pointer shrink-0 border border-white/5"
+                title="Close"
+              >
+                <X className="w-4 h-4" />
+              </button>
             </div>
 
             <p className="text-xs font-mono text-slate-300 leading-relaxed">
@@ -8567,8 +8650,17 @@ export const VortexDashboard: React.FC<VortexDashboardProps> = ({
 
       {/* VORTEX OFFICIAL VERIFICATION INFORMATION MODAL */}
       {showVerificationModal && (
-        <div className="fixed inset-0 z-[120] bg-black/85 backdrop-blur-md flex items-center justify-center p-4 animate-in fade-in duration-200">
-          <div className="relative w-full max-w-lg bg-[#0F121A] border border-[#262D40] rounded-3xl p-6 sm:p-7 shadow-[0_25px_70px_rgba(0,0,0,0.95)] space-y-5 text-left">
+        <div 
+          onClick={() => {
+            sound.playClick();
+            setShowVerificationModal(false);
+          }}
+          className="fixed inset-0 z-[120] bg-black/85 backdrop-blur-md flex items-center justify-center p-4 animate-in fade-in duration-200 cursor-pointer overflow-y-auto"
+        >
+          <div 
+            onClick={(e) => e.stopPropagation()}
+            className="relative w-full max-w-lg bg-[#0F121A] border border-[#262D40] rounded-3xl p-6 sm:p-7 shadow-[0_25px_70px_rgba(0,0,0,0.95)] space-y-5 text-left cursor-default my-auto"
+          >
             {/* Header */}
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-3">
@@ -9195,8 +9287,17 @@ export const VortexDashboard: React.FC<VortexDashboardProps> = ({
       {/* Opens when user clicks [+ Invite Teammate] on any slot   */}
       {/* ======================================================== */}
       {inviteModalOpen && (
-        <div className="fixed inset-0 z-[120] bg-black/85 backdrop-blur-md flex items-center justify-center p-4">
-          <div className="relative w-full max-w-xl bg-[#0D0F17] border border-[#A3E635]/40 rounded-3xl p-6 shadow-[0_20px_60px_rgba(0,0,0,0.9)] space-y-5 animate-in fade-in zoom-in-95 duration-150">
+        <div 
+          onClick={() => {
+            sound.playClick();
+            setInviteModalOpen(false);
+          }}
+          className="fixed inset-0 z-[120] bg-black/85 backdrop-blur-md flex items-center justify-center p-4 cursor-pointer overflow-y-auto"
+        >
+          <div 
+            onClick={(e) => e.stopPropagation()}
+            className="relative w-full max-w-xl bg-[#0D0F17] border border-[#A3E635]/40 rounded-3xl p-6 shadow-[0_20px_60px_rgba(0,0,0,0.9)] space-y-5 animate-in fade-in zoom-in-95 duration-150 cursor-default my-auto"
+          >
             {/* Modal Header */}
             <div className="flex items-center justify-between pb-3 border-b border-[#1E2538]">
               <div className="flex items-center gap-3">
@@ -9373,8 +9474,17 @@ export const VortexDashboard: React.FC<VortexDashboardProps> = ({
       {/* VORTEX MINIMAL CLEAN "INVITE TO PARTY" MODAL DIALOG       */}
       {/* ======================================================== */}
       {activePartyInvite && (
-        <div className="fixed inset-0 z-[150] bg-black/85 backdrop-blur-[3px] flex items-center justify-center p-4 animate-in fade-in duration-150">
-          <div className="relative w-full max-w-[530px] bg-[#0E121B] border border-[#A3E635]/40 rounded-3xl shadow-[0_25px_60px_rgba(0,0,0,0.95),0_0_35px_rgba(163,230,53,0.18)] overflow-hidden animate-in zoom-in-95 duration-150">
+        <div 
+          onClick={() => {
+            sound.playClick();
+            setActivePartyInvite(null);
+          }}
+          className="fixed inset-0 z-[150] bg-black/85 backdrop-blur-[3px] flex items-center justify-center p-4 animate-in fade-in duration-150 cursor-pointer overflow-y-auto"
+        >
+          <div 
+            onClick={(e) => e.stopPropagation()}
+            className="relative w-full max-w-[530px] bg-[#0E121B] border border-[#A3E635]/40 rounded-3xl shadow-[0_25px_60px_rgba(0,0,0,0.95),0_0_35px_rgba(163,230,53,0.18)] overflow-hidden animate-in zoom-in-95 duration-150 cursor-default my-auto"
+          >
             {/* Top Slim Glowing Neon Lime Animated Countdown Bar */}
             <div className="w-full bg-[#182030] h-1">
               <div
