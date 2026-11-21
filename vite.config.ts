@@ -18,6 +18,7 @@ function devApiEndpointsPlugin() {
           '/api/trade-withdraw': './api/trade-withdraw.js',
           '/api/trade-status': './api/trade-status.js',
           '/api/steam-profile': './api/steam-profile.js',
+          '/api/steam-online': './api/steam-online.js',
           '/api/faceit/profile': './api/faceit-profile.js',
           '/api/faceit-player': './api/faceit-player.js',
           '/api/faceit-organizer': './api/faceit-organizer.js'
