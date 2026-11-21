@@ -189,23 +189,12 @@ export const VortexPureHtmlLanding: React.FC<VortexPureHtmlLandingProps> = ({
       <header className="w-full border-b border-white/[0.06] bg-[#07080B]/90 backdrop-blur-md sticky top-0 z-50">
         <div className="w-full px-4 sm:px-6 lg:px-8 h-18 flex items-center justify-between gap-4">
           
-          {/* Brand Logo & Live Player Counter (Exact Hellcase Style: Logo + Signal + Number) */}
-          <div className="flex items-center gap-3">
-            <div 
-              onClick={() => { sound.playClick(); setActiveTab('home'); }} 
-              className="cursor-pointer transition hover:opacity-90 flex items-center shrink-0"
-            >
-              <VortexBrandLogo />
-            </div>
-
-            {/* Live Online Player Counter (Sleek Hellcase Style: Icon + Number) */}
-            <div 
-              className="flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-[#0E121B] border border-emerald-500/30 text-xs font-mono font-bold shadow-[0_0_12px_rgba(16,185,129,0.15)]"
-              title="Official Counter-Strike 2 telemetry live from Valve Steam"
-            >
-              <Wifi className="w-3.5 h-3.5 text-emerald-400 animate-pulse" />
-              <span className="text-white font-extrabold">{onlineCount.toLocaleString()}</span>
-            </div>
+          {/* Brand Logo */}
+          <div 
+            onClick={() => { sound.playClick(); setActiveTab('home'); }} 
+            className="cursor-pointer transition hover:opacity-90 flex items-center shrink-0"
+          >
+            <VortexBrandLogo />
           </div>
 
           {/* Nav Links */}
@@ -322,13 +311,23 @@ export const VortexPureHtmlLanding: React.FC<VortexPureHtmlLandingProps> = ({
             {/* ---------------------------------------------------- */}
             <div className="lg:col-span-5 xl:col-span-5 flex flex-col items-start text-left z-20">
               
-              {/* Category Tracker Badge */}
-              <div className="flex items-center gap-3 mb-4">
+              {/* Category Tracker Badge & Live Player Counter */}
+              <div className="flex flex-wrap items-center gap-3 mb-4">
                 <span className="text-[#A3E635] font-mono font-bold tracking-[0.25em] text-xs uppercase flex items-center gap-2 select-text drop-shadow-[0_2px_8px_rgba(0,0,0,1)]">
                   <span className="w-2 h-2 rounded-full bg-[#A3E635] shadow-[0_0_12px_#A3E635] animate-pulse" />
                   COUNTER-STRIKE 2 PLATFORM
                 </span>
-                <div className="h-[1px] w-12 bg-gradient-to-r from-[#A3E635]/60 to-transparent" />
+                <div className="h-[1px] w-10 bg-gradient-to-r from-[#A3E635]/60 to-transparent hidden sm:block" />
+
+                {/* Live Online Counter (Placed Down in Hero Where It Was Before) */}
+                <div 
+                  className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-black/60 border border-white/10 text-xs font-mono shadow-[0_0_16px_rgba(0,0,0,0.8)] backdrop-blur-md"
+                  title="Official Counter-Strike 2 telemetry live from Valve Steam"
+                >
+                  <span className="w-2 h-2 rounded-full bg-[#22C55E] shadow-[0_0_8px_#22C55E] animate-pulse shrink-0" />
+                  <span className="font-extrabold text-white">{onlineCount.toLocaleString()}</span>
+                  <span className="text-slate-300 font-sans">players online right now</span>
+                </div>
               </div>
 
               {/* Massive Bold Headline with Heavy Layered Shadows */}
