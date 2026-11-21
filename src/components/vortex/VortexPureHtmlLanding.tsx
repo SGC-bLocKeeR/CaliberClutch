@@ -319,14 +319,13 @@ export const VortexPureHtmlLanding: React.FC<VortexPureHtmlLandingProps> = ({
                 </span>
                 <div className="h-[1px] w-10 bg-gradient-to-r from-[#A3E635]/60 to-transparent hidden sm:block" />
 
-                {/* Live Online Counter (Placed Down in Hero Where It Was Before) */}
+                {/* Live Online Counter */}
                 <div 
                   className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-black/60 border border-white/10 text-xs font-mono shadow-[0_0_16px_rgba(0,0,0,0.8)] backdrop-blur-md"
                   title="Live players online on Caliber Clutch"
                 >
                   <span className="w-2 h-2 rounded-full bg-[#22C55E] shadow-[0_0_8px_#22C55E] animate-pulse shrink-0" />
                   <span className="font-extrabold text-white">{onlineCount.toLocaleString()}</span>
-                  <span className="text-slate-300 font-sans">players online right now</span>
                 </div>
               </div>
 
@@ -1327,7 +1326,7 @@ export const VortexPureHtmlLanding: React.FC<VortexPureHtmlLandingProps> = ({
             <div className="px-5 sm:px-7 py-4 border-t border-white/10 bg-[#0C101A] flex flex-col sm:flex-row items-center justify-between gap-3 shrink-0">
               <span className="text-xs font-mono text-slate-400 flex items-center gap-2">
                 <span className="w-2 h-2 rounded-full bg-[#22C55E] animate-pulse" />
-                {onlineCount.toLocaleString()} players online now
+                {onlineCount.toLocaleString()}
               </span>
               <div className="flex items-center gap-3 w-full sm:w-auto">
                 <button
