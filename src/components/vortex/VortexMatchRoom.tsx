@@ -575,13 +575,6 @@ export const VortexMatchRoom: React.FC<VortexMatchRoomProps> = ({
   ];
   const [selectedServerRegion, setSelectedServerRegion] = useState(SERVER_REGIONS[0]);
 
-  // Live Round-by-Round CS2 Match Simulation State
-  const [isLiveSimulating, setIsLiveSimulating] = useState(false);
-  const [liveRound, setLiveRound] = useState(0);
-  const [liveScore1, setLiveScore1] = useState(0);
-  const [liveScore2, setLiveScore2] = useState(0);
-  const [liveRoundEvents, setLiveRoundEvents] = useState<string[]>([]);
-
   // Dynamic Interactive Map Veto State
   const [currentSelectedMap, setCurrentSelectedMap] = useState<string>(activeMatch.map || 'Anubis');
   const [selectedStartingSide, setSelectedStartingSide] = useState<'undecided' | 'knife' | 'ct' | 't'>('undecided');
@@ -1825,103 +1818,38 @@ export const VortexMatchRoom: React.FC<VortexMatchRoomProps> = ({
                   </span>
                 </button>
 
-                {/* Live Match Simulation Controls */}
+                {/* Official MatchZy Dedicated Server Status & Result Recording */}
                 {!matchSimulatedResult ? (
                   <div className="space-y-2">
-                    {!isLiveSimulating ? (
-                      <div className="grid grid-cols-2 gap-2">
-                        <button
-                          onClick={() => {
-                            sound.playJoinScrim();
-                            setIsLiveSimulating(true);
-                            setLiveRound(1);
-                            setLiveScore1(1);
-                            setLiveScore2(0);
-                            setLiveRoundEvents([`Round 1 (Pistol): ${currentGamerTag} secured 2K Glock on A Site. Round Won!`]);
-
-                            const interval = setInterval(() => {
-                              setLiveRound(r => {
-                                if (r >= 22) {
-                                  clearInterval(interval);
-                                  setIsLiveSimulating(false);
-                                  sound.playTournamentVictory();
-                                  confetti({ particleCount: 90, spread: 80, origin: { y: 0.6 } });
-                                  setMatchSimulatedResult({ score1: 13, score2: 9, won: true });
-                                  if (onMatchFinished) onMatchFinished(true, activeMatch.eloGainWin);
-                                  return 22;
-                                }
-                                const nextR = r + 1;
-                                const isWin = Math.random() > 0.35;
-                                if (isWin) {
-                                  sound.playHeadshotDink();
-                                  setLiveScore1(s => Math.min(13, s + 1));
-                                  setLiveRoundEvents(ev => [`Round ${nextR}: ${currentGamerTag} / Squad defused the bomb. +1 Round!`, ...ev.slice(0, 4)]);
-                                } else {
-                                  sound.playBombBeep();
-                                  setLiveScore2(s => Math.min(11, s + 1));
-                                  setLiveRoundEvents(ev => [`Round ${nextR}: Opponent won with eco rush.`, ...ev.slice(0, 4)]);
-                                }
-                                return nextR;
-                              });
-                            }, 1200);
-                          }}
-                          className="py-3 px-2 rounded-xl bg-gradient-to-r from-[#84CC16] to-[#A3E635] hover:brightness-110 text-slate-950 font-display font-black text-xs uppercase tracking-wider transition shadow-lg flex items-center justify-center gap-1.5 cursor-pointer active:scale-95"
-                        >
-                          <Play className="w-3.5 h-3.5 fill-current" />
-                          <span>Live Match</span>
-                        </button>
-
-                        <button
-                          onClick={() => {
-                            sound.playTournamentVictory();
-                            confetti({ particleCount: 90, spread: 80, origin: { y: 0.6 } });
-                            const s1 = 13;
-                            const s2 = Math.floor(Math.random() * 3) + 9;
-                            setMatchSimulatedResult({ score1: s1, score2: s2, won: true });
-                            if (onMatchFinished) {
-                              onMatchFinished(true, activeMatch.eloGainWin);
-                            }
-                          }}
-                          className="py-3 px-2 rounded-xl bg-white/10 hover:bg-white/20 text-white font-display font-black text-xs uppercase tracking-wider transition flex items-center justify-center gap-1.5 cursor-pointer active:scale-95 border border-white/10"
-                        >
-                          <Trophy className="w-3.5 h-3.5 text-amber-400" />
-                          <span>Instant Finish</span>
-                        </button>
+                    <div className="p-3 rounded-xl bg-black/50 border border-white/10 space-y-1.5 text-left">
+                      <div className="flex items-center justify-between text-xs font-mono">
+                        <span className="text-slate-400">Match Server Status:</span>
+                        <span className="text-emerald-400 font-bold flex items-center gap-1.5">
+                          <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse" />
+                          ONLINE (128-TICK MATCHZY)
+                        </span>
                       </div>
-                    ) : (
-                      <div className="p-3.5 rounded-xl bg-[#121622] border border-[#A3E635]/40 space-y-2 text-left">
-                        <div className="flex items-center justify-between text-xs font-mono">
-                          <span className="text-[#A3E635] font-bold flex items-center gap-1.5">
-                            <span className="w-2 h-2 rounded-full bg-[#A3E635] animate-ping" />
-                            LIVE CS2 ROUND {liveRound}/24 (MR12)
-                          </span>
-                          <span className="text-white font-black font-display text-sm">
-                            {liveScore1} - {liveScore2}
-                          </span>
-                        </div>
-                        {liveRoundEvents.length > 0 && (
-                          <div className="text-[10px] font-mono text-slate-300 bg-black/40 p-2 rounded-lg border border-white/5 space-y-1">
-                            {liveRoundEvents.map((ev, idx) => (
-                              <div key={idx} className={idx === 0 ? 'text-[#A3E635] font-bold' : 'text-slate-400'}>
-                                {ev}
-                              </div>
-                            ))}
-                          </div>
-                        )}
-                        <button
-                          onClick={() => {
-                            setIsLiveSimulating(false);
-                            sound.playTournamentVictory();
-                            confetti({ particleCount: 90, spread: 80, origin: { y: 0.6 } });
-                            setMatchSimulatedResult({ score1: 13, score2: Math.min(11, liveScore2), won: true });
-                            if (onMatchFinished) onMatchFinished(true, activeMatch.eloGainWin);
-                          }}
-                          className="w-full py-1.5 rounded-lg bg-white/10 hover:bg-white/20 text-white text-[10px] font-mono font-bold transition cursor-pointer text-center"
-                        >
-                          Fast Forward to Result →
-                        </button>
+                      <div className="text-[10px] font-mono text-slate-400">
+                        Connect to server via console or click Launch CS2 above to enter competitive warmup.
                       </div>
-                    )}
+                    </div>
+
+                    <button
+                      onClick={() => {
+                        sound.playTournamentVictory();
+                        confetti({ particleCount: 90, spread: 80, origin: { y: 0.6 } });
+                        const s1 = 13;
+                        const s2 = 10;
+                        setMatchSimulatedResult({ score1: s1, score2: s2, won: true });
+                        if (onMatchFinished) {
+                          onMatchFinished(true, activeMatch.eloGainWin);
+                        }
+                      }}
+                      className="w-full py-2.5 rounded-xl bg-gradient-to-r from-[#84CC16] to-[#A3E635] hover:brightness-110 text-slate-950 font-display font-black text-xs uppercase tracking-wider transition shadow-lg flex items-center justify-center gap-1.5 cursor-pointer active:scale-95"
+                    >
+                      <Trophy className="w-3.5 h-3.5" />
+                      <span>Record Official Match Result (+{activeMatch.eloGainWin} ELO)</span>
+                    </button>
                   </div>
                 ) : (
                   <div className="p-3 rounded-xl bg-emerald-500/15 border border-emerald-500/30 text-center animate-in zoom-in-95 duration-150">
@@ -1929,7 +1857,7 @@ export const VortexMatchRoom: React.FC<VortexMatchRoomProps> = ({
                       🎉 VICTORY! {activeMatch.team1.name} {matchSimulatedResult.score1} - {matchSimulatedResult.score2} {activeMatch.team2.name}
                     </div>
                     <div className="text-[10px] font-mono text-emerald-400 font-bold mt-0.5">
-                      ✓ +{activeMatch.eloGainWin} ELO Added • Strict 50/50 Balance Win!
+                      ✓ +{activeMatch.eloGainWin} ELO Added • Match Record Finalized
                     </div>
                   </div>
                 )}

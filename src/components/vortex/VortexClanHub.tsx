@@ -1765,188 +1765,6 @@ export const VortexClanHub: React.FC<VortexClanHubProps> = ({
     return DEFAULT_CLAN_MATCHES;
   });
 
-  // 1-Click Simulation of a New Clan War Match
-  const handleSimulateNewClanMatch = () => {
-    sound.playSelect();
-
-    const opponent = DEFAULT_OPPONENT_CLANS[Math.floor(Math.random() * DEFAULT_OPPONENT_CLANS.length)];
-    const maps = [
-      { name: 'de_mirage', displayName: 'Mirage', img: '/images/maps/cs2_mirage.png' },
-      { name: 'de_inferno', displayName: 'Inferno', img: '/images/maps/cs2_inferno.png' },
-      { name: 'de_dust2', displayName: 'Dust 2', img: '/images/maps/cs2_dust2.png' },
-      { name: 'de_anubis', displayName: 'Anubis', img: '/images/maps/cs2_anubis.png' },
-      { name: 'de_ancient', displayName: 'Ancient', img: '/images/maps/cs2_ancient.png' }
-    ];
-    const pickedMap = maps[Math.floor(Math.random() * maps.length)];
-    const userScore = 13;
-    const oppScore = Math.floor(Math.random() * 4) + 8; // 8 - 11 close match
-
-    const newMatch: ClanMatch = {
-      id: `cm-sim-${Date.now()}`,
-      date: 'Today',
-      time: 'Just now',
-      isWin: true,
-      scoreDisplay: `${userScore} : ${oppScore}`,
-      userScore: userScore,
-      opponentScore: oppScore,
-      userElo: currentUserElo + 25,
-      eloDelta: 25,
-      userRating: '1.38',
-      userStats: {
-        kills: 22,
-        deaths: 12,
-        assists: 6,
-        kd: '1.83',
-        adr: '98.5'
-      },
-      mapName: pickedMap.name,
-      mapDisplayName: pickedMap.displayName,
-      mapImage: pickedMap.img,
-      server: 'Frankfurt Central • 128-Tick MatchZy',
-      timeAgo: 'Just now',
-      duration: '31 mins',
-      eloChange: 25,
-      tournamentOrEvent: 'Caliber Clutch 5v5 Official Tournament Match',
-
-      team1: {
-        name: userClan.name,
-        avatar: userClan.logo,
-        score: userScore,
-        firstHalf: 8,
-        secondHalf: 5,
-        avgLevel: currentUserLevel,
-        avgElo: userClan.stats.avgElo + 25,
-        players: userClan.members.slice(0, 5).map((m, idx) => ({
-          id: `sim-user-${idx}`,
-          name: m.name,
-          avatar: m.avatar,
-          factionIcon: 'diamond',
-          level: m.level,
-          elo: m.elo + 25,
-          rating: idx === 0 ? '1.42' : (1.10 + Math.random() * 0.25).toFixed(2),
-          hasMvpStar: idx === 0,
-          swing: `+${(4 + Math.random() * 6).toFixed(2)}%`,
-          isPositiveSwing: true,
-          kills: idx === 0 ? 24 : Math.floor(Math.random() * 6) + 14,
-          deaths: Math.floor(Math.random() * 4) + 10,
-          assists: Math.floor(Math.random() * 5) + 3,
-          adr: (82 + Math.random() * 26).toFixed(1),
-          kd: (1.20 + Math.random() * 0.6).toFixed(2),
-          kr: (0.75 + Math.random() * 0.25).toFixed(2),
-          hs: Math.floor(Math.random() * 6) + 7,
-          hsPercentage: `${Math.floor(Math.random() * 25) + 50}%`,
-          k5: 0,
-          k4: idx === 0 ? 1 : 0,
-          k3: 1,
-          k2: 3,
-          mvps: idx === 0 ? 4 : 2,
-          isCurrentUser: m.isUser || idx === 0
-        }))
-      },
-
-      team2: {
-        name: opponent.name,
-        avatar: opponent.logo,
-        score: oppScore,
-        firstHalf: 7,
-        secondHalf: oppScore - 7,
-        avgLevel: Math.max(1, currentUserLevel - 1),
-        avgElo: opponent.stats.avgElo,
-        players: opponent.members.slice(0, 5).map((m, idx) => ({
-          id: `sim-opp-${idx}`,
-          name: m.name,
-          avatar: m.avatar,
-          factionIcon: 'triangle',
-          level: m.level,
-          elo: m.elo - 25,
-          rating: (0.85 + Math.random() * 0.30).toFixed(2),
-          hasMvpStar: false,
-          swing: `-${(2 + Math.random() * 5).toFixed(2)}%`,
-          isPositiveSwing: false,
-          kills: Math.floor(Math.random() * 6) + 11,
-          deaths: Math.floor(Math.random() * 5) + 14,
-          assists: Math.floor(Math.random() * 4) + 2,
-          adr: (68 + Math.random() * 22).toFixed(1),
-          kd: (0.70 + Math.random() * 0.35).toFixed(2),
-          kr: (0.55 + Math.random() * 0.20).toFixed(2),
-          hs: Math.floor(Math.random() * 5) + 5,
-          hsPercentage: `${Math.floor(Math.random() * 20) + 40}%`,
-          k5: 0,
-          k4: 0,
-          k3: 0,
-          k2: 2,
-          mvps: 1
-        }))
-      },
-
-      clan1: {
-        id: 'cc-squad',
-        name: userClan.name,
-        tag: userClan.tag,
-        logo: userClan.logo,
-        score: userScore,
-        isWinner: true
-      },
-      clan2: {
-        id: opponent.id,
-        name: opponent.name,
-        tag: opponent.tag,
-        logo: opponent.logo,
-        score: oppScore,
-        isWinner: false
-      },
-      mvp: {
-        name: currentGamerTag.split(' ')[0] || 'M14',
-        avatar: userClan.logo,
-        kills: 24,
-        deaths: 12,
-        rating: '1.42',
-        clanTag: userClan.tag
-      },
-      clan1Players: userClan.members.slice(0, 5).map(m => ({
-        name: m.name,
-        kills: 18,
-        deaths: 11,
-        assists: 5,
-        adr: '92.4',
-        rating: '1.25'
-      })),
-      clan2Players: opponent.members.slice(0, 5).map(m => ({
-        name: m.name,
-        kills: 14,
-        deaths: 16,
-        assists: 4,
-        adr: '74.2',
-        rating: '0.92'
-      }))
-    };
-
-    const updatedMatches = [newMatch, ...clanMatches];
-    setClanMatches(updatedMatches);
-    try {
-      localStorage.setItem('vortex_clan_matches_list', JSON.stringify(updatedMatches));
-    } catch (_) {}
-
-    // Update user clan stats
-    const nextClan = {
-      ...userClan,
-      stats: {
-        ...userClan.stats,
-        matches: userClan.stats.matches + 1,
-        wins: userClan.stats.wins + 1,
-        streak: userClan.stats.streak + 1,
-        avgElo: userClan.stats.avgElo + 25,
-        winrate: `${Math.round(((userClan.stats.wins + 1) / (userClan.stats.matches + 1)) * 1000) / 10}%`
-      }
-    };
-    setUserClan(nextClan);
-    try {
-      localStorage.setItem('vortex_user_clan_data', JSON.stringify(nextClan));
-    } catch (_) {}
-
-    setToast(`⚔️ Official 5v5 Clan Match registered! [${userClan.tag}] ${userScore} - ${oppScore} [${opponent.tag}] on ${pickedMap.displayName} (+$75.00 Cash Prize)!`);
-  };
-
   // Load user clan from localStorage or initialize with M14 / Caliber Clutch default
   const [userClan, setUserClan] = useState<ClanData>(() => {
     try {
@@ -2982,9 +2800,13 @@ export const VortexClanHub: React.FC<VortexClanHubProps> = ({
 
               <div className="flex flex-wrap items-center gap-2.5">
                 <button
-                  onClick={handleSimulateNewClanMatch}
+                  onClick={() => {
+                    sound.playSelect();
+                    onNavigateTab('play');
+                    setToast('Entering 5v5 Clan Matchmaking Queue...');
+                  }}
                   className="px-4 py-2 rounded-xl bg-gradient-to-r from-[#84CC16] to-[#A3E635] hover:brightness-110 text-slate-950 font-display font-black text-xs uppercase tracking-wider flex items-center gap-2 cursor-pointer shadow-lg active:scale-95 transition"
-                  title="Queue and schedule official 5v5 clan match against verified European squads"
+                  title="Queue official 5v5 clan match against verified European squads"
                 >
                   <Swords className="w-3.5 h-3.5 stroke-[2.5]" />
                   <span>Find 5v5 Clan Match</span>

@@ -5395,7 +5395,7 @@ export const VortexDashboard: React.FC<VortexDashboardProps> = ({
                         <p className="text-xs font-mono text-slate-400">
                           {tourneyFilter === 'registered' 
                             ? "You haven't enrolled in any tournament yet. Browse active tournaments or host your own."
-                            : "There are no mock tournaments online. Only real Caliber Clutch tournaments hosted by administrators and verified organizers appear here."}
+                            : "There are no inactive tournaments online. Only official Caliber Clutch tournaments hosted by administrators and verified organizers appear here."}
                         </p>
                       </div>
                       <button
@@ -7181,13 +7181,27 @@ export const VortexDashboard: React.FC<VortexDashboardProps> = ({
                   ACCEPT MATCH
                 </button>
               ) : (
-                <div className="p-4 rounded-2xl bg-[#A3E635]/15 border border-[#A3E635]/40 text-[#A3E635] text-center font-display font-black text-sm uppercase tracking-wider flex items-center justify-center gap-2">
-                  <Check className="w-5 h-5" />
-                  <span>
-                    {acceptedPlayerList.length >= 10 
-                      ? 'ALL PLAYERS ACCEPTED • ENTERING MATCH ROOM...' 
-                      : `ACCEPTED • WAITING FOR OTHERS (${acceptedPlayerList.length}/10)...`}
-                  </span>
+                <div className="space-y-2">
+                  <div className="p-4 rounded-2xl bg-[#A3E635]/15 border border-[#A3E635]/40 text-[#A3E635] text-center font-display font-black text-sm uppercase tracking-wider flex items-center justify-center gap-2">
+                    <Check className="w-5 h-5" />
+                    <span>
+                      {acceptedPlayerList.length >= 10 
+                        ? 'ALL PLAYERS ACCEPTED • ENTERING MATCH ROOM...' 
+                        : `ACCEPTED • WAITING FOR OTHERS (${acceptedPlayerList.length}/10)...`}
+                    </span>
+                  </div>
+                  {isProjectAdmin && (
+                    <button
+                      onClick={() => {
+                        sound.playTournamentVictory();
+                        setMatchFoundModal(false);
+                        setIsMatchRoomOpen(true);
+                      }}
+                      className="w-full py-2.5 rounded-xl bg-white/10 hover:bg-white/20 text-white font-mono font-bold text-xs uppercase tracking-wider transition cursor-pointer"
+                    >
+                      Instant Enter Match Room (Admin Shortcut) →
+                    </button>
+                  )}
                 </div>
               )}
             </div>

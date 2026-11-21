@@ -13,6 +13,7 @@ import {
   Crown
 } from 'lucide-react';
 import { sound } from '../../utils/soundEffects';
+import { supabase } from '../../lib/supabase';
 
 export interface ChatMessage {
   id: string;
@@ -46,26 +47,6 @@ const QUICK_TACTICAL_PHRASES = [
   "Nice try, good comms 👍"
 ];
 
-const BOT_REPLIES: Record<string, string[]> = {
-  default: [
-    "Roger that, let's lock in! 🎯",
-    "Agreed, queue standard 5v5",
-    "I got B-site smoke ready",
-    "Focus on crosshair placement guys",
-    "LFG! Let's get that +25 ELO"
-  ],
-  ban: [
-    "100% ban Vertigo, Anubis is fine too",
-    "Let's play Mirage or Inferno",
-    "Banning Nuke first"
-  ],
-  ready: [
-    "Ready! Start queue!",
-    "Locked and loaded 🔫",
-    "Waiting for captain to hit find match"
-  ]
-};
-
 export const VortexPartyChat: React.FC<PartyChatProps> = ({
   currentGamerTag,
   currentAvatarUrl,
@@ -85,16 +66,32 @@ export const VortexPartyChat: React.FC<PartyChatProps> = ({
       text: 'Party formed. Voice comms connected (CS2 sub-tick encrypted).',
       timestamp: 'Just now',
       isSystem: true
-    },
-    {
-      id: 'm1',
-      sender: 'M18',
-      avatar: '/images/faceit_m18_badge.png',
-      verification: 'vip',
-      text: 'Hey team, ready for ranked 5v5! Ban Vertigo if we get captain.',
-      timestamp: '1m ago'
     }
   ]);
+
+  // Real-Time Party Chat Channel via Supabase
+  useEffect(() => {
+    const channel = supabase.channel('caliber_party_chat_live', {
+      config: { broadcast: { ack: true } }
+    });
+
+    channel
+      .on('broadcast', { event: 'party_msg' }, ({ payload }) => {
+        if (payload && payload.sender !== currentGamerTag) {
+          if (!isMuted) sound.playChatMessage();
+          setMessages(prev => {
+            if (prev.some(m => m.id === payload.id)) return prev;
+            return [...prev, payload];
+          });
+          if (!isOpen) setUnreadCount(prev => prev + 1);
+        }
+      })
+      .subscribe();
+
+    return () => {
+      supabase.removeChannel(channel);
+    };
+  }, [currentGamerTag, isMuted, isOpen]);
 
   const scrollToBottom = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
@@ -117,7 +114,7 @@ export const VortexPartyChat: React.FC<PartyChatProps> = ({
     const timeStr = now.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
 
     const newMsg: ChatMessage = {
-      id: `msg-${Date.now()}`,
+      id: `msg-${Date.now()}-${Math.random().toString(36).substr(2, 4)}`,
       sender: currentGamerTag,
       avatar: currentAvatarUrl,
       verification: 'vip',
@@ -128,39 +125,12 @@ export const VortexPartyChat: React.FC<PartyChatProps> = ({
     setMessages(prev => [...prev, newMsg]);
     if (!textToSend) setInputValue('');
 
-    // Simulated reply from M18 or another teammate
-    const otherMembers = partyMembers.filter(m => m.name !== currentGamerTag);
-    if (otherMembers.length > 0) {
-      setTimeout(() => {
-        const bot = otherMembers[Math.floor(Math.random() * otherMembers.length)];
-        let pool = BOT_REPLIES.default;
-        const lower = text.toLowerCase();
-        if (lower.includes('ban') || lower.includes('vertigo') || lower.includes('mirage')) {
-          pool = BOT_REPLIES.ban;
-        } else if (lower.includes('ready') || lower.includes('start') || lower.includes('go')) {
-          pool = BOT_REPLIES.ready;
-        }
-        const replyText = pool[Math.floor(Math.random() * pool.length)];
-
-        if (!isMuted) sound.playChatMessage();
-
-        setMessages(prev => [
-          ...prev,
-          {
-            id: `msg-reply-${Date.now()}`,
-            sender: bot.name,
-            avatar: bot.avatar,
-            verification: bot.verification || 'vip',
-            text: replyText,
-            timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
-          }
-        ]);
-
-        if (!isOpen) {
-          setUnreadCount(prev => prev + 1);
-        }
-      }, 1200);
-    }
+    // Broadcast in real-time across Supabase to all other party participants
+    supabase.channel('caliber_party_chat_live').send({
+      type: 'broadcast',
+      event: 'party_msg',
+      payload: newMsg
+    }).catch(() => {});
   };
 
   return (
