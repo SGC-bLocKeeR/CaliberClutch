@@ -16,6 +16,7 @@ import {
   Home,
   Crown, 
   Eye, 
+  EyeOff,
   ArrowRight,
   ArrowLeft,
   Menu,
@@ -180,25 +181,25 @@ const COMING_SOON_TABS: Record<string, ComingSoonData> = {
     title: 'Scrims Hub Arena (5v5)',
     badge: 'REOPENING SOON • PRACC LOBBIES',
     subtitle: 'Team Practice & Competitive Matchmaking',
-    announcement: 'The Scrims Hub Arena is preparing for its official relaunch for all registered squads and clans. Ultra-low ping CS2 Sub-Tick private servers are deployed (Frankfurt, Stockholm, London), alongside a comprehensive map & captain veto system, and automatic GOTV demo recording after every match for in-depth tactical reviews. Doors open shortly!',
+    announcement: 'The Scrims Hub Arena is preparing for its official relaunch for all registered squads and clans. Low-latency private match lobbies are deployed (Frankfurt, Stockholm, London), alongside a comprehensive map & captain veto system, and automatic demo recording after every match for in-depth tactical reviews. Doors open shortly!',
     desc: 'Dedicated practice and tactical scrimmage space for organized 5v5 rosters is in final calibration.',
     progress: 82,
-    phase: 'Phase 4/5: CS2 Sub-Tick Server Validation',
+    phase: 'Phase 4/5: Matchmaking Validation',
     icon: Swords,
     color: '#A3E635',
     accentRgb: '163, 230, 53',
     highlights: [
       { title: 'Dedicated Squad Matchmaking', desc: 'Balanced opponent matchmaking calibrated to team ELO tiers.' },
       { title: 'Captain Map Veto System', desc: 'Official active duty map pick/ban and side knife rounds.' },
-      { title: 'Private CS2 Sub-Tick Servers', desc: 'Peak performance with optimized sub-tick routing and zero packet loss.' },
-      { title: 'Instant GOTV Demo Access', desc: 'Immediate access to parsed .dem files for round-by-round replay analysis.' }
+      { title: 'Private Match Infrastructure', desc: 'Peak performance with optimized low-latency routing and zero packet loss.' },
+      { title: 'Instant Demo Access', desc: 'Immediate access to parsed replay files for round-by-round tactical analysis.' }
     ]
   },
   aim: {
     title: '1v1 Aim Duel Arena',
     badge: 'REOPENING SOON • 1V1 DUELS',
     subtitle: 'Head-to-Head Showdowns & Dedicated ELO Ladder',
-    announcement: 'The ultimate proving ground for precision aim, reaction speed, and mechanical weapon mastery is returning! Classic duel arenas (Aim Botz, Redline, AWP Arena) are calibrated with sub-tick hit registration and an independent 1v1 ELO rating ladder. Get ready to challenge your rivals to intense head-to-head duels!',
+    announcement: 'The ultimate proving ground for precision aim, reaction speed, and mechanical weapon mastery is returning! Classic duel arenas (Aim Botz, Redline, AWP Arena) are calibrated with high-precision hit registration and an independent 1v1 ELO rating ladder. Get ready to challenge your rivals to intense head-to-head duels!',
     desc: 'Individual duel arena refined for absolute hit precision and competitive integrity.',
     progress: 78,
     phase: 'Phase 3/5: Hit-Reg & Anti-Peek Calibration',
@@ -208,7 +209,7 @@ const COMING_SOON_TABS: Record<string, ComingSoonData> = {
     highlights: [
       { title: 'Fast First-to-16 Duels', desc: 'Dynamic rifle and pistol duels: AK-47, M4A1-S, AWP, Desert Eagle.' },
       { title: 'Aim-Calibrated Arenas', desc: 'Optimized low-latency environments built for direct aim battles.' },
-      { title: 'Sub-Tick Hit Registration', desc: 'Pixel-accurate headshot detection with zero registry deviation.' },
+      { title: 'Precision Hit Registration', desc: 'Pixel-accurate headshot detection with zero registry deviation.' },
       { title: 'Independent 1v1 ELO Ladder', desc: 'Climb to the pinnacle of the solo duelist leaderboards.' }
     ]
   },
@@ -1544,15 +1545,17 @@ export const VortexDashboard: React.FC<VortexDashboardProps> = ({
   const [newTourneyOrganizer, setNewTourneyOrganizer] = useState<string>('');
   const [newTourneyCashPrize, setNewTourneyCashPrize] = useState('1000');
   const [newTourneyMaxTeams, setNewTourneyMaxTeams] = useState<number>(16);
-  const [newTourneyEntryFee, setNewTourneyEntryFee] = useState<number>(63); // Auto-calculated: Math.ceil(1000 / 16) = 63
+  const [newTourneyEntryFee, setNewTourneyEntryFee] = useState<number>(69); // Auto-calculated: Math.ceil((1000 * 1.10) / 16) = 69
   const [newTourneyIsPaid, setNewTourneyIsPaid] = useState<boolean>(true);
+  const [revealTournamentStreamIp, setRevealTournamentStreamIp] = useState<boolean>(false);
 
-  // Auto-calculate all entry fees & revenue split (5% Admin + 5% Organizer + 90% Prize Pool)
+  // Auto-calculate all entry fees & financial model (100% Untouched Cash Prize + Participant-Funded 5% Fees)
   const handleCashPrizeChange = (val: string) => {
     setNewTourneyCashPrize(val);
     const numeric = parseFloat(val.replace(/[^0-9.]/g, ''));
     if (numeric && numeric > 0 && newTourneyMaxTeams > 0) {
-      const calcFee = Math.ceil(numeric / newTourneyMaxTeams);
+      const totalFund = numeric * 1.10;
+      const calcFee = Math.ceil(totalFund / newTourneyMaxTeams);
       setNewTourneyEntryFee(calcFee);
     }
   };
@@ -1562,7 +1565,8 @@ export const VortexDashboard: React.FC<VortexDashboardProps> = ({
     setNewTourneyMaxTeams(teams);
     const numeric = parseFloat(newTourneyCashPrize.replace(/[^0-9.]/g, '')) || 1000;
     if (numeric > 0 && teams > 0) {
-      const calcFee = Math.ceil(numeric / teams);
+      const totalFund = numeric * 1.10;
+      const calcFee = Math.ceil(totalFund / teams);
       setNewTourneyEntryFee(calcFee);
     }
   };
@@ -1571,8 +1575,9 @@ export const VortexDashboard: React.FC<VortexDashboardProps> = ({
   const handleEntryFeeChange = (fee: number) => {
     const safeFee = Math.max(1, fee);
     setNewTourneyEntryFee(safeFee);
-    const totalGross = safeFee * newTourneyMaxTeams;
-    setNewTourneyCashPrize(String(totalGross));
+    const totalFund = safeFee * newTourneyMaxTeams;
+    const prizePool = Math.round(totalFund / 1.10);
+    setNewTourneyCashPrize(String(prizePool));
   };
   const [newTourneyStructure, setNewTourneyStructure] = useState<string>('Single Elimination');
   const [newTourneyPlayoffsFormat, setNewTourneyPlayoffsFormat] = useState<'BO1' | 'BO3'>('BO1');
@@ -3085,7 +3090,7 @@ export const VortexDashboard: React.FC<VortexDashboardProps> = ({
                             CALIBER CLUTCH
                           </h1>
                           <p className="text-sm font-mono text-slate-300 max-w-2xl">
-                            Competitive Counter-Strike 2 arena with dedicated European CS2 Sub-Tick servers, tournament prize pools, and official leaderboards.
+                            Competitive Counter-Strike 2 arena with ranked matchmaking, tournament cash prize pools, and official leaderboards.
                           </p>
                         </div>
                       </div>
@@ -3101,7 +3106,7 @@ export const VortexDashboard: React.FC<VortexDashboardProps> = ({
                           <Play className="w-5 h-5 fill-[#A3E635]" />
                         </div>
                         <h4 className="text-sm font-black font-display text-white uppercase tracking-wider">Play 5v5 Matchmaking</h4>
-                        <p className="text-xs text-slate-400 mt-1">CS2 Sub-Tick dedicated Europe queue.</p>
+                        <p className="text-xs text-slate-400 mt-1">Official 5v5 competitive European queue.</p>
                       </div>
 
                       <div 
@@ -4923,17 +4928,17 @@ export const VortexDashboard: React.FC<VortexDashboardProps> = ({
                           </div>
                         </div>
 
-                        {/* 3. AUTOMATED REVENUE & PRIZE POOL SPLIT (5% Admin • 5% Organizer • 90% Winners) */}
+                        {/* 3. AUTOMATED FINANCIAL SPLIT (100% Pure Untouched Prize Pool + Participant-Funded 5% Fees) */}
                         {(() => {
                           const poolNumeric = parseFloat(String(newTourneyCashPrize).replace(/[^0-9.]/g, '')) || 1000;
-                          const grossTotal = poolNumeric > 0 ? poolNumeric : (newTourneyMaxTeams * newTourneyEntryFee);
-                          const adminProfit = grossTotal * 0.05;
-                          const organizerReward = grossTotal * 0.05;
-                          const winnersPrize = Math.round(grossTotal * 0.90);
-                          const firstPrize = Math.round(winnersPrize * 0.70);
-                          const secondPrize = Math.round(winnersPrize * 0.20);
-                          const thirdPrize = Math.max(0, winnersPrize - firstPrize - secondPrize);
-                          const feePerTeam = Math.ceil(grossTotal / newTourneyMaxTeams);
+                          const prizePool = poolNumeric > 0 ? poolNumeric : Math.round((newTourneyMaxTeams * newTourneyEntryFee) / 1.10);
+                          const platformFee = prizePool * 0.05;
+                          const organizerFee = prizePool * 0.05;
+                          const totalCollected = prizePool + platformFee + organizerFee; // 100% prize + 5% platform + 5% organizer
+                          const firstPrize = Math.round(prizePool * 0.70);
+                          const secondPrize = Math.round(prizePool * 0.20);
+                          const thirdPrize = Math.max(0, prizePool - firstPrize - secondPrize);
+                          const feePerTeam = Math.ceil(totalCollected / newTourneyMaxTeams);
                           const feePerPlayer = (feePerTeam / 5).toFixed(2);
 
                           return (
@@ -4942,53 +4947,53 @@ export const VortexDashboard: React.FC<VortexDashboardProps> = ({
                                 <div>
                                   <label className="text-[11px] text-amber-400 uppercase tracking-wider block font-bold flex items-center gap-1.5">
                                     <Coins className="w-4 h-4 text-amber-400" />
-                                    <span>Automated Financial Split (5% Admin + 5% Organizer + 90% Prize Pool)</span>
+                                    <span>Automated Financial Split (100% Untouched Cash Prize + 5% Participant-Funded Fees)</span>
                                   </label>
                                   <span className="text-xs text-slate-400">
-                                    Automatically divided from €{grossTotal.toLocaleString()} total pool across {newTourneyMaxTeams} teams.
+                                    Full €{prizePool.toLocaleString()} prize pool is 100% untouched for winners. Platform & host fees are paid upon entry.
                                   </span>
                                 </div>
                                 <span className="px-3 py-1 rounded-xl bg-gradient-to-r from-amber-400 to-[#A3E635] text-slate-950 font-mono font-black text-xs uppercase tracking-wider shadow-md">
-                                  5% Admin • 5% Organizer • 90% Prize
+                                  100% Prize Untouched • +5% Admin • +5% Host
                                 </span>
                               </div>
 
                               {/* Live 4-Pillar Financial Summary Bar */}
                               <div className="grid grid-cols-2 sm:grid-cols-4 gap-2.5">
-                                <div className="p-3 rounded-xl bg-white/5 border border-white/10 text-center">
-                                  <div className="text-[10px] font-mono text-slate-400 uppercase">Gross Pool (100%)</div>
-                                  <div className="text-sm sm:text-base font-black font-mono text-white mt-0.5">€{grossTotal.toLocaleString()}</div>
-                                  <div className="text-[9px] font-mono text-slate-400">Total Buy-In</div>
-                                </div>
-                                <div className="p-3 rounded-xl bg-amber-500/10 border border-amber-500/25 text-center">
-                                  <div className="text-[10px] font-mono text-amber-400 uppercase font-bold flex items-center justify-center gap-1">
-                                    <ShieldCheck className="w-3 h-3 text-amber-400" /> Admin (5%)
+                                <div className="p-3 rounded-xl bg-emerald-500/10 border border-emerald-500/25 text-center">
+                                  <div className="text-[10px] font-mono text-emerald-400 uppercase font-bold flex items-center justify-center gap-1">
+                                    <Trophy className="w-3 h-3 text-emerald-400" /> Pure Prize (100%)
                                   </div>
-                                  <div className="text-sm sm:text-base font-black font-mono text-amber-300 mt-0.5">+€{adminProfit.toFixed(2)}</div>
-                                  <div className="text-[9px] font-mono text-amber-400/80">Platform Net Fee</div>
+                                  <div className="text-sm sm:text-base font-black font-mono text-[#A3E635] mt-0.5">€{prizePool.toLocaleString()}</div>
+                                  <div className="text-[9px] font-mono text-emerald-400/80">Untouched for Winners</div>
                                 </div>
                                 <div className="p-3 rounded-xl bg-cyan-500/10 border border-cyan-500/25 text-center">
                                   <div className="text-[10px] font-mono text-cyan-400 uppercase font-bold flex items-center justify-center gap-1">
-                                    <Award className="w-3 h-3 text-cyan-400" /> Host (5%)
+                                    <Award className="w-3 h-3 text-cyan-400" /> Host Fee (+5%)
                                   </div>
-                                  <div className="text-sm sm:text-base font-black font-mono text-cyan-300 mt-0.5">+€{organizerReward.toFixed(2)}</div>
-                                  <div className="text-[9px] font-mono text-cyan-400/80">Organizer Commission</div>
+                                  <div className="text-sm sm:text-base font-black font-mono text-cyan-300 mt-0.5">+€{organizerFee.toFixed(2)}</div>
+                                  <div className="text-[9px] font-mono text-cyan-400/80">Organizer Reward</div>
                                 </div>
-                                <div className="p-3 rounded-xl bg-emerald-500/10 border border-emerald-500/25 text-center">
-                                  <div className="text-[10px] font-mono text-emerald-400 uppercase font-bold flex items-center justify-center gap-1">
-                                    <Trophy className="w-3 h-3 text-emerald-400" /> Winners (90%)
+                                <div className="p-3 rounded-xl bg-amber-500/10 border border-amber-500/25 text-center">
+                                  <div className="text-[10px] font-mono text-amber-400 uppercase font-bold flex items-center justify-center gap-1">
+                                    <ShieldCheck className="w-3 h-3 text-amber-400" /> Admin Fee (+5%)
                                   </div>
-                                  <div className="text-sm sm:text-base font-black font-mono text-[#A3E635] mt-0.5">€{winnersPrize.toLocaleString()}</div>
-                                  <div className="text-[9px] font-mono text-emerald-400/80">Instant Payout</div>
+                                  <div className="text-sm sm:text-base font-black font-mono text-amber-300 mt-0.5">+€{platformFee.toFixed(2)}</div>
+                                  <div className="text-[9px] font-mono text-amber-400/80">Platform Net Fee</div>
+                                </div>
+                                <div className="p-3 rounded-xl bg-white/5 border border-white/10 text-center">
+                                  <div className="text-[10px] font-mono text-slate-400 uppercase font-bold">Total Entry Fund</div>
+                                  <div className="text-sm sm:text-base font-black font-mono text-white mt-0.5">€{totalCollected.toLocaleString()}</div>
+                                  <div className="text-[9px] font-mono text-slate-400">Total Entrant Pool</div>
                                 </div>
                               </div>
 
-                              {/* Winner Tier Cash Prize Distribution (from 90% pool) */}
+                              {/* Winner Tier Cash Prize Distribution (from 100% untouched pool) */}
                               <div className="p-3.5 rounded-xl bg-black/40 border border-white/5 space-y-2">
                                 <div className="flex items-center justify-between text-[11px] font-mono">
                                   <span className="text-[#A3E635] font-bold flex items-center gap-1.5">
                                     <Trophy className="w-3.5 h-3.5 text-[#A3E635]" />
-                                    <span>Winner Prize Distribution (100% of 90% Prize Pool):</span>
+                                    <span>Winner Prize Distribution (100% Pure Cash Pool):</span>
                                   </span>
                                   <span className="text-emerald-400 text-[10px] font-bold">Instant Balance Credit</span>
                                 </div>
@@ -5023,18 +5028,18 @@ export const VortexDashboard: React.FC<VortexDashboardProps> = ({
                                 </div>
                               </div>
 
-                              {/* Host Exclusive Privileges: Spectator CSTV Stream IP */}
+                              {/* Host Exclusive Privileges: Spectator Stream Access (Masked/Protected) */}
                               <div className="p-3.5 rounded-xl bg-gradient-to-r from-cyan-950/40 via-[#0B1522] to-cyan-950/40 border border-cyan-500/30 flex items-start gap-3">
                                 <Radio className="w-5 h-5 text-cyan-400 shrink-0 mt-0.5 animate-pulse" />
                                 <div className="space-y-1 text-left min-w-0">
                                   <div className="text-xs font-bold text-cyan-300 flex flex-wrap items-center gap-2">
-                                    <span>Exclusive Organizer Stream Rights & CSTV Spectator Access</span>
+                                    <span>Exclusive Organizer Stream Rights & Spectator Access</span>
                                     <span className="px-2 py-0.5 rounded text-[9px] font-mono font-bold bg-cyan-500/20 text-cyan-300 border border-cyan-500/40">
-                                      120s Anti-Ghosting Delay Protected
+                                      120s Delay Protected
                                     </span>
                                   </div>
                                   <p className="text-[11px] font-mono text-slate-300 leading-relaxed">
-                                    As tournament host, you receive authorized spectator CSTV relay credentials (<code className="text-cyan-300 font-bold select-all">connect tv.caliberclutch.gg:27020; password cc_cast</code>) with free-cam observer tools to broadcast your matches live on Twitch, YouTube, or Kick.
+                                    As tournament host, you receive authorized spectator relay credentials (<span className="text-cyan-300 font-bold blur-sm select-none">connect tv.caliberclutch.gg:27020; password cc_cast</span>) with free-cam observer tools to broadcast your matches live on Twitch, YouTube, or Kick.
                                   </p>
                                 </div>
                               </div>
@@ -5112,19 +5117,23 @@ export const VortexDashboard: React.FC<VortexDashboardProps> = ({
                             }
 
                             const poolNumeric = parseFloat(String(newTourneyCashPrize).replace(/[^0-9.]/g, '')) || 1000;
-                            const grossPool = poolNumeric > 0 ? poolNumeric : (newTourneyMaxTeams * newTourneyEntryFee);
-                            const adminProfit = grossPool * 0.05;
-                            const organizerReward = grossPool * 0.05;
-                            const winnersPrize = Math.round(grossPool * 0.90);
-                            const feePerTeam = Math.ceil(grossPool / newTourneyMaxTeams);
+                            const prizePool = poolNumeric > 0 ? poolNumeric : Math.round((newTourneyMaxTeams * newTourneyEntryFee) / 1.10);
+                            const adminProfit = prizePool * 0.05;
+                            const organizerReward = prizePool * 0.05;
+                            const totalCollected = prizePool + adminProfit + organizerReward;
+                            const feePerTeam = Math.ceil(totalCollected / newTourneyMaxTeams);
+                            const firstPrize = Math.round(prizePool * 0.70);
+                            const secondPrize = Math.round(prizePool * 0.20);
+                            const thirdPrize = Math.max(0, prizePool - firstPrize - secondPrize);
 
                             const createdItem = {
                               id: `custom-${Date.now()}`,
                               title: newTourneyTitle.trim(),
                               type: 'COMMUNITY CLAN CUP',
                               game: 'CS2 5v5 Tactical',
-                              cashPrize: `€${winnersPrize.toLocaleString()}`,
-                              totalPool: grossPool,
+                              cashPrize: `€${prizePool.toLocaleString()}`,
+                              totalPool: prizePool,
+                              totalCollected: totalCollected,
                               teams: `0 / ${newTourneyMaxTeams}`,
                               maxTeams: newTourneyMaxTeams,
                               registeredTeamsCount: 0,
@@ -5153,9 +5162,9 @@ export const VortexDashboard: React.FC<VortexDashboardProps> = ({
                               playoffsFormat: newTourneyPlayoffsFormat,
                               finalsFormat: newTourneyFinalsFormat,
                               region: newTourneyRegion || 'European Online Bracket',
-                              payout1st: `70% Cash (€${Math.round(winnersPrize * 0.70).toLocaleString()})`,
-                              payout2nd: `20% Cash (€${Math.round(winnersPrize * 0.20).toLocaleString()})`,
-                              payout3rd: `10% Cash (€${Math.max(0, winnersPrize - Math.round(winnersPrize * 0.70) - Math.round(winnersPrize * 0.20)).toLocaleString()})`
+                              payout1st: `70% Cash (€${firstPrize.toLocaleString()})`,
+                              payout2nd: `20% Cash (€${secondPrize.toLocaleString()})`,
+                              payout3rd: `10% Cash (€${thirdPrize.toLocaleString()})`
                             };
 
                             setCustomTournaments((prev: any[]) => {
@@ -5212,10 +5221,10 @@ export const VortexDashboard: React.FC<VortexDashboardProps> = ({
                         <div className="p-4 rounded-2xl bg-black/40 border border-white/5 space-y-2 hover:border-[#A3E635]/30 transition">
                           <div className="flex items-center gap-2 text-white font-bold">
                             <Target className="w-4 h-4 text-[#A3E635] shrink-0" />
-                            <span>1. Match Format (CS2 MR12 & Overtime)</span>
+                            <span>1. Match Format (Competitive Regulations & Overtime)</span>
                           </div>
                           <p className="text-[11px] text-slate-400 pl-6 leading-relaxed">
-                            Matches are played according to official CS2 MR12 regulations (12 rounds per half, 24 rounds total). In the event of a 12-12 tie, an MR3 Overtime ($10,000 starting cash) is played immediately until a clan wins with a 2-round advantage.
+                            Matches are played according to standard competitive regulations (12 rounds per half, 24 rounds total). In the event of a 12-12 tie, an overtime is played immediately until a clan wins with a 2-round advantage.
                           </p>
                         </div>
 
@@ -5237,7 +5246,7 @@ export const VortexDashboard: React.FC<VortexDashboardProps> = ({
                             <span>3. Check-In & Ready Up (15-Minute Forfeit Timer)</span>
                           </div>
                           <p className="text-[11px] text-slate-400 pl-6 leading-relaxed">
-                            Clans must click Ready Up in the match lobby and connect to the dedicated server within 15 minutes of server IP generation. Any clan failing to show up within 15 minutes receives an automatic default loss (Def-Loss).
+                            Clans must click Ready Up in the match lobby and join their scheduled match within 15 minutes of lobby generation. Any clan failing to show up within 15 minutes receives an automatic default loss (Def-Loss).
                           </p>
                         </div>
 
@@ -5285,14 +5294,14 @@ export const VortexDashboard: React.FC<VortexDashboardProps> = ({
                           </p>
                         </div>
 
-                        {/* Rule 8: Valve CS2 Tournament Standards & Sub-Tick Dedicated Architecture */}
+                        {/* Rule 8: Competitive Integrity & Fair Play Guarantee */}
                         <div className="p-4 rounded-2xl bg-black/40 border border-white/5 space-y-2 hover:border-sky-400/30 transition md:col-span-2 lg:col-span-2">
                           <div className="flex items-center gap-2 text-white font-bold">
-                            <Radio className="w-4 h-4 text-sky-400 shrink-0" />
-                            <span>8. Valve Tournament Standards & Sub-Tick Integrity</span>
+                            <ShieldCheck className="w-4 h-4 text-sky-400 shrink-0" />
+                            <span>8. Competitive Integrity & Fair Play Guarantee</span>
                           </div>
                           <p className="text-[11px] text-slate-400 pl-6 leading-relaxed">
-                            All tournament matches run strictly on dedicated European CS2 Sub-Tick servers in full compliance with Valve Corporation's official Tournament Limited License regulations. Hardcoded uniform sub-tick packet timing guarantees genuine bullet registration and eliminates arbitrary tickrate discrepancies. In strict compliance with Valve regulations, CaliberClutch enforces an open ecosystem with zero unregulated skin gambling or illicit betting sponsorships.
+                            All tournament matches run in strict compliance with official esports tournament regulations. CaliberClutch enforces an authentic, transparent competitive ecosystem with zero unregulated skin gambling, match fixing, or unauthorized third-party interference.
                           </p>
                         </div>
                       </div>
@@ -5604,15 +5613,15 @@ export const VortexDashboard: React.FC<VortexDashboardProps> = ({
                           })()}
                         </div>
 
-                        <div className="pt-4 border-t border-[#1C2233] space-y-3 w-full max-w-full">
+                        <div className="pt-4 border-t border-[#1C2233] space-y-2.5 w-full max-w-full overflow-hidden">
                           {/* Top Row: Slots Counter & Organizer/Caster Utility Tools */}
-                          <div className="flex flex-wrap items-center justify-between gap-2 w-full">
+                          <div className="flex items-center justify-between gap-2 w-full flex-wrap">
                             <div className="flex items-center gap-2 text-xs font-mono text-slate-300 font-bold shrink-0">
                               <span className="w-2 h-2 rounded-full bg-[#A3E635] animate-pulse" />
                               <span>Slots: {t.teams}</span>
                             </div>
 
-                            <div className="flex flex-wrap items-center gap-1.5">
+                            <div className="flex items-center gap-1.5 flex-wrap justify-end">
                               <button
                                 type="button"
                                 onClick={() => {
@@ -5620,7 +5629,7 @@ export const VortexDashboard: React.FC<VortexDashboardProps> = ({
                                   setTourneyModalTab('bracket');
                                   setSelectedBracketTourney(t);
                                 }}
-                                className="px-2.5 py-1.5 rounded-xl bg-white/5 hover:bg-white/10 text-xs font-mono text-slate-200 hover:text-white border border-white/10 transition cursor-pointer flex items-center gap-1.5"
+                                className="px-2 py-1.5 rounded-xl bg-white/5 hover:bg-white/10 text-xs font-mono text-slate-200 hover:text-white border border-white/10 transition cursor-pointer flex items-center gap-1.5 shrink-0"
                               >
                                 <Eye className="w-3.5 h-3.5 text-amber-400" />
                                 <span>Bracket</span>
@@ -5641,10 +5650,10 @@ export const VortexDashboard: React.FC<VortexDashboardProps> = ({
                                         setTourneyModalTab('teams');
                                         setSelectedBracketTourney(t);
                                       }}
-                                      className="px-2.5 py-1.5 rounded-xl bg-amber-500/15 hover:bg-amber-500/25 text-xs font-mono text-amber-300 hover:text-white border border-amber-500/30 transition cursor-pointer flex items-center gap-1.5"
+                                      className="px-2 py-1.5 rounded-xl bg-amber-500/15 hover:bg-amber-500/25 text-xs font-mono text-amber-300 hover:text-white border border-amber-500/30 transition cursor-pointer flex items-center gap-1.5 shrink-0"
                                     >
                                       <Users className="w-3.5 h-3.5 text-amber-400" />
-                                      <span>Manage</span>
+                                      <span>Teams</span>
                                     </button>
                                     <button
                                       type="button"
@@ -5653,10 +5662,10 @@ export const VortexDashboard: React.FC<VortexDashboardProps> = ({
                                         setTourneyModalTab('admin');
                                         setSelectedBracketTourney(t);
                                       }}
-                                      className="px-2.5 py-1.5 rounded-xl bg-cyan-500/15 hover:bg-cyan-500/25 text-xs font-mono text-cyan-300 hover:text-white border border-cyan-500/30 transition cursor-pointer flex items-center gap-1.5"
+                                      className="px-2 py-1.5 rounded-xl bg-cyan-500/15 hover:bg-cyan-500/25 text-xs font-mono text-cyan-300 hover:text-white border border-cyan-500/30 transition cursor-pointer flex items-center gap-1.5 shrink-0"
                                     >
                                       <Radio className="w-3.5 h-3.5 text-cyan-400" />
-                                      <span>Live Stream</span>
+                                      <span>Stream</span>
                                     </button>
                                   </>
                                 );
@@ -6758,7 +6767,7 @@ export const VortexDashboard: React.FC<VortexDashboardProps> = ({
                     <div className="flex items-center justify-between pb-3 border-b border-white/[0.06]">
                       <div>
                         <h3 className="text-lg font-black font-display text-white">Competitive Map Performance</h3>
-                        <p className="text-xs text-slate-400">Telemetry across official CS2 Sub-Tick ranked pool</p>
+                        <p className="text-xs text-slate-400">Telemetry across official ranked competitive pool</p>
                       </div>
                       <span className="text-xs font-mono text-[#A3E635]">Season 1</span>
                     </div>
@@ -6810,7 +6819,7 @@ export const VortexDashboard: React.FC<VortexDashboardProps> = ({
                   <div className="flex items-center justify-between pb-3 border-b border-white/[0.06]">
                     <div>
                       <h3 className="text-lg font-black font-display text-white">Weapon Mastery & Accuracy</h3>
-                      <p className="text-xs text-[#94A3B8]">Telemetry synchronized with CS2 competitive servers</p>
+                      <p className="text-xs text-[#94A3B8]">Telemetry synchronized with competitive matches</p>
                     </div>
                     <span className="text-xs font-mono text-emerald-400 font-bold">Season 1 Data</span>
                   </div>
@@ -6870,7 +6879,7 @@ export const VortexDashboard: React.FC<VortexDashboardProps> = ({
                   <div className="flex items-center justify-between pb-3 border-b border-white/[0.06]">
                     <div>
                       <h3 className="text-xl font-bold font-sans text-white tracking-tight">Recent matches</h3>
-                      <p className="text-xs text-[#94A3B8]">Verified CS2 Sub-Tick ranked competitive match history & GOTV replays</p>
+                      <p className="text-xs text-[#94A3B8]">Verified competitive match history & replay recordings</p>
                     </div>
                     {displayMatches > 0 && (
                       <button
@@ -7969,7 +7978,7 @@ export const VortexDashboard: React.FC<VortexDashboardProps> = ({
                     {selectedBracketTourney.title}
                   </h3>
                   <p className="text-xs font-mono text-slate-400">
-                    Valve MR12 Ruleset • CaliberClutch European Competitive Matchmaking
+                    Official European Championship Bracket • 5v5 Competitive
                   </p>
                 </div>
               </div>
@@ -8151,8 +8160,30 @@ export const VortexDashboard: React.FC<VortexDashboardProps> = ({
                       As tournament host, you receive authorized spectator relay access with full observer camera tools to broadcast all tournament matches live on Twitch, YouTube, or Kick.
                     </p>
 
-                    <div className="text-xs font-mono text-cyan-300 select-all bg-black/60 px-3 py-2 rounded-xl border border-cyan-500/20">
-                      connect tv.caliberclutch.gg:27020; password cc_cast
+                    {/* Security Hardened Stream Connection Box with Blur/Hide Toggle */}
+                    <div className="flex items-center justify-between p-2.5 rounded-xl bg-black/60 border border-cyan-500/20">
+                      <div className="flex items-center gap-2 overflow-hidden flex-1">
+                        <Radio className="w-3.5 h-3.5 text-cyan-400 shrink-0" />
+                        <span className={`text-xs font-mono text-cyan-300 transition-all duration-200 truncate ${
+                          revealTournamentStreamIp ? 'filter-none select-all' : 'blur-sm select-none opacity-60'
+                        }`}>
+                          {revealTournamentStreamIp 
+                            ? 'connect tv.caliberclutch.gg:27020; password cc_cast' 
+                            : 'connect tv.caliberclutch.gg:•••••; password ••••••'}
+                        </span>
+                      </div>
+                      <button
+                        type="button"
+                        onClick={() => {
+                          sound.playClick();
+                          setRevealTournamentStreamIp(!revealTournamentStreamIp);
+                        }}
+                        className="px-2.5 py-1 rounded-lg bg-white/5 hover:bg-white/10 text-cyan-300 hover:text-white text-xs font-mono flex items-center gap-1.5 cursor-pointer shrink-0 transition ml-2 border border-white/10"
+                        title={revealTournamentStreamIp ? 'Hide Stream IP' : 'Reveal Stream IP'}
+                      >
+                        {revealTournamentStreamIp ? <EyeOff className="w-3.5 h-3.5" /> : <Eye className="w-3.5 h-3.5" />}
+                        <span>{revealTournamentStreamIp ? 'Hide' : 'Reveal'}</span>
+                      </button>
                     </div>
 
                     <div className="flex items-center gap-2 pt-1">
@@ -8357,7 +8388,7 @@ export const VortexDashboard: React.FC<VortexDashboardProps> = ({
                         </div>
                         <div className="text-[10px] font-mono text-slate-500 border-t border-white/5 pt-1.5 flex justify-between">
                           <span>{isBo1Playoffs ? 'de_mirage' : 'Mirage (13-9), Anubis (13-11)'}</span>
-                          <span className="text-emerald-400">{isBo1Playoffs ? 'MR12' : 'BO3'}</span>
+                          <span className="text-emerald-400">{isBo1Playoffs ? 'BO1' : 'BO3'}</span>
                         </div>
                       </div>
 
@@ -8420,7 +8451,7 @@ export const VortexDashboard: React.FC<VortexDashboardProps> = ({
                         </div>
                         <div className="text-[10px] font-mono text-slate-500 border-t border-white/5 pt-1.5 flex justify-between">
                           <span>{isBo1Playoffs ? 'de_ancient' : 'Ancient (13-11)'}</span>
-                          <span className="text-emerald-400">{isBo1Playoffs ? 'MR12' : 'BO3'}</span>
+                          <span className="text-emerald-400">{isBo1Playoffs ? 'BO1' : 'BO3'}</span>
                         </div>
                       </div>
 
@@ -8442,7 +8473,7 @@ export const VortexDashboard: React.FC<VortexDashboardProps> = ({
                         </div>
                         <div className="text-[10px] font-mono text-slate-500 border-t border-white/5 pt-1.5 flex justify-between">
                           <span>{isBo1Playoffs ? 'de_dust2' : 'Dust II (13-7)'}</span>
-                          <span className="text-emerald-400">{isBo1Playoffs ? 'MR12' : 'BO3'}</span>
+                          <span className="text-emerald-400">{isBo1Playoffs ? 'BO1' : 'BO3'}</span>
                         </div>
                       </div>
                     </div>
@@ -8515,7 +8546,7 @@ export const VortexDashboard: React.FC<VortexDashboardProps> = ({
                         </div>
                         <div className="text-[10px] font-mono text-slate-500 border-t border-white/5 pt-1.5 flex justify-between">
                           <span>de_nuke</span>
-                          <span className="text-emerald-400">{stage === 'final' || stage === 'champion' ? 'G2 Advanced ✓' : 'MR12'}</span>
+                          <span className="text-emerald-400">{stage === 'final' || stage === 'champion' ? 'G2 Advanced ✓' : 'BO1'}</span>
                         </div>
                       </div>
                     </div>
@@ -10174,7 +10205,7 @@ export const VortexDashboard: React.FC<VortexDashboardProps> = ({
                 <span className="text-[10px] font-mono font-bold uppercase text-slate-400 tracking-wider">
                   Recent CS2 Competitive Matches
                 </span>
-                <span className="text-[10px] font-mono text-[#A3E635]">Valve CS2 Sub-Tick Verified</span>
+                <span className="text-[10px] font-mono text-[#A3E635]">Competitive Verified</span>
               </div>
               <div className="space-y-1.5 max-h-44 overflow-y-auto pr-1">
                 {[

@@ -23,6 +23,7 @@ import {
   Download,
   Lock,
   Eye,
+  EyeOff,
   Star,
   ChevronRight,
   ChevronLeft,
@@ -565,6 +566,8 @@ export const VortexMatchRoom: React.FC<VortexMatchRoomProps> = ({
     won: boolean;
   } | null>(null);
   const [copiedServerIp, setCopiedServerIp] = useState<boolean>(false);
+  const [isMatchIpRevealed, setIsMatchIpRevealed] = useState<boolean>(false);
+  const [isStreamIpRevealed, setIsStreamIpRevealed] = useState<boolean>(false);
 
   // Dedicated European CS2 Sub-Tick Server Regions
   const SERVER_REGIONS = [
@@ -1772,8 +1775,30 @@ export const VortexMatchRoom: React.FC<VortexMatchRoomProps> = ({
                     ))}
                   </div>
 
-                  <div className="text-[11px] font-mono text-[#A3E635] truncate select-all bg-black/50 px-2.5 py-1.5 rounded-lg border border-white/5">
-                    connect {selectedServerRegion.ip}; password cc123
+                  {/* Connection String Box with Hide / Blur Security Toggle */}
+                  <div className="flex items-center justify-between p-2 rounded-xl bg-black/50 border border-white/5">
+                    <div className="flex items-center gap-2 overflow-hidden flex-1">
+                      <span className="text-[10px] font-mono text-slate-400 shrink-0">Connect:</span>
+                      <div className={`text-[11px] font-mono text-[#A3E635] truncate transition-all duration-200 ${
+                        isMatchIpRevealed ? 'filter-none select-all' : 'blur-sm select-none opacity-60'
+                      }`}>
+                        {isMatchIpRevealed
+                          ? `connect ${selectedServerRegion.ip}; password cc123`
+                          : `connect srv-•••••.caliberclutch.com:•••••; password •••••`}
+                      </div>
+                    </div>
+                    <button
+                      type="button"
+                      onClick={() => {
+                        sound.playClick();
+                        setIsMatchIpRevealed(!isMatchIpRevealed);
+                      }}
+                      className="px-2 py-1 rounded-lg bg-white/5 hover:bg-white/10 text-slate-300 hover:text-white text-[10px] font-mono flex items-center gap-1 cursor-pointer shrink-0 transition"
+                      title={isMatchIpRevealed ? 'Hide connection code' : 'Reveal connection code'}
+                    >
+                      {isMatchIpRevealed ? <EyeOff className="w-3 h-3" /> : <Eye className="w-3 h-3" />}
+                      <span>{isMatchIpRevealed ? 'Hide' : 'Reveal'}</span>
+                    </button>
                   </div>
 
                   <div className="flex items-center gap-2 pt-0.5">
@@ -1799,23 +1824,40 @@ export const VortexMatchRoom: React.FC<VortexMatchRoomProps> = ({
                     </a>
                   </div>
 
-                  {/* Discreet Live Stream / Spectator Option */}
+                  {/* Discreet Live Stream / Spectator Option (Blurred by default) */}
                   <div className="pt-2 border-t border-white/5 flex items-center justify-between text-[10px] font-mono">
-                    <span className="text-slate-400 flex items-center gap-1">
-                      <Radio className="w-2.5 h-2.5 text-purple-400" />
-                      Live Stream Feed (120s Delay)
-                    </span>
-                    <button
-                      onClick={() => {
-                        sound.playClick();
-                        navigator.clipboard.writeText('connect tv.caliberclutch.gg:27020; password cc_cast');
-                        setCopiedServerIp(true);
-                        setTimeout(() => setCopiedServerIp(false), 2000);
-                      }}
-                      className="text-purple-300 hover:text-purple-200 underline cursor-pointer font-bold"
-                    >
-                      Copy Stream IP
-                    </button>
+                    <div className="flex items-center gap-2 overflow-hidden flex-1">
+                      <Radio className="w-2.5 h-2.5 text-purple-400 shrink-0" />
+                      <span className="text-slate-400 shrink-0">Live Stream Feed (120s Delay):</span>
+                      <span className={`text-purple-300 transition-all duration-200 truncate ${
+                        isStreamIpRevealed ? 'filter-none select-all' : 'blur-sm select-none opacity-60'
+                      }`}>
+                        {isStreamIpRevealed ? 'connect tv.caliberclutch.gg:27020; password cc_cast' : 'tv.caliberclutch.gg:•••••; password ••••••'}
+                      </span>
+                    </div>
+                    <div className="flex items-center gap-1.5 shrink-0">
+                      <button
+                        type="button"
+                        onClick={() => {
+                          sound.playClick();
+                          setIsStreamIpRevealed(!isStreamIpRevealed);
+                        }}
+                        className="text-slate-400 hover:text-white text-[9px] underline cursor-pointer px-1"
+                      >
+                        {isStreamIpRevealed ? 'Hide' : 'Reveal'}
+                      </button>
+                      <button
+                        onClick={() => {
+                          sound.playClick();
+                          navigator.clipboard.writeText('connect tv.caliberclutch.gg:27020; password cc_cast');
+                          setCopiedServerIp(true);
+                          setTimeout(() => setCopiedServerIp(false), 2000);
+                        }}
+                        className="text-purple-300 hover:text-purple-200 font-bold underline cursor-pointer px-1"
+                      >
+                        Copy
+                      </button>
+                    </div>
                   </div>
                 </div>
 
