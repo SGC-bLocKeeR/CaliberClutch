@@ -33,6 +33,8 @@ import {
   Gift,
   Package,
   Play,
+  Pause,
+  RotateCcw,
   Clock,
   Info,
   Lock,
@@ -1139,6 +1141,58 @@ export const VortexDashboard: React.FC<VortexDashboardProps> = ({
     teamTag?: string;
   } | null>(null);
 
+  // Tournament Organizer Panel State (Bracket / Team Applications / Server Admin)
+  const [tourneyModalTab, setTourneyModalTab] = useState<'bracket' | 'teams' | 'admin'>('bracket');
+  const [tourneyTeamsMap, setTourneyTeamsMap] = useState<Record<string, Array<{
+    id: string;
+    name: string;
+    tag: string;
+    captain: string;
+    country: string;
+    elo: number;
+    status: 'approved' | 'pending' | 'rejected';
+    appliedAt: string;
+  }>>>(() => {
+    try {
+      const saved = localStorage.getItem('vortex_tourney_teams_map');
+      if (saved) return JSON.parse(saved);
+    } catch (_) {}
+    return {};
+  });
+
+  const getTourneyTeams = (tourneyKey: string) => {
+    if (tourneyTeamsMap[tourneyKey]) return tourneyTeamsMap[tourneyKey];
+    const initial = [
+      { id: 'tm-1', name: 'Bad News Eagles', tag: 'BNE', captain: 'SENER1', country: 'XK', elo: 2450, status: 'approved' as const, appliedAt: 'Today • 14:20' },
+      { id: 'tm-2', name: 'Guild Esports', tag: 'GUILD', captain: 'Draken', country: 'GB', elo: 2320, status: 'approved' as const, appliedAt: 'Today • 15:10' },
+      { id: 'tm-3', name: 'Monte Academy', tag: 'MONTE', captain: 'Woro2k', country: 'UA', elo: 2280, status: 'pending' as const, appliedAt: '12 mins ago' },
+      { id: 'tm-4', name: 'FaZe Clan Youth', tag: 'FAZE', captain: 'NeoCS', country: 'DE', elo: 2410, status: 'approved' as const, appliedAt: 'Today • 16:00' },
+      { id: 'tm-5', name: 'Fnatic Rising', tag: 'FNC', captain: 'Krimz', country: 'SE', elo: 2350, status: 'pending' as const, appliedAt: '8 mins ago' },
+      { id: 'tm-6', name: 'Natus Vincere Junior', tag: 'NAVI', captain: 'Headtr1ck', country: 'UA', elo: 2390, status: 'pending' as const, appliedAt: '25 mins ago' },
+      { id: 'tm-7', name: 'Heroic Prospects', tag: 'HEROIC', captain: 'TeSeS', country: 'DK', elo: 2310, status: 'approved' as const, appliedAt: 'Today • 17:30' },
+      { id: 'tm-8', name: userClanData.name || 'Caliber Clutch Squad', tag: userClanData.tag || 'CC', captain: currentGamerTag, country: 'XK', elo: userClanData.stats?.avgElo || 2150, status: 'approved' as const, appliedAt: 'Host Roster' }
+    ];
+    return initial;
+  };
+
+  const handleUpdateTeamStatus = (tourneyKey: string, teamId: string, newStatus: 'approved' | 'rejected') => {
+    sound.playSelect();
+    const currentTeams = getTourneyTeams(tourneyKey);
+    const updated = currentTeams.map(t => t.id === teamId ? { ...t, status: newStatus } : t);
+    const nextMap = { ...tourneyTeamsMap, [tourneyKey]: updated };
+    setTourneyTeamsMap(nextMap);
+    try {
+      localStorage.setItem('vortex_tourney_teams_map', JSON.stringify(nextMap));
+    } catch (_) {}
+    const team = currentTeams.find(t => t.id === teamId);
+    if (newStatus === 'approved') {
+      setDashboardToast(`✓ Team [${team?.tag || teamId}] approved & accepted into tournament!`);
+    } else {
+      setDashboardToast(`⚠️ Team [${team?.tag || teamId}] application rejected/cancelled.`);
+    }
+    setTimeout(() => setDashboardToast(null), 3500);
+  };
+
   // Real-time Clan Sync Revision
   const [clanRevision, setClanRevision] = useState(0);
   useEffect(() => {
@@ -1490,15 +1544,15 @@ export const VortexDashboard: React.FC<VortexDashboardProps> = ({
   const [newTourneyOrganizer, setNewTourneyOrganizer] = useState<string>('');
   const [newTourneyCashPrize, setNewTourneyCashPrize] = useState('1000');
   const [newTourneyMaxTeams, setNewTourneyMaxTeams] = useState<number>(16);
-  const [newTourneyEntryFee, setNewTourneyEntryFee] = useState<number>(74); // Auto-calculated: Math.ceil((1000 / 0.85) / 16) = 74
+  const [newTourneyEntryFee, setNewTourneyEntryFee] = useState<number>(63); // Auto-calculated: Math.ceil(1000 / 16) = 63
   const [newTourneyIsPaid, setNewTourneyIsPaid] = useState<boolean>(true);
 
-  // Auto-calculate all entry fees & platform commission when prize pool changes
+  // Auto-calculate all entry fees & revenue split (5% Admin + 5% Organizer + 90% Prize Pool)
   const handleCashPrizeChange = (val: string) => {
     setNewTourneyCashPrize(val);
     const numeric = parseFloat(val.replace(/[^0-9.]/g, ''));
     if (numeric && numeric > 0 && newTourneyMaxTeams > 0) {
-      const calcFee = Math.ceil((numeric / 0.85) / newTourneyMaxTeams);
+      const calcFee = Math.ceil(numeric / newTourneyMaxTeams);
       setNewTourneyEntryFee(calcFee);
     }
   };
@@ -1508,7 +1562,7 @@ export const VortexDashboard: React.FC<VortexDashboardProps> = ({
     setNewTourneyMaxTeams(teams);
     const numeric = parseFloat(newTourneyCashPrize.replace(/[^0-9.]/g, '')) || 1000;
     if (numeric > 0 && teams > 0) {
-      const calcFee = Math.ceil((numeric / 0.85) / teams);
+      const calcFee = Math.ceil(numeric / teams);
       setNewTourneyEntryFee(calcFee);
     }
   };
@@ -1518,8 +1572,7 @@ export const VortexDashboard: React.FC<VortexDashboardProps> = ({
     const safeFee = Math.max(1, fee);
     setNewTourneyEntryFee(safeFee);
     const totalGross = safeFee * newTourneyMaxTeams;
-    const winnersPool = Math.round(totalGross * 0.85);
-    setNewTourneyCashPrize(String(winnersPool));
+    setNewTourneyCashPrize(String(totalGross));
   };
   const [newTourneyStructure, setNewTourneyStructure] = useState<string>('Single Elimination');
   const [newTourneyPlayoffsFormat, setNewTourneyPlayoffsFormat] = useState<'BO1' | 'BO3'>('BO1');
@@ -4765,7 +4818,7 @@ export const VortexDashboard: React.FC<VortexDashboardProps> = ({
                   <div className="space-y-8">
                     
                     {/* WINDOW 1 (TOP • FULL-WIDTH): TOURNAMENT SETUP & CLAN CONFIGURATION */}
-                    <div className="w-full rounded-3xl bg-[#0E121B] border border-[#202738] p-6 sm:p-8 space-y-6 text-left shadow-2xl">
+                    <div className="w-full max-w-full rounded-3xl bg-[#0E121B] border border-[#202738] p-6 sm:p-8 space-y-6 text-left shadow-2xl overflow-hidden">
                       <div className="flex flex-col sm:flex-row sm:items-center justify-between border-b border-white/5 pb-4 gap-3">
                         <div>
                           <div className="flex items-center gap-2">
@@ -4786,10 +4839,10 @@ export const VortexDashboard: React.FC<VortexDashboardProps> = ({
                       </div>
 
                       {/* Form Fields Container */}
-                      <div className="space-y-5 text-xs font-mono">
+                      <div className="space-y-5 text-xs font-mono w-full max-w-full">
                         {/* 1. Organizer Name & Tournament Title (2 Columns) */}
-                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 sm:gap-6">
-                          <div>
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 sm:gap-6 w-full max-w-full">
+                          <div className="min-w-0 w-full">
                             <label className="text-[11px] text-amber-400 uppercase tracking-wider block mb-1.5 font-bold flex items-center gap-1.5">
                               <Crown className="w-4 h-4 text-amber-400" />
                               <span>Organizer / Host Clan Name</span>
@@ -4803,7 +4856,7 @@ export const VortexDashboard: React.FC<VortexDashboardProps> = ({
                             />
                           </div>
 
-                          <div>
+                          <div className="min-w-0 w-full">
                             <label className="text-[11px] text-slate-300 uppercase tracking-wider block mb-1.5 font-bold">
                               Tournament Title
                             </label>
@@ -4817,16 +4870,16 @@ export const VortexDashboard: React.FC<VortexDashboardProps> = ({
                           </div>
                         </div>
 
-                        {/* 2. Cash Prize Pool & Max Teams & Structure (3 Columns) */}
-                        <div className="grid grid-cols-1 md:grid-cols-3 gap-4 sm:gap-6">
-                          <div>
+                        {/* 2. Cash Prize Pool & Max Teams & Structure (3 Columns - Guaranteed No Overflow) */}
+                        <div className="grid grid-cols-1 md:grid-cols-3 gap-4 w-full max-w-full">
+                          <div className="min-w-0 w-full">
                             <label className="text-[11px] text-slate-300 uppercase tracking-wider block mb-1.5 font-bold flex items-center justify-between">
                               <span className="truncate">Prize Pool (€)</span>
                               <span className="text-[9px] px-1.5 py-0.5 rounded bg-[#A3E635]/15 text-[#A3E635] font-mono font-bold tracking-normal whitespace-nowrap">
-                                AUTO-CALC
+                                AUTO-SPLIT
                               </span>
                             </label>
-                            <div className="relative">
+                            <div className="relative w-full">
                               <input
                                 type="text"
                                 value={newTourneyCashPrize}
@@ -4838,69 +4891,151 @@ export const VortexDashboard: React.FC<VortexDashboardProps> = ({
                             </div>
                           </div>
 
-                          <div>
+                          <div className="min-w-0 w-full">
                             <label className="text-[11px] text-slate-300 uppercase tracking-wider block mb-1.5 font-bold whitespace-nowrap">
                               Team Capacity
                             </label>
                             <select
                               value={newTourneyMaxTeams}
                               onChange={(e) => handleMaxTeamsChange(Number(e.target.value))}
-                              className="w-full px-3 py-3 rounded-xl bg-[#141722] border border-[#252C3D] text-white font-bold focus:outline-none focus:border-[#A3E635] cursor-pointer text-xs sm:text-sm"
+                              className="w-full max-w-full min-w-0 px-3 py-3 rounded-xl bg-[#141722] border border-[#252C3D] text-white font-bold focus:outline-none focus:border-[#A3E635] cursor-pointer text-xs sm:text-sm truncate"
                             >
-                              <option value={8}>8 Teams (Quarter-Finals)</option>
-                              <option value={16}>16 Teams (Round of 16)</option>
-                              <option value={32}>32 Teams (Championship)</option>
-                              <option value={64}>64 Teams (Open Circuit)</option>
+                              <option value={8} className="bg-[#141722] text-white">8 Teams (Quarter-Finals)</option>
+                              <option value={16} className="bg-[#141722] text-white">16 Teams (Round of 16)</option>
+                              <option value={32} className="bg-[#141722] text-white">32 Teams (Championship)</option>
+                              <option value={64} className="bg-[#141722] text-white">64 Teams (Open Circuit)</option>
                             </select>
                           </div>
 
-                          <div>
+                          <div className="min-w-0 w-full">
                             <label className="text-[11px] text-slate-300 uppercase tracking-wider block mb-1.5 font-bold whitespace-nowrap">
                               Bracket Format
                             </label>
                             <select
                               value={newTourneyStructure}
                               onChange={(e) => setNewTourneyStructure(e.target.value)}
-                              className="w-full px-3 py-3 rounded-xl bg-[#141722] border border-[#252C3D] text-white font-bold focus:outline-none focus:border-[#A3E635] cursor-pointer text-xs sm:text-sm"
+                              className="w-full max-w-full min-w-0 px-3 py-3 rounded-xl bg-[#141722] border border-[#252C3D] text-white font-bold focus:outline-none focus:border-[#A3E635] cursor-pointer text-xs sm:text-sm truncate"
                             >
-                              <option value="Single Elimination">Single Elimination (5v5)</option>
-                              <option value="Double Elimination">Double Elimination (5v5)</option>
-                              <option value="GSL Group Stage + Single Elim">GSL Group + Single Elim</option>
+                              <option value="Single Elimination" className="bg-[#141722] text-white">Single Elimination (5v5)</option>
+                              <option value="Double Elimination" className="bg-[#141722] text-white">Double Elimination (5v5)</option>
+                              <option value="GSL Group Stage + Single Elim" className="bg-[#141722] text-white">GSL Group + Single Elim</option>
                             </select>
                           </div>
                         </div>
 
-                        {/* 3. Pure 100% Cash Prize Distribution */}
+                        {/* 3. AUTOMATED REVENUE & PRIZE POOL SPLIT (5% Admin • 5% Organizer • 90% Winners) */}
                         {(() => {
-                          const numericPrize = parseFloat(String(newTourneyCashPrize).replace(/[^0-9.]/g, '')) || 1000;
-                          const firstPrize = Math.round(numericPrize * 0.70);
-                          const secondPrize = Math.round(numericPrize * 0.20);
-                          const thirdPrize = Math.max(0, numericPrize - firstPrize - secondPrize);
+                          const poolNumeric = parseFloat(String(newTourneyCashPrize).replace(/[^0-9.]/g, '')) || 1000;
+                          const grossTotal = poolNumeric > 0 ? poolNumeric : (newTourneyMaxTeams * newTourneyEntryFee);
+                          const adminProfit = grossTotal * 0.05;
+                          const organizerReward = grossTotal * 0.05;
+                          const winnersPrize = Math.round(grossTotal * 0.90);
+                          const firstPrize = Math.round(winnersPrize * 0.70);
+                          const secondPrize = Math.round(winnersPrize * 0.20);
+                          const thirdPrize = Math.max(0, winnersPrize - firstPrize - secondPrize);
+                          const feePerTeam = Math.ceil(grossTotal / newTourneyMaxTeams);
+                          const feePerPlayer = (feePerTeam / 5).toFixed(2);
 
                           return (
-                            <div className="p-4 rounded-2xl bg-black/40 border border-white/5 space-y-2.5">
-                              <div className="flex items-center justify-between text-xs font-mono">
-                                <span className="text-[#A3E635] font-bold flex items-center gap-1.5">
-                                  <Trophy className="w-4 h-4 text-[#A3E635]" />
-                                  <span>Official Cash Prize Distribution (100% Pure Cash Pool):</span>
+                            <div className="p-4 sm:p-5 rounded-2xl bg-[#101420] border border-[#20293D] space-y-4 w-full max-w-full overflow-hidden">
+                              <div className="flex items-center justify-between flex-wrap gap-2">
+                                <div>
+                                  <label className="text-[11px] text-amber-400 uppercase tracking-wider block font-bold flex items-center gap-1.5">
+                                    <Coins className="w-4 h-4 text-amber-400" />
+                                    <span>Automated Financial Split (5% Admin + 5% Organizer + 90% Prize Pool)</span>
+                                  </label>
+                                  <span className="text-xs text-slate-400">
+                                    Automatically divided from €{grossTotal.toLocaleString()} total pool across {newTourneyMaxTeams} teams.
+                                  </span>
+                                </div>
+                                <span className="px-3 py-1 rounded-xl bg-gradient-to-r from-amber-400 to-[#A3E635] text-slate-950 font-mono font-black text-xs uppercase tracking-wider shadow-md">
+                                  5% Admin • 5% Organizer • 90% Prize
                                 </span>
-                                <span className="text-emerald-400 text-[11px] font-bold">Instant Balance Payout</span>
                               </div>
-                              <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 text-center font-mono">
-                                <div className="p-3 rounded-xl bg-amber-500/10 border border-amber-500/25">
-                                  <div className="text-xs font-bold text-amber-400">🥇 1st Place</div>
-                                  <div className="text-base font-black text-white mt-1">€{firstPrize.toLocaleString()}</div>
-                                  <div className="text-[10px] text-[#A3E635] font-bold">70% Cash</div>
+
+                              {/* Live 4-Pillar Financial Summary Bar */}
+                              <div className="grid grid-cols-2 sm:grid-cols-4 gap-2.5">
+                                <div className="p-3 rounded-xl bg-white/5 border border-white/10 text-center">
+                                  <div className="text-[10px] font-mono text-slate-400 uppercase">Gross Pool (100%)</div>
+                                  <div className="text-sm sm:text-base font-black font-mono text-white mt-0.5">€{grossTotal.toLocaleString()}</div>
+                                  <div className="text-[9px] font-mono text-slate-400">Total Buy-In</div>
                                 </div>
-                                <div className="p-3 rounded-xl bg-slate-400/10 border border-slate-400/25">
-                                  <div className="text-xs font-bold text-slate-300">🥈 2nd Place</div>
-                                  <div className="text-base font-black text-white mt-1">€{secondPrize.toLocaleString()}</div>
-                                  <div className="text-[10px] text-slate-400 font-bold">20% Cash</div>
+                                <div className="p-3 rounded-xl bg-amber-500/10 border border-amber-500/25 text-center">
+                                  <div className="text-[10px] font-mono text-amber-400 uppercase font-bold flex items-center justify-center gap-1">
+                                    <ShieldCheck className="w-3 h-3 text-amber-400" /> Admin (5%)
+                                  </div>
+                                  <div className="text-sm sm:text-base font-black font-mono text-amber-300 mt-0.5">+€{adminProfit.toFixed(2)}</div>
+                                  <div className="text-[9px] font-mono text-amber-400/80">Platform Net Fee</div>
                                 </div>
-                                <div className="p-3 rounded-xl bg-amber-700/10 border border-amber-700/25">
-                                  <div className="text-xs font-bold text-amber-600">🥉 3rd Place</div>
-                                  <div className="text-base font-black text-white mt-1">€{thirdPrize.toLocaleString()}</div>
-                                  <div className="text-[10px] text-amber-500 font-bold">10% Cash</div>
+                                <div className="p-3 rounded-xl bg-cyan-500/10 border border-cyan-500/25 text-center">
+                                  <div className="text-[10px] font-mono text-cyan-400 uppercase font-bold flex items-center justify-center gap-1">
+                                    <Award className="w-3 h-3 text-cyan-400" /> Host (5%)
+                                  </div>
+                                  <div className="text-sm sm:text-base font-black font-mono text-cyan-300 mt-0.5">+€{organizerReward.toFixed(2)}</div>
+                                  <div className="text-[9px] font-mono text-cyan-400/80">Organizer Commission</div>
+                                </div>
+                                <div className="p-3 rounded-xl bg-emerald-500/10 border border-emerald-500/25 text-center">
+                                  <div className="text-[10px] font-mono text-emerald-400 uppercase font-bold flex items-center justify-center gap-1">
+                                    <Trophy className="w-3 h-3 text-emerald-400" /> Winners (90%)
+                                  </div>
+                                  <div className="text-sm sm:text-base font-black font-mono text-[#A3E635] mt-0.5">€{winnersPrize.toLocaleString()}</div>
+                                  <div className="text-[9px] font-mono text-emerald-400/80">Instant Payout</div>
+                                </div>
+                              </div>
+
+                              {/* Winner Tier Cash Prize Distribution (from 90% pool) */}
+                              <div className="p-3.5 rounded-xl bg-black/40 border border-white/5 space-y-2">
+                                <div className="flex items-center justify-between text-[11px] font-mono">
+                                  <span className="text-[#A3E635] font-bold flex items-center gap-1.5">
+                                    <Trophy className="w-3.5 h-3.5 text-[#A3E635]" />
+                                    <span>Winner Prize Distribution (100% of 90% Prize Pool):</span>
+                                  </span>
+                                  <span className="text-emerald-400 text-[10px] font-bold">Instant Balance Credit</span>
+                                </div>
+                                <div className="grid grid-cols-1 sm:grid-cols-3 gap-2.5 text-center font-mono">
+                                  <div className="p-2.5 rounded-xl bg-amber-500/10 border border-amber-500/20">
+                                    <div className="text-[10px] font-bold text-amber-400">🥇 1st Place (70%)</div>
+                                    <div className="text-sm font-black text-white mt-0.5">€{firstPrize.toLocaleString()}</div>
+                                    <div className="text-[9px] text-slate-400 mt-0.5">€{(firstPrize / 5).toFixed(0)} / player</div>
+                                  </div>
+                                  <div className="p-2.5 rounded-xl bg-slate-400/10 border border-slate-400/20">
+                                    <div className="text-[10px] font-bold text-slate-300">🥈 2nd Place (20%)</div>
+                                    <div className="text-sm font-black text-white mt-0.5">€{secondPrize.toLocaleString()}</div>
+                                    <div className="text-[9px] text-slate-400 mt-0.5">€{(secondPrize / 5).toFixed(0)} / player</div>
+                                  </div>
+                                  <div className="p-2.5 rounded-xl bg-amber-700/10 border border-amber-700/20">
+                                    <div className="text-[10px] font-bold text-amber-500">🥉 3rd Place (10%)</div>
+                                    <div className="text-sm font-black text-white mt-0.5">€{thirdPrize.toLocaleString()}</div>
+                                    <div className="text-[9px] text-slate-400 mt-0.5">€{(thirdPrize / 5).toFixed(0)} / player</div>
+                                  </div>
+                                </div>
+                              </div>
+
+                              {/* Auto-Calculated Entry Fees */}
+                              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 pt-1">
+                                <div className="p-3 rounded-xl bg-[#0B0E16] border border-[#252C3D] flex items-center justify-between text-xs">
+                                  <span className="text-slate-300 font-bold">Auto-Calculated Fee per Team:</span>
+                                  <span className="font-mono text-amber-300 font-black text-sm">€{feePerTeam} <span className="text-xs text-slate-400 font-normal">/ team</span></span>
+                                </div>
+                                <div className="p-3 rounded-xl bg-[#0B0E16] border border-[#252C3D] flex items-center justify-between text-xs">
+                                  <span className="text-slate-300 font-bold">Calculated per Player (5v5 Lineup):</span>
+                                  <span className="font-mono text-emerald-400 font-black text-sm">€{feePerPlayer} <span className="text-xs text-slate-400 font-normal">/ player</span></span>
+                                </div>
+                              </div>
+
+                              {/* Host Exclusive Privileges: Spectator CSTV Stream IP */}
+                              <div className="p-3.5 rounded-xl bg-gradient-to-r from-cyan-950/40 via-[#0B1522] to-cyan-950/40 border border-cyan-500/30 flex items-start gap-3">
+                                <Radio className="w-5 h-5 text-cyan-400 shrink-0 mt-0.5 animate-pulse" />
+                                <div className="space-y-1 text-left min-w-0">
+                                  <div className="text-xs font-bold text-cyan-300 flex flex-wrap items-center gap-2">
+                                    <span>Exclusive Organizer Stream Rights & CSTV Spectator Access</span>
+                                    <span className="px-2 py-0.5 rounded text-[9px] font-mono font-bold bg-cyan-500/20 text-cyan-300 border border-cyan-500/40">
+                                      120s Anti-Ghosting Delay Protected
+                                    </span>
+                                  </div>
+                                  <p className="text-[11px] font-mono text-slate-300 leading-relaxed">
+                                    As tournament host, you receive authorized spectator CSTV relay credentials (<code className="text-cyan-300 font-bold select-all">connect tv.caliberclutch.gg:27020; password cc_cast</code>) with free-cam observer tools to broadcast your matches live on Twitch, YouTube, or Kick.
+                                  </p>
                                 </div>
                               </div>
                             </div>
@@ -4908,8 +5043,8 @@ export const VortexDashboard: React.FC<VortexDashboardProps> = ({
                         })()}
 
                         {/* 4. Match Formats (Playoffs, Finals) (2 Columns) */}
-                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 sm:gap-6">
-                          <div>
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 sm:gap-6 w-full max-w-full">
+                          <div className="min-w-0 w-full">
                             <label className="text-[11px] text-amber-300 uppercase tracking-wider block mb-1.5 font-bold flex items-center justify-between">
                               <span>Playoffs Format</span>
                               <span className="text-[10px] text-slate-400 font-normal">Up to Finals</span>
@@ -4917,13 +5052,13 @@ export const VortexDashboard: React.FC<VortexDashboardProps> = ({
                             <select
                               value={newTourneyPlayoffsFormat}
                               onChange={(e) => setNewTourneyPlayoffsFormat(e.target.value as any)}
-                              className="w-full px-4 py-3 rounded-xl bg-[#141722] border border-[#252C3D] text-amber-300 font-bold focus:outline-none focus:border-[#A3E635] cursor-pointer text-sm"
+                              className="w-full max-w-full min-w-0 px-4 py-3 rounded-xl bg-[#141722] border border-[#252C3D] text-amber-300 font-bold focus:outline-none focus:border-[#A3E635] cursor-pointer text-sm truncate"
                             >
-                              <option value="BO1">BO1 (Best of 1 • Single Map)</option>
-                              <option value="BO3">BO3 (Best of 3 • Competitive Standard)</option>
+                              <option value="BO1" className="bg-[#141722] text-amber-300">BO1 (Best of 1 • Single Map)</option>
+                              <option value="BO3" className="bg-[#141722] text-amber-300">BO3 (Best of 3 • Competitive Standard)</option>
                             </select>
                           </div>
-                          <div>
+                          <div className="min-w-0 w-full">
                             <label className="text-[11px] text-[#A3E635] uppercase tracking-wider block mb-1.5 font-bold flex items-center justify-between">
                               <span>Grand Finals Format</span>
                               <span className="text-[10px] text-slate-400 font-normal">Championship Decider</span>
@@ -4931,112 +5066,17 @@ export const VortexDashboard: React.FC<VortexDashboardProps> = ({
                             <select
                               value={newTourneyFinalsFormat}
                               onChange={(e) => setNewTourneyFinalsFormat(e.target.value as any)}
-                              className="w-full px-4 py-3 rounded-xl bg-[#141722] border border-[#252C3D] text-[#A3E635] font-bold focus:outline-none focus:border-[#A3E635] cursor-pointer text-sm"
+                              className="w-full max-w-full min-w-0 px-4 py-3 rounded-xl bg-[#141722] border border-[#252C3D] text-[#A3E635] font-bold focus:outline-none focus:border-[#A3E635] cursor-pointer text-sm truncate"
                             >
-                              <option value="BO1">BO1 (Best of 1 • Sudden Death)</option>
-                              <option value="BO3">BO3 (Best of 3 • Esports Standard)</option>
-                              <option value="BO5">BO5 (Best of 5 • Major Championship)</option>
+                              <option value="BO1" className="bg-[#141722] text-[#A3E635]">BO1 (Best of 1 • Sudden Death)</option>
+                              <option value="BO3" className="bg-[#141722] text-[#A3E635]">BO3 (Best of 3 • Esports Standard)</option>
+                              <option value="BO5" className="bg-[#141722] text-[#A3E635]">BO5 (Best of 5 • Major Championship)</option>
                             </select>
                           </div>
                         </div>
 
-                        {/* 5. Entry Fee & Platform Revenue System (Mandatory Paid Buy-In) */}
-                        {(() => {
-                          const numericPrize = parseFloat(String(newTourneyCashPrize).replace(/[^0-9.]/g, '')) || 1000;
-                          const grossTotal = newTourneyMaxTeams * newTourneyEntryFee;
-                          const platformProfit = Math.max(0, grossTotal - numericPrize);
-                          const platformPercent = grossTotal > 0 ? ((platformProfit / grossTotal) * 100).toFixed(1) : '15.0';
-                          const firstPrize = Math.round(numericPrize * 0.70);
-                          const secondPrize = Math.round(numericPrize * 0.20);
-                          const thirdPrize = Math.max(0, numericPrize - firstPrize - secondPrize);
-
-                          return (
-                            <div className="p-4 sm:p-5 rounded-2xl bg-[#101420] border border-[#20293D] space-y-4">
-                              <div className="flex items-center justify-between flex-wrap gap-2">
-                                <div>
-                                  <label className="text-[11px] text-amber-400 uppercase tracking-wider block font-bold flex items-center gap-1.5">
-                                    <Coins className="w-4 h-4 text-amber-400" />
-                                    <span>Automatic Buy-In & Platform Revenue Calculation</span>
-                                  </label>
-                                  <span className="text-xs text-slate-400">
-                                    Automated financial split for €{numericPrize.toLocaleString()} prize pool across {newTourneyMaxTeams} teams.
-                                  </span>
-                                </div>
-                                <span className="px-3 py-1 rounded-xl bg-amber-400 text-slate-950 font-mono font-black text-xs uppercase tracking-wider shadow-md">
-                                  Auto 15% Platform Split
-                                </span>
-                              </div>
-
-                              <div className="space-y-4 pt-3 border-t border-white/5">
-                                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                                  <div>
-                                    <label className="text-[11px] text-slate-300 uppercase block mb-1.5 font-bold flex items-center justify-between">
-                                      <span>Auto-Calculated Fee per Team</span>
-                                      <span className="text-[10px] text-[#A3E635] font-normal">Auto-Synced</span>
-                                    </label>
-                                    <div className="w-full px-4 py-2.5 rounded-xl bg-[#0B0E16] border border-[#252C3D] text-amber-300 font-bold flex items-center justify-between text-sm">
-                                      <span>€{newTourneyEntryFee}</span>
-                                      <span className="text-xs text-slate-400 font-normal">€{newTourneyEntryFee} / team</span>
-                                    </div>
-                                  </div>
-                                  <div>
-                                    <label className="text-[11px] text-slate-300 uppercase block mb-1.5 font-bold">
-                                      Calculated per Player (5v5 Lineup)
-                                    </label>
-                                    <div className="w-full px-4 py-2.5 rounded-xl bg-[#0B0E16] border border-[#252C3D] text-emerald-400 font-bold flex items-center justify-between text-sm">
-                                      <span>€{(newTourneyEntryFee / 5).toFixed(2)}</span>
-                                      <span className="text-xs text-slate-400 font-normal">€{(newTourneyEntryFee / 5).toFixed(2)} / player</span>
-                                    </div>
-                                  </div>
-                                </div>
-
-                                {/* Financial Payout Breakdown */}
-                                <div className="p-4 rounded-xl bg-black/50 border border-amber-500/20 space-y-2.5 text-xs font-mono">
-                                  <div className="flex items-center justify-between text-slate-300">
-                                    <span>Total Buy-In Pool ({newTourneyMaxTeams} teams × €{newTourneyEntryFee}):</span>
-                                    <span className="font-bold text-white">€{grossTotal.toFixed(2)}</span>
-                                  </div>
-                                  <div className="flex items-center justify-between text-amber-400 font-bold">
-                                    <span className="flex items-center gap-1.5">
-                                      <ShieldCheck className="w-3.5 h-3.5 text-amber-400" />
-                                      CaliberClutch Platform Profit ({platformPercent}% Net Commission):
-                                    </span>
-                                    <span className="font-mono text-emerald-400 font-black">+€{platformProfit.toFixed(2)} NET PROFIT</span>
-                                  </div>
-                                  <div className="flex items-center justify-between text-emerald-400 font-bold border-t border-white/10 pt-2">
-                                    <span className="flex items-center gap-1.5 text-amber-300">
-                                      <Trophy className="w-3.5 h-3.5 text-amber-400" />
-                                      Prize Pool for Winners (100% Instant Payout):
-                                    </span>
-                                    <span className="font-mono text-[#A3E635] text-sm font-black">€{numericPrize.toLocaleString()}</span>
-                                  </div>
-
-                                  {/* Winner Distribution Breakdown */}
-                                  <div className="grid grid-cols-3 gap-2 pt-2 border-t border-white/5 text-[11px] font-mono text-center">
-                                    <div className="p-2 rounded-xl bg-amber-500/10 border border-amber-500/20">
-                                      <span className="text-amber-400 block font-bold">🥇 1st Place (70%)</span>
-                                      <span className="text-white font-bold block mt-0.5">€{firstPrize.toLocaleString()}</span>
-                                      <span className="text-[9px] text-slate-400">€{(firstPrize / 5).toFixed(0)}/player</span>
-                                    </div>
-                                    <div className="p-2 rounded-xl bg-slate-400/10 border border-slate-400/20">
-                                      <span className="text-slate-300 block font-bold">🥈 2nd Place (20%)</span>
-                                      <span className="text-white font-bold block mt-0.5">€{secondPrize.toLocaleString()}</span>
-                                      <span className="text-[9px] text-slate-400">€{(secondPrize / 5).toFixed(0)}/player</span>
-                                    </div>
-                                    <div className="p-2 rounded-xl bg-amber-700/10 border border-amber-700/20">
-                                      <span className="text-amber-500 block font-bold">🥉 3rd Place (10%)</span>
-                                      <span className="text-white font-bold block mt-0.5">€{thirdPrize.toLocaleString()}</span>
-                                      <span className="text-[9px] text-slate-400">€{(thirdPrize / 5).toFixed(0)}/player</span>
-                                    </div>
-                                  </div>
-                                </div>
-                              </div>
-                            </div>
-                          );
-                        })()}
-
-                        {/* 6. Schedule & Start Time */}
-                        <div>
+                        {/* 5. Schedule & Start Time */}
+                        <div className="w-full max-w-full">
                           <label className="text-[11px] text-slate-300 uppercase tracking-wider block mb-1.5 font-bold">
                             Schedule & Start Time
                           </label>
@@ -5071,12 +5111,20 @@ export const VortexDashboard: React.FC<VortexDashboardProps> = ({
                               return;
                             }
 
+                            const poolNumeric = parseFloat(String(newTourneyCashPrize).replace(/[^0-9.]/g, '')) || 1000;
+                            const grossPool = poolNumeric > 0 ? poolNumeric : (newTourneyMaxTeams * newTourneyEntryFee);
+                            const adminProfit = grossPool * 0.05;
+                            const organizerReward = grossPool * 0.05;
+                            const winnersPrize = Math.round(grossPool * 0.90);
+                            const feePerTeam = Math.ceil(grossPool / newTourneyMaxTeams);
+
                             const createdItem = {
                               id: `custom-${Date.now()}`,
                               title: newTourneyTitle.trim(),
                               type: 'COMMUNITY CLAN CUP',
                               game: 'CS2 5v5 Tactical',
-                              cashPrize: newTourneyCashPrize.trim() || `€${Math.round(newTourneyMaxTeams * newTourneyEntryFee * 0.85).toLocaleString()}`,
+                              cashPrize: `€${winnersPrize.toLocaleString()}`,
+                              totalPool: grossPool,
                               teams: `0 / ${newTourneyMaxTeams}`,
                               maxTeams: newTourneyMaxTeams,
                               registeredTeamsCount: 0,
@@ -5086,19 +5134,28 @@ export const VortexDashboard: React.FC<VortexDashboardProps> = ({
                               isLive: false,
                               isOpen: true,
                               isCustom: true,
-                              organizer: newTourneyOrganizer.trim() || 'Clan Organizer',
-                              creator: newTourneyOrganizer.trim() || 'Clan Organizer',
-                              entryFee: newTourneyEntryFee,
-                              entryFeePerPlayer: newTourneyEntryFee / 5,
+                              organizer: newTourneyOrganizer.trim() || currentGamerTag,
+                              creator: currentGamerTag,
+                              creatorClan: userClanData.tag || 'COMM',
+                              creatorGamerTag: currentGamerTag,
+                              entryFee: feePerTeam,
+                              entryFeePerPlayer: feePerTeam / 5,
                               isPaidEntry: true,
-                              platformCommission: 0.15,
+                              platformCommission: 0.05,
+                              organizerCommission: 0.05,
+                              platformProfit: adminProfit,
+                              organizerReward: organizerReward,
+                              spectatorIp: 'tv.caliberclutch.gg:27020',
+                              spectatorPassword: 'cc_cast',
+                              casterDelay: 120,
+                              streamRightsGranted: true,
                               structure: newTourneyStructure,
                               playoffsFormat: newTourneyPlayoffsFormat,
                               finalsFormat: newTourneyFinalsFormat,
                               region: newTourneyRegion || 'European Online Bracket',
-                              payout1st: '70% Cash',
-                              payout2nd: '20% Cash',
-                              payout3rd: '10% Cash'
+                              payout1st: `70% Cash (€${Math.round(winnersPrize * 0.70).toLocaleString()})`,
+                              payout2nd: `20% Cash (€${Math.round(winnersPrize * 0.20).toLocaleString()})`,
+                              payout3rd: `10% Cash (€${Math.max(0, winnersPrize - Math.round(winnersPrize * 0.70) - Math.round(winnersPrize * 0.20)).toLocaleString()})`
                             };
 
                             setCustomTournaments((prev: any[]) => {
@@ -5120,7 +5177,7 @@ export const VortexDashboard: React.FC<VortexDashboardProps> = ({
 
                             setTourneyTabMode('browse');
                             sound.playSelect();
-                            setDashboardToast(`✓ Tournament "${createdItem.title}" published. Registrations are open.`);
+                            setDashboardToast(`✓ Tournament "${createdItem.title}" published! 5% Organizer commission & official CSTV stream rights active.`);
                             setTimeout(() => setDashboardToast(null), 5000);
                           }}
                           className="px-6 py-3 rounded-2xl bg-gradient-to-r from-[#84CC16] to-[#A3E635] hover:brightness-110 text-slate-950 font-display font-black text-xs uppercase tracking-wider transition shadow-lg shadow-lime-500/25 cursor-pointer active:scale-95 flex items-center gap-2"
@@ -5438,6 +5495,19 @@ export const VortexDashboard: React.FC<VortexDashboardProps> = ({
                                     <span>HOSTED BY {t.organizer || t.creator}</span>
                                   </span>
                                 )}
+                                {(() => {
+                                  const isHost = isProjectAdmin || 
+                                    (t.creator && t.creator.toLowerCase() === currentGamerTag.toLowerCase()) ||
+                                    (t.creatorClan && userClanData?.tag && t.creatorClan.toLowerCase() === userClanData.tag.toLowerCase()) ||
+                                    (t.organizer && t.organizer.toLowerCase().includes(currentGamerTag.toLowerCase()));
+                                  if (!isHost) return null;
+                                  return (
+                                    <span className="px-2 py-0.5 rounded text-[10px] font-mono font-black bg-cyan-500/20 text-cyan-300 border border-cyan-500/40 flex items-center gap-1">
+                                      <Radio className="w-3 h-3 text-cyan-400 animate-pulse" />
+                                      <span>HOST • STREAM & ADMIN ACCESS</span>
+                                    </span>
+                                  );
+                                })()}
                                 {t.entryFee ? (
                                   <span className="px-2 py-0.5 rounded text-[10px] font-mono font-bold bg-amber-500/15 text-amber-300 border border-amber-500/30 flex items-center gap-1">
                                     <Coins className="w-3 h-3 text-amber-400" />
@@ -5542,6 +5612,7 @@ export const VortexDashboard: React.FC<VortexDashboardProps> = ({
                               type="button"
                               onClick={() => {
                                 sound.playSelect();
+                                setTourneyModalTab('bracket');
                                 setSelectedBracketTourney(t);
                               }}
                               className="px-3 py-1.5 rounded-xl bg-white/5 hover:bg-white/10 text-xs font-mono text-slate-200 hover:text-white border border-white/10 transition cursor-pointer flex items-center gap-1.5"
@@ -5549,6 +5620,43 @@ export const VortexDashboard: React.FC<VortexDashboardProps> = ({
                               <Eye className="w-3.5 h-3.5 text-amber-400" />
                               <span>View Bracket</span>
                             </button>
+                            {(() => {
+                              const isHost = isProjectAdmin || 
+                                (t.creator && t.creator.toLowerCase() === currentGamerTag.toLowerCase()) ||
+                                (t.creatorClan && userClanData?.tag && t.creatorClan.toLowerCase() === userClanData.tag.toLowerCase()) ||
+                                (t.organizer && t.organizer.toLowerCase().includes(currentGamerTag.toLowerCase()));
+                              if (!isHost) return null;
+                              return (
+                                <>
+                                  <span className="text-slate-600">•</span>
+                                  <button
+                                    type="button"
+                                    onClick={() => {
+                                      sound.playSelect();
+                                      setTourneyModalTab('teams');
+                                      setSelectedBracketTourney(t);
+                                    }}
+                                    className="px-3 py-1.5 rounded-xl bg-amber-500/15 hover:bg-amber-500/25 text-xs font-mono text-amber-300 hover:text-white border border-amber-500/30 transition cursor-pointer flex items-center gap-1.5"
+                                  >
+                                    <Users className="w-3.5 h-3.5 text-amber-400" />
+                                    <span>Manage Teams</span>
+                                  </button>
+                                  <span className="text-slate-600">•</span>
+                                  <button
+                                    type="button"
+                                    onClick={() => {
+                                      sound.playSelect();
+                                      setTourneyModalTab('admin');
+                                      setSelectedBracketTourney(t);
+                                    }}
+                                    className="px-3 py-1.5 rounded-xl bg-cyan-500/15 hover:bg-cyan-500/25 text-xs font-mono text-cyan-300 hover:text-white border border-cyan-500/30 transition cursor-pointer flex items-center gap-1.5"
+                                  >
+                                    <Radio className="w-3.5 h-3.5 text-cyan-400 animate-pulse" />
+                                    <span>Caster & Admin IP</span>
+                                  </button>
+                                </>
+                              );
+                            })()}
                           </div>
 
                           <div className="flex items-center gap-2">
