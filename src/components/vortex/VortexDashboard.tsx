@@ -4875,57 +4875,92 @@ export const VortexDashboard: React.FC<VortexDashboardProps> = ({
                           </div>
                         </div>
 
-                        {/* 2. Cash Prize Pool & Max Teams & Structure (3 Columns - Guaranteed No Overflow) */}
-                        <div className="grid grid-cols-1 md:grid-cols-3 gap-4 w-full max-w-full">
-                          <div className="min-w-0 w-full">
-                            <label className="text-[11px] text-slate-300 uppercase tracking-wider block mb-1.5 font-bold flex items-center justify-between">
-                              <span className="truncate">Prize Pool (€)</span>
-                              <span className="text-[9px] px-1.5 py-0.5 rounded bg-[#A3E635]/15 text-[#A3E635] font-mono font-bold tracking-normal whitespace-nowrap">
-                                AUTO-SPLIT
-                              </span>
-                            </label>
-                            <div className="relative w-full">
-                              <input
-                                type="text"
-                                value={newTourneyCashPrize}
-                                onChange={(e) => handleCashPrizeChange(e.target.value)}
-                                placeholder="1000"
-                                className="w-full pl-8 pr-4 py-3 rounded-xl bg-[#141722] border border-[#252C3D] text-[#A3E635] font-black focus:outline-none focus:border-[#A3E635] text-sm"
-                              />
-                              <span className="absolute left-3 top-3 text-[#A3E635]/70 font-black text-sm">€</span>
+                        {/* 2. Cash Prize Pool & Max Teams & Structure (With Entry Fees Directly Under Prize Pool) */}
+                        <div className="space-y-3 w-full max-w-full">
+                          <div className="grid grid-cols-1 md:grid-cols-3 gap-4 w-full max-w-full">
+                            <div className="min-w-0 w-full">
+                              <label className="text-[11px] text-slate-300 uppercase tracking-wider block mb-1.5 font-bold flex items-center justify-between">
+                                <span className="truncate">Prize Pool (€)</span>
+                                <span className="text-[9px] px-1.5 py-0.5 rounded bg-[#A3E635]/15 text-[#A3E635] font-mono font-bold tracking-normal whitespace-nowrap">
+                                  AUTO-SPLIT
+                                </span>
+                              </label>
+                              <div className="relative w-full">
+                                <input
+                                  type="text"
+                                  value={newTourneyCashPrize}
+                                  onChange={(e) => handleCashPrizeChange(e.target.value)}
+                                  placeholder="1000"
+                                  className="w-full pl-8 pr-4 py-3 rounded-xl bg-[#141722] border border-[#252C3D] text-[#A3E635] font-black focus:outline-none focus:border-[#A3E635] text-sm"
+                                />
+                                <span className="absolute left-3 top-3 text-[#A3E635]/70 font-black text-sm">€</span>
+                              </div>
+                            </div>
+
+                            <div className="min-w-0 w-full">
+                              <label className="text-[11px] text-slate-300 uppercase tracking-wider block mb-1.5 font-bold whitespace-nowrap">
+                                Team Capacity
+                              </label>
+                              <select
+                                value={newTourneyMaxTeams}
+                                onChange={(e) => handleMaxTeamsChange(Number(e.target.value))}
+                                className="w-full max-w-full min-w-0 px-3 py-3 rounded-xl bg-[#141722] border border-[#252C3D] text-white font-bold focus:outline-none focus:border-[#A3E635] cursor-pointer text-xs sm:text-sm truncate"
+                              >
+                                <option value={8} className="bg-[#141722] text-white">8 Teams (Quarter-Finals)</option>
+                                <option value={16} className="bg-[#141722] text-white">16 Teams (Round of 16)</option>
+                                <option value={32} className="bg-[#141722] text-white">32 Teams (Championship)</option>
+                                <option value={64} className="bg-[#141722] text-white">64 Teams (Open Circuit)</option>
+                              </select>
+                            </div>
+
+                            <div className="min-w-0 w-full">
+                              <label className="text-[11px] text-slate-300 uppercase tracking-wider block mb-1.5 font-bold whitespace-nowrap">
+                                Bracket Format
+                              </label>
+                              <select
+                                value={newTourneyStructure}
+                                onChange={(e) => setNewTourneyStructure(e.target.value)}
+                                className="w-full max-w-full min-w-0 px-3 py-3 rounded-xl bg-[#141722] border border-[#252C3D] text-white font-bold focus:outline-none focus:border-[#A3E635] cursor-pointer text-xs sm:text-sm truncate"
+                              >
+                                <option value="Single Elimination" className="bg-[#141722] text-white">Single Elimination (5v5)</option>
+                                <option value="Double Elimination" className="bg-[#141722] text-white">Double Elimination (5v5)</option>
+                                <option value="GSL Group Stage + Single Elim" className="bg-[#141722] text-white">GSL Group + Single Elim</option>
+                              </select>
                             </div>
                           </div>
 
-                          <div className="min-w-0 w-full">
-                            <label className="text-[11px] text-slate-300 uppercase tracking-wider block mb-1.5 font-bold whitespace-nowrap">
-                              Team Capacity
-                            </label>
-                            <select
-                              value={newTourneyMaxTeams}
-                              onChange={(e) => handleMaxTeamsChange(Number(e.target.value))}
-                              className="w-full max-w-full min-w-0 px-3 py-3 rounded-xl bg-[#141722] border border-[#252C3D] text-white font-bold focus:outline-none focus:border-[#A3E635] cursor-pointer text-xs sm:text-sm truncate"
-                            >
-                              <option value={8} className="bg-[#141722] text-white">8 Teams (Quarter-Finals)</option>
-                              <option value={16} className="bg-[#141722] text-white">16 Teams (Round of 16)</option>
-                              <option value={32} className="bg-[#141722] text-white">32 Teams (Championship)</option>
-                              <option value={64} className="bg-[#141722] text-white">64 Teams (Open Circuit)</option>
-                            </select>
-                          </div>
+                          {/* Auto-Calculated Entry Fees - Directly Under Prize Pool & Capacity */}
+                          {(() => {
+                            const poolNumeric = parseFloat(String(newTourneyCashPrize).replace(/[^0-9.]/g, '')) || 1000;
+                            const prizePool = poolNumeric > 0 ? poolNumeric : Math.round((newTourneyMaxTeams * newTourneyEntryFee) / 1.10);
+                            const totalCollected = prizePool * 1.10;
+                            const feePerTeam = Math.ceil(totalCollected / newTourneyMaxTeams);
+                            const feePerPlayer = (feePerTeam / 5).toFixed(2);
 
-                          <div className="min-w-0 w-full">
-                            <label className="text-[11px] text-slate-300 uppercase tracking-wider block mb-1.5 font-bold whitespace-nowrap">
-                              Bracket Format
-                            </label>
-                            <select
-                              value={newTourneyStructure}
-                              onChange={(e) => setNewTourneyStructure(e.target.value)}
-                              className="w-full max-w-full min-w-0 px-3 py-3 rounded-xl bg-[#141722] border border-[#252C3D] text-white font-bold focus:outline-none focus:border-[#A3E635] cursor-pointer text-xs sm:text-sm truncate"
-                            >
-                              <option value="Single Elimination" className="bg-[#141722] text-white">Single Elimination (5v5)</option>
-                              <option value="Double Elimination" className="bg-[#141722] text-white">Double Elimination (5v5)</option>
-                              <option value="GSL Group Stage + Single Elim" className="bg-[#141722] text-white">GSL Group + Single Elim</option>
-                            </select>
-                          </div>
+                            return (
+                              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 pt-1">
+                                <div>
+                                  <label className="text-[11px] text-slate-300 uppercase block mb-1.5 font-bold flex items-center justify-between">
+                                    <span>Auto-Calculated Fee per Team</span>
+                                    <span className="text-[10px] text-[#A3E635] font-normal">Auto-Synced</span>
+                                  </label>
+                                  <div className="w-full px-4 py-2.5 rounded-xl bg-[#0B0E16] border border-[#252C3D] text-amber-300 font-bold flex items-center justify-between text-sm font-mono">
+                                    <span>€{feePerTeam}</span>
+                                    <span className="text-xs text-slate-400 font-normal">€{feePerTeam} / team</span>
+                                  </div>
+                                </div>
+                                <div>
+                                  <label className="text-[11px] text-slate-300 uppercase block mb-1.5 font-bold">
+                                    Calculated per Player (5v5 Lineup)
+                                  </label>
+                                  <div className="w-full px-4 py-2.5 rounded-xl bg-[#0B0E16] border border-[#252C3D] text-emerald-400 font-bold flex items-center justify-between text-sm font-mono">
+                                    <span>€{feePerPlayer}</span>
+                                    <span className="text-xs text-slate-400 font-normal">€{feePerPlayer} / player</span>
+                                  </div>
+                                </div>
+                              </div>
+                            );
+                          })()}
                         </div>
 
                         {/* 3. AUTOMATED FINANCIAL SPLIT (100% Pure Untouched Prize Pool + Participant-Funded 5% Fees) */}
@@ -5012,29 +5047,6 @@ export const VortexDashboard: React.FC<VortexDashboardProps> = ({
                                     <div className="text-[10px] font-bold text-amber-500">🥉 3rd Place (10%)</div>
                                     <div className="text-sm font-black text-white mt-0.5">€{thirdPrize.toLocaleString()}</div>
                                     <div className="text-[9px] text-slate-400 mt-0.5">€{(thirdPrize / 5).toFixed(0)} / player</div>
-                                  </div>
-                                </div>
-                              </div>
-
-                              {/* Auto-Calculated Entry Fees */}
-                              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                                <div>
-                                  <label className="text-[11px] text-slate-300 uppercase block mb-1.5 font-bold flex items-center justify-between">
-                                    <span>Auto-Calculated Fee per Team</span>
-                                    <span className="text-[10px] text-[#A3E635] font-normal">Auto-Synced</span>
-                                  </label>
-                                  <div className="w-full px-4 py-2.5 rounded-xl bg-[#0B0E16] border border-[#252C3D] text-amber-300 font-bold flex items-center justify-between text-sm font-mono">
-                                    <span>€{feePerTeam}</span>
-                                    <span className="text-xs text-slate-400 font-normal">€{feePerTeam} / team</span>
-                                  </div>
-                                </div>
-                                <div>
-                                  <label className="text-[11px] text-slate-300 uppercase block mb-1.5 font-bold">
-                                    Calculated per Player (5v5 Lineup)
-                                  </label>
-                                  <div className="w-full px-4 py-2.5 rounded-xl bg-[#0B0E16] border border-[#252C3D] text-emerald-400 font-bold flex items-center justify-between text-sm font-mono">
-                                    <span>€{feePerPlayer}</span>
-                                    <span className="text-xs text-slate-400 font-normal">€{feePerPlayer} / player</span>
                                   </div>
                                 </div>
                               </div>
