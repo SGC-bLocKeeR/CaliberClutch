@@ -165,7 +165,7 @@ export const VortexRightSocialRail: React.FC<VortexRightSocialRailProps> = ({
   const [copiedCode, setCopiedCode] = useState(false);
   const [spectateToast, setSpectateToast] = useState<string | null>(null);
 
-  // Mobile Collapsible Rail State (Vetem per telefon/mobile)
+  // Mobile Collapsible Rail State (Only for mobile view)
   const [mobileCollapsed, setMobileCollapsed] = useState<boolean>(() => 
     typeof window !== 'undefined' ? window.innerWidth < 1024 : false
   );
@@ -572,7 +572,7 @@ export const VortexRightSocialRail: React.FC<VortexRightSocialRailProps> = ({
                 }
               }}
               className="flex-1 min-w-0 flex items-center justify-between p-1.5 rounded-xl hover:bg-white/[0.05] transition cursor-pointer group"
-              title={isMobile ? (mobileCollapsed ? "Shfaq panelin e plotë (Expand)" : "Player Profile") : "Player Profile"}
+              title={isMobile ? (mobileCollapsed ? "Expand Player Profile" : "Player Profile") : "Player Profile"}
             >
               <div className="flex items-center gap-2 min-w-0">
                 <div className="relative w-8 h-8 shrink-0">
@@ -609,7 +609,7 @@ export const VortexRightSocialRail: React.FC<VortexRightSocialRailProps> = ({
                   setMobileCollapsed(true);
                 }}
                 className="ml-1 p-1.5 rounded-xl bg-white/5 hover:bg-white/10 text-slate-400 hover:text-white transition cursor-pointer shrink-0"
-                title="Mbyll panelin"
+                title="Close panel"
               >
                 <X className="w-4 h-4" />
               </button>

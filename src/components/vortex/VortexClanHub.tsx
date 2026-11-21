@@ -2301,9 +2301,9 @@ export const VortexClanHub: React.FC<VortexClanHubProps> = ({
     saveClanToCloud(nextClan);
 
     if (targetMember.name.toLowerCase() === currentGamerTag.toLowerCase() || targetMember.id === 'current-user') {
-      setToast(`👑 Ju tani jeni Kapiteni Zyrtar i [${userClan.tag}]! Keni të drejtën e plotë për të regjistruar ekipin në turne.`);
+      setToast(`👑 You are now the Official Team Captain of [${userClan.tag}]! Full tournament registration authority granted.`);
     } else {
-      setToast(`👑 Statusi i Kapitenit iu transferua ${targetMember.name}! Vetëm ${targetMember.name} tani mund ta fusë ekipin në turne.`);
+      setToast(`👑 Captaincy transferred to ${targetMember.name}! Only ${targetMember.name} can now register the squad.`);
     }
   };
 
@@ -2786,7 +2786,7 @@ export const VortexClanHub: React.FC<VortexClanHubProps> = ({
                   {member.isCaptain ? (
                     <span className="px-2.5 py-1.5 rounded-xl bg-amber-500/20 text-amber-300 border border-amber-500/40 text-[11px] font-mono font-black flex items-center gap-1.5 shadow-sm">
                       <Crown className="w-3.5 h-3.5 text-amber-400 fill-current" />
-                      <span>Kapiten Zyrtar</span>
+                      <span>Official Captain</span>
                     </span>
                   ) : (
                     <button
@@ -2796,10 +2796,10 @@ export const VortexClanHub: React.FC<VortexClanHubProps> = ({
                         handleTransferCaptain(member.id);
                       }}
                       className="px-2.5 py-1.5 rounded-xl bg-amber-500/10 hover:bg-amber-500/25 text-amber-300 border border-amber-500/30 text-[11px] font-mono font-bold flex items-center gap-1.5 transition cursor-pointer active:scale-95"
-                      title={member.isUser ? "Rimerr të drejtat e Kapitenit" : `Bëje ${member.name} Kapiten të ekipit`}
+                      title={member.isUser ? "Reclaim Captain Rights" : `Appoint ${member.name} as Team Captain`}
                     >
                       <Crown className="w-3.5 h-3.5 text-amber-400" />
-                      <span>{member.isUser ? 'Bëhu Kapiten' : 'Bëje Kapiten'}</span>
+                      <span>{member.isUser ? 'Reclaim Captain' : 'Make Captain'}</span>
                     </button>
                   )}
 
@@ -3239,7 +3239,7 @@ export const VortexClanHub: React.FC<VortexClanHubProps> = ({
             verified: true,
             roster: [
               { name: 'Kastrioti', role: 'IGL / Captain', flag: '🇽🇰', countryCode: 'xk', level: 10, elo: 2720 },
-              { name: 'ShqipeAim', role: 'Entry Fragger', flag: '🇦🇱', countryCode: 'al', level: 10, elo: 2780 },
+              { name: 'FalconAim', role: 'Entry Fragger', flag: '🇦🇱', countryCode: 'al', level: 10, elo: 2780 },
               { name: 'DriniSniper', role: 'AWPer', flag: '🇽🇰', countryCode: 'xk', level: 9, elo: 2640 },
               { name: 'LabiLurker', role: 'Lurker', flag: '🇽🇰', countryCode: 'xk', level: 9, elo: 2590 },
               { name: 'ValonSupport', role: 'Support', flag: '🇽🇰', countryCode: 'xk', level: 9, elo: 2510 },
@@ -3299,8 +3299,8 @@ export const VortexClanHub: React.FC<VortexClanHubProps> = ({
               { name: 'SharriAWP', role: 'AWPer', flag: '🇽🇰', countryCode: 'xk', level: 10, elo: 2710 },
               { name: 'DrenicaAim', role: 'Entry Fragger', flag: '🇽🇰', countryCode: 'xk', level: 9, elo: 2560 },
               { name: 'Ulpiana', role: 'Support', flag: '🇽🇰', countryCode: 'xk', level: 8, elo: 2420 },
-              { name: 'GërmiaIGL', role: 'IGL / Captain', flag: '🇽🇰', countryCode: 'xk', level: 9, elo: 2490 },
-              { name: 'Arbëria', role: 'Anchor', flag: '🇽🇰', countryCode: 'xk', level: 8, elo: 2450 },
+              { name: 'ApexIGL', role: 'IGL / Captain', flag: '🇽🇰', countryCode: 'xk', level: 9, elo: 2490 },
+              { name: 'Spectre', role: 'Anchor', flag: '🇽🇰', countryCode: 'xk', level: 8, elo: 2450 },
             ],
           },
           {
@@ -3327,7 +3327,7 @@ export const VortexClanHub: React.FC<VortexClanHubProps> = ({
             roster: [
               { name: 'Rozafat', role: 'IGL / Captain', flag: '🇦🇱', countryCode: 'al', level: 9, elo: 2540 },
               { name: 'Labeat', role: 'Entry Fragger', flag: '🇦🇱', countryCode: 'al', level: 9, elo: 2480 },
-              { name: 'Tarabosh', role: 'AWPer', flag: '🇦🇱', countryCode: 'al', level: 9, elo: 2450 },
+              { name: 'IronClad', role: 'AWPer', flag: '🇦🇱', countryCode: 'al', level: 9, elo: 2450 },
               { name: 'BunaSniper', role: 'Support', flag: '🇦🇱', countryCode: 'al', level: 8, elo: 2390 },
               { name: 'Marubi', role: 'Anchor', flag: '🇦🇱', countryCode: 'al', level: 8, elo: 2380 },
             ],

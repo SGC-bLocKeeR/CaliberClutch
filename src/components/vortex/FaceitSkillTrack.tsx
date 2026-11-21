@@ -275,10 +275,10 @@ export const FaceitSeasonStatsCard: React.FC<FaceitSeasonStatsCardProps> = ({
 
           <div className="space-y-1.5 max-w-lg">
             <h3 className="text-base sm:text-lg font-bold font-display text-white">
-              0 Ndeshje të Luajtura • Kalibrimi në Pritje
+              0 Matches Played • Calibration Pending
             </h3>
             <p className="text-xs text-slate-400 font-sans leading-relaxed">
-              Statistikat e detajuara (Rating, K/D, ADR, K/R, Headshot %, RWS, Kills, Clutches dhe grafiku i ELO-s) do të llogariten automatikisht në bazë të lojës suaj sapo të përfundoni ndeshjen e parë 5v5 në Caliber Clutch.
+              Detailed performance telemetry (Rating, K/D, ADR, K/R, Headshot %, RWS, Kills, Clutches and ELO trajectory) will be calculated automatically based on your gameplay as soon as you finish your first 5v5 match on Caliber Clutch.
             </p>
           </div>
 

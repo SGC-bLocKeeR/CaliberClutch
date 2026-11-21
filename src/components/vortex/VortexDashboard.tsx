@@ -10,6 +10,7 @@ import {
   Shield,
   ShieldCheck, 
   ShieldAlert, 
+  AlertTriangle,
   User, 
   UserPlus,
   Home,
@@ -152,75 +153,75 @@ interface ComingSoonData {
 
 const COMING_SOON_TABS: Record<string, ComingSoonData> = {
   tournaments: {
-    title: 'Rikthimi i Qarkut të Turneve CS2',
-    badge: 'RI-HAPJA SË SHPEJTI • Q2 2026',
-    subtitle: 'Kampionate Zyrtare & Shpërblime Reale me Skin-e dhe Cash',
-    announcement: 'Ky tab po ri-ndërtohet plotësisht me standardet më të larta të skenës ndërkombëtare esports. Rikthimi i turneve do të sjellë kllapa automatike 32-ekipesh, fonde çmimesh të garantuara në para dhe shpërblime me skin-e CS2 (Covert & Thika) të dorëzuara menjëherë në Steam nëpërmjet DMarket B2B Steam Bot. Po kryhen auditimet finale të sigurisë dhe drejtësisë sportive me anti-cheat për të siguruar përvojë madhështore konkurruese.',
-    desc: 'Turnetë zyrtare po kalojnë fazën finale të testimit të sigurisë para hapjes së regjistrimeve për kampionatin e madh ballkanik dhe evropian.',
+    title: 'CS2 Tournament Circuit Relaunch',
+    badge: 'REOPENING SOON • Q2 2026',
+    subtitle: 'Official Championships & Guaranteed Pure Cash Prize Pools',
+    announcement: 'This tab is being completely rebuilt to the highest standards of the international competitive esports scene. The tournament circuit relaunch features automated 32-team brackets, guaranteed cash prize pools, and CS2 skin payouts dispatched instantly via DMarket B2B Steam Bots. Final anti-cheat integrity audits and sportsmanship verifications are underway to ensure an uncompromising competitive environment.',
+    desc: 'Official tournament brackets are in the final validation phase prior to open registration for the European championship.',
     progress: 88,
-    phase: 'Faza 4/5: Kalibrimi i Çmimeve & Auditimi Final',
+    phase: 'Phase 4/5: Prize Calibration & Final Audit',
     icon: Trophy,
     color: '#F59E0B',
     accentRgb: '245, 158, 11',
     highlights: [
-      { title: 'Kllapa Automatikë 32-Ekipesh', desc: 'Sistem eliminimi direkt dhe dyfish (Single & Double Elimination).' },
-      { title: 'Shpërblime me Skin-e & Para', desc: 'Fonde çmimesh të garantuara me shpërndarje direkte në llogari.' },
-      { title: 'DMarket B2B Steam Bot', desc: 'Dërgim i menjëhershëm i armëve pa trade hold dhe pa pritje.' },
-      { title: 'Mbrojtje e Plotë me Anti-Cheat', desc: '100% garanci kundër lojtarëve të dyshimtë dhe smurfs.' }
+      { title: 'Automated 32-Team Brackets', desc: 'Single and Double Elimination formats with instant seeding.' },
+      { title: 'Guaranteed Cash & Skin Rewards', desc: 'Secure prize pools with instant, direct balance disbursement.' },
+      { title: 'DMarket B2B Steam Bot', desc: 'Instant item dispatch without trade hold delays.' },
+      { title: 'Full Anti-Cheat Protection', desc: 'Kernel-level integrity guarantees against smurfs and bad actors.' }
     ]
   },
   scrims: {
-    title: 'Rikthimi i Arenës Scrims Hub (5v5)',
-    badge: 'RI-HAPJA SË SHPEJTI • PRACC LOBBIES',
-    subtitle: 'Ndeshje Stërvitore & Matchmaking midis Skuadrave',
-    announcement: 'Arena e Scrims Hub po përgatitet për rikthimin e saj të fuqishëm për të gjitha skuadrat dhe klanet e organizuara. Po vendosen servera privatë CS2 Sub-Tick me ping ultra të ulët (Frankfurt, Stockholm, London), sistem i plotë vetoje hartash dhe kapitenësh, si dhe regjistrim automatik i GOTV demove pas çdo ndeshjeje për analiza taktike. Dyert do të hapen shumë shpejt!',
-    desc: 'Hapësira e dedikuar për pracc dhe stërvitje taktike midis 5v5 skuadrave të organizuara është në përgatitjet finale.',
+    title: 'Scrims Hub Arena (5v5)',
+    badge: 'REOPENING SOON • PRACC LOBBIES',
+    subtitle: 'Team Practice & Competitive Matchmaking',
+    announcement: 'The Scrims Hub Arena is preparing for its official relaunch for all registered squads and clans. Ultra-low ping CS2 Sub-Tick private servers are deployed (Frankfurt, Stockholm, London), alongside a comprehensive map & captain veto system, and automatic GOTV demo recording after every match for in-depth tactical reviews. Doors open shortly!',
+    desc: 'Dedicated practice and tactical scrimmage space for organized 5v5 rosters is in final calibration.',
     progress: 82,
-    phase: 'Faza 4/5: Testimi i Serverave CS2 Sub-Tick',
+    phase: 'Phase 4/5: CS2 Sub-Tick Server Validation',
     icon: Swords,
     color: '#A3E635',
     accentRgb: '163, 230, 53',
     highlights: [
-      { title: 'Lobi i Dedikuar midis Skuadrave', desc: 'Gjetje e balancuar e kundërshtarëve sipas nivelit ELO të ekipit.' },
-      { title: 'Sistem Vetoje për Kapitenët', desc: 'Zgjedhje zyrtare hartash dhe anësh (CT/T side knife round).' },
-      { title: 'Servera Privatë CS2 Sub-Tick', desc: 'Performancë maksimale me sub-tick routing pa humbje paketash.' },
-      { title: 'Shkarkim GOTV Demo', desc: 'Qasje e menjëhershme në skedarët .dem për analizë raundi pas raundi.' }
+      { title: 'Dedicated Squad Matchmaking', desc: 'Balanced opponent matchmaking calibrated to team ELO tiers.' },
+      { title: 'Captain Map Veto System', desc: 'Official active duty map pick/ban and side knife rounds.' },
+      { title: 'Private CS2 Sub-Tick Servers', desc: 'Peak performance with optimized sub-tick routing and zero packet loss.' },
+      { title: 'Instant GOTV Demo Access', desc: 'Immediate access to parsed .dem files for round-by-round replay analysis.' }
     ]
   },
   aim: {
-    title: 'Rikthimi i 1v1 Aim Duel Arena',
-    badge: 'RI-HAPJA SË SHPEJTI • 1V1 DUELS',
-    subtitle: 'Beteja Kokë-më-Kokë & Renditje e Veçantë ELO',
-    announcement: 'Përballjet 1v1 për të dëshmuar saktësinë e pastër të shënjestrimit, kohën e reagimit dhe zotërimin e armëve po rikthehen! Po kalibrohen hartat më të famshme të duelit (Aim Botz, Redline, AWP Arena) me llogaritje precize të sub-tick hit registration dhe tabelë të veçantë pikësh 1v1 ELO. Përgatituni për të sfiduar miqtë tuaj në duele të zjarrta!',
-    desc: 'Arena e duelit individual po përsoset për të garantuar saktësi absolute dhe barazi të plotë teknike.',
+    title: '1v1 Aim Duel Arena',
+    badge: 'REOPENING SOON • 1V1 DUELS',
+    subtitle: 'Head-to-Head Showdowns & Dedicated ELO Ladder',
+    announcement: 'The ultimate proving ground for precision aim, reaction speed, and mechanical weapon mastery is returning! Classic duel arenas (Aim Botz, Redline, AWP Arena) are calibrated with sub-tick hit registration and an independent 1v1 ELO rating ladder. Get ready to challenge your rivals to intense head-to-head duels!',
+    desc: 'Individual duel arena refined for absolute hit precision and competitive integrity.',
     progress: 78,
-    phase: 'Faza 3/5: Kalibrimi i Hit-Reg & Anti-Peek',
+    phase: 'Phase 3/5: Hit-Reg & Anti-Peek Calibration',
     icon: Crosshair,
     color: '#EF4444',
     accentRgb: '239, 68, 68',
     highlights: [
-      { title: 'Duele të Shpejta First-to-16', desc: 'Beteja dinamike me AK-47, M4A1-S, AWP dhe Desert Eagle.' },
-      { title: 'Harta të Kalibruara për Aim', desc: 'Ambiente të optimizuara pa vonesa për duele të drejtpërdrejta.' },
-      { title: 'Sub-Tick Hit Registration', desc: 'Regjistrim milimetrik i plumbave në kokë me zero devijim.' },
-      { title: 'Renditje e Pavarur 1v1 ELO', desc: 'Ngrituni në krye të tabelës së duelistëve më të mirë.' }
+      { title: 'Fast First-to-16 Duels', desc: 'Dynamic rifle and pistol duels: AK-47, M4A1-S, AWP, Desert Eagle.' },
+      { title: 'Aim-Calibrated Arenas', desc: 'Optimized low-latency environments built for direct aim battles.' },
+      { title: 'Sub-Tick Hit Registration', desc: 'Pixel-accurate headshot detection with zero registry deviation.' },
+      { title: 'Independent 1v1 ELO Ladder', desc: 'Climb to the pinnacle of the solo duelist leaderboards.' }
     ]
   },
   lineups: {
-    title: 'Rikthimi i CS2 Lineups & Tactical Radar',
-    badge: 'RI-HAPJA SË SHPEJTI • TACTICAL RADAR',
-    subtitle: 'Playbook Interaktiv 2D me Video 60 FPS',
-    announcement: 'Guida taktike dhe radari interaktiv për hedhjen e granatave (smokes, flashbangs, molotovs, HE) po pasurohet me të gjitha zbulimet më të fundit nga skena pro. Çdo hedhje po regjistrohet në 60 FPS me pamje nga këndvështrimi i parë, tregues të saktë të krosherit dhe pozicionim me koordinata 2D për të gjitha hartat zyrtare të Valve. Rikthehemi së shpejti me librarinë më të pasur taktike!',
-    desc: 'Libraria profesionale e granatave dhe pozicioneve taktike po merr prekjet përfundimtare për sezonin e ri.',
+    title: 'CS2 Lineups & Tactical Radar',
+    badge: 'REOPENING SOON • TACTICAL RADAR',
+    subtitle: 'Interactive 2D Playbook with 60 FPS Guides',
+    announcement: 'The tactical utility radar and interactive grenade lineup guide (smokes, flashbangs, molotovs, HE) is expanding with professional playbook discoveries. Every lineup is recorded in silky 60 FPS first-person view, with pinpoint crosshair alignment and 2D radar landing coordinates across all official Valve Active Duty maps. Returning soon with the ultimate tactical library!',
+    desc: 'Professional utility and tactical positioning playbook receiving final seasonal polish.',
     progress: 90,
-    phase: 'Faza 4/5: Përfundimi i Regjistrimit të Videove',
+    phase: 'Phase 4/5: Video Recording Finalization',
     icon: Compass,
     color: '#3B82F6',
     accentRgb: '59, 130, 246',
     highlights: [
-      { title: 'Video të Kristalta 60 FPS', desc: 'Udhëzues vizual të shpejtë për çdo tymosje kyçe në secilën hartë.' },
-      { title: 'Radar Interaktiv 2D/3D', desc: 'Klikoni mbi zonë për të parë ku bie granata dhe nga ku hidhet.' },
-      { title: 'Konfigurim Jumpthrow & Run-throw', desc: 'Bind-e të unifikuara për hedhje 100% konsistente në çdo raund.' },
-      { title: 'Mirage, Inferno, Nuke, Dust II, Anubis', desc: 'Mbulim i plotë i të gjitha hartave të Active Duty pool.' }
+      { title: 'Crisp 60 FPS Video Guides', desc: 'Rapid visual walk-throughs for every essential utility lineup.' },
+      { title: 'Interactive 2D/3D Radar', desc: 'Click any bombsite zone to view precise trajectory and landing.' },
+      { title: 'Standardized Jumpthrow Binds', desc: 'Unified throwing keybinds for 100% consistent execution.' },
+      { title: 'Active Duty Map Pool', desc: 'Comprehensive coverage of Mirage, Inferno, Nuke, Dust II, Anubis, Ancient.' }
     ]
   }
 };
@@ -910,7 +911,7 @@ export const VortexDashboard: React.FC<VortexDashboardProps> = ({
     sound.playSelect();
     const targetNick = (draftFaceitNickname || faceitNickname || localStorage.getItem('vortex_faceit_nickname') || 'bLocKeeRz').trim();
     if (!targetNick) {
-      setFaceitSyncError('Ju lutem vendosni nickname-in ose linkun tuaj në FACEIT.');
+      setFaceitSyncError('Please enter your exact FACEIT nickname or profile link.');
       return;
     }
     setIsSyncingFaceit(true);
@@ -941,8 +942,8 @@ export const VortexDashboard: React.FC<VortexDashboardProps> = ({
       }
 
       sound.playTournamentVictory();
-      setFaceitSyncSuccess(`✓ Llogaria FACEIT (${nick}) u sinkronizua: Level ${lvl} • ${el.toLocaleString()} ELO`);
-      setDashboardToast(`FACEIT Connected! ${nick} (Level ${lvl} • ${el.toLocaleString()} ELO) u verifikua.`);
+      setFaceitSyncSuccess(`✓ FACEIT profile (${nick}) synchronized: Level ${lvl} • ${el.toLocaleString()} ELO`);
+      setDashboardToast(`FACEIT Connected! ${nick} (Level ${lvl} • ${el.toLocaleString()} ELO) verified.`);
       setTimeout(() => setDashboardToast(null), 3500);
     };
 
@@ -950,7 +951,7 @@ export const VortexDashboard: React.FC<VortexDashboardProps> = ({
       const res = await fetch(`/api/faceit/profile?steamId64=${encodeURIComponent(sid)}&nickname=${encodeURIComponent(clean)}&force=true`);
       if (res.status === 429) {
         const err = await res.json();
-        setFaceitSyncError(err.message || 'Cooldown 1-orë aktiv ndërmjet rifreskimeve.');
+        setFaceitSyncError(err.message || '1-hour cooldown active between telemetry refreshes.');
         return;
       }
       if (res.ok) {
@@ -1226,6 +1227,14 @@ export const VortexDashboard: React.FC<VortexDashboardProps> = ({
     }
     return isUserTeamCaptain ? 'IGL / Captain' : 'Team Member';
   }, [userClanData, currentGamerTag, isUserTeamCaptain]);
+
+  const teamRosterCount = useMemo(() => {
+    return Array.isArray(userClanData?.members) ? userClanData.members.length : 0;
+  }, [userClanData]);
+
+  const isFull5Stack = useMemo(() => {
+    return teamRosterCount >= 5;
+  }, [teamRosterCount]);
 
   // Tournament Bracket Simulation & Match Engine State
   const [bracketStates, setBracketStates] = useState<Record<string, {
@@ -2784,7 +2793,7 @@ export const VortexDashboard: React.FC<VortexDashboardProps> = ({
                     {isSubscribedNotify && (
                       <div className="p-3.5 rounded-xl bg-emerald-500/10 border border-emerald-500/25 text-emerald-300 text-xs font-mono flex items-center gap-2 animate-in fade-in">
                         <Sparkles className="w-4 h-4 text-emerald-400 shrink-0" />
-                        <span>Je regjistruar me sukses në listën prioritare VIP! Sapo serverat e Caliber Clutch të kalibrohen plotësisht, do të njoftohesh menjëherë.</span>
+                        <span>Successfully enrolled in the VIP Priority List! As soon as the Caliber Clutch servers finish calibration, you will be notified immediately.</span>
                       </div>
                     )}
                   </div>
@@ -3918,7 +3927,7 @@ export const VortexDashboard: React.FC<VortexDashboardProps> = ({
                     {/* Status Pill */}
                     <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-black/60 border border-amber-500/30 text-xs font-mono text-amber-300 shadow-md">
                       <Lock className="w-3.5 h-3.5 text-amber-400" />
-                      <span className="font-bold tracking-wide">TAB I BLLOKUAR PËRKOHËSISHT • RI-KALIBRIM STRUKTUROR</span>
+                      <span className="font-bold tracking-wide">TAB TEMPORARILY LOCKED • STRUCTURAL RE-CALIBRATION</span>
                     </div>
 
                     <div className="space-y-2">
@@ -3934,7 +3943,7 @@ export const VortexDashboard: React.FC<VortexDashboardProps> = ({
                     <div className="p-5 sm:p-6 rounded-2xl bg-[#090B10]/80 border border-white/10 text-left space-y-2.5 backdrop-blur-sm shadow-xl">
                       <div className="flex items-center gap-2 text-xs font-mono font-bold text-amber-400 uppercase tracking-wider">
                         <Sparkles className="w-4 h-4 text-amber-400" />
-                        <span>Njoftim Zyrtar mbi Rikthimin e Tabit</span>
+                        <span>Official Feature Return Announcement</span>
                       </div>
                       <p className="text-sm sm:text-base text-slate-200 leading-relaxed font-sans">
                         {devInfo.announcement}
@@ -3948,7 +3957,7 @@ export const VortexDashboard: React.FC<VortexDashboardProps> = ({
                           <Activity className="w-3.5 h-3.5 text-emerald-400" />
                           <span>{devInfo.phase}</span>
                         </span>
-                        <span className="font-bold text-white">{devInfo.progress}% e Përfunduar</span>
+                        <span className="font-bold text-white">{devInfo.progress}% Complete</span>
                       </div>
                       <div className="w-full h-3 rounded-full bg-[#1A1F2C] border border-[#2B3448] overflow-hidden p-0.5">
                         <div
@@ -3986,13 +3995,13 @@ export const VortexDashboard: React.FC<VortexDashboardProps> = ({
                         onClick={() => {
                           sound.playTournamentVictory();
                           confetti({ particleCount: 70, spread: 60, origin: { y: 0.6 } });
-                          setDashboardToast(`✓ Njoftimi u aktivizua! Do të lajmëroheni i pari sapo të rikthehet ${devInfo.title}.`);
+                          setDashboardToast(`✓ Notification enabled! You will be alerted first when ${devInfo.title} launches.`);
                           setTimeout(() => setDashboardToast(null), 4500);
                         }}
                         className="px-6 py-3 rounded-2xl bg-gradient-to-r from-amber-500 to-orange-500 hover:brightness-110 text-slate-950 font-display font-black text-xs uppercase tracking-wider transition shadow-lg shadow-amber-500/25 cursor-pointer flex items-center gap-2 active:scale-95"
                       >
                         <Bell className="w-4 h-4" />
-                        <span>Më njofto sapo të rikthehet tab-i</span>
+                        <span>Notify me when this tab launches</span>
                       </button>
                     </div>
                   </div>
@@ -4248,7 +4257,7 @@ export const VortexDashboard: React.FC<VortexDashboardProps> = ({
                               if (!faceitKeyInput.trim()) {
                                 setFaceitStatusResult({
                                   success: false,
-                                  message: '⚠️ Mungon FACEIT API Key! Shkoni te Tab 1 (developers.faceit.com) > My Apps > API Keys, gjeneroni Server API Key dhe vendoseni këtu për t\'u lidhur me serverat live.'
+                                  message: '⚠️ Missing FACEIT API Key! Navigate to Tab 1 (developers.faceit.com) > My Apps > API Keys, generate a Server API Key, and enter it here to link live servers.'
                                 });
                                 setFaceitTesting(false);
                                 return;
@@ -4264,19 +4273,19 @@ export const VortexDashboard: React.FC<VortexDashboardProps> = ({
                                 if (result.success && result.organizer) {
                                   setFaceitStatusResult({
                                     success: true,
-                                    message: `🟢 Lidhja LIVE me FACEIT u konfirmua! Organizatori: ${result.organizer.name || 'CaliberClutch'}`,
+                                    message: `🟢 LIVE FACEIT connection verified! Organizer: ${result.organizer.name || 'CaliberClutch'}`,
                                     details: result.organizer
                                   });
                                 } else {
                                   setFaceitStatusResult({
                                     success: false,
-                                    message: result.error || 'Nuk mund të kryhet lidhja live me FACEIT. Kontrolloni API Key-in te developers.faceit.com.'
+                                    message: result.error || 'Live connection with FACEIT failed. Verify your API Key on developers.faceit.com.'
                                   });
                                 }
                               } catch (err: any) {
                                 setFaceitStatusResult({
                                   success: false,
-                                  message: `API query error: ${err?.message || 'Kontrolloni API Key-in nga developers.faceit.com'}`
+                                  message: `API query error: ${err?.message || 'Check your API Key from developers.faceit.com'}`
                                 });
                               } finally {
                                 setFaceitTesting(false);
@@ -4285,13 +4294,13 @@ export const VortexDashboard: React.FC<VortexDashboardProps> = ({
                             className="px-5 py-2.5 rounded-xl bg-[#171C2B] hover:bg-[#20273D] border border-white/10 text-white font-mono font-bold text-xs uppercase transition cursor-pointer flex items-center gap-2"
                           >
                             <RefreshCw className={`w-3.5 h-3.5 ${faceitTesting ? 'animate-spin' : ''}`} />
-                            <span>{faceitTesting ? 'Duke testuar live...' : 'Test Connection'}</span>
+                            <span>{faceitTesting ? 'Testing live...' : 'Test Connection'}</span>
                           </button>
 
                           {faceitSavingSuccess && (
                             <span className="text-emerald-400 text-xs font-mono font-bold flex items-center gap-1 animate-in fade-in">
                               <CheckCircle2 className="w-3.5 h-3.5" />
-                              <span>U Ruajtën me Sukses!</span>
+                              <span>Successfully Saved!</span>
                             </span>
                           )}
                         </div>
@@ -4341,9 +4350,9 @@ export const VortexDashboard: React.FC<VortexDashboardProps> = ({
                                 LIVE ONLINE (Frankfurt EU)
                               </span>
                             ) : faceitKeyInput.trim() ? (
-                              <span className="text-amber-400 font-bold">Çelësi i Ruajtur (Kliko Test)</span>
+                              <span className="text-amber-400 font-bold">Saved Key (Click Test)</span>
                             ) : (
-                              <span className="text-rose-400 font-bold">Mungon API Key</span>
+                              <span className="text-rose-400 font-bold">Missing API Key</span>
                             )}
                           </div>
 
@@ -4383,7 +4392,7 @@ export const VortexDashboard: React.FC<VortexDashboardProps> = ({
                             if (!faceitKeyInput.trim()) {
                               setFaceitStatusResult({
                                 success: false,
-                                message: '⚠️ Vendosni API Key-in nga Tab 1 për të tërhequr turnetë live nga FACEIT.'
+                                message: '⚠️ Enter your API Key from Tab 1 to fetch live tournaments from FACEIT.'
                               });
                               return;
                             }
@@ -4432,19 +4441,19 @@ export const VortexDashboard: React.FC<VortexDashboardProps> = ({
                                 setFaceitStatusResult({
                                   success: true,
                                   message: res.items.length > 0 
-                                    ? `U sinkronizuan ${res.items.length} kampionate live nga FACEIT në platformë!` 
-                                    : 'Lidhja me FACEIT është aktive! Asnjë kampionat publik nuk është krijuar ende te CaliberClutch në faceit.com (Tab 2).'
+                                    ? `Synchronized ${res.items.length} live tournaments from FACEIT to the platform!` 
+                                    : 'Connection to FACEIT active! No public championships have been created yet on CaliberClutch at faceit.com (Tab 2).'
                                 });
                               } else {
                                 setFaceitStatusResult({
                                   success: false,
-                                  message: res.error || 'Nuk u sinkronizuan dot turnetë nga FACEIT.'
+                                  message: res.error || 'Failed to synchronize tournaments from FACEIT.'
                                 });
                               }
                             } catch (err: any) {
                               setFaceitStatusResult({
                                 success: false,
-                                message: `Gabim gjatë sinkronizimit: ${err?.message || 'Kontrolloni API Key'}`
+                                message: `Synchronization error: ${err?.message || 'Check your API Key'}`
                               });
                             }
                           }}
@@ -4457,7 +4466,7 @@ export const VortexDashboard: React.FC<VortexDashboardProps> = ({
                         {faceitLiveTourneys.length > 0 ? (
                           <div className="p-3 rounded-xl bg-black/60 border border-white/5 space-y-2">
                             <div className="text-[11px] font-mono font-bold text-emerald-400">
-                              ✓ {faceitLiveTourneys.length} Turne Live te CaliberClutch në FACEIT:
+                              ✓ {faceitLiveTourneys.length} Live Tournaments on CaliberClutch FACEIT Hub:
                             </div>
                             <div className="space-y-1.5 max-h-48 overflow-y-auto">
                               {faceitLiveTourneys.map((t, idx) => (
@@ -4948,7 +4957,7 @@ export const VortexDashboard: React.FC<VortexDashboardProps> = ({
                             <span>5. Rosters & Captain Authority (5 Starters + 1 Sub)</span>
                           </div>
                           <p className="text-[11px] text-slate-400 pl-6 leading-relaxed">
-                            Each clan roster must contain 5 starting players and at most 1 registered substitute (stand-in). <strong>Vetëm Lideri i Ekipit (Kapiteni)</strong> ka autoritetin ligjor dhe sportiv për të regjistruar dhe kyçur formacionin në turne zyrtare.
+                            Each clan roster must contain 5 starting players and at most 1 registered substitute (stand-in). <strong>Only the Team Captain (Leader)</strong> has the official legal and sporting authority to register and lock the 5-stack roster in official tournaments.
                           </p>
                         </div>
 
@@ -5020,28 +5029,41 @@ export const VortexDashboard: React.FC<VortexDashboardProps> = ({
               {/* Team Captain Roster Clearance Bar */}
               <div className="p-4 rounded-2xl bg-[#0C1019] border border-[#222B3D] flex flex-col sm:flex-row sm:items-center justify-between gap-3 text-xs font-mono shadow-lg">
                 <div className="flex items-center gap-3">
-                  <div className={`w-9 h-9 rounded-xl flex items-center justify-center shrink-0 ${isUserTeamCaptain ? 'bg-[#A3E635]/15 border border-[#A3E635]/30 text-[#A3E635]' : 'bg-amber-500/15 border border-amber-500/30 text-amber-400'}`}>
-                    {isUserTeamCaptain ? <Crown className="w-5 h-5 text-[#A3E635]" /> : <Lock className="w-4 h-4 text-amber-400" />}
+                  <div className={`w-9 h-9 rounded-xl flex items-center justify-center shrink-0 ${isUserTeamCaptain ? (isFull5Stack ? 'bg-[#A3E635]/15 border border-[#A3E635]/30 text-[#A3E635]' : 'bg-rose-500/15 border border-rose-500/30 text-rose-400') : 'bg-amber-500/15 border border-amber-500/30 text-amber-400'}`}>
+                    {isUserTeamCaptain ? (isFull5Stack ? <Crown className="w-5 h-5 text-[#A3E635]" /> : <AlertTriangle className="w-5 h-5 text-rose-400" />) : <Lock className="w-4 h-4 text-amber-400" />}
                   </div>
                   <div>
                     <div className="flex flex-wrap items-center gap-2">
-                      <span className="font-bold text-white">Ekipi Yt: [{userClanData.tag}] {userClanData.name}</span>
+                      <span className="font-bold text-white">Your Team: [{userClanData.tag}] {userClanData.name}</span>
                       {isUserTeamCaptain ? (
                         <span className="px-2 py-0.5 rounded-md bg-[#A3E635]/15 text-[#A3E635] border border-[#A3E635]/30 text-[10px] font-black uppercase flex items-center gap-1">
                           <Crown className="w-3 h-3 text-[#A3E635]" />
-                          Ti je Lideri (Kapiteni)
+                          Team Captain
                         </span>
                       ) : (
                         <span className="px-2 py-0.5 rounded-md bg-amber-500/15 text-amber-300 border border-amber-500/30 text-[10px] font-bold flex items-center gap-1">
                           <Lock className="w-3 h-3 text-amber-400" />
-                          Roli Yt: {currentUserRole}
+                          Your Role: {currentUserRole}
+                        </span>
+                      )}
+                      {!isFull5Stack ? (
+                        <span className="px-2 py-0.5 rounded-md bg-rose-500/15 text-rose-300 border border-rose-500/30 text-[10px] font-bold flex items-center gap-1">
+                          <AlertTriangle className="w-3 h-3 text-rose-400" />
+                          Incomplete Roster ({teamRosterCount}/5)
+                        </span>
+                      ) : (
+                        <span className="px-2 py-0.5 rounded-md bg-emerald-500/15 text-emerald-300 border border-emerald-500/30 text-[10px] font-bold flex items-center gap-1">
+                          <CheckCircle2 className="w-3 h-3 text-emerald-400" />
+                          Full 5-Stack Ready (5/5)
                         </span>
                       )}
                     </div>
                     <p className="text-[11px] text-slate-400 mt-1">
                       {isUserTeamCaptain 
-                        ? `✓ Autorizim i Plotë: Si Kapiten, ju keni të drejtën ligjore për ta futur ekipin në turne me çmime cash.` 
-                        : `⚠️ Kufizim Zyrtar: Vetëm Kapiteni i ekipit (${userClanData.captainName || 'Team Leader'}) ka të drejtë të regjistrojë ekipin në turne.`}
+                        ? (isFull5Stack 
+                            ? `✓ Full Clearance Verified: As Captain, you have legal authority to enroll and lock your 5-stack in cash tournaments.` 
+                            : `⚠️ Incomplete Squad (${teamRosterCount}/5 Players): Official tournament entry requires exactly 5 confirmed starters. Recruit players in Teams Hub.`)
+                        : `⚠️ Captain Only: Only the official Team Captain (${userClanData.captainName || 'Team Leader'}) can register this squad.`}
                     </p>
                   </div>
                 </div>
@@ -5051,7 +5073,7 @@ export const VortexDashboard: React.FC<VortexDashboardProps> = ({
                   className="px-3.5 py-2 rounded-xl bg-white/5 hover:bg-white/10 text-slate-300 hover:text-white border border-white/10 text-xs font-mono transition cursor-pointer self-start sm:self-auto flex items-center gap-1.5 shrink-0"
                 >
                   <Users className="w-3.5 h-3.5 text-slate-400" />
-                  <span>Menaxho Ekipin</span>
+                  <span>Manage Squad</span>
                   <ChevronRight className="w-3.5 h-3.5 text-slate-500" />
                 </button>
               </div>
@@ -5308,16 +5330,30 @@ export const VortexDashboard: React.FC<VortexDashboardProps> = ({
                                 <span>Team Enrolled</span>
                               </button>
                             ) : isUserTeamCaptain ? (
-                              <button
-                                onClick={() => {
-                                  sound.playSelect();
-                                  setSelectedRegisterTourney(t);
-                                }}
-                                className="px-5 py-2.5 rounded-full bg-gradient-to-r from-[#84CC16] to-[#A3E635] hover:brightness-110 text-slate-950 font-display font-black text-xs uppercase tracking-wider transition shadow-md cursor-pointer active:scale-95 flex items-center gap-1.5"
-                              >
-                                <Crown className="w-4 h-4 text-slate-950" />
-                                <span>Register Team</span>
-                              </button>
+                              !isFull5Stack ? (
+                                <button
+                                  onClick={() => {
+                                    sound.playClick();
+                                    setSelectedRegisterTourney(t);
+                                  }}
+                                  className="px-4 py-2.5 rounded-full bg-rose-500/10 hover:bg-rose-500/20 text-rose-300 border border-rose-500/30 font-display font-black text-xs uppercase tracking-wider transition cursor-pointer flex items-center gap-1.5 shadow-sm group"
+                                  title="Complete 5-Stack roster required for tournament registration"
+                                >
+                                  <AlertTriangle className="w-3.5 h-3.5 text-rose-400 group-hover:scale-110 transition" />
+                                  <span>5-Stack Required ({teamRosterCount}/5)</span>
+                                </button>
+                              ) : (
+                                <button
+                                  onClick={() => {
+                                    sound.playSelect();
+                                    setSelectedRegisterTourney(t);
+                                  }}
+                                  className="px-5 py-2.5 rounded-full bg-gradient-to-r from-[#84CC16] to-[#A3E635] hover:brightness-110 text-slate-950 font-display font-black text-xs uppercase tracking-wider transition shadow-md cursor-pointer active:scale-95 flex items-center gap-1.5"
+                                >
+                                  <Crown className="w-4 h-4 text-slate-950" />
+                                  <span>Register Team</span>
+                                </button>
+                              )
                             ) : (
                               <button
                                 onClick={() => {
@@ -5328,11 +5364,11 @@ export const VortexDashboard: React.FC<VortexDashboardProps> = ({
                                     captainName: userClanData.captainName || 'Team Captain',
                                     teamTag: userClanData.tag || 'Squad'
                                   });
-                                  setDashboardToast(`⚠️ Vetëm lideri i ekipit (${userClanData.captainName || 'Kapiteni'}) mund ta regjistrojë ekipin në turne.`);
+                                  setDashboardToast(`⚠️ Only Team Captain (${userClanData.captainName || 'Captain'}) can register squad in official tournaments.`);
                                   setTimeout(() => setDashboardToast(null), 4500);
                                 }}
                                 className="px-4 py-2.5 rounded-full bg-amber-500/10 hover:bg-amber-500/20 text-amber-300 border border-amber-500/30 font-display font-black text-xs uppercase tracking-wider transition cursor-pointer flex items-center gap-1.5 shadow-sm group"
-                                title="Vetëm Lideri i Ekipit (Kapiteni) ka të drejtë të regjistrojë ekipin"
+                                title="Only Team Captain can register squad"
                               >
                                 <Lock className="w-3.5 h-3.5 text-amber-400 group-hover:scale-110 transition" />
                                 <span>Captain Only</span>
@@ -7525,11 +7561,11 @@ export const VortexDashboard: React.FC<VortexDashboardProps> = ({
               });
               setSelectedRegisterTourney(null);
               confetti({ particleCount: 100, spread: 85, origin: { y: 0.6 } });
-              setDashboardToast(`✓ Pagesa e Buy-In (€${res.amountEur}) u krye me sukses! [${userClanData.tag}] u regjistrua në ${tourneyTitle}.`);
+              setDashboardToast(`✓ Buy-In payment (€${res.amountEur}) completed! [${userClanData.tag}] registered in ${tourneyTitle}.`);
             } else if (res.item.type === 'wallet_topup') {
               creditVortexWalletBalance(res.amountEur);
               confetti({ particleCount: 60, spread: 70, origin: { y: 0.6 } });
-              setDashboardToast(`✓ Kuleta u rimbush me sukses (+€${res.amountEur.toFixed(2)})!`);
+              setDashboardToast(`✓ Caliber Wallet topped up successfully (+€${res.amountEur.toFixed(2)})!`);
             }
             setTimeout(() => setDashboardToast(null), 5000);
             setShowPremiumModal(false);
@@ -7682,16 +7718,30 @@ export const VortexDashboard: React.FC<VortexDashboardProps> = ({
                       5v5 Roster Locked & Enrolled
                     </span>
                   ) : isUserTeamCaptain ? (
-                    <button
-                      onClick={() => {
-                        sound.playSelect();
-                        setSelectedRegisterTourney(selectedBracketTourney);
-                      }}
-                      className="px-3.5 py-1.5 rounded-xl bg-[#A3E635] hover:bg-[#84CC16] text-slate-950 font-mono font-black text-xs cursor-pointer transition shadow flex items-center gap-1.5"
-                    >
-                      <Crown className="w-3.5 h-3.5 text-slate-950" />
-                      <span>+ Enroll [{userClanData.tag}] Roster</span>
-                    </button>
+                    !isFull5Stack ? (
+                      <button
+                        onClick={() => {
+                          sound.playClick();
+                          setSelectedRegisterTourney(selectedBracketTourney);
+                        }}
+                        className="px-3.5 py-1.5 rounded-xl bg-rose-500/15 hover:bg-rose-500/25 text-rose-300 border border-rose-500/30 font-mono font-bold text-xs cursor-pointer transition flex items-center gap-1.5"
+                        title="Complete 5-Stack required for tournament registration"
+                      >
+                        <AlertTriangle className="w-3.5 h-3.5 text-rose-400" />
+                        <span>5-Stack Required ({teamRosterCount}/5)</span>
+                      </button>
+                    ) : (
+                      <button
+                        onClick={() => {
+                          sound.playSelect();
+                          setSelectedRegisterTourney(selectedBracketTourney);
+                        }}
+                        className="px-3.5 py-1.5 rounded-xl bg-[#A3E635] hover:bg-[#84CC16] text-slate-950 font-mono font-black text-xs cursor-pointer transition shadow flex items-center gap-1.5"
+                      >
+                        <Crown className="w-3.5 h-3.5 text-slate-950" />
+                        <span>+ Enroll [{userClanData.tag}] Roster</span>
+                      </button>
+                    )
                   ) : (
                     <button
                       onClick={() => {
@@ -7702,11 +7752,11 @@ export const VortexDashboard: React.FC<VortexDashboardProps> = ({
                           captainName: userClanData.captainName || 'Team Captain',
                           teamTag: userClanData.tag || 'Squad'
                         });
-                        setDashboardToast(`⚠️ Vetëm lideri i ekipit (${userClanData.captainName || 'Kapiteni'}) mund ta regjistrojë ekipin.`);
+                        setDashboardToast(`⚠️ Only Team Captain (${userClanData.captainName || 'Captain'}) can register squad in official tournaments.`);
                         setTimeout(() => setDashboardToast(null), 4500);
                       }}
                       className="px-3.5 py-1.5 rounded-xl bg-amber-500/15 hover:bg-amber-500/25 text-amber-300 border border-amber-500/30 font-mono font-bold text-xs cursor-pointer transition flex items-center gap-1.5"
-                      title="Vetëm Lideri i Ekipit ka të drejtë të regjistrojë"
+                      title="Only Team Captain can register squad"
                     >
                       <Lock className="w-3.5 h-3.5 text-amber-400" />
                       <span>Captain Only ({userClanData.captainName})</span>
@@ -8107,16 +8157,28 @@ export const VortexDashboard: React.FC<VortexDashboardProps> = ({
               </div>
             </div>
 
-            {/* Captaincy Authority Status Banner */}
-            {isUserTeamCaptain ? (
+            {/* Captaincy & 5-Stack Status Banner */}
+            {!isFull5Stack ? (
+              <div className="p-3.5 rounded-2xl bg-rose-500/10 border border-rose-500/30 flex items-center gap-3 text-xs font-mono">
+                <div className="w-8 h-8 rounded-xl bg-rose-500/20 text-rose-400 flex items-center justify-center shrink-0">
+                  <AlertTriangle className="w-4 h-4 text-rose-400" />
+                </div>
+                <div>
+                  <span className="font-bold text-rose-300 block">⛔ INCOMPLETE ROSTER — 5-STACK STRICTLY REQUIRED</span>
+                  <p className="text-[11px] text-slate-300 mt-0.5">
+                    Your team currently has {teamRosterCount}/5 players. Official tournament entry requires exactly 5 confirmed starting players. Please recruit or complete your 5-stack in Teams Hub.
+                  </p>
+                </div>
+              </div>
+            ) : isUserTeamCaptain ? (
               <div className="p-3.5 rounded-2xl bg-emerald-500/10 border border-emerald-500/30 flex items-center gap-3 text-xs font-mono">
                 <div className="w-8 h-8 rounded-xl bg-emerald-500/20 text-emerald-400 flex items-center justify-center shrink-0">
                   <Crown className="w-4 h-4 text-emerald-400" />
                 </div>
                 <div>
-                  <span className="font-bold text-emerald-300 block">✓ CAPTAIN CLEARANCE VERIFIED</span>
+                  <span className="font-bold text-emerald-300 block">✓ CAPTAIN CLEARANCE & 5-STACK VERIFIED</span>
                   <p className="text-[11px] text-slate-300 mt-0.5">
-                    Përshëndetje Kapiten {currentGamerTag}. Keni të drejtën e plotë zyrtare për të kyçur formacionin dhe regjistruar [{userClanData.tag}].
+                    Welcome Captain {currentGamerTag}. Full tournament registration and buy-in authority verified for [{userClanData.tag}].
                   </p>
                 </div>
               </div>
@@ -8126,9 +8188,9 @@ export const VortexDashboard: React.FC<VortexDashboardProps> = ({
                   <Lock className="w-4 h-4 text-amber-400" />
                 </div>
                 <div>
-                  <span className="font-bold text-amber-300 block">⛔ VETËM LIDERI I EKIPIT KA TË DREJTË TË REGJISTROJË</span>
+                  <span className="font-bold text-amber-300 block">⛔ REGISTRATION RESTRICTED: TEAM CAPTAIN ONLY</span>
                   <p className="text-[11px] text-slate-300 mt-0.5">
-                    Kapiteni zyrtar i ekipit është <strong>{userClanData.captainName}</strong>. Roli yt: {currentUserRole}. Vetëm kapiteni mund të konfirmojë regjistrimin.
+                    Official Team Captain is <strong>{userClanData.captainName}</strong>. Your role: {currentUserRole}. Only the captain can enroll and lock this squad.
                   </p>
                 </div>
               </div>
@@ -8160,18 +8222,43 @@ export const VortexDashboard: React.FC<VortexDashboardProps> = ({
               <div className="space-y-1.5 pt-1">
                 <div className="flex items-center justify-between">
                   <label className="text-[10px] text-slate-400 uppercase tracking-wider block">Confirmed 5v5 Lineup [{userClanData.tag}]</label>
-                  <span className="text-[10px] font-mono text-[#A3E635]">5 Starters Locked</span>
+                  <span className={`text-[10px] font-mono font-bold ${isFull5Stack ? 'text-[#A3E635]' : 'text-rose-400'}`}>
+                    {isFull5Stack ? '5 Starters Locked' : `${teamRosterCount}/5 Starters (Missing ${5 - teamRosterCount})`}
+                  </span>
                 </div>
                 <div className="p-3 rounded-2xl bg-black/40 border border-white/5 space-y-2">
-                  {userClanData.members.slice(0, 5).map((m: any, idx: number) => (
-                    <div key={m.id || idx} className="flex items-center justify-between text-xs font-mono">
-                      <span className={`font-bold flex items-center gap-1.5 ${idx === 0 ? 'text-amber-300' : 'text-white'}`}>
-                        {idx === 0 ? <Crown className="w-3.5 h-3.5 text-amber-400" /> : <CountryFlag code="XK" size="xs" />}
-                        {idx + 1}. {m.name} ({m.role})
-                      </span>
-                      <span className="text-[10px] text-emerald-400 font-bold">Ring-0 AC Ready ✓</span>
-                    </div>
-                  ))}
+                  {[0, 1, 2, 3, 4].map((slotIdx) => {
+                    const member = userClanData.members[slotIdx];
+                    if (member) {
+                      return (
+                        <div key={member.id || slotIdx} className="flex items-center justify-between text-xs font-mono">
+                          <span className={`font-bold flex items-center gap-1.5 ${slotIdx === 0 ? 'text-amber-300' : 'text-white'}`}>
+                            {slotIdx === 0 ? <Crown className="w-3.5 h-3.5 text-amber-400" /> : <CountryFlag code="XK" size="xs" />}
+                            {slotIdx + 1}. {member.name} ({member.role})
+                          </span>
+                          <span className="text-[10px] text-emerald-400 font-bold">Ring-0 AC Ready ✓</span>
+                        </div>
+                      );
+                    }
+                    return (
+                      <div key={`empty-${slotIdx}`} className="flex items-center justify-between text-xs font-mono p-2 rounded-xl bg-rose-500/10 border border-rose-500/25">
+                        <span className="font-bold flex items-center gap-1.5 text-rose-300">
+                          <AlertTriangle className="w-3.5 h-3.5 text-rose-400" />
+                          Slot {slotIdx + 1}: [EMPTY SLOT] Missing Player
+                        </span>
+                        <button
+                          type="button"
+                          onClick={() => {
+                            setSelectedRegisterTourney(null);
+                            setActiveTab('teams');
+                          }}
+                          className="text-[10px] font-mono text-rose-300 hover:text-white underline cursor-pointer"
+                        >
+                          + Invite Teammate
+                        </button>
+                      </div>
+                    );
+                  })}
                   {userClanData.members[5] && (
                     <div className="flex items-center justify-between text-xs font-mono border-t border-white/5 pt-1 text-slate-400">
                       <span className="flex items-center gap-1.5">
@@ -8206,19 +8293,19 @@ export const VortexDashboard: React.FC<VortexDashboardProps> = ({
                     <div className="flex items-center justify-between border-b border-white/5 pb-2.5">
                       <div className="flex items-center gap-2">
                         <Coins className="w-4 h-4 text-amber-400" />
-                        <span className="font-bold text-white text-xs">Pagesa e Pjesëmarrjes (Team Buy-In Fee)</span>
+                        <span className="font-bold text-white text-xs">Tournament Entry Fee (Team Buy-In)</span>
                       </div>
                       <div className="text-right">
-                        <div className="font-display font-black text-amber-400 text-sm">€{entryFee} / Ekip</div>
-                        <div className="text-[10px] text-slate-400">€{(entryFee / 5).toFixed(0)} për lojtar (5v5)</div>
+                        <div className="font-display font-black text-amber-400 text-sm">€{entryFee} / Team</div>
+                        <div className="text-[10px] text-slate-400">€{(entryFee / 5).toFixed(0)} per player (5v5)</div>
                       </div>
                     </div>
 
-                    {/* Kuleta e Llogarisë Status Bar */}
+                    {/* Caliber Wallet Status Bar */}
                     <div className="p-2.5 rounded-xl bg-black/40 border border-white/5 flex items-center justify-between text-xs font-mono">
                       <div className="flex items-center gap-2 text-slate-300">
                         <Wallet className="w-4 h-4 text-[#A3E635]" />
-                        <span>Kuleta Yt (Caliber Wallet):</span>
+                        <span>Caliber Wallet Balance:</span>
                       </div>
                       <div className="flex items-center gap-2">
                         <span className={`font-mono font-bold ${hasEnoughWallet ? 'text-[#A3E635]' : 'text-amber-400'}`}>
@@ -8226,23 +8313,23 @@ export const VortexDashboard: React.FC<VortexDashboardProps> = ({
                         </span>
                         {hasEnoughWallet ? (
                           <span className="px-1.5 py-0.5 rounded text-[9px] font-bold bg-emerald-500/20 text-emerald-400">
-                            ✓ Mjafton
+                            ✓ Sufficient Balance
                           </span>
                         ) : (
                           <span className="px-1.5 py-0.5 rounded text-[9px] font-bold bg-amber-500/20 text-amber-300">
-                            Mungojnë €{(entryFee - vortexCoinsBalance).toFixed(2)}
+                            Missing €{(entryFee - vortexCoinsBalance).toFixed(2)}
                           </span>
                         )}
                       </div>
                     </div>
 
-                    {/* Zgjedhja e Metodës së Pagesës */}
+                    {/* Payment Method Selector */}
                     <div className="space-y-1.5">
                       <label className="text-[10px] text-slate-400 uppercase tracking-wider block">
-                        Zgjidh Mënyrën se si dëshiron ta bësh Pagesën:
+                        Select Payment Method:
                       </label>
                       <div className="grid grid-cols-2 gap-2.5">
-                        {/* Opsioni 1: Caliber Wallet */}
+                        {/* Option 1: Caliber Wallet */}
                         <button
                           type="button"
                           onClick={() => setTournamentPaymentMethod('wallet')}
@@ -8258,11 +8345,11 @@ export const VortexDashboard: React.FC<VortexDashboardProps> = ({
                           </div>
                           <div className="mt-2">
                             <div className="font-bold text-white text-[11px]">Caliber Wallet</div>
-                            <div className="text-[10px] text-slate-400">Zbritje nga bilanci yt</div>
+                            <div className="text-[10px] text-slate-400">Direct wallet deduction</div>
                           </div>
                         </button>
 
-                        {/* Opsioni 2: Kartelë / Crypto / PayPal via Xsolla */}
+                        {/* Option 2: Card / Crypto / PayPal via Xsolla */}
                         <button
                           type="button"
                           onClick={() => setTournamentPaymentMethod('xsolla')}
@@ -8277,16 +8364,16 @@ export const VortexDashboard: React.FC<VortexDashboardProps> = ({
                             <span className={`w-2 h-2 rounded-full ${tournamentPaymentMethod === 'xsolla' ? 'bg-[#A3E635]' : 'bg-transparent border border-slate-600'}`} />
                           </div>
                           <div className="mt-2">
-                            <div className="font-bold text-white text-[11px]">Kartelë / Crypto / PayPal</div>
-                            <div className="text-[10px] text-slate-400">Pagesë direkte me Xsolla</div>
+                            <div className="font-bold text-white text-[11px]">Card / Crypto / PayPal</div>
+                            <div className="text-[10px] text-slate-400">Direct checkout via Xsolla</div>
                           </div>
                         </button>
                       </div>
                     </div>
 
-                    {/* Sqarim mbi shpërndarjen e çmimit */}
+                    {/* Prize Pool Distribution Explainer */}
                     <div className="text-[10px] text-slate-400 leading-relaxed bg-black/30 p-2.5 rounded-xl border border-white/5">
-                      💡 <strong>Si funksionon pagesa:</strong> Kapiteni i ekipit autorizon tarifën e hyrjes (€{entryFee}). Fondi i mbledhur (85% e kuotave) shkon direkt në <strong>Fondin e Çmimit Cash</strong>, dhe shpërndahet automatikisht menjëherë pas Grand Finales.
+                      💡 <strong>How payments work:</strong> The team captain authorizes the tournament entry fee (€{entryFee}). Collected funds (85% prize allocation) go directly into the <strong>Guaranteed Cash Prize Pool</strong>, disbursed automatically and instantly to the winners' balances upon conclusion of the Grand Final.
                     </div>
                   </div>
                 );
@@ -8317,6 +8404,18 @@ export const VortexDashboard: React.FC<VortexDashboardProps> = ({
                       <Lock className="w-3.5 h-3.5 text-slate-500" />
                       <span>Locked: Captain Only ({userClanData.captainName})</span>
                     </button>
+                  ) : !isFull5Stack ? (
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setSelectedRegisterTourney(null);
+                        setActiveTab('teams');
+                      }}
+                      className="w-full sm:w-auto px-6 py-2.5 rounded-xl bg-gradient-to-r from-rose-600 to-rose-700 hover:brightness-110 text-white font-display font-black text-xs uppercase tracking-wider transition shadow-lg cursor-pointer flex items-center justify-center gap-2 active:scale-95"
+                    >
+                      <Users className="w-4 h-4 text-white" />
+                      <span>Complete 5-Stack in Teams Hub ({teamRosterCount}/5) →</span>
+                    </button>
                   ) : tournamentPaymentMethod === 'wallet' && !hasEnoughWallet ? (
                     <button
                       type="button"
@@ -8324,8 +8423,8 @@ export const VortexDashboard: React.FC<VortexDashboardProps> = ({
                         sound.playSelect();
                         setXsollaCheckoutItem({
                           id: `topup-${Date.now()}`,
-                          title: 'Rimbush Kuletën për Turne',
-                          description: `Rimbushje kuletë për turneun ${selectedRegisterTourney.title} [${userClanData.tag}]`,
+                          title: 'Tournament Wallet Top-Up',
+                          description: `Wallet top-up for ${selectedRegisterTourney.title} [${userClanData.tag}]`,
                           amountEur: Math.max(10, entryFee - Math.floor(vortexCoinsBalance)),
                           type: 'wallet_topup',
                         });
@@ -8333,7 +8432,7 @@ export const VortexDashboard: React.FC<VortexDashboardProps> = ({
                       className="w-full sm:w-auto px-6 py-2.5 rounded-xl bg-gradient-to-r from-amber-500 to-amber-600 hover:brightness-110 text-slate-950 font-display font-black text-xs uppercase tracking-wider transition shadow-lg cursor-pointer flex items-center justify-center gap-2 active:scale-95"
                     >
                       <CreditCard className="w-4 h-4 text-slate-950" />
-                      <span>Rimbush Kuletën (+€{(entryFee - vortexCoinsBalance).toFixed(0)}) me Kartelë/Crypto</span>
+                      <span>Top-Up Wallet (+€{(entryFee - vortexCoinsBalance).toFixed(0)}) via Card/Crypto</span>
                     </button>
                   ) : tournamentPaymentMethod === 'wallet' && hasEnoughWallet ? (
                     <button
@@ -8342,7 +8441,7 @@ export const VortexDashboard: React.FC<VortexDashboardProps> = ({
                         sound.playSelect();
                         const deducted = deductVortexWalletBalance(entryFee);
                         if (!deducted) {
-                          setDashboardToast('⚠️ Bilanci në kuletë nuk mjafton!');
+                          setDashboardToast('⚠️ Insufficient balance in wallet!');
                           setTimeout(() => setDashboardToast(null), 3000);
                           return;
                         }
@@ -8356,13 +8455,13 @@ export const VortexDashboard: React.FC<VortexDashboardProps> = ({
                         });
                         setSelectedRegisterTourney(null);
                         confetti({ particleCount: 90, spread: 80, origin: { y: 0.6 } });
-                        setDashboardToast(`✓ Pagesa €${entryFee} u zbrit nga kuleta! [${userClanData.tag}] u regjistrua me sukses në ${tourneyTitle}.`);
+                        setDashboardToast(`✓ Payment €${entryFee} deducted from wallet! [${userClanData.tag}] registered in ${tourneyTitle}.`);
                         setTimeout(() => setDashboardToast(null), 5000);
                       }}
                       className="w-full sm:w-auto px-6 py-2.5 rounded-xl bg-gradient-to-r from-[#84CC16] to-[#A3E635] hover:brightness-110 text-slate-950 font-display font-black text-xs uppercase tracking-wider transition shadow-lg cursor-pointer active:scale-95 flex items-center justify-center gap-2"
                     >
                       <Crown className="w-4 h-4 text-slate-950" />
-                      <span>Paguaj €{entryFee} nga Kuleta & Kyç Formacionin</span>
+                      <span>Pay €{entryFee} from Wallet & Lock 5-Stack</span>
                     </button>
                   ) : (
                     <button
@@ -8381,7 +8480,7 @@ export const VortexDashboard: React.FC<VortexDashboardProps> = ({
                       className="w-full sm:w-auto px-6 py-2.5 rounded-xl bg-gradient-to-r from-emerald-500 to-teal-400 hover:brightness-110 text-slate-950 font-display font-black text-xs uppercase tracking-wider transition shadow-lg cursor-pointer active:scale-95 flex items-center justify-center gap-2"
                     >
                       <CreditCard className="w-4 h-4 text-slate-950" />
-                      <span>Vazhdo tek Pagesa me Kartelë / Crypto (€{entryFee}) →</span>
+                      <span>Proceed to Card / Crypto Payment (€{entryFee}) →</span>
                     </button>
                   )}
                 </div>
@@ -8404,41 +8503,41 @@ export const VortexDashboard: React.FC<VortexDashboardProps> = ({
                   Tournament Security Regulation
                 </span>
                 <h3 className="text-base font-black font-display text-white">
-                  Vetëm Lideri i Ekipit mund të Regjistrojë
+                  TOURNAMENT ENTRY RESTRICTED: TEAM CAPTAIN ONLY
                 </h3>
               </div>
             </div>
 
             <p className="text-xs font-mono text-slate-300 leading-relaxed">
-              Sipas rregullores zyrtare të turneve në <strong>Caliber Clutch</strong>, vetëm <strong>Lideri i Ekipit (Kapiteni)</strong> ka autoritetin për të futur dhe kyçur ekipin në turne.
+              Under official <strong>Caliber Clutch</strong> tournament regulations, only the designated <strong>Team Captain (Leader)</strong> possesses legal sporting authority to register and lock squads into official tournaments.
             </p>
 
             <div className="p-3.5 rounded-2xl bg-black/50 border border-white/10 space-y-2 text-xs font-mono">
               <div className="flex items-center justify-between">
-                <span className="text-slate-400">Turneu:</span>
+                <span className="text-slate-400">Tournament:</span>
                 <span className="text-white font-bold truncate max-w-[200px]">{captainDeniedModal.tourneyTitle}</span>
               </div>
               <div className="flex items-center justify-between">
-                <span className="text-slate-400">Ekipi Yt:</span>
+                <span className="text-slate-400">Your Team:</span>
                 <span className="text-white font-bold">[{captainDeniedModal.teamTag || userClanData.tag}] {userClanData.name}</span>
               </div>
               <div className="flex items-center justify-between border-t border-white/5 pt-2">
                 <span className="text-amber-400 font-bold flex items-center gap-1">
                   <Crown className="w-3.5 h-3.5 text-amber-400" />
-                  Kapiteni Zyrtar:
+                  Official Captain:
                 </span>
                 <span className="text-amber-300 font-black">{captainDeniedModal.captainName || userClanData.captainName || 'Team Leader'}</span>
               </div>
               <div className="flex items-center justify-between">
-                <span className="text-slate-400">Roli Yt Aktual:</span>
-                <span className="text-slate-300 font-semibold">{currentUserRole} (Jo Kapiten)</span>
+                <span className="text-slate-400">Your Current Role:</span>
+                <span className="text-slate-300 font-semibold">{currentUserRole} (Not Captain)</span>
               </div>
             </div>
 
             <div className="p-3 rounded-xl bg-amber-500/10 border border-amber-500/20 text-[11px] font-mono text-amber-300/90 leading-normal flex items-start gap-2">
               <Info className="w-4 h-4 text-amber-400 shrink-0 mt-0.5" />
               <span>
-                Nëse dëshironi ta regjistroni ekipin, kërkoni nga Kapiteni <strong>{captainDeniedModal.captainName || userClanData.captainName}</strong> ta bëjë regjistrimin, ose merrni të drejtat e kapitenit tek tab-i "Teams".
+                To enroll this squad, request that Captain <strong>{captainDeniedModal.captainName || userClanData.captainName}</strong> completes registration, or claim captaincy rights in the Teams Hub.
               </span>
             </div>
 
@@ -8448,7 +8547,7 @@ export const VortexDashboard: React.FC<VortexDashboardProps> = ({
                 onClick={() => setCaptainDeniedModal(null)}
                 className="w-full sm:w-auto px-4 py-2.5 rounded-xl bg-white/5 hover:bg-white/10 text-xs font-mono text-slate-300 transition cursor-pointer"
               >
-                Kuptova (Mbyll)
+                Understood (Dismiss)
               </button>
               <button
                 type="button"
@@ -8459,7 +8558,7 @@ export const VortexDashboard: React.FC<VortexDashboardProps> = ({
                 className="w-full sm:w-auto px-5 py-2.5 rounded-xl bg-gradient-to-r from-amber-500 to-amber-600 hover:brightness-110 text-slate-950 font-display font-black text-xs uppercase tracking-wider transition shadow-lg cursor-pointer flex items-center justify-center gap-1.5"
               >
                 <Users className="w-3.5 h-3.5 text-slate-950" />
-                <span>Kalo tek Ekipi (Teams Hub)</span>
+                <span>Go to Teams Hub</span>
               </button>
             </div>
           </div>
@@ -8978,7 +9077,7 @@ export const VortexDashboard: React.FC<VortexDashboardProps> = ({
                               </span>
                             </div>
                             <p className="text-[10px] font-mono text-slate-400 mt-0.5">
-                              Sinkronizimi zyrtar me FACEIT CS2. Niveli, ELO dhe statistikat sinkronizohen në kohë reale.
+                              Official FACEIT CS2 telemetry synchronization. Real-time skill level, ELO, and match statistics.
                             </p>
                           </div>
                         </div>
@@ -8995,7 +9094,7 @@ export const VortexDashboard: React.FC<VortexDashboardProps> = ({
                                   {activeFaceitNick}
                                 </span>
                                 <span className="px-1.5 py-0.5 rounded text-[9px] font-mono font-bold uppercase bg-[#A3E635]/20 text-[#A3E635] border border-[#A3E635]/30">
-                                  Lidhur me FACEIT
+                                  Connected to FACEIT
                                 </span>
                               </div>
                               <div className="flex items-center gap-2 mt-0.5 text-[10px] font-mono text-slate-400 flex-wrap">
@@ -9043,7 +9142,7 @@ export const VortexDashboard: React.FC<VortexDashboardProps> = ({
                             />
                           </div>
                           <p className="text-[10px] font-mono text-slate-500">
-                            Shkruani nickname-in tuaj në FACEIT për sinkronizim të menjëhershëm të ELO-s dhe nivelit.
+                            Enter your exact FACEIT nickname for instant telemetry calibration and official ELO verification.
                           </p>
                         </div>
                       </>

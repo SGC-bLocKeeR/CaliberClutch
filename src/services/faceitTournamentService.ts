@@ -146,7 +146,7 @@ export async function testLiveFaceitConnection(organizerId = CALIBER_FACEIT_ORGA
     return {
       success: false,
       live: false,
-      error: 'Ju lutem vendosni API Key-in nga Tab 1 (developers.faceit.com). Nuk mund të lidhemi me serverat live pa një çelës të vlefshëm.'
+      error: 'Please provide an API Key from Tab 1 (developers.faceit.com). Live server connection requires a valid organizer key.'
     };
   }
 
@@ -199,14 +199,14 @@ export async function testLiveFaceitConnection(organizerId = CALIBER_FACEIT_ORGA
       return {
         success: false,
         live: true,
-        error: `FACEIT refuzoi çelësin (${directRes.status}): ${msg}. Kontrolloni lejet në developers.faceit.com.`
+        error: `FACEIT rejected the key (${directRes.status}): ${msg}. Verify your permissions on developers.faceit.com.`
       };
     }
   } catch (err: any) {
     return {
       success: false,
       live: false,
-      error: `Nuk mund të kontaktohej FACEIT API: ${err?.message || 'Kontrolloni lidhjen e internetit ose API Key'}`
+      error: `Failed to contact FACEIT API: ${err?.message || 'Check network connection or API Key'}`
     };
   }
 }
@@ -224,7 +224,7 @@ export async function fetchLiveOrganizerTournaments(organizerId = CALIBER_FACEIT
     return {
       success: false,
       items: [],
-      error: 'Ju lutem vendosni API Key-in për të sinkronizuar turnetë nga FACEIT.'
+      error: 'Please provide an API Key to synchronize tournaments from FACEIT.'
     };
   }
 
@@ -275,7 +275,7 @@ export async function fetchLiveOrganizerTournaments(organizerId = CALIBER_FACEIT
     }
   } catch (_) {}
 
-  return { success: false, items: [], error: 'Nuk u morën dot turnetë nga FACEIT Organizer.' };
+  return { success: false, items: [], error: 'Failed to retrieve tournaments from FACEIT Organizer.' };
 }
 
 /**

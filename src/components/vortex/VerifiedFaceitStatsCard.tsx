@@ -269,8 +269,8 @@ export const VerifiedFaceitStatsCard: React.FC<VerifiedFaceitStatsCardProps> = (
               }`}
               title={
                 cooldownRemaining > 0
-                  ? `Cooldown aktiv: mund të rifreskoni përsëri pas ${formatRemainingMinutes(cooldownRemaining)}`
-                  : 'Kliko për të rifreskuar statistikat zyrtare nga FACEIT'
+                  ? `Active cooldown: you can refresh again in ${formatRemainingMinutes(cooldownRemaining)}`
+                  : 'Click to refresh official stats from FACEIT'
               }
             >
               {cooldownRemaining > 0 ? (
