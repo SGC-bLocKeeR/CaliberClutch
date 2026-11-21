@@ -1,6 +1,7 @@
 import { defineConfig } from 'vite'
 import react from '@vitejs/plugin-react'
-import { fileURLToPath, URL } from 'node:url'
+import { fileURLToPath, URL, pathToFileURL } from 'node:url'
+import path from 'node:path'
 
 function devApiEndpointsPlugin() {
   return {
@@ -56,8 +57,9 @@ function devApiEndpointsPlugin() {
               };
             }
 
+            const targetUrl = pathToFileURL(path.resolve(process.cwd(), targetFile)).href;
             // @ts-ignore
-            const { default: handler } = await import(targetFile);
+            const { default: handler } = await import(targetUrl);
             return handler(req, res);
           } catch (e: any) {
             console.error(`[Vite Dev API] ${pathname} error:`, e);
