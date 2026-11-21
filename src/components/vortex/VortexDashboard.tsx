@@ -5503,8 +5503,8 @@ export const VortexDashboard: React.FC<VortexDashboardProps> = ({
                                   if (!isHost) return null;
                                   return (
                                     <span className="px-2 py-0.5 rounded text-[10px] font-mono font-black bg-cyan-500/20 text-cyan-300 border border-cyan-500/40 flex items-center gap-1">
-                                      <Radio className="w-3 h-3 text-cyan-400 animate-pulse" />
-                                      <span>HOST • STREAM & ADMIN ACCESS</span>
+                                      <Radio className="w-3 h-3 text-cyan-400" />
+                                      <span>HOST STREAM ACTIVE</span>
                                     </span>
                                   );
                                 })()}
@@ -5655,8 +5655,8 @@ export const VortexDashboard: React.FC<VortexDashboardProps> = ({
                                       }}
                                       className="px-2.5 py-1.5 rounded-xl bg-cyan-500/15 hover:bg-cyan-500/25 text-xs font-mono text-cyan-300 hover:text-white border border-cyan-500/30 transition cursor-pointer flex items-center gap-1.5"
                                     >
-                                      <Radio className="w-3.5 h-3.5 text-cyan-400 animate-pulse" />
-                                      <span>Caster & Admin IP</span>
+                                      <Radio className="w-3.5 h-3.5 text-cyan-400" />
+                                      <span>Live Stream</span>
                                     </button>
                                   </>
                                 );
@@ -7933,6 +7933,15 @@ export const VortexDashboard: React.FC<VortexDashboardProps> = ({
         const prizeRaw = selectedBracketTourney.cashPrize || '€3,000';
         const prizeNum = parseInt(prizeRaw.replace(/[^0-9]/g, ''), 10) || 1500;
 
+        const currentTeams = getTourneyTeams(tourneyKey);
+        const approvedTeams = currentTeams.filter(t => t.status === 'approved');
+        const pendingTeams = currentTeams.filter(t => t.status === 'pending');
+        const maxCapacity = selectedBracketTourney.maxTeams || (selectedBracketTourney.teams ? parseInt(String(selectedBracketTourney.teams).split('/')[1] || '16', 10) : 16);
+        const isHost = isProjectAdmin || 
+          (selectedBracketTourney.creator && selectedBracketTourney.creator.toLowerCase() === currentGamerTag.toLowerCase()) ||
+          (selectedBracketTourney.creatorClan && userClanData?.tag && selectedBracketTourney.creatorClan.toLowerCase() === userClanData.tag.toLowerCase()) ||
+          (selectedBracketTourney.organizer && selectedBracketTourney.organizer.toLowerCase().includes(currentGamerTag.toLowerCase()));
+
         return (
           <div 
             onClick={() => {
@@ -7945,12 +7954,12 @@ export const VortexDashboard: React.FC<VortexDashboardProps> = ({
               onClick={(e) => e.stopPropagation()}
               className="w-full max-w-4xl max-h-[90vh] overflow-y-auto bg-[#0C1019] border border-[#252E42] rounded-3xl p-6 sm:p-8 shadow-2xl space-y-6 text-left relative cursor-default my-auto"
             >
-              {/* Modal Header */}
+              {/* Modal Header (No redundant X button - dismissed via bottom button, backdrop, or Escape) */}
               <div className="flex items-start justify-between border-b border-[#1E2638] pb-4">
                 <div className="space-y-1">
                   <div className="flex items-center gap-2.5">
                     <span className="px-2.5 py-0.5 rounded text-[10px] font-mono font-bold bg-[#A3E635]/15 text-[#A3E635] border border-[#A3E635]/30 uppercase">
-                      Official Bracket Tree
+                      Official Tournament Championship
                     </span>
                     <span className="text-xs font-mono text-amber-400 font-bold">
                       100% Cash Prize Pool: {selectedBracketTourney.cashPrize}
@@ -7960,457 +7969,644 @@ export const VortexDashboard: React.FC<VortexDashboardProps> = ({
                     {selectedBracketTourney.title}
                   </h3>
                   <p className="text-xs font-mono text-slate-400">
-                    Valve MR12 Ruleset • CaliberClutch European Competitive Matchmaking (CS2 Sub-Tick)
+                    Valve MR12 Ruleset • CaliberClutch European Competitive Matchmaking
                   </p>
                 </div>
-                <button
-                  onClick={() => setSelectedBracketTourney(null)}
-                  className="w-8 h-8 rounded-xl bg-white/5 hover:bg-white/10 text-slate-400 hover:text-white flex items-center justify-center transition cursor-pointer"
-                >
-                  ✕
-                </button>
               </div>
 
-              {/* Connected Clan Enrollment Bar */}
-              <div className="p-3.5 rounded-2xl bg-gradient-to-r from-[#141620] to-[#0E1017] border border-[#232938] flex flex-col sm:flex-row sm:items-center justify-between gap-3 shadow-md">
-                <div className="flex items-center gap-3">
-                  <img
-                    src={userClanData.logo}
-                    alt={userClanData.name}
-                    className="w-10 h-10 rounded-xl object-contain border border-[#A3E635]/40 bg-[#12141D] p-0.5"
-                  />
-                  <div>
-                    <div className="flex items-center gap-2">
-                      <span className="text-sm font-black font-display text-white">{userClanData.name}</span>
-                      <span className="px-1.5 py-0.2 rounded text-[10px] font-mono font-black bg-[#A3E635]/20 text-[#A3E635] border border-[#A3E635]/40">
-                        [{userClanData.tag}]
-                      </span>
-                    </div>
-                    <span className="text-[10px] font-mono text-slate-400">
-                      Team Captain: <strong className="text-white">{currentGamerTag}</strong> • Team ELO: <strong className="text-[#A3E635]">{userClanData.stats?.avgElo || 2150}</strong>
-                    </span>
-                  </div>
-                </div>
-
-                <div className="flex items-center gap-2.5">
-                  {stage === 'champion' ? (
-                    <span className="px-3.5 py-1.5 rounded-xl bg-amber-500/20 text-amber-300 border border-amber-500/40 text-xs font-mono font-black flex items-center gap-1.5 animate-pulse">
-                      <Trophy className="w-3.5 h-3.5 text-amber-400 fill-current" />
-                      CHAMPIONS • {selectedBracketTourney.cashPrize} PAID OUT ✓
-                    </span>
-                  ) : isRegistered ? (
-                    <span className="px-3 py-1.5 rounded-xl bg-emerald-500/15 text-emerald-400 border border-emerald-500/30 text-xs font-mono font-bold flex items-center gap-1.5">
-                      <CheckCircle2 className="w-3.5 h-3.5" />
-                      5v5 Roster Locked & Enrolled
-                    </span>
-                  ) : isUserTeamCaptain ? (
-                    !isFull5Stack ? (
-                      <button
-                        onClick={() => {
-                          sound.playClick();
-                          setSelectedRegisterTourney(selectedBracketTourney);
-                        }}
-                        className="px-3.5 py-1.5 rounded-xl bg-rose-500/15 hover:bg-rose-500/25 text-rose-300 border border-rose-500/30 font-mono font-bold text-xs cursor-pointer transition flex items-center gap-1.5"
-                        title="Complete 5-Stack required for tournament registration"
-                      >
-                        <AlertTriangle className="w-3.5 h-3.5 text-rose-400" />
-                        <span>5-Stack Required ({teamRosterCount}/5)</span>
-                      </button>
-                    ) : (
-                      <button
-                        onClick={() => {
-                          sound.playSelect();
-                          setSelectedRegisterTourney(selectedBracketTourney);
-                        }}
-                        className="px-3.5 py-1.5 rounded-xl bg-[#A3E635] hover:bg-[#84CC16] text-slate-950 font-mono font-black text-xs cursor-pointer transition shadow flex items-center gap-1.5"
-                      >
-                        <Crown className="w-3.5 h-3.5 text-slate-950" />
-                        <span>+ Enroll [{userClanData.tag}] Roster</span>
-                      </button>
-                    )
-                  ) : (
-                    <button
-                      onClick={() => {
-                        sound.playClick();
-                        setCaptainDeniedModal({
-                          open: true,
-                          tourneyTitle: selectedBracketTourney.title,
-                          captainName: userClanData.captainName || 'Team Captain',
-                          teamTag: userClanData.tag || 'Squad'
-                        });
-                        setDashboardToast(`⚠️ Only Team Captain (${userClanData.captainName || 'Captain'}) can register squad in official tournaments.`);
-                        setTimeout(() => setDashboardToast(null), 4500);
-                      }}
-                      className="px-3.5 py-1.5 rounded-xl bg-amber-500/15 hover:bg-amber-500/25 text-amber-300 border border-amber-500/30 font-mono font-bold text-xs cursor-pointer transition flex items-center gap-1.5"
-                      title="Only Team Captain can register squad"
-                    >
-                      <Lock className="w-3.5 h-3.5 text-amber-400" />
-                      <span>Captain Only ({userClanData.captainName})</span>
-                    </button>
-                  )}
-                </div>
-              </div>
-
-              {/* Live GOTV Broadcast Banner */}
-              <div className="p-3.5 rounded-2xl bg-black/50 border border-emerald-500/30 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
-                <div className="flex items-center gap-2.5">
-                  <span className="w-2.5 h-2.5 rounded-full bg-emerald-400 animate-ping shrink-0" />
-                  <span className="text-xs font-mono text-emerald-400 font-bold">
-                    LIVE GOTV BROADCAST (0% Jitter • CS2 Sub-Tick)
-                  </span>
-                </div>
-                <div className="flex items-center gap-2">
-                  <code className="text-[11px] font-mono bg-black/80 px-2.5 py-1 rounded-lg text-slate-300 border border-white/10 select-all">
-                    connect tv.caliberclutch.gg:27020; password gotv
-                  </code>
+              {/* Organizer Navigation Tabs (Only visible to Host / Admin) */}
+              {isHost && (
+                <div className="flex items-center gap-2 p-1.5 rounded-2xl bg-black/60 border border-white/10 text-xs font-mono">
                   <button
                     onClick={() => {
                       sound.playClick();
-                      navigator.clipboard.writeText('connect tv.caliberclutch.gg:27020; password gotv');
-                      setDashboardToast('✓ GOTV connect command copied to clipboard!');
-                      setTimeout(() => setDashboardToast(null), 3000);
+                      setTourneyModalTab('bracket');
                     }}
-                    className="px-2.5 py-1 rounded-lg bg-emerald-500/20 text-emerald-400 hover:bg-emerald-500/30 text-xs font-mono font-bold cursor-pointer transition"
+                    className={`flex-1 py-2 px-3 rounded-xl font-bold transition flex items-center justify-center gap-2 cursor-pointer ${
+                      tourneyModalTab === 'bracket'
+                        ? 'bg-[#A3E635] text-slate-950 shadow-md'
+                        : 'text-slate-400 hover:text-white'
+                    }`}
                   >
-                    Copy
+                    <Trophy className="w-3.5 h-3.5" />
+                    <span>Bracket Tree</span>
                   </button>
-                </div>
-              </div>
-
-              {/* Tournament Format & Server Details Banner */}
-              <div className="flex flex-wrap items-center justify-between gap-3 px-4 py-2.5 rounded-2xl bg-[#101420] border border-white/5 text-xs font-mono">
-                <div className="flex flex-wrap items-center gap-2">
-                  <span className="text-slate-400">Playoffs:</span>
-                  <span className="px-2 py-0.5 rounded bg-amber-500/15 text-amber-300 font-bold border border-amber-500/30">
-                    {pFormat} Series
-                  </span>
-                  <span className="text-slate-600">•</span>
-                  <span className="text-slate-400">Grand Final:</span>
-                  <span className="px-2 py-0.5 rounded bg-[#A3E635]/15 text-[#A3E635] font-bold border border-[#A3E635]/30">
-                    {fFormat} Series
-                  </span>
-                  <span className="text-slate-600">•</span>
-                  <span className="text-slate-400">{selectedBracketTourney.region || 'Germany (Frankfurt Central)'}</span>
-                </div>
-                <div className="flex items-center gap-1.5 text-[11px] text-emerald-400 font-bold">
-                  <ShieldCheck className="w-3.5 h-3.5" />
-                  <span>CaliberClutch Ring-0 Anti-Cheat Active</span>
-                </div>
-              </div>
-
-              {/* CHAMPION VICTORY CELEBRATION BANNER */}
-              {stage === 'champion' && (
-                <div className="p-5 rounded-3xl bg-gradient-to-r from-amber-500/20 via-yellow-500/15 to-[#A3E635]/20 border-2 border-amber-400/50 shadow-2xl flex flex-col sm:flex-row sm:items-center justify-between gap-4 animate-in zoom-in-95 duration-300">
-                  <div className="flex items-center gap-3.5">
-                    <div className="w-12 h-12 rounded-2xl bg-amber-400/20 border border-amber-400/40 flex items-center justify-center text-amber-400 shrink-0 shadow-lg">
-                      <Trophy className="w-6 h-6 fill-current" />
-                    </div>
-                    <div>
-                      <div className="text-base font-black font-display text-amber-300 flex items-center gap-2">
-                        <span>🏆 1ST PLACE CHAMPIONS — [{userClanData.tag}] {userClanData.name}</span>
-                      </div>
-                      <p className="text-xs font-mono text-emerald-400 font-bold">
-                        ✓ {selectedBracketTourney.cashPrize} Cash Prize automatically credited to your balance!
-                      </p>
-                    </div>
-                  </div>
                   <button
                     onClick={() => {
                       sound.playClick();
-                      resetTourneyBracketStage(tourneyKey);
-                      setDashboardToast(`✓ Bracket reset! You can now replay the tournament.`);
+                      setTourneyModalTab('teams');
                     }}
-                    className="px-4 py-2 rounded-xl bg-white/10 hover:bg-white/20 border border-white/20 text-xs font-mono font-bold text-white cursor-pointer transition shrink-0"
+                    className={`flex-1 py-2 px-3 rounded-xl font-bold transition flex items-center justify-center gap-2 cursor-pointer ${
+                      tourneyModalTab === 'teams'
+                        ? 'bg-amber-400 text-slate-950 shadow-md'
+                        : 'text-slate-400 hover:text-white'
+                    }`}
                   >
-                    ↺ Replay Bracket
+                    <Users className="w-3.5 h-3.5" />
+                    <span>Manage Teams ({approvedTeams.length}/{maxCapacity})</span>
+                    {pendingTeams.length > 0 && (
+                      <span className="px-1.5 py-0.2 rounded-full bg-rose-500 text-white text-[10px] font-black">
+                        {pendingTeams.length} PENDING
+                      </span>
+                    )}
+                  </button>
+                  <button
+                    onClick={() => {
+                      sound.playClick();
+                      setTourneyModalTab('admin');
+                    }}
+                    className={`flex-1 py-2 px-3 rounded-xl font-bold transition flex items-center justify-center gap-2 cursor-pointer ${
+                      tourneyModalTab === 'admin'
+                        ? 'bg-cyan-400 text-slate-950 shadow-md'
+                        : 'text-slate-400 hover:text-white'
+                    }`}
+                  >
+                    <Radio className="w-3.5 h-3.5" />
+                    <span>Live Stream</span>
                   </button>
                 </div>
               )}
 
-              {/* Esports Interactive Bracket Columns */}
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-4 pt-2">
-                {/* 1. QUARTERFINALS */}
-                <div className="space-y-3">
-                  <div className="text-xs font-mono font-bold text-slate-400 uppercase tracking-wider flex items-center justify-between">
-                    <span>Quarterfinals ({pFormat})</span>
-                    <span className="text-[10px] text-emerald-400 font-bold">
-                      {stage === 'qf' ? '⚡ Action Required' : 'Finished ✓'}
+              {/* TAB 1: MANAGE TEAMS & SPORTING AUTHORITY */}
+              {tourneyModalTab === 'teams' && isHost ? (
+                <div className="space-y-4 animate-in fade-in duration-200">
+                  <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 p-4 rounded-2xl bg-amber-500/10 border border-amber-500/25">
+                    <div>
+                      <div className="text-sm font-bold text-amber-300 flex items-center gap-2 font-display">
+                        <Users className="w-4 h-4 text-amber-400" />
+                        <span>ORGANIZER SPORTING AUTHORITY</span>
+                      </div>
+                      <p className="text-xs font-mono text-slate-300 mt-1">
+                        Review team applications, accept qualified rosters, or reject entries. Current capacity: {approvedTeams.length} / {maxCapacity} slots filled.
+                      </p>
+                    </div>
+                    <span className="px-3 py-1 rounded-xl bg-amber-400 text-slate-950 font-mono font-black text-xs uppercase shrink-0">
+                      Host Controls Active
                     </span>
                   </div>
 
-                  {/* QF-1 */}
-                  <div className="p-3.5 rounded-2xl bg-[#121622] border border-[#232B3D] space-y-2">
-                    <div className="flex justify-between items-center text-xs font-mono">
-                      <span className="text-white font-bold flex items-center gap-1.5">
-                        <CountryFlag code="XK" size="xs" />
-                        Bad News Eagles
-                      </span>
-                      <span className="font-bold text-emerald-400">{isBo1Playoffs ? '13 ✓' : '2 ✓'}</span>
-                    </div>
-                    <div className="flex justify-between items-center text-xs font-mono text-slate-400">
-                      <span className="flex items-center gap-1.5">
-                        <CountryFlag code="GB" size="xs" />
-                        Guild Esports
-                      </span>
-                      <span>{isBo1Playoffs ? '9' : '0'}</span>
-                    </div>
-                    <div className="text-[10px] font-mono text-slate-500 border-t border-white/5 pt-1.5 flex justify-between">
-                      <span>{isBo1Playoffs ? 'de_mirage' : 'Mirage (13-9), Anubis (13-11)'}</span>
-                      <span className="text-emerald-400">{isBo1Playoffs ? 'MR12' : 'BO3'}</span>
-                    </div>
+                  {/* Team Applications List */}
+                  <div className="space-y-2.5">
+                    {currentTeams.map((team) => (
+                      <div
+                        key={team.id}
+                        className={`p-3.5 rounded-2xl border transition flex flex-col sm:flex-row sm:items-center justify-between gap-3 ${
+                          team.status === 'approved'
+                            ? 'bg-[#121622] border-[#252E42]'
+                            : team.status === 'pending'
+                            ? 'bg-amber-950/20 border-amber-500/30'
+                            : 'bg-black/40 border-white/5 opacity-60'
+                        }`}
+                      >
+                        <div className="flex items-center gap-3">
+                          <CountryFlag code={team.country} size="sm" />
+                          <div>
+                            <div className="flex items-center gap-2">
+                              <span className="text-sm font-bold font-display text-white">{team.name}</span>
+                              <span className="px-1.5 py-0.2 rounded text-[10px] font-mono font-bold bg-white/5 text-slate-300 border border-white/10">
+                                [{team.tag}]
+                              </span>
+                              {team.status === 'approved' && (
+                                <span className="px-2 py-0.2 rounded text-[9px] font-mono font-bold bg-emerald-500/20 text-emerald-400 border border-emerald-500/40">
+                                  APPROVED ✓
+                                </span>
+                              )}
+                              {team.status === 'pending' && (
+                                <span className="px-2 py-0.2 rounded text-[9px] font-mono font-bold bg-amber-500/20 text-amber-300 border border-amber-500/40 animate-pulse">
+                                  PENDING REVIEW ⏳
+                                </span>
+                              )}
+                              {team.status === 'rejected' && (
+                                <span className="px-2 py-0.2 rounded text-[9px] font-mono font-bold bg-rose-500/20 text-rose-400 border border-rose-500/40">
+                                  REJECTED ✕
+                                </span>
+                              )}
+                            </div>
+                            <div className="text-[11px] font-mono text-slate-400 mt-0.5 flex items-center gap-2">
+                              <span>Captain: <strong className="text-slate-200">{team.captain}</strong></span>
+                              <span>•</span>
+                              <span>Avg ELO: <strong className="text-[#A3E635]">{team.elo}</strong></span>
+                              <span>•</span>
+                              <span>{team.appliedAt}</span>
+                            </div>
+                          </div>
+                        </div>
+
+                        {/* Host Sporting Action Buttons */}
+                        <div className="flex items-center gap-2 shrink-0">
+                          {team.status === 'pending' && (
+                            <>
+                              <button
+                                onClick={() => handleUpdateTeamStatus(tourneyKey, team.id, 'approved')}
+                                className="px-3.5 py-1.5 rounded-xl bg-emerald-500/20 hover:bg-emerald-500/30 text-emerald-300 border border-emerald-500/40 font-mono font-bold text-xs flex items-center gap-1.5 transition cursor-pointer"
+                              >
+                                <Check className="w-3.5 h-3.5 text-emerald-400" />
+                                <span>Accept Team</span>
+                              </button>
+                              <button
+                                onClick={() => handleUpdateTeamStatus(tourneyKey, team.id, 'rejected')}
+                                className="px-3.5 py-1.5 rounded-xl bg-rose-500/20 hover:bg-rose-500/30 text-rose-300 border border-rose-500/40 font-mono font-bold text-xs flex items-center gap-1.5 transition cursor-pointer"
+                              >
+                                <X className="w-3.5 h-3.5 text-rose-400" />
+                                <span>Reject</span>
+                              </button>
+                            </>
+                          )}
+                          {team.status === 'approved' && team.name !== userClanData.name && (
+                            <button
+                              onClick={() => handleUpdateTeamStatus(tourneyKey, team.id, 'rejected')}
+                              className="px-3 py-1.5 rounded-xl bg-white/5 hover:bg-rose-500/20 text-slate-400 hover:text-rose-300 border border-white/10 hover:border-rose-500/30 font-mono text-xs transition cursor-pointer"
+                              title="Remove squad from tournament"
+                            >
+                              Remove Team
+                            </button>
+                          )}
+                          {team.status === 'rejected' && (
+                            <button
+                              onClick={() => handleUpdateTeamStatus(tourneyKey, team.id, 'approved')}
+                              className="px-3 py-1.5 rounded-xl bg-white/5 hover:bg-emerald-500/20 text-slate-400 hover:text-emerald-300 border border-white/10 hover:border-emerald-500/30 font-mono text-xs transition cursor-pointer"
+                            >
+                              Re-Approve
+                            </button>
+                          )}
+                        </div>
+                      </div>
+                    ))}
                   </div>
+                </div>
+              ) : tourneyModalTab === 'admin' && isHost ? (
+                /* TAB 2: LIVE STREAM & SPECTATOR BROADCAST */
+                <div className="space-y-4 animate-in fade-in duration-200">
+                  <div className="p-4 rounded-2xl bg-cyan-950/30 border border-cyan-500/30 space-y-3">
+                    <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+                      <div className="flex items-center gap-2">
+                        <Radio className="w-4 h-4 text-cyan-400 animate-pulse" />
+                        <span className="font-display font-black text-white text-sm">OFFICIAL LIVE STREAM & SPECTATOR FEED</span>
+                      </div>
+                      <span className="px-2.5 py-0.5 rounded text-[10px] font-mono font-bold bg-cyan-500/20 text-cyan-300 border border-cyan-500/40">
+                        120s Anti-Ghosting Delay Protected
+                      </span>
+                    </div>
+                    <p className="text-xs font-mono text-slate-300 leading-relaxed">
+                      As tournament host, you receive authorized spectator relay access with full observer camera tools to broadcast all tournament matches live on Twitch, YouTube, or Kick.
+                    </p>
 
-                  {/* QF-2 (User Clan Match) */}
-                  <div className={`p-3.5 rounded-2xl border transition space-y-2 ${
-                    stage === 'qf'
-                      ? 'bg-gradient-to-b from-[#1E1926] to-[#121420] border-amber-500/50 shadow-lg'
-                      : 'bg-[#121622] border-[#232B3D]'
-                  }`}>
-                    <div className="flex justify-between items-center text-xs font-mono">
-                      <span className="text-amber-300 font-bold flex items-center gap-1.5 truncate">
-                        <Crown className="w-3.5 h-3.5 text-amber-400 shrink-0" />
-                        <span>[{userClanData.tag}] {userClanData.name}</span>
-                      </span>
-                      <span className="font-bold text-emerald-400">
-                        {stage === 'qf' ? '13 ✓' : '13 ✓'}
-                      </span>
-                    </div>
-                    <div className="flex justify-between items-center text-xs font-mono text-slate-400">
-                      <span className="flex items-center gap-1.5">
-                        <CountryFlag code="UA" size="xs" />
-                        Monte Academy
-                      </span>
-                      <span>7</span>
-                    </div>
-                    <div className="text-[10px] font-mono text-slate-500 border-t border-white/5 pt-1.5 flex justify-between items-center">
-                      <span>de_inferno • MR12 Match</span>
-                      <span className="text-emerald-400 font-bold">QF-2 Finished ✓</span>
+                    <div className="text-xs font-mono text-cyan-300 select-all bg-black/60 px-3 py-2 rounded-xl border border-cyan-500/20">
+                      connect tv.caliberclutch.gg:27020; password cc_cast
                     </div>
 
-                    {stage === 'qf' && (
+                    <div className="flex items-center gap-2 pt-1">
                       <button
                         onClick={() => {
                           sound.playClick();
-                          updateTourneyBracketStage(tourneyKey, 'sf');
-                          setDashboardToast(`✓ QF Victory! [${userClanData.tag}] defeats Monte Academy (13-7) and advances to Semifinals!`);
-                          setTimeout(() => setDashboardToast(null), 4000);
+                          navigator.clipboard.writeText('connect tv.caliberclutch.gg:27020; password cc_cast');
+                          setDashboardToast('✓ Stream connection command copied!');
+                          setTimeout(() => setDashboardToast(null), 3000);
                         }}
-                        className="w-full mt-1.5 py-1.5 rounded-xl bg-gradient-to-r from-emerald-600 to-[#A3E635] hover:brightness-110 text-black font-mono font-black text-[11px] uppercase tracking-wider flex items-center justify-center gap-1.5 cursor-pointer shadow transition"
+                        className="flex-1 py-2 rounded-xl bg-cyan-500/20 hover:bg-cyan-500/30 border border-cyan-500/40 text-cyan-200 font-mono font-bold text-xs flex items-center justify-center gap-1.5 transition cursor-pointer"
                       >
-                        <Swords className="w-3.5 h-3.5" />
-                        <span>Advance to Semifinals (13-7)</span>
+                        <Copy className="w-3.5 h-3.5" />
+                        <span>Copy Stream IP</span>
                       </button>
-                    )}
-                  </div>
-
-                  {/* QF-3 */}
-                  <div className="p-3.5 rounded-2xl bg-[#121622] border border-[#232B3D] space-y-2">
-                    <div className="flex justify-between items-center text-xs font-mono">
-                      <span className="text-white font-bold flex items-center gap-1.5">
-                        <CountryFlag code="DE" size="xs" />
-                        FaZe Clan Youth
-                      </span>
-                      <span className="font-bold text-emerald-400">{isBo1Playoffs ? '13 ✓' : '2 ✓'}</span>
-                    </div>
-                    <div className="flex justify-between items-center text-xs font-mono text-slate-400">
-                      <span className="flex items-center gap-1.5">
-                        <CountryFlag code="SE" size="xs" />
-                        Fnatic Rising
-                      </span>
-                      <span>{isBo1Playoffs ? '11' : '1'}</span>
-                    </div>
-                    <div className="text-[10px] font-mono text-slate-500 border-t border-white/5 pt-1.5 flex justify-between">
-                      <span>de_ancient</span>
-                      <span className="text-emerald-400">{isBo1Playoffs ? 'MR12' : 'BO3'}</span>
+                      <a
+                        href="steam://connect/tv.caliberclutch.gg:27020/cc_cast"
+                        onClick={() => sound.playClick()}
+                        className="flex-1 py-2 rounded-xl bg-cyan-500 hover:bg-cyan-400 text-slate-950 font-mono font-black text-xs flex items-center justify-center gap-1.5 transition cursor-pointer shadow-lg"
+                      >
+                        <Play className="w-3.5 h-3.5 fill-current" />
+                        <span>Launch Spectator Feed</span>
+                      </a>
                     </div>
                   </div>
 
-                  {/* QF-4 */}
-                  <div className="p-3.5 rounded-2xl bg-[#121622] border border-[#232B3D] space-y-2">
-                    <div className="flex justify-between items-center text-xs font-mono">
-                      <span className="text-white font-bold flex items-center gap-1.5">
-                        <CountryFlag code="FR" size="xs" />
-                        G2 Academy
-                      </span>
-                      <span className="font-bold text-emerald-400">{isBo1Playoffs ? '13 ✓' : '2 ✓'}</span>
+                  {/* 5% Host Commission Reward Tracker */}
+                  <div className="p-4 rounded-2xl bg-[#121622] border border-[#252E42] flex flex-col sm:flex-row sm:items-center justify-between gap-3 text-xs font-mono">
+                    <div className="flex items-center gap-3">
+                      <div className="w-10 h-10 rounded-xl bg-[#A3E635]/15 border border-[#A3E635]/30 flex items-center justify-center text-[#A3E635] shrink-0">
+                        <Coins className="w-5 h-5 text-[#A3E635]" />
+                      </div>
+                      <div>
+                        <div className="text-white font-bold">5% Organizer Host Commission</div>
+                        <div className="text-slate-400 text-[11px]">
+                          Automated payout upon championship conclusion: <strong className="text-emerald-400 font-bold">€{Math.round(prizeNum * 0.05)} Cash</strong>
+                        </div>
+                      </div>
                     </div>
-                    <div className="flex justify-between items-center text-xs font-mono text-slate-400">
-                      <span className="flex items-center gap-1.5">
-                        <CountryFlag code="DK" size="xs" />
-                        Astralis Talent
-                      </span>
-                      <span>{isBo1Playoffs ? '8' : '0'}</span>
-                    </div>
-                    <div className="text-[10px] font-mono text-slate-500 border-t border-white/5 pt-1.5 flex justify-between">
-                      <span>de_nuke</span>
-                      <span className="text-emerald-400">{isBo1Playoffs ? 'MR12' : 'BO3'}</span>
-                    </div>
-                  </div>
-                </div>
-
-                {/* 2. SEMIFINALS */}
-                <div className="space-y-3">
-                  <div className="text-xs font-mono font-bold text-slate-400 uppercase tracking-wider flex items-center justify-between">
-                    <span>Semifinals ({pFormat})</span>
-                    <span className="text-[10px] text-emerald-400 font-bold">
-                      {stage === 'sf' ? '⚡ Match Ready' : stage === 'final' || stage === 'champion' ? 'Finished ✓' : 'Pending QF'}
+                    <span className="px-3 py-1 rounded-xl bg-emerald-500/20 text-emerald-400 border border-emerald-500/30 font-bold text-xs shrink-0">
+                      Guaranteed Instant Payout ✓
                     </span>
                   </div>
-
-                  {/* Match SF-1 (User Clan vs Bad News Eagles) */}
-                  <div className={`p-4 rounded-2xl border space-y-2.5 mt-8 transition ${
-                    stage === 'sf'
-                      ? 'bg-gradient-to-b from-[#172212] to-[#10141D] border-[#A3E635]/60 shadow-xl'
-                      : 'bg-[#121622] border-[#232B3D]'
-                  }`}>
-                    <div className="flex justify-between items-center text-xs font-mono">
-                      <span className="text-white font-bold flex items-center gap-1.5">
-                        <CountryFlag code="XK" size="xs" />
-                        Bad News Eagles
-                      </span>
-                      <span className={`font-bold ${stage === 'final' || stage === 'champion' ? 'text-slate-400' : 'text-slate-300'}`}>
-                        {stage === 'final' || stage === 'champion' ? '1' : '0'}
-                      </span>
-                    </div>
-                    <div className="flex justify-between items-center text-xs font-mono">
-                      <span className="text-amber-300 font-bold flex items-center gap-1.5 truncate">
-                        <Crown className="w-3.5 h-3.5 text-amber-400 shrink-0" />
-                        <span>[{userClanData.tag}] {userClanData.name}</span>
-                      </span>
-                      <span className={`font-bold ${stage === 'final' || stage === 'champion' ? 'text-emerald-400' : 'text-slate-300'}`}>
-                        {stage === 'final' || stage === 'champion' ? '2 ✓' : '0'}
-                      </span>
-                    </div>
-                    <div className="text-[10px] font-mono text-slate-500 border-t border-white/5 pt-1.5 flex justify-between">
-                      <span>Dust II (13-11), Mirage (10-13), Anubis (16-14)</span>
-                      <span className="text-amber-400 font-bold">BO3 Series</span>
+                </div>
+              ) : (
+                /* TAB 0: BRACKET TREE */
+                <>
+                  {/* Connected Clan Enrollment Bar */}
+                  <div className="p-3.5 rounded-2xl bg-gradient-to-r from-[#141620] to-[#0E1017] border border-[#232938] flex flex-col sm:flex-row sm:items-center justify-between gap-3 shadow-md">
+                    <div className="flex items-center gap-3">
+                      <img
+                        src={userClanData.logo}
+                        alt={userClanData.name}
+                        className="w-10 h-10 rounded-xl object-contain border border-[#A3E635]/40 bg-[#12141D] p-0.5"
+                      />
+                      <div>
+                        <div className="flex items-center gap-2">
+                          <span className="text-sm font-black font-display text-white">{userClanData.name}</span>
+                          <span className="px-1.5 py-0.2 rounded text-[10px] font-mono font-black bg-[#A3E635]/20 text-[#A3E635] border border-[#A3E635]/40">
+                            [{userClanData.tag}]
+                          </span>
+                        </div>
+                        <span className="text-[10px] font-mono text-slate-400">
+                          Team Captain: <strong className="text-white">{currentGamerTag}</strong> • Team ELO: <strong className="text-[#A3E635]">{userClanData.stats?.avgElo || 2150}</strong>
+                        </span>
+                      </div>
                     </div>
 
-                    {stage === 'sf' && (
+                    <div className="flex items-center gap-2.5">
+                      {stage === 'champion' ? (
+                        <span className="px-3.5 py-1.5 rounded-xl bg-amber-500/20 text-amber-300 border border-amber-500/40 text-xs font-mono font-black flex items-center gap-1.5 animate-pulse">
+                          <Trophy className="w-3.5 h-3.5 text-amber-400 fill-current" />
+                          CHAMPIONS • {selectedBracketTourney.cashPrize} PAID OUT ✓
+                        </span>
+                      ) : isRegistered ? (
+                        <span className="px-3 py-1.5 rounded-xl bg-emerald-500/15 text-emerald-400 border border-emerald-500/30 text-xs font-mono font-bold flex items-center gap-1.5">
+                          <CheckCircle2 className="w-3.5 h-3.5" />
+                          5v5 Roster Locked & Enrolled
+                        </span>
+                      ) : isUserTeamCaptain ? (
+                        !isFull5Stack ? (
+                          <button
+                            onClick={() => {
+                              sound.playClick();
+                              setSelectedRegisterTourney(selectedBracketTourney);
+                            }}
+                            className="px-3.5 py-1.5 rounded-xl bg-rose-500/15 hover:bg-rose-500/25 text-rose-300 border border-rose-500/30 font-mono font-bold text-xs cursor-pointer transition flex items-center gap-1.5"
+                            title="Complete 5-Stack required for tournament registration"
+                          >
+                            <AlertTriangle className="w-3.5 h-3.5 text-rose-400" />
+                            <span>5-Stack Required ({teamRosterCount}/5)</span>
+                          </button>
+                        ) : (
+                          <button
+                            onClick={() => {
+                              sound.playSelect();
+                              setSelectedRegisterTourney(selectedBracketTourney);
+                            }}
+                            className="px-3.5 py-1.5 rounded-xl bg-[#A3E635] hover:bg-[#84CC16] text-slate-950 font-mono font-black text-xs cursor-pointer transition shadow flex items-center gap-1.5"
+                          >
+                            <Crown className="w-3.5 h-3.5 text-slate-950" />
+                            <span>+ Enroll [{userClanData.tag}] Roster</span>
+                          </button>
+                        )
+                      ) : (
+                        <button
+                          onClick={() => {
+                            sound.playClick();
+                            setCaptainDeniedModal({
+                              open: true,
+                              tourneyTitle: selectedBracketTourney.title,
+                              captainName: userClanData.captainName || 'Team Captain',
+                              teamTag: userClanData.tag || 'Squad'
+                            });
+                            setDashboardToast(`⚠️ Only Team Captain (${userClanData.captainName || 'Captain'}) can register squad in official tournaments.`);
+                            setTimeout(() => setDashboardToast(null), 4500);
+                          }}
+                          className="px-3.5 py-1.5 rounded-xl bg-amber-500/15 hover:bg-amber-500/25 text-amber-300 border border-amber-500/30 font-mono font-bold text-xs cursor-pointer transition flex items-center gap-1.5"
+                          title="Only Team Captain can register squad"
+                        >
+                          <Lock className="w-3.5 h-3.5 text-amber-400" />
+                          <span>Captain Only ({userClanData.captainName})</span>
+                        </button>
+                      )}
+                    </div>
+                  </div>
+
+                  {/* Tournament Format Banner */}
+                  <div className="flex flex-wrap items-center justify-between gap-3 px-4 py-2.5 rounded-2xl bg-[#101420] border border-white/5 text-xs font-mono">
+                    <div className="flex flex-wrap items-center gap-2">
+                      <span className="text-slate-400">Playoffs:</span>
+                      <span className="px-2 py-0.5 rounded bg-amber-500/15 text-amber-300 font-bold border border-amber-500/30">
+                        {pFormat} Series
+                      </span>
+                      <span className="text-slate-600">•</span>
+                      <span className="text-slate-400">Grand Final:</span>
+                      <span className="px-2 py-0.5 rounded bg-[#A3E635]/15 text-[#A3E635] font-bold border border-[#A3E635]/30">
+                        {fFormat} Series
+                      </span>
+                    </div>
+                    <div className="flex items-center gap-1.5 text-[11px] text-emerald-400 font-bold">
+                      <ShieldCheck className="w-3.5 h-3.5" />
+                      <span>CaliberClutch Ring-0 Anti-Cheat Active</span>
+                    </div>
+                  </div>
+
+                  {/* CHAMPION VICTORY CELEBRATION BANNER */}
+                  {stage === 'champion' && (
+                    <div className="p-5 rounded-3xl bg-gradient-to-r from-amber-500/20 via-yellow-500/15 to-[#A3E635]/20 border-2 border-amber-400/50 shadow-2xl flex flex-col sm:flex-row sm:items-center justify-between gap-4 animate-in zoom-in-95 duration-300">
+                      <div className="flex items-center gap-3.5">
+                        <div className="w-12 h-12 rounded-2xl bg-amber-400/20 border border-amber-400/40 flex items-center justify-center text-amber-400 shrink-0 shadow-lg">
+                          <Trophy className="w-6 h-6 fill-current" />
+                        </div>
+                        <div>
+                          <div className="text-base font-black font-display text-amber-300 flex items-center gap-2">
+                            <span>🏆 1ST PLACE CHAMPIONS — [{userClanData.tag}] {userClanData.name}</span>
+                          </div>
+                          <p className="text-xs font-mono text-emerald-400 font-bold">
+                            ✓ {selectedBracketTourney.cashPrize} Cash Prize automatically credited to your balance!
+                          </p>
+                        </div>
+                      </div>
                       <button
                         onClick={() => {
                           sound.playClick();
-                          updateTourneyBracketStage(tourneyKey, 'final');
-                          setDashboardToast(`✓ Semifinals Won! [${userClanData.tag}] defeats Bad News Eagles (2 - 1) and enters the Grand Final!`);
-                          setTimeout(() => setDashboardToast(null), 4000);
+                          resetTourneyBracketStage(tourneyKey);
+                          setDashboardToast(`✓ Bracket reset! You can now replay the tournament.`);
                         }}
-                        className="w-full mt-2 py-2 rounded-xl bg-gradient-to-r from-emerald-500 to-[#A3E635] hover:brightness-110 text-slate-950 font-mono font-black text-xs uppercase tracking-wider flex items-center justify-center gap-2 cursor-pointer shadow transition"
+                        className="px-4 py-2 rounded-xl bg-white/10 hover:bg-white/20 border border-white/20 text-xs font-mono font-bold text-white cursor-pointer transition shrink-0"
                       >
-                        <Swords className="w-3.5 h-3.5" />
-                        <span>Play Semifinals & Enter Grand Final</span>
+                        ↺ Replay Bracket
                       </button>
-                    )}
-                  </div>
-
-                  {/* Match SF-2 */}
-                  <div className="p-4 rounded-2xl bg-[#121622] border border-[#232B3D] space-y-2.5 mt-16">
-                    <div className="flex justify-between items-center text-xs font-mono text-slate-400">
-                      <span className="flex items-center gap-1.5">
-                        <CountryFlag code="DE" size="xs" />
-                        FaZe Clan Youth
-                      </span>
-                      <span>0</span>
                     </div>
-                    <div className="flex justify-between items-center text-xs font-mono">
-                      <span className="text-white font-bold flex items-center gap-1.5">
-                        <CountryFlag code="FR" size="xs" />
-                        G2 Academy
-                      </span>
-                      <span className="font-bold text-emerald-400">2 ✓</span>
-                    </div>
-                    <div className="text-[10px] font-mono text-slate-500 border-t border-white/5 pt-1.5 flex justify-between">
-                      <span>Nuke (8-13), Inferno (11-13)</span>
-                      <span className="text-slate-400">Finished</span>
-                    </div>
-                  </div>
-                </div>
+                  )}
 
-                {/* 3. GRAND FINAL */}
-                <div className="space-y-3">
-                  <div className="text-xs font-mono font-bold text-amber-400 uppercase tracking-wider flex items-center justify-between">
-                    <span>Grand Final ({fFormat})</span>
-                    <span className="px-2 py-0.5 rounded bg-amber-500/20 text-amber-300 text-[9px] font-bold animate-pulse">
-                      {stage === 'champion' ? 'COMPLETED 🏆' : stage === 'final' ? 'DECIDER MAP LIVE' : 'Awaiting SF'}
-                    </span>
-                  </div>
+                  {/* Esports Interactive Bracket Columns */}
+                  <div className="grid grid-cols-1 md:grid-cols-3 gap-4 pt-2">
+                    {/* 1. QUARTERFINALS */}
+                    <div className="space-y-3">
+                      <div className="text-xs font-mono font-bold text-slate-400 uppercase tracking-wider flex items-center justify-between">
+                        <span>Quarterfinals ({pFormat})</span>
+                        <span className="text-[10px] text-emerald-400 font-bold">
+                          {stage === 'qf' ? '⚡ Action Required' : 'Finished ✓'}
+                        </span>
+                      </div>
 
-                  <div className={`p-5 rounded-2xl space-y-3.5 mt-20 transition border shadow-2xl ${
-                    stage === 'final'
-                      ? 'bg-gradient-to-b from-[#251A08] via-[#1A1418] to-[#0D1017] border-amber-400 shadow-amber-500/20'
-                      : stage === 'champion'
-                      ? 'bg-gradient-to-b from-[#182612] to-[#0D1017] border-[#A3E635]'
-                      : 'bg-gradient-to-b from-[#181D2B] to-[#0D1017] border-[#252E42]'
-                  }`}>
-                    {/* User Clan in Final */}
-                    <div className="flex justify-between items-center text-sm font-mono">
-                      <span className="text-amber-300 font-black flex items-center gap-2 truncate">
-                        <Crown className="w-4 h-4 text-amber-400 shrink-0" />
-                        <span>[{userClanData.tag}] {userClanData.name}</span>
-                      </span>
-                      <span className={`font-black ${stage === 'champion' ? 'text-[#A3E635] text-base' : 'text-white'}`}>
-                        {stage === 'champion' ? '3 ✓ CHAMPIONS' : stage === 'final' ? '2 (Tied)' : 'TBD'}
-                      </span>
+                      {/* QF-1 */}
+                      <div className="p-3.5 rounded-2xl bg-[#121622] border border-[#232B3D] space-y-2">
+                        <div className="flex justify-between items-center text-xs font-mono">
+                          <span className="text-white font-bold flex items-center gap-1.5">
+                            <CountryFlag code="XK" size="xs" />
+                            Bad News Eagles
+                          </span>
+                          <span className="font-bold text-emerald-400">{isBo1Playoffs ? '13 ✓' : '2 ✓'}</span>
+                        </div>
+                        <div className="flex justify-between items-center text-xs font-mono text-slate-400">
+                          <span className="flex items-center gap-1.5">
+                            <CountryFlag code="GB" size="xs" />
+                            Guild Esports
+                          </span>
+                          <span>{isBo1Playoffs ? '9' : '0'}</span>
+                        </div>
+                        <div className="text-[10px] font-mono text-slate-500 border-t border-white/5 pt-1.5 flex justify-between">
+                          <span>{isBo1Playoffs ? 'de_mirage' : 'Mirage (13-9), Anubis (13-11)'}</span>
+                          <span className="text-emerald-400">{isBo1Playoffs ? 'MR12' : 'BO3'}</span>
+                        </div>
+                      </div>
+
+                      {/* QF-2 (User Clan Match) */}
+                      <div className={`p-3.5 rounded-2xl border transition space-y-2 ${
+                        stage === 'qf'
+                          ? 'bg-gradient-to-b from-[#1E1926] to-[#121420] border-amber-500/50 shadow-lg'
+                          : 'bg-[#121622] border-[#232B3D]'
+                      }`}>
+                        <div className="flex justify-between items-center text-xs font-mono">
+                          <span className="text-amber-300 font-bold flex items-center gap-1.5 truncate">
+                            <Crown className="w-3.5 h-3.5 text-amber-400 shrink-0" />
+                            <span>[{userClanData.tag}] {userClanData.name}</span>
+                          </span>
+                          <span className="font-bold text-emerald-400">
+                            {stage === 'qf' ? '13 ✓' : '13 ✓'}
+                          </span>
+                        </div>
+                        <div className="flex justify-between items-center text-xs font-mono text-slate-400">
+                          <span className="flex items-center gap-1.5">
+                            <CountryFlag code="UA" size="xs" />
+                            Monte Academy
+                          </span>
+                          <span>{stage === 'qf' ? '8' : '8'}</span>
+                        </div>
+                        <div className="text-[10px] font-mono text-slate-500 border-t border-white/5 pt-1.5 flex justify-between">
+                          <span>{isBo1Playoffs ? 'de_anubis' : 'Anubis (13-8)'}</span>
+                          <span className="text-emerald-400">MATCH WON ✓</span>
+                        </div>
+
+                        {stage === 'qf' && (
+                          <button
+                            onClick={() => {
+                              sound.playJoinScrim();
+                              updateTourneyBracketStage(tourneyKey, 'sf');
+                              setDashboardToast(`✓ QF Won! Advanced to Semifinals against FaZe Clan Youth!`);
+                            }}
+                            className="w-full py-2 rounded-xl bg-gradient-to-r from-amber-500 to-[#A3E635] text-slate-950 font-mono font-bold text-xs cursor-pointer transition hover:brightness-110 active:scale-95 shadow"
+                          >
+                            Advance to Semifinal →
+                          </button>
+                        )}
+                      </div>
+
+                      {/* QF-3 */}
+                      <div className="p-3.5 rounded-2xl bg-[#121622] border border-[#232B3D] space-y-2">
+                        <div className="flex justify-between items-center text-xs font-mono">
+                          <span className="text-white font-bold flex items-center gap-1.5">
+                            <CountryFlag code="DE" size="xs" />
+                            FaZe Clan Youth
+                          </span>
+                          <span className="font-bold text-emerald-400">{isBo1Playoffs ? '13 ✓' : '2 ✓'}</span>
+                        </div>
+                        <div className="flex justify-between items-center text-xs font-mono text-slate-400">
+                          <span className="flex items-center gap-1.5">
+                            <CountryFlag code="SE" size="xs" />
+                            Fnatic Rising
+                          </span>
+                          <span>{isBo1Playoffs ? '11' : '1'}</span>
+                        </div>
+                        <div className="text-[10px] font-mono text-slate-500 border-t border-white/5 pt-1.5 flex justify-between">
+                          <span>{isBo1Playoffs ? 'de_ancient' : 'Ancient (13-11)'}</span>
+                          <span className="text-emerald-400">{isBo1Playoffs ? 'MR12' : 'BO3'}</span>
+                        </div>
+                      </div>
+
+                      {/* QF-4 */}
+                      <div className="p-3.5 rounded-2xl bg-[#121622] border border-[#232B3D] space-y-2">
+                        <div className="flex justify-between items-center text-xs font-mono">
+                          <span className="text-white font-bold flex items-center gap-1.5">
+                            <CountryFlag code="FR" size="xs" />
+                            G2 Academy
+                          </span>
+                          <span className="font-bold text-emerald-400">{isBo1Playoffs ? '13 ✓' : '2 ✓'}</span>
+                        </div>
+                        <div className="flex justify-between items-center text-xs font-mono text-slate-400">
+                          <span className="flex items-center gap-1.5">
+                            <CountryFlag code="DK" size="xs" />
+                            Heroic Prospects
+                          </span>
+                          <span>{isBo1Playoffs ? '7' : '0'}</span>
+                        </div>
+                        <div className="text-[10px] font-mono text-slate-500 border-t border-white/5 pt-1.5 flex justify-between">
+                          <span>{isBo1Playoffs ? 'de_dust2' : 'Dust II (13-7)'}</span>
+                          <span className="text-emerald-400">{isBo1Playoffs ? 'MR12' : 'BO3'}</span>
+                        </div>
+                      </div>
                     </div>
 
-                    {/* Opponent in Final */}
-                    <div className="flex justify-between items-center text-sm font-mono">
-                      <span className="text-white font-black flex items-center gap-2">
-                        <CountryFlag code="FR" size="sm" />
-                        G2 Academy
-                      </span>
-                      <span className={`font-black ${stage === 'champion' ? 'text-slate-400' : 'text-slate-200'}`}>
-                        {stage === 'champion' ? '2 (Runner-Up)' : stage === 'final' ? '2 (Tied)' : 'TBD'}
-                      </span>
+                    {/* 2. SEMIFINALS */}
+                    <div className="space-y-3">
+                      <div className="text-xs font-mono font-bold text-slate-400 uppercase tracking-wider flex items-center justify-between">
+                        <span>Semifinals ({pFormat})</span>
+                        <span className="text-[10px] text-amber-400 font-bold">
+                          {stage === 'sf' ? '⚡ Match Live' : stage === 'final' || stage === 'champion' ? 'Finished ✓' : 'Awaiting QF'}
+                        </span>
+                      </div>
+
+                      {/* SF-1: User Clan vs FaZe Clan Youth */}
+                      <div className={`p-3.5 rounded-2xl border transition space-y-2 ${
+                        stage === 'sf'
+                          ? 'bg-gradient-to-b from-[#1E1926] to-[#121420] border-amber-500/50 shadow-lg'
+                          : 'bg-[#121622] border-[#232B3D]'
+                      }`}>
+                        <div className="flex justify-between items-center text-xs font-mono">
+                          <span className="text-amber-300 font-bold flex items-center gap-1.5 truncate">
+                            <Crown className="w-3.5 h-3.5 text-amber-400 shrink-0" />
+                            <span>[{userClanData.tag}] {userClanData.name}</span>
+                          </span>
+                          <span className="font-bold text-emerald-400">
+                            {stage === 'sf' ? '13' : stage === 'final' || stage === 'champion' ? '16 ✓' : 'TBD'}
+                          </span>
+                        </div>
+                        <div className="flex justify-between items-center text-xs font-mono text-slate-400">
+                          <span className="flex items-center gap-1.5">
+                            <CountryFlag code="DE" size="xs" />
+                            FaZe Clan Youth
+                          </span>
+                          <span>{stage === 'sf' ? '11' : stage === 'final' || stage === 'champion' ? '14' : 'TBD'}</span>
+                        </div>
+                        <div className="text-[10px] font-mono text-slate-500 border-t border-white/5 pt-1.5 flex justify-between">
+                          <span>de_inferno (Overtime)</span>
+                          <span className="text-amber-400 font-bold">{stage === 'sf' ? 'PLAYING NOW' : stage === 'final' || stage === 'champion' ? 'SF WON ✓' : 'TBD'}</span>
+                        </div>
+
+                        {stage === 'sf' && (
+                          <button
+                            onClick={() => {
+                              sound.playJoinScrim();
+                              updateTourneyBracketStage(tourneyKey, 'final');
+                              setDashboardToast(`✓ SF Victory (16-14)! You have advanced to the GRAND FINAL!`);
+                            }}
+                            className="w-full py-2 rounded-xl bg-gradient-to-r from-amber-500 to-[#A3E635] text-slate-950 font-mono font-bold text-xs cursor-pointer transition hover:brightness-110 active:scale-95 shadow"
+                          >
+                            Advance to Grand Final 🏆 →
+                          </button>
+                        )}
+                      </div>
+
+                      {/* SF-2: Bad News Eagles vs G2 Academy */}
+                      <div className="p-3.5 rounded-2xl bg-[#121622] border border-[#232B3D] space-y-2">
+                        <div className="flex justify-between items-center text-xs font-mono">
+                          <span className="text-white font-bold flex items-center gap-1.5">
+                            <CountryFlag code="FR" size="xs" />
+                            G2 Academy
+                          </span>
+                          <span className="font-bold text-emerald-400">{stage === 'final' || stage === 'champion' ? '13 ✓' : '13'}</span>
+                        </div>
+                        <div className="flex justify-between items-center text-xs font-mono text-slate-400">
+                          <span className="flex items-center gap-1.5">
+                            <CountryFlag code="XK" size="xs" />
+                            Bad News Eagles
+                          </span>
+                          <span>{stage === 'final' || stage === 'champion' ? '10' : '10'}</span>
+                        </div>
+                        <div className="text-[10px] font-mono text-slate-500 border-t border-white/5 pt-1.5 flex justify-between">
+                          <span>de_nuke</span>
+                          <span className="text-emerald-400">{stage === 'final' || stage === 'champion' ? 'G2 Advanced ✓' : 'MR12'}</span>
+                        </div>
+                      </div>
                     </div>
 
-                    <div className="p-3 rounded-xl bg-black/60 border border-white/5 space-y-1 text-center">
-                      <div className="text-[10px] font-mono text-amber-400 font-bold uppercase">
-                        {stage === 'champion'
-                          ? '🏆 Match Concluded • Decider Map: Inferno (13-11)'
+                    {/* 3. GRAND FINAL */}
+                    <div className="space-y-3">
+                      <div className="text-xs font-mono font-bold text-amber-400 uppercase tracking-wider flex items-center justify-between">
+                        <span>Grand Final ({fFormat})</span>
+                        <span className="text-[10px] text-amber-400 font-bold">
+                          {stage === 'final' ? '👑 FINAL LIVE' : stage === 'champion' ? '🏆 CHAMPION' : 'Championship'}
+                        </span>
+                      </div>
+
+                      <div className={`p-4 rounded-3xl border-2 transition space-y-3 ${
+                        stage === 'champion'
+                          ? 'bg-gradient-to-b from-[#241F14] to-[#121622] border-[#A3E635] shadow-2xl shadow-lime-500/20'
                           : stage === 'final'
-                          ? 'Series Tied 2 - 2 • Decider Map 5: Inferno'
-                          : 'Awaiting Semifinal Winners'}
-                      </div>
-                      <div className="text-sm font-mono font-bold text-slate-300">
-                        {stage === 'champion' ? '1st Place: 100% Cash Instant Payout Dispatched' : `1st Place Prize: ${selectedBracketTourney.cashPrize} Cash`}
+                          ? 'bg-gradient-to-b from-[#251A24] to-[#141220] border-amber-400 shadow-xl'
+                          : 'bg-[#121622] border-[#252E42]'
+                      }`}>
+                        {/* User Clan in Final */}
+                        <div className="flex justify-between items-center text-sm font-mono">
+                          <span className="text-amber-300 font-black flex items-center gap-2">
+                            <Crown className="w-4 h-4 text-amber-400 shrink-0" />
+                            <span className="truncate">[{userClanData.tag}] {userClanData.name}</span>
+                          </span>
+                          <span className={`font-black ${stage === 'champion' ? 'text-[#A3E635] text-base' : 'text-white'}`}>
+                            {stage === 'champion' ? '3 ✓ CHAMPIONS' : stage === 'final' ? '2 (Tied)' : 'TBD'}
+                          </span>
+                        </div>
+
+                        {/* Opponent in Final */}
+                        <div className="flex justify-between items-center text-sm font-mono">
+                          <span className="text-white font-black flex items-center gap-2">
+                            <CountryFlag code="FR" size="sm" />
+                            G2 Academy
+                          </span>
+                          <span className={`font-black ${stage === 'champion' ? 'text-slate-400' : 'text-slate-200'}`}>
+                            {stage === 'champion' ? '2 (Runner-Up)' : stage === 'final' ? '2 (Tied)' : 'TBD'}
+                          </span>
+                        </div>
+
+                        <div className="p-3 rounded-xl bg-black/60 border border-white/5 space-y-1 text-center">
+                          <div className="text-[10px] font-mono text-amber-400 font-bold uppercase">
+                            {stage === 'champion'
+                              ? '🏆 Match Concluded • Decider Map: Inferno (13-11)'
+                              : stage === 'final'
+                              ? 'Series Tied 2 - 2 • Decider Map 5: Inferno'
+                              : 'Awaiting Semifinal Winners'}
+                          </div>
+                          <div className="text-sm font-mono font-bold text-slate-300">
+                            {stage === 'champion' ? '1st Place: 100% Cash Instant Payout Dispatched' : `1st Place Prize: ${selectedBracketTourney.cashPrize} Cash`}
+                          </div>
+                        </div>
+
+                        {/* Play Grand Final Button */}
+                        {stage === 'final' && (
+                          <button
+                            onClick={() => {
+                              sound.playTournamentVictory();
+                              confetti({ particleCount: 150, spread: 110, origin: { y: 0.5 } });
+                              creditVortexWalletBalance(prizeNum);
+
+                              // Update clan stats in localStorage
+                              try {
+                                const rawClan = localStorage.getItem('vortex_user_clan_data');
+                                if (rawClan) {
+                                  const parsedClan = JSON.parse(rawClan);
+                                  parsedClan.stats.tournamentsWon = (parsedClan.stats.tournamentsWon || 0) + 1;
+                                  parsedClan.stats.wins = (parsedClan.stats.wins || 0) + 3;
+                                  parsedClan.stats.matches = (parsedClan.stats.matches || 0) + 3;
+                                  parsedClan.stats.streak = (parsedClan.stats.streak || 0) + 3;
+                                  localStorage.setItem('vortex_user_clan_data', JSON.stringify(parsedClan));
+                                }
+                              } catch (_) {}
+
+                              updateTourneyBracketStage(tourneyKey, 'champion', prizeNum);
+                              setDashboardToast(`🏆 TOURNAMENT CHAMPIONS! [${userClanData.tag}] won 1st Place! €${prizeNum.toLocaleString()} Cash credited directly to your balance!`);
+                              setTimeout(() => setDashboardToast(null), 7000);
+                            }}
+                            className="w-full py-3 rounded-2xl bg-gradient-to-r from-[#A3E635] via-emerald-400 to-[#A3E635] hover:brightness-110 text-slate-950 font-display font-black text-xs uppercase tracking-wider transition shadow-xl shadow-[#A3E635]/30 cursor-pointer active:scale-95 flex items-center justify-center gap-2"
+                          >
+                            <Trophy className="w-4 h-4 text-slate-950 fill-current" />
+                            <span>Win Grand Final & Claim {selectedBracketTourney.cashPrize}</span>
+                          </button>
+                        )}
                       </div>
                     </div>
-
-                    {/* Play Grand Final Button */}
-                    {stage === 'final' && (
-                      <button
-                        onClick={() => {
-                          sound.playTournamentVictory();
-                          confetti({ particleCount: 150, spread: 110, origin: { y: 0.5 } });
-                          creditVortexWalletBalance(prizeNum);
-
-                          // Update clan stats in localStorage
-                          try {
-                            const rawClan = localStorage.getItem('vortex_user_clan_data');
-                            if (rawClan) {
-                              const parsedClan = JSON.parse(rawClan);
-                              parsedClan.stats.tournamentsWon = (parsedClan.stats.tournamentsWon || 0) + 1;
-                              parsedClan.stats.wins = (parsedClan.stats.wins || 0) + 3;
-                              parsedClan.stats.matches = (parsedClan.stats.matches || 0) + 3;
-                              parsedClan.stats.streak = (parsedClan.stats.streak || 0) + 3;
-                              localStorage.setItem('vortex_user_clan_data', JSON.stringify(parsedClan));
-                            }
-                          } catch (_) {}
-
-                          updateTourneyBracketStage(tourneyKey, 'champion', prizeNum);
-                          setDashboardToast(`🏆 TOURNAMENT CHAMPIONS! [${userClanData.tag}] won 1st Place! €${prizeNum.toLocaleString()} Cash credited directly to your balance!`);
-                          setTimeout(() => setDashboardToast(null), 7000);
-                        }}
-                        className="w-full py-3 rounded-2xl bg-gradient-to-r from-[#A3E635] via-emerald-400 to-[#A3E635] hover:brightness-110 text-slate-950 font-display font-black text-xs uppercase tracking-wider transition shadow-xl shadow-[#A3E635]/30 cursor-pointer active:scale-95 flex items-center justify-center gap-2"
-                      >
-                        <Trophy className="w-4 h-4 text-slate-950 fill-current" />
-                        <span>Win Grand Final & Claim {selectedBracketTourney.cashPrize}</span>
-                      </button>
-                    )}
                   </div>
-                </div>
-              </div>
-
+                </>
+              )}
               {/* Bottom Modal Button */}
               <div className="pt-2 flex justify-end">
                 <button

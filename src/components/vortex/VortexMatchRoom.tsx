@@ -565,14 +565,6 @@ export const VortexMatchRoom: React.FC<VortexMatchRoomProps> = ({
     won: boolean;
   } | null>(null);
   const [copiedServerIp, setCopiedServerIp] = useState<boolean>(false);
-  const [serverAccessMode, setServerAccessMode] = useState<'player' | 'caster' | 'admin'>('player');
-  const [adminCommandStatus, setAdminCommandStatus] = useState<string | null>(null);
-
-  const handleRunAdminCommand = (cmd: string) => {
-    sound.playClick();
-    setAdminCommandStatus(`MatchZy command '${cmd}' sent to match server!`);
-    setTimeout(() => setAdminCommandStatus(null), 3000);
-  };
 
   // Dedicated European CS2 Sub-Tick Server Regions
   const SERVER_REGIONS = [
@@ -1749,68 +1741,18 @@ export const VortexMatchRoom: React.FC<VortexMatchRoomProps> = ({
                 </div>
               </div>
 
-              {/* CS2 Server Connect & Action Buttons */}
+              {/* CS2 Match Connect & Action Buttons */}
               <div className="space-y-2 pt-1">
-                {/* Dedicated Server IP Card & Mode Selector */}
                 <div className="p-3.5 rounded-xl bg-black/60 border border-white/10 space-y-2.5 text-left">
-                  {/* Access Mode Selector Tabs */}
-                  <div className="flex items-center gap-1 p-1 rounded-lg bg-black/40 border border-white/5 text-[10px] font-mono">
-                    <button
-                      onClick={() => {
-                        sound.playClick();
-                        setServerAccessMode('player');
-                      }}
-                      className={`flex-1 py-1 rounded-md font-bold transition flex items-center justify-center gap-1 cursor-pointer ${
-                        serverAccessMode === 'player'
-                          ? 'bg-[#A3E635] text-black shadow-sm'
-                          : 'text-slate-400 hover:text-white'
-                      }`}
-                    >
-                      <Play className="w-2.5 h-2.5 fill-current" />
-                      <span>Player</span>
-                    </button>
-                    <button
-                      onClick={() => {
-                        sound.playClick();
-                        setServerAccessMode('caster');
-                      }}
-                      className={`flex-1 py-1 rounded-md font-bold transition flex items-center justify-center gap-1 cursor-pointer ${
-                        serverAccessMode === 'caster'
-                          ? 'bg-purple-500 text-white shadow-sm'
-                          : 'text-slate-400 hover:text-white'
-                      }`}
-                    >
-                      <Radio className="w-2.5 h-2.5" />
-                      <span>Caster CSTV</span>
-                    </button>
-                    <button
-                      onClick={() => {
-                        sound.playClick();
-                        setServerAccessMode('admin');
-                      }}
-                      className={`flex-1 py-1 rounded-md font-bold transition flex items-center justify-center gap-1 cursor-pointer ${
-                        serverAccessMode === 'admin'
-                          ? 'bg-amber-400 text-slate-950 shadow-sm'
-                          : 'text-slate-400 hover:text-white'
-                      }`}
-                    >
-                      <Zap className="w-2.5 h-2.5" />
-                      <span>Referee Admin</span>
-                    </button>
-                  </div>
-
-                  {/* Header info based on mode */}
                   <div className="flex items-center justify-between text-[10px] font-mono text-slate-400">
-                    <span className="flex items-center gap-1 text-[#A3E635] font-bold">
+                    <span className="flex items-center gap-1.5 text-[#A3E635] font-bold">
                       <Radio className="w-3 h-3 text-[#A3E635] animate-pulse" />
-                      {serverAccessMode === 'player' && 'CS2 Sub-Tick Dedicated Server'}
-                      {serverAccessMode === 'caster' && 'CSTV Spectator Broadcast Feed'}
-                      {serverAccessMode === 'admin' && 'MatchZy Tournament Referee Slot'}
+                      Direct Match Connect
                     </span>
                     <span className="text-emerald-400 font-bold">{selectedServerRegion.ping}ms Ping</span>
                   </div>
 
-                  {/* Server Region Selector */}
+                  {/* Region Selector */}
                   <div className="flex items-center gap-1 overflow-x-auto pb-1 text-[10px] font-mono">
                     {SERVER_REGIONS.map((reg) => (
                       <button
@@ -1830,153 +1772,51 @@ export const VortexMatchRoom: React.FC<VortexMatchRoomProps> = ({
                     ))}
                   </div>
 
-                  {/* Connection String Box */}
-                  {serverAccessMode === 'player' && (
-                    <>
-                      <div className="text-[11px] font-mono text-[#A3E635] truncate select-all bg-black/50 px-2.5 py-1.5 rounded-lg border border-white/5">
-                        connect {selectedServerRegion.ip}; password cc123
-                      </div>
-                      <div className="flex items-center gap-2 pt-0.5">
-                        <button
-                          onClick={() => {
-                            sound.playClick();
-                            navigator.clipboard.writeText(`connect ${selectedServerRegion.ip}; password cc123`);
-                            setCopiedServerIp(true);
-                            setTimeout(() => setCopiedServerIp(false), 2000);
-                          }}
-                          className="flex-1 py-1.5 rounded-lg bg-white/10 hover:bg-white/20 text-white font-mono font-bold text-[10px] flex items-center justify-center gap-1 transition cursor-pointer"
-                        >
-                          {copiedServerIp ? <Check className="w-3 h-3 text-emerald-400" /> : <Copy className="w-3 h-3" />}
-                          <span>{copiedServerIp ? 'Copied ✓' : 'Copy IP'}</span>
-                        </button>
-                        <a
-                          href={`steam://connect/${selectedServerRegion.ip}/cc123`}
-                          onClick={() => sound.playClick()}
-                          className="flex-1 py-1.5 rounded-lg bg-[#A3E635]/20 hover:bg-[#A3E635]/30 border border-[#A3E635]/40 text-[#A3E635] font-mono font-bold text-[10px] flex items-center justify-center gap-1 transition cursor-pointer"
-                        >
-                          <Play className="w-3 h-3 fill-current" />
-                          <span>Launch CS2</span>
-                        </a>
-                      </div>
-                    </>
-                  )}
+                  <div className="text-[11px] font-mono text-[#A3E635] truncate select-all bg-black/50 px-2.5 py-1.5 rounded-lg border border-white/5">
+                    connect {selectedServerRegion.ip}; password cc123
+                  </div>
 
-                  {serverAccessMode === 'caster' && (
-                    <>
-                      <div className="p-2 rounded-lg bg-purple-950/30 border border-purple-500/20 space-y-1">
-                        <div className="flex items-center justify-between text-[9px] font-mono text-purple-300">
-                          <span className="font-bold flex items-center gap-1">
-                            <Radio className="w-2.5 h-2.5 text-purple-400 animate-pulse" />
-                            Official CSTV Spectator IP
-                          </span>
-                          <span className="px-1.5 py-0.2 rounded bg-purple-500/20 text-purple-300 font-bold">120s Broadcast Delay</span>
-                        </div>
-                        <div className="text-[11px] font-mono text-purple-300 select-all truncate bg-black/50 px-2 py-1 rounded border border-purple-500/10">
-                          connect tv.caliberclutch.gg:27020; password cc_cast
-                        </div>
-                      </div>
-                      <div className="flex items-center gap-2 pt-0.5">
-                        <button
-                          onClick={() => {
-                            sound.playClick();
-                            navigator.clipboard.writeText('connect tv.caliberclutch.gg:27020; password cc_cast');
-                            setCopiedServerIp(true);
-                            setTimeout(() => setCopiedServerIp(false), 2000);
-                          }}
-                          className="flex-1 py-1.5 rounded-lg bg-purple-600/20 hover:bg-purple-600/30 border border-purple-500/30 text-purple-200 font-mono font-bold text-[10px] flex items-center justify-center gap-1 transition cursor-pointer"
-                        >
-                          {copiedServerIp ? <Check className="w-3 h-3 text-emerald-400" /> : <Copy className="w-3 h-3" />}
-                          <span>{copiedServerIp ? 'Caster IP Copied ✓' : 'Copy Caster IP'}</span>
-                        </button>
-                        <a
-                          href="steam://connect/tv.caliberclutch.gg:27020/cc_cast"
-                          onClick={() => sound.playClick()}
-                          className="flex-1 py-1.5 rounded-lg bg-purple-500 hover:bg-purple-400 text-white font-mono font-bold text-[10px] flex items-center justify-center gap-1 transition cursor-pointer shadow-md"
-                        >
-                          <Radio className="w-3 h-3" />
-                          <span>Stream Spectator</span>
-                        </a>
-                      </div>
-                    </>
-                  )}
+                  <div className="flex items-center gap-2 pt-0.5">
+                    <button
+                      onClick={() => {
+                        sound.playClick();
+                        navigator.clipboard.writeText(`connect ${selectedServerRegion.ip}; password cc123`);
+                        setCopiedServerIp(true);
+                        setTimeout(() => setCopiedServerIp(false), 2000);
+                      }}
+                      className="flex-1 py-1.5 rounded-lg bg-white/10 hover:bg-white/20 text-white font-mono font-bold text-[10px] flex items-center justify-center gap-1 transition cursor-pointer"
+                    >
+                      {copiedServerIp ? <Check className="w-3 h-3 text-emerald-400" /> : <Copy className="w-3 h-3" />}
+                      <span>{copiedServerIp ? 'Copied ✓' : 'Copy IP'}</span>
+                    </button>
+                    <a
+                      href={`steam://connect/${selectedServerRegion.ip}/cc123`}
+                      onClick={() => sound.playClick()}
+                      className="flex-1 py-1.5 rounded-lg bg-[#A3E635]/20 hover:bg-[#A3E635]/30 border border-[#A3E635]/40 text-[#A3E635] font-mono font-bold text-[10px] flex items-center justify-center gap-1 transition cursor-pointer"
+                    >
+                      <Play className="w-3 h-3 fill-current" />
+                      <span>Launch CS2</span>
+                    </a>
+                  </div>
 
-                  {serverAccessMode === 'admin' && (
-                    <>
-                      <div className="p-2 rounded-lg bg-amber-950/30 border border-amber-500/20 space-y-1">
-                        <div className="flex items-center justify-between text-[9px] font-mono text-amber-300">
-                          <span className="font-bold flex items-center gap-1">
-                            <Zap className="w-2.5 h-2.5 text-amber-400" />
-                            MatchZy In-Game Admin Console
-                          </span>
-                          <span className="px-1.5 py-0.2 rounded bg-amber-500/20 text-amber-300 font-bold">RCON Authenticated</span>
-                        </div>
-                        <div className="text-[11px] font-mono text-amber-300 select-all truncate bg-black/50 px-2 py-1 rounded border border-amber-500/10">
-                          connect {selectedServerRegion.ip}; password cc_admin
-                        </div>
-                      </div>
-
-                      {adminCommandStatus && (
-                        <div className="px-2 py-1 rounded bg-[#A3E635]/15 border border-[#A3E635]/30 text-[#A3E635] font-mono text-[9px] font-bold text-center animate-pulse">
-                          {adminCommandStatus}
-                        </div>
-                      )}
-
-                      {/* MatchZy Server Admin Quick Commands */}
-                      <div className="grid grid-cols-4 gap-1 pt-0.5">
-                        <button
-                          onClick={() => handleRunAdminCommand('.pause')}
-                          className="py-1 px-1 rounded bg-white/5 hover:bg-white/10 text-slate-300 hover:text-white font-mono text-[9px] font-bold border border-white/5 transition cursor-pointer text-center"
-                          title="Pause the current match"
-                        >
-                          .pause
-                        </button>
-                        <button
-                          onClick={() => handleRunAdminCommand('.unpause')}
-                          className="py-1 px-1 rounded bg-white/5 hover:bg-white/10 text-slate-300 hover:text-white font-mono text-[9px] font-bold border border-white/5 transition cursor-pointer text-center"
-                          title="Resume the match"
-                        >
-                          .unpause
-                        </button>
-                        <button
-                          onClick={() => handleRunAdminCommand('.restart')}
-                          className="py-1 px-1 rounded bg-white/5 hover:bg-white/10 text-slate-300 hover:text-white font-mono text-[9px] font-bold border border-white/5 transition cursor-pointer text-center"
-                          title="Restart the current round"
-                        >
-                          .restart
-                        </button>
-                        <button
-                          onClick={() => handleRunAdminCommand('.forcestart')}
-                          className="py-1 px-1 rounded bg-amber-500/20 hover:bg-amber-500/30 text-amber-300 font-mono text-[9px] font-bold border border-amber-500/30 transition cursor-pointer text-center"
-                          title="Force live start immediately"
-                        >
-                          .forcestart
-                        </button>
-                      </div>
-
-                      <div className="flex items-center gap-2 pt-0.5">
-                        <button
-                          onClick={() => {
-                            sound.playClick();
-                            navigator.clipboard.writeText(`connect ${selectedServerRegion.ip}; password cc_admin`);
-                            setCopiedServerIp(true);
-                            setTimeout(() => setCopiedServerIp(false), 2000);
-                          }}
-                          className="flex-1 py-1.5 rounded-lg bg-amber-500/20 hover:bg-amber-500/30 border border-amber-500/30 text-amber-300 font-mono font-bold text-[10px] flex items-center justify-center gap-1 transition cursor-pointer"
-                        >
-                          {copiedServerIp ? <Check className="w-3 h-3 text-emerald-400" /> : <Copy className="w-3 h-3" />}
-                          <span>{copiedServerIp ? 'Admin IP Copied ✓' : 'Copy Admin IP'}</span>
-                        </button>
-                        <a
-                          href={`steam://connect/${selectedServerRegion.ip}/cc_admin`}
-                          onClick={() => sound.playClick()}
-                          className="flex-1 py-1.5 rounded-lg bg-amber-400 hover:bg-amber-300 text-slate-950 font-mono font-black text-[10px] flex items-center justify-center gap-1 transition cursor-pointer shadow-md"
-                        >
-                          <Zap className="w-3 h-3 fill-current" />
-                          <span>Launch Admin</span>
-                        </a>
-                      </div>
-                    </>
-                  )}
+                  {/* Discreet Live Stream / Spectator Option */}
+                  <div className="pt-2 border-t border-white/5 flex items-center justify-between text-[10px] font-mono">
+                    <span className="text-slate-400 flex items-center gap-1">
+                      <Radio className="w-2.5 h-2.5 text-purple-400" />
+                      Live Stream Feed (120s Delay)
+                    </span>
+                    <button
+                      onClick={() => {
+                        sound.playClick();
+                        navigator.clipboard.writeText('connect tv.caliberclutch.gg:27020; password cc_cast');
+                        setCopiedServerIp(true);
+                        setTimeout(() => setCopiedServerIp(false), 2000);
+                      }}
+                      className="text-purple-300 hover:text-purple-200 underline cursor-pointer font-bold"
+                    >
+                      Copy Stream IP
+                    </button>
+                  </div>
                 </div>
 
                 {/* Map Veto & Side Status Button */}
