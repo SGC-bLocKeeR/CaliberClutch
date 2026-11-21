@@ -32,7 +32,10 @@ import {
   Smile,
   ImageIcon,
   Sparkles,
-  Ban
+  Ban,
+  Swords,
+  Crown,
+  Zap
 } from 'lucide-react';
 import { sound } from '../../utils/soundEffects';
 import confetti from 'canvas-confetti';
@@ -149,6 +152,7 @@ interface VortexMatchRoomProps {
   matchData?: BalancedMatch;
   onMatchFinished?: (won: boolean, deltaElo: number) => void;
   onClose: () => void;
+  initialVetoOpen?: boolean;
 }
 
 export interface MatchChatMessage {
@@ -355,7 +359,8 @@ export const VortexMatchRoom: React.FC<VortexMatchRoomProps> = ({
   partyMembers = [],
   matchData,
   onMatchFinished,
-  onClose
+  onClose,
+  initialVetoOpen = true
 }) => {
   // Navigation Tabs: OVERVIEW vs STATS
   const [activeTab, setActiveTab] = useState<'overview' | 'stats'>('overview');
@@ -560,9 +565,26 @@ export const VortexMatchRoom: React.FC<VortexMatchRoomProps> = ({
   } | null>(null);
   const [copiedServerIp, setCopiedServerIp] = useState<boolean>(false);
 
+  // Dedicated European CS2 Sub-Tick Server Regions
+  const SERVER_REGIONS = [
+    { id: 'fra', name: 'Germany (Frankfurt Central)', ping: 18, ip: 'srv-fra.caliberclutch.com:27015' },
+    { id: 'sto', name: 'Sweden (Stockholm)', ping: 24, ip: 'srv-sto.caliberclutch.com:27015' },
+    { id: 'lon', name: 'United Kingdom (London)', ping: 28, ip: 'srv-lon.caliberclutch.com:27015' },
+    { id: 'waw', name: 'Poland (Warsaw)', ping: 22, ip: 'srv-waw.caliberclutch.com:27015' }
+  ];
+  const [selectedServerRegion, setSelectedServerRegion] = useState(SERVER_REGIONS[0]);
+
+  // Live Round-by-Round CS2 Match Simulation State
+  const [isLiveSimulating, setIsLiveSimulating] = useState(false);
+  const [liveRound, setLiveRound] = useState(0);
+  const [liveScore1, setLiveScore1] = useState(0);
+  const [liveScore2, setLiveScore2] = useState(0);
+  const [liveRoundEvents, setLiveRoundEvents] = useState<string[]>([]);
+
   // Dynamic Interactive Map Veto State
   const [currentSelectedMap, setCurrentSelectedMap] = useState<string>(activeMatch.map || 'Anubis');
-  const [isInteractiveVetoOpen, setIsInteractiveVetoOpen] = useState<boolean>(false);
+  const [selectedStartingSide, setSelectedStartingSide] = useState<'undecided' | 'knife' | 'ct' | 't'>('undecided');
+  const [isInteractiveVetoOpen, setIsInteractiveVetoOpen] = useState<boolean>(initialVetoOpen);
   const [bannedMapIds, setBannedMapIds] = useState<string[]>([]);
   const [vetoHistory, setVetoHistory] = useState<Array<{ step: number; text: string; isDecided: boolean; team: string; mapName: string }>>([]);
   const [isOpponentBanning, setIsOpponentBanning] = useState<boolean>(false);
@@ -1644,60 +1666,179 @@ export const VortexMatchRoom: React.FC<VortexMatchRoomProps> = ({
 
               {/* CS2 Server Connect & Action Buttons */}
               <div className="space-y-2 pt-1">
-                {/* Dedicated Server IP Card */}
-                <div className="p-3 rounded-xl bg-black/60 border border-white/10 space-y-1.5 text-left">
+                {/* Dedicated Server IP Card & Region Selector */}
+                <div className="p-3.5 rounded-xl bg-black/60 border border-white/10 space-y-2 text-left">
                   <div className="flex items-center justify-between text-[10px] font-mono text-slate-400">
-                    <span className="flex items-center gap-1 text-emerald-400 font-bold">
-                      <Radio className="w-3 h-3 animate-pulse" />
-                      CS2 MatchZy Sub-Tick
+                    <span className="flex items-center gap-1 text-[#A3E635] font-bold">
+                      <Radio className="w-3 h-3 text-[#A3E635] animate-pulse" />
+                      CS2 Dedicated Sub-Tick Server
                     </span>
-                    <span>Sub-Tick 24ms</span>
+                    <span className="text-emerald-400 font-bold">{selectedServerRegion.ping}ms Ping</span>
                   </div>
-                  <div className="text-[11px] font-mono text-[#A3E635] truncate select-all bg-black/40 px-2 py-1 rounded border border-white/5">
-                    connect {activeMatch.serverIp}; password vortex
+
+                  {/* Server Region Selector */}
+                  <div className="flex items-center gap-1 overflow-x-auto pb-1 text-[10px] font-mono">
+                    {SERVER_REGIONS.map((reg) => (
+                      <button
+                        key={reg.id}
+                        onClick={() => {
+                          sound.playClick();
+                          setSelectedServerRegion(reg);
+                        }}
+                        className={`px-2 py-1 rounded-lg border transition cursor-pointer shrink-0 ${
+                          selectedServerRegion.id === reg.id
+                            ? 'bg-[#A3E635]/20 text-[#A3E635] border-[#A3E635]/50 font-bold'
+                            : 'bg-white/5 text-slate-400 border-white/5 hover:text-white'
+                        }`}
+                      >
+                        {reg.name.split(' (')[0]} ({reg.ping}ms)
+                      </button>
+                    ))}
                   </div>
+
+                  <div className="text-[11px] font-mono text-[#A3E635] truncate select-all bg-black/50 px-2.5 py-1.5 rounded-lg border border-white/5">
+                    connect {selectedServerRegion.ip}; password cc123
+                  </div>
+
                   <div className="flex items-center gap-2 pt-0.5">
                     <button
                       onClick={() => {
                         sound.playClick();
-                        navigator.clipboard.writeText(`connect ${activeMatch.serverIp}; password vortex`);
+                        navigator.clipboard.writeText(`connect ${selectedServerRegion.ip}; password cc123`);
                         setCopiedServerIp(true);
                         setTimeout(() => setCopiedServerIp(false), 2000);
                       }}
                       className="flex-1 py-1.5 rounded-lg bg-white/10 hover:bg-white/20 text-white font-mono font-bold text-[10px] flex items-center justify-center gap-1 transition cursor-pointer"
                     >
                       {copiedServerIp ? <Check className="w-3 h-3 text-emerald-400" /> : <Copy className="w-3 h-3" />}
-                      <span>{copiedServerIp ? 'Copied ✓' : 'Copy Connect'}</span>
+                      <span>{copiedServerIp ? 'Copied ✓' : 'Copy IP'}</span>
                     </button>
                     <a
-                      href={`steam://connect/${activeMatch.serverIp}/vortex`}
+                      href={`steam://connect/${selectedServerRegion.ip}/cc123`}
                       onClick={() => sound.playClick()}
-                      className="flex-1 py-1.5 rounded-lg bg-emerald-500/20 hover:bg-emerald-500/30 border border-emerald-500/40 text-emerald-400 font-mono font-bold text-[10px] flex items-center justify-center gap-1 transition cursor-pointer"
+                      className="flex-1 py-1.5 rounded-lg bg-[#A3E635]/20 hover:bg-[#A3E635]/30 border border-[#A3E635]/40 text-[#A3E635] font-mono font-bold text-[10px] flex items-center justify-center gap-1 transition cursor-pointer"
                     >
                       <Play className="w-3 h-3 fill-current" />
-                      <span>Open CS2</span>
+                      <span>Launch CS2</span>
                     </a>
                   </div>
                 </div>
 
-                {/* 1-Click Match Result Simulation */}
+                {/* Map Veto & Side Status Button */}
+                <button
+                  onClick={() => {
+                    sound.playSelect();
+                    setIsInteractiveVetoOpen(true);
+                  }}
+                  className="w-full py-2.5 rounded-xl bg-[#141824] hover:bg-[#1A2030] border border-[#2A344A] text-white font-mono font-bold text-xs flex items-center justify-between px-3 transition cursor-pointer"
+                >
+                  <div className="flex items-center gap-2">
+                    <Ban className="w-3.5 h-3.5 text-amber-400" />
+                    <span>Map Veto ({currentSelectedMap})</span>
+                  </div>
+                  <span className="text-[10px] text-[#A3E635] uppercase font-bold">
+                    {selectedStartingSide !== 'undecided' ? `${selectedStartingSide.toUpperCase()} Side ✓` : 'Open Veto →'}
+                  </span>
+                </button>
+
+                {/* Live Match Simulation Controls */}
                 {!matchSimulatedResult ? (
-                  <button
-                    onClick={() => {
-                      sound.playTournamentVictory();
-                      confetti({ particleCount: 90, spread: 80, origin: { y: 0.6 } });
-                      const s1 = 13;
-                      const s2 = Math.floor(Math.random() * 3) + 9; // 9-11 (close match)
-                      setMatchSimulatedResult({ score1: s1, score2: s2, won: true });
-                      if (onMatchFinished) {
-                        onMatchFinished(true, activeMatch.eloGainWin);
-                      }
-                    }}
-                    className="w-full py-3 rounded-lg bg-gradient-to-r from-[#FF5500] to-amber-500 hover:brightness-110 text-black font-display font-black text-xs uppercase tracking-wider transition shadow-lg flex items-center justify-center gap-2 cursor-pointer active:scale-95"
-                  >
-                    <Trophy className="w-3.5 h-3.5" />
-                    <span>Simulate Match (1-Click Result)</span>
-                  </button>
+                  <div className="space-y-2">
+                    {!isLiveSimulating ? (
+                      <div className="grid grid-cols-2 gap-2">
+                        <button
+                          onClick={() => {
+                            sound.playJoinScrim();
+                            setIsLiveSimulating(true);
+                            setLiveRound(1);
+                            setLiveScore1(1);
+                            setLiveScore2(0);
+                            setLiveRoundEvents([`Round 1 (Pistol): ${currentGamerTag} secured 2K Glock on A Site. Round Won!`]);
+
+                            const interval = setInterval(() => {
+                              setLiveRound(r => {
+                                if (r >= 22) {
+                                  clearInterval(interval);
+                                  setIsLiveSimulating(false);
+                                  sound.playTournamentVictory();
+                                  confetti({ particleCount: 90, spread: 80, origin: { y: 0.6 } });
+                                  setMatchSimulatedResult({ score1: 13, score2: 9, won: true });
+                                  if (onMatchFinished) onMatchFinished(true, activeMatch.eloGainWin);
+                                  return 22;
+                                }
+                                const nextR = r + 1;
+                                const isWin = Math.random() > 0.35;
+                                if (isWin) {
+                                  sound.playHeadshotDink();
+                                  setLiveScore1(s => Math.min(13, s + 1));
+                                  setLiveRoundEvents(ev => [`Round ${nextR}: ${currentGamerTag} / Squad defused the bomb. +1 Round!`, ...ev.slice(0, 4)]);
+                                } else {
+                                  sound.playBombBeep();
+                                  setLiveScore2(s => Math.min(11, s + 1));
+                                  setLiveRoundEvents(ev => [`Round ${nextR}: Opponent won with eco rush.`, ...ev.slice(0, 4)]);
+                                }
+                                return nextR;
+                              });
+                            }, 1200);
+                          }}
+                          className="py-3 px-2 rounded-xl bg-gradient-to-r from-[#84CC16] to-[#A3E635] hover:brightness-110 text-slate-950 font-display font-black text-xs uppercase tracking-wider transition shadow-lg flex items-center justify-center gap-1.5 cursor-pointer active:scale-95"
+                        >
+                          <Play className="w-3.5 h-3.5 fill-current" />
+                          <span>Live Match</span>
+                        </button>
+
+                        <button
+                          onClick={() => {
+                            sound.playTournamentVictory();
+                            confetti({ particleCount: 90, spread: 80, origin: { y: 0.6 } });
+                            const s1 = 13;
+                            const s2 = Math.floor(Math.random() * 3) + 9;
+                            setMatchSimulatedResult({ score1: s1, score2: s2, won: true });
+                            if (onMatchFinished) {
+                              onMatchFinished(true, activeMatch.eloGainWin);
+                            }
+                          }}
+                          className="py-3 px-2 rounded-xl bg-white/10 hover:bg-white/20 text-white font-display font-black text-xs uppercase tracking-wider transition flex items-center justify-center gap-1.5 cursor-pointer active:scale-95 border border-white/10"
+                        >
+                          <Trophy className="w-3.5 h-3.5 text-amber-400" />
+                          <span>Instant Finish</span>
+                        </button>
+                      </div>
+                    ) : (
+                      <div className="p-3.5 rounded-xl bg-[#121622] border border-[#A3E635]/40 space-y-2 text-left">
+                        <div className="flex items-center justify-between text-xs font-mono">
+                          <span className="text-[#A3E635] font-bold flex items-center gap-1.5">
+                            <span className="w-2 h-2 rounded-full bg-[#A3E635] animate-ping" />
+                            LIVE CS2 ROUND {liveRound}/24 (MR12)
+                          </span>
+                          <span className="text-white font-black font-display text-sm">
+                            {liveScore1} - {liveScore2}
+                          </span>
+                        </div>
+                        {liveRoundEvents.length > 0 && (
+                          <div className="text-[10px] font-mono text-slate-300 bg-black/40 p-2 rounded-lg border border-white/5 space-y-1">
+                            {liveRoundEvents.map((ev, idx) => (
+                              <div key={idx} className={idx === 0 ? 'text-[#A3E635] font-bold' : 'text-slate-400'}>
+                                {ev}
+                              </div>
+                            ))}
+                          </div>
+                        )}
+                        <button
+                          onClick={() => {
+                            setIsLiveSimulating(false);
+                            sound.playTournamentVictory();
+                            confetti({ particleCount: 90, spread: 80, origin: { y: 0.6 } });
+                            setMatchSimulatedResult({ score1: 13, score2: Math.min(11, liveScore2), won: true });
+                            if (onMatchFinished) onMatchFinished(true, activeMatch.eloGainWin);
+                          }}
+                          className="w-full py-1.5 rounded-lg bg-white/10 hover:bg-white/20 text-white text-[10px] font-mono font-bold transition cursor-pointer text-center"
+                        >
+                          Fast Forward to Result →
+                        </button>
+                      </div>
+                    )}
+                  </div>
                 ) : (
                   <div className="p-3 rounded-xl bg-emerald-500/15 border border-emerald-500/30 text-center animate-in zoom-in-95 duration-150">
                     <div className="text-xs font-black font-display text-white">
@@ -2725,12 +2866,17 @@ export const VortexMatchRoom: React.FC<VortexMatchRoomProps> = ({
       {/* INTERACTIVE CS2 ACTIVE DUTY MAP VETO MODAL               */}
       {/* ======================================================== */}
       {isInteractiveVetoOpen && (
-        <div className="fixed inset-0 z-50 bg-black/85 backdrop-blur-md flex items-center justify-center p-4 animate-in fade-in duration-200">
+        <div 
+          onClick={() => {
+            sound.playClick();
+            setIsInteractiveVetoOpen(false);
+          }}
+          className="fixed inset-0 z-50 bg-black/85 backdrop-blur-md flex items-center justify-center p-4 animate-in fade-in duration-200 cursor-pointer overflow-y-auto"
+        >
           <div 
-            className="fixed inset-0" 
-            onClick={() => setIsInteractiveVetoOpen(false)} 
-          />
-          <div className="relative z-10 w-full max-w-4xl bg-[#0E1017] border border-[#23293B] rounded-3xl p-6 sm:p-8 shadow-2xl space-y-6 max-h-[92vh] overflow-y-auto">
+            onClick={(e) => e.stopPropagation()}
+            className="relative z-10 w-full max-w-4xl bg-[#0E1017] border border-[#23293B] rounded-3xl p-6 sm:p-8 shadow-2xl space-y-6 max-h-[92vh] overflow-y-auto cursor-default my-auto"
+          >
             {/* Header */}
             <div className="flex items-start justify-between border-b border-white/10 pb-4">
               <div>
@@ -2755,13 +2901,7 @@ export const VortexMatchRoom: React.FC<VortexMatchRoomProps> = ({
                   title="Reset and start veto from scratch"
                 >
                   <RotateCcw className="w-3.5 h-3.5" />
-                  <span className="hidden sm:inline">Reset</span>
-                </button>
-                <button
-                  onClick={() => setIsInteractiveVetoOpen(false)}
-                  className="p-1.5 rounded-xl bg-white/5 hover:bg-white/10 text-slate-400 hover:text-white transition cursor-pointer"
-                >
-                  <X className="w-5 h-5" />
+                  <span className="hidden sm:inline">Reset Veto</span>
                 </button>
               </div>
             </div>
@@ -2797,6 +2937,65 @@ export const VortexMatchRoom: React.FC<VortexMatchRoomProps> = ({
                 {isVetoCompleted ? 'DECIDED' : `${remainingMaps.length} MAPS LEFT`}
               </div>
             </div>
+
+            {/* Captain Side Selection Phase */}
+            {isVetoCompleted && (
+              <div className="p-4 rounded-2xl bg-gradient-to-r from-[#18210C] to-[#0E131C] border border-[#A3E635]/40 text-left space-y-3 animate-in zoom-in-95">
+                <div className="flex items-center justify-between">
+                  <span className="font-mono text-xs font-bold text-[#A3E635] uppercase flex items-center gap-1.5">
+                    <Crown className="w-4 h-4 fill-[#A3E635]" />
+                    CAPTAIN SIDE SELECTION • {currentSelectedMap}
+                  </span>
+                  <span className="text-[10px] font-mono text-slate-400">
+                    {selectedStartingSide !== 'undecided' ? `Selected: ${selectedStartingSide.toUpperCase()}` : 'Select starting side'}
+                  </span>
+                </div>
+                <div className="grid grid-cols-1 sm:grid-cols-3 gap-2.5">
+                  <button
+                    onClick={() => {
+                      sound.playClick();
+                      setSelectedStartingSide('ct');
+                    }}
+                    className={`p-3 rounded-xl border font-mono text-xs font-bold flex items-center justify-center gap-2 transition cursor-pointer ${
+                      selectedStartingSide === 'ct'
+                        ? 'bg-blue-600/30 border-blue-400 text-blue-300 shadow-md ring-2 ring-blue-500/40'
+                        : 'bg-white/5 border-white/10 text-slate-300 hover:border-blue-400/50'
+                    }`}
+                  >
+                    <Shield className="w-4 h-4 text-blue-400" />
+                    <span>START AS CT (DEFENDERS)</span>
+                  </button>
+                  <button
+                    onClick={() => {
+                      sound.playClick();
+                      setSelectedStartingSide('t');
+                    }}
+                    className={`p-3 rounded-xl border font-mono text-xs font-bold flex items-center justify-center gap-2 transition cursor-pointer ${
+                      selectedStartingSide === 't'
+                        ? 'bg-amber-600/30 border-amber-400 text-amber-300 shadow-md ring-2 ring-amber-500/40'
+                        : 'bg-white/5 border-white/10 text-slate-300 hover:border-amber-400/50'
+                    }`}
+                  >
+                    <Flame className="w-4 h-4 text-amber-400" />
+                    <span>START AS T (ATTACKERS)</span>
+                  </button>
+                  <button
+                    onClick={() => {
+                      sound.playClick();
+                      setSelectedStartingSide('knife');
+                    }}
+                    className={`p-3 rounded-xl border font-mono text-xs font-bold flex items-center justify-center gap-2 transition cursor-pointer ${
+                      selectedStartingSide === 'knife'
+                        ? 'bg-purple-600/30 border-purple-400 text-purple-300 shadow-md ring-2 ring-purple-500/40'
+                        : 'bg-white/5 border-white/10 text-slate-300 hover:border-purple-400/50'
+                    }`}
+                  >
+                    <Swords className="w-4 h-4 text-purple-400" />
+                    <span>KNIFE ROUND FOR SIDE</span>
+                  </button>
+                </div>
+              </div>
+            )}
 
             {/* 7 Maps Grid */}
             <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">

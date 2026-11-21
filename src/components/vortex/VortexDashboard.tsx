@@ -86,6 +86,7 @@ import { getVortexWalletBalance, creditVortexWalletBalance, deductVortexWalletBa
 import { FaceitSkillTrack, FaceitSeasonStatsCard } from './FaceitSkillTrack';
 import { VerifiedFaceitStatsCard } from './VerifiedFaceitStatsCard';
 import { VortexClanHub } from './VortexClanHub';
+import { VortexSquadRadar, SoloGrinder, AVAILABLE_SOLO_GRINDERS } from './VortexSquadRadar';
 import { 
   getFaceitOrganizerConfig, 
   saveFaceitOrganizerConfig, 
@@ -133,8 +134,10 @@ interface PartySlotMember {
   verification?: VerificationType;
   flag?: string;
   code?: string;
+  countryCode?: string;
   countryName?: string;
   matches?: number;
+  role?: string;
 }
 
 interface ComingSoonData {
@@ -1236,6 +1239,153 @@ export const VortexDashboard: React.FC<VortexDashboardProps> = ({
     return teamRosterCount >= 5;
   }, [teamRosterCount]);
 
+  // Tactical Player Dossier Modal State (Option 4)
+  const [selectedDossierPlayer, setSelectedDossierPlayer] = useState<PlatformRankingPlayer | null>(null);
+
+  // Interactive Squad Radar Handlers (Option 2)
+  const handleRecruitToSquad = (player: SoloGrinder) => {
+    try {
+      const saved = localStorage.getItem('vortex_user_clan_data');
+      let clan = saved ? JSON.parse(saved) : null;
+      if (!clan) {
+        clan = {
+          name: `${currentClanTag || 'CC'} Competitive Squad`,
+          tag: currentClanTag || 'CC',
+          logo: '/images/clan_badges/badge_caliber_lime.svg',
+          captainId: 'current-user',
+          captainName: currentGamerTag,
+          members: [
+            { id: '1', name: currentGamerTag, role: 'IGL / Captain', isCaptain: true, isUser: true, level: currentUserLevel, elo: currentUserElo, avatar: currentAvatarUrl }
+          ],
+          stats: { matches: 0, wins: 0, losses: 0, winrate: '0%', avgElo: 2150, tournamentsWon: 0, streak: 0 }
+        };
+      }
+      if (!Array.isArray(clan.members)) clan.members = [];
+      if (clan.members.length >= 5) {
+        setDashboardToast('⚠️ Squad already has 5 players (full 5-stack).');
+        return;
+      }
+      const newMember = {
+        id: player.id,
+        name: player.name,
+        role: player.role,
+        level: player.level,
+        elo: player.elo,
+        avatar: player.avatar,
+        countryCode: player.countryCode,
+        isCaptain: false,
+        isUser: false
+      };
+      clan.members.push(newMember);
+      localStorage.setItem('vortex_user_clan_data', JSON.stringify(clan));
+      setClanRevision(prev => prev + 1);
+
+      // Also update partySlots
+      const emptyPartyIdx = partySlots.findIndex(s => s === null);
+      if (emptyPartyIdx !== -1) {
+        const nextParty = [...partySlots];
+        nextParty[emptyPartyIdx] = {
+          id: player.id,
+          name: player.name,
+          role: player.role,
+          level: player.level,
+          elo: player.elo,
+          avatar: player.avatar,
+          countryCode: player.countryCode
+        };
+        setPartySlots(nextParty);
+      }
+
+      if (clan.members.length >= 5) {
+        sound.playTournamentVictory();
+        setDashboardToast(`🎉 5-Stack Completed (5/5)! [${clan.tag}] is now eligible for official tournaments!`);
+      } else {
+        sound.playPartyInvite();
+        setDashboardToast(`✓ ${player.name} (${player.role}) recruited to [${clan.tag}] squad (${clan.members.length}/5)!`);
+      }
+      setTimeout(() => setDashboardToast(null), 4000);
+    } catch (e) {
+      console.error(e);
+    }
+  };
+
+  const handleRemoveFromSquad = (playerId: string) => {
+    try {
+      const saved = localStorage.getItem('vortex_user_clan_data');
+      if (!saved) return;
+      const clan = JSON.parse(saved);
+      if (!Array.isArray(clan.members)) return;
+      clan.members = clan.members.filter((m: any) => m.id !== playerId && !m.isCaptain && !m.isUser);
+      localStorage.setItem('vortex_user_clan_data', JSON.stringify(clan));
+      setClanRevision(prev => prev + 1);
+
+      // Also update partySlots
+      setPartySlots(prev => prev.map(m => m && m.id === playerId ? null : m));
+      setDashboardToast('Teammate removed from squad.');
+      setTimeout(() => setDashboardToast(null), 3000);
+    } catch (e) {}
+  };
+
+  const handleAutoFillSquad = () => {
+    try {
+      const saved = localStorage.getItem('vortex_user_clan_data');
+      let clan = saved ? JSON.parse(saved) : null;
+      if (!clan) {
+        clan = {
+          name: `${currentClanTag || 'CC'} Competitive Squad`,
+          tag: currentClanTag || 'CC',
+          logo: '/images/clan_badges/badge_caliber_lime.svg',
+          captainId: 'current-user',
+          captainName: currentGamerTag,
+          members: [
+            { id: '1', name: currentGamerTag, role: 'IGL / Captain', isCaptain: true, isUser: true, level: currentUserLevel, elo: currentUserElo, avatar: currentAvatarUrl }
+          ],
+          stats: { matches: 0, wins: 0, losses: 0, winrate: '0%', avgElo: 2150, tournamentsWon: 0, streak: 0 }
+        };
+      }
+      if (!Array.isArray(clan.members)) clan.members = [];
+      const currentMemberIds = new Set((clan.members || []).map((m: any) => m.id));
+      for (const player of AVAILABLE_SOLO_GRINDERS) {
+        if (clan.members.length >= 5) break;
+        if (!currentMemberIds.has(player.id)) {
+          clan.members.push({
+            id: player.id,
+            name: player.name,
+            role: player.role,
+            level: player.level,
+            elo: player.elo,
+            avatar: player.avatar,
+            countryCode: player.countryCode,
+            isCaptain: false,
+            isUser: false
+          });
+        }
+      }
+      localStorage.setItem('vortex_user_clan_data', JSON.stringify(clan));
+      setClanRevision(prev => prev + 1);
+
+      // Sync partySlots
+      const newPartySlots: (PartySlotMember | null)[] = [null, null, null, null, null];
+      clan.members.forEach((m: any, idx: number) => {
+        if (idx < 5) {
+          newPartySlots[idx] = {
+            id: m.id,
+            name: m.name,
+            role: m.role,
+            level: m.level || 9,
+            elo: m.elo || 2000,
+            avatar: m.avatar,
+            countryCode: m.countryCode
+          };
+        }
+      });
+      setPartySlots(newPartySlots);
+      sound.playTournamentVictory();
+      setDashboardToast(`🎉 Squad Auto-Filled with 5 verified solo grinders! 5-stack unlocked.`);
+      setTimeout(() => setDashboardToast(null), 4000);
+    } catch (e) {}
+  };
+
   // Tournament Bracket Simulation & Match Engine State
   const [bracketStates, setBracketStates] = useState<Record<string, {
     stage: 'qf' | 'sf' | 'final' | 'champion';
@@ -2017,12 +2167,7 @@ export const VortexDashboard: React.FC<VortexDashboardProps> = ({
 
   const handleViewPlayerProfile = (p: PlatformRankingPlayer) => {
     sound.playSelect();
-    if (p.isUser) {
-      setViewedPlayer(null);
-    } else {
-      setViewedPlayer(p);
-    }
-    setActiveTab('profile');
+    setSelectedDossierPlayer(p);
   };
   const [sidebarSearchQuery, setSidebarSearchQuery] = useState('');
   const [sidebarSearchOpen, setSidebarSearchOpen] = useState(false);
@@ -2197,8 +2342,8 @@ export const VortexDashboard: React.FC<VortexDashboardProps> = ({
     setIsQueuing(false);
     setMatchFoundModal(true);
     setUserHasAccepted(false);
-    setMatchReadyCountdown(60);
-    sound.playNotification();
+    setMatchReadyCountdown(30);
+    sound.playMatchFound();
 
     // 1. Generate strictly balanced match based on active party members & user ELO
     const activePartyMembers = partySlots.filter((m): m is PartySlotMember => m !== null);
@@ -3038,10 +3183,21 @@ export const VortexDashboard: React.FC<VortexDashboardProps> = ({
                   <div className="flex items-center gap-2">
                     <button
                       onClick={() => {
+                        sound.playMatchFound();
+                        triggerMatchFound();
+                      }}
+                      className="px-3.5 py-1.5 rounded-xl bg-amber-500/15 hover:bg-amber-500/25 border border-amber-500/40 text-amber-300 hover:text-white font-bold transition flex items-center gap-1.5 shadow-sm cursor-pointer text-xs"
+                      title="Test CS2 5v5 Match Ready Check (30s Acceptance Phase)"
+                    >
+                      <Bell className="w-3.5 h-3.5 text-amber-400" />
+                      <span>TEST READY CHECK</span>
+                    </button>
+                    <button
+                      onClick={() => {
                         sound.playSelect();
                         setIsMatchRoomOpen(true);
                       }}
-                      className="px-4 py-1.5 rounded-xl bg-[#A3E635]/15 hover:bg-[#A3E635]/25 border border-[#A3E635]/40 text-[#A3E635] hover:text-white font-bold transition flex items-center gap-2 shadow-sm hover:shadow-[0_0_15px_rgba(163,230,53,0.3)] cursor-pointer"
+                      className="px-4 py-1.5 rounded-xl bg-[#A3E635]/15 hover:bg-[#A3E635]/25 border border-[#A3E635]/40 text-[#A3E635] hover:text-white font-bold transition flex items-center gap-2 shadow-sm hover:shadow-[0_0_15px_rgba(163,230,53,0.3)] cursor-pointer text-xs"
                       title="Enter CS2 Match Room with Active Duty Map Veto"
                     >
                       <Radio className="w-3.5 h-3.5 animate-pulse text-[#A3E635]" />
@@ -3872,6 +4028,27 @@ export const VortexDashboard: React.FC<VortexDashboardProps> = ({
                   </div>
                 </div>
 
+              </div>
+
+              {/* INTERACTIVE TEAM FINDER // SQUAD RADAR MODULE */}
+              <div className="mt-6">
+                <VortexSquadRadar
+                  currentGamerTag={currentGamerTag}
+                  currentClanTag={currentClanTag}
+                  members={userClanData.members.map((m: any) => ({
+                    id: m.id,
+                    name: m.name,
+                    role: m.role || 'Player',
+                    level: m.level || 9,
+                    elo: m.elo || 2000,
+                    avatar: m.avatar || 'https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=80',
+                    countryCode: m.countryCode || 'XK',
+                    isCaptain: m.isCaptain
+                  }))}
+                  onRecruit={handleRecruitToSquad}
+                  onRemove={handleRemoveFromSquad}
+                  onAutoFill5Stack={handleAutoFillSquad}
+                />
               </div>
             </div>
           )}
@@ -5480,6 +5657,38 @@ export const VortexDashboard: React.FC<VortexDashboardProps> = ({
                     <p className="text-xs text-[#94A3B8] mt-1">
                       Official competitive leaderboard of registered players on our platform • Your Standing: <strong className="text-white">{currentUserMatches > 0 ? `${userPlatformRank} (${currentUserElo.toLocaleString()} ELO)` : 'Unranked (800 ELO • 0 Matches)'}</strong> (Click any player to view full profile)
                     </p>
+                  </div>
+                </div>
+
+                {/* SEASON 1 CASH PRIZE LEADERBOARD POOL */}
+                <div className="p-5 rounded-2xl bg-gradient-to-r from-[#18210C] via-[#10151E] to-[#0A0D14] border border-[#A3E635]/30 relative overflow-hidden text-left flex flex-col md:flex-row items-start md:items-center justify-between gap-4 shadow-xl">
+                  <div className="space-y-1.5 z-10">
+                    <div className="flex items-center gap-2">
+                      <span className="px-2.5 py-0.5 rounded-full text-[10px] font-mono font-black uppercase text-[#A3E635] bg-[#A3E635]/15 border border-[#A3E635]/40 flex items-center gap-1.5 shadow-[0_0_12px_rgba(163,230,53,0.3)]">
+                        <Trophy className="w-3.5 h-3.5 fill-[#A3E635]" />
+                        SEASON 1 CASH POOL: €5,000
+                      </span>
+                      <span className="text-[10px] font-mono text-amber-400 bg-amber-500/10 border border-amber-500/30 px-2 py-0.5 rounded">
+                        Ends in: 14d 08h 32m
+                      </span>
+                    </div>
+                    <h3 className="font-display font-black text-white text-lg tracking-wide uppercase">
+                      OFFICIAL EUROPEAN COMPETITIVE CASH CIRCUIT
+                    </h3>
+                    <p className="text-xs font-mono text-slate-300">
+                      Cash rewards automatically credited to Caliber Wallet upon season finale:
+                      <strong className="text-amber-400 ml-1">1st: €2,500</strong> • <strong className="text-slate-300">2nd: €1,200</strong> • <strong className="text-amber-600">3rd: €600</strong> • <strong className="text-slate-400">4th-10th: €100 each</strong>
+                    </p>
+                  </div>
+                  <div className="shrink-0 flex items-center gap-2.5 z-10">
+                    <div className="p-3 rounded-xl bg-black/50 border border-white/10 text-center min-w-[100px]">
+                      <span className="text-[10px] font-mono text-slate-400 block uppercase">Your Standing</span>
+                      <span className="font-display font-black text-sm text-[#A3E635]">{userPlatformRank}</span>
+                    </div>
+                    <div className="p-3 rounded-xl bg-black/50 border border-white/10 text-center min-w-[100px]">
+                      <span className="text-[10px] font-mono text-slate-400 block uppercase">Seasonal ELO</span>
+                      <span className="font-display font-black text-sm text-white">{currentUserMatches > 0 ? currentUserElo : 800}</span>
+                    </div>
                   </div>
                 </div>
 
@@ -8216,7 +8425,7 @@ export const VortexDashboard: React.FC<VortexDashboardProps> = ({
                 <div>
                   <span className="font-bold text-rose-300 block">⛔ INCOMPLETE ROSTER — 5-STACK STRICTLY REQUIRED</span>
                   <p className="text-[11px] text-slate-300 mt-0.5">
-                    Your team currently has {teamRosterCount}/5 players. Official tournament entry requires exactly 5 confirmed starting players. Please recruit or complete your 5-stack in Teams Hub.
+                    Your team currently has {teamRosterCount}/5 players. Official tournament entry requires exactly 5 confirmed starting players. Recruit below or auto-fill with verified solo grinders.
                   </p>
                 </div>
               </div>
@@ -8243,6 +8452,30 @@ export const VortexDashboard: React.FC<VortexDashboardProps> = ({
                     Official Team Captain is <strong>{userClanData.captainName}</strong>. Your role: {currentUserRole}. Only the captain can enroll and lock this squad.
                   </p>
                 </div>
+              </div>
+            )}
+
+            {/* IN-MODAL QUICK SQUAD RADAR TO FILL 5-STACK */}
+            {!isFull5Stack && (
+              <div className="pt-1">
+                <VortexSquadRadar
+                  currentGamerTag={currentGamerTag}
+                  currentClanTag={currentClanTag}
+                  members={userClanData.members.map((m: any) => ({
+                    id: m.id,
+                    name: m.name,
+                    role: m.role || 'Player',
+                    level: m.level || 9,
+                    elo: m.elo || 2000,
+                    avatar: m.avatar || 'https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=80',
+                    countryCode: m.countryCode || 'XK',
+                    isCaptain: m.isCaptain
+                  }))}
+                  onRecruit={handleRecruitToSquad}
+                  onRemove={handleRemoveFromSquad}
+                  onAutoFill5Stack={handleAutoFillSquad}
+                  compact={true}
+                />
               </div>
             )}
 
@@ -8458,13 +8691,12 @@ export const VortexDashboard: React.FC<VortexDashboardProps> = ({
                     <button
                       type="button"
                       onClick={() => {
-                        setSelectedRegisterTourney(null);
-                        setActiveTab('teams');
+                        handleAutoFillSquad();
                       }}
-                      className="w-full sm:w-auto px-6 py-2.5 rounded-xl bg-gradient-to-r from-rose-600 to-rose-700 hover:brightness-110 text-white font-display font-black text-xs uppercase tracking-wider transition shadow-lg cursor-pointer flex items-center justify-center gap-2 active:scale-95"
+                      className="w-full sm:w-auto px-6 py-2.5 rounded-xl bg-gradient-to-r from-amber-500 to-[#A3E635] hover:brightness-110 text-slate-950 font-display font-black text-xs uppercase tracking-wider transition shadow-lg cursor-pointer flex items-center justify-center gap-2 active:scale-95"
                     >
-                      <Users className="w-4 h-4 text-white" />
-                      <span>Complete 5-Stack in Teams Hub ({teamRosterCount}/5) →</span>
+                      <Zap className="w-4 h-4 fill-slate-950 text-slate-950" />
+                      <span>Auto-Fill 5-Stack ({teamRosterCount}/5) →</span>
                     </button>
                   ) : tournamentPaymentMethod === 'wallet' && !hasEnoughWallet ? (
                     <button
@@ -9587,6 +9819,202 @@ export const VortexDashboard: React.FC<VortexDashboardProps> = ({
           }}
           onClose={() => setIsMatchRoomOpen(false)}
         />
+      )}
+
+      {/* ======================================================== */}
+      {/* CS2 TACTICAL PLAYER DOSSIER MODAL (OPTION 4)             */}
+      {/* ======================================================== */}
+      {selectedDossierPlayer && (
+        <div
+          onClick={() => {
+            sound.playClick();
+            setSelectedDossierPlayer(null);
+          }}
+          className="fixed inset-0 z-[140] bg-black/85 backdrop-blur-md flex items-center justify-center p-4 animate-in fade-in duration-200 cursor-pointer overflow-y-auto"
+        >
+          <div
+            onClick={(e) => e.stopPropagation()}
+            className="w-full max-w-2xl bg-[#0C1019] border border-[#252E42] rounded-3xl p-6 sm:p-7 shadow-2xl space-y-6 text-left relative overflow-hidden cursor-default my-auto max-h-[92vh] overflow-y-auto"
+          >
+            {/* Header / Player Info */}
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-[#1E2638] pb-5">
+              <div className="flex items-center gap-4">
+                <img
+                  src={selectedDossierPlayer.avatar}
+                  alt={selectedDossierPlayer.tag}
+                  className="w-16 h-16 rounded-2xl object-cover border-2 border-[#A3E635]/60 shadow-lg shadow-[#A3E635]/20"
+                />
+                <div>
+                  <div className="flex items-center gap-2 flex-wrap">
+                    <span className="font-display font-black text-xl text-white">
+                      {selectedDossierPlayer.tag}
+                    </span>
+                    {selectedDossierPlayer.clanTag && (
+                      <span className="px-2 py-0.5 rounded text-[11px] font-mono font-bold bg-amber-500/15 text-amber-400 border border-amber-500/30">
+                        [{selectedDossierPlayer.clanTag}]
+                      </span>
+                    )}
+                    <CountryFlag code={selectedDossierPlayer.code || 'XK'} name={selectedDossierPlayer.country} size="xs" />
+                  </div>
+                  <div className="flex items-center gap-2.5 text-xs font-mono text-slate-400 mt-1">
+                    <span className="text-white font-bold">{selectedDossierPlayer.role || 'CS2 Competitor'}</span>
+                    <span>•</span>
+                    <span className="text-amber-400 font-bold">Lvl {selectedDossierPlayer.levelNum} ({selectedDossierPlayer.elo} ELO)</span>
+                    <span>•</span>
+                    <span className="text-emerald-400 font-bold flex items-center gap-1">
+                      <ShieldCheck className="w-3.5 h-3.5" />
+                      Ring-0 AC Active ✓
+                    </span>
+                  </div>
+                </div>
+              </div>
+
+              <div className="flex items-center gap-2">
+                <span className="px-3 py-1 rounded-xl bg-white/5 border border-white/10 font-mono text-xs text-slate-300">
+                  Global Rank: <strong className="text-[#A3E635]">{selectedDossierPlayer.rank}</strong>
+                </span>
+              </div>
+            </div>
+
+            {/* Combat Tactical Metrics Grid */}
+            <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 text-center">
+              <div className="p-3.5 rounded-2xl bg-[#121622] border border-[#232B3D]">
+                <span className="text-[10px] font-mono text-slate-400 block uppercase">Win Rate</span>
+                <span className="font-display font-black text-lg text-emerald-400 mt-0.5 block">
+                  {selectedDossierPlayer.winrate || '62.5%'}
+                </span>
+                <span className="text-[9px] font-mono text-slate-500">{selectedDossierPlayer.matches} Matches</span>
+              </div>
+
+              <div className="p-3.5 rounded-2xl bg-[#121622] border border-[#232B3D]">
+                <span className="text-[10px] font-mono text-slate-400 block uppercase">K/D Ratio</span>
+                <span className="font-display font-black text-lg text-white mt-0.5 block">
+                  {selectedDossierPlayer.kd || '1.24'}
+                </span>
+                <span className="text-[9px] font-mono text-slate-500">1.48 KDA</span>
+              </div>
+
+              <div className="p-3.5 rounded-2xl bg-[#121622] border border-[#232B3D]">
+                <span className="text-[10px] font-mono text-slate-400 block uppercase">Headshot %</span>
+                <span className="font-display font-black text-lg text-amber-400 mt-0.5 block">
+                  {selectedDossierPlayer.hs || '58.2%'}
+                </span>
+                <span className="text-[9px] font-mono text-slate-500">Precision Fragger</span>
+              </div>
+
+              <div className="p-3.5 rounded-2xl bg-[#121622] border border-[#232B3D]">
+                <span className="text-[10px] font-mono text-slate-400 block uppercase">Est. ADR</span>
+                <span className="font-display font-black text-lg text-[#A3E635] mt-0.5 block">
+                  {selectedDossierPlayer.kd ? (parseFloat(selectedDossierPlayer.kd) * 68).toFixed(1) : '86.4'}
+                </span>
+                <span className="text-[9px] font-mono text-slate-500">Dmg Per Round</span>
+              </div>
+            </div>
+
+            {/* Weapon Mastery & Playstyle */}
+            <div className="p-4 rounded-2xl bg-black/40 border border-white/5 space-y-3">
+              <span className="text-[10px] font-mono font-bold uppercase text-slate-400 tracking-wider block">
+                Primary CS2 Loadout & Weapon Mastery
+              </span>
+              <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 text-xs font-mono">
+                <div className="p-2.5 rounded-xl bg-white/[0.03] border border-white/5">
+                  <span className="font-bold text-white block">AK-47</span>
+                  <span className="text-[10px] text-slate-400">45% Usage • 64% HS</span>
+                </div>
+                <div className="p-2.5 rounded-xl bg-white/[0.03] border border-white/5">
+                  <span className="font-bold text-white block">AWP</span>
+                  <span className="text-[10px] text-slate-400">30% Usage • 88% Acc</span>
+                </div>
+                <div className="p-2.5 rounded-xl bg-white/[0.03] border border-white/5">
+                  <span className="font-bold text-white block">M4A1-S</span>
+                  <span className="text-[10px] text-slate-400">15% Usage • 52% HS</span>
+                </div>
+                <div className="p-2.5 rounded-xl bg-white/[0.03] border border-white/5">
+                  <span className="font-bold text-white block">Desert Eagle</span>
+                  <span className="text-[10px] text-slate-400">10% Usage • 76% HS</span>
+                </div>
+              </div>
+            </div>
+
+            {/* Recent Match History (5 Official Matches) */}
+            <div className="space-y-2">
+              <div className="flex items-center justify-between">
+                <span className="text-[10px] font-mono font-bold uppercase text-slate-400 tracking-wider">
+                  Recent CS2 Competitive Matches
+                </span>
+                <span className="text-[10px] font-mono text-[#A3E635]">Valve CS2 Sub-Tick Verified</span>
+              </div>
+              <div className="space-y-1.5 max-h-44 overflow-y-auto pr-1">
+                {[
+                  { map: 'Mirage', score: '13 - 7', win: true, kda: '23/12/4', rating: '1.38', eloDelta: '+25' },
+                  { map: 'Inferno', score: '13 - 11', win: true, kda: '21/16/6', rating: '1.24', eloDelta: '+24' },
+                  { map: 'Nuke', score: '9 - 13', win: false, kda: '16/17/3', rating: '0.98', eloDelta: '-22' },
+                  { map: 'Anubis', score: '13 - 8', win: true, kda: '25/14/5', rating: '1.42', eloDelta: '+26' },
+                  { map: 'Dust II', score: '13 - 5', win: true, kda: '19/8/2', rating: '1.45', eloDelta: '+25' }
+                ].map((m, idx) => (
+                  <div
+                    key={idx}
+                    className="p-2.5 rounded-xl bg-[#121622] border border-[#232B3D] flex items-center justify-between text-xs font-mono"
+                  >
+                    <div className="flex items-center gap-2.5">
+                      <span className={`w-2 h-2 rounded-full ${m.win ? 'bg-emerald-400' : 'bg-rose-400'}`} />
+                      <span className="font-bold text-white">{m.map}</span>
+                      <span className={m.win ? 'text-emerald-400 font-bold' : 'text-rose-400 font-bold'}>{m.score}</span>
+                    </div>
+                    <div className="flex items-center gap-3 text-slate-400 text-[11px]">
+                      <span>{m.kda}</span>
+                      <span className="text-white font-bold">{m.rating} Rating</span>
+                      <span className={m.win ? 'text-emerald-400 font-bold' : 'text-rose-400'}>{m.eloDelta} ELO</span>
+                      <button
+                        onClick={() => {
+                          sound.playClick();
+                          setDashboardToast('Downloading GOTV Demo (.dem.gz)...');
+                          setTimeout(() => setDashboardToast(null), 2500);
+                        }}
+                        className="px-2 py-0.5 rounded bg-white/5 hover:bg-white/10 text-slate-300 text-[10px] transition cursor-pointer"
+                        title="Download GOTV Match Demo"
+                      >
+                        Demo ↓
+                      </button>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+
+            {/* Bottom Actions */}
+            <div className="pt-3 border-t border-[#1E2638] flex items-center justify-between">
+              <button
+                type="button"
+                onClick={() => {
+                  sound.playClick();
+                  setSelectedDossierPlayer(null);
+                }}
+                className="px-5 py-2.5 rounded-xl bg-white/5 hover:bg-white/10 text-slate-300 font-mono text-xs transition cursor-pointer"
+              >
+                Close Dossier
+              </button>
+
+              <button
+                type="button"
+                onClick={() => {
+                  sound.playSelect();
+                  const target = selectedDossierPlayer;
+                  setSelectedDossierPlayer(null);
+                  if (target.isUser) {
+                    setViewedPlayer(null);
+                  } else {
+                    setViewedPlayer(target);
+                  }
+                  setActiveTab('profile');
+                }}
+                className="px-5 py-2.5 rounded-xl bg-[#A3E635] hover:bg-[#bef264] text-slate-950 font-mono font-black text-xs uppercase tracking-wider transition cursor-pointer shadow-md"
+              >
+                Open Full Career Profile →
+              </button>
+            </div>
+          </div>
+        </div>
       )}
 
       {/* ======================================================== */}
