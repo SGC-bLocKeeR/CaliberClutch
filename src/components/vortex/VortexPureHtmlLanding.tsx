@@ -187,7 +187,7 @@ export const VortexPureHtmlLanding: React.FC<VortexPureHtmlLandingProps> = ({
       {/* 1. TOP NAVIGATION BAR (100% Real HTML & Responsive)      */}
       {/* ======================================================== */}
       <header className="w-full border-b border-white/[0.06] bg-[#07080B]/90 backdrop-blur-md sticky top-0 z-50">
-        <div className="max-w-[1720px] mx-auto px-4 sm:px-8 lg:px-12 h-18 flex items-center justify-between gap-4">
+        <div className="w-full px-4 sm:px-8 lg:px-12 xl:px-16 2xl:px-24 h-18 flex items-center justify-between gap-4">
           
           {/* Brand Logo & Live Player Counter */}
           <div className="flex items-center gap-4">
@@ -315,7 +315,7 @@ export const VortexPureHtmlLanding: React.FC<VortexPureHtmlLandingProps> = ({
           <div className="absolute inset-x-0 top-0 h-24 bg-gradient-to-b from-[#07080B]/80 to-transparent pointer-events-none z-10" />
         </div>
 
-        <div className="max-w-[1720px] mx-auto px-4 sm:px-8 lg:px-12 relative z-10 w-full">
+        <div className="w-full px-4 sm:px-8 lg:px-12 xl:px-16 2xl:px-24 relative z-10">
           <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-center">
             
             {/* ---------------------------------------------------- */}
@@ -512,7 +512,7 @@ export const VortexPureHtmlLanding: React.FC<VortexPureHtmlLandingProps> = ({
         {/* Ambient Glow */}
         <div className="absolute left-1/4 top-1/3 w-96 h-96 bg-[#A3E635]/5 rounded-full blur-3xl pointer-events-none" />
 
-        <div className="w-full max-w-[1720px] mx-auto px-4 sm:px-8 lg:px-12">
+        <div className="w-full px-4 sm:px-8 lg:px-12 xl:px-16 2xl:px-24">
           <div className="w-full grid grid-cols-1 lg:grid-cols-12 gap-10 lg:gap-14 items-center">
             
             {/* Left Column: Clean Editorial Headline & Steps (Open, no card box) */}
@@ -621,7 +621,7 @@ export const VortexPureHtmlLanding: React.FC<VortexPureHtmlLandingProps> = ({
         {/* Ambient Glow */}
         <div className="absolute right-1/4 bottom-1/4 w-96 h-96 bg-[#A3E635]/5 rounded-full blur-3xl pointer-events-none" />
 
-        <div className="w-full max-w-[1720px] mx-auto px-4 sm:px-8 lg:px-12 space-y-10">
+        <div className="w-full px-4 sm:px-8 lg:px-12 xl:px-16 2xl:px-24 space-y-10">
 
             {/* Tactical Bridge Bar */}
             <div className="flex flex-wrap items-center justify-between border border-[#1E2612]/90 rounded-2xl bg-[#0C1107]/80 backdrop-blur-md px-6 py-3.5 text-xs font-mono text-[#94A3B8] shadow-lg shadow-black/40">
@@ -745,7 +745,7 @@ export const VortexPureHtmlLanding: React.FC<VortexPureHtmlLandingProps> = ({
       {/* 4. VORTEX PREMIUM & VIP PASS TIERS + PAYMENTS SHOWCASE    */}
       {/* ======================================================== */}
       <section className="w-full relative py-16 lg:py-24 overflow-hidden">
-        <div className="w-full max-w-[1720px] mx-auto px-4 sm:px-8 lg:px-12 space-y-16">
+        <div className="w-full px-4 sm:px-8 lg:px-12 xl:px-16 2xl:px-24 space-y-16">
           <div className="w-full flex flex-col items-center">
             
             <div className="text-center max-w-2xl mb-12">
@@ -1185,7 +1185,7 @@ export const VortexPureHtmlLanding: React.FC<VortexPureHtmlLandingProps> = ({
       {/* ======================================================== */}
       {/* 6.5 OFFICIAL ADVERTISER & SPONSOR SHOWCASE (100% ENGLISH) */}
       {/* ======================================================== */}
-      <section className="w-full max-w-[1720px] mx-auto px-4 sm:px-8 lg:px-12 py-8">
+      <section className="w-full px-4 sm:px-8 lg:px-12 xl:px-16 2xl:px-24 py-8">
         <VortexAdBanner placement="footer" />
       </section>
 
@@ -1193,7 +1193,7 @@ export const VortexPureHtmlLanding: React.FC<VortexPureHtmlLandingProps> = ({
       {/* 7. FOOTER                                                */}
       {/* ======================================================== */}
       <footer className="w-full border-t border-white/[0.08] bg-[#050608] py-12 mt-auto">
-        <div className="max-w-[1720px] mx-auto px-4 sm:px-8 lg:px-12 flex flex-col md:flex-row items-center justify-between gap-6">
+        <div className="w-full px-4 sm:px-8 lg:px-12 xl:px-16 2xl:px-24 flex flex-col md:flex-row items-center justify-between gap-6">
           <div className="flex flex-col items-center md:items-start gap-2">
             <VortexBrandLogo />
             <p className="text-xs text-slate-500 font-mono mt-1">
