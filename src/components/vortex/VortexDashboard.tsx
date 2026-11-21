@@ -7214,7 +7214,7 @@ export const VortexDashboard: React.FC<VortexDashboardProps> = ({
                     sound.playSelect();
                     setXsollaCheckoutItem({
                       id: 'sub-premium',
-                      sku: 'VTX-SUB-PREMIUM',
+                      sku: 'CC-SUB-PREMIUM',
                       title: 'Caliber Clutch Premium Membership (1 Month)',
                       description: 'Super Match 5v5 queue, strict ±250 ELO balance, captain map veto priority.',
                       amountEur: 5.99,
@@ -7277,7 +7277,7 @@ export const VortexDashboard: React.FC<VortexDashboardProps> = ({
                     sound.playSelect();
                     setXsollaCheckoutItem({
                       id: 'sub-vip',
-                      sku: 'VTX-SUB-VIP',
+                      sku: 'CC-SUB-VIP',
                       title: 'Caliber Clutch VIP Elite Pass (1 Month)',
                       description: 'VIP Match queue, ultra-strict ±150 ELO, automated GOTV demo recording, 2x Points.',
                       amountEur: 12.99,
