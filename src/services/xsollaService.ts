@@ -17,7 +17,7 @@ export interface XsollaOrderItem {
   title: string;
   description: string;
   amountEur: number;
-  type: 'wallet_topup' | 'membership_premium' | 'membership_vip';
+  type: 'wallet_topup' | 'membership_premium' | 'membership_vip' | 'tournament_entry';
   currency?: string;
   sku?: string;
 }

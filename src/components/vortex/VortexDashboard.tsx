@@ -62,6 +62,8 @@ import {
   RefreshCw,
   Globe,
   Key,
+  Wallet,
+  CreditCard,
   Image as ImageIcon
 } from 'lucide-react';
 import confetti from 'canvas-confetti';
@@ -79,7 +81,7 @@ import { XsollaOrderItem } from '../../services/xsollaService';
 import { VortexPartnersModal } from './VortexPartnersModal';
 import { VortexAdBanner } from './VortexAdBanner';
 import { VortexTopSponsorRibbon, VortexComingSoonDeals } from './VortexSponsorRibbon';
-import { getVortexWalletBalance, creditVortexWalletBalance } from '../../services/skinDeliveryService';
+import { getVortexWalletBalance, creditVortexWalletBalance, deductVortexWalletBalance } from '../../services/skinDeliveryService';
 import { FaceitSkillTrack, FaceitSeasonStatsCard } from './FaceitSkillTrack';
 import { VerifiedFaceitStatsCard } from './VerifiedFaceitStatsCard';
 import { VortexClanHub } from './VortexClanHub';
@@ -1123,6 +1125,7 @@ export const VortexDashboard: React.FC<VortexDashboardProps> = ({
   const [faceitSavingSuccess, setFaceitSavingSuccess] = useState<boolean>(false);
   const [selectedBracketTourney, setSelectedBracketTourney] = useState<any | null>(null);
   const [selectedRegisterTourney, setSelectedRegisterTourney] = useState<any | null>(null);
+  const [tournamentPaymentMethod, setTournamentPaymentMethod] = useState<'wallet' | 'xsolla'>('wallet');
   const [tourneyFilter, setTourneyFilter] = useState<'all' | 'live' | 'open' | 'registered'>('all');
   const [tourneySearchQuery, setTourneySearchQuery] = useState<string>('');
   const [captainDeniedModal, setCaptainDeniedModal] = useState<{
@@ -7511,6 +7514,22 @@ export const VortexDashboard: React.FC<VortexDashboardProps> = ({
               setUserMembershipTier('vip');
               confetti({ particleCount: 100, spread: 90, origin: { y: 0.6 } });
               setDashboardToast('👑 Payment Confirmed via Xsolla! Upgraded to VIP ELITE!');
+            } else if (res.item.type === 'tournament_entry') {
+              const tourneyTitle = res.item.sku || selectedRegisterTourney?.title || 'Tournament';
+              setRegisteredTourneys(prev => {
+                const next = Array.from(new Set([...prev, tourneyTitle]));
+                try {
+                  localStorage.setItem('vortex_registered_tournaments', JSON.stringify(next));
+                } catch (_) {}
+                return next;
+              });
+              setSelectedRegisterTourney(null);
+              confetti({ particleCount: 100, spread: 85, origin: { y: 0.6 } });
+              setDashboardToast(`✓ Pagesa e Buy-In (€${res.amountEur}) u krye me sukses! [${userClanData.tag}] u regjistrua në ${tourneyTitle}.`);
+            } else if (res.item.type === 'wallet_topup') {
+              creditVortexWalletBalance(res.amountEur);
+              confetti({ particleCount: 60, spread: 70, origin: { y: 0.6 } });
+              setDashboardToast(`✓ Kuleta u rimbush me sukses (+€${res.amountEur.toFixed(2)})!`);
             }
             setTimeout(() => setDashboardToast(null), 5000);
             setShowPremiumModal(false);
@@ -8177,63 +8196,197 @@ export const VortexDashboard: React.FC<VortexDashboardProps> = ({
                 </div>
               </div>
 
-              {/* Mandatory Buy-In Entry Fee Notice */}
-              <div className="p-3.5 rounded-2xl bg-amber-500/10 border border-amber-500/25 space-y-1.5 text-[11px]">
-                <div className="flex items-center justify-between text-amber-300 font-bold">
-                  <span className="flex items-center gap-1.5">
-                    <Coins className="w-3.5 h-3.5 text-amber-400" />
-                    Mandatory Team Buy-In Fee:
-                  </span>
-                  <span>€{selectedRegisterTourney?.entryFee || 25} / Team (€{((selectedRegisterTourney?.entryFee || 25) / 5).toFixed(0)} / player)</span>
-                </div>
-                <p className="text-[10px] text-slate-300">
-                  Prize pool distributed instantly via automated payout. 15% platform operator commission and 85% pure cash credited to winners' wallet upon grand final conclusion.
-                </p>
-              </div>
+              {/* INTERACTIVE TOURNAMENT BUY-IN & PAYMENT SECTION */}
+              {(() => {
+                const entryFee = Number(selectedRegisterTourney?.entryFee) || 25;
+                const hasEnoughWallet = vortexCoinsBalance >= entryFee;
+
+                return (
+                  <div className="p-4 rounded-2xl bg-[#090C12] border border-[#202738] space-y-3.5">
+                    <div className="flex items-center justify-between border-b border-white/5 pb-2.5">
+                      <div className="flex items-center gap-2">
+                        <Coins className="w-4 h-4 text-amber-400" />
+                        <span className="font-bold text-white text-xs">Pagesa e Pjesëmarrjes (Team Buy-In Fee)</span>
+                      </div>
+                      <div className="text-right">
+                        <div className="font-display font-black text-amber-400 text-sm">€{entryFee} / Ekip</div>
+                        <div className="text-[10px] text-slate-400">€{(entryFee / 5).toFixed(0)} për lojtar (5v5)</div>
+                      </div>
+                    </div>
+
+                    {/* Kuleta e Llogarisë Status Bar */}
+                    <div className="p-2.5 rounded-xl bg-black/40 border border-white/5 flex items-center justify-between text-xs font-mono">
+                      <div className="flex items-center gap-2 text-slate-300">
+                        <Wallet className="w-4 h-4 text-[#A3E635]" />
+                        <span>Kuleta Yt (Caliber Wallet):</span>
+                      </div>
+                      <div className="flex items-center gap-2">
+                        <span className={`font-mono font-bold ${hasEnoughWallet ? 'text-[#A3E635]' : 'text-amber-400'}`}>
+                          €{vortexCoinsBalance.toFixed(2)}
+                        </span>
+                        {hasEnoughWallet ? (
+                          <span className="px-1.5 py-0.5 rounded text-[9px] font-bold bg-emerald-500/20 text-emerald-400">
+                            ✓ Mjafton
+                          </span>
+                        ) : (
+                          <span className="px-1.5 py-0.5 rounded text-[9px] font-bold bg-amber-500/20 text-amber-300">
+                            Mungojnë €{(entryFee - vortexCoinsBalance).toFixed(2)}
+                          </span>
+                        )}
+                      </div>
+                    </div>
+
+                    {/* Zgjedhja e Metodës së Pagesës */}
+                    <div className="space-y-1.5">
+                      <label className="text-[10px] text-slate-400 uppercase tracking-wider block">
+                        Zgjidh Mënyrën se si dëshiron ta bësh Pagesën:
+                      </label>
+                      <div className="grid grid-cols-2 gap-2.5">
+                        {/* Opsioni 1: Caliber Wallet */}
+                        <button
+                          type="button"
+                          onClick={() => setTournamentPaymentMethod('wallet')}
+                          className={`p-3 rounded-xl border text-left transition cursor-pointer flex flex-col justify-between ${
+                            tournamentPaymentMethod === 'wallet'
+                              ? 'bg-[#121A0E] border-[#A3E635] shadow-[0_0_15px_rgba(163,230,53,0.15)]'
+                              : 'bg-[#10141E] border-white/10 hover:border-white/20'
+                          }`}
+                        >
+                          <div className="flex items-center justify-between">
+                            <Wallet className={`w-4 h-4 ${tournamentPaymentMethod === 'wallet' ? 'text-[#A3E635]' : 'text-slate-400'}`} />
+                            <span className={`w-2 h-2 rounded-full ${tournamentPaymentMethod === 'wallet' ? 'bg-[#A3E635]' : 'bg-transparent border border-slate-600'}`} />
+                          </div>
+                          <div className="mt-2">
+                            <div className="font-bold text-white text-[11px]">Caliber Wallet</div>
+                            <div className="text-[10px] text-slate-400">Zbritje nga bilanci yt</div>
+                          </div>
+                        </button>
+
+                        {/* Opsioni 2: Kartelë / Crypto / PayPal via Xsolla */}
+                        <button
+                          type="button"
+                          onClick={() => setTournamentPaymentMethod('xsolla')}
+                          className={`p-3 rounded-xl border text-left transition cursor-pointer flex flex-col justify-between ${
+                            tournamentPaymentMethod === 'xsolla'
+                              ? 'bg-[#121A0E] border-[#A3E635] shadow-[0_0_15px_rgba(163,230,53,0.15)]'
+                              : 'bg-[#10141E] border-white/10 hover:border-white/20'
+                          }`}
+                        >
+                          <div className="flex items-center justify-between">
+                            <CreditCard className={`w-4 h-4 ${tournamentPaymentMethod === 'xsolla' ? 'text-[#A3E635]' : 'text-slate-400'}`} />
+                            <span className={`w-2 h-2 rounded-full ${tournamentPaymentMethod === 'xsolla' ? 'bg-[#A3E635]' : 'bg-transparent border border-slate-600'}`} />
+                          </div>
+                          <div className="mt-2">
+                            <div className="font-bold text-white text-[11px]">Kartelë / Crypto / PayPal</div>
+                            <div className="text-[10px] text-slate-400">Pagesë direkte me Xsolla</div>
+                          </div>
+                        </button>
+                      </div>
+                    </div>
+
+                    {/* Sqarim mbi shpërndarjen e çmimit */}
+                    <div className="text-[10px] text-slate-400 leading-relaxed bg-black/30 p-2.5 rounded-xl border border-white/5">
+                      💡 <strong>Si funksionon pagesa:</strong> Kapiteni i ekipit autorizon tarifën e hyrjes (€{entryFee}). Fondi i mbledhur (85% e kuotave) shkon direkt në <strong>Fondin e Çmimit Cash</strong>, dhe shpërndahet automatikisht menjëherë pas Grand Finales.
+                    </div>
+                  </div>
+                );
+              })()}
             </div>
 
             {/* Modal Actions */}
-            <div className="pt-2 flex items-center justify-end gap-3">
-              <button
-                type="button"
-                onClick={() => setSelectedRegisterTourney(null)}
-                className="px-4 py-2 rounded-xl bg-white/5 hover:bg-white/10 text-xs font-mono text-slate-300 transition cursor-pointer"
-              >
-                Cancel
-              </button>
-              {isUserTeamCaptain ? (
-                <button
-                  type="button"
-                  onClick={() => {
-                    sound.playSelect();
-                    const tourneyTitle = selectedRegisterTourney.title;
-                    setRegisteredTourneys(prev => {
-                      const next = Array.from(new Set([...prev, tourneyTitle]));
-                      try {
-                        localStorage.setItem('vortex_registered_tournaments', JSON.stringify(next));
-                      } catch (_) {}
-                      return next;
-                    });
-                    setSelectedRegisterTourney(null);
-                    setDashboardToast(`✓ [${userClanData.tag}] u regjistrua me sukses në ${tourneyTitle} nga Kapiteni ${currentGamerTag}!`);
-                    setTimeout(() => setDashboardToast(null), 4000);
-                  }}
-                  className="px-6 py-2.5 rounded-xl bg-gradient-to-r from-[#84CC16] to-[#A3E635] hover:brightness-110 text-slate-950 font-display font-black text-xs uppercase tracking-wider transition shadow-lg cursor-pointer active:scale-95 flex items-center gap-2"
-                >
-                  <Crown className="w-4 h-4 text-slate-950" />
-                  <span>Confirm & Lock Roster (Captain)</span>
-                </button>
-              ) : (
-                <button
-                  type="button"
-                  disabled
-                  className="px-6 py-2.5 rounded-xl bg-slate-800 text-slate-500 font-display font-black text-xs uppercase tracking-wider cursor-not-allowed opacity-60 flex items-center gap-2"
-                >
-                  <Lock className="w-3.5 h-3.5 text-slate-500" />
-                  <span>Locked: Captain Only ({userClanData.captainName})</span>
-                </button>
-              )}
-            </div>
+            {(() => {
+              const entryFee = Number(selectedRegisterTourney?.entryFee) || 25;
+              const hasEnoughWallet = vortexCoinsBalance >= entryFee;
+
+              return (
+                <div className="pt-2 flex flex-col sm:flex-row items-center justify-end gap-3">
+                  <button
+                    type="button"
+                    onClick={() => setSelectedRegisterTourney(null)}
+                    className="w-full sm:w-auto px-4 py-2.5 rounded-xl bg-white/5 hover:bg-white/10 text-xs font-mono text-slate-300 transition cursor-pointer"
+                  >
+                    Cancel
+                  </button>
+
+                  {!isUserTeamCaptain ? (
+                    <button
+                      type="button"
+                      disabled
+                      className="w-full sm:w-auto px-6 py-2.5 rounded-xl bg-slate-800 text-slate-500 font-display font-black text-xs uppercase tracking-wider cursor-not-allowed opacity-60 flex items-center justify-center gap-2"
+                    >
+                      <Lock className="w-3.5 h-3.5 text-slate-500" />
+                      <span>Locked: Captain Only ({userClanData.captainName})</span>
+                    </button>
+                  ) : tournamentPaymentMethod === 'wallet' && !hasEnoughWallet ? (
+                    <button
+                      type="button"
+                      onClick={() => {
+                        sound.playSelect();
+                        setXsollaCheckoutItem({
+                          id: `topup-${Date.now()}`,
+                          title: 'Rimbush Kuletën për Turne',
+                          description: `Rimbushje kuletë për turneun ${selectedRegisterTourney.title} [${userClanData.tag}]`,
+                          amountEur: Math.max(10, entryFee - Math.floor(vortexCoinsBalance)),
+                          type: 'wallet_topup',
+                        });
+                      }}
+                      className="w-full sm:w-auto px-6 py-2.5 rounded-xl bg-gradient-to-r from-amber-500 to-amber-600 hover:brightness-110 text-slate-950 font-display font-black text-xs uppercase tracking-wider transition shadow-lg cursor-pointer flex items-center justify-center gap-2 active:scale-95"
+                    >
+                      <CreditCard className="w-4 h-4 text-slate-950" />
+                      <span>Rimbush Kuletën (+€{(entryFee - vortexCoinsBalance).toFixed(0)}) me Kartelë/Crypto</span>
+                    </button>
+                  ) : tournamentPaymentMethod === 'wallet' && hasEnoughWallet ? (
+                    <button
+                      type="button"
+                      onClick={() => {
+                        sound.playSelect();
+                        const deducted = deductVortexWalletBalance(entryFee);
+                        if (!deducted) {
+                          setDashboardToast('⚠️ Bilanci në kuletë nuk mjafton!');
+                          setTimeout(() => setDashboardToast(null), 3000);
+                          return;
+                        }
+                        const tourneyTitle = selectedRegisterTourney.title;
+                        setRegisteredTourneys(prev => {
+                          const next = Array.from(new Set([...prev, tourneyTitle]));
+                          try {
+                            localStorage.setItem('vortex_registered_tournaments', JSON.stringify(next));
+                          } catch (_) {}
+                          return next;
+                        });
+                        setSelectedRegisterTourney(null);
+                        confetti({ particleCount: 90, spread: 80, origin: { y: 0.6 } });
+                        setDashboardToast(`✓ Pagesa €${entryFee} u zbrit nga kuleta! [${userClanData.tag}] u regjistrua me sukses në ${tourneyTitle}.`);
+                        setTimeout(() => setDashboardToast(null), 5000);
+                      }}
+                      className="w-full sm:w-auto px-6 py-2.5 rounded-xl bg-gradient-to-r from-[#84CC16] to-[#A3E635] hover:brightness-110 text-slate-950 font-display font-black text-xs uppercase tracking-wider transition shadow-lg cursor-pointer active:scale-95 flex items-center justify-center gap-2"
+                    >
+                      <Crown className="w-4 h-4 text-slate-950" />
+                      <span>Paguaj €{entryFee} nga Kuleta & Kyç Formacionin</span>
+                    </button>
+                  ) : (
+                    <button
+                      type="button"
+                      onClick={() => {
+                        sound.playSelect();
+                        setXsollaCheckoutItem({
+                          id: `tourney-entry-${selectedRegisterTourney.id || Date.now()}`,
+                          title: `${selectedRegisterTourney.title} - Team Buy-In`,
+                          description: `Official 5v5 Tournament Buy-In Fee for [${userClanData.tag}]`,
+                          amountEur: entryFee,
+                          type: 'tournament_entry',
+                          sku: selectedRegisterTourney.title
+                        });
+                      }}
+                      className="w-full sm:w-auto px-6 py-2.5 rounded-xl bg-gradient-to-r from-emerald-500 to-teal-400 hover:brightness-110 text-slate-950 font-display font-black text-xs uppercase tracking-wider transition shadow-lg cursor-pointer active:scale-95 flex items-center justify-center gap-2"
+                    >
+                      <CreditCard className="w-4 h-4 text-slate-950" />
+                      <span>Vazhdo tek Pagesa me Kartelë / Crypto (€{entryFee}) →</span>
+                    </button>
+                  )}
+                </div>
+              );
+            })()}
           </div>
         </div>
       )}
