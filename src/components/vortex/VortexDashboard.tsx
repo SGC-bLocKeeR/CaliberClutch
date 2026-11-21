@@ -5017,14 +5017,25 @@ export const VortexDashboard: React.FC<VortexDashboardProps> = ({
                               </div>
 
                               {/* Auto-Calculated Entry Fees */}
-                              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 pt-1">
-                                <div className="p-3 rounded-xl bg-[#0B0E16] border border-[#252C3D] flex items-center justify-between text-xs">
-                                  <span className="text-slate-300 font-bold">Auto-Calculated Fee per Team:</span>
-                                  <span className="font-mono text-amber-300 font-black text-sm">€{feePerTeam} <span className="text-xs text-slate-400 font-normal">/ team</span></span>
+                              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                                <div>
+                                  <label className="text-[11px] text-slate-300 uppercase block mb-1.5 font-bold flex items-center justify-between">
+                                    <span>Auto-Calculated Fee per Team</span>
+                                    <span className="text-[10px] text-[#A3E635] font-normal">Auto-Synced</span>
+                                  </label>
+                                  <div className="w-full px-4 py-2.5 rounded-xl bg-[#0B0E16] border border-[#252C3D] text-amber-300 font-bold flex items-center justify-between text-sm font-mono">
+                                    <span>€{feePerTeam}</span>
+                                    <span className="text-xs text-slate-400 font-normal">€{feePerTeam} / team</span>
+                                  </div>
                                 </div>
-                                <div className="p-3 rounded-xl bg-[#0B0E16] border border-[#252C3D] flex items-center justify-between text-xs">
-                                  <span className="text-slate-300 font-bold">Calculated per Player (5v5 Lineup):</span>
-                                  <span className="font-mono text-emerald-400 font-black text-sm">€{feePerPlayer} <span className="text-xs text-slate-400 font-normal">/ player</span></span>
+                                <div>
+                                  <label className="text-[11px] text-slate-300 uppercase block mb-1.5 font-bold">
+                                    Calculated per Player (5v5 Lineup)
+                                  </label>
+                                  <div className="w-full px-4 py-2.5 rounded-xl bg-[#0B0E16] border border-[#252C3D] text-emerald-400 font-bold flex items-center justify-between text-sm font-mono">
+                                    <span>€{feePerPlayer}</span>
+                                    <span className="text-xs text-slate-400 font-normal">€{feePerPlayer} / player</span>
+                                  </div>
                                 </div>
                               </div>
 
@@ -8178,11 +8189,10 @@ export const VortexDashboard: React.FC<VortexDashboardProps> = ({
                           sound.playClick();
                           setRevealTournamentStreamIp(!revealTournamentStreamIp);
                         }}
-                        className="px-2.5 py-1 rounded-lg bg-white/5 hover:bg-white/10 text-cyan-300 hover:text-white text-xs font-mono flex items-center gap-1.5 cursor-pointer shrink-0 transition ml-2 border border-white/10"
+                        className="p-1.5 rounded-lg bg-white/5 hover:bg-white/10 text-cyan-300 hover:text-white transition cursor-pointer shrink-0 ml-2 border border-white/10"
                         title={revealTournamentStreamIp ? 'Hide Stream IP' : 'Reveal Stream IP'}
                       >
-                        {revealTournamentStreamIp ? <EyeOff className="w-3.5 h-3.5" /> : <Eye className="w-3.5 h-3.5" />}
-                        <span>{revealTournamentStreamIp ? 'Hide' : 'Reveal'}</span>
+                        {revealTournamentStreamIp ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
                       </button>
                     </div>
 

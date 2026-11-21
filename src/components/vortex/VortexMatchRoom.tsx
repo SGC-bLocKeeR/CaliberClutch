@@ -1793,11 +1793,10 @@ export const VortexMatchRoom: React.FC<VortexMatchRoomProps> = ({
                         sound.playClick();
                         setIsMatchIpRevealed(!isMatchIpRevealed);
                       }}
-                      className="px-2 py-1 rounded-lg bg-white/5 hover:bg-white/10 text-slate-300 hover:text-white text-[10px] font-mono flex items-center gap-1 cursor-pointer shrink-0 transition"
+                      className="p-1.5 rounded-lg bg-white/5 hover:bg-white/10 text-slate-300 hover:text-white transition cursor-pointer shrink-0"
                       title={isMatchIpRevealed ? 'Hide connection code' : 'Reveal connection code'}
                     >
-                      {isMatchIpRevealed ? <EyeOff className="w-3 h-3" /> : <Eye className="w-3 h-3" />}
-                      <span>{isMatchIpRevealed ? 'Hide' : 'Reveal'}</span>
+                      {isMatchIpRevealed ? <EyeOff className="w-3.5 h-3.5" /> : <Eye className="w-3.5 h-3.5" />}
                     </button>
                   </div>
 
@@ -1842,9 +1841,10 @@ export const VortexMatchRoom: React.FC<VortexMatchRoomProps> = ({
                           sound.playClick();
                           setIsStreamIpRevealed(!isStreamIpRevealed);
                         }}
-                        className="text-slate-400 hover:text-white text-[9px] underline cursor-pointer px-1"
+                        className="p-1 rounded-lg bg-white/5 hover:bg-white/10 text-purple-300 hover:text-white transition cursor-pointer"
+                        title={isStreamIpRevealed ? 'Hide stream feed' : 'Reveal stream feed'}
                       >
-                        {isStreamIpRevealed ? 'Hide' : 'Reveal'}
+                        {isStreamIpRevealed ? <EyeOff className="w-3 h-3" /> : <Eye className="w-3 h-3" />}
                       </button>
                       <button
                         onClick={() => {
