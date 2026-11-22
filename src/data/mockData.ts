@@ -273,8 +273,8 @@ export const INITIAL_TOURNAMENTS: Tournament[] = [
         id: 'v1',
         round: 'Semifinals',
         roundNumber: 1,
-        teamA: { id: 'vt1', name: 'Fnatic Challengers', tag: 'FNC.C', logo: '🦊', score: 2, seed: 1, winner: true },
-        teamB: { id: 'vt2', name: 'Karmine Corp Blue', tag: 'KCB', logo: '💙', score: 1, seed: 4, winner: false },
+        teamA: { id: 'vt1', name: 'Vanguard Challengers', tag: 'VNG.C', logo: '🦊', score: 2, seed: 1, winner: true },
+        teamB: { id: 'vt2', name: 'Eclipse Blue', tag: 'ECL.B', logo: '💙', score: 1, seed: 4, winner: false },
         time: 'Ended',
         status: 'finished'
       },
@@ -282,8 +282,8 @@ export const INITIAL_TOURNAMENTS: Tournament[] = [
         id: 'v2',
         round: 'Semifinals',
         roundNumber: 1,
-        teamA: { id: 'vt3', name: 'Sentinels Nova', tag: 'SEN.N', logo: '⚡', score: 2, seed: 2, winner: true },
-        teamB: { id: 'vt4', name: 'Paper Rex Prodigy', tag: 'PRX.P', logo: '🦖', score: 0, seed: 3, winner: false },
+        teamA: { id: 'vt3', name: 'Apex Nova', tag: 'APX.N', logo: '⚡', score: 2, seed: 2, winner: true },
+        teamB: { id: 'vt4', name: 'Titan Prodigy', tag: 'TTN.P', logo: '🦖', score: 0, seed: 3, winner: false },
         time: 'Ended',
         status: 'finished'
       },
@@ -291,8 +291,8 @@ export const INITIAL_TOURNAMENTS: Tournament[] = [
         id: 'v3',
         round: 'Grand Finals',
         roundNumber: 2,
-        teamA: { id: 'vt1', name: 'Fnatic Challengers', tag: 'FNC.C', logo: '🦊', score: 0, seed: 1 },
-        teamB: { id: 'vt3', name: 'Sentinels Nova', tag: 'SEN.N', logo: '⚡', score: 0, seed: 2 },
+        teamA: { id: 'vt1', name: 'Vanguard Challengers', tag: 'VNG.C', logo: '🦊', score: 0, seed: 1 },
+        teamB: { id: 'vt3', name: 'Apex Nova', tag: 'APX.N', logo: '⚡', score: 0, seed: 2 },
         time: 'Starts in 45m',
         status: 'upcoming'
       }

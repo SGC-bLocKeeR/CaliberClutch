@@ -1716,7 +1716,7 @@ export const VortexDashboard: React.FC<VortexDashboardProps> = ({
       });
     } catch {}
     setNotifications(prev => prev.map(n => n.id === id ? { ...n, read: true, actionStatus: 'accepted' } : n));
-    setDashboardToast('✓ Match Confirmed! IP copied: connect 185.122.54.12:27015');
+    setDashboardToast('✓ Match Confirmed! Server connection command copied to clipboard.');
     if (navigator.clipboard) {
       navigator.clipboard.writeText('connect 185.122.54.12:27015; password vortex').catch(() => {});
     }
@@ -7645,7 +7645,7 @@ export const VortexDashboard: React.FC<VortexDashboardProps> = ({
                                   if (navigator.clipboard) {
                                     navigator.clipboard.writeText('connect 185.122.54.12:27015; password vortex');
                                   }
-                                  setDashboardToast('Console command copied: connect 185.122.54.12:27015');
+                                  setDashboardToast('Console connection command copied to clipboard.');
                                 }}
                                 className="px-2.5 py-1 rounded-lg bg-emerald-500 hover:bg-emerald-400 text-slate-950 font-black text-[10px] font-mono transition cursor-pointer flex items-center gap-1 shadow-sm"
                               >
