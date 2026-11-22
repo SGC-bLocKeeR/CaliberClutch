@@ -418,7 +418,7 @@ const SUGGESTED_TEAMMATES: PartySlotMember[] = [
   {
     id: 'sener1',
     name: 'sener1',
-    tag: 'BNE',
+    tag: 'VNG',
     avatar: 'https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?auto=format&fit=crop&w=200&q=80',
     level: 10,
     elo: 2750,
@@ -430,7 +430,7 @@ const SUGGESTED_TEAMMATES: PartySlotMember[] = [
   {
     id: 'gxx-',
     name: 'gxx-',
-    tag: 'BNE',
+    tag: 'VNG',
     avatar: 'https://images.unsplash.com/photo-1570295999919-56ceb5ecca61?auto=format&fit=crop&w=200&q=80',
     level: 10,
     elo: 2690,
@@ -440,9 +440,9 @@ const SUGGESTED_TEAMMATES: PartySlotMember[] = [
     countryName: 'Kosovo'
   },
   {
-    id: 'karrigan_fan',
-    name: 'karrigan_fan',
-    tag: 'FAZE',
+    id: 'apex_sniper',
+    name: 'apex_sniper',
+    tag: 'VTX',
     avatar: 'https://images.unsplash.com/photo-1527980965255-d3b416303d12?auto=format&fit=crop&w=200&q=80',
     level: 8,
     elo: 1610,
@@ -454,7 +454,7 @@ const SUGGESTED_TEAMMATES: PartySlotMember[] = [
   {
     id: 'sinnopsyy',
     name: 'sinnopsyy',
-    tag: 'BNE',
+    tag: 'VNG',
     avatar: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?auto=format&fit=crop&w=200&q=80',
     level: 10,
     elo: 2810,
@@ -1164,13 +1164,13 @@ export const VortexDashboard: React.FC<VortexDashboardProps> = ({
   const getTourneyTeams = (tourneyKey: string) => {
     if (tourneyTeamsMap[tourneyKey]) return tourneyTeamsMap[tourneyKey];
     const initial = [
-      { id: 'tm-1', name: 'Bad News Eagles', tag: 'BNE', captain: 'SENER1', country: 'XK', elo: 2450, status: 'approved' as const, appliedAt: 'Today • 14:20' },
-      { id: 'tm-2', name: 'Guild Esports', tag: 'GUILD', captain: 'Draken', country: 'GB', elo: 2320, status: 'approved' as const, appliedAt: 'Today • 15:10' },
-      { id: 'tm-3', name: 'Monte Academy', tag: 'MONTE', captain: 'Woro2k', country: 'UA', elo: 2280, status: 'pending' as const, appliedAt: '12 mins ago' },
-      { id: 'tm-4', name: 'FaZe Clan Youth', tag: 'FAZE', captain: 'NeoCS', country: 'DE', elo: 2410, status: 'approved' as const, appliedAt: 'Today • 16:00' },
-      { id: 'tm-5', name: 'Fnatic Rising', tag: 'FNC', captain: 'Krimz', country: 'SE', elo: 2350, status: 'pending' as const, appliedAt: '8 mins ago' },
-      { id: 'tm-6', name: 'Natus Vincere Junior', tag: 'NAVI', captain: 'Headtr1ck', country: 'UA', elo: 2390, status: 'pending' as const, appliedAt: '25 mins ago' },
-      { id: 'tm-7', name: 'Heroic Prospects', tag: 'HEROIC', captain: 'TeSeS', country: 'DK', elo: 2310, status: 'approved' as const, appliedAt: 'Today • 17:30' },
+      { id: 'tm-1', name: 'Vanguard Tactical', tag: 'VNG', captain: 'Shadow', country: 'XK', elo: 2450, status: 'approved' as const, appliedAt: 'Today • 14:20' },
+      { id: 'tm-2', name: 'Apex Legion', tag: 'APEX', captain: 'Striker', country: 'GB', elo: 2320, status: 'approved' as const, appliedAt: 'Today • 15:10' },
+      { id: 'tm-3', name: 'Eclipse Esports', tag: 'ECL', captain: 'Vortex', country: 'UA', elo: 2280, status: 'pending' as const, appliedAt: '12 mins ago' },
+      { id: 'tm-4', name: 'Vortex Prime', tag: 'VTX', captain: 'NeoCS', country: 'DE', elo: 2410, status: 'approved' as const, appliedAt: 'Today • 16:00' },
+      { id: 'tm-5', name: 'Titan Esports', tag: 'TTN', captain: 'Krimz', country: 'SE', elo: 2350, status: 'pending' as const, appliedAt: '8 mins ago' },
+      { id: 'tm-6', name: 'Phoenix Strike', tag: 'PHX', captain: 'Blaze', country: 'UA', elo: 2390, status: 'pending' as const, appliedAt: '25 mins ago' },
+      { id: 'tm-7', name: 'Cyber Knights', tag: 'CKN', captain: 'Spectre', country: 'DK', elo: 2310, status: 'approved' as const, appliedAt: 'Today • 17:30' },
       { id: 'tm-8', name: userClanData.name || 'Caliber Clutch Squad', tag: userClanData.tag || 'CC', captain: currentGamerTag, country: 'XK', elo: userClanData.stats?.avgElo || 2150, status: 'approved' as const, appliedAt: 'Host Roster' }
     ];
     return initial;
@@ -1540,59 +1540,24 @@ export const VortexDashboard: React.FC<VortexDashboardProps> = ({
       .catch(() => {});
   }, [activeTab]);
 
-  // Robust European & US currency parser (supports "10.000", "1.000", "10,000", "1000", "68.75", "10.000,50", etc.)
+  // Unified integer currency parser: strips dots, commas, spaces, currency symbols to extract pure integer
   const parseCurrencyInput = (raw: string | number | undefined | null): number => {
     if (raw === undefined || raw === null) return 0;
-    if (typeof raw === 'number') return isNaN(raw) ? 0 : raw;
+    if (typeof raw === 'number') return isNaN(raw) ? 0 : Math.round(raw);
     const str = String(raw).trim();
     if (!str) return 0;
 
-    const cleaned = str.replace(/[^0-9.,]/g, '');
-    if (!cleaned) return 0;
-
-    if (cleaned.includes('.') && cleaned.includes(',')) {
-      const lastDot = cleaned.lastIndexOf('.');
-      const lastComma = cleaned.lastIndexOf(',');
-      if (lastComma > lastDot) {
-        return parseFloat(cleaned.replace(/\./g, '').replace(',', '.')) || 0;
-      } else {
-        return parseFloat(cleaned.replace(/,/g, '')) || 0;
-      }
-    }
-
-    if (cleaned.includes('.') && !cleaned.includes(',')) {
-      const parts = cleaned.split('.');
-      if (parts.length > 2) {
-        return parseFloat(cleaned.replace(/\./g, '')) || 0;
-      }
-      if (parts[1].length === 3) {
-        return parseFloat(cleaned.replace(/\./g, '')) || 0;
-      } else {
-        return parseFloat(cleaned) || 0;
-      }
-    }
-
-    if (cleaned.includes(',') && !cleaned.includes('.')) {
-      const parts = cleaned.split(',');
-      if (parts.length > 2) {
-        return parseFloat(cleaned.replace(/,/g, '')) || 0;
-      }
-      if (parts[1].length === 3) {
-        return parseFloat(cleaned.replace(/,/g, '')) || 0;
-      } else {
-        return parseFloat(cleaned.replace(',', '.')) || 0;
-      }
-    }
-
-    return parseFloat(cleaned) || 0;
+    const digits = str.replace(/[^0-9]/g, '');
+    if (!digits) return 0;
+    return parseInt(digits, 10) || 0;
   };
 
-  // Create tournament form state
-  const [newTourneyTitle, setNewTourneyTitle] = useState('CALIBER CLUTCH Community Cup #1');
+  // Create tournament form state (clean initial states with pale gray placeholders)
+  const [newTourneyTitle, setNewTourneyTitle] = useState<string>('');
   const [newTourneyOrganizer, setNewTourneyOrganizer] = useState<string>('');
-  const [newTourneyCashPrize, setNewTourneyCashPrize] = useState('1000');
+  const [newTourneyCashPrize, setNewTourneyCashPrize] = useState<string>('');
   const [newTourneyMaxTeams, setNewTourneyMaxTeams] = useState<number>(16);
-  const [newTourneyEntryFee, setNewTourneyEntryFee] = useState<number>(68.75); // Auto-calculated: (1000 * 1.10) / 16 = 68.75
+  const [newTourneyEntryFee, setNewTourneyEntryFee] = useState<number>(0);
   const [newTourneyIsPaid, setNewTourneyIsPaid] = useState<boolean>(true);
   const [revealTournamentStreamIp, setRevealTournamentStreamIp] = useState<boolean>(false);
 
@@ -1600,21 +1565,25 @@ export const VortexDashboard: React.FC<VortexDashboardProps> = ({
   const handleCashPrizeChange = (val: string) => {
     setNewTourneyCashPrize(val);
     const numeric = parseCurrencyInput(val);
-    if (numeric && numeric > 0 && newTourneyMaxTeams > 0) {
+    if (numeric > 0 && newTourneyMaxTeams > 0) {
       const totalFund = numeric * 1.10;
       const calcFee = parseFloat((totalFund / newTourneyMaxTeams).toFixed(2));
       setNewTourneyEntryFee(calcFee);
+    } else {
+      setNewTourneyEntryFee(0);
     }
   };
 
   // Auto-calculate fee when team capacity changes
   const handleMaxTeamsChange = (teams: number) => {
     setNewTourneyMaxTeams(teams);
-    const numeric = parseCurrencyInput(newTourneyCashPrize) || 1000;
+    const numeric = parseCurrencyInput(newTourneyCashPrize);
     if (numeric > 0 && teams > 0) {
       const totalFund = numeric * 1.10;
       const calcFee = parseFloat((totalFund / teams).toFixed(2));
       setNewTourneyEntryFee(calcFee);
+    } else {
+      setNewTourneyEntryFee(0);
     }
   };
 
@@ -1630,7 +1599,7 @@ export const VortexDashboard: React.FC<VortexDashboardProps> = ({
   const [newTourneyPlayoffsFormat, setNewTourneyPlayoffsFormat] = useState<'BO1' | 'BO3'>('BO1');
   const [newTourneyFinalsFormat, setNewTourneyFinalsFormat] = useState<'BO1' | 'BO3' | 'BO5'>('BO3');
   const [newTourneyRegion, setNewTourneyRegion] = useState('European Online Bracket');
-  const [newTourneyDate, setNewTourneyDate] = useState('Starts Sunday • 19:00 CET');
+  const [newTourneyDate, setNewTourneyDate] = useState<string>('');
   const [newTourneySkinPrize, setNewTourneySkinPrize] = useState('★ Butterfly Knife | Doppler (FN)');
   const [newTourneySkinValue, setNewTourneySkinValue] = useState<number>(1450);
 
@@ -4903,8 +4872,8 @@ export const VortexDashboard: React.FC<VortexDashboardProps> = ({
                               type="text"
                               value={newTourneyOrganizer}
                               onChange={(e) => setNewTourneyOrganizer(e.target.value)}
-                              placeholder="Enter organizer or clan name (e.g. Bad News Eagles, FaZe Clan, Guild Gaming)..."
-                              className="w-full px-4 py-3 rounded-xl bg-[#141722] border border-[#252C3D] text-amber-300 font-bold focus:outline-none focus:border-amber-400 text-sm"
+                              placeholder="e.g. Caliber Squad or Streamer Name"
+                              className="w-full px-4 py-3 rounded-xl bg-[#141722] border border-[#252C3D] text-amber-300 font-bold focus:outline-none focus:border-amber-400 placeholder:text-slate-500 placeholder:font-normal text-sm"
                             />
                           </div>
 
@@ -4916,8 +4885,8 @@ export const VortexDashboard: React.FC<VortexDashboardProps> = ({
                               type="text"
                               value={newTourneyTitle}
                               onChange={(e) => setNewTourneyTitle(e.target.value)}
-                              placeholder="e.g. CALIBER CLUTCH European Masters #1"
-                              className="w-full px-4 py-3 rounded-xl bg-[#141722] border border-[#252C3D] text-white font-bold focus:outline-none focus:border-[#A3E635] text-sm"
+                              placeholder="e.g. CaliberClutch Open Cup #1"
+                              className="w-full px-4 py-3 rounded-xl bg-[#141722] border border-[#252C3D] text-white font-bold focus:outline-none focus:border-[#A3E635] placeholder:text-slate-500 placeholder:font-normal text-sm"
                             />
                           </div>
                         </div>
@@ -4937,8 +4906,8 @@ export const VortexDashboard: React.FC<VortexDashboardProps> = ({
                                   type="text"
                                   value={newTourneyCashPrize}
                                   onChange={(e) => handleCashPrizeChange(e.target.value)}
-                                  placeholder="1000"
-                                  className="w-full pl-8 pr-4 py-3 rounded-xl bg-[#141722] border border-[#252C3D] text-[#A3E635] font-black focus:outline-none focus:border-[#A3E635] text-sm"
+                                  placeholder="e.g. 1000 or 10.000"
+                                  className="w-full pl-8 pr-4 py-3 rounded-xl bg-[#141722] border border-[#252C3D] text-[#A3E635] font-black focus:outline-none focus:border-[#A3E635] placeholder:text-slate-500 placeholder:font-normal text-sm"
                                 />
                                 <span className="absolute left-3 top-3 text-[#A3E635]/70 font-black text-sm">€</span>
                               </div>
@@ -4978,15 +4947,14 @@ export const VortexDashboard: React.FC<VortexDashboardProps> = ({
 
                           {/* Auto-Calculated Entry Fees - Directly Under Prize Pool & Capacity */}
                           {(() => {
-                            const poolNumeric = parseCurrencyInput(newTourneyCashPrize) || 1000;
-                            const prizePool = poolNumeric > 0 ? poolNumeric : ((newTourneyMaxTeams * newTourneyEntryFee) / 1.10);
-                            const hostFee = prizePool * 0.05;
-                            const adminFee = prizePool * 0.05;
-                            const totalCollected = prizePool + hostFee + adminFee; // P + 5% + 5% = P * 1.10
-                            const feePerTeamNum = newTourneyMaxTeams > 0 ? totalCollected / newTourneyMaxTeams : 0;
-                            const feePerPlayerNum = feePerTeamNum / 5;
-                            const feePerTeamStr = (feePerTeamNum % 1 !== 0) ? feePerTeamNum.toFixed(2) : feePerTeamNum.toFixed(2);
-                            const feePerPlayerStr = (feePerPlayerNum % 1 !== 0) ? feePerPlayerNum.toFixed(2) : feePerPlayerNum.toFixed(2);
+                            const prizePool = parseCurrencyInput(newTourneyCashPrize);
+                            const hostFee = prizePool > 0 ? prizePool * 0.05 : 0;
+                            const adminFee = prizePool > 0 ? prizePool * 0.05 : 0;
+                            const totalCollected = prizePool > 0 ? prizePool + hostFee + adminFee : 0; // P + 5% + 5% = P * 1.10
+                            const feePerTeamNum = (prizePool > 0 && newTourneyMaxTeams > 0) ? totalCollected / newTourneyMaxTeams : 0;
+                            const feePerPlayerNum = feePerTeamNum > 0 ? feePerTeamNum / 5 : 0;
+                            const feePerTeamStr = feePerTeamNum > 0 ? feePerTeamNum.toFixed(2) : '0.00';
+                            const feePerPlayerStr = feePerPlayerNum > 0 ? feePerPlayerNum.toFixed(2) : '0.00';
 
                             return (
                               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 pt-1">
@@ -5016,18 +4984,17 @@ export const VortexDashboard: React.FC<VortexDashboardProps> = ({
 
                         {/* 3. AUTOMATED FINANCIAL SPLIT (100% Pure Untouched Prize Pool + Participant-Funded 5% Fees) */}
                         {(() => {
-                          const poolNumeric = parseCurrencyInput(newTourneyCashPrize) || 1000;
-                          const prizePool = poolNumeric > 0 ? poolNumeric : ((newTourneyMaxTeams * newTourneyEntryFee) / 1.10);
-                          const platformFee = prizePool * 0.05;
-                          const organizerFee = prizePool * 0.05;
-                          const totalCollected = prizePool + platformFee + organizerFee; // 100% prize + 5% platform + 5% organizer
-                          const firstPrize = Math.round(prizePool * 0.70);
-                          const secondPrize = Math.round(prizePool * 0.20);
-                          const thirdPrize = Math.max(0, prizePool - firstPrize - secondPrize);
-                          const feePerTeamNum = newTourneyMaxTeams > 0 ? totalCollected / newTourneyMaxTeams : 0;
-                          const feePerPlayerNum = feePerTeamNum / 5;
-                          const feePerTeamStr = (feePerTeamNum % 1 !== 0) ? feePerTeamNum.toFixed(2) : feePerTeamNum.toFixed(2);
-                          const feePerPlayerStr = (feePerPlayerNum % 1 !== 0) ? feePerPlayerNum.toFixed(2) : feePerPlayerNum.toFixed(2);
+                          const prizePool = parseCurrencyInput(newTourneyCashPrize);
+                          const platformFee = prizePool > 0 ? prizePool * 0.05 : 0;
+                          const organizerFee = prizePool > 0 ? prizePool * 0.05 : 0;
+                          const totalCollected = prizePool > 0 ? prizePool + platformFee + organizerFee : 0; // 100% prize + 5% platform + 5% organizer
+                          const firstPrize = prizePool > 0 ? Math.round(prizePool * 0.70) : 0;
+                          const secondPrize = prizePool > 0 ? Math.round(prizePool * 0.20) : 0;
+                          const thirdPrize = prizePool > 0 ? Math.max(0, prizePool - firstPrize - secondPrize) : 0;
+                          const feePerTeamNum = (prizePool > 0 && newTourneyMaxTeams > 0) ? totalCollected / newTourneyMaxTeams : 0;
+                          const feePerPlayerNum = feePerTeamNum > 0 ? feePerTeamNum / 5 : 0;
+                          const feePerTeamStr = feePerTeamNum > 0 ? feePerTeamNum.toFixed(2) : '0.00';
+                          const feePerPlayerStr = feePerPlayerNum > 0 ? feePerPlayerNum.toFixed(2) : '0.00';
                           const totalCollectedStr = totalCollected.toLocaleString(undefined, { minimumFractionDigits: totalCollected % 1 !== 0 ? 2 : 0, maximumFractionDigits: 2 });
 
                           return (
@@ -5090,17 +5057,17 @@ export const VortexDashboard: React.FC<VortexDashboardProps> = ({
                                   <div className="p-2.5 rounded-xl bg-amber-500/10 border border-amber-500/20">
                                     <div className="text-[10px] font-bold text-amber-400">🥇 1st Place (70%)</div>
                                     <div className="text-sm font-black text-white mt-0.5">€{firstPrize.toLocaleString()}</div>
-                                    <div className="text-[9px] text-slate-400 mt-0.5">€{(firstPrize / 5).toFixed(0)} / player</div>
+                                    <div className="text-[9px] text-slate-400 mt-0.5">€{firstPrize > 0 ? (firstPrize / 5).toFixed(0) : '0'} / player</div>
                                   </div>
                                   <div className="p-2.5 rounded-xl bg-slate-400/10 border border-slate-400/20">
                                     <div className="text-[10px] font-bold text-slate-300">🥈 2nd Place (20%)</div>
                                     <div className="text-sm font-black text-white mt-0.5">€{secondPrize.toLocaleString()}</div>
-                                    <div className="text-[9px] text-slate-400 mt-0.5">€{(secondPrize / 5).toFixed(0)} / player</div>
+                                    <div className="text-[9px] text-slate-400 mt-0.5">€{secondPrize > 0 ? (secondPrize / 5).toFixed(0) : '0'} / player</div>
                                   </div>
                                   <div className="p-2.5 rounded-xl bg-amber-700/10 border border-amber-700/20">
                                     <div className="text-[10px] font-bold text-amber-500">🥉 3rd Place (10%)</div>
                                     <div className="text-sm font-black text-white mt-0.5">€{thirdPrize.toLocaleString()}</div>
-                                    <div className="text-[9px] text-slate-400 mt-0.5">€{(thirdPrize / 5).toFixed(0)} / player</div>
+                                    <div className="text-[9px] text-slate-400 mt-0.5">€{thirdPrize > 0 ? (thirdPrize / 5).toFixed(0) : '0'} / player</div>
                                   </div>
                                 </div>
                               </div>
@@ -5167,7 +5134,7 @@ export const VortexDashboard: React.FC<VortexDashboardProps> = ({
                             value={newTourneyDate}
                             onChange={(e) => setNewTourneyDate(e.target.value)}
                             placeholder="e.g. Starts Sunday • 19:00 CET"
-                            className="w-full px-4 py-3 rounded-xl bg-[#141722] border border-[#252C3D] text-white focus:outline-none focus:border-[#A3E635] text-sm"
+                            className="w-full px-4 py-3 rounded-xl bg-[#141722] border border-[#252C3D] text-white focus:outline-none focus:border-[#A3E635] placeholder:text-slate-500 placeholder:font-normal text-sm"
                           />
                         </div>
                       </div>
@@ -5193,8 +5160,11 @@ export const VortexDashboard: React.FC<VortexDashboardProps> = ({
                               return;
                             }
 
-                            const poolNumeric = parseCurrencyInput(newTourneyCashPrize) || 1000;
-                            const prizePool = poolNumeric > 0 ? poolNumeric : ((newTourneyMaxTeams * newTourneyEntryFee) / 1.10);
+                            const prizePool = parseCurrencyInput(newTourneyCashPrize);
+                            if (prizePool <= 0) {
+                              alert('Please enter a valid prize pool amount (e.g. €1,000).');
+                              return;
+                            }
                             const adminProfit = prizePool * 0.05;
                             const organizerReward = prizePool * 0.05;
                             const totalCollected = prizePool + adminProfit + organizerReward;
@@ -8452,14 +8422,14 @@ export const VortexDashboard: React.FC<VortexDashboardProps> = ({
                         <div className="flex justify-between items-center text-xs font-mono">
                           <span className="text-white font-bold flex items-center gap-1.5">
                             <CountryFlag code="XK" size="xs" />
-                            Bad News Eagles
+                            Vanguard Tactical
                           </span>
                           <span className="font-bold text-emerald-400">{isBo1Playoffs ? '13 ✓' : '2 ✓'}</span>
                         </div>
                         <div className="flex justify-between items-center text-xs font-mono text-slate-400">
                           <span className="flex items-center gap-1.5">
                             <CountryFlag code="GB" size="xs" />
-                            Guild Esports
+                            Apex Legion
                           </span>
                           <span>{isBo1Playoffs ? '9' : '0'}</span>
                         </div>
@@ -8487,7 +8457,7 @@ export const VortexDashboard: React.FC<VortexDashboardProps> = ({
                         <div className="flex justify-between items-center text-xs font-mono text-slate-400">
                           <span className="flex items-center gap-1.5">
                             <CountryFlag code="UA" size="xs" />
-                            Monte Academy
+                            Eclipse Esports
                           </span>
                           <span>{stage === 'qf' ? '8' : '8'}</span>
                         </div>
@@ -8501,7 +8471,7 @@ export const VortexDashboard: React.FC<VortexDashboardProps> = ({
                             onClick={() => {
                               sound.playJoinScrim();
                               updateTourneyBracketStage(tourneyKey, 'sf');
-                              setDashboardToast(`✓ QF Won! Advanced to Semifinals against FaZe Clan Youth!`);
+                              setDashboardToast(`✓ QF Won! Advanced to Semifinals against Vortex Prime!`);
                             }}
                             className="w-full py-2 rounded-xl bg-gradient-to-r from-amber-500 to-[#A3E635] text-slate-950 font-mono font-bold text-xs cursor-pointer transition hover:brightness-110 active:scale-95 shadow"
                           >
@@ -8515,14 +8485,14 @@ export const VortexDashboard: React.FC<VortexDashboardProps> = ({
                         <div className="flex justify-between items-center text-xs font-mono">
                           <span className="text-white font-bold flex items-center gap-1.5">
                             <CountryFlag code="DE" size="xs" />
-                            FaZe Clan Youth
+                            Vortex Prime
                           </span>
                           <span className="font-bold text-emerald-400">{isBo1Playoffs ? '13 ✓' : '2 ✓'}</span>
                         </div>
                         <div className="flex justify-between items-center text-xs font-mono text-slate-400">
                           <span className="flex items-center gap-1.5">
                             <CountryFlag code="SE" size="xs" />
-                            Fnatic Rising
+                            Titan Esports
                           </span>
                           <span>{isBo1Playoffs ? '11' : '1'}</span>
                         </div>
@@ -8537,14 +8507,14 @@ export const VortexDashboard: React.FC<VortexDashboardProps> = ({
                         <div className="flex justify-between items-center text-xs font-mono">
                           <span className="text-white font-bold flex items-center gap-1.5">
                             <CountryFlag code="FR" size="xs" />
-                            G2 Academy
+                            Astral Legion
                           </span>
                           <span className="font-bold text-emerald-400">{isBo1Playoffs ? '13 ✓' : '2 ✓'}</span>
                         </div>
                         <div className="flex justify-between items-center text-xs font-mono text-slate-400">
                           <span className="flex items-center gap-1.5">
                             <CountryFlag code="DK" size="xs" />
-                            Heroic Prospects
+                            Cyber Knights
                           </span>
                           <span>{isBo1Playoffs ? '7' : '0'}</span>
                         </div>
@@ -8564,7 +8534,7 @@ export const VortexDashboard: React.FC<VortexDashboardProps> = ({
                         </span>
                       </div>
 
-                      {/* SF-1: User Clan vs FaZe Clan Youth */}
+                      {/* SF-1: User Clan vs Vortex Prime */}
                       <div className={`p-3.5 rounded-2xl border transition space-y-2 ${
                         stage === 'sf'
                           ? 'bg-gradient-to-b from-[#1E1926] to-[#121420] border-amber-500/50 shadow-lg'
@@ -8582,7 +8552,7 @@ export const VortexDashboard: React.FC<VortexDashboardProps> = ({
                         <div className="flex justify-between items-center text-xs font-mono text-slate-400">
                           <span className="flex items-center gap-1.5">
                             <CountryFlag code="DE" size="xs" />
-                            FaZe Clan Youth
+                            Vortex Prime
                           </span>
                           <span>{stage === 'sf' ? '11' : stage === 'final' || stage === 'champion' ? '14' : 'TBD'}</span>
                         </div>
@@ -8605,25 +8575,25 @@ export const VortexDashboard: React.FC<VortexDashboardProps> = ({
                         )}
                       </div>
 
-                      {/* SF-2: Bad News Eagles vs G2 Academy */}
+                      {/* SF-2: Vanguard Tactical vs Astral Legion */}
                       <div className="p-3.5 rounded-2xl bg-[#121622] border border-[#232B3D] space-y-2">
                         <div className="flex justify-between items-center text-xs font-mono">
                           <span className="text-white font-bold flex items-center gap-1.5">
                             <CountryFlag code="FR" size="xs" />
-                            G2 Academy
+                            Astral Legion
                           </span>
                           <span className="font-bold text-emerald-400">{stage === 'final' || stage === 'champion' ? '13 ✓' : '13'}</span>
                         </div>
                         <div className="flex justify-between items-center text-xs font-mono text-slate-400">
                           <span className="flex items-center gap-1.5">
                             <CountryFlag code="XK" size="xs" />
-                            Bad News Eagles
+                            Vanguard Tactical
                           </span>
                           <span>{stage === 'final' || stage === 'champion' ? '10' : '10'}</span>
                         </div>
                         <div className="text-[10px] font-mono text-slate-500 border-t border-white/5 pt-1.5 flex justify-between">
                           <span>de_nuke</span>
-                          <span className="text-emerald-400">{stage === 'final' || stage === 'champion' ? 'G2 Advanced ✓' : 'BO1'}</span>
+                          <span className="text-emerald-400">{stage === 'final' || stage === 'champion' ? 'Astral Advanced ✓' : 'BO1'}</span>
                         </div>
                       </div>
                     </div>
@@ -8659,7 +8629,7 @@ export const VortexDashboard: React.FC<VortexDashboardProps> = ({
                         <div className="flex justify-between items-center text-sm font-mono">
                           <span className="text-white font-black flex items-center gap-2">
                             <CountryFlag code="FR" size="sm" />
-                            G2 Academy
+                            Astral Legion
                           </span>
                           <span className={`font-black ${stage === 'champion' ? 'text-slate-400' : 'text-slate-200'}`}>
                             {stage === 'champion' ? '2 (Runner-Up)' : stage === 'final' ? '2 (Tied)' : 'TBD'}
@@ -8827,7 +8797,8 @@ export const VortexDashboard: React.FC<VortexDashboardProps> = ({
                   <input
                     type="text"
                     defaultValue={userClanData.name}
-                    className="w-full px-3 py-2 rounded-xl bg-[#141722] border border-[#252C3D] text-white font-bold focus:outline-none focus:border-[#A3E635]"
+                    placeholder="Enter team name (e.g. Caliber Clan)..."
+                    className="w-full px-3 py-2 rounded-xl bg-[#141722] border border-[#252C3D] text-white font-bold focus:outline-none focus:border-[#A3E635] placeholder:text-slate-600 placeholder:font-normal"
                   />
                 </div>
                 <div>
@@ -8835,8 +8806,9 @@ export const VortexDashboard: React.FC<VortexDashboardProps> = ({
                   <input
                     type="text"
                     defaultValue={userClanData.tag}
+                    placeholder="e.g. CLBR"
                     maxLength={5}
-                    className="w-full px-3 py-2 rounded-xl bg-[#141722] border border-[#252C3D] text-amber-400 font-bold focus:outline-none focus:border-[#A3E635]"
+                    className="w-full px-3 py-2 rounded-xl bg-[#141722] border border-[#252C3D] text-amber-400 font-bold focus:outline-none focus:border-[#A3E635] placeholder:text-slate-600 placeholder:font-normal"
                   />
                 </div>
               </div>
@@ -9901,7 +9873,7 @@ export const VortexDashboard: React.FC<VortexDashboardProps> = ({
                     : 'text-slate-400 hover:text-white hover:bg-white/5'
                 }`}
               >
-                Kosovo CS2 Pros (BNE)
+                Verified Regional Pros
               </button>
               <button
                 onClick={() => { sound.playClick(); setInviteModalTab('international'); }}
