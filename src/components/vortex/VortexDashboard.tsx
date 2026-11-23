@@ -300,7 +300,7 @@ export const FaceitVerificationBadge: React.FC<FaceitVerificationBadgeProps> = (
             e.stopPropagation();
             e.preventDefault();
             sound.playSelect();
-            window.dispatchEvent(new CustomEvent('vortex_open_verification_modal', { detail: { type } }));
+            window.dispatchEvent(new CustomEvent('caliber_open_verification_modal', { detail: { type } })); window.dispatchEvent(new CustomEvent('vortex_open_verification_modal', { detail: { type } }));
           }}
           className={`${sizeClasses} shrink-0 cursor-pointer transition-transform duration-150 group-hover/vbadge:scale-110 drop-shadow-[0_1px_4px_rgba(235,160,30,0.5)]`}
           fill="none"
@@ -336,7 +336,7 @@ export const FaceitVerificationBadge: React.FC<FaceitVerificationBadgeProps> = (
             e.stopPropagation();
             e.preventDefault();
             sound.playSelect();
-            window.dispatchEvent(new CustomEvent('vortex_open_verification_modal', { detail: { type } }));
+            window.dispatchEvent(new CustomEvent('caliber_open_verification_modal', { detail: { type } })); window.dispatchEvent(new CustomEvent('vortex_open_verification_modal', { detail: { type } }));
           }}
           className={`${sizeClasses} shrink-0 cursor-pointer transition-transform duration-150 group-hover/vbadge:scale-110 drop-shadow-[0_1px_4px_rgba(255,255,255,0.35)]`}
           fill="none"
@@ -384,7 +384,7 @@ export const FaceitVerificationBadge: React.FC<FaceitVerificationBadgeProps> = (
               e.stopPropagation();
               e.preventDefault();
               sound.playSelect();
-              window.dispatchEvent(new CustomEvent('vortex_open_verification_modal', { detail: { type } }));
+              window.dispatchEvent(new CustomEvent('caliber_open_verification_modal', { detail: { type } })); window.dispatchEvent(new CustomEvent('vortex_open_verification_modal', { detail: { type } }));
             }}
             className="text-[11px] font-sans text-slate-300 hover:text-white leading-snug whitespace-nowrap text-left transition cursor-pointer flex items-center gap-1 group/btn"
           >
@@ -690,6 +690,24 @@ export const getFaceitTierInfo = (levelOrElo: number): FaceitTierInfo => {
   return FACEIT_TIERS[level] || FACEIT_TIERS[3];
 };
 
+
+const getLocalState = (key: string): string | null => {
+  if (typeof window === 'undefined') return null;
+  const caliberKey = key.startsWith('caliber_') ? key : key.replace(/^vortex_/, 'caliber_');
+  const vortexKey = key.startsWith('vortex_') ? key : key.replace(/^caliber_/, 'vortex_');
+  return localStorage.getItem(caliberKey) || localStorage.getItem(vortexKey);
+};
+
+const setLocalState = (key: string, value: string): void => {
+  if (typeof window === 'undefined') return;
+  const caliberKey = key.startsWith('caliber_') ? key : key.replace(/^vortex_/, 'caliber_');
+  const vortexKey = key.startsWith('vortex_') ? key : key.replace(/^caliber_/, 'vortex_');
+  try {
+    localStorage.setItem(caliberKey, value);
+    localStorage.setItem(vortexKey, value);
+  } catch (_) {}
+};
+
 export const VortexDashboard: React.FC<VortexDashboardProps> = ({
   userGamerTag = 'M14 | caliberclutch.vercel.app',
   avatarUrl = 'https://distribution.faceit-cdn.net/images/ac453a50-dbca-4d42-a740-dac12bdc74c0.jpeg',
@@ -699,18 +717,18 @@ export const VortexDashboard: React.FC<VortexDashboardProps> = ({
 }) => {
   // Profile Customization State with localStorage persistence
   const [currentGamerTag, setCurrentGamerTag] = useState<string>(() => {
-    const saved = localStorage.getItem('vortex_user_gamertag');
+    const saved = getLocalState('caliber_user_gamertag');
     const cleaned = cleanGamerTag(saved);
     if (!saved || saved !== cleaned) {
-      localStorage.setItem('vortex_user_gamertag', cleaned);
+      setLocalState('caliber_user_gamertag', cleaned);
     }
     return cleaned;
   });
   const [currentAvatarUrl, setCurrentAvatarUrl] = useState<string>(() => {
-    const saved = localStorage.getItem('vortex_user_avatar');
+    const saved = getLocalState('caliber_user_avatar');
     if (!saved || saved.includes('blockeerz')) {
       const def = 'https://distribution.faceit-cdn.net/images/ac453a50-dbca-4d42-a740-dac12bdc74c0.jpeg';
-      localStorage.setItem('vortex_user_avatar', def);
+      setLocalState('caliber_user_avatar', def);
       return def;
     }
     return saved;
@@ -720,26 +738,26 @@ export const VortexDashboard: React.FC<VortexDashboardProps> = ({
   useEffect(() => {
     if (typeof window !== 'undefined') {
       try {
-        const savedTag = localStorage.getItem('vortex_user_gamertag');
+        const savedTag = getLocalState('caliber_user_gamertag');
         const cleaned = cleanGamerTag(savedTag);
         if (savedTag !== cleaned) {
-          localStorage.setItem('vortex_user_gamertag', cleaned);
+          setLocalState('caliber_user_gamertag', cleaned);
           setCurrentGamerTag(cleaned);
         }
-        const savedAv = localStorage.getItem('vortex_user_avatar');
+        const savedAv = getLocalState('caliber_user_avatar');
         if (savedAv && savedAv.includes('blockeerz')) {
           const def = 'https://distribution.faceit-cdn.net/images/ac453a50-dbca-4d42-a740-dac12bdc74c0.jpeg';
-          localStorage.setItem('vortex_user_avatar', def);
+          setLocalState('caliber_user_avatar', def);
           setCurrentAvatarUrl(def);
         }
-        const rawPlayers = localStorage.getItem('vortex_platform_registered_players');
+        const rawPlayers = getLocalState('caliber_platform_registered_players');
         if (rawPlayers) {
           const list: any[] = JSON.parse(rawPlayers);
           const cleaned = list.filter(p => {
             const tag = (p.gamerTag || p.name || '').toLowerCase();
             return !tag.includes('blockeer') && !tag.includes('shadow_kid') && !tag.includes('nyxora') && !tag.includes('chronopulse') && !tag.includes('test') && !tag.includes('m14');
           });
-          localStorage.setItem('vortex_platform_registered_players', JSON.stringify(cleaned));
+          setLocalState('caliber_platform_registered_players', JSON.stringify(cleaned));
         }
       } catch {}
     }
@@ -754,17 +772,17 @@ export const VortexDashboard: React.FC<VortexDashboardProps> = ({
 
   const [adminBypassComingSoon, setAdminBypassComingSoon] = useState<boolean>(() => {
     if (typeof window !== 'undefined') {
-      const saved = localStorage.getItem('vortex_admin_bypass_coming_soon');
+      const saved = getLocalState('caliber_admin_bypass_coming_soon');
       if (saved !== null) return saved === 'true';
     }
     return true;
   });
 
   const [currentClanTag, setCurrentClanTag] = useState<string>(() => {
-    return localStorage.getItem('vortex_user_clantag') || 'CC';
+    return getLocalState('caliber_user_clantag') || 'CC';
   });
   const [currentCountry, setCurrentCountry] = useState<{ code: string; name: string; flag: string }>(() => {
-    const saved = localStorage.getItem('vortex_user_country');
+    const saved = getLocalState('caliber_user_country');
     if (saved) {
       try {
         return JSON.parse(saved);
@@ -773,21 +791,21 @@ export const VortexDashboard: React.FC<VortexDashboardProps> = ({
     return { code: 'XK', name: 'Kosovo', flag: '🇽🇰' };
   });
   const [currentRole, setCurrentRole] = useState<string>(() => {
-    return localStorage.getItem('vortex_user_role') || 'AWPer / Entry';
+    return getLocalState('caliber_user_role') || 'AWPer / Entry';
   });
   const [currentBio, setCurrentBio] = useState<string>(() => {
-    return localStorage.getItem('vortex_user_bio') || 'Pushing ELO to Level 10. Smoke lineups on point.';
+    return getLocalState('caliber_user_bio') || 'Pushing ELO to Level 10. Smoke lineups on point.';
   });
   const [currentTradeUrl, setCurrentTradeUrl] = useState<string>(() => {
-    return localStorage.getItem('vortex_user_tradeurl') || 'https://steamcommunity.com/tradeoffer/new/?partner=43918293';
+    return getLocalState('caliber_user_tradeurl') || 'https://steamcommunity.com/tradeoffer/new/?partner=43918293';
   });
   const [currentCrosshairCode, setCurrentCrosshairCode] = useState<string>(() => {
-    return localStorage.getItem('vortex_user_crosshair') || 'CSGO-4w29A-6yvKP-6k7kF-3xK2v-d9HkQ';
+    return getLocalState('caliber_user_crosshair') || 'CSGO-4w29A-6yvKP-6k7kF-3xK2v-d9HkQ';
   });
 
   // User Matches & ELO State (FACEIT-Standard Calibration: 0 matches = Level 3 & 800 ELO baseline)
   const [currentUserMatches, setCurrentUserMatches] = useState<number>(() => {
-    const saved = localStorage.getItem('vortex_user_matches');
+    const saved = getLocalState('caliber_user_matches');
     if (saved !== null) {
       const parsed = parseInt(saved, 10);
       if (!isNaN(parsed) && parsed >= 0) return parsed;
@@ -796,13 +814,13 @@ export const VortexDashboard: React.FC<VortexDashboardProps> = ({
   });
 
   const [currentUserElo, setCurrentUserElo] = useState<number>(() => {
-    const savedMatches = localStorage.getItem('vortex_user_matches');
+    const savedMatches = getLocalState('caliber_user_matches');
     const matchesCount = savedMatches !== null ? parseInt(savedMatches, 10) : 0;
     if (matchesCount === 0) {
-      localStorage.setItem('vortex_user_elo', '800');
+      setLocalState('caliber_user_elo', '800');
       return 800;
     }
-    const saved = localStorage.getItem('vortex_user_elo');
+    const saved = getLocalState('caliber_user_elo');
     if (saved) {
       const parsed = parseInt(saved, 10);
       if (!isNaN(parsed) && parsed > 0) return parsed;
@@ -811,13 +829,13 @@ export const VortexDashboard: React.FC<VortexDashboardProps> = ({
   });
 
   const [currentUserLevel, setCurrentUserLevel] = useState<number>(() => {
-    const savedMatches = localStorage.getItem('vortex_user_matches');
+    const savedMatches = getLocalState('caliber_user_matches');
     const matchesCount = savedMatches !== null ? parseInt(savedMatches, 10) : 0;
     if (matchesCount === 0) {
-      localStorage.setItem('vortex_user_level', '3');
+      setLocalState('caliber_user_level', '3');
       return 3;
     }
-    const saved = localStorage.getItem('vortex_user_level');
+    const saved = getLocalState('caliber_user_level');
     if (saved) {
       const parsed = parseInt(saved, 10);
       if (!isNaN(parsed) && parsed >= 1 && parsed <= 10) return parsed;
@@ -834,48 +852,48 @@ export const VortexDashboard: React.FC<VortexDashboardProps> = ({
     if (userGamerTag) {
       setCurrentGamerTag(userGamerTag);
       const isFounder = isUserAdminOrFounder(userGamerTag) || isUserAdminOrFounder(currentGamerTag);
-      const hasFaceit = localStorage.getItem('vortex_faceit_connected') === 'true';
+      const hasFaceit = getLocalState('caliber_faceit_connected') === 'true';
 
       if (currentUserMatches === 0) {
         setCurrentUserLevel(3);
         setCurrentUserElo(800);
-        localStorage.setItem('vortex_user_level', '3');
-        localStorage.setItem('vortex_user_elo', '800');
-        localStorage.setItem('vortex_user_matches', '0');
+        setLocalState('caliber_user_level', '3');
+        setLocalState('caliber_user_elo', '800');
+        setLocalState('caliber_user_matches', '0');
       }
 
       if (isFounder) {
         setCurrentVerification('vip');
-        localStorage.setItem('vortex_user_verification', 'vip');
+        setLocalState('caliber_user_verification', 'vip');
       } else if (!hasFaceit) {
-        const savedVerif = localStorage.getItem('vortex_user_verification');
+        const savedVerif = getLocalState('caliber_user_verification');
         if (!savedVerif || savedVerif === 'vip') {
           setCurrentVerification('none');
-          localStorage.setItem('vortex_user_verification', 'none');
+          setLocalState('caliber_user_verification', 'none');
         }
       }
     }
   }, [userGamerTag, currentUserMatches]);
 
   const [faceitNickname, setFaceitNickname] = useState<string>(() => {
-    return localStorage.getItem('vortex_faceit_nickname') || 'bLocKeeRz';
+    return getLocalState('caliber_faceit_nickname') || 'bLocKeeRz';
   });
 
   const [faceitConnected, setFaceitConnected] = useState<boolean>(() => {
-    return localStorage.getItem('vortex_faceit_connected') !== 'false';
+    return getLocalState('caliber_faceit_connected') !== 'false';
   });
 
   const [currentVerification, setCurrentVerification] = useState<VerificationType>(() => {
-    const tag = localStorage.getItem('vortex_user_gamertag') || userGamerTag;
+    const tag = getLocalState('caliber_user_gamertag') || userGamerTag;
     const isFounder = isUserAdminOrFounder(tag);
     if (isFounder) return 'vip';
-    const saved = localStorage.getItem('vortex_user_verification');
+    const saved = getLocalState('caliber_user_verification');
     if (saved === 'verified' || saved === 'none') {
       return saved as VerificationType;
     }
     if (saved === 'vip') {
       if (!isFounder) {
-        localStorage.setItem('vortex_user_verification', 'none');
+        setLocalState('caliber_user_verification', 'none');
         return 'none';
       }
       return 'vip';
@@ -913,7 +931,7 @@ export const VortexDashboard: React.FC<VortexDashboardProps> = ({
     setDraftTradeUrl(currentTradeUrl);
     setDraftCrosshairCode(currentCrosshairCode);
     setDraftVerification(currentVerification);
-    setDraftFaceitNickname(faceitNickname || localStorage.getItem('vortex_faceit_nickname') || 'bLocKeeRz');
+    setDraftFaceitNickname(faceitNickname || getLocalState('caliber_faceit_nickname') || 'bLocKeeRz');
     setFaceitSyncSuccess(null);
     setFaceitSyncError(null);
     setProVerificationNotice(null);
@@ -923,7 +941,7 @@ export const VortexDashboard: React.FC<VortexDashboardProps> = ({
 
   const handleSyncFaceit = async () => {
     sound.playSelect();
-    const targetNick = (draftFaceitNickname || faceitNickname || localStorage.getItem('vortex_faceit_nickname') || 'bLocKeeRz').trim();
+    const targetNick = (draftFaceitNickname || faceitNickname || getLocalState('caliber_faceit_nickname') || 'bLocKeeRz').trim();
     if (!targetNick) {
       setFaceitSyncError('Please enter your exact FACEIT nickname or profile link.');
       return;
@@ -933,7 +951,7 @@ export const VortexDashboard: React.FC<VortexDashboardProps> = ({
     setFaceitSyncSuccess(null);
 
     const clean = targetNick.replace(/^https?:\/\/(www\.)?faceit\.com\/[a-z]{2}\/players\/?/i, '').replace(/\/$/, '');
-    const sid = localStorage.getItem('vortex_steam_id64') || convertSteam2ToSteam64(localStorage.getItem('vortex_steam_id') || 'STEAM_0:1:43918293') || '76561198012241163';
+    const sid = getLocalState('caliber_steam_id64') || convertSteam2ToSteam64(getLocalState('caliber_steam_id') || 'STEAM_0:1:43918293') || '76561198012241163';
 
     const applyFaceitData = (lvl: number, el: number, nick: string, fullData?: any) => {
       setCurrentUserLevel(lvl);
@@ -944,14 +962,14 @@ export const VortexDashboard: React.FC<VortexDashboardProps> = ({
       setDraftVerification('verified');
       setCurrentVerification('verified');
 
-      localStorage.setItem('vortex_faceit_nickname', nick);
-      localStorage.setItem('vortex_faceit_connected', 'true');
-      localStorage.setItem('vortex_user_level', String(lvl));
-      localStorage.setItem('vortex_user_elo', String(el));
-      localStorage.setItem('vortex_user_verification', 'verified');
+      setLocalState('caliber_faceit_nickname', nick);
+      setLocalState('caliber_faceit_connected', 'true');
+      setLocalState('caliber_user_level', String(lvl));
+      setLocalState('caliber_user_elo', String(el));
+      setLocalState('caliber_user_verification', 'verified');
       if (fullData) {
         try {
-          localStorage.setItem(`vortex_faceit_stats_${sid}`, JSON.stringify(fullData));
+          setLocalState(`caliber_faceit_stats_${sid}`, JSON.stringify(fullData));
         } catch (_) {}
       }
 
@@ -1038,21 +1056,21 @@ export const VortexDashboard: React.FC<VortexDashboardProps> = ({
     const finalVerification: VerificationType = (!isUserAdminOrFounder(currentGamerTag) && draftVerification === 'vip') ? 'verified' : draftVerification;
     setCurrentVerification(finalVerification);
 
-    localStorage.setItem('vortex_user_gamertag', draftGamerTag);
-    localStorage.setItem('vortex_user_avatar', draftAvatarUrl);
-    localStorage.setItem('vortex_user_clantag', draftClanTag);
-    localStorage.setItem('vortex_user_country', JSON.stringify(draftCountry));
-    localStorage.setItem('vortex_user_role', draftRole);
-    localStorage.setItem('vortex_user_bio', draftBio);
-    localStorage.setItem('vortex_user_tradeurl', draftTradeUrl);
-    localStorage.setItem('vortex_user_crosshair', draftCrosshairCode);
-    localStorage.setItem('vortex_user_verification', finalVerification);
+    setLocalState('caliber_user_gamertag', draftGamerTag);
+    setLocalState('caliber_user_avatar', draftAvatarUrl);
+    setLocalState('caliber_user_clantag', draftClanTag);
+    setLocalState('caliber_user_country', JSON.stringify(draftCountry));
+    setLocalState('caliber_user_role', draftRole);
+    setLocalState('caliber_user_bio', draftBio);
+    setLocalState('caliber_user_tradeurl', draftTradeUrl);
+    setLocalState('caliber_user_crosshair', draftCrosshairCode);
+    setLocalState('caliber_user_verification', finalVerification);
 
     const cleanFaceit = (draftFaceitNickname || faceitNickname || 'bLocKeeRz').trim().replace(/^https?:\/\/(www\.)?faceit\.com\/[a-z]{2}\/players\/?/i, '').replace(/\/$/, '');
     if (cleanFaceit) {
       setFaceitNickname(cleanFaceit);
-      localStorage.setItem('vortex_faceit_nickname', cleanFaceit);
-      localStorage.setItem('vortex_faceit_connected', 'true');
+      setLocalState('caliber_faceit_nickname', cleanFaceit);
+      setLocalState('caliber_faceit_connected', 'true');
     }
 
     setPartySlots(prev => {
@@ -1103,13 +1121,13 @@ export const VortexDashboard: React.FC<VortexDashboardProps> = ({
   const [promoCodeSuccess, setPromoCodeSuccess] = useState<string | null>(null);
   const [copiedPartnerCode, setCopiedPartnerCode] = useState<boolean>(false);
   const [isSubscribedNotify, setIsSubscribedNotify] = useState<boolean>(() => {
-    return localStorage.getItem('vortex_notified_coming_soon') === 'true';
+    return getLocalState('caliber_notified_coming_soon') === 'true';
   });
 
   // Tournaments Interactive State
   const [registeredTourneys, setRegisteredTourneys] = useState<string[]>(() => {
     try {
-      const saved = localStorage.getItem('vortex_registered_tournaments');
+      const saved = getLocalState('caliber_registered_tournaments');
       if (saved) {
         const parsed: string[] = JSON.parse(saved);
         // Purge legacy fake tournament titles
@@ -1123,7 +1141,7 @@ export const VortexDashboard: React.FC<VortexDashboardProps> = ({
   });
   const [customTournaments, setCustomTournaments] = useState<any[]>(() => {
     try {
-      const saved = localStorage.getItem('vortex_custom_tournaments');
+      const saved = getLocalState('caliber_custom_tournaments');
       if (saved) return JSON.parse(saved);
     } catch (_) {}
     return [];
@@ -1162,7 +1180,7 @@ export const VortexDashboard: React.FC<VortexDashboardProps> = ({
     appliedAt: string;
   }>>>(() => {
     try {
-      const saved = localStorage.getItem('vortex_tourney_teams_map');
+      const saved = getLocalState('caliber_tourney_teams_map');
       if (saved) return JSON.parse(saved);
     } catch (_) {}
     return {};
@@ -1173,8 +1191,8 @@ export const VortexDashboard: React.FC<VortexDashboardProps> = ({
     const initial = [
       { id: 'tm-1', name: 'Vanguard Tactical', tag: 'VNG', captain: 'Shadow', country: 'XK', elo: 2450, status: 'approved' as const, appliedAt: 'Today • 14:20' },
       { id: 'tm-2', name: 'Apex Legion', tag: 'APEX', captain: 'Striker', country: 'GB', elo: 2320, status: 'approved' as const, appliedAt: 'Today • 15:10' },
-      { id: 'tm-3', name: 'Eclipse Esports', tag: 'ECL', captain: 'Vortex', country: 'UA', elo: 2280, status: 'pending' as const, appliedAt: '12 mins ago' },
-      { id: 'tm-4', name: 'Vortex Prime', tag: 'VTX', captain: 'NeoCS', country: 'DE', elo: 2410, status: 'approved' as const, appliedAt: 'Today • 16:00' },
+      { id: 'tm-3', name: 'Eclipse Esports', tag: 'ECL', captain: 'ClutchMaster', country: 'UA', elo: 2280, status: 'pending' as const, appliedAt: '12 mins ago' },
+      { id: 'tm-4', name: 'Apex Vanguard', tag: 'AVG', captain: 'NeoCS', country: 'DE', elo: 2410, status: 'approved' as const, appliedAt: 'Today • 16:00' },
       { id: 'tm-5', name: 'Titan Esports', tag: 'TTN', captain: 'Krimz', country: 'SE', elo: 2350, status: 'pending' as const, appliedAt: '8 mins ago' },
       { id: 'tm-6', name: 'Phoenix Strike', tag: 'PHX', captain: 'Blaze', country: 'UA', elo: 2390, status: 'pending' as const, appliedAt: '25 mins ago' },
       { id: 'tm-7', name: 'Cyber Knights', tag: 'CKN', captain: 'Spectre', country: 'DK', elo: 2310, status: 'approved' as const, appliedAt: 'Today • 17:30' },
@@ -1190,7 +1208,7 @@ export const VortexDashboard: React.FC<VortexDashboardProps> = ({
     const nextMap = { ...tourneyTeamsMap, [tourneyKey]: updated };
     setTourneyTeamsMap(nextMap);
     try {
-      localStorage.setItem('vortex_tourney_teams_map', JSON.stringify(nextMap));
+      setLocalState('caliber_tourney_teams_map', JSON.stringify(nextMap));
     } catch (_) {}
     const team = currentTeams.find(t => t.id === teamId);
     if (newStatus === 'approved') {
@@ -1254,13 +1272,13 @@ export const VortexDashboard: React.FC<VortexDashboardProps> = ({
 
   // Cloud Database Sync: Player Profile Sync
   useEffect(() => {
-    const steamId = localStorage.getItem('vortex_steam_id') || undefined;
-    const steamId64 = localStorage.getItem('vortex_steam_id64') || undefined;
-    const faceitNick = localStorage.getItem('vortex_faceit_nickname') || undefined;
-    const matches = Number(localStorage.getItem('vortex_user_matches') || 0);
+    const steamId = getLocalState('caliber_steam_id') || undefined;
+    const steamId64 = getLocalState('caliber_steam_id64') || undefined;
+    const faceitNick = getLocalState('caliber_faceit_nickname') || undefined;
+    const matches = Number(getLocalState('caliber_user_matches') || 0);
     const balance = getVortexWalletBalance();
-    const coins = Number(localStorage.getItem('vortex_user_coins') || 0);
-    const xp = Number(localStorage.getItem('vortex_user_xp') || 0);
+    const coins = Number(getLocalState('caliber_user_coins') || 0);
+    const xp = Number(getLocalState('caliber_user_xp') || 0);
 
     saveProfileToCloud({
       id: steamId64 || currentGamerTag,
@@ -1285,7 +1303,7 @@ export const VortexDashboard: React.FC<VortexDashboardProps> = ({
   // User Clan Data sync for Tournaments & Leaderboards
   const userClanData = useMemo(() => {
     try {
-      const saved = localStorage.getItem('vortex_user_clan_data');
+      const saved = getLocalState('caliber_user_clan_data');
       if (saved) {
         const parsed = JSON.parse(saved);
         if (parsed.stats && (parsed.stats.matches > 0 || parsed.stats.tournamentsWon > 0 || parsed.stats.streak > 0 || parsed.stats.avgElo > 0 || parsed.stats.winrate !== '0%')) {
@@ -1299,7 +1317,7 @@ export const VortexDashboard: React.FC<VortexDashboardProps> = ({
             streak: 0,
           };
         }
-        if (parsed.members && !parsed.members.some((m: any) => ['vortex_ghost', 'silent_clutcher', 'shadowstrike'].includes(m.name?.toLowerCase()))) {
+        if (parsed.members && !parsed.members.some((m: any) => ['phantom_clutch', 'vortex_ghost', 'silent_clutcher', 'shadowstrike'].includes(m.name?.toLowerCase()))) {
           return parsed;
         }
       }
@@ -1376,7 +1394,7 @@ export const VortexDashboard: React.FC<VortexDashboardProps> = ({
   // Interactive Squad Radar Handlers (Option 2)
   const handleRecruitToSquad = (player: SoloGrinder) => {
     try {
-      const saved = localStorage.getItem('vortex_user_clan_data');
+      const saved = getLocalState('caliber_user_clan_data');
       let clan = saved ? JSON.parse(saved) : null;
       if (!clan) {
         clan = {
@@ -1408,7 +1426,7 @@ export const VortexDashboard: React.FC<VortexDashboardProps> = ({
         isUser: false
       };
       clan.members.push(newMember);
-      localStorage.setItem('vortex_user_clan_data', JSON.stringify(clan));
+      setLocalState('caliber_user_clan_data', JSON.stringify(clan));
       setClanRevision(prev => prev + 1);
 
       // Also update partySlots
@@ -1442,12 +1460,12 @@ export const VortexDashboard: React.FC<VortexDashboardProps> = ({
 
   const handleRemoveFromSquad = (playerId: string) => {
     try {
-      const saved = localStorage.getItem('vortex_user_clan_data');
+      const saved = getLocalState('caliber_user_clan_data');
       if (!saved) return;
       const clan = JSON.parse(saved);
       if (!Array.isArray(clan.members)) return;
       clan.members = clan.members.filter((m: any) => m.id !== playerId && !m.isCaptain && !m.isUser);
-      localStorage.setItem('vortex_user_clan_data', JSON.stringify(clan));
+      setLocalState('caliber_user_clan_data', JSON.stringify(clan));
       setClanRevision(prev => prev + 1);
 
       // Also update partySlots
@@ -1459,7 +1477,7 @@ export const VortexDashboard: React.FC<VortexDashboardProps> = ({
 
   const handleAutoFillSquad = () => {
     try {
-      const saved = localStorage.getItem('vortex_user_clan_data');
+      const saved = getLocalState('caliber_user_clan_data');
       let clan = saved ? JSON.parse(saved) : null;
       if (!clan) {
         clan = {
@@ -1492,7 +1510,7 @@ export const VortexDashboard: React.FC<VortexDashboardProps> = ({
           });
         }
       }
-      localStorage.setItem('vortex_user_clan_data', JSON.stringify(clan));
+      setLocalState('caliber_user_clan_data', JSON.stringify(clan));
       setClanRevision(prev => prev + 1);
 
       // Sync partySlots
@@ -1527,7 +1545,7 @@ export const VortexDashboard: React.FC<VortexDashboardProps> = ({
     prizeAmount?: number;
   }>>(() => {
     try {
-      const saved = localStorage.getItem('vortex_tournament_bracket_states');
+      const saved = getLocalState('caliber_tournament_bracket_states');
       if (saved) return JSON.parse(saved);
     } catch (_) {}
     return {};
@@ -1547,7 +1565,7 @@ export const VortexDashboard: React.FC<VortexDashboardProps> = ({
         }
       };
       try {
-        localStorage.setItem('vortex_tournament_bracket_states', JSON.stringify(updated));
+        setLocalState('caliber_tournament_bracket_states', JSON.stringify(updated));
       } catch (_) {}
       return updated;
     });
@@ -1558,7 +1576,7 @@ export const VortexDashboard: React.FC<VortexDashboardProps> = ({
       const updated = { ...prev };
       delete updated[tourneyKey];
       try {
-        localStorage.setItem('vortex_tournament_bracket_states', JSON.stringify(updated));
+        setLocalState('caliber_tournament_bracket_states', JSON.stringify(updated));
       } catch (_) {}
       return updated;
     });
@@ -1607,7 +1625,7 @@ export const VortexDashboard: React.FC<VortexDashboardProps> = ({
             if (newItems.length === 0) return prev;
             const updated = [...newItems, ...prev];
             try {
-              localStorage.setItem('vortex_custom_tournaments', JSON.stringify(updated));
+              setLocalState('caliber_custom_tournaments', JSON.stringify(updated));
             } catch (_) {}
             return updated;
           });
@@ -1684,8 +1702,8 @@ export const VortexDashboard: React.FC<VortexDashboardProps> = ({
       const custom = e as CustomEvent<number>;
       setVortexCoinsBalance(custom.detail);
     };
-    window.addEventListener('vortex_wallet_updated', handleWallet);
-    return () => window.removeEventListener('vortex_wallet_updated', handleWallet);
+    window.addEventListener('caliber_wallet_updated', handleWallet); window.addEventListener('vortex_wallet_updated', handleWallet);
+    return () => window.removeEventListener('caliber_wallet_updated', handleWallet); window.removeEventListener('vortex_wallet_updated', handleWallet);
   }, []);
 
   useEffect(() => {
@@ -1694,8 +1712,8 @@ export const VortexDashboard: React.FC<VortexDashboardProps> = ({
       setVerificationModalType(custom.detail?.type || 'vip');
       setShowVerificationModal(true);
     };
-    window.addEventListener('vortex_open_verification_modal', handleOpenVerification);
-    return () => window.removeEventListener('vortex_open_verification_modal', handleOpenVerification);
+    window.addEventListener('caliber_open_verification_modal', handleOpenVerification); window.addEventListener('vortex_open_verification_modal', handleOpenVerification);
+    return () => window.removeEventListener('caliber_open_verification_modal', handleOpenVerification); window.removeEventListener('vortex_open_verification_modal', handleOpenVerification);
   }, []);
 
   // =========================================================================
@@ -1744,7 +1762,7 @@ export const VortexDashboard: React.FC<VortexDashboardProps> = ({
       subtitle: 'Bracket check-in opens in 1h 45m. Make sure all 5 players have Anti-Cheat active.',
       time: '42m ago',
       read: false,
-      data: { tournamentId: 'vortex-global-open' },
+      data: { tournamentId: 'caliber-global-open' },
     },
     {
       id: 'notif-4',
@@ -1794,7 +1812,7 @@ export const VortexDashboard: React.FC<VortexDashboardProps> = ({
     setNotifications(prev => prev.map(n => n.id === id ? { ...n, read: true, actionStatus: 'accepted' } : n));
     setDashboardToast('✓ Match Confirmed! Server connection command copied to clipboard.');
     if (navigator.clipboard) {
-      navigator.clipboard.writeText('connect 185.122.54.12:27015; password vortex').catch(() => {});
+      navigator.clipboard.writeText('connect 185.122.54.12:27015; password cc_play').catch(() => {});
     }
   };
 
@@ -2123,7 +2141,7 @@ export const VortexDashboard: React.FC<VortexDashboardProps> = ({
 
   // Anti-Cheat Active State (Stored in localStorage, default false)
   const [isAntiCheatActive, setIsAntiCheatActive] = useState<boolean>(() => {
-    const saved = localStorage.getItem('vortex_anticheat_active');
+    const saved = getLocalState('caliber_anticheat_active');
     return saved === 'true';
   });
 
@@ -2152,7 +2170,7 @@ export const VortexDashboard: React.FC<VortexDashboardProps> = ({
 
     setIsAntiCheatActive(true);
     setShowAcPrompt(false);
-    localStorage.setItem('vortex_anticheat_active', 'true');
+    setLocalState('caliber_anticheat_active', 'true');
     setDashboardToast('Launching Anti-Cheat client & activating Ring-0 driver...');
     setTimeout(() => setDashboardToast(null), 3500);
   };
@@ -2161,7 +2179,7 @@ export const VortexDashboard: React.FC<VortexDashboardProps> = ({
     sound.playClick();
     setIsAntiCheatActive(prev => {
       const next = !prev;
-      localStorage.setItem('vortex_anticheat_active', String(next));
+      setLocalState('caliber_anticheat_active', String(next));
       if (next) {
         setShowAcPrompt(false);
       }
@@ -2239,14 +2257,14 @@ export const VortexDashboard: React.FC<VortexDashboardProps> = ({
       bio: currentBio || 'Official verified player on Caliber Clutch.',
       role: currentRole || 'AWPer / Entry',
       crosshairCode: currentCrosshairCode || 'CSGO-4w29A-6yvKP-6k7kF-3xK2v-d9HkQ',
-      steamId: localStorage.getItem('vortex_steam_id') || 'STEAM_0:1:43918293',
+      steamId: getLocalState('caliber_steam_id') || 'STEAM_0:1:43918293',
       sens: '800 DPI • 1.15 Sens • 1280x960 4:3 Stretched',
       bestMap: 'Mirage',
       bestMapWin: 0
     },
     ...(() => {
       try {
-        const raw = localStorage.getItem('vortex_platform_registered_players');
+        const raw = getLocalState('caliber_platform_registered_players');
         if (!raw) return [];
         const stored: any[] = JSON.parse(raw);
         return stored
@@ -2276,9 +2294,9 @@ export const VortexDashboard: React.FC<VortexDashboardProps> = ({
             hs: p.hs || (p.matches ? '0.0%' : '--'),
             verification: p.verification || 'none',
             isUser: false,
-            bio: p.bio || 'Verified VORTEX registered player.',
+            bio: p.bio || 'Verified Caliber Clutch registered player.',
             role: p.role || 'Rifler',
-            crosshairCode: 'CSGO-VTX01-PLAYR-AIM00-CS288',
+            crosshairCode: 'CSGO-CC001-PLAYR-AIM00-CS288',
             steamId: p.steamId || 'STEAM_0:1:00000000',
             sens: '800 DPI • 1.10 Sens',
             bestMap: 'Mirage',
@@ -2666,7 +2684,7 @@ export const VortexDashboard: React.FC<VortexDashboardProps> = ({
       const demoUrl = URL.createObjectURL(demoBlob);
       const downloadLink = document.createElement('a');
       downloadLink.href = demoUrl;
-      downloadLink.download = `vortex-match-${matchName}.dem`;
+      downloadLink.download = `caliber-match-${matchName}.dem`;
       document.body.appendChild(downloadLink);
       downloadLink.click();
       document.body.removeChild(downloadLink);
@@ -3020,7 +3038,7 @@ export const VortexDashboard: React.FC<VortexDashboardProps> = ({
                   sound.playClick();
                   const next = !adminBypassComingSoon;
                   setAdminBypassComingSoon(next);
-                  localStorage.setItem('vortex_admin_bypass_coming_soon', String(next));
+                  setLocalState('caliber_admin_bypass_coming_soon', String(next));
                 }}
                 className="px-3.5 py-1.5 rounded-xl bg-amber-500/20 hover:bg-amber-500/30 border border-amber-500/50 text-amber-200 font-bold transition flex items-center gap-2 cursor-pointer shadow-sm hover:scale-105 active:scale-95"
                 title="Toggle between viewing the Live Admin Platform and testing what normal visitors see"
@@ -3122,7 +3140,7 @@ export const VortexDashboard: React.FC<VortexDashboardProps> = ({
                             sound.playTournamentVictory();
                             confetti({ particleCount: 75, spread: 80, origin: { y: 0.6 } });
                             setIsSubscribedNotify(true);
-                            localStorage.setItem('vortex_notified_coming_soon', 'true');
+                            setLocalState('caliber_notified_coming_soon', 'true');
                             setDashboardToast('🎉 You are on the VIP priority notification list! Prepare your crosshair — launch announcement coming soon.');
                             setTimeout(() => setDashboardToast(null), 6000);
                           }}
@@ -4828,7 +4846,7 @@ export const VortexDashboard: React.FC<VortexDashboardProps> = ({
                                     const newItems = mapped.filter((m: any) => !existingIds.has(m.id));
                                     const updated = [...newItems, ...prev];
                                     try {
-                                      localStorage.setItem('vortex_custom_tournaments', JSON.stringify(updated));
+                                      setLocalState('caliber_custom_tournaments', JSON.stringify(updated));
                                     } catch (_) {}
                                     return updated;
                                   });
@@ -5294,7 +5312,7 @@ export const VortexDashboard: React.FC<VortexDashboardProps> = ({
                             setCustomTournaments((prev: any[]) => {
                               const next = [createdItem, ...prev];
                               try {
-                                localStorage.setItem('vortex_custom_tournaments', JSON.stringify(next));
+                                setLocalState('caliber_custom_tournaments', JSON.stringify(next));
                               } catch (_) {}
                               return next;
                             });
@@ -5304,7 +5322,7 @@ export const VortexDashboard: React.FC<VortexDashboardProps> = ({
                             setRegisteredTourneys((prev: string[]) => {
                               const next = Array.from(new Set([...prev, createdItem.title]));
                               try {
-                                localStorage.setItem('vortex_registered_tournaments', JSON.stringify(next));
+                                setLocalState('caliber_registered_tournaments', JSON.stringify(next));
                               } catch (_) {}
                               return next;
                             });
@@ -5681,7 +5699,7 @@ export const VortexDashboard: React.FC<VortexDashboardProps> = ({
                                     setCustomTournaments(prev => {
                                       const next = prev.filter((item: any) => item.id !== t.id);
                                       try {
-                                        localStorage.setItem('vortex_custom_tournaments', JSON.stringify(next));
+                                        setLocalState('caliber_custom_tournaments', JSON.stringify(next));
                                       } catch (_) {}
                                       return next;
                                     });
@@ -5912,7 +5930,7 @@ export const VortexDashboard: React.FC<VortexDashboardProps> = ({
               currentCountry={currentCountry}
               onUpdateClanTag={(newTag) => {
                 setCurrentClanTag(newTag);
-                localStorage.setItem('vortex_user_clantag', newTag);
+                setLocalState('caliber_user_clantag', newTag);
               }}
               onNavigateTab={(tab) => {
                 setActiveTab(tab as VortexTab);
@@ -6508,7 +6526,7 @@ export const VortexDashboard: React.FC<VortexDashboardProps> = ({
                     </h3>
                     <p className="text-xs text-[#94A3B8] mt-1">
                       {isAntiCheatActive 
-                        ? 'vortex_kernel_ac.sys verified and running at Ring-0.' 
+                        ? 'caliber_kernel_ac.sys verified and running at Ring-0.' 
                         : 'The driver is currently stopped. Launch Anti-Cheat to queue for matches.'}
                     </p>
                   </div>
@@ -6568,7 +6586,7 @@ export const VortexDashboard: React.FC<VortexDashboardProps> = ({
             const displayHs = (viewedPlayer && viewedPlayer.matches > 0) ? (viewedPlayer.hs || '--') : (displayMatches > 0 ? '0.0%' : '--');
             const displaySteamId = viewedPlayer ? (viewedPlayer.steamId || 'STEAM_0:1:88291039') : 'STEAM_0:1:43918293';
             const activeSteamId64 = !isViewingOther
-              ? (localStorage.getItem('vortex_steam_id64') || convertSteam2ToSteam64(displaySteamId) || '76561198089448834')
+              ? (getLocalState('caliber_steam_id64') || convertSteam2ToSteam64(displaySteamId) || '76561198089448834')
               : (convertSteam2ToSteam64(displaySteamId) || '76561198089448834');
             const displayCrosshairCode = viewedPlayer ? (viewedPlayer.crosshairCode || 'CSGO-vortx-CS299-PRO88-MATCH') : currentCrosshairCode;
             const displaySens = viewedPlayer ? (viewedPlayer.sens || '800 DPI • 1.15 Sens • 1280x960 4:3') : '800 DPI • 1.15 Sens • 1280x960 4:3 Stretched';
@@ -6863,7 +6881,7 @@ export const VortexDashboard: React.FC<VortexDashboardProps> = ({
                         <button
                           onClick={() => {
                             sound.playSelect();
-                            window.dispatchEvent(new CustomEvent('vortex_open_withdraw_modal'));
+                            window.dispatchEvent(new CustomEvent('caliber_open_withdraw_modal')); window.dispatchEvent(new CustomEvent('vortex_open_withdraw_modal'));
                           }}
                           className="px-3 py-1.5 rounded-lg bg-gradient-to-r from-amber-500 to-orange-500 hover:from-amber-400 hover:to-orange-400 text-slate-950 font-mono font-black text-xs transition cursor-pointer shadow-sm hover:scale-105 active:scale-95"
                         >
@@ -7721,7 +7739,7 @@ export const VortexDashboard: React.FC<VortexDashboardProps> = ({
                                 onClick={() => {
                                   sound.playClick();
                                   if (navigator.clipboard) {
-                                    navigator.clipboard.writeText('connect 185.122.54.12:27015; password vortex');
+                                    navigator.clipboard.writeText('connect 185.122.54.12:27015; password cc_play');
                                   }
                                   setDashboardToast('Console connection command copied to clipboard.');
                                 }}
@@ -7813,7 +7831,7 @@ export const VortexDashboard: React.FC<VortexDashboardProps> = ({
                     setNotificationsOpen(false);
                   }}
                   className="px-2.5 py-1 rounded-lg bg-[#A3E635]/15 hover:bg-[#A3E635]/25 border border-[#A3E635]/40 text-[#A3E635] font-bold transition flex items-center gap-1.5 cursor-pointer shadow-sm"
-                  title="Show VORTEX Party Invite dialog with Accept and Decline"
+                  title="Show Caliber Clutch Party Invite dialog with Accept and Decline"
                 >
                   <Users className="w-3 h-3 text-[#A3E635]" />
                   <span>Show Party Invite</span>
@@ -7830,7 +7848,7 @@ export const VortexDashboard: React.FC<VortexDashboardProps> = ({
         </>
       )}
 
-      {/* VORTEX Membership Upgrade Modal */}
+      {/* Caliber Clutch Membership Upgrade Modal */}
       {showPremiumModal && (
         <div className="fixed inset-0 z-50 bg-black/90 backdrop-blur-md flex items-center justify-center p-4">
           <div className="relative w-full max-w-2xl bg-[#0E1017] border border-amber-500/50 rounded-3xl p-6 sm:p-8 shadow-2xl space-y-6">
@@ -8029,7 +8047,7 @@ export const VortexDashboard: React.FC<VortexDashboardProps> = ({
               setRegisteredTourneys(prev => {
                 const next = Array.from(new Set([...prev, tourneyTitle]));
                 try {
-                  localStorage.setItem('vortex_registered_tournaments', JSON.stringify(next));
+                  setLocalState('caliber_registered_tournaments', JSON.stringify(next));
                 } catch (_) {}
                 return next;
               });
@@ -8049,7 +8067,7 @@ export const VortexDashboard: React.FC<VortexDashboardProps> = ({
       )}
 
 
-      {/* VORTEX OFFICIAL PARTNERS & SPONSORSHIPS MODAL (HLTV STANDARD) */}
+      {/* CALIBER CLUTCH OFFICIAL PARTNERS & SPONSORSHIPS MODAL (HLTV STANDARD) */}
       <VortexPartnersModal
         isOpen={showPartnersModal}
         onClose={() => setShowPartnersModal(false)}
@@ -8549,7 +8567,7 @@ export const VortexDashboard: React.FC<VortexDashboardProps> = ({
                             onClick={() => {
                               sound.playJoinScrim();
                               updateTourneyBracketStage(tourneyKey, 'sf');
-                              setDashboardToast(`✓ QF Won! Advanced to Semifinals against Vortex Prime!`);
+                              setDashboardToast(`✓ QF Won! Advanced to Semifinals against Apex Vanguard!`);
                             }}
                             className="w-full py-2 rounded-xl bg-gradient-to-r from-amber-500 to-[#A3E635] text-slate-950 font-mono font-bold text-xs cursor-pointer transition hover:brightness-110 active:scale-95 shadow"
                           >
@@ -8563,7 +8581,7 @@ export const VortexDashboard: React.FC<VortexDashboardProps> = ({
                         <div className="flex justify-between items-center text-xs font-mono">
                           <span className="text-white font-bold flex items-center gap-1.5">
                             <CountryFlag code="DE" size="xs" />
-                            Vortex Prime
+                            Apex Vanguard
                           </span>
                           <span className="font-bold text-emerald-400">{isBo1Playoffs ? '13 ✓' : '2 ✓'}</span>
                         </div>
@@ -8612,7 +8630,7 @@ export const VortexDashboard: React.FC<VortexDashboardProps> = ({
                         </span>
                       </div>
 
-                      {/* SF-1: User Clan vs Vortex Prime */}
+                      {/* SF-1: User Clan vs Apex Vanguard */}
                       <div className={`p-3.5 rounded-2xl border transition space-y-2 ${
                         stage === 'sf'
                           ? 'bg-gradient-to-b from-[#1E1926] to-[#121420] border-amber-500/50 shadow-lg'
@@ -8630,7 +8648,7 @@ export const VortexDashboard: React.FC<VortexDashboardProps> = ({
                         <div className="flex justify-between items-center text-xs font-mono text-slate-400">
                           <span className="flex items-center gap-1.5">
                             <CountryFlag code="DE" size="xs" />
-                            Vortex Prime
+                            Apex Vanguard
                           </span>
                           <span>{stage === 'sf' ? '11' : stage === 'final' || stage === 'champion' ? '14' : 'TBD'}</span>
                         </div>
@@ -8737,14 +8755,14 @@ export const VortexDashboard: React.FC<VortexDashboardProps> = ({
 
                               // Update clan stats in localStorage
                               try {
-                                const rawClan = localStorage.getItem('vortex_user_clan_data');
+                                const rawClan = getLocalState('caliber_user_clan_data');
                                 if (rawClan) {
                                   const parsedClan = JSON.parse(rawClan);
                                   parsedClan.stats.tournamentsWon = (parsedClan.stats.tournamentsWon || 0) + 1;
                                   parsedClan.stats.wins = (parsedClan.stats.wins || 0) + 3;
                                   parsedClan.stats.matches = (parsedClan.stats.matches || 0) + 3;
                                   parsedClan.stats.streak = (parsedClan.stats.streak || 0) + 3;
-                                  localStorage.setItem('vortex_user_clan_data', JSON.stringify(parsedClan));
+                                  setLocalState('caliber_user_clan_data', JSON.stringify(parsedClan));
                                 }
                               } catch (_) {}
 
@@ -9121,7 +9139,7 @@ export const VortexDashboard: React.FC<VortexDashboardProps> = ({
                         setRegisteredTourneys(prev => {
                           const next = Array.from(new Set([...prev, tourneyTitle]));
                           try {
-                            localStorage.setItem('vortex_registered_tournaments', JSON.stringify(next));
+                            setLocalState('caliber_registered_tournaments', JSON.stringify(next));
                           } catch (_) {}
                           return next;
                         });
@@ -9246,7 +9264,7 @@ export const VortexDashboard: React.FC<VortexDashboardProps> = ({
         </div>
       )}
 
-      {/* VORTEX OFFICIAL VERIFICATION INFORMATION MODAL */}
+      {/* CALIBER CLUTCH OFFICIAL VERIFICATION INFORMATION MODAL */}
       {showVerificationModal && (
         <div 
           onClick={() => {
@@ -9751,8 +9769,8 @@ export const VortexDashboard: React.FC<VortexDashboardProps> = ({
                 {/* Verified via FACEIT Telemetry Sync (Automatic SteamID64 Sync) */}
                 <div className="pt-3 border-t border-white/[0.06] space-y-3">
                   {(() => {
-                    const activeFaceitNick = (draftFaceitNickname || faceitNickname || localStorage.getItem('vortex_faceit_nickname') || 'bLocKeeRz').trim().replace(/^https?:\/\/(www\.)?faceit\.com\/[a-z]{2}\/players\/?/i, '').replace(/\/$/, '');
-                    const activeSteamId = localStorage.getItem('vortex_steam_id64') || convertSteam2ToSteam64(localStorage.getItem('vortex_steam_id') || 'STEAM_0:1:43918293') || '76561198012241163';
+                    const activeFaceitNick = (draftFaceitNickname || faceitNickname || getLocalState('caliber_faceit_nickname') || 'bLocKeeRz').trim().replace(/^https?:\/\/(www\.)?faceit\.com\/[a-z]{2}\/players\/?/i, '').replace(/\/$/, '');
+                    const activeSteamId = getLocalState('caliber_steam_id64') || convertSteam2ToSteam64(getLocalState('caliber_steam_id') || 'STEAM_0:1:43918293') || '76561198012241163';
 
                     return (
                       <>
@@ -10069,7 +10087,7 @@ export const VortexDashboard: React.FC<VortexDashboardProps> = ({
       )}
 
       {/* ======================================================== */}
-      {/* VORTEX MINIMAL CLEAN "INVITE TO PARTY" MODAL DIALOG       */}
+      {/* CALIBER CLUTCH MINIMAL CLEAN "INVITE TO PARTY" MODAL DIALOG       */}
       {/* ======================================================== */}
       {activePartyInvite && (
         <div 
@@ -10109,7 +10127,7 @@ export const VortexDashboard: React.FC<VortexDashboardProps> = ({
             <div className="px-8 pt-4 pb-6 flex items-center gap-6">
               {/* Left Column: Photo with Name Badge UNDER the Photo */}
               <div className="flex flex-col items-center gap-2.5 shrink-0 select-none">
-                {/* Photo / Avatar with VORTEX Glowing Border and Status Dot */}
+                {/* Photo / Avatar with Caliber Glowing Border and Status Dot */}
                 <div className="relative">
                   {(!activePartyInvite.avatar && activePartyInvite.sender === 'M18') ? (
                     <div className="w-[72px] h-[72px] rounded-2xl bg-[#090C12] border-2 border-[#A3E635] p-2 flex flex-col items-center justify-center shadow-[0_0_20px_rgba(163,230,53,0.35)] relative overflow-hidden">
@@ -10184,7 +10202,7 @@ export const VortexDashboard: React.FC<VortexDashboardProps> = ({
       )}
 
       {/* ======================================================== */}
-      {/* VORTEX CS2 MATCH ROOM & MAP VETO MODAL                   */}
+      {/* CALIBER CLUTCH CS2 MATCH ROOM & MAP VETO MODAL                   */}
       {/* ======================================================== */}
       {isMatchRoomOpen && (
         <VortexMatchRoom
@@ -10201,9 +10219,9 @@ export const VortexDashboard: React.FC<VortexDashboardProps> = ({
             setCurrentUserElo(nextElo);
             setCurrentUserLevel(nextLevel);
             try {
-              localStorage.setItem('vortex_user_matches', nextMatches.toString());
-              localStorage.setItem('vortex_user_elo', nextElo.toString());
-              localStorage.setItem('vortex_user_level', nextLevel.toString());
+              setLocalState('caliber_user_matches', nextMatches.toString());
+              setLocalState('caliber_user_elo', nextElo.toString());
+              setLocalState('caliber_user_level', nextLevel.toString());
             } catch (_) {}
             setDashboardToast(won ? `🎉 Match Won! +${eloDelta} ELO (New ELO: ${nextElo})` : `Match Finished. -${eloDelta} ELO (New ELO: ${nextElo})`);
           }}

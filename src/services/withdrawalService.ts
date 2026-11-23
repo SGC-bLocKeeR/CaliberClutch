@@ -1,9 +1,9 @@
 // ========================================================
-// VORTEX GAMING - WITHDRAWAL & CASHOUT SERVICE
+// CALIBER CLUTCH - WITHDRAWAL & CASHOUT SERVICE
 // Real Steam Trade Offer Bot Dispatch & Crypto Settlement
 // ========================================================
 
-import { CS2Skin, isValidSteamTradeUrl, getSavedSteamTradeUrl, deductVortexWalletBalance, getVortexWalletBalance } from './skinDeliveryService';
+import { CS2Skin, isValidSteamTradeUrl, getSavedSteamTradeUrl, deductCaliberWalletBalance, getCaliberWalletBalance } from './skinDeliveryService';
 
 export interface WithdrawalHistoryItem {
   id: string;
@@ -22,8 +22,10 @@ export interface WithdrawalHistoryItem {
   weapon?: string;
 }
 
-const STORAGE_KEY_USER_SKINS = 'vortex_user_skins_inventory_v1';
-const STORAGE_KEY_WITHDRAW_HISTORY = 'vortex_withdrawal_history_v1';
+const STORAGE_KEY_USER_SKINS = 'caliber_user_skins_inventory_v1';
+const STORAGE_KEY_WITHDRAW_HISTORY = 'caliber_withdrawal_history_v1';
+const LEGACY_STORAGE_KEY_USER_SKINS = 'vortex_user_skins_inventory_v1';
+const LEGACY_STORAGE_KEY_WITHDRAW_HISTORY = 'vortex_withdrawal_history_v1';
 
 // Starter items for user's platform vault if brand new
 const STARTER_VAULT_SKINS: CS2Skin[] = [
@@ -59,7 +61,7 @@ const STARTER_VAULT_SKINS: CS2Skin[] = [
 
 export const getUserSkinInventory = (): CS2Skin[] => {
   if (typeof window === 'undefined') return STARTER_VAULT_SKINS;
-  const saved = localStorage.getItem(STORAGE_KEY_USER_SKINS);
+  const saved = localStorage.getItem(STORAGE_KEY_USER_SKINS) || localStorage.getItem(LEGACY_STORAGE_KEY_USER_SKINS);
   if (!saved) {
     localStorage.setItem(STORAGE_KEY_USER_SKINS, JSON.stringify(STARTER_VAULT_SKINS));
     return STARTER_VAULT_SKINS;
@@ -77,6 +79,7 @@ export const addUserSkinToInventory = (skin: CS2Skin): void => {
   const items = getUserSkinInventory();
   const updated = [skin, ...items];
   localStorage.setItem(STORAGE_KEY_USER_SKINS, JSON.stringify(updated));
+  window.dispatchEvent(new CustomEvent('caliber_inventory_updated', { detail: updated }));
   window.dispatchEvent(new CustomEvent('vortex_inventory_updated', { detail: updated }));
 };
 
@@ -85,6 +88,7 @@ export const removeUserSkinFromInventory = (skinId: string): void => {
   const items = getUserSkinInventory();
   const updated = items.filter(s => s.id !== skinId);
   localStorage.setItem(STORAGE_KEY_USER_SKINS, JSON.stringify(updated));
+  window.dispatchEvent(new CustomEvent('caliber_inventory_updated', { detail: updated }));
   window.dispatchEvent(new CustomEvent('vortex_inventory_updated', { detail: updated }));
 };
 
@@ -94,7 +98,7 @@ export const removeUserSkinFromInventory = (skinId: string): void => {
 
 export const getWithdrawalHistory = (): WithdrawalHistoryItem[] => {
   if (typeof window === 'undefined') return [];
-  const saved = localStorage.getItem(STORAGE_KEY_WITHDRAW_HISTORY);
+  const saved = localStorage.getItem(STORAGE_KEY_WITHDRAW_HISTORY) || localStorage.getItem(LEGACY_STORAGE_KEY_WITHDRAW_HISTORY);
   if (!saved) return [];
   try {
     const parsed = JSON.parse(saved);
@@ -109,6 +113,7 @@ export const addWithdrawalHistoryItem = (item: WithdrawalHistoryItem): void => {
   const history = getWithdrawalHistory();
   const updated = [item, ...history];
   localStorage.setItem(STORAGE_KEY_WITHDRAW_HISTORY, JSON.stringify(updated));
+  window.dispatchEvent(new CustomEvent('caliber_withdraw_history_updated', { detail: updated }));
   window.dispatchEvent(new CustomEvent('vortex_withdraw_history_updated', { detail: updated }));
 };
 
@@ -146,7 +151,7 @@ export const executeSkinWithdrawal = async (
       body: JSON.stringify({
         tradeUrl,
         skin,
-        steamId64: localStorage.getItem('vortex_steam_id64') || '76561198089448834'
+        steamId64: localStorage.getItem('caliber_steam_id64') || localStorage.getItem('vortex_steam_id64') || '76561198089448834'
       })
     });
     if (res.ok) {
@@ -156,7 +161,7 @@ export const executeSkinWithdrawal = async (
       }
     }
   } catch (e) {
-    console.warn('[VORTEX Withdraw] Remote withdraw dispatch warning:', e);
+    console.warn('[Caliber Withdraw] Remote withdraw dispatch warning:', e);
   }
 
   // Remove skin from user vault
@@ -201,7 +206,7 @@ export const executeCryptoWithdrawal = async (
   recipientAddress: string,
   onProgress?: (step: number, message: string) => void
 ): Promise<{ success: boolean; txHash: string; message: string }> => {
-  const currentBalance = getVortexWalletBalance();
+  const currentBalance = getCaliberWalletBalance();
   if (currentBalance < amountEur) {
     throw new Error(`Insufficient wallet balance. You have ${currentBalance.toFixed(2)} €, but requested ${amountEur.toFixed(2)} €.`);
   }
@@ -216,7 +221,7 @@ export const executeCryptoWithdrawal = async (
   }
 
   // Deduct balance from user wallet
-  const deducted = deductVortexWalletBalance(amountEur);
+  const deducted = deductCaliberWalletBalance(amountEur);
   if (!deducted) {
     throw new Error('Failed to deduct balance from wallet.');
   }

@@ -16,8 +16,10 @@ export interface ClanSyncStatus {
   message?: string;
 }
 
-const STORAGE_KEY_USER_CLAN = 'vortex_user_clan_data';
-const STORAGE_KEY_LAST_SYNC = 'vortex_clan_last_supabase_sync';
+const STORAGE_KEY_USER_CLAN = 'caliber_user_clan_data';
+const STORAGE_KEY_LAST_SYNC = 'caliber_clan_last_supabase_sync';
+const getStoredClan = (): string | null => localStorage.getItem(STORAGE_KEY_USER_CLAN) || localStorage.getItem('vortex_user_clan_data');
+const getStoredLastSync = (): string | null => localStorage.getItem(STORAGE_KEY_LAST_SYNC) || localStorage.getItem('vortex_clan_last_supabase_sync');
 
 /**
  * Check if the Supabase connection is healthy and if clan tables exist
@@ -89,7 +91,7 @@ export async function fetchClanFromCloud(clanTag: string = 'CC'): Promise<ClanDa
 
   // Fallback to local storage
   try {
-    const local = localStorage.getItem(STORAGE_KEY_USER_CLAN);
+    const local = getStoredClan();
     if (local) return JSON.parse(local);
   } catch (_) {}
 
@@ -161,7 +163,7 @@ export async function saveClanToCloud(clan: ClanData): Promise<{
  * Get current sync status
  */
 export function getLocalClanSyncStatus(clan: ClanData): ClanSyncStatus {
-  const lastSync = localStorage.getItem(STORAGE_KEY_LAST_SYNC);
+  const lastSync = getStoredLastSync();
   return {
     isConnected: true,
     isSynced: !!lastSync,

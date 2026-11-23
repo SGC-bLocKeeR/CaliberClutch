@@ -1,7 +1,7 @@
 {
-  "name": "vortex-steam-bot",
+  "name": "caliber-steam-bot",
   "version": "1.0.0",
-  "description": "24/7 Automated Steam P2P Trading Daemon for VORTEX Gaming",
+  "description": "24/7 Automated Steam P2P Trading Daemon for Caliber Clutch",
   "main": "src/bot.js",
   "type": "module",
   "scripts": {

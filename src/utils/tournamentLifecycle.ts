@@ -59,7 +59,7 @@ export const SCHEDULED_TOURNAMENTS: ScheduledCircuitEvent[] = [
     liveMatchDescription: 'Group A Opening: Team Spirit vs FURIA (BO3 Series)'
   },
   {
-    id: 'vortex-global',
+    id: 'caliber-global',
     name: 'Caliber Clutch Global Circuit Season 1',
     startDate: '2026-11-14T16:00:00Z',
     endDate: '2026-11-18T22:00:00Z',

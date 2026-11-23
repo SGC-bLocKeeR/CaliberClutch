@@ -76,7 +76,7 @@ const EUROPEAN_CANDIDATES: CandidatePlayer[] = [
   { name: 'balkan_fury', code: 'AL', countryName: 'Albania', avatar: 'https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?auto=format&fit=crop&w=150&q=80' },
   { name: 'shroud_al', code: 'XK', countryName: 'Kosovo', avatar: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?auto=format&fit=crop&w=150&q=80' },
   { name: 'nordic_aim', code: 'SE', countryName: 'Sweden', avatar: 'https://images.unsplash.com/photo-1500648767791-00dcc994a43e?auto=format&fit=crop&w=150&q=80' },
-  { name: 'vortex_ghost', code: 'DE', countryName: 'Germany', avatar: 'https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?auto=format&fit=crop&w=150&q=80' },
+  { name: 'phantom_clutch', code: 'DE', countryName: 'Germany', avatar: 'https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?auto=format&fit=crop&w=150&q=80' },
   { name: 'z1mmy_fr', code: 'FR', countryName: 'France', avatar: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=150&q=80' },
   { name: 'nascar_pl', code: 'PL', countryName: 'Poland', avatar: 'https://images.unsplash.com/photo-1522075469751-3a6694fb2f61?auto=format&fit=crop&w=150&q=80' },
   { name: 'd1on_ua', code: 'UA', countryName: 'Ukraine', avatar: 'https://images.unsplash.com/photo-1517841905240-472988babdf9?auto=format&fit=crop&w=150&q=80' },

@@ -1,5 +1,5 @@
 // ========================================================
-// VORTEX GAMING - 24/7 AUTOMATED STEAM TRADE BOT DAEMON
+// CALIBER CLUTCH - 24/7 AUTOMATED STEAM TRADE BOT DAEMON
 // Handles CS2 Skin Deposits & Withdrawals via Official Steam API
 // ========================================================
 
@@ -17,13 +17,13 @@ const {
   STEAM_SHARED_SECRET,
   STEAM_IDENTITY_SECRET,
   STEAM_API_KEY,
-  VORTEX_API_URL = 'http://localhost:5175/api',
-  VORTEX_BOT_SECRET_KEY = 'vortex_super_secure_bot_token_2026',
+  CALIBER_API_URL = 'http://localhost:5175/api',
+  CALIBER_BOT_SECRET_KEY = 'caliber_super_secure_bot_token_2026',
   BOT_POLL_INTERVAL_MS = '3000'
 } = process.env;
 
 console.log('========================================================');
-console.log('🎮 VORTEX GAMING - STEAM FAST-TRACK BOT SERVICE');
+console.log('🎮 CALIBER CLUTCH - STEAM FAST-TRACK BOT SERVICE');
 console.log('========================================================');
 
 if (!STEAM_ACCOUNT_NAME || !STEAM_PASSWORD) {
@@ -59,13 +59,13 @@ function loginToSteam() {
 }
 
 client.on('loggedOn', () => {
-  console.log(`✅ [VORTEX Bot] Successfully logged into Steam network as [${STEAM_ACCOUNT_NAME}]!`);
-  client.setPersona(SteamUser.EPersonaState.Online, '[VORTEX] Fast-Track Bot #07');
+  console.log(`✅ [Caliber Bot] Successfully logged into Steam network as [${STEAM_ACCOUNT_NAME}]!`);
+  client.setPersona(SteamUser.EPersonaState.Online, '[Caliber] Fast-Track Bot #07');
   client.gamesPlayed([730]); // CS2 AppID
 });
 
 client.on('webSession', (sessionID, cookies) => {
-  console.log('🌐 [VORTEX Bot] Steam Web Session established.');
+  console.log('🌐 [Caliber Bot] Steam Web Session established.');
   community.setCookies(cookies);
 
   manager.setCookies(cookies, (err) => {
@@ -73,7 +73,7 @@ client.on('webSession', (sessionID, cookies) => {
       console.error('❌ Error setting trade manager cookies:', err.message);
       return;
     }
-    console.log('📦 [VORTEX Bot] Trade Offer Manager ready and active!');
+    console.log('📦 [Caliber Bot] Trade Offer Manager ready and active!');
   });
 });
 
@@ -92,7 +92,7 @@ export async function sendDepositTradeOffer({ tradeUrl, items, securityCode, ord
 
       // Add message with anti-phishing security token
       offer.setMessage(
-        `VORTEX Gaming Fast-Track Deposit | Security Code: [${securityCode}] | Order: ${orderId}`
+        `Caliber Clutch Fast-Track Deposit | Security Code: [${securityCode}] | Order: ${orderId}`
       );
 
       // CS2 AppID: 730, ContextID: 2
@@ -129,7 +129,7 @@ export async function sendDepositTradeOffer({ tradeUrl, items, securityCode, ord
               return reject(sendErr);
             }
 
-            console.log(`🚀 [VORTEX Bot] Trade Offer #${offer.id} sent to user! Status: ${status}`);
+            console.log(`🚀 [Caliber Bot] Trade Offer #${offer.id} sent to user! Status: ${status}`);
 
             // Automatically confirm with Steam Guard 2FA if identity_secret exists
             if (STEAM_IDENTITY_SECRET && status === 'pending') {
@@ -137,7 +137,7 @@ export async function sendDepositTradeOffer({ tradeUrl, items, securityCode, ord
                 if (confErr) {
                   console.error('❌ Could not auto-confirm with 2FA:', confErr.message);
                 } else {
-                  console.log(`🛡️ [VORTEX Bot] Auto-confirmed offer #${offer.id} via Steam Guard 2FA!`);
+                  console.log(`🛡️ [Caliber Bot] Auto-confirmed offer #${offer.id} via Steam Guard 2FA!`);
                 }
               });
             }
@@ -162,15 +162,15 @@ manager.on('sentOfferChanged', async (offer, oldState) => {
 
   // When offer is accepted by the user on Steam Mobile Authenticator
   if (offer.state === TradeOfferManager.ETradeOfferState.Accepted) {
-    console.log(`🎉 [VORTEX Bot] Trade Offer #${offer.id} ACCEPTED by user! Processing wallet credit...`);
+    console.log(`🎉 [Caliber Bot] Trade Offer #${offer.id} ACCEPTED by user! Processing wallet credit...`);
 
     try {
-      // Notify VORTEX API that trade is completed
-      const res = await fetch(`${VORTEX_API_URL}/trade-status`, {
+      // Notify Caliber Clutch API that trade is completed
+      const res = await fetch(`${CALIBER_API_URL}/trade-status`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
-          'Authorization': `Bearer ${VORTEX_BOT_SECRET_KEY}`
+          'Authorization': `Bearer ${CALIBER_BOT_SECRET_KEY}`
         },
         body: JSON.stringify({
           action: 'confirm',
@@ -179,10 +179,10 @@ manager.on('sentOfferChanged', async (offer, oldState) => {
       });
 
       if (res.ok) {
-        console.log(`💰 [VORTEX Bot] Successfully credited user wallet for trade #${offer.id}!`);
+        console.log(`💰 [Caliber Bot] Successfully credited user wallet for trade #${offer.id}!`);
       }
     } catch (err) {
-      console.error('❌ Error notifying VORTEX API of trade completion:', err.message);
+      console.error('❌ Error notifying Caliber API of trade completion:', err.message);
     }
   }
 

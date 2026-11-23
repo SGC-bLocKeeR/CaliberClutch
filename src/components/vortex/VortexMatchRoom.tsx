@@ -1928,7 +1928,7 @@ export const VortexMatchRoom: React.FC<VortexMatchRoomProps> = ({
                     const demoUrl = `https://demos-europe-west.faceit.com/cs2/${matchId}.dem.gz`;
                     const link = document.createElement('a');
                     link.href = demoUrl;
-                    link.setAttribute('download', `vortex-match-${matchId}.dem.gz`);
+                    link.setAttribute('download', `caliber-match-${matchId}.dem.gz`);
                     document.body.appendChild(link);
                     link.click();
                     document.body.removeChild(link);

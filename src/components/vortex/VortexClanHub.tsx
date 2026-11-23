@@ -881,7 +881,7 @@ export const DEFAULT_CLAN_MATCHES: ClanMatch[] = [
       players: [
         {
           id: 'p-kar-1',
-          name: 'vortex_pro',
+          name: 'caliber_pro',
           avatar: 'https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?auto=format&fit=crop&w=150&q=80',
           factionIcon: 'triangle',
           level: 7,
@@ -1034,7 +1034,7 @@ export const DEFAULT_CLAN_MATCHES: ClanMatch[] = [
       { name: 'Ar7isti', kills: 10, deaths: 10, assists: 3, adr: '68.5', rating: '1.05' }
     ],
     clan2Players: [
-      { name: 'vortex_pro', kills: 13, deaths: 13, assists: 3, adr: '81.2', rating: '1.10' },
+      { name: 'caliber_pro', kills: 13, deaths: 13, assists: 3, adr: '81.2', rating: '1.10' },
       { name: 'valde_fan', kills: 10, deaths: 14, assists: 2, adr: '62.4', rating: '0.85' },
       { name: 'dexter_aim', kills: 9, deaths: 14, assists: 4, adr: '58.1', rating: '0.78' },
       { name: 'stavn_cs', kills: 7, deaths: 15, assists: 2, adr: '48.0', rating: '0.65' },
@@ -1569,7 +1569,7 @@ export const VortexClanHub: React.FC<VortexClanHubProps> = ({
   const [userFriends, setUserFriends] = useState<SocialFriend[]>(() => getUserFriends(currentGamerTag));
   const [pendingInvites, setPendingInvites] = useState<ClanInvite[]>(() => {
     try {
-      const raw = localStorage.getItem('vortex_clan_pending_invites');
+      const raw = localStorage.getItem('caliber_clan_pending_invites') || localStorage.getItem('vortex_clan_pending_invites');
       if (raw) {
         const list = JSON.parse(raw);
         if (Array.isArray(list)) return list.filter((i: ClanInvite) => i.status === 'pending');
@@ -1581,7 +1581,7 @@ export const VortexClanHub: React.FC<VortexClanHubProps> = ({
 
   useEffect(() => {
     try {
-      localStorage.setItem('vortex_clan_pending_invites', JSON.stringify(pendingInvites));
+      localStorage.setItem('caliber_clan_pending_invites', JSON.stringify(pendingInvites));
     } catch (_) {}
   }, [pendingInvites]);
 
@@ -1589,8 +1589,12 @@ export const VortexClanHub: React.FC<VortexClanHubProps> = ({
     const handleFriendsUpdate = () => {
       setUserFriends(getUserFriends(currentGamerTag));
     };
+    window.addEventListener('caliber_friends_updated', handleFriendsUpdate);
     window.addEventListener('vortex_friends_updated', handleFriendsUpdate);
-    return () => window.removeEventListener('vortex_friends_updated', handleFriendsUpdate);
+    return () => {
+      window.removeEventListener('caliber_friends_updated', handleFriendsUpdate);
+      window.removeEventListener('vortex_friends_updated', handleFriendsUpdate);
+    };
   }, [currentGamerTag]);
 
   useEffect(() => {
@@ -1756,7 +1760,7 @@ export const VortexClanHub: React.FC<VortexClanHubProps> = ({
   // Load clan matches from localStorage or initialize with DEFAULT_CLAN_MATCHES
   const [clanMatches, setClanMatches] = useState<ClanMatch[]>(() => {
     try {
-      const saved = localStorage.getItem('vortex_clan_matches_list');
+      const saved = localStorage.getItem('caliber_clan_matches_list') || localStorage.getItem('vortex_clan_matches_list');
       if (saved) {
         const parsed = JSON.parse(saved);
         if (Array.isArray(parsed) && parsed.length > 0) return parsed;
@@ -1768,7 +1772,7 @@ export const VortexClanHub: React.FC<VortexClanHubProps> = ({
   // Load user clan from localStorage or initialize with M14 / Caliber Clutch default
   const [userClan, setUserClan] = useState<ClanData>(() => {
     try {
-      const saved = localStorage.getItem('vortex_user_clan_data');
+      const saved = localStorage.getItem('caliber_user_clan_data') || localStorage.getItem('vortex_user_clan_data');
       if (saved) {
         const parsed = JSON.parse(saved);
         // Automatically migrate any legacy unsplash stock images to official Caliber Clutch badge
@@ -1798,7 +1802,7 @@ export const VortexClanHub: React.FC<VortexClanHubProps> = ({
         // Reset clan members to ONLY registered users (no fake un-registered pros or bots)
         const hasUnregisteredMembers = parsed.members && (
           parsed.members.length > 1 && parsed.members.some((m: any) => 
-            ['juanflatro-aim', 'sener1-tap', 'gxx-fire', 'sinnopsyy-beast', 'devilwalk-coach', 'vortex_ghost', 'silent_clutcher', 'shadowstrike', 'k1llshot_al', 'balkansub_01', 'aimgod_99'].includes(m.name?.toLowerCase())
+            ['juanflatro-aim', 'sener1-tap', 'gxx-fire', 'sinnopsyy-beast', 'devilwalk-coach', 'phantom_clutch', 'vortex_ghost', 'silent_clutcher', 'shadowstrike', 'k1llshot_al', 'balkansub_01', 'aimgod_99'].includes(m.name?.toLowerCase())
           )
         );
         if (hasUnregisteredMembers || !parsed.members || parsed.members.length === 0) {
@@ -1820,7 +1824,7 @@ export const VortexClanHub: React.FC<VortexClanHubProps> = ({
         }
         if (modified) {
           try {
-            localStorage.setItem('vortex_user_clan_data', JSON.stringify(parsed));
+            localStorage.setItem('caliber_user_clan_data', JSON.stringify(parsed));
           } catch (_) {}
         }
         return parsed;
@@ -2013,6 +2017,7 @@ export const VortexClanHub: React.FC<VortexClanHubProps> = ({
 
     setUserClan(nextClan);
     try {
+      localStorage.setItem('caliber_user_clan_data', JSON.stringify(nextClan));
       localStorage.setItem('vortex_user_clan_data', JSON.stringify(nextClan));
     } catch (_) {}
 
@@ -2076,7 +2081,9 @@ export const VortexClanHub: React.FC<VortexClanHubProps> = ({
     };
     setUserClan(nextClan);
     try {
+      localStorage.setItem('caliber_user_clan_data', JSON.stringify(nextClan));
       localStorage.setItem('vortex_user_clan_data', JSON.stringify(nextClan));
+      window.dispatchEvent(new Event('caliber_clan_updated'));
       window.dispatchEvent(new Event('vortex_clan_updated'));
     } catch (_) {}
     saveClanToCloud(nextClan);
@@ -2113,7 +2120,9 @@ export const VortexClanHub: React.FC<VortexClanHubProps> = ({
 
     setUserClan(nextClan);
     try {
+      localStorage.setItem('caliber_user_clan_data', JSON.stringify(nextClan));
       localStorage.setItem('vortex_user_clan_data', JSON.stringify(nextClan));
+      window.dispatchEvent(new Event('caliber_clan_updated'));
       window.dispatchEvent(new Event('vortex_clan_updated'));
     } catch (_) {}
     saveClanToCloud(nextClan);
@@ -2141,7 +2150,9 @@ export const VortexClanHub: React.FC<VortexClanHubProps> = ({
     const nextClan = { ...userClan, members: nextMembers };
     setUserClan(nextClan);
     try {
+      localStorage.setItem('caliber_user_clan_data', JSON.stringify(nextClan));
       localStorage.setItem('vortex_user_clan_data', JSON.stringify(nextClan));
+      window.dispatchEvent(new Event('caliber_clan_updated'));
       window.dispatchEvent(new Event('vortex_clan_updated'));
     } catch (_) {}
     saveClanToCloud(nextClan);
@@ -3518,7 +3529,7 @@ export const VortexClanHub: React.FC<VortexClanHubProps> = ({
                 </div>
               </div>
 
-              {/* Sub-Tabs: Scoreboard / Rounds / Performance (Vortex / Caliber Clutch Signature Style) */}
+              {/* Sub-Tabs: Scoreboard / Rounds / Performance (Caliber Clutch Signature Style) */}
               <div className="flex items-center gap-2">
                 <div className="flex items-center bg-[#070912] p-1.5 rounded-2xl border border-[#182136] shadow-inner gap-1.5 text-xs font-mono">
                   <button
@@ -4714,7 +4725,7 @@ export const VortexClanHub: React.FC<VortexClanHubProps> = ({
             {/* Anti-Cheat & VAC Standing */}
             <div className="p-3 rounded-2xl bg-[#070A12] border border-[#182136] flex items-center justify-between text-xs font-mono text-slate-400 relative z-10">
               <div>
-                <span className="text-[10px] uppercase text-slate-500 block font-bold">Vortex Client Anti-Cheat</span>
+                <span className="text-[10px] uppercase text-slate-500 block font-bold">Caliber Anti-Cheat / FACEIT Ring-0</span>
                 <span className="text-emerald-400 font-bold flex items-center gap-1 mt-0.5">
                   <Shield className="w-3.5 h-3.5 text-emerald-400" />
                   Active • VAC Clean & In Good Standing

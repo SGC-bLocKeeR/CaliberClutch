@@ -1,5 +1,5 @@
 // ========================================================
-// VORTEX GAMING - CS2 WHITE-LABEL SKIN DELIVERY SERVICE
+// CALIBER CLUTCH - CS2 WHITE-LABEL SKIN DELIVERY SERVICE
 // B2B Integration with DMarket API & Waxpeer P2P API
 // Uses Official Akamai Steam Community Asset CDN
 // ========================================================
@@ -53,9 +53,12 @@ export interface TradeOfferDeliveryResult {
   timestamp: number;
 }
 
-const STORAGE_KEY_TRADE_URL = 'vortex_steam_trade_url';
-const STORAGE_KEY_WALLET_EUR = 'vortex_wallet_eur';
-const STORAGE_KEY_WALLET_RESET_LOCK = 'vortex_wallet_zero_locked_v2';
+const STORAGE_KEY_TRADE_URL = 'caliber_steam_trade_url';
+const STORAGE_KEY_WALLET_EUR = 'caliber_wallet_eur';
+const STORAGE_KEY_WALLET_RESET_LOCK = 'caliber_wallet_zero_locked_v2';
+const LEGACY_STORAGE_KEY_TRADE_URL = 'vortex_steam_trade_url';
+const LEGACY_STORAGE_KEY_WALLET_EUR = 'vortex_wallet_eur';
+const LEGACY_STORAGE_KEY_WALLET_RESET_LOCK = 'vortex_wallet_zero_locked_v2';
 const DEFAULT_INITIAL_BALANCE = 0.00; // All accounts start strictly at 0.00 € until real deposit
 
 // ========================================================
@@ -70,7 +73,7 @@ export const isValidSteamTradeUrl = (url: string): boolean => {
 
 export const getSavedSteamTradeUrl = (): string => {
   if (typeof window === 'undefined') return '';
-  return localStorage.getItem(STORAGE_KEY_TRADE_URL) || '';
+  return localStorage.getItem(STORAGE_KEY_TRADE_URL) || localStorage.getItem(LEGACY_STORAGE_KEY_TRADE_URL) || '';
 };
 
 export const saveSteamTradeUrl = (url: string): boolean => {
@@ -78,6 +81,7 @@ export const saveSteamTradeUrl = (url: string): boolean => {
   const trimmed = url.trim();
   if (isValidSteamTradeUrl(trimmed)) {
     localStorage.setItem(STORAGE_KEY_TRADE_URL, trimmed);
+    window.dispatchEvent(new CustomEvent('caliber_trade_url_updated', { detail: trimmed }));
     window.dispatchEvent(new CustomEvent('vortex_trade_url_updated', { detail: trimmed }));
     return true;
   }
@@ -85,20 +89,20 @@ export const saveSteamTradeUrl = (url: string): boolean => {
 };
 
 // ========================================================
-// 2. VORTEX USER WALLET (EUR BALANCE)
+// 2. CALIBER CLUTCH USER WALLET (EUR BALANCE)
 // ========================================================
 
-export const getVortexWalletBalance = (): number => {
+export const getCaliberWalletBalance = (): number => {
   if (typeof window === 'undefined') return DEFAULT_INITIAL_BALANCE;
 
-  // Enforce zero initial balance: wipe legacy 25€ faucet balance from all clients
-  if (localStorage.getItem(STORAGE_KEY_WALLET_RESET_LOCK) !== 'true') {
+  // Enforce zero initial balance: wipe legacy faucet balance from all clients
+  if (localStorage.getItem(STORAGE_KEY_WALLET_RESET_LOCK) !== 'true' && localStorage.getItem(LEGACY_STORAGE_KEY_WALLET_RESET_LOCK) !== 'true') {
     localStorage.setItem(STORAGE_KEY_WALLET_RESET_LOCK, 'true');
     localStorage.setItem(STORAGE_KEY_WALLET_EUR, '0.00');
     return 0.00;
   }
 
-  const saved = localStorage.getItem(STORAGE_KEY_WALLET_EUR);
+  const saved = localStorage.getItem(STORAGE_KEY_WALLET_EUR) || localStorage.getItem(LEGACY_STORAGE_KEY_WALLET_EUR);
   if (saved === null) {
     localStorage.setItem(STORAGE_KEY_WALLET_EUR, '0.00');
     return 0.00;
@@ -107,28 +111,36 @@ export const getVortexWalletBalance = (): number => {
   return isNaN(parsed) ? 0.00 : parsed;
 };
 
-export const deductVortexWalletBalance = (amountEur: number): boolean => {
-  const current = getVortexWalletBalance();
+export const getVortexWalletBalance = getCaliberWalletBalance;
+
+export const deductCaliberWalletBalance = (amountEur: number): boolean => {
+  const current = getCaliberWalletBalance();
   if (current < amountEur) return false;
   const updated = Math.max(0, parseFloat((current - amountEur).toFixed(2)));
   localStorage.setItem(STORAGE_KEY_WALLET_EUR, String(updated));
+  window.dispatchEvent(new CustomEvent('caliber_wallet_updated', { detail: updated }));
   window.dispatchEvent(new CustomEvent('vortex_wallet_updated', { detail: updated }));
   return true;
 };
 
-export const creditVortexWalletBalance = (amountEur: number): number => {
-  const current = getVortexWalletBalance();
+export const deductVortexWalletBalance = deductCaliberWalletBalance;
+
+export const creditCaliberWalletBalance = (amountEur: number): number => {
+  const current = getCaliberWalletBalance();
   const updated = parseFloat((current + amountEur).toFixed(2));
   localStorage.setItem(STORAGE_KEY_WALLET_EUR, String(updated));
+  window.dispatchEvent(new CustomEvent('caliber_wallet_updated', { detail: updated }));
   window.dispatchEvent(new CustomEvent('vortex_wallet_updated', { detail: updated }));
   return updated;
 };
+
+export const creditVortexWalletBalance = creditCaliberWalletBalance;
 
 // ========================================================
 // 3. AUTHENTIC CS2 WEAPON CASE CATALOG (OFFICIAL VALVE 3D CRATES)
 // ========================================================
 
-export const VORTEX_CASE_CATALOG: CS2Case[] = [
+export const CALIBER_CASE_CATALOG: CS2Case[] = [
   {
     "id": "dreams-nightmares",
     "name": "Dreams & Nightmares Case",
@@ -1744,15 +1756,15 @@ export const dispatchSkinViaTradeBot = async (
   await new Promise(res => setTimeout(res, 900));
 
   // Step 2: Inventory Allocation
-  onProgress?.(2, `Preparing [${item.name}] from Vortex verified inventory...`);
+  onProgress?.(2, `Preparing [${item.name}] from Caliber Clutch verified inventory...`);
   await new Promise(res => setTimeout(res, 1100));
 
   // Step 3: Steam Bot Trade Offer Dispatch
-  onProgress?.(3, 'Automated Vortex Bot dispatched Trade Offer to your Steam account!');
+  onProgress?.(3, 'Automated Caliber Bot dispatched Trade Offer to your Steam account!');
   await new Promise(res => setTimeout(res, 800));
 
   const randomBotNumber = Math.floor(Math.random() * 8) + 1;
-  const orderId = `VTX-TRD-${Math.floor(10000000 + Math.random() * 90000000)}`;
+  const orderId = `CC-TRD-${Math.floor(10000000 + Math.random() * 90000000)}`;
   const tradeOfferId = `${Math.floor(6000000000 + Math.random() * 3000000000)}`;
 
   return {
@@ -1760,7 +1772,7 @@ export const dispatchSkinViaTradeBot = async (
     orderId,
     tradeOfferId,
     botSteamId: '76561198894120894',
-    botName: `Vortex Steam Trade Bot #${randomBotNumber.toString().padStart(2, '0')}`,
+    botName: `Caliber Steam Trade Bot #${randomBotNumber.toString().padStart(2, '0')}`,
     item,
     status: 'sent',
     message: `Trade Offer sent successfully! Open Steam Mobile Authenticator or browser to accept your item.`,
@@ -1774,8 +1786,10 @@ export const dispatchSkinViaTradeBot = async (
 // 5. DMARKET API LIVE CREDENTIALS & HANDSHAKE ENGINE
 // ========================================================
 
-const STORAGE_KEY_DMARKET_PUBLIC = 'vortex_dmarket_public_key';
-const STORAGE_KEY_DMARKET_SECRET = 'vortex_dmarket_secret_key';
+const STORAGE_KEY_DMARKET_PUBLIC = 'caliber_dmarket_public_key';
+const STORAGE_KEY_DMARKET_SECRET = 'caliber_dmarket_secret_key';
+const LEGACY_STORAGE_KEY_DMARKET_PUBLIC = 'vortex_dmarket_public_key';
+const LEGACY_STORAGE_KEY_DMARKET_SECRET = 'vortex_dmarket_secret_key';
 
 export interface DMarketCredentials {
   publicKey: string;
@@ -1787,8 +1801,8 @@ export const getDMarketCredentials = (): DMarketCredentials => {
   if (typeof window === 'undefined') {
     return { publicKey: '', secretKey: '', isConnected: false };
   }
-  const pub = localStorage.getItem(STORAGE_KEY_DMARKET_PUBLIC) || '';
-  const sec = localStorage.getItem(STORAGE_KEY_DMARKET_SECRET) || '';
+  const pub = localStorage.getItem(STORAGE_KEY_DMARKET_PUBLIC) || localStorage.getItem(LEGACY_STORAGE_KEY_DMARKET_PUBLIC) || '';
+  const sec = localStorage.getItem(STORAGE_KEY_DMARKET_SECRET) || localStorage.getItem(LEGACY_STORAGE_KEY_DMARKET_SECRET) || '';
   return {
     publicKey: pub,
     secretKey: sec,
@@ -1800,6 +1814,7 @@ export const saveDMarketCredentials = (publicKey: string, secretKey: string): vo
   if (typeof window === 'undefined') return;
   localStorage.setItem(STORAGE_KEY_DMARKET_PUBLIC, publicKey.trim());
   localStorage.setItem(STORAGE_KEY_DMARKET_SECRET, secretKey.trim());
+  window.dispatchEvent(new CustomEvent('caliber_dmarket_keys_updated'));
   window.dispatchEvent(new CustomEvent('vortex_dmarket_keys_updated'));
 };
 
@@ -2098,13 +2113,13 @@ export const buySkinDirectFromDMarket = async (
   }
 
   // Deduct user wallet
-  const deducted = deductVortexWalletBalance(item.priceEur);
+  const deducted = deductCaliberWalletBalance(item.priceEur);
   if (!deducted) {
-    throw new Error(`Your Vortex balance is insufficient to purchase [${item.name}] (${item.priceEur.toFixed(2)} €).`);
+    throw new Error(`Your Caliber balance is insufficient to purchase [${item.name}] (${item.priceEur.toFixed(2)} €).`);
   }
 
   // Step 1: Order Validation
-  onProgress?.(1, `Validating availability of [${item.name}] on Vortex network...`);
+  onProgress?.(1, `Validating availability of [${item.name}] on Caliber Clutch network...`);
   await new Promise(res => setTimeout(res, 900));
 
   // Step 2: Settlement & Steam Bot Handshake
@@ -2115,7 +2130,7 @@ export const buySkinDirectFromDMarket = async (
   onProgress?.(3, `Dispatching Steam Trade Offer to your Trade URL...`);
   await new Promise(res => setTimeout(res, 800));
 
-  const orderId = `VTX-ORD-${Math.floor(10000000 + Math.random() * 90000000)}`;
+  const orderId = `CC-ORD-${Math.floor(10000000 + Math.random() * 90000000)}`;
   const tradeOfferId = `${Math.floor(6000000000 + Math.random() * 3000000000)}`;
 
   return {
@@ -2123,7 +2138,7 @@ export const buySkinDirectFromDMarket = async (
     orderId,
     tradeOfferId,
     botSteamId: '76561198894120894',
-    botName: 'Vortex Steam Trade Bot #04',
+    botName: 'Caliber Steam Trade Bot #04',
     item,
     status: 'sent',
     message: `Trade Offer for [${item.name}] was sent successfully to your Steam account! Open Steam to accept the trade.`,

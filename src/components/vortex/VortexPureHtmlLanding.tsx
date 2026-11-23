@@ -726,7 +726,7 @@ export const VortexPureHtmlLanding: React.FC<VortexPureHtmlLandingProps> = ({
       </section>
 
       {/* ======================================================== */}
-      {/* 4. VORTEX PREMIUM & VIP PASS TIERS + PAYMENTS SHOWCASE    */}
+      {/* 4. CALIBER CLUTCH PREMIUM & VIP PASS TIERS + PAYMENTS SHOWCASE */}
       {/* ======================================================== */}
       <section className="w-full relative py-16 lg:py-24 overflow-hidden">
         <div className="w-full px-4 sm:px-6 lg:px-8 space-y-16">
@@ -846,7 +846,7 @@ export const VortexPureHtmlLanding: React.FC<VortexPureHtmlLandingProps> = ({
                 </div>
               </div>
 
-              {/* PLAN 2: VORTEX PREMIUM (Most Popular) */}
+              {/* PLAN 2: CALIBER PREMIUM (Most Popular) */}
               <div className="relative rounded-3xl bg-gradient-to-b from-[#18230D] via-[#10170A] to-[#0A0D07] border-2 border-[#A3E635] p-8 flex flex-col justify-between shadow-[0_0_50px_rgba(163,230,53,0.3)] transform lg:-translate-y-3">
                 
                 {/* Most Popular Badge */}
@@ -919,7 +919,7 @@ export const VortexPureHtmlLanding: React.FC<VortexPureHtmlLandingProps> = ({
                 </div>
               </div>
 
-              {/* PLAN 3: VORTEX VIP ELITE */}
+              {/* PLAN 3: CALIBER VIP ELITE */}
               <div className="rounded-3xl bg-gradient-to-b from-[#101826] via-[#0D121D] to-[#080B10] border border-cyan-500/40 hover:border-cyan-400/80 p-8 flex flex-col justify-between shadow-2xl transition-all">
                 <div>
                   <div className="flex items-center justify-between mb-4">

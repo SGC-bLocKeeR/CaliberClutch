@@ -49,7 +49,8 @@ export interface CloudTournament {
   bracket?: any[];
 }
 
-const STORAGE_KEY = 'vortex_custom_tournaments';
+const STORAGE_KEY = 'caliber_custom_tournaments';
+const getStoredTournaments = (): string | null => localStorage.getItem(STORAGE_KEY) || localStorage.getItem('vortex_custom_tournaments');
 
 export function mapRowToTournament(row: any): CloudTournament {
   return {
@@ -188,7 +189,7 @@ export async function fetchTournamentsFromCloud(): Promise<CloudTournament[]> {
 
   // Fallback to local storage
   try {
-    const saved = localStorage.getItem(STORAGE_KEY);
+    const saved = getStoredTournaments();
     if (saved) return JSON.parse(saved);
   } catch (_) {}
 
@@ -205,7 +206,7 @@ export async function saveTournamentToCloud(tournament: CloudTournament): Promis
 }> {
   // 1. Instantly persist to LocalStorage
   try {
-    const local = localStorage.getItem(STORAGE_KEY);
+    const local = getStoredTournaments();
     const list: CloudTournament[] = local ? JSON.parse(local) : [];
     const idx = list.findIndex(item => item.id === tournament.id);
     if (idx >= 0) {
@@ -256,7 +257,7 @@ export async function deleteTournamentFromCloud(tournamentId: string): Promise<{
 }> {
   // 1. Remove from LocalStorage
   try {
-    const local = localStorage.getItem(STORAGE_KEY);
+    const local = getStoredTournaments();
     if (local) {
       const list: CloudTournament[] = JSON.parse(local);
       const filtered = list.filter(item => item.id !== tournamentId);

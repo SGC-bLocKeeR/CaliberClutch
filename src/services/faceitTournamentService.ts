@@ -69,7 +69,7 @@ export const getFaceitOrganizerConfig = (): FaceitOrganizerConfig => {
       if (!parsed.organizerId || parsed.organizerId.toLowerCase().includes('nexus') || parsed.organizerId === 'nexus-esports-org') {
         parsed.organizerId = CALIBER_FACEIT_ORGANIZER_ID;
       }
-      if (parsed.hubId === 'vortex-global-cs2-hub' || parsed.hubId === 'nexus-hub') {
+      if (parsed.hubId === 'caliber-global-cs2-hub' || parsed.hubId === 'vortex-global-cs2-hub' || parsed.hubId === 'nexus-hub') {
         parsed.hubId = 'caliber-clutch-hub';
       }
       if (!parsed.apiKey || !parsed.apiKey.trim()) {

@@ -96,7 +96,7 @@ export const VerifiedFaceitStatsCard: React.FC<VerifiedFaceitStatsCardProps> = (
   const [stats, setStats] = useState<FaceitStatsData | null>(() => {
     if (!steamId64) return null;
     try {
-      const cached = localStorage.getItem(`vortex_faceit_stats_${steamId64}`);
+      const cached = localStorage.getItem(`caliber_faceit_stats_${steamId64}`) || localStorage.getItem(`vortex_faceit_stats_${steamId64}`);
       if (cached) return JSON.parse(cached);
     } catch (_) {}
     return null;
@@ -136,7 +136,7 @@ export const VerifiedFaceitStatsCard: React.FC<VerifiedFaceitStatsCardProps> = (
     }
 
     setErrorMessage(null);
-    const activeNickname = localStorage.getItem('vortex_faceit_nickname') || localStorage.getItem('vortex_user_gamertag') || 'bLocKeeRz';
+    const activeNickname = localStorage.getItem('caliber_faceit_nickname') || localStorage.getItem('vortex_faceit_nickname') || localStorage.getItem('caliber_user_gamertag') || localStorage.getItem('vortex_user_gamertag') || 'bLocKeeRz';
 
     try {
       const url = `/api/faceit/profile?steamId64=${encodeURIComponent(steamId64)}&nickname=${encodeURIComponent(activeNickname)}${force ? '&force=true' : ''}`;
@@ -156,7 +156,7 @@ export const VerifiedFaceitStatsCard: React.FC<VerifiedFaceitStatsCardProps> = (
         if (data.linked) {
           setStats(data);
           try {
-            localStorage.setItem(`vortex_faceit_stats_${steamId64}`, JSON.stringify(data));
+            localStorage.setItem(`caliber_faceit_stats_${steamId64}`, JSON.stringify(data));
           } catch (_) {}
 
           if (force && data.linked) {
@@ -171,7 +171,7 @@ export const VerifiedFaceitStatsCard: React.FC<VerifiedFaceitStatsCardProps> = (
       if (direct && direct.linked) {
         setStats(direct);
         try {
-          localStorage.setItem(`vortex_faceit_stats_${steamId64}`, JSON.stringify(direct));
+          localStorage.setItem(`caliber_faceit_stats_${steamId64}`, JSON.stringify(direct));
         } catch (_) {}
         if (force) sound.playNotification();
         return;
@@ -189,7 +189,7 @@ export const VerifiedFaceitStatsCard: React.FC<VerifiedFaceitStatsCardProps> = (
       if (direct && direct.linked) {
         setStats(direct);
         try {
-          localStorage.setItem(`vortex_faceit_stats_${steamId64}`, JSON.stringify(direct));
+          localStorage.setItem(`caliber_faceit_stats_${steamId64}`, JSON.stringify(direct));
         } catch (_) {}
         if (force) sound.playNotification();
         return;

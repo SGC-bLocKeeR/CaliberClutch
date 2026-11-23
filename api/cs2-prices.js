@@ -19,7 +19,7 @@ async function getPrices() {
       const res = await fetch('https://api.skinport.com/v1/items?currency=EUR', {
         headers: {
           'Accept-Encoding': 'br, gzip, deflate',
-          'User-Agent': 'VORTEX-Pricing-Engine/2.0'
+          'User-Agent': 'CaliberClutch-Pricing-Engine/2.0'
         }
       });
       if (res.ok) {

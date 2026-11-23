@@ -1,5 +1,5 @@
 /**
- * VORTEX Real-Time Friends & Social Management Service
+ * Caliber Clutch Real-Time Friends & Social Management Service
  * Pure real-time architecture: no fake demo friends.
  * Supports registered player discovery, real-time friend requests, and persistent DMs.
  */
@@ -133,10 +133,14 @@ export const PLATFORM_REGISTERED_PLAYERS: RegisteredPlayer[] = [
   }
 ];
 
-const STORAGE_REGISTERED_PLAYERS = 'vortex_platform_registered_players';
-const STORAGE_FRIENDS_PREFIX = 'vortex_friends_';
-const STORAGE_REQUESTS_PREFIX = 'vortex_friend_requests_';
-const STORAGE_DMS_PREFIX = 'vortex_dms_';
+const STORAGE_REGISTERED_PLAYERS = 'caliber_platform_registered_players';
+const STORAGE_FRIENDS_PREFIX = 'caliber_friends_';
+const STORAGE_REQUESTS_PREFIX = 'caliber_friend_requests_';
+const STORAGE_DMS_PREFIX = 'caliber_dms_';
+const LEGACY_STORAGE_REGISTERED_PLAYERS = 'vortex_platform_registered_players';
+const LEGACY_STORAGE_FRIENDS_PREFIX = 'vortex_friends_';
+const LEGACY_STORAGE_REQUESTS_PREFIX = 'vortex_friend_requests_';
+const LEGACY_STORAGE_DMS_PREFIX = 'vortex_dms_';
 
 /**
  * Registers or updates a player in the platform's searchable directory
@@ -144,7 +148,7 @@ const STORAGE_DMS_PREFIX = 'vortex_dms_';
 export const registerPlatformPlayer = (player: RegisteredPlayer) => {
   if (typeof window === 'undefined' || !player.gamerTag) return;
   try {
-    const raw = localStorage.getItem(STORAGE_REGISTERED_PLAYERS);
+    const raw = localStorage.getItem(STORAGE_REGISTERED_PLAYERS) || localStorage.getItem(LEGACY_STORAGE_REGISTERED_PLAYERS);
     const list: RegisteredPlayer[] = raw ? JSON.parse(raw) : [];
     const index = list.findIndex(p => 
       p.gamerTag.toLowerCase() === player.gamerTag.toLowerCase() || 
@@ -156,6 +160,7 @@ export const registerPlatformPlayer = (player: RegisteredPlayer) => {
       list.push(player);
     }
     localStorage.setItem(STORAGE_REGISTERED_PLAYERS, JSON.stringify(list));
+    window.dispatchEvent(new CustomEvent('caliber_players_updated'));
     window.dispatchEvent(new CustomEvent('vortex_players_updated'));
   } catch (err) {
     console.error('Failed to register platform player', err);
@@ -163,13 +168,13 @@ export const registerPlatformPlayer = (player: RegisteredPlayer) => {
 };
 
 /**
- * Searches registered users on VORTEX platform
+ * Searches registered users on Caliber Clutch platform
  */
 export const searchRegisteredPlayers = (query: string, currentGamerTag: string): RegisteredPlayer[] => {
   let dynamicPlayers: RegisteredPlayer[] = [];
   if (typeof window !== 'undefined') {
     try {
-      const raw = localStorage.getItem(STORAGE_REGISTERED_PLAYERS);
+      const raw = localStorage.getItem(STORAGE_REGISTERED_PLAYERS) || localStorage.getItem(LEGACY_STORAGE_REGISTERED_PLAYERS);
       if (raw) dynamicPlayers = JSON.parse(raw);
     } catch {
       dynamicPlayers = [];
@@ -217,7 +222,8 @@ if (typeof window !== 'undefined') {
 export const getUserFriends = (gamerTag: string): SocialFriend[] => {
   if (typeof window === 'undefined' || !gamerTag) return [];
   const key = `${STORAGE_FRIENDS_PREFIX}${gamerTag.toLowerCase()}`;
-  const raw = localStorage.getItem(key);
+  const legacyKey = `${LEGACY_STORAGE_FRIENDS_PREFIX}${gamerTag.toLowerCase()}`;
+  const raw = localStorage.getItem(key) || localStorage.getItem(legacyKey);
   if (!raw) return [];
   try {
     const list: SocialFriend[] = JSON.parse(raw);
@@ -240,6 +246,7 @@ export const saveUserFriends = (gamerTag: string, friends: SocialFriend[]) => {
   if (typeof window === 'undefined' || !gamerTag) return;
   const key = `${STORAGE_FRIENDS_PREFIX}${gamerTag.toLowerCase()}`;
   localStorage.setItem(key, JSON.stringify(friends));
+  window.dispatchEvent(new CustomEvent('caliber_friends_updated', { detail: { gamerTag, count: friends.length } }));
   window.dispatchEvent(new CustomEvent('vortex_friends_updated', { detail: { gamerTag, count: friends.length } }));
 };
 
@@ -249,7 +256,8 @@ export const saveUserFriends = (gamerTag: string, friends: SocialFriend[]) => {
 export const getUserFriendRequests = (gamerTag: string): { incoming: FriendRequest[]; outgoing: FriendRequest[] } => {
   if (typeof window === 'undefined' || !gamerTag) return { incoming: [], outgoing: [] };
   const key = `${STORAGE_REQUESTS_PREFIX}${gamerTag.toLowerCase()}`;
-  const raw = localStorage.getItem(key);
+  const legacyKey = `${LEGACY_STORAGE_REQUESTS_PREFIX}${gamerTag.toLowerCase()}`;
+  const raw = localStorage.getItem(key) || localStorage.getItem(legacyKey);
   if (!raw) return { incoming: [], outgoing: [] };
   try {
     const all: FriendRequest[] = JSON.parse(raw);
@@ -310,6 +318,7 @@ export const sendFriendRequest = (
   receiverList.unshift(req);
   localStorage.setItem(receiverKey, JSON.stringify(receiverList));
 
+  window.dispatchEvent(new CustomEvent('caliber_friend_requests_updated'));
   window.dispatchEvent(new CustomEvent('vortex_friend_requests_updated'));
   return req;
 };
@@ -397,6 +406,7 @@ export const acceptFriendRequest = (
     saveUserFriends(targetReq.fromGamerTag, senderFriends);
   }
 
+  window.dispatchEvent(new CustomEvent('caliber_friend_requests_updated'));
   window.dispatchEvent(new CustomEvent('vortex_friend_requests_updated'));
   return newFriendForReceiver;
 };
@@ -427,6 +437,7 @@ export const declineFriendRequest = (currentGamerTag: string, requestId: string)
     localStorage.setItem(senderKey, JSON.stringify(senderFiltered));
   }
 
+  window.dispatchEvent(new CustomEvent('caliber_friend_requests_updated'));
   window.dispatchEvent(new CustomEvent('vortex_friend_requests_updated'));
 };
 
@@ -452,7 +463,7 @@ export const removeFriend = (currentGamerTag: string, targetFriendNameOrId: stri
 export const getDirectMessagesHistory = (currentGamerTag: string, targetName: string): DMMessage[] => {
   if (typeof window === 'undefined' || !currentGamerTag || !targetName) return [];
   const pairKey = [currentGamerTag.toLowerCase(), targetName.toLowerCase()].sort().join('__');
-  const raw = localStorage.getItem(`${STORAGE_DMS_PREFIX}${pairKey}`);
+  const raw = localStorage.getItem(`${STORAGE_DMS_PREFIX}${pairKey}`) || localStorage.getItem(`${LEGACY_STORAGE_DMS_PREFIX}${pairKey}`);
   if (!raw) return [];
   try {
     const list = JSON.parse(raw);
@@ -471,5 +482,6 @@ export const appendDirectMessage = (currentGamerTag: string, targetName: string,
   const existing = getDirectMessagesHistory(currentGamerTag, targetName);
   existing.push(message);
   localStorage.setItem(`${STORAGE_DMS_PREFIX}${pairKey}`, JSON.stringify(existing));
+  window.dispatchEvent(new CustomEvent('caliber_dms_updated', { detail: { targetName } }));
   window.dispatchEvent(new CustomEvent('vortex_dms_updated', { detail: { targetName } }));
 };

@@ -20,7 +20,7 @@ export default async function handler(req, res) {
   if (req.method === 'GET') {
     return res.status(200).json({
       status: 'active',
-      service: 'VORTEX Gaming Xsolla Webhook Gateway',
+      service: 'Caliber Clutch Xsolla Webhook Gateway',
       projectId: '321543',
       merchantId: '870122',
       endpoints: {
@@ -34,7 +34,7 @@ export default async function handler(req, res) {
   try {
     const payload = req.body || {};
     const notificationType = payload.notification_type || 'user_validation';
-    const userId = payload.user?.id || 'vortex-player';
+    const userId = payload.user?.id || 'caliber-player';
     const transaction = payload.transaction || {};
     const paymentDetails = payload.payment_details || {};
 

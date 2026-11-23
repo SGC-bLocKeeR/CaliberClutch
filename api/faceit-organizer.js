@@ -57,7 +57,7 @@ export default async function handler(req, res) {
     return res.status(500).json({
       success: false,
       live: false,
-      error: `Gabim rrjeti gjatë thirrjes së FACEIT Open API: ${err.message}`
+      error: `Network error while fetching FACEIT Open API: ${err.message}`
     });
   }
 }

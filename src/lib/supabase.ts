@@ -9,12 +9,12 @@ export const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY, {
     persistSession: true,
     autoRefreshToken: true,
     detectSessionInUrl: true,
-    storageKey: 'vortex_gaming_auth_token',
+    storageKey: 'caliber_clutch_auth_token',
     flowType: 'pkce'
   }
 });
 
-export interface VortexAuthUser {
+export interface CaliberAuthUser {
   id: string;
   email: string;
   gamerTag: string;
@@ -28,6 +28,8 @@ export interface VortexAuthUser {
   steamId64?: string;
   isFaceitVerified?: boolean;
 }
+
+export type VortexAuthUser = CaliberAuthUser;
 
 export async function registerWithSupabase(params: {
   email: string;

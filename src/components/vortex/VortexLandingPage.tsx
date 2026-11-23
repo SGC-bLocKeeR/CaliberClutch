@@ -36,7 +36,7 @@ const SteamIcon = ({ className = "w-4 h-4" }: { className?: string }) => (
 );
 
 // High-Definition CALIBER CLUTCH Brand Logo
-export const VortexBrandLogo = ({ className = "h-8" }: { className?: string }) => (
+export const CaliberBrandLogo = ({ className = "h-8" }: { className?: string }) => (
   <div className={`flex items-center gap-2.5 select-none ${className}`}>
     <div className="relative flex items-center justify-center">
       <svg className="w-7 h-7 drop-shadow-[0_0_14px_rgba(163,230,53,0.85)]" viewBox="0 0 32 32" fill="none">
@@ -56,6 +56,8 @@ export const VortexBrandLogo = ({ className = "h-8" }: { className?: string }) =
     </div>
   </div>
 );
+
+export const VortexBrandLogo = CaliberBrandLogo;
 
 export const VortexLandingPage: React.FC<VortexLandingPageProps> = ({
   onLoginWithSteam,
@@ -90,7 +92,7 @@ export const VortexLandingPage: React.FC<VortexLandingPageProps> = ({
       
       {/* ======================================================== */}
       {/* 1. HERO SECTION: 100% IDENTICAL DESIGN TO REFERENCE      */}
-      {/* VORTEX GAMING Theme, Green Accents, Interactive Zooming Maps */}
+      {/* CALIBER CLUTCH Theme, Green Accents, Interactive Zooming Maps */}
       {/* ======================================================== */}
       <section className="w-full bg-[#07080B] relative">
         <div className="w-full max-w-[1920px] mx-auto relative select-none">
@@ -99,7 +101,7 @@ export const VortexLandingPage: React.FC<VortexLandingPageProps> = ({
           <div className="relative w-full aspect-[1662/489] overflow-hidden">
             <img 
               src="/images/vortex_landing_reference.jpg" 
-              alt="VORTEX CS2 Platform" 
+              alt="Caliber Clutch CS2 Platform" 
               className="w-full h-full object-cover pointer-events-none block select-none"
             />
 
@@ -107,14 +109,14 @@ export const VortexLandingPage: React.FC<VortexLandingPageProps> = ({
             <div className="absolute inset-x-0 bottom-0 h-4 bg-gradient-to-t from-[#07080B] to-transparent pointer-events-none z-10" />
 
             {/* ==================================================== */}
-            {/* TOP BRAND LOGO: VORTEX GAMING                        */}
+            {/* TOP BRAND LOGO: CALIBER CLUTCH                       */}
             {/* ==================================================== */}
             <div 
               className="absolute z-20 flex items-center cursor-pointer transition hover:scale-105"
               style={{ left: '2.80%', top: '3.60%', height: '7.50%' }}
               onClick={() => sound.playClick()}
             >
-              <VortexBrandLogo />
+              <CaliberBrandLogo />
             </div>
 
             {/* ==================================================== */}
@@ -482,7 +484,7 @@ export const VortexLandingPage: React.FC<VortexLandingPageProps> = ({
           <div className="w-full border-b border-white/[0.08] my-12" />
 
           {/* ======================================================== */}
-          {/* 5. VORTEX PREMIUM & VIP PASS TIERS + PAYMENTS SHOWCASE    */}
+          {/* 5. CALIBER PREMIUM & VIP PASS TIERS + PAYMENTS SHOWCASE    */}
           {/* ======================================================== */}
           <div className="w-full flex flex-col items-center pt-8">
             
@@ -600,7 +602,7 @@ export const VortexLandingPage: React.FC<VortexLandingPageProps> = ({
                 </div>
               </div>
 
-              {/* PLAN 2: VORTEX PREMIUM (Most Popular) */}
+              {/* PLAN 2: CALIBER PREMIUM (Most Popular) */}
               <div className="relative rounded-3xl bg-gradient-to-b from-[#18230D] via-[#10170A] to-[#0A0D07] border-2 border-[#A3E635] p-8 flex flex-col justify-between shadow-[0_0_50px_rgba(163,230,53,0.3)] transform lg:-translate-y-3">
                 
                 {/* Most Popular Badge */}
@@ -673,7 +675,7 @@ export const VortexLandingPage: React.FC<VortexLandingPageProps> = ({
                 </div>
               </div>
 
-              {/* PLAN 3: VORTEX VIP ELITE */}
+              {/* PLAN 3: CALIBER VIP ELITE */}
               <div className="rounded-3xl bg-gradient-to-b from-[#101826] via-[#0D121D] to-[#080B10] border border-cyan-500/40 hover:border-cyan-400/80 p-8 flex flex-col justify-between shadow-2xl transition-all">
                 <div>
                   <div className="flex items-center justify-between mb-4">

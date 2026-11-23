@@ -12,7 +12,7 @@ export default async function handler(req, res) {
     return res.status(200).end();
   }
 
-  const { amount, currency = 'EUR', description, itemType = 'wallet', userId = 'vortex-user' } = req.body || req.query || {};
+  const { amount, currency = 'EUR', description, itemType = 'wallet', userId = 'caliber-user' } = req.body || req.query || {};
 
   const orderAmount = parseFloat(amount) || 10.00;
   const transactionId = `XSL-${Date.now()}-${Math.floor(Math.random() * 100000)}`;
@@ -31,7 +31,7 @@ export default async function handler(req, res) {
     merchantId,
     amount: orderAmount,
     currency,
-    description: description || `Vortex Gaming ${itemType === 'wallet' ? 'Wallet Top-Up' : 'Membership Upgrade'}`,
+    description: description || `Caliber Clutch ${itemType === 'wallet' ? 'Wallet Top-Up' : 'Membership Upgrade'}`,
     payStationUrl: `https://secure.xsolla.com/paystation4/?project_id=${projectId}&token=${mockToken}`,
     sandboxUrl: `https://sandbox-secure.xsolla.com/paystation4/?project_id=${projectId}&token=${mockToken}`
   });

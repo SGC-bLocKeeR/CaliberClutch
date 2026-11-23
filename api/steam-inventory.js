@@ -24,7 +24,7 @@ export async function getLiveSkinportPrices() {
       const res = await fetch('https://api.skinport.com/v1/items?currency=EUR', {
         headers: {
           'Accept-Encoding': 'br, gzip, deflate',
-          'User-Agent': 'VORTEX-Gaming-CS2-Pricing-Engine/2.0'
+          'User-Agent': 'CaliberClutch-Pricing-Engine/2.0'
         }
       });
       if (res.ok) {
@@ -45,7 +45,7 @@ export async function getLiveSkinportPrices() {
         skinportCache.timestamp = Date.now();
       }
     } catch (err) {
-      console.warn('[VORTEX Pricing] Skinport fetch failed, using active cache:', err.message);
+      console.warn('[Caliber Pricing] Skinport fetch failed, using active cache:', err.message);
     } finally {
       skinportCache.isFetching = null;
     }
@@ -571,7 +571,7 @@ export default async function handler(req, res) {
         }
       }
     } catch (err) {
-      console.warn('[VORTEX Steam Inventory] Live Steam fetch error, serving enriched catalog:', err.message);
+      console.warn('[Caliber Steam Inventory] Live Steam fetch error, serving enriched catalog:', err.message);
     }
   }
 

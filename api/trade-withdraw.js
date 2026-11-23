@@ -1,13 +1,13 @@
-// VORTEX CS2 Skin & Crypto Withdrawal Backend Engine
+// Caliber Clutch CS2 Skin & Crypto Withdrawal Backend Engine
 // Prepares and queues real skin dispatches via Steam Trade Bots
 
 import { isValidSteamTradeUrl, extractTradeParams } from './trade-deposit.js';
 
-if (!globalThis.vortexWithdrawOrders) {
-  globalThis.vortexWithdrawOrders = new Map();
+if (!globalThis.caliberWithdrawOrders) {
+  globalThis.caliberWithdrawOrders = new Map();
 }
 
-const WITHDRAW_ORDERS = globalThis.vortexWithdrawOrders;
+const WITHDRAW_ORDERS = globalThis.caliberWithdrawOrders;
 
 export default async function handler(req, res) {
   res.setHeader('Access-Control-Allow-Origin', '*');
@@ -58,7 +58,7 @@ export default async function handler(req, res) {
 
     const { partner, token } = extractTradeParams(tradeUrl);
 
-    const orderId = `VTX-WD-${Date.now().toString(36).toUpperCase()}-${Math.random().toString(36).substring(2, 6).toUpperCase()}`;
+    const orderId = `CC-WD-${Date.now().toString(36).toUpperCase()}-${Math.random().toString(36).substring(2, 6).toUpperCase()}`;
     const tradeOfferId = `${Math.floor(6100000000 + Math.random() * 2900000000)}`;
 
     const orderData = {
@@ -78,7 +78,7 @@ export default async function handler(req, res) {
         priceEur: skin.priceEur,
         image: skin.image
       },
-      botName: 'VORTEX Fast-Track Bot #04',
+      botName: 'Caliber Fast-Track Bot #04',
       botSteamId: '76561198884912044',
       status: 'OFFER_SENT', // WAITING_BOT -> OFFER_SENT -> ACCEPTED
       createdAt: Date.now(),

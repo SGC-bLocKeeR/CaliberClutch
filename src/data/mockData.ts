@@ -204,7 +204,7 @@ export const INITIAL_TOURNAMENTS: Tournament[] = [
     organizer: {
       name: 'Caliber Clutch Pro Tier Circuit',
       verified: true,
-      avatar: 'https://api.dicebear.com/7.x/bottts/svg?seed=vortex_pro'
+      avatar: 'https://api.dicebear.com/7.x/bottts/svg?seed=caliber_pro'
     },
     rules: [
       'Caliber PRO or ELITE Membership Required for Squad Leader',
@@ -345,7 +345,7 @@ export const INITIAL_TOURNAMENTS: Tournament[] = [
     organizer: {
       name: 'Caliber Clutch Gaming Community',
       verified: true,
-      avatar: 'https://api.dicebear.com/7.x/bottts/svg?seed=vortex_lol'
+      avatar: 'https://api.dicebear.com/7.x/bottts/svg?seed=caliber_lol'
     },
     rules: [
       'Tournament Draft Mode on Summoners Rift',
@@ -767,7 +767,7 @@ export const SCOUTING_PLAYERS: GamerPassport[] = [
     eloHistory: [],
     connectedServices: [],
     badges: [
-      { id: 'b1', name: 'VORTEX Verified', icon: '🛡️', color: '#FF5500', description: 'Verified player' },
+      { id: 'b1', name: 'Caliber Verified', icon: '🛡️', color: '#A3E635', description: 'Verified player' },
       { id: 'b2', name: 'LAN Veteran', icon: '🎖️', color: '#8B5CF6', description: 'Competed in DreamHack Open' }
     ],
     hardwareSpecs: {
@@ -812,7 +812,7 @@ export const SCOUTING_PLAYERS: GamerPassport[] = [
     eloHistory: [],
     connectedServices: [],
     badges: [
-      { id: 'b1', name: 'VORTEX Verified', icon: '🛡️', color: '#FF5500', description: 'Verified' },
+      { id: 'b1', name: 'Caliber Verified', icon: '🛡️', color: '#A3E635', description: 'Verified' },
       { id: 'b4', name: 'SoloQ Prodigy', icon: '✨', color: '#F59E0B', description: 'Top 50 EUW SoloQ' }
     ],
     hardwareSpecs: {
@@ -955,7 +955,7 @@ export const INITIAL_SHOP_ITEMS: ShopItem[] = [
     image: 'https://images.unsplash.com/photo-1550745165-9bc0b252726f?q=80&w=600&auto=format&fit=crop',
     rarity: 'rare',
     inStock: true,
-    description: 'Global Steam code sent to your registered VORTEX email immediately for CS2 cases & keys.',
+    description: 'Global Steam code sent to your registered Caliber Clutch email immediately for CS2 cases & keys.',
     tag: 'Steam Code'
   },
   {
@@ -1037,7 +1037,7 @@ export const INITIAL_NOTIFICATIONS: NotificationItem[] = [
   {
     id: 'n1',
     title: 'CS2 Major Grand Finals Live!',
-    message: 'VORTEX CS2 Major Championship: NAVI Youth vs Team Liquid Gen is in Map 3!',
+    message: 'Caliber Clutch CS2 Major Championship: NAVI Youth vs Team Liquid Gen is in Map 3!',
     time: '2m ago',
     type: 'tournament',
     read: false
@@ -1045,7 +1045,7 @@ export const INITIAL_NOTIFICATIONS: NotificationItem[] = [
   {
     id: 'n2',
     title: 'Daily Quest Completed',
-    message: 'You achieved "CS2: Headhunter Precision"! Claim your 120 VORTEX Coins now.',
+    message: 'You achieved "CS2: Headhunter Precision"! Claim your 120 Caliber Coins now.',
     time: '15m ago',
     type: 'bounty',
     read: false

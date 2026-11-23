@@ -14,8 +14,8 @@ import {
 } from 'lucide-react';
 import { sound } from '../../utils/soundEffects';
 import { 
-  getVortexWalletBalance, 
-  deductVortexWalletBalance 
+  getCaliberWalletBalance, 
+  deductCaliberWalletBalance 
 } from '../../services/skinDeliveryService';
 import { 
   executeCryptoWithdrawal, 
@@ -39,12 +39,12 @@ export const VortexWithdrawModal: React.FC<VortexWithdrawModalProps> = ({
     return (initialTab === 'bank' || initialTab === 'history') ? initialTab : 'crypto';
   });
   const currentTab = (activeTab === 'bank' || activeTab === 'history') ? activeTab : 'crypto';
-  const [walletBalance, setWalletBalance] = useState<number>(() => getVortexWalletBalance());
+  const [walletBalance, setWalletBalance] = useState<number>(() => getCaliberWalletBalance());
   const [history, setHistory] = useState<WithdrawalHistoryItem[]>(() => getWithdrawalHistory());
 
   React.useEffect(() => {
     if (isOpen) {
-      setWalletBalance(getVortexWalletBalance());
+      setWalletBalance(getCaliberWalletBalance());
       setHistory(getWithdrawalHistory());
       if (activeTab !== 'crypto' && activeTab !== 'bank' && activeTab !== 'history') {
         setActiveTab('crypto');
@@ -96,7 +96,7 @@ export const VortexWithdrawModal: React.FC<VortexWithdrawModalProps> = ({
       });
       setCryptoStep(null);
       setCryptoResult(res);
-      setWalletBalance(getVortexWalletBalance());
+      setWalletBalance(getCaliberWalletBalance());
       setHistory(getWithdrawalHistory());
       sound.playTournamentVictory();
     } catch (err: unknown) {
@@ -132,7 +132,7 @@ export const VortexWithdrawModal: React.FC<VortexWithdrawModalProps> = ({
     setBankStep({ step: 2, message: 'Authorizing bank wire from Caliber Clutch Treasury...' });
     await new Promise(r => setTimeout(r, 800));
 
-    deductVortexWalletBalance(eur);
+    deductCaliberWalletBalance(eur);
     const refId = `CC-WIRE-${Math.random().toString(36).substring(2, 9).toUpperCase()}`;
 
     const historyItem: WithdrawalHistoryItem = {
@@ -146,12 +146,12 @@ export const VortexWithdrawModal: React.FC<VortexWithdrawModalProps> = ({
     };
 
     try {
-      const existing = JSON.parse(localStorage.getItem('vortex_withdrawal_history_v1') || '[]');
+      const existing = JSON.parse(localStorage.getItem('caliber_withdrawal_history_v1') || localStorage.getItem('vortex_withdrawal_history_v1') || '[]');
       existing.unshift(historyItem);
-      localStorage.setItem('vortex_withdrawal_history_v1', JSON.stringify(existing));
+      localStorage.setItem('caliber_withdrawal_history_v1', JSON.stringify(existing));
     } catch (_) {}
 
-    setWalletBalance(getVortexWalletBalance());
+    setWalletBalance(getCaliberWalletBalance());
     setHistory(getWithdrawalHistory());
     setBankStep(null);
     setBankResult({

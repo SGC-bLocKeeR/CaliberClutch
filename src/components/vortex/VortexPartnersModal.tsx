@@ -365,7 +365,7 @@ export const VortexPartnersModal: React.FC<VortexPartnersModalProps> = ({ isOpen
             ))}
           </div>
 
-          {/* 4. BECOME A VORTEX PARTNER OR TOURNAMENT SPONSOR */}
+          {/* 4. BECOME A CALIBERCLUTCH PARTNER OR TOURNAMENT SPONSOR */}
           <div className="p-6 rounded-2xl bg-[#0F131D] border border-[#232C3E] space-y-4">
             <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-[#1E2638] pb-4">
               <div>

@@ -43,7 +43,7 @@ import { CountryFlag } from './CountryFlag';
 import { FaceitVerificationBadge } from './VortexDashboard';
 import { XsollaCheckoutModal } from './XsollaCheckoutModal';
 import { VortexWithdrawModal } from './VortexWithdrawModal';
-import { getVortexWalletBalance } from '../../services/skinDeliveryService';
+import { getCaliberWalletBalance } from '../../services/skinDeliveryService';
 import {
   RegisteredPlayer,
   SocialFriend,
@@ -143,19 +143,23 @@ export const VortexRightSocialRail: React.FC<VortexRightSocialRailProps> = ({
   // Modals & Wallet State
   const [showXsollaTopUp, setShowXsollaTopUp] = useState(false);
   const [showWithdrawModal, setShowWithdrawModal] = useState(false);
-  const [vortexBalance, setVortexBalance] = useState<number>(() => getVortexWalletBalance());
+  const [caliberBalance, setCaliberBalance] = useState<number>(() => getCaliberWalletBalance());
 
   useEffect(() => {
     const handleBalance = (e: Event) => {
       const custom = e as CustomEvent<number>;
-      setVortexBalance(custom.detail);
+      setCaliberBalance(custom.detail);
     };
     const handleOpenWithdraw = () => setShowWithdrawModal(true);
 
+    window.addEventListener('caliber_wallet_updated', handleBalance);
     window.addEventListener('vortex_wallet_updated', handleBalance);
+    window.addEventListener('caliber_open_withdraw_modal', handleOpenWithdraw);
     window.addEventListener('vortex_open_withdraw_modal', handleOpenWithdraw);
     return () => {
+      window.removeEventListener('caliber_wallet_updated', handleBalance);
       window.removeEventListener('vortex_wallet_updated', handleBalance);
+      window.removeEventListener('caliber_open_withdraw_modal', handleOpenWithdraw);
       window.removeEventListener('vortex_open_withdraw_modal', handleOpenWithdraw);
     };
   }, []);
@@ -216,7 +220,7 @@ export const VortexRightSocialRail: React.FC<VortexRightSocialRailProps> = ({
       name: 'Skinport Market',
       tagline: 'Safest CS2 Skin Marketplace',
       bonus: '0% Buyer Commission • Direct Cashout',
-      url: 'https://skinport.com/r/vortex',
+      url: 'https://skinport.com/r/caliberclutch',
       badgeColor: '#3B82F6',
       image: 'https://community.akamai.steamstatic.com/economy/image/-9a81dlWLwJ2UUGcVs_nsVtzdOEdtWwKGZZLQHTxDZ7I56KU0Zwwo4NUX4oFJZEHLbXH5ApeO4YmlhxYQknCRvCo04DEVlxkKgpou-6kejhz2v_Nfz5H_uO1gb-Gw_alIITfn2xV_Pp_jez--YXygED6-kZkYj3wLITDdQc8MlCG_Fftxr3ug8C0u5vNnHJr6SQmsH6MnRDi1gYMMLIqu-Y0gQ/360fx360f',
       features: ['Official Steam WebAPI', 'Real Bank & Card Cashout', 'Guaranteed Anti-Scam']
@@ -236,9 +240,9 @@ export const VortexRightSocialRail: React.FC<VortexRightSocialRailProps> = ({
   // Register current user into the platform directory
   useEffect(() => {
     if (currentGamerTag && !currentGamerTag.toLowerCase().includes('blockeer')) {
-      const savedMatches = typeof window !== 'undefined' ? localStorage.getItem('vortex_user_matches') : null;
+      const savedMatches = typeof window !== 'undefined' ? (localStorage.getItem('caliber_user_matches') || localStorage.getItem('vortex_user_matches')) : null;
       const matchCount = savedMatches !== null ? parseInt(savedMatches, 10) : 0;
-      const savedElo = typeof window !== 'undefined' ? localStorage.getItem('vortex_user_elo') : null;
+      const savedElo = typeof window !== 'undefined' ? (localStorage.getItem('caliber_user_elo') || localStorage.getItem('vortex_user_elo')) : null;
       const elo = matchCount > 0 && savedElo ? parseInt(savedElo, 10) : 800;
       const lvl = matchCount > 0 ? (elo >= 2001 ? 10 : elo >= 1751 ? 9 : elo >= 1531 ? 8 : elo >= 1351 ? 7 : elo >= 1201 ? 6 : elo >= 1051 ? 5 : elo >= 901 ? 4 : elo >= 751 ? 3 : elo >= 501 ? 2 : 1) : 3;
 
@@ -273,14 +277,22 @@ export const VortexRightSocialRail: React.FC<VortexRightSocialRailProps> = ({
       }
       setFriendsList(getUserFriends(currentGamerTag));
     };
+    window.addEventListener('caliber_friends_updated', handleSync);
     window.addEventListener('vortex_friends_updated', handleSync);
+    window.addEventListener('caliber_friend_requests_updated', handleSync);
     window.addEventListener('vortex_friend_requests_updated', handleSync);
+    window.addEventListener('caliber_dms_updated', handleDms);
     window.addEventListener('vortex_dms_updated', handleDms);
+    window.addEventListener('caliber_players_updated', handleSync);
     window.addEventListener('vortex_players_updated', handleSync);
     return () => {
+      window.removeEventListener('caliber_friends_updated', handleSync);
       window.removeEventListener('vortex_friends_updated', handleSync);
+      window.removeEventListener('caliber_friend_requests_updated', handleSync);
       window.removeEventListener('vortex_friend_requests_updated', handleSync);
+      window.removeEventListener('caliber_dms_updated', handleDms);
       window.removeEventListener('vortex_dms_updated', handleDms);
+      window.removeEventListener('caliber_players_updated', handleSync);
       window.removeEventListener('vortex_players_updated', handleSync);
     };
   }, [currentGamerTag, activeDmUser]);
@@ -620,7 +632,7 @@ export const VortexRightSocialRail: React.FC<VortexRightSocialRailProps> = ({
         {/* MIDDLE SECTION: Notifications • Social • Party Capsule */}
         <div className={`flex-col gap-3 w-full flex-1 pt-3 overflow-y-auto ${mobileCollapsed ? 'hidden' : 'flex'} lg:flex`}>
           
-          {/* AUTHENTIC VORTEX WALLET BALANCE BAR */}
+          {/* AUTHENTIC CALIBER CLUTCH WALLET BALANCE BAR */}
           <div className="w-full px-2.5 py-1.5 rounded-2xl bg-gradient-to-r from-[#0C101A] via-[#121726] to-[#0C101A] border border-emerald-500/35 shadow-[0_4px_20px_rgba(16,185,129,0.12)] flex items-center justify-between gap-1.5 select-none">
             <div
               className="flex items-center gap-1.5 px-2 py-1 rounded-xl bg-black/60 border border-emerald-500/30 shrink-0"
@@ -630,7 +642,7 @@ export const VortexRightSocialRail: React.FC<VortexRightSocialRailProps> = ({
                 <Coins className="w-2.5 h-2.5 text-emerald-400" />
               </div>
               <span className="font-mono font-black text-xs text-emerald-400 tracking-tight whitespace-nowrap">
-                {vortexBalance.toFixed(2)} €
+                {caliberBalance.toFixed(2)} €
               </span>
             </div>
 
@@ -773,7 +785,7 @@ export const VortexRightSocialRail: React.FC<VortexRightSocialRailProps> = ({
                 </button>
               </div>
 
-              {/* Voice Comms Trigger (Lime Green VORTEX theme) */}
+              {/* Voice Comms Trigger (Lime Green Caliber Clutch theme) */}
               <button
                 onClick={() => {
                   sound.playClick();
@@ -796,7 +808,7 @@ export const VortexRightSocialRail: React.FC<VortexRightSocialRailProps> = ({
           </div>
 
           {/* ======================================================== */}
-          {/* VORTEX CS2 CASES (OFFICIAL WHITE-LABEL STORE) CAPSULE     */}
+          {/* CALIBER CLUTCH CS2 CASES & PRIZES CAPSULE                 */}
           {/* ======================================================== */}
           <div className="rounded-2xl bg-[#10121A] border border-[#1E2333] p-3 flex flex-col gap-2.5 shadow-lg hover:border-amber-500/40 transition group">
             <div className="flex items-center justify-between">
@@ -821,7 +833,7 @@ export const VortexRightSocialRail: React.FC<VortexRightSocialRailProps> = ({
               >
                 <div className="flex items-center gap-1.5">
                   <Coins className="w-3.5 h-3.5 text-amber-400" />
-                  <span className="text-emerald-400 font-black">{vortexBalance.toFixed(2)} €</span>
+                  <span className="text-emerald-400 font-black">{caliberBalance.toFixed(2)} €</span>
                 </div>
                 <span className="text-[9px] text-slate-400 font-mono font-bold uppercase bg-white/5 border border-white/10 px-1.5 py-0.5 rounded">
                   WALLET
@@ -848,7 +860,7 @@ export const VortexRightSocialRail: React.FC<VortexRightSocialRailProps> = ({
 
         </div>
 
-        {/* BOTTOM SECTION: Profile Settings & Vortex Wolf Badge */}
+        {/* BOTTOM SECTION: Profile Settings & Caliber Clutch Badge */}
         <div className={`w-full pt-3 border-t border-[#1A1D27] items-center justify-between ${mobileCollapsed ? 'hidden' : 'flex'} lg:flex`}>
           <button
             onClick={() => {
@@ -2173,7 +2185,7 @@ export const VortexRightSocialRail: React.FC<VortexRightSocialRailProps> = ({
                 <button
                   onClick={() => {
                     sound.playClick();
-                    const activeSteamId = localStorage.getItem('vortex_steam_id') || 'STEAM_0:1:43918293';
+                    const activeSteamId = localStorage.getItem('caliber_steam_id') || localStorage.getItem('vortex_steam_id') || 'STEAM_0:1:43918293';
                     navigator.clipboard.writeText(activeSteamId);
                     setCopiedSteamId(true);
                     setTimeout(() => setCopiedSteamId(false), 2500);
@@ -2189,7 +2201,7 @@ export const VortexRightSocialRail: React.FC<VortexRightSocialRailProps> = ({
                     <span>{copiedSteamId ? 'Copied to Clipboard!' : 'Copy SteamID'}</span>
                   </div>
                   <span className="text-[10px] text-slate-500 font-mono">
-                    {(localStorage.getItem('vortex_steam_id') || 'STEAM_0:1:43918293').slice(0, 15)}...
+                    {(localStorage.getItem('caliber_steam_id') || localStorage.getItem('vortex_steam_id') || 'STEAM_0:1:43918293').slice(0, 15)}...
                   </span>
                 </button>
 

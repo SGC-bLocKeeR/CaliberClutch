@@ -55,7 +55,7 @@ export const VortexAdBanner: React.FC<VortexAdBannerProps> = ({
           <iframe
             data-aa="2462347"
             src="https://acceptable.a-ads.com/2462347/?size=Adaptive"
-            title="VORTEX Official Sponsored Network Advertisement"
+            title="CaliberClutch Official Sponsored Network Advertisement"
             style={{
               border: 0,
               padding: 0,

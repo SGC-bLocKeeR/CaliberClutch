@@ -1,6 +1,6 @@
 /**
  * Official Xsolla Game Commerce & Payment Processing Service
- * Powers global video game monetisation for Vortex Gaming
+ * Powers global video game monetisation for Caliber Clutch
  * Supports Pay Station 4, 700+ payment methods, and real-time wallet settlement.
  */
 
@@ -32,15 +32,15 @@ export interface XsollaPaymentResult {
   timestamp: number;
 }
 
-const STORAGE_XSOLLA_PROJECT_ID = 'vortex_xsolla_project_id';
-const STORAGE_XSOLLA_MERCHANT_ID = 'vortex_xsolla_merchant_id';
-const STORAGE_XSOLLA_MODE = 'vortex_xsolla_mode';
-const STORAGE_XSOLLA_API_KEY = 'vortex_xsolla_api_key';
-const STORAGE_XSOLLA_SECRET_KEY = 'vortex_xsolla_secret_key';
+const STORAGE_XSOLLA_PROJECT_ID = 'caliber_xsolla_project_id';
+const STORAGE_XSOLLA_MERCHANT_ID = 'caliber_xsolla_merchant_id';
+const STORAGE_XSOLLA_MODE = 'caliber_xsolla_mode';
+const STORAGE_XSOLLA_API_KEY = 'caliber_xsolla_api_key';
+const STORAGE_XSOLLA_SECRET_KEY = 'caliber_xsolla_secret_key';
 
 export const DEFAULT_XSOLLA_CONFIG: XsollaConfig = {
-  projectId: '321543', // Official VORTEX Gaming Project ID on Xsolla Publisher
-  merchantId: '870122', // Official VORTEX Gaming Merchant ID
+  projectId: '321543', // Official Caliber Clutch Gaming Project ID on Xsolla Publisher
+  merchantId: '870122', // Official Caliber Clutch Gaming Merchant ID
   mode: 'live', // Real live production mode (Real money)
   apiKey: 'c067e12d8b1829007277de34c5f3ed9ab446aafc',
   secretKey: 'zK17ILbblZfq35s8ggkz44j-olQBn_B35XgEhhKUsrg',
@@ -49,11 +49,11 @@ export const DEFAULT_XSOLLA_CONFIG: XsollaConfig = {
 export const getXsollaConfig = (): XsollaConfig => {
   if (typeof window === 'undefined') return DEFAULT_XSOLLA_CONFIG;
   return {
-    projectId: localStorage.getItem(STORAGE_XSOLLA_PROJECT_ID) || DEFAULT_XSOLLA_CONFIG.projectId,
-    merchantId: localStorage.getItem(STORAGE_XSOLLA_MERCHANT_ID) || DEFAULT_XSOLLA_CONFIG.merchantId,
+    projectId: localStorage.getItem(STORAGE_XSOLLA_PROJECT_ID) || localStorage.getItem('vortex_xsolla_project_id') || DEFAULT_XSOLLA_CONFIG.projectId,
+    merchantId: localStorage.getItem(STORAGE_XSOLLA_MERCHANT_ID) || localStorage.getItem('vortex_xsolla_merchant_id') || DEFAULT_XSOLLA_CONFIG.merchantId,
     mode: 'live',
-    apiKey: localStorage.getItem(STORAGE_XSOLLA_API_KEY) || DEFAULT_XSOLLA_CONFIG.apiKey,
-    secretKey: localStorage.getItem(STORAGE_XSOLLA_SECRET_KEY) || DEFAULT_XSOLLA_CONFIG.secretKey,
+    apiKey: localStorage.getItem(STORAGE_XSOLLA_API_KEY) || localStorage.getItem('vortex_xsolla_api_key') || DEFAULT_XSOLLA_CONFIG.apiKey,
+    secretKey: localStorage.getItem(STORAGE_XSOLLA_SECRET_KEY) || localStorage.getItem('vortex_xsolla_secret_key') || DEFAULT_XSOLLA_CONFIG.secretKey,
   };
 };
 
@@ -64,6 +64,7 @@ export const saveXsollaConfig = (config: Partial<XsollaConfig>) => {
   if (config.mode !== undefined) localStorage.setItem(STORAGE_XSOLLA_MODE, config.mode);
   if (config.apiKey !== undefined) localStorage.setItem(STORAGE_XSOLLA_API_KEY, config.apiKey);
   if (config.secretKey !== undefined) localStorage.setItem(STORAGE_XSOLLA_SECRET_KEY, config.secretKey);
+  window.dispatchEvent(new CustomEvent('caliber_xsolla_config_updated'));
   window.dispatchEvent(new CustomEvent('vortex_xsolla_config_updated'));
 };
 

@@ -18,7 +18,7 @@ import {
   AlertCircle
 } from 'lucide-react';
 import { sound } from '../../utils/soundEffects';
-import { creditVortexWalletBalance } from '../../services/skinDeliveryService';
+import { creditCaliberWalletBalance } from '../../services/skinDeliveryService';
 import {
   XsollaOrderItem,
   XSOLLA_WALLET_PACKAGES,
@@ -335,7 +335,7 @@ export const XsollaCheckoutModal: React.FC<XsollaCheckoutModalProps> = ({
 
     // Credit real wallet balance strictly after verified on-chain confirmation
     if (selectedItem.type === 'wallet_topup') {
-      creditVortexWalletBalance(selectedItem.amountEur);
+      creditCaliberWalletBalance(selectedItem.amountEur);
     }
 
     sound.playTournamentVictory();
