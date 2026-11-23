@@ -38,6 +38,21 @@
 - **Icons**: Lucide React + Steam Glyphs + SVG Country Flags
 - **Sounds**: Interactive UI Sound Synthesizer (Web Audio API)
 - **API**: FACEIT Open API v4 & OpenID Steam Authentication
+- **Database & Realtime**: Supabase (PostgreSQL Cloud + Supabase Realtime Channels)
+
+---
+
+## 🗄️ Database Setup (Supabase)
+
+To enable cloud persistence and real-time live synchronization for tournaments, 5v5 clans, and player profiles:
+
+1. Open your [Supabase SQL Editor](https://supabase.com/dashboard/project/awxmcphoobeavlgxlasj/sql).
+2. Copy and execute the migration script located at [scripts/supabase_complete_schema.sql](file:///C:/Users/GGEZ/Documents/GitHub/vortex-gaming/scripts/supabase_complete_schema.sql).
+3. The script configures:
+   - `public.tournaments` (Community cups, prize distribution, and brackets)
+   - `public.clans` (5v5 competitive rosters & statistics)
+   - `public.caliber_profiles` (Player ranks, ELO, wallet balance, and Faceit verification)
+   - Real-time replication (`supabase_realtime`) for instant multi-client updates.
 
 ---
 

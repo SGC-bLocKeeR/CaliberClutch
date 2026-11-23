@@ -101,6 +101,13 @@ import {
   FaceitOrganizerConfig 
 } from '../../services/faceitTournamentService';
 import { realtimeMatchmaking, RealtimeQueuePlayer } from '../../services/realtimeMatchmakingService';
+import { 
+  fetchTournamentsFromCloud, 
+  saveTournamentToCloud, 
+  deleteTournamentFromCloud, 
+  subscribeToTournamentChanges 
+} from '../../services/tournamentSupabaseService';
+import { saveProfileToCloud } from '../../services/profileSupabaseService';
 
 interface VortexDashboardProps {
   userGamerTag?: string;
@@ -1205,6 +1212,75 @@ export const VortexDashboard: React.FC<VortexDashboardProps> = ({
       window.removeEventListener('storage', handleClanUpdate);
     };
   }, []);
+
+  // Cloud Database Sync: Tournaments & Real-time Listeners
+  useEffect(() => {
+    fetchTournamentsFromCloud().then(cloudItems => {
+      if (cloudItems && cloudItems.length > 0) {
+        setCustomTournaments(prev => {
+          const map = new Map();
+          prev.forEach((p: any) => map.set(p.id, p));
+          cloudItems.forEach((c: any) => map.set(c.id, c));
+          return Array.from(map.values());
+        });
+      }
+    });
+
+    const unsubscribe = subscribeToTournamentChanges(
+      (updated) => {
+        setCustomTournaments(prev => {
+          const next = prev.map((t: any) => t.id === updated.id ? updated : t);
+          if (!next.some((t: any) => t.id === updated.id)) {
+            next.unshift(updated);
+          }
+          return next;
+        });
+      },
+      (newTourney) => {
+        setCustomTournaments(prev => {
+          if (prev.some((t: any) => t.id === newTourney.id)) return prev;
+          return [newTourney, ...prev];
+        });
+      },
+      (deletedId) => {
+        setCustomTournaments(prev => prev.filter((t: any) => t.id !== deletedId));
+      }
+    );
+
+    return () => {
+      unsubscribe();
+    };
+  }, []);
+
+  // Cloud Database Sync: Player Profile Sync
+  useEffect(() => {
+    const steamId = localStorage.getItem('vortex_steam_id') || undefined;
+    const steamId64 = localStorage.getItem('vortex_steam_id64') || undefined;
+    const faceitNick = localStorage.getItem('vortex_faceit_nickname') || undefined;
+    const matches = Number(localStorage.getItem('vortex_user_matches') || 0);
+    const balance = getVortexWalletBalance();
+    const coins = Number(localStorage.getItem('vortex_user_coins') || 0);
+    const xp = Number(localStorage.getItem('vortex_user_xp') || 0);
+
+    saveProfileToCloud({
+      id: steamId64 || currentGamerTag,
+      gamerTag: currentGamerTag,
+      avatarUrl: currentAvatarUrl,
+      steamId,
+      steamId64,
+      faceitNickname: faceitNick,
+      faceitElo: currentUserElo,
+      faceitLevel: currentUserLevel,
+      matchesPlayed: matches,
+      walletBalance: balance,
+      coins,
+      xp,
+      membershipTier: userMembershipTier,
+      country: currentCountry.name,
+      flag: currentCountry.code,
+      isAdmin: isProjectAdmin,
+    }).catch(() => {});
+  }, [currentGamerTag, currentAvatarUrl, currentUserElo, currentUserLevel, userMembershipTier, currentCountry, isProjectAdmin]);
 
   // User Clan Data sync for Tournaments & Leaderboards
   const userClanData = useMemo(() => {
@@ -5222,6 +5298,7 @@ export const VortexDashboard: React.FC<VortexDashboardProps> = ({
                               } catch (_) {}
                               return next;
                             });
+                            saveTournamentToCloud(createdItem as any);
 
                             // Automatically enroll creator's roster
                             setRegisteredTourneys((prev: string[]) => {
@@ -5608,6 +5685,7 @@ export const VortexDashboard: React.FC<VortexDashboardProps> = ({
                                       } catch (_) {}
                                       return next;
                                     });
+                                    deleteTournamentFromCloud(t.id);
                                     setDashboardToast(`✓ Custom tournament "${t.title}" deleted.`);
                                     setTimeout(() => setDashboardToast(null), 3000);
                                   }}
