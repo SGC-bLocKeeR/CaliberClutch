@@ -187,7 +187,7 @@ export const INITIAL_TOURNAMENTS: Tournament[] = [
   },
   {
     id: 'tourney-pro-special',
-    title: 'VORTEX Pro Elite Weekly Cup (PRO Only)',
+    title: 'Caliber Clutch Pro Elite Weekly Cup (PRO Only)',
     gameId: 'cs2',
     gameName: 'Counter-Strike 2',
     prizePool: 10000,
@@ -202,12 +202,12 @@ export const INITIAL_TOURNAMENTS: Tournament[] = [
     banner: 'https://images.unsplash.com/photo-1511512578047-dfb367046420?q=80&w=1200&auto=format&fit=crop',
     isProOnly: true,
     organizer: {
-      name: 'VORTEX Pro Tier Circuit',
+      name: 'Caliber Clutch Pro Tier Circuit',
       verified: true,
       avatar: 'https://api.dicebear.com/7.x/bottts/svg?seed=vortex_pro'
     },
     rules: [
-      'VORTEX PRO or ELITE Membership Required for Squad Leader',
+      'Caliber PRO or ELITE Membership Required for Squad Leader',
       'Instant $10,000 cash prize distributed same-day with 0% fee',
       'Exclusive CS2 Sub-Tick private European servers'
     ],
@@ -343,7 +343,7 @@ export const INITIAL_TOURNAMENTS: Tournament[] = [
     startDate: 'Saturday, Nov 15 - 16:00 CET',
     banner: 'https://images.unsplash.com/photo-1560253023-3ec5d502959f?q=80&w=1200&auto=format&fit=crop',
     organizer: {
-      name: 'VORTEX Gaming Community',
+      name: 'Caliber Clutch Gaming Community',
       verified: true,
       avatar: 'https://api.dicebear.com/7.x/bottts/svg?seed=vortex_lol'
     },
@@ -404,7 +404,7 @@ export const INITIAL_SCRIMS: ScrimLobby[] = [
     format: 'BO3',
     region: 'EU Central (Frankfurt Sub-Tick)',
     maps: ['Mirage', 'Ancient', 'Nuke', 'Inferno', 'Dust II'],
-    serverLocation: 'VORTEX Dedicated Frankfurt #04',
+    serverLocation: 'Caliber Dedicated Frankfurt #04',
     antiCheatRequired: true,
     scheduledTime: 'Now - Looking for challenger',
     status: 'waiting',
@@ -426,7 +426,7 @@ export const INITIAL_SCRIMS: ScrimLobby[] = [
     format: 'BO1',
     region: 'EU East (Warsaw)',
     maps: ['Inferno', 'Overpass', 'Anubis'],
-    serverLocation: 'VORTEX Dedicated Warsaw #12',
+    serverLocation: 'Caliber Dedicated Warsaw #12',
     antiCheatRequired: true,
     scheduledTime: 'Instant / Ready Now',
     status: 'waiting',
@@ -448,7 +448,7 @@ export const INITIAL_SCRIMS: ScrimLobby[] = [
     format: 'BO3',
     region: 'EU Central (Frankfurt Sub-Tick)',
     maps: ['Nuke', 'Mirage', 'Ancient'],
-    serverLocation: 'VORTEX Dedicated Frankfurt #09',
+    serverLocation: 'Caliber Dedicated Frankfurt #09',
     antiCheatRequired: true,
     scheduledTime: 'Starts in 10 mins',
     status: 'waiting',

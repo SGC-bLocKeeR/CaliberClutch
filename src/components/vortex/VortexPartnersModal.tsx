@@ -48,11 +48,11 @@ export const OFFICIAL_PARTNERS: PartnerProvider[] = [
     badge: 'OFFICIAL SKIN PROVIDER',
     badgeColor: 'bg-emerald-500/15 text-emerald-400 border-emerald-500/30',
     logo: 'https://imgproxy.dmarket.com/insecure/rs:fit:120:120:0/g:ce/aHR0cHM6Ly9jb21tdW5pdHkuYWthbWFpLnN0ZWFtc3RhdGljLmNvbS9lY29ub215L2ltYWdlL2kwQ29aODFVaTBtLTlLd2xCWTFMXzE4bXl1R3VxMXdmaFdTYVpnTXR0eVZmUGFFUlNSMFdxbXU3TEFvY0dKS3oybHVfWHNuWHd0bWtKalNVOTFkaDhiajM1VlRxVkJQNGlvX2ZybklWN0tiNU9hVS1KcWZIRHpYRmxlMHU0TFk4R3lfa2tSZ2lzR3pjbTR2NEozdkRPQVFtRE1keVJ2bEs3RWNtZUNVM3l3.webp',
-    description: 'Powers all VORTEX Tournament prize skins, marketplace liquidity, and instant automated Steam Bot deliveries with zero escrow wait.',
-    bonusText: 'Lowest trading fees + Priority Steam Bot Trade queue with code VORTEX',
-    promoCode: 'VORTEX',
+    description: 'Powers all CaliberClutch Tournament prize skins, marketplace liquidity, and instant automated Steam Bot deliveries with zero escrow wait.',
+    bonusText: 'Lowest trading fees + Priority Steam Bot Trade queue with code CALIBER',
+    promoCode: 'CALIBER',
     features: ['1,500,000+ CS2 Skins in Stock', 'Sub-30s Automated Bot Dispatch', '100% Steam WebAPI Compliant'],
-    referralUrl: 'https://dmarket.com?ref=vortex',
+    referralUrl: 'https://dmarket.com?ref=caliberclutch',
     status: 'Operational'
   },
   {
@@ -62,11 +62,11 @@ export const OFFICIAL_PARTNERS: PartnerProvider[] = [
     badge: 'EU LICENSED VALUATION',
     badgeColor: 'bg-blue-500/15 text-blue-400 border-blue-500/30',
     logo: 'https://community.akamai.steamstatic.com/economy/image/-9a81dlWLwJ2UUGcVs_nsVtzdOEdtWwKGZZLQHTxDZ7I56KU0Zwwo4NUX4oFJZEHLbXH5ApeO4YmlhxYQknCRvCo04DEVlxkKgpou-6kejhz2v_Nfz5H_uO1gb-Gw_alIITfn2xV_Pp_jez--YXygED6-kZkYj3wLITDdQc8MlCG_Fftxr3ug8C0u5vNnHJr6SQmsH6MnRDi1gYMMLIqu-Y0gQ/360fx360f',
-    description: 'German-regulated CS2 item exchange providing official real-time pricing feeds and legal European bank cashout for VORTEX users.',
+    description: 'German-regulated CS2 item exchange providing official real-time pricing feeds and legal European bank cashout for CaliberClutch users.',
     bonusText: '0% deposit fees on bank wires & cards + Verified seller status',
-    promoCode: 'VORTEX',
+    promoCode: 'CALIBER',
     features: ['BaFin Regulated EU Jurisdiction', 'Direct Bank & SEPA Cashout', 'Real-time Item Pricing Engine'],
-    referralUrl: 'https://skinport.com/r/vortex',
+    referralUrl: 'https://skinport.com/r/caliberclutch',
     status: 'Operational'
   },
   {
@@ -77,8 +77,8 @@ export const OFFICIAL_PARTNERS: PartnerProvider[] = [
     badgeColor: 'bg-orange-500/15 text-orange-400 border-orange-500/30',
     logo: 'https://community.akamai.steamstatic.com/economy/image/-9a81dlWLwJ2UUGcVs_nsVtzdOEdtWwKGZZLQHTxDZ7I56KU0Zwwo4NUX4oFJZEHLbXH5ApeO4YmlhxYQknCRvCo04DEVlxkKgpou-6kejhz2v_Nfz5H_uO1gb-Gw_alIITfn2xV_Pp_jez--YXygED6-kZkYj3wLITDdQc8MlCG_Fftxr3ug8C0u5vNnHJr6SQmsH6MnRDi1gYMMLIqu-Y0gQ/360fx360f',
     description: 'Official esports audio partner powering tournament communications, Arctis headsets, and pro gaming mice.',
-    bonusText: '15% Off all pro gaming gear with partner code VORTEX',
-    promoCode: 'VORTEX',
+    bonusText: '15% Off all pro gaming gear with partner code CALIBER',
+    promoCode: 'CALIBER',
     features: ['ClearCast AI Microphone', 'Nova Pro Wireless Audio', 'Aerox Ultra-Light Mice'],
     referralUrl: 'https://steelseries.com',
     status: 'Operational'
@@ -92,7 +92,7 @@ export const OFFICIAL_PARTNERS: PartnerProvider[] = [
     logo: 'https://community.akamai.steamstatic.com/economy/image/-9a81dlWLwJ2UUGcVs_nsVtzdOEdtWwKGZZLQHTxDZ7I56KU0Zwwo4NUX4oFJZEHLbXH5ApeO4YmlhxYQknCRvCo04DEVlxkKgpot621FABz7PLfYQJS5NO0m5O0m_7zO6-fk29T-sBzpezT_I2tiVXs-RE5YTincY-WdVA4N13R81brx-e51sW9786czydiuSQn4ivcnBfmn1gSOd0N_1mS/360fx360f',
     description: 'The global esports standard for high-refresh 240Hz & 360Hz displays and tournament ergonomic mice.',
     bonusText: 'Official Tournament Display Partner for CaliberClutch Championships',
-    promoCode: 'VORTEX',
+    promoCode: 'CALIBER',
     features: ['DyAc 2 Fast Clarity', '360Hz Fast TN Esports Panels', 'Symmetrical & Ergonomic Mice'],
     referralUrl: 'https://zowie.benq.com',
     status: 'Operational'
@@ -104,9 +104,9 @@ export const OFFICIAL_PARTNERS: PartnerProvider[] = [
     badge: '3D INSPECTION ENGINE',
     badgeColor: 'bg-purple-500/15 text-purple-400 border-purple-500/30',
     logo: 'https://imgproxy.dmarket.com/insecure/rs:fit:120:120:0/g:ce/aHR0cHM6Ly9jb21tdW5pdHkuYWthbWFpLnN0ZWFtc3RhdGljLmNvbS9lY29ub215L2ltYWdlL2kwQ29aODFVaTBtLTlLd2xCWTFMXzE4bXl1R3VxMXdmaFdTYVpnTXR0eVZmUGFFUlNSMFdxbXU3TEFvY0dJR3ozVXFsWE9McnhNLXZNR21XOFZOeHU1RHg2MG5vVHlMd2xjSzN3aU5RME9LaGVxZG9MUEdhQUZpY3lPbC1wSzh4R0hfbndVdDFzR3JTejlpdmNIS1FPQWNqWE1Za1J1NVl1eGU0bFlDeVpPcTI1VlNNMm9NVDAyeWcyVXhCU0VnQQ==.webp',
-    description: 'Supplies real-time CS2 weapon float inspection, high-resolution 3D renders, and automatic skin trade liquidity to VORTEX players.',
-    bonusText: '+35% Deposit Bonus on Trade-ins with code VORTEX',
-    promoCode: 'VORTEX',
+    description: 'Supplies real-time CS2 weapon float inspection, high-resolution 3D renders, and automatic skin trade liquidity to CaliberClutch players.',
+    bonusText: '+35% Deposit Bonus on Trade-ins with code CALIBER',
+    promoCode: 'CALIBER',
     features: ['Custom 3D Weapon Renders', 'Accurate Float & Seed Matching', 'Direct Peer-to-Peer Trades'],
     referralUrl: 'https://cs.money',
     status: 'Operational'
@@ -205,27 +205,27 @@ export const VortexPartnersModal: React.FC<VortexPartnersModalProps> = ({ isOpen
               <div className="flex items-center gap-2">
                 <Sparkles className="w-4 h-4 text-amber-400" />
                 <span className="text-xs font-mono font-black text-amber-400 uppercase tracking-wider">
-                  Universal VORTEX Partner Code
+                  Universal CaliberClutch Partner Code
                 </span>
               </div>
               <h3 className="text-base font-black font-display text-white">
                 Official Esports Hardware & Platform Partner Benefits
               </h3>
               <p className="text-xs text-slate-400">
-                Use code <strong className="text-white font-mono">VORTEX</strong> on SteelSeries, ZOWIE, Skinport or DMarket to unlock verified platform rewards.
+                Use code <strong className="text-white font-mono">CALIBER</strong> on SteelSeries, ZOWIE, Skinport or DMarket to unlock verified platform rewards.
               </p>
             </div>
 
             <div className="flex items-center gap-2 shrink-0">
               <div className="px-4 py-2.5 rounded-xl bg-black/60 border border-amber-400/40 text-amber-400 font-mono font-black text-sm tracking-widest select-all">
-                VORTEX
+                CALIBER
               </div>
               <button
                 type="button"
-                onClick={() => handleCopyCode('VORTEX')}
+                onClick={() => handleCopyCode('CALIBER')}
                 className="px-4 py-2.5 rounded-xl bg-gradient-to-r from-amber-400 to-yellow-400 hover:from-amber-300 hover:to-yellow-300 text-slate-950 font-mono font-black text-xs uppercase tracking-wider transition cursor-pointer shadow-[0_0_15px_rgba(245,158,11,0.3)] flex items-center gap-1.5 active:scale-95"
               >
-                {copiedCode === 'VORTEX' ? (
+                {copiedCode === 'CALIBER' ? (
                   <>
                     <Check className="w-3.5 h-3.5" />
                     <span>Copied!</span>
@@ -372,7 +372,7 @@ export const VortexPartnersModal: React.FC<VortexPartnersModalProps> = ({ isOpen
                 <div className="flex items-center gap-2">
                   <Building className="w-4 h-4 text-[#A3E635]" />
                   <h3 className="text-base font-black font-display text-white">
-                    Become a VORTEX Partner or Tournament Sponsor
+                    Become a CaliberClutch Partner or Tournament Sponsor
                   </h3>
                 </div>
                 <p className="text-xs text-slate-400 mt-1">
@@ -461,7 +461,7 @@ export const VortexPartnersModal: React.FC<VortexPartnersModalProps> = ({ isOpen
                 <div className="flex items-center justify-between pt-2">
                   <div className="flex items-center gap-1.5 text-[11px] font-mono text-slate-400">
                     <Mail className="w-3.5 h-3.5 text-amber-400" />
-                    <span>Direct contact: <a href="mailto:partners@vortex.gg" className="text-amber-400 underline">partners@vortex.gg</a></span>
+                    <span>Direct contact: <a href="mailto:partners@caliberclutch.gg" className="text-amber-400 underline">partners@caliberclutch.gg</a></span>
                   </div>
 
                   <button

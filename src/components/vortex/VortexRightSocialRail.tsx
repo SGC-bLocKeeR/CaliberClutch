@@ -185,7 +185,7 @@ export const VortexRightSocialRail: React.FC<VortexRightSocialRailProps> = ({
 
   const handleCopyPartnerCode = () => {
     sound.playSelect();
-    navigator.clipboard.writeText('VORTEX');
+    navigator.clipboard.writeText('CALIBER');
     setCopiedCode(true);
     setTimeout(() => setCopiedCode(false), 2500);
   };
@@ -195,7 +195,7 @@ export const VortexRightSocialRail: React.FC<VortexRightSocialRailProps> = ({
       id: 'steelseries',
       name: 'SteelSeries Esports',
       tagline: 'Official Pro Gaming Headsets & Gear',
-      bonus: '15% Off with code VORTEX',
+      bonus: '15% Off with code CALIBER',
       url: 'https://steelseries.com',
       badgeColor: '#FF5500',
       image: 'https://community.akamai.steamstatic.com/economy/image/-9a81dlWLwJ2UUGcVs_nsVtzdOEdtWwKGZZLQHTxDZ7I56KU0Zwwo4NUX4oFJZEHLbXH5ApeO4YmlhxYQknCRvCo04DEVlxkKgpou-6kejhz2v_Nfz5H_uO1gb-Gw_alIITfn2xV_Pp_jez--YXygED6-kZkYj3wLITDdQc8MlCG_Fftxr3ug8C0u5vNnHJr6SQmsH6MnRDi1gYMMLIqu-Y0gQ/360fx360f',
@@ -1131,7 +1131,7 @@ export const VortexRightSocialRail: React.FC<VortexRightSocialRailProps> = ({
                         </div>
                         <div className="text-sm font-mono font-black text-slate-200">No Friends Added Yet</div>
                         <p className="text-xs text-slate-400 max-w-[240px] leading-relaxed">
-                          Only registered players on VORTEX appear here. Find players and send friend requests to play together!
+                          Only registered players on Caliber Clutch appear here. Find players and send friend requests to play together!
                         </p>
                         <button
                           onClick={() => {
@@ -1332,7 +1332,7 @@ export const VortexRightSocialRail: React.FC<VortexRightSocialRailProps> = ({
                         </div>
                         <div className="text-sm font-mono font-black text-slate-200">No Messages Yet</div>
                         <p className="text-xs text-slate-400 max-w-[230px] leading-relaxed">
-                          Your conversations will appear here once you message a friend or teammate on VORTEX.
+                          Your conversations will appear here once you message a friend or teammate on Caliber Clutch.
                         </p>
                       </div>
                     ) : (
@@ -1443,7 +1443,7 @@ export const VortexRightSocialRail: React.FC<VortexRightSocialRailProps> = ({
                     <div className="space-y-2 pt-2 border-t border-[#181B26]">
                       <div className="px-1 flex items-center justify-between">
                         <span className="text-[11px] font-mono font-bold text-slate-300">
-                          Registered Players on VORTEX
+                          Registered Players on Caliber Clutch
                         </span>
                         <span className="text-[10px] font-mono text-emerald-400 bg-emerald-500/10 border border-emerald-500/20 px-1.5 py-0.5 rounded">
                           REAL-TIME
@@ -2214,7 +2214,7 @@ export const VortexRightSocialRail: React.FC<VortexRightSocialRailProps> = ({
 
             {/* Bottom Status */}
             <div className="p-3 rounded-2xl bg-[#141824] border border-white/5 text-center text-[11px] font-mono text-slate-400">
-              VORTEX GAMING PLATFORM • LEVEL 7
+              CALIBER CLUTCH PLATFORM • LEVEL 7
             </div>
 
           </div>
@@ -2255,7 +2255,7 @@ export const VortexRightSocialRail: React.FC<VortexRightSocialRailProps> = ({
               Open CS2 Cases & Win Real Knives
             </h3>
             <p className="text-xs text-slate-400 font-sans mt-1 max-w-lg">
-              Use promo code <strong className="text-amber-400 font-mono">VORTEX</strong> on partner platforms to receive <strong className="text-white">+10% Extra Deposit Bonus</strong> and free starter crates. Skins withdraw directly to your Steam inventory!
+              Use promo code <strong className="text-amber-400 font-mono">CALIBER</strong> on partner platforms to receive <strong className="text-white">+10% Extra Deposit Bonus</strong> and free starter crates. Skins withdraw directly to your Steam inventory!
             </p>
 
             {/* Promo Code Highlight Banner */}
@@ -2267,7 +2267,7 @@ export const VortexRightSocialRail: React.FC<VortexRightSocialRailProps> = ({
                 <div>
                   <div className="text-[11px] font-mono text-slate-400 uppercase tracking-wider">Exclusive Promo Code:</div>
                   <div className="text-lg font-black font-mono text-amber-400 tracking-wider">
-                    VORTEX
+                    CALIBER
                     <span className="text-xs font-normal text-slate-300 ml-2">(+10% EXTRA & FREE CRATE)</span>
                   </div>
                 </div>
