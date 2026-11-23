@@ -46,7 +46,7 @@
 
 To enable cloud persistence and real-time live synchronization for tournaments, 5v5 clans, and player profiles:
 
-1. Open your [Supabase SQL Editor](https://supabase.com/dashboard/project/awxmcphoobeavlgxlasj/sql).
+1. Open your [Supabase SQL Editor](https://supabase.com/dashboard/project/mddfsdaoyeemzwoctfej/sql).
 2. Copy and execute the migration script located at [scripts/supabase_complete_schema.sql](file:///C:/Users/GGEZ/Documents/GitHub/vortex-gaming/scripts/supabase_complete_schema.sql).
 3. The script configures:
    - `public.tournaments` (Community cups, prize distribution, and brackets)

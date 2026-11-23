@@ -1,7 +1,7 @@
 -- ========================================================
 -- CALIBER CLUTCH - COMPLETE SUPABASE CLOUD DATABASE SCHEMA
 -- Run this script in your Supabase SQL Editor:
--- https://supabase.com/dashboard/project/awxmcphoobeavlgxlasj/sql
+-- https://supabase.com/dashboard/project/mddfsdaoyeemzwoctfej/sql
 -- ========================================================
 
 -- 1. CLANS TABLE (5v5 Competitive Rosters)

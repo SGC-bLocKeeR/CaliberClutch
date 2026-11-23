@@ -1,8 +1,8 @@
 import { createClient } from '@supabase/supabase-js';
 import { GameId } from '../types/esports';
 
-const SUPABASE_URL = import.meta.env.VITE_SUPABASE_URL || 'https://awxmcphoobeavlgxlasj.supabase.co';
-const SUPABASE_ANON_KEY = import.meta.env.VITE_SUPABASE_ANON_KEY || 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImF3eG1jcGhvb2JlYXZsZ3hsYXNqIiwicm9sZSI6ImFub24iLCJpYXQiOjE3OTIzMjU4NjYsImV4cCI6MjEwNzkwMTg2Nn0.PHAo-SdAOt1TWq-ULp8L80UKEJ4v1FVCqyI7gq9iTHY';
+const SUPABASE_URL = import.meta.env.VITE_SUPABASE_URL || 'https://mddfsdaoyeemzwoctfej.supabase.co';
+const SUPABASE_ANON_KEY = import.meta.env.VITE_SUPABASE_ANON_KEY || 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im1kZGZzZGFveWVlbXp3b2N0ZmVqIiwicm9sZSI6ImFub24iLCJpYXQiOjE3OTUzOTA4NTQsImV4cCI6MjExMDk2Njg1NH0.9-IGLbq0pI6xFmlFHBpmpDlXAqYcPSxCuiEAk_dO35I';
 
 export const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY, {
   auth: {
