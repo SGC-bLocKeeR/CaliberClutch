@@ -329,9 +329,9 @@ export const VortexWithdrawModal: React.FC<VortexWithdrawModalProps> = ({
                     value={cryptoAmountEur}
                     onChange={(e) => setCryptoAmountEur(e.target.value)}
                     placeholder="25.00"
-                    className="w-full px-4 py-3 rounded-xl bg-black/60 border border-white/15 text-lg font-mono font-black text-white focus:border-emerald-400 focus:outline-none"
+                    className="w-full pl-4 pr-24 py-3 rounded-xl bg-black/60 border border-white/15 text-lg font-mono font-black text-white focus:border-emerald-400 focus:outline-none [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
                   />
-                  <span className="absolute right-4 top-1/2 -translate-y-1/2 font-mono font-bold text-slate-400">
+                  <span className="absolute right-4 top-1/2 -translate-y-1/2 font-mono font-bold text-slate-400 pointer-events-none select-none">
                     EUR (€)
                   </span>
                 </div>
@@ -492,7 +492,7 @@ export const VortexWithdrawModal: React.FC<VortexWithdrawModalProps> = ({
                         value={bankAmountEur}
                         onChange={(e) => setBankAmountEur(e.target.value)}
                         placeholder="50.00"
-                        className="w-full px-3.5 py-2.5 rounded-xl bg-black/60 border border-white/15 text-xs font-mono text-white focus:border-blue-400 focus:outline-none font-bold"
+                        className="w-full px-3.5 py-2.5 rounded-xl bg-black/60 border border-white/15 text-xs font-mono text-white focus:border-blue-400 focus:outline-none font-bold [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
                       />
                     </div>
                   </div>

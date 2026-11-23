@@ -40,6 +40,17 @@
     outline: none !important;
     -webkit-tap-highlight-color: transparent;
   }
+
+  /* Remove default browser number input spin arrows / stepper buttons */
+  input[type="number"]::-webkit-outer-spin-button,
+  input[type="number"]::-webkit-inner-spin-button {
+    -webkit-appearance: none !important;
+    margin: 0 !important;
+  }
+  input[type="number"] {
+    -moz-appearance: textfield !important;
+    appearance: textfield !important;
+  }
 }
 
 /* Custom Scrollbars - Modern CaliberClutch Theme */
