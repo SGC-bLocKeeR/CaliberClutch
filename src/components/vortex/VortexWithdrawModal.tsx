@@ -21,7 +21,11 @@ import {
   executeCryptoWithdrawal, 
   getWithdrawalHistory, 
   WithdrawalHistoryItem, 
-  CRYPTO_RATES 
+  CRYPTO_RATES,
+  SupportedCrypto,
+  DEFAULT_CRYPTO_PRICES_EUR,
+  getLiveCryptoPricesEur,
+  calculateCryptoAmount
 } from '../../services/withdrawalService';
 
 interface VortexWithdrawModalProps {
@@ -53,13 +57,67 @@ export const VortexWithdrawModal: React.FC<VortexWithdrawModalProps> = ({
   }, [isOpen, activeTab]);
 
   // Crypto Cashout State
-  const [cryptoCurrency, setCryptoCurrency] = useState<'USDT' | 'BTC' | 'ETH' | 'SOL'>('USDT');
+  const [cryptoCurrency, setCryptoCurrency] = useState<SupportedCrypto>('USDT');
   const [cryptoAmountEur, setCryptoAmountEur] = useState<string>('25.00');
   const [cryptoAddress, setCryptoAddress] = useState<string>('');
   const [cryptoStep, setCryptoStep] = useState<{ step: number; message: string } | null>(null);
   const [cryptoResult, setCryptoResult] = useState<{ success: boolean; txHash: string; message: string } | null>(null);
   const [cryptoError, setCryptoError] = useState<string | null>(null);
   const [copiedTx, setCopiedTx] = useState(false);
+
+  // Live Crypto Rates State (CoinGecko with caching & safe fallback)
+  const [cryptoPricesEur, setCryptoPricesEur] = useState<Record<SupportedCrypto, number>>(DEFAULT_CRYPTO_PRICES_EUR);
+  const [isRatesLive, setIsRatesLive] = useState<boolean>(false);
+  const [ratesLoading, setRatesLoading] = useState<boolean>(false);
+
+  React.useEffect(() => {
+    let isMounted = true;
+    if (isOpen) {
+      setRatesLoading(true);
+      getLiveCryptoPricesEur()
+        .then((res) => {
+          if (isMounted) {
+            setCryptoPricesEur(res.pricesEur);
+            setIsRatesLive(res.isLive);
+          }
+        })
+        .catch((err) => {
+          console.warn('[CaliberClutch] Could not load live crypto rates:', err);
+        })
+        .finally(() => {
+          if (isMounted) setRatesLoading(false);
+        });
+    }
+    return () => {
+      isMounted = false;
+    };
+  }, [isOpen]);
+
+  // Derived Values & Validations
+  const currentPriceEur = cryptoPricesEur[cryptoCurrency] || DEFAULT_CRYPTO_PRICES_EUR[cryptoCurrency];
+  const parsedCryptoAmount = parseFloat(cryptoAmountEur || '0');
+  const isCryptoAmountEmpty = !cryptoAmountEur.trim();
+  const isCryptoAmountNan = isNaN(parsedCryptoAmount);
+  const isCryptoAmountZeroOrNegative = isCryptoAmountNan || parsedCryptoAmount <= 0;
+  const isCryptoInsufficientBalance = !isCryptoAmountNan && parsedCryptoAmount > walletBalance;
+  const isCryptoBelowMinimum = !isCryptoAmountNan && parsedCryptoAmount > 0 && parsedCryptoAmount < 5.00;
+  const isCryptoAddressEmpty = !cryptoAddress.trim();
+  const isCryptoAddressTooShort = !isCryptoAddressEmpty && cryptoAddress.trim().length < 15;
+
+  const convertedCrypto = calculateCryptoAmount(
+    isCryptoAmountZeroOrNegative ? 0 : parsedCryptoAmount,
+    cryptoCurrency,
+    currentPriceEur
+  );
+
+  const isCryptoWithdrawDisabled = 
+    Boolean(cryptoStep) ||
+    walletBalance <= 0 ||
+    isCryptoInsufficientBalance ||
+    isCryptoAmountZeroOrNegative ||
+    isCryptoBelowMinimum ||
+    isCryptoAddressEmpty ||
+    isCryptoAddressTooShort;
 
   // Bank / SEPA Wire Transfer State
   const [bankAccountHolder, setBankAccountHolder] = useState<string>('M14 | Caliber Clutch');
@@ -91,9 +149,15 @@ export const VortexWithdrawModal: React.FC<VortexWithdrawModalProps> = ({
     }
 
     try {
-      const res = await executeCryptoWithdrawal(eur, cryptoCurrency, cryptoAddress, (step, message) => {
-        setCryptoStep({ step, message });
-      });
+      const res = await executeCryptoWithdrawal(
+        eur,
+        cryptoCurrency,
+        cryptoAddress,
+        (step, message) => {
+          setCryptoStep({ step, message });
+        },
+        convertedCrypto
+      );
       setCryptoStep(null);
       setCryptoResult(res);
       setWalletBalance(getCaliberWalletBalance());
@@ -161,10 +225,6 @@ export const VortexWithdrawModal: React.FC<VortexWithdrawModalProps> = ({
     });
     sound.playTournamentVictory();
   };
-
-  const convertedCrypto = (parseFloat(cryptoAmountEur || '0') * CRYPTO_RATES[cryptoCurrency]).toFixed(
-    cryptoCurrency === 'USDT' ? 2 : 6
-  );
 
   if (!isOpen) return null;
 
@@ -323,13 +383,22 @@ export const VortexWithdrawModal: React.FC<VortexWithdrawModalProps> = ({
                 <div className="relative">
                   <input
                     type="number"
-                    step="1"
+                    step="any"
                     min="5"
                     max={walletBalance}
                     value={cryptoAmountEur}
-                    onChange={(e) => setCryptoAmountEur(e.target.value)}
+                    onChange={(e) => {
+                      setCryptoAmountEur(e.target.value);
+                      if (cryptoError) setCryptoError(null);
+                    }}
                     placeholder="25.00"
-                    className="w-full pl-4 pr-24 py-3 rounded-xl bg-black/60 border border-white/15 text-lg font-mono font-black text-white focus:border-emerald-400 focus:outline-none [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
+                    className={`w-full pl-4 pr-24 py-3 rounded-xl bg-black/60 border text-lg font-mono font-black text-white focus:outline-none [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none transition-colors ${
+                      isCryptoInsufficientBalance 
+                        ? 'border-red-500/70 focus:border-red-400 shadow-[0_0_12px_rgba(239,68,68,0.2)]'
+                        : isCryptoBelowMinimum || (isCryptoAmountZeroOrNegative && !isCryptoAmountEmpty)
+                        ? 'border-amber-500/60 focus:border-amber-400'
+                        : 'border-white/15 focus:border-emerald-400'
+                    }`}
                   />
                   <span className="absolute right-4 top-1/2 -translate-y-1/2 font-mono font-bold text-slate-400 pointer-events-none select-none">
                     EUR (€)
@@ -357,12 +426,55 @@ export const VortexWithdrawModal: React.FC<VortexWithdrawModalProps> = ({
                   </button>
                 </div>
 
-                {/* Converted Crypto Quote */}
-                <div className="p-3 rounded-xl bg-black/40 border border-emerald-500/20 flex items-center justify-between text-xs font-mono">
-                  <span className="text-slate-400">You will receive approximately:</span>
-                  <span className="font-bold text-emerald-400 text-sm">
-                    ≈ {convertedCrypto} {cryptoCurrency}
-                  </span>
+                {/* Validation Warnings */}
+                {isCryptoInsufficientBalance && (
+                  <div className="p-2.5 rounded-xl bg-red-500/10 border border-red-500/30 text-red-400 text-xs font-mono flex items-center gap-2 animate-in fade-in">
+                    <AlertCircle className="w-4 h-4 shrink-0 text-red-400" />
+                    <span>Insufficient balance (Max available: <strong>{walletBalance.toFixed(2)} €</strong>)</span>
+                  </div>
+                )}
+
+                {!isCryptoInsufficientBalance && isCryptoAmountZeroOrNegative && !isCryptoAmountEmpty && (
+                  <div className="p-2.5 rounded-xl bg-amber-500/10 border border-amber-500/30 text-amber-400 text-xs font-mono flex items-center gap-2 animate-in fade-in">
+                    <AlertCircle className="w-4 h-4 shrink-0 text-amber-400" />
+                    <span>Please enter an amount greater than 0.00 €.</span>
+                  </div>
+                )}
+
+                {!isCryptoInsufficientBalance && isCryptoBelowMinimum && (
+                  <div className="p-2.5 rounded-xl bg-amber-500/10 border border-amber-500/30 text-amber-400 text-xs font-mono flex items-center gap-2 animate-in fade-in">
+                    <AlertCircle className="w-4 h-4 shrink-0 text-amber-400" />
+                    <span>Minimum withdrawal amount is <strong>5.00 €</strong>.</span>
+                  </div>
+                )}
+
+                {/* Converted Crypto Quote & Live Rate */}
+                <div className="p-3.5 rounded-xl bg-black/40 border border-emerald-500/20 space-y-2 font-mono">
+                  <div className="flex items-center justify-between text-xs">
+                    <span className="text-slate-400">You will receive approximately:</span>
+                    <span className="font-bold text-emerald-400 text-sm">
+                      ≈ {convertedCrypto} {cryptoCurrency}
+                    </span>
+                  </div>
+
+                  <div className="flex items-center justify-between text-[11px] pt-2 border-t border-white/5 text-slate-400">
+                    <span className="flex items-center gap-1.5">
+                      <span className={`w-1.5 h-1.5 rounded-full ${ratesLoading ? 'bg-amber-400 animate-spin' : isRatesLive ? 'bg-emerald-400 animate-pulse' : 'bg-slate-400'}`} />
+                      <span>{ratesLoading ? 'Fetching rate...' : isRatesLive ? 'Live rate (CoinGecko):' : 'Estimated rate:'}</span>
+                    </span>
+                    <span className="font-bold text-slate-300">
+                      {cryptoCurrency === 'USDT' ? (
+                        `1 EUR ≈ ${(1 / currentPriceEur).toFixed(4)} USDT`
+                      ) : (
+                        <>
+                          1 {cryptoCurrency} ≈ €{currentPriceEur.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+                          <span className="text-slate-400 font-normal ml-1">
+                            (1 EUR ≈ {(1 / currentPriceEur).toFixed(cryptoCurrency === 'SOL' ? 4 : 6)} {cryptoCurrency})
+                          </span>
+                        </>
+                      )}
+                    </span>
+                  </div>
                 </div>
               </div>
 
@@ -415,13 +527,37 @@ export const VortexWithdrawModal: React.FC<VortexWithdrawModalProps> = ({
 
               <button
                 onClick={handleWithdrawCrypto}
-                disabled={Boolean(cryptoStep) || walletBalance <= 0}
-                className="w-full py-3.5 rounded-xl bg-gradient-to-r from-emerald-500 to-[#A3E635] hover:brightness-110 text-slate-950 font-mono font-black text-xs uppercase tracking-wider transition cursor-pointer shadow-lg shadow-emerald-500/25 disabled:opacity-50 flex items-center justify-center gap-2"
+                disabled={isCryptoWithdrawDisabled}
+                className={`w-full py-3.5 rounded-xl font-mono font-black text-xs uppercase tracking-wider transition flex items-center justify-center gap-2 ${
+                  isCryptoWithdrawDisabled
+                    ? 'bg-white/5 border border-white/10 text-slate-500 cursor-not-allowed opacity-50 shadow-none'
+                    : 'bg-gradient-to-r from-emerald-500 to-[#A3E635] hover:brightness-110 text-slate-950 cursor-pointer shadow-lg shadow-emerald-500/25'
+                }`}
               >
                 {cryptoStep ? (
                   <>
                     <RefreshCw className="w-4 h-4 animate-spin" />
                     <span>{cryptoStep.message}</span>
+                  </>
+                ) : isCryptoInsufficientBalance ? (
+                  <>
+                    <AlertCircle className="w-4 h-4 text-red-400" />
+                    <span>Insufficient Balance ({walletBalance.toFixed(2)} € Max)</span>
+                  </>
+                ) : isCryptoAmountZeroOrNegative && !isCryptoAmountEmpty ? (
+                  <>
+                    <AlertCircle className="w-4 h-4 text-amber-400" />
+                    <span>Enter Valid Amount</span>
+                  </>
+                ) : isCryptoBelowMinimum ? (
+                  <>
+                    <AlertCircle className="w-4 h-4 text-amber-400" />
+                    <span>Min Withdrawal is 5.00 €</span>
+                  </>
+                ) : isCryptoAddressEmpty ? (
+                  <>
+                    <Wallet className="w-4 h-4" />
+                    <span>Enter Destination {cryptoCurrency} Address</span>
                   </>
                 ) : (
                   <>

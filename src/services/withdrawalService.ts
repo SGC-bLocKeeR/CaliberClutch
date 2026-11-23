@@ -191,20 +191,159 @@ export const executeSkinWithdrawal = async (
 
 // ========================================================
 // 4. CRYPTO CASHOUT EXECUTION (USDT / BTC / ETH / SOL)
+// Live CoinGecko Price Feed with 4-min Caching & Safe Fallback
 // ========================================================
 
-export const CRYPTO_RATES = {
-  USDT: 1.08,    // 1 EUR = ~1.08 USDT
-  BTC: 0.000014, // 1 EUR = ~0.000014 BTC
-  ETH: 0.00038,  // 1 EUR = ~0.00038 ETH
-  SOL: 0.0068    // 1 EUR = ~0.0068 SOL
+export type SupportedCrypto = 'USDT' | 'BTC' | 'ETH' | 'SOL';
+
+export const DEFAULT_CRYPTO_PRICES_EUR: Record<SupportedCrypto, number> = {
+  USDT: 0.915,     // ~1 EUR = 1.093 USDT
+  BTC: 60000.0,    // 1 BTC = ~60,000 EUR
+  ETH: 2600.0,     // 1 ETH = ~2,600 EUR
+  SOL: 140.0       // 1 SOL = ~140 EUR
+};
+
+// Multiplier rates (1 EUR = X crypto) for backwards compatibility
+export const CRYPTO_RATES: Record<SupportedCrypto, number> = {
+  USDT: 1 / DEFAULT_CRYPTO_PRICES_EUR.USDT,
+  BTC: 1 / DEFAULT_CRYPTO_PRICES_EUR.BTC,
+  ETH: 1 / DEFAULT_CRYPTO_PRICES_EUR.ETH,
+  SOL: 1 / DEFAULT_CRYPTO_PRICES_EUR.SOL
+};
+
+const CRYPTO_CACHE_KEY = 'caliber_crypto_rates_cache_v1';
+const CACHE_TTL_MS = 4 * 60 * 1000; // 4 minutes cache to prevent rate-limiting
+
+export interface LiveRatesResponse {
+  pricesEur: Record<SupportedCrypto, number>;
+  isLive: boolean;
+  lastUpdated: number;
+}
+
+export const getLiveCryptoPricesEur = async (): Promise<LiveRatesResponse> => {
+  // 1. Check local cache first
+  if (typeof window !== 'undefined') {
+    try {
+      const cached = localStorage.getItem(CRYPTO_CACHE_KEY);
+      if (cached) {
+        const parsed = JSON.parse(cached);
+        if (parsed && parsed.pricesEur && typeof parsed.pricesEur.USDT === 'number') {
+          if (Date.now() - parsed.timestamp < CACHE_TTL_MS) {
+            return {
+              pricesEur: parsed.pricesEur,
+              isLive: true,
+              lastUpdated: parsed.timestamp
+            };
+          }
+        }
+      }
+    } catch {
+      // Ignore cache parse error
+    }
+  }
+
+  // 2. Fetch from CoinGecko Public API
+  try {
+    const controller = new AbortController();
+    const timeout = setTimeout(() => controller.abort(), 6000);
+
+    const res = await fetch(
+      'https://api.coingecko.com/api/v3/simple/price?ids=tether,bitcoin,ethereum,solana&vs_currencies=eur',
+      {
+        signal: controller.signal,
+        headers: { 'Accept': 'application/json' }
+      }
+    );
+    clearTimeout(timeout);
+
+    if (res.ok) {
+      const data = await res.json();
+      const freshPrices: Record<SupportedCrypto, number> = {
+        USDT: (data.tether && typeof data.tether.eur === 'number' && data.tether.eur > 0)
+          ? data.tether.eur
+          : DEFAULT_CRYPTO_PRICES_EUR.USDT,
+        BTC: (data.bitcoin && typeof data.bitcoin.eur === 'number' && data.bitcoin.eur > 0)
+          ? data.bitcoin.eur
+          : DEFAULT_CRYPTO_PRICES_EUR.BTC,
+        ETH: (data.ethereum && typeof data.ethereum.eur === 'number' && data.ethereum.eur > 0)
+          ? data.ethereum.eur
+          : DEFAULT_CRYPTO_PRICES_EUR.ETH,
+        SOL: (data.solana && typeof data.solana.eur === 'number' && data.solana.eur > 0)
+          ? data.solana.eur
+          : DEFAULT_CRYPTO_PRICES_EUR.SOL
+      };
+
+      if (typeof window !== 'undefined') {
+        try {
+          localStorage.setItem(CRYPTO_CACHE_KEY, JSON.stringify({
+            pricesEur: freshPrices,
+            timestamp: Date.now()
+          }));
+        } catch {
+          // Ignore storage errors
+        }
+      }
+
+      return {
+        pricesEur: freshPrices,
+        isLive: true,
+        lastUpdated: Date.now()
+      };
+    }
+  } catch (err) {
+    console.warn('[CaliberClutch] CoinGecko live rates notice (using cache/fallback):', err);
+  }
+
+  // 3. Fallback: check expired cache before hardcoded defaults
+  if (typeof window !== 'undefined') {
+    try {
+      const cached = localStorage.getItem(CRYPTO_CACHE_KEY);
+      if (cached) {
+        const parsed = JSON.parse(cached);
+        if (parsed?.pricesEur?.USDT) {
+          return {
+            pricesEur: parsed.pricesEur,
+            isLive: false,
+            lastUpdated: parsed.timestamp || Date.now()
+          };
+        }
+      }
+    } catch {
+      // Ignore
+    }
+  }
+
+  return {
+    pricesEur: DEFAULT_CRYPTO_PRICES_EUR,
+    isLive: false,
+    lastUpdated: Date.now()
+  };
+};
+
+export const calculateCryptoAmount = (
+  amountEur: number,
+  currency: SupportedCrypto,
+  priceInEur: number
+): string => {
+  if (isNaN(amountEur) || amountEur <= 0 || !priceInEur || priceInEur <= 0) {
+    return currency === 'USDT' ? '0.00' : '0.000000';
+  }
+  const cryptoQty = amountEur / priceInEur;
+  if (currency === 'USDT') {
+    return cryptoQty.toFixed(2);
+  }
+  if (currency === 'SOL') {
+    return cryptoQty.toFixed(4);
+  }
+  return cryptoQty.toFixed(6);
 };
 
 export const executeCryptoWithdrawal = async (
   amountEur: number,
-  currency: 'USDT' | 'BTC' | 'ETH' | 'SOL',
+  currency: SupportedCrypto,
   recipientAddress: string,
-  onProgress?: (step: number, message: string) => void
+  onProgress?: (step: number, message: string) => void,
+  customCryptoVal?: string
 ): Promise<{ success: boolean; txHash: string; message: string }> => {
   const currentBalance = getCaliberWalletBalance();
   if (currentBalance < amountEur) {
@@ -238,7 +377,13 @@ export const executeCryptoWithdrawal = async (
   onProgress?.(3, 'Transaction confirmed on ledger. Generating explorer receipt...');
   await new Promise(r => setTimeout(r, 800));
 
-  const cryptoVal = (amountEur * CRYPTO_RATES[currency]).toFixed(currency === 'USDT' ? 2 : 6);
+  let cryptoVal = customCryptoVal;
+  if (!cryptoVal) {
+    const { pricesEur } = await getLiveCryptoPricesEur();
+    const price = pricesEur[currency] || DEFAULT_CRYPTO_PRICES_EUR[currency];
+    cryptoVal = calculateCryptoAmount(amountEur, currency, price);
+  }
+
   const txHash = currency === 'USDT'
     ? `0x${Array.from({ length: 64 }, () => Math.floor(Math.random() * 16).toString(16)).join('')}`
     : `TX-${Math.floor(10000000 + Math.random() * 90000000)}`;
