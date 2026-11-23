@@ -27,7 +27,7 @@
 - **Dedicated Server Browser**: Real-time ping diagnostics, player capacities, and one-click Steam protocol direct connect (`steam://connect/`).
 - **Tournament Circuit**: Automated prize pool distribution, registration tracking, and bracket progression.
 - **Kernel Anti-Cheat Monitor**: Ring-0 driver integrity status and hardware UUID verification.
-- **VORTEX Premium**: Exclusive competitive perks and priority matchmaking queues.
+- **Caliber Elite / VIP**: Exclusive competitive perks and priority matchmaking queues.
 
 ---
 
@@ -65,10 +65,10 @@ To enable cloud persistence and real-time live synchronization for tournaments, 
 ### Installation
 ```bash
 # Clone the repository
-git clone https://github.com/SGC-bLocKeeR/vortex-gaming.git
+git clone https://github.com/SGC-bLocKeeR/CaliberClutch.git
 
 # Navigate to project directory
-cd vortex-gaming
+cd CaliberClutch
 
 # Install dependencies
 npm install
@@ -87,4 +87,4 @@ Visit [http://localhost:5175](http://localhost:5175) to view the platform.
 
 ---
 
-© 2026 VORTEX Gaming. All rights reserved. Counter-Strike and CS2 are trademarks of Valve Corporation.
+© 2026 Caliber Clutch. All rights reserved. Counter-Strike and CS2 are trademarks of Valve Corporation.
