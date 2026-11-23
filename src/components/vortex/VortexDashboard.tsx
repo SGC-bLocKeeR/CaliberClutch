@@ -647,6 +647,86 @@ export const isUserAdminOrFounder = (tagName?: string | null): boolean => {
 // OFFICIAL FACEIT CS2 ELO & SKILL LEVEL TIERS (100 - 2001+ ELO)
 // Reference: Refrag.gg / FACEIT Official Standard
 // ============================================================================
+// ============================================================================
+// CALIBER CLUTCH COMPETITIVE DIVISION & TIER SYSTEM (ORIGINAL RANK SYSTEM)
+// ============================================================================
+export interface CaliberTierInfo {
+  tier: string;       // e.g. 'TIER III'
+  roman: string;      // e.g. 'III'
+  name: string;       // e.g. 'CONTENDER'
+  color: string;      // e.g. '#A3E635'
+  minMmr: number;
+  maxMmr: number;
+  nextTierName: string | null;
+}
+
+export const getCaliberTier = (mmr: number): CaliberTierInfo => {
+  if (mmr >= 1750) {
+    return {
+      tier: 'TIER VI',
+      roman: 'VI',
+      name: 'APEX ELITE',
+      color: '#A855F7',
+      minMmr: 1750,
+      maxMmr: 3000,
+      nextTierName: null,
+    };
+  }
+  if (mmr >= 1350) {
+    return {
+      tier: 'TIER V',
+      roman: 'V',
+      name: 'CLUTCH MASTER',
+      color: '#FB923C',
+      minMmr: 1350,
+      maxMmr: 1749,
+      nextTierName: 'TIER VI • APEX ELITE',
+    };
+  }
+  if (mmr >= 1000) {
+    return {
+      tier: 'TIER IV',
+      roman: 'IV',
+      name: 'VANGUARD',
+      color: '#FACC15',
+      minMmr: 1000,
+      maxMmr: 1349,
+      nextTierName: 'TIER V • CLUTCH MASTER',
+    };
+  }
+  if (mmr >= 700) {
+    return {
+      tier: 'TIER III',
+      roman: 'III',
+      name: 'CONTENDER',
+      color: '#A3E635',
+      minMmr: 700,
+      maxMmr: 999,
+      nextTierName: 'TIER IV • VANGUARD',
+    };
+  }
+  if (mmr >= 400) {
+    return {
+      tier: 'TIER II',
+      roman: 'II',
+      name: 'INITIATE',
+      color: '#38BDF8',
+      minMmr: 400,
+      maxMmr: 699,
+      nextTierName: 'TIER III • CONTENDER',
+    };
+  }
+  return {
+    tier: 'TIER I',
+    roman: 'I',
+    name: 'RECRUIT',
+    color: '#94A3B8',
+    minMmr: 0,
+    maxMmr: 399,
+    nextTierName: 'TIER II • INITIATE',
+  };
+};
+
 export interface FaceitTierInfo {
   level: number;
   minElo: number;
@@ -847,6 +927,7 @@ export const VortexDashboard: React.FC<VortexDashboardProps> = ({
   const isCalibrated = currentUserMatches > 0;
   const effectiveElo = isCalibrated ? currentUserElo : 800;
   const effectiveLevel = isCalibrated ? getFaceitLevelFromElo(currentUserElo) : 3;
+  const caliberTier = getCaliberTier(effectiveElo);
 
   useEffect(() => {
     if (userGamerTag) {
@@ -1100,8 +1181,8 @@ export const VortexDashboard: React.FC<VortexDashboardProps> = ({
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
   // User Membership Status ('free' | 'premium' | 'vip')
   const [userMembershipTier, setUserMembershipTier] = useState<'free' | 'premium' | 'vip'>('free');
-  // Matchmaking Sub-tab ('match_type' | 'maps' | 'servers') & Membership Tier ('free' | 'premium' | 'vip')
-  const [playSubTab, setPlaySubTab] = useState<'match_type' | 'maps' | 'servers'>('match_type');
+  // Matchmaking Sub-tab ('match_type' | 'maps') & Membership Tier ('free' | 'premium' | 'vip')
+  const [playSubTab, setPlaySubTab] = useState<'match_type' | 'maps'>('match_type');
   const [selectedMatchTier, setSelectedMatchTier] = useState<'free' | 'premium' | 'vip'>('free');
   // Selected server country locations (default 4 matching screenshot: Netherlands, Germany, Sweden, Finland)
   const [selectedServers, setSelectedServers] = useState<string[]>(['netherlands', 'germany', 'sweden', 'finland']);
@@ -3256,54 +3337,42 @@ export const VortexDashboard: React.FC<VortexDashboardProps> = ({
 
                 {/* Top Centered Queue Pill */}
                 <div className="flex justify-center mb-6">
-                  <span className="px-5 py-1.5 rounded-full text-xs font-mono font-bold uppercase tracking-wider text-[#FF5500] bg-[#1C120D] border border-[#FF5500]/60 shadow-md flex items-center gap-2">
-                    <span className="w-2 h-2 rounded-full bg-[#FF5500] animate-pulse" />
-                    EUROPE 5v5 QUEUE
+                  <span className="px-5 py-1.5 rounded-full text-xs font-mono font-bold uppercase tracking-wider text-[#A3E635] bg-[#121A0E] border border-[#A3E635]/60 shadow-[0_0_20px_rgba(163,230,53,0.2)] flex items-center gap-2">
+                    <span className="w-2 h-2 rounded-full bg-[#A3E635] animate-pulse" />
+                    CALIBER CLUTCH • 5v5 TACTICAL LOBBY
                   </span>
                 </div>
 
-                {/* Top Row: User Level / ELO Progression */}
+                {/* Top Row: Caliber Clutch Custom Rank Badge & Division Progression */}
                 <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-6 pb-6 border-b border-white/[0.06]">
                   
-                  {/* Dynamic Faceit Level Badge & ELO Progression */}
+                  {/* Caliber Clutch Custom Tactical Insignia Badge & Division Progression */}
                   <div className="flex flex-col sm:flex-row sm:items-center gap-5 w-full">
-                    {/* Faceit Level Circular Badge (Color scaled by Level matching Refrag official standards) */}
-                    <div className={`w-16 h-16 sm:w-20 sm:h-20 rounded-full p-[3.5px] shadow-lg shrink-0 ${
-                      effectiveLevel >= 10
-                        ? 'bg-gradient-to-br from-[#FF5500] via-red-600 to-rose-700 shadow-orange-500/25'
-                        : effectiveLevel >= 8
-                        ? 'bg-gradient-to-br from-orange-500 via-orange-600 to-amber-600 shadow-orange-500/25'
-                        : effectiveLevel >= 7
-                        ? 'bg-gradient-to-br from-amber-400 via-amber-500 to-yellow-600 shadow-amber-500/25'
-                        : effectiveLevel >= 4
-                        ? 'bg-gradient-to-br from-yellow-400 via-yellow-500 to-amber-500 shadow-yellow-500/20'
-                        : effectiveLevel >= 2
-                        ? 'bg-gradient-to-br from-[#A3E635] via-emerald-500 to-teal-600 shadow-lime-500/20'
-                        : 'bg-gradient-to-br from-slate-400 via-slate-500 to-slate-600 shadow-slate-500/20'
-                    }`}>
-                      <div className="w-full h-full rounded-full bg-[#12141C] flex items-center justify-center border border-white/20">
-                        <span className="text-2xl sm:text-3xl font-black font-display text-white tracking-tighter">{effectiveLevel}</span>
+                    {/* Caliber Clutch Insignia Rank Crest (Original Military / Esports Insignia) */}
+                    <div className="relative w-20 h-20 sm:w-24 sm:h-24 rounded-2xl bg-gradient-to-br from-[#1C2612] via-[#0E1318] to-[#0A0D14] border-2 border-[#A3E635] shadow-[0_0_25px_rgba(163,230,53,0.35)] flex flex-col items-center justify-center p-2 shrink-0 select-none group">
+                      <div className="absolute -top-2.5 px-2 py-0.5 rounded-full bg-[#A3E635] text-slate-950 text-[9px] font-mono font-black uppercase tracking-wider shadow-sm">
+                        DIVISION
+                      </div>
+                      <div className="text-2xl sm:text-3xl font-black font-display text-white tracking-wider flex items-center gap-1">
+                        <span className="text-[#A3E635]">TIER</span> {caliberTier.roman}
+                      </div>
+                      <div className="text-[10px] font-mono font-black text-[#A3E635] uppercase tracking-widest mt-0.5">
+                        {caliberTier.name}
                       </div>
                     </div>
 
-                    {/* ELO Details & Progression Line */}
-                    <div className="flex-1 space-y-2">
-                      <div className="flex items-center gap-3">
+                    {/* Division Details & Tactical Milestone Progression Rail */}
+                    <div className="flex-1 space-y-2.5">
+                      <div className="flex flex-wrap items-center gap-3">
                         <span className="text-xl sm:text-2xl font-black font-display text-white tracking-tight flex items-center gap-2">
-                          {isCalibrated ? (
-                            <>
-                              {effectiveElo.toLocaleString()} ELO
-                              <TrendingUp className="w-4 h-4 text-emerald-400 inline" />
-                            </>
-                          ) : (
-                            <>
-                              <span>800 ELO</span>
-                              <span className="text-[10px] font-mono font-bold text-amber-400 bg-amber-500/10 border border-amber-500/30 px-2 py-0.5 rounded tracking-wider">
-                                UNCALIBRATED • 0 MATCHES
-                              </span>
-                            </>
-                          )}
+                          <span>{caliberTier.tier} • {caliberTier.name} • {effectiveElo} MMR</span>
+                          <TrendingUp className="w-4 h-4 text-[#A3E635] inline" />
                         </span>
+
+                        <span className="text-[10px] font-mono font-bold text-amber-400 bg-amber-500/10 border border-amber-500/30 px-2.5 py-0.5 rounded-full tracking-wider">
+                          {isCalibrated ? 'CALIBRATED' : 'UNCALIBRATED • 0 MATCHES'}
+                        </span>
+
                         {currentVerification === 'none' && (
                           <span className="text-[10px] font-mono font-bold text-amber-400 bg-amber-500/10 border border-amber-500/30 px-2 py-0.5 rounded">
                             UNVERIFIED
@@ -3319,37 +3388,89 @@ export const VortexDashboard: React.FC<VortexDashboardProps> = ({
                             VIP PRO
                           </span>
                         )}
-                        <div className="ml-auto flex items-center gap-1.5 px-2.5 py-0.5 rounded-lg bg-white/[0.04] border border-white/10 text-xs font-mono font-bold text-slate-300">
-                          <span>{isCalibrated ? userPlatformRank : 'Unranked (0 Matches)'}</span>
+
+                        <div className="ml-auto flex items-center gap-1.5 px-2.5 py-1 rounded-xl bg-white/[0.04] border border-white/10 text-xs font-mono font-bold text-slate-300">
+                          <span>{isCalibrated ? userPlatformRank : 'Unranked Contender'}</span>
                           <CountryFlag code={currentCountry.code} name={currentCountry.name} size="xs" />
                           <ChevronRight className="w-3.5 h-3.5 text-emerald-400" />
                         </div>
                       </div>
 
-                      {/* Authentic FACEIT CS2 Horizontal Skill Rank Track (1 to 10 + Challenger) */}
-                      <FaceitSkillTrack elo={effectiveElo} level={effectiveLevel} isCalibrated={isCalibrated} />
+                      {/* Caliber Clutch Tactical Division Track (6 Divisions: Recruit -> Apex) */}
+                      <div className="space-y-1.5">
+                        <div className="grid grid-cols-6 gap-1.5">
+                          {[
+                            { tier: 'I', label: 'RECRUIT', min: 0 },
+                            { tier: 'II', label: 'INITIATE', min: 400 },
+                            { tier: 'III', label: 'CONTENDER', min: 700 },
+                            { tier: 'IV', label: 'VANGUARD', min: 1000 },
+                            { tier: 'V', label: 'MASTER', min: 1350 },
+                            { tier: 'VI', label: 'APEX', min: 1750 },
+                          ].map((div) => {
+                            const isCurrent = caliberTier.roman === div.tier;
+                            const isReached = effectiveElo >= div.min;
+                            return (
+                              <div
+                                key={div.tier}
+                                className={`py-1.5 px-2 rounded-xl border text-center transition-all ${
+                                  isCurrent
+                                    ? 'bg-gradient-to-b from-[#1E2812] to-[#10141D] border-[#A3E635] shadow-[0_0_15px_rgba(163,230,53,0.3)] ring-1 ring-[#A3E635]/50'
+                                    : isReached
+                                    ? 'bg-[#12151F] border-white/15 text-slate-300'
+                                    : 'bg-black/40 border-white/5 opacity-40 text-slate-500'
+                                }`}
+                              >
+                                <div className={`text-[11px] font-display font-black ${isCurrent ? 'text-[#A3E635]' : 'text-slate-300'}`}>
+                                  {div.tier}
+                                </div>
+                                <div className="text-[9px] font-mono tracking-wider truncate">
+                                  {div.label}
+                                </div>
+                              </div>
+                            );
+                          })}
+                        </div>
+
+                        {/* Progress Bar & Subtitle */}
+                        <div className="space-y-1 pt-0.5">
+                          <div className="h-2 w-full rounded-full bg-black/60 border border-white/10 overflow-hidden p-[1px]">
+                            <div
+                              className="h-full rounded-full bg-gradient-to-r from-emerald-500 via-[#A3E635] to-emerald-400 transition-all duration-500 shadow-[0_0_10px_rgba(163,230,53,0.5)]"
+                              style={{ width: `${Math.min(100, Math.max(15, ((effectiveElo - 700) / 300) * 100))}%` }}
+                            />
+                          </div>
+                          <div className="flex items-center justify-between text-[11px] font-mono text-slate-400">
+                            <span className="text-[#A3E635] font-bold">
+                              {effectiveElo >= 1000 ? 'Tier IV Achieved' : `${Math.max(1, 1000 - effectiveElo)} MMR needed to Tier IV (Vanguard)`}
+                            </span>
+                            <span className="text-slate-500">
+                              {isCalibrated ? `${effectiveElo} MMR Rating` : 'Uncalibrated (800 MMR Baseline)'}
+                            </span>
+                          </div>
+                        </div>
+                      </div>
 
                       {/* Party Action Buttons */}
                       <div className="flex items-center gap-2.5 pt-1">
                         <button
                           onClick={() => sound.playClick()}
-                          className="px-3 py-1 rounded-full bg-white/[0.05] hover:bg-white/[0.10] border border-white/10 text-slate-300 hover:text-white font-mono text-xs flex items-center gap-1.5 transition cursor-pointer"
+                          className="px-3.5 py-1 rounded-full bg-white/[0.05] hover:bg-white/[0.10] border border-white/10 text-slate-300 hover:text-white font-mono text-xs flex items-center gap-1.5 transition cursor-pointer"
                         >
-                          <Users className="w-3.5 h-3.5 text-[#FF5500]" />
-                          <span>Find party</span>
+                          <Users className="w-3.5 h-3.5 text-[#A3E635]" />
+                          <span>Find 5-Stack Squad</span>
                           <span className="px-1.5 py-0.2 rounded-full bg-black/40 text-[10px] text-slate-400">14</span>
                         </button>
                         <button
                           onClick={() => sound.playClick()}
-                          className="px-3 py-1 rounded-full bg-white/[0.05] hover:bg-white/[0.10] border border-white/10 text-slate-300 hover:text-white font-mono text-xs transition cursor-pointer"
+                          className="px-3.5 py-1 rounded-full bg-white/[0.05] hover:bg-white/[0.10] border border-white/10 text-slate-300 hover:text-white font-mono text-xs transition cursor-pointer"
                         >
-                          Post party
+                          Post Squad LFM
                         </button>
                         <button
                           onClick={() => { sound.playSelect(); setActiveTab('teams'); }}
-                          className="px-3 py-1 rounded-full bg-white/[0.05] hover:bg-white/[0.10] border border-[#FF5500]/30 text-amber-300 hover:text-white font-mono text-xs flex items-center gap-1.5 transition cursor-pointer"
+                          className="px-3.5 py-1 rounded-full bg-white/[0.05] hover:bg-white/[0.10] border border-[#A3E635]/30 text-[#A3E635] hover:text-white font-mono text-xs flex items-center gap-1.5 transition cursor-pointer"
                         >
-                          <Shield className="w-3.5 h-3.5 text-[#FF5500]" />
+                          <Shield className="w-3.5 h-3.5 text-[#A3E635]" />
                           <span>Team Roster [{currentClanTag || 'M14'}]</span>
                         </button>
                       </div>
@@ -3405,74 +3526,50 @@ export const VortexDashboard: React.FC<VortexDashboardProps> = ({
                   </div>
                 </div>
 
-                {/* 5 PARTY SLOTS */}
-                <div className="relative">
-                  <div className="grid grid-cols-2 sm:grid-cols-5 gap-3.5">
-                    {partySlots.map((member, idx) => {
-                      const isLeader = partyLeaderIndex === idx;
-                      const isCenterLeader = idx === 2;
-                      const isCurrentUser = member?.id === 'current-user' || member?.name === currentGamerTag;
+                {/* 5-STACK SQUAD ROSTER (COMMANDER & OPERATIVES TACTICAL FORMATION) */}
+                <div className="relative space-y-4">
+                  {(() => {
+                    const leaderIdx = partyLeaderIndex;
+                    const leaderMember = partySlots[leaderIdx];
+                    const operativeIndices = [0, 1, 2, 3, 4].filter(i => i !== leaderIdx);
 
-                      if (member) {
-                        return (
-                          <div
-                            key={member.id}
-                            className={`h-56 rounded-2xl border flex flex-col items-center justify-between px-2 py-3.5 transition-all relative group overflow-hidden ${
-                              isLeader
-                                ? 'bg-gradient-to-b from-[#18210C] via-[#121612] to-[#0E1118] border-[#A3E635]/60 shadow-lg shadow-[#A3E635]/15'
-                                : 'bg-[#12141C] border-[#252B3B] hover:border-[#A3E635]/40'
-                            }`}
-                          >
-                            {/* Member Top Row */}
-                            <div className="w-full flex items-center justify-between text-[10px] font-mono">
-                              {isLeader ? (
-                                <span className="px-2 py-0.5 rounded bg-[#A3E635]/15 text-[#A3E635] font-bold border border-[#A3E635]/30 flex items-center gap-1">
-                                  <Crown className="w-3 h-3 fill-[#A3E635]" />
-                                  LEADER
-                                </span>
-                              ) : (
-                                <span className="px-2 py-0.5 rounded bg-white/[0.05] text-slate-400 font-bold">
-                                  MEMBER
-                                </span>
-                              )}
+                    return (
+                      <div className="grid grid-cols-1 lg:grid-cols-12 gap-4 items-stretch">
+                        {/* 1. SQUAD COMMANDER / IGL (FEATURED TACTICAL COMMAND CARD - 5 COLS) */}
+                        <div className="lg:col-span-5 rounded-3xl bg-gradient-to-b from-[#1C2612] via-[#10141D] to-[#0A0D14] border-2 border-[#A3E635]/80 shadow-[0_0_30px_rgba(163,230,53,0.22)] p-5 flex flex-col justify-between relative overflow-hidden group">
+                          {/* Tactical Decals */}
+                          <div className="absolute top-0 right-0 w-24 h-24 bg-gradient-to-bl from-[#A3E635]/15 to-transparent pointer-events-none" />
+                          <div className="absolute -right-6 -bottom-6 w-32 h-32 bg-[#A3E635]/10 rounded-full blur-2xl pointer-events-none" />
 
-                              <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
-                                {!isLeader && (
-                                  <button
-                                    onClick={(e) => handlePromoteToLeader(idx, e)}
-                                    className="p-1 rounded hover:bg-amber-500/20 text-slate-400 hover:text-amber-400 transition cursor-pointer"
-                                    title="Promote to Leader"
-                                  >
-                                    <Crown className="w-3.5 h-3.5" />
-                                  </button>
-                                )}
-                                {!isCurrentUser ? (
-                                  <button
-                                    onClick={(e) => handleKickMember(idx, e)}
-                                    className="p-1 rounded hover:bg-red-500/20 text-slate-400 hover:text-red-400 transition cursor-pointer"
-                                    title="Kick from party"
-                                  >
-                                    <X className="w-3.5 h-3.5" />
-                                  </button>
-                                ) : (
-                                  partySlots.filter(Boolean).length > 1 && (
-                                    <button
-                                      onClick={handleLeaveParty}
-                                      className="p-1 rounded hover:bg-red-500/20 text-slate-400 hover:text-red-400 transition cursor-pointer"
-                                      title="Leave Party"
-                                    >
-                                      <LogOut className="w-3.5 h-3.5" />
-                                    </button>
-                                  )
-                                )}
-                              </div>
+                          {/* Header: Commander Callout */}
+                          <div className="flex items-center justify-between pb-3.5 border-b border-white/10">
+                            <div className="flex items-center gap-2">
+                              <span className="px-3 py-1 rounded-xl bg-[#A3E635] text-slate-950 font-black text-[11px] font-mono tracking-wider flex items-center gap-1.5 shadow-sm">
+                                <Crown className="w-3.5 h-3.5 fill-slate-950" />
+                                SQUAD COMMANDER // IGL
+                              </span>
+                              <span className="text-[10px] font-mono text-slate-400 font-bold">SLOT #01</span>
                             </div>
 
-                            {/* Member Avatar & Details */}
-                            <div className="flex flex-col items-center text-center space-y-2">
-                              <div className="relative">
-                                {member.name === 'M18' || !member.avatar ? (
-                                  <div className="w-16 h-16 rounded-full bg-black border-2 border-[#A3E635] shadow-[0_0_15px_rgba(163,230,53,0.35)] flex flex-col items-center justify-center p-1">
+                            {leaderMember && (leaderMember.id === 'current-user' || leaderMember.name === currentGamerTag) ? (
+                              partySlots.filter(Boolean).length > 1 && (
+                                <button
+                                  onClick={handleLeaveParty}
+                                  className="p-1 rounded-lg hover:bg-red-500/20 text-slate-400 hover:text-red-400 transition cursor-pointer"
+                                  title="Disband / Leave Party"
+                                >
+                                  <LogOut className="w-3.5 h-3.5" />
+                                </button>
+                              )
+                            ) : null}
+                          </div>
+
+                          {/* Commander Profile & Details */}
+                          <div className="py-5 flex flex-col sm:flex-row items-center gap-4 text-center sm:text-left">
+                            <div className="relative shrink-0">
+                              <div className="w-20 h-20 rounded-2xl p-[2px] bg-gradient-to-br from-[#A3E635] via-emerald-400 to-[#10141D] shadow-[0_0_20px_rgba(163,230,53,0.35)]">
+                                {leaderMember?.name === 'M18' || !leaderMember?.avatar ? (
+                                  <div className="w-full h-full rounded-2xl bg-black flex flex-col items-center justify-center p-1">
                                     <svg className="w-10 h-5 text-white" viewBox="0 0 100 40" fill="currentColor">
                                       <path d="M 6 22 L 20 22 L 22 17 L 36 17 L 38 20 L 52 20 L 57 18 L 82 18 L 84 20 L 92 20 L 92 23 L 83 23 L 83 26 L 76 26 L 75 23 L 52 23 L 50 30 L 44 30 L 47 23 L 38 23 L 34 32 L 28 32 L 26 24 L 6 26 Z" />
                                     </svg>
@@ -3480,264 +3577,246 @@ export const VortexDashboard: React.FC<VortexDashboardProps> = ({
                                   </div>
                                 ) : (
                                   <img
-                                    src={member.avatar}
-                                    alt={member.name}
-                                    className={`w-16 h-16 rounded-full object-cover border-2 shadow-md ${
-                                      isCenterLeader 
-                                        ? 'border-[#A3E635] shadow-[0_0_18px_rgba(163,230,53,0.4)]' 
-                                        : 'border-[#A3E635]/60'
-                                    }`}
-                                    onError={(e) => {
-                                      (e.target as HTMLElement).style.display = 'none';
-                                    }}
+                                    src={leaderMember?.avatar || currentAvatarUrl}
+                                    alt={leaderMember?.name || currentGamerTag}
+                                    className="w-full h-full rounded-2xl object-cover"
                                   />
                                 )}
-                                <span className="absolute bottom-0 right-0 w-3.5 h-3.5 rounded-full bg-emerald-400 border-2 border-[#12141C]" />
+                              </div>
+                              <span className="absolute -bottom-1 -right-1 w-4 h-4 rounded-full bg-emerald-400 border-2 border-[#10141D] shadow-[0_0_8px_rgba(16,185,129,0.8)]" />
+                            </div>
+
+                            <div className="space-y-1.5 min-w-0 flex-1">
+                              <div className="flex items-center justify-center sm:justify-start gap-1.5">
+                                <span className="font-display font-black text-lg text-white truncate max-w-[170px]" title={leaderMember?.name || currentGamerTag}>
+                                  {leaderMember?.name || currentGamerTag}
+                                </span>
+                                <FaceitVerificationBadge type={leaderMember?.verification || currentVerification} size="xs" />
+                                <CountryFlag code={leaderMember?.code || currentCountry.code} name={leaderMember?.countryName || currentCountry.name} size="xs" />
                               </div>
 
-                              <div className="w-full px-1 min-w-0 flex flex-col items-center">
-                                <div className="text-xs font-bold text-white flex items-center justify-center gap-1 font-display max-w-full min-w-0">
-                                  <span className="truncate min-w-0 max-w-[68px] sm:max-w-[74px]" title={member.name}>{member.name}</span>
-                                  <FaceitVerificationBadge 
-                                    type={member.verification || (isCenterLeader ? currentVerification : 'none')} 
-                                    size="xs" 
-                                    className="shrink-0"
-                                  />
-                                  <CountryFlag 
-                                    code={member.code || (isCenterLeader ? currentCountry.code : 'XK')} 
-                                    name={member.countryName || (isCenterLeader ? currentCountry.name : 'Kosovo')} 
-                                    size="xs" 
-                                    className="shrink-0"
-                                  />
-                                </div>
-                                <div className="inline-flex items-center gap-2 px-2.5 py-0.5 rounded-full bg-[#151922] border border-white/10 shadow-inner mt-1">
-                                  <div className="w-4 h-4 rounded-full relative flex items-center justify-center">
-                                    <svg className="w-4 h-4 -rotate-90" viewBox="0 0 36 36">
-                                      <path className="text-white/10" strokeWidth="4" stroke="currentColor" fill="none" d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" />
-                                      <path 
-                                        className={
-                                          member.level >= 10 
-                                            ? 'text-[#FF5500]' 
-                                            : member.level >= 8 
-                                            ? 'text-orange-500' 
-                                            : member.level >= 7 
-                                            ? 'text-amber-500' 
-                                            : member.level >= 4 
-                                            ? 'text-yellow-400' 
-                                            : member.level >= 2 
-                                            ? 'text-[#A3E635]' 
-                                            : 'text-slate-400'
-                                        } 
-                                        strokeDasharray={`${(FACEIT_TIERS[member.level]?.ringPercent || 30) * 0.95}, 100`} 
-                                        strokeWidth="4" 
-                                        strokeLinecap="round" 
-                                        stroke="currentColor" 
-                                        fill="none" 
-                                        d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" 
-                                      />
-                                    </svg>
-                                    <span className="absolute text-[9px] font-black text-white">{member.level}</span>
+                              <div className="flex flex-wrap items-center justify-center sm:justify-start gap-2 text-xs font-mono">
+                                <span className="px-2 py-0.5 rounded-md bg-black/60 border border-[#A3E635]/40 text-[#A3E635] font-black">
+                                  {caliberTier.tier} • {caliberTier.name}
+                                </span>
+                                <span className="text-slate-300 font-bold">
+                                  {effectiveElo} MMR
+                                </span>
+                              </div>
+
+                              <div className="text-[11px] font-mono text-slate-400">
+                                Tactical Authority: <strong className="text-slate-200">Map Vetoes & Squad Calling</strong>
+                              </div>
+                            </div>
+                          </div>
+
+                          {/* Bottom Commander Status Ribbon */}
+                          <div className="pt-3.5 border-t border-white/10 flex items-center justify-between text-xs font-mono">
+                            <div className="flex items-center gap-2">
+                              <span className="w-2.5 h-2.5 rounded-full bg-emerald-400 animate-pulse" />
+                              <span className="text-emerald-400 font-bold uppercase tracking-wider text-[11px]">READY FOR DEPLOYMENT</span>
+                            </div>
+                            <span className="text-[10px] text-slate-400 font-mono">Signal: 100% Locked</span>
+                          </div>
+                        </div>
+
+                        {/* 2. 4 SQUAD OPERATIVES (TACTICAL 2x2 GRID - 7 COLS) */}
+                        <div className="lg:col-span-7 grid grid-cols-1 sm:grid-cols-2 gap-3.5">
+                          {operativeIndices.map((slotIdx, orderIdx) => {
+                            const member = partySlots[slotIdx];
+                            const pendingPlayer = pendingSlotInvites[slotIdx];
+                            const roleLabels = [
+                              'ENTRY FRAGGER',
+                              'AWP SNIPER',
+                              'SUPPORT & UTILITY',
+                              'LURKER & ANCHOR'
+                            ];
+                            const slotRole = roleLabels[orderIdx] || 'TACTICAL OPERATIVE';
+                            const slotNumber = String(orderIdx + 2).padStart(2, '0');
+
+                            if (member) {
+                              const memberTier = getCaliberTier(member.elo);
+                              const isCurrentUser = member.id === 'current-user' || member.name === currentGamerTag;
+
+                              return (
+                                <div
+                                  key={member.id}
+                                  className="rounded-2xl bg-[#121520] border border-[#232838] hover:border-[#A3E635]/50 p-4 flex flex-col justify-between transition-all relative group overflow-hidden"
+                                >
+                                  {/* Header */}
+                                  <div className="flex items-center justify-between text-[10px] font-mono pb-2 border-b border-white/5">
+                                    <span className="text-slate-400 font-bold">
+                                      OPERATIVE #{slotNumber} // {slotRole}
+                                    </span>
+                                    <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+                                      <button
+                                        onClick={(e) => handlePromoteToLeader(slotIdx, e)}
+                                        className="p-1 rounded hover:bg-amber-500/20 text-slate-400 hover:text-amber-400 transition cursor-pointer"
+                                        title="Promote to Commander"
+                                      >
+                                        <Crown className="w-3.5 h-3.5" />
+                                      </button>
+                                      {!isCurrentUser ? (
+                                        <button
+                                          onClick={(e) => handleKickMember(slotIdx, e)}
+                                          className="p-1 rounded hover:bg-red-500/20 text-slate-400 hover:text-red-400 transition cursor-pointer"
+                                          title="Remove from squad"
+                                        >
+                                          <X className="w-3.5 h-3.5" />
+                                        </button>
+                                      ) : null}
+                                    </div>
                                   </div>
-                                  <span className="text-xs font-mono font-bold text-white tracking-tight">{member.elo.toLocaleString()}</span>
+
+                                  {/* Member Content */}
+                                  <div className="flex items-center gap-3 py-2.5">
+                                    <div className="relative shrink-0">
+                                      <img
+                                        src={member.avatar || currentAvatarUrl}
+                                        alt={member.name}
+                                        className="w-12 h-12 rounded-xl object-cover border border-[#A3E635]/40"
+                                      />
+                                      <span className="absolute -bottom-1 -right-1 w-3 h-3 rounded-full bg-emerald-400 border border-black" />
+                                    </div>
+                                    <div className="min-w-0 flex-1">
+                                      <div className="flex items-center gap-1 text-xs font-bold text-white font-display">
+                                        <span className="truncate max-w-[110px]">{member.name}</span>
+                                        <FaceitVerificationBadge type={member.verification || 'none'} size="xs" />
+                                        <CountryFlag code={member.code || 'XK'} name={member.countryName || 'Kosovo'} size="xs" />
+                                      </div>
+                                      <div className="text-[11px] font-mono text-[#A3E635] font-bold mt-0.5">
+                                        {memberTier.tier} • {member.elo} MMR
+                                      </div>
+                                    </div>
+                                  </div>
+
+                                  {/* Status */}
+                                  <div className="pt-2 border-t border-white/5 flex items-center justify-between text-[10px] font-mono">
+                                    <span className="text-emerald-400 font-bold">✓ READY</span>
+                                    <span className="text-slate-500">{slotRole}</span>
+                                  </div>
+                                </div>
+                              );
+                            }
+
+                            if (pendingPlayer) {
+                              return (
+                                <div
+                                  key={`pending-${slotIdx}`}
+                                  onClick={() => {
+                                    sound.playClick();
+                                    setPartyInviteCountdown(88);
+                                    setActivePartyInvite({
+                                      id: `invite-${Date.now()}`,
+                                      sender: pendingPlayer.name,
+                                      avatar: pendingPlayer.avatar,
+                                      level: pendingPlayer.level,
+                                      code: pendingPlayer.code || 'XK',
+                                      countryName: pendingPlayer.countryName || 'Kosovo',
+                                      targetSlotIdx: slotIdx,
+                                      playerObj: pendingPlayer,
+                                    });
+                                  }}
+                                  className="rounded-2xl bg-[#0F1118] border-2 border-dashed border-amber-500/60 p-4 flex flex-col justify-between transition-all relative cursor-pointer hover:border-amber-400"
+                                >
+                                  <div className="flex items-center justify-between text-[10px] font-mono pb-1">
+                                    <span className="text-amber-400 font-bold flex items-center gap-1">
+                                      <span className="w-1.5 h-1.5 rounded-full bg-amber-400 animate-ping" />
+                                      WAITING FOR ACCEPTANCE...
+                                    </span>
+                                    <button
+                                      onClick={(e) => handleCancelPendingInvite(slotIdx, e)}
+                                      className="text-slate-400 hover:text-red-400 p-0.5"
+                                    >
+                                      <X className="w-3.5 h-3.5" />
+                                    </button>
+                                  </div>
+                                  <div className="flex items-center gap-2.5 py-1.5">
+                                    <img src={pendingPlayer.avatar} alt={pendingPlayer.name} className="w-10 h-10 rounded-xl object-cover border border-amber-500/40" />
+                                    <div className="min-w-0">
+                                      <div className="text-xs font-bold text-white truncate">{pendingPlayer.name}</div>
+                                      <div className="text-[10px] font-mono text-amber-300">Invite dispatched • {pendingPlayer.elo} MMR</div>
+                                    </div>
+                                  </div>
+                                  <div className="flex items-center gap-1.5 pt-1 border-t border-white/5">
+                                    <button
+                                      onClick={(e) => {
+                                        e.stopPropagation();
+                                        sound.playClick();
+                                        setPartyInviteCountdown(88);
+                                        setActivePartyInvite({
+                                          id: `invite-${Date.now()}`,
+                                          sender: currentGamerTag,
+                                          avatar: currentAvatarUrl,
+                                          level: 7,
+                                          code: currentCountry.code,
+                                          countryName: currentCountry.name,
+                                          verification: currentVerification,
+                                          targetSlotIdx: slotIdx,
+                                          playerObj: pendingPlayer,
+                                          isOutgoingSimulation: true,
+                                          invitedPlayerName: pendingPlayer.name,
+                                        });
+                                      }}
+                                      className="flex-1 py-1 rounded bg-[#A3E635]/20 hover:bg-[#A3E635]/30 text-[#A3E635] text-[10px] font-mono font-bold"
+                                    >
+                                      PREVIEW INVITE
+                                    </button>
+                                  </div>
+                                </div>
+                              );
+                            }
+
+                            // Empty Operative Slot
+                            return (
+                              <div
+                                key={`empty-${slotIdx}`}
+                                onClick={() => handleOpenInviteModal(slotIdx)}
+                                className="rounded-2xl bg-[#0E1017] border border-white/10 hover:border-[#A3E635]/70 hover:bg-[#121622] p-4 flex flex-col items-center justify-center gap-2 transition-all cursor-pointer group shadow-sm hover:shadow-[0_0_20px_rgba(163,230,53,0.15)] select-none"
+                              >
+                                <div className="w-full flex items-center justify-between text-[10px] font-mono text-slate-500 pb-1">
+                                  <span>OPERATIVE #{slotNumber}</span>
+                                  <span className="text-[#A3E635] font-semibold">{slotRole}</span>
+                                </div>
+                                <div className="w-10 h-10 rounded-xl bg-white/[0.03] group-hover:bg-[#A3E635]/15 border border-white/10 group-hover:border-[#A3E635]/50 flex items-center justify-center text-slate-400 group-hover:text-[#A3E635] transition">
+                                  <Plus className="w-5 h-5 group-hover:scale-110 transition-transform" />
+                                </div>
+                                <div className="text-center">
+                                  <span className="block text-xs font-mono font-bold text-slate-300 group-hover:text-white transition">
+                                    + Invite Operative
+                                  </span>
+                                  <span className="block text-[10px] font-mono text-slate-500 group-hover:text-[#A3E635] transition">
+                                    Open Squad Roster
+                                  </span>
                                 </div>
                               </div>
-                            </div>
-
-                            {/* Status Bottom */}
-                            <div className="w-full text-center">
-                              <span className="px-2.5 py-0.5 rounded text-[10px] font-mono font-bold bg-emerald-500/15 text-emerald-400 border border-emerald-500/30">
-                                READY
-                              </span>
-                            </div>
-                          </div>
-                        );
-                      }
-
-                      // Pending Outgoing Invite Slot
-                      const pendingPlayer = pendingSlotInvites[idx];
-                      if (pendingPlayer) {
-                        return (
-                          <div
-                            key={`pending-${idx}`}
-                            onClick={() => {
-                              sound.playClick();
-                              setPartyInviteCountdown(88);
-                              setActivePartyInvite({
-                                id: `invite-${Date.now()}`,
-                                sender: pendingPlayer.name,
-                                avatar: pendingPlayer.avatar,
-                                level: pendingPlayer.level,
-                                code: pendingPlayer.code || 'XK',
-                                countryName: pendingPlayer.countryName || 'Kosovo',
-                                targetSlotIdx: idx,
-                                playerObj: pendingPlayer,
-                              });
-                            }}
-                            className="h-56 rounded-2xl bg-[#0E1017] border-2 border-dashed border-amber-500/70 p-4 flex flex-col justify-between items-center relative group shadow-[0_0_20px_rgba(245,158,11,0.15)] animate-in zoom-in-95 cursor-pointer hover:border-[#FF5500] transition-all hover:scale-[1.01]"
-                            title="Click to preview the FACEIT party invitation"
-                          >
-                            {/* Top Pending Tag */}
-                            <div className="w-full flex items-center justify-between">
-                              <span className="text-[10px] font-mono font-bold text-amber-300 bg-amber-500/20 border border-amber-500/40 px-2 py-0.5 rounded flex items-center gap-1.5 animate-pulse">
-                                <span className="w-1.5 h-1.5 rounded-full bg-amber-400" />
-                                WAITING...
-                              </span>
-                              <button
-                                onClick={(e) => handleCancelPendingInvite(idx, e)}
-                                className="text-slate-500 hover:text-red-400 p-1 transition cursor-pointer"
-                                title="Cancel Invitation"
-                              >
-                                <X className="w-3.5 h-3.5" />
-                              </button>
-                            </div>
-
-                            {/* Player Avatar */}
-                            <div className="relative my-1">
-                              {pendingPlayer.name === 'M18' || !pendingPlayer.avatar ? (
-                                <div className="w-14 h-14 rounded-2xl bg-black border border-white/10 flex flex-col items-center justify-center p-1">
-                                  <svg className="w-9 h-4 text-white" viewBox="0 0 100 40" fill="currentColor">
-                                    <path d="M 6 22 L 20 22 L 22 17 L 36 17 L 38 20 L 52 20 L 57 18 L 82 18 L 84 20 L 92 20 L 92 23 L 83 23 L 83 26 L 76 26 L 75 23 L 52 23 L 50 30 L 44 30 L 47 23 L 38 23 L 34 32 L 28 32 L 26 24 L 6 26 Z" />
-                                  </svg>
-                                  <span className="text-[10px] font-black text-white">M18</span>
-                                </div>
-                              ) : (
-                                <img
-                                  src={pendingPlayer.avatar}
-                                  alt={pendingPlayer.name}
-                                  className="w-14 h-14 rounded-2xl object-cover grayscale opacity-80 border-2 border-amber-500/60 shadow-md"
-                                />
-                              )}
-                              <div className="absolute -bottom-1 -right-1 px-1.5 py-0.2 rounded bg-[#A3E635] text-slate-950 font-black text-[9px] font-mono border border-black shadow">
-                                LVL {pendingPlayer.level}
-                              </div>
-                            </div>
-
-                            {/* Player Name & ELO */}
-                            <div className="text-center w-full">
-                              <div className="flex items-center justify-center gap-1.5 text-xs font-bold text-white font-mono">
-                                <span>{pendingPlayer.name}</span>
-                                <CountryFlag code={pendingPlayer.code || 'XK'} name={pendingPlayer.countryName || 'Kosovo'} size="xs" />
-                              </div>
-                              <span className="text-[10px] text-[#A3E635] font-mono">Invite sent • {pendingPlayer.elo} ELO</span>
-                            </div>
-
-                            {/* Action Row */}
-                            <div className="w-full flex items-center gap-1.5 pt-1">
-                              <button
-                                onClick={(e) => {
-                                  e.stopPropagation();
-                                  sound.playClick();
-                                  setPartyInviteCountdown(88);
-                                  setActivePartyInvite({
-                                    id: `invite-${Date.now()}`,
-                                    sender: currentGamerTag,
-                                    avatar: currentAvatarUrl,
-                                    level: 7,
-                                    code: currentCountry.code,
-                                    countryName: currentCountry.name,
-                                    verification: currentVerification,
-                                    targetSlotIdx: idx,
-                                    playerObj: pendingPlayer,
-                                    isOutgoingSimulation: true,
-                                    invitedPlayerName: pendingPlayer.name,
-                                  });
-                                }}
-                                className="flex-1 py-1 rounded-lg bg-gradient-to-r from-[#84CC16] to-[#A3E635] hover:brightness-110 text-slate-950 text-[10px] font-mono font-black transition cursor-pointer shadow-[0_0_10px_rgba(163,230,53,0.3)] text-center uppercase"
-                              >
-                                TEST DIALOG
-                              </button>
-                              <button
-                                onClick={(e) => handleCancelPendingInvite(idx, e)}
-                                className="px-2 py-1 rounded-lg bg-white/5 hover:bg-red-500/20 text-slate-400 hover:text-red-300 border border-white/10 text-[10px] font-mono font-bold transition cursor-pointer"
-                                title="Cancel invitation"
-                              >
-                                <X className="w-3 h-3" />
-                              </button>
-                            </div>
-                          </div>
-                        );
-                      }
-
-                      // Empty Slot (Opens FACEIT Invite Modal)
-                      return (
-                        <div
-                          key={`empty-${idx}`}
-                          onClick={() => handleOpenInviteModal(idx)}
-                          className="h-56 rounded-2xl bg-[#10121A] border border-[#202535] hover:border-[#A3E635]/60 hover:bg-[#131722] flex flex-col items-center justify-center gap-2.5 p-4 transition-all duration-150 group cursor-pointer shadow-sm hover:shadow-[0_0_20px_rgba(163,230,53,0.15)] hover:scale-[1.01]"
-                        >
-                          <div className="w-12 h-12 rounded-2xl bg-white/[0.03] group-hover:bg-[#A3E635]/15 border border-white/10 group-hover:border-[#A3E635]/50 flex items-center justify-center text-slate-500 group-hover:text-[#A3E635] transition shadow-inner">
-                            <Plus className="w-6 h-6 group-hover:scale-125 transition-transform" />
-                          </div>
-                          <div className="text-center">
-                            <span className="block text-xs font-mono font-bold text-slate-400 group-hover:text-white transition">
-                              + Invite Teammate
-                            </span>
-                            <span className="block text-[10px] font-mono text-slate-600 group-hover:text-[#A3E635] transition mt-0.5">
-                              Open Friends List
-                            </span>
-                          </div>
+                            );
+                          })}
                         </div>
-                      );
-                    })}
-                  </div>
-
-                  {/* FLOATING ANTI-CHEAT WARNING PILL (SHOWN ONLY IF USER CLICKS FIND MATCH WITHOUT AC RUNNING) */}
-                  {!isAntiCheatActive && showAcPrompt && (
-                    <div className="flex justify-center -mt-4 relative z-10 animate-in fade-in zoom-in-95 duration-200">
-                      <div className="inline-flex items-center gap-3 sm:gap-4 px-4 sm:px-5 py-2 sm:py-2.5 rounded-xl bg-[#090B0F] border border-[#FF5500] shadow-[0_0_25px_rgba(255,85,0,0.3)] text-xs font-mono">
-                        <div className="flex items-center gap-2 text-slate-200">
-                          <ShieldAlert className="w-4 h-4 text-[#FF5500] shrink-0" />
-                          <span className="font-semibold text-slate-100 tracking-wide">Please run Anti-Cheat</span>
-                        </div>
-                        <a
-                          href="https://www.faceit.com/en/anti-cheat"
-                          target="_blank"
-                          rel="noopener noreferrer"
-                          className="text-[#FF5500] hover:text-[#FFAA00] font-bold text-xs uppercase tracking-wider transition hover:underline"
-                        >
-                          DOWNLOAD
-                        </a>
-                        <a
-                          href="faceitac://"
-                          onClick={() => {
-                            handleLaunchAntiCheat();
-                          }}
-                          className="px-4 py-1.5 rounded-lg bg-[#FF5500] hover:bg-[#FF6611] text-white font-black text-xs uppercase tracking-wider transition cursor-pointer shadow-md shadow-orange-500/30 hover:scale-105 active:scale-95 inline-flex items-center"
-                          title="Click to launch Anti-Cheat"
-                        >
-                          LAUNCH
-                        </a>
-                        <button
-                          onClick={() => setShowAcPrompt(false)}
-                          className="text-slate-500 hover:text-white transition cursor-pointer p-0.5 ml-0.5"
-                          title="Dismiss warning"
-                        >
-                          <X className="w-3.5 h-3.5" />
-                        </button>
                       </div>
-                    </div>
-                  )}
+                    );
+                  })()}
                 </div>
 
-                {/* FIND MATCH BUTTON (CENTERED AS IN SCREENSHOT) */}
+                {/* DEPLOY 5-STACK BUTTON */}
                 <div className="flex justify-center mt-6">
                   {isQueuing ? (
                     <div className="flex flex-col sm:flex-row items-center justify-center gap-3">
-                      <div className="flex flex-wrap items-center gap-3.5 px-6 py-3.5 rounded-2xl bg-[#1A130D] border border-[#FF5500]/60 text-xs font-mono shadow-xl shadow-orange-500/15">
-                        <span className="w-2.5 h-2.5 rounded-full bg-[#FF5500] animate-ping shrink-0" />
+                      <div className="flex flex-wrap items-center gap-3.5 px-6 py-3.5 rounded-2xl bg-[#1A130D] border border-[#A3E635]/60 text-xs font-mono shadow-xl shadow-lime-500/15">
+                        <span className="w-2.5 h-2.5 rounded-full bg-[#A3E635] animate-ping shrink-0" />
                         <div>
                           <div className="flex items-center gap-2">
-                            <span className="text-white font-black tracking-wider">SEARCHING BALANCED 5V5 MATCH...</span>
+                            <span className="text-white font-black tracking-wider">DEPLOYING 5-STACK TO CS2 MATCH...</span>
                             <span className="text-amber-400 font-bold font-mono">00:{queueSeconds.toString().padStart(2, '0')}</span>
                           </div>
                           <div className="text-[10px] text-slate-400 font-mono mt-0.5 flex flex-wrap items-center gap-2">
                             <span className="text-emerald-400 font-bold">
-                              {realtimeQueuePlayers.length > 0 ? `${realtimeQueuePlayers.length}/10 Active Queued` : '1/10 Searching'}
+                              {realtimeQueuePlayers.length > 0 ? `${realtimeQueuePlayers.length}/10 Active Queued` : '5/10 In Queue'}
                             </span>
                             <span>•</span>
-                            <span className="text-[#A3E635] font-bold">Real-time Supabase Presence</span>
+                            <span className="text-[#A3E635] font-bold">5v5 Squad Deployment</span>
                             <span>•</span>
-                            <span>Strict Bracket: Level {effectiveLevel} (ELO {effectiveElo - 40} - {effectiveElo + 40})</span>
+                            <span>Bracket: {caliberTier.tier} (MMR {effectiveElo - 50} - {effectiveElo + 50})</span>
                           </div>
                         </div>
                       </div>
@@ -3748,7 +3827,7 @@ export const VortexDashboard: React.FC<VortexDashboardProps> = ({
                               sound.playMatchFound();
                               triggerMatchFound();
                             }}
-                            className="px-4 py-3.5 rounded-2xl bg-gradient-to-r from-emerald-500 to-green-600 hover:brightness-110 text-slate-950 text-xs font-mono font-black uppercase cursor-pointer transition shadow-md flex items-center gap-1.5"
+                            className="px-4 py-3.5 rounded-2xl bg-gradient-to-r from-emerald-500 to-[#A3E635] hover:brightness-110 text-slate-950 text-xs font-mono font-black uppercase cursor-pointer transition shadow-md flex items-center gap-1.5"
                             title="Administrator shortcut: immediately trigger match ready check"
                           >
                             <Zap className="w-4 h-4 fill-slate-950" />
@@ -3776,7 +3855,7 @@ export const VortexDashboard: React.FC<VortexDashboardProps> = ({
                       className="w-full sm:w-auto min-w-[340px] px-10 py-4 rounded-2xl bg-gradient-to-r from-amber-500 via-orange-500 to-amber-500 hover:brightness-110 text-slate-950 font-display font-black text-sm uppercase tracking-wider transition shadow-[0_0_30px_rgba(245,158,11,0.4)] hover:scale-[1.02] cursor-pointer flex items-center justify-center gap-3"
                     >
                       <Lock className="w-4 h-4 fill-slate-950" />
-                      <span>UPGRADE TO PREMIUM TO QUEUE SUPER MATCH</span>
+                      <span>PRO PASS REQUIRED TO DEPLOY RANKED SERIES</span>
                     </button>
                   ) : selectedMatchTier === 'vip' && userMembershipTier !== 'vip' ? (
                     <button
@@ -3787,31 +3866,24 @@ export const VortexDashboard: React.FC<VortexDashboardProps> = ({
                       className="w-full sm:w-auto min-w-[340px] px-10 py-4 rounded-2xl bg-gradient-to-r from-purple-500 via-fuchsia-500 to-amber-400 hover:brightness-110 text-slate-950 font-display font-black text-sm uppercase tracking-wider transition shadow-[0_0_30px_rgba(168,85,247,0.4)] hover:scale-[1.02] cursor-pointer flex items-center justify-center gap-3"
                     >
                       <Crown className="w-4 h-4 fill-slate-950" />
-                      <span>UPGRADE TO VIP TO QUEUE VIP ELITE</span>
+                      <span>UPGRADE TO DEPLOY 5v5 PRIZE CLASH</span>
                     </button>
                   ) : (
                     <button
                       onClick={() => {
-                        if (!isAntiCheatActive) {
-                          sound.playClick();
-                          setShowAcPrompt(true);
-                          setDashboardToast('⚠️ Anti-Cheat must be running to find a match! Click LAUNCH.');
-                          setTimeout(() => setDashboardToast(null), 3500);
-                          return;
-                        }
                         sound.playJoinScrim();
                         setIsQueuing(true);
                         setQueueSeconds(0);
                       }}
-                      className="w-full sm:w-auto min-w-[320px] px-12 py-4 rounded-2xl bg-gradient-to-r from-[#84CC16] via-[#A3E635] to-[#84CC16] hover:brightness-110 text-slate-950 font-display font-black text-sm uppercase tracking-wider transition shadow-[0_0_30px_rgba(163,230,53,0.35)] hover:scale-[1.02] cursor-pointer flex items-center justify-center gap-3"
+                      className="w-full sm:w-auto min-w-[340px] px-12 py-4 rounded-2xl bg-gradient-to-r from-[#84CC16] via-[#A3E635] to-[#84CC16] hover:brightness-110 text-slate-950 font-display font-black text-sm uppercase tracking-wider transition shadow-[0_0_30px_rgba(163,230,53,0.35)] hover:scale-[1.02] cursor-pointer flex items-center justify-center gap-3"
                     >
-                      <Play className="w-4 h-4 fill-slate-950" />
-                      <span>FIND MATCH ({selectedMatchTier === 'free' ? 'STANDARD' : selectedMatchTier === 'premium' ? 'SUPER MATCH' : 'VIP ELITE'})</span>
+                      <Crosshair className="w-4 h-4 text-slate-950" />
+                      <span>DEPLOY 5-STACK ({selectedMatchTier === 'free' ? 'OPEN SCRIM' : selectedMatchTier === 'premium' ? 'RANKED SERIES' : 'PRIZE CLASH'})</span>
                     </button>
                   )}
                 </div>
 
-                {/* MATCHMAKING SUB-NAVIGATION (MATCH TYPE • MAPS • SERVERS) */}
+                {/* MATCHMAKING SUB-NAVIGATION (MATCH FORMAT • ACTIVE DUTY MAP POOL) */}
                 <div className="mt-8 pt-4 border-t border-white/[0.08] flex flex-wrap items-center justify-between gap-4 text-xs font-mono">
                   <div className="flex items-center gap-6">
                     <button
@@ -3822,8 +3894,8 @@ export const VortexDashboard: React.FC<VortexDashboardProps> = ({
                           : 'text-slate-400 hover:text-white'
                       }`}
                     >
-                      <Crosshair className="w-3.5 h-3.5 text-[#A3E635]" />
-                      <span>MATCH TYPE</span>
+                      <Swords className="w-3.5 h-3.5 text-[#A3E635]" />
+                      <span>5v5 COMPETITIVE FORMAT</span>
                     </button>
 
                     <button
@@ -3842,24 +3914,17 @@ export const VortexDashboard: React.FC<VortexDashboardProps> = ({
                     </button>
                   </div>
 
-                  <button
-                    onClick={() => { sound.playClick(); setPlaySubTab('servers'); }}
-                    className={`relative pb-3 font-bold transition flex items-center gap-2 cursor-pointer ${
-                      playSubTab === 'servers'
-                        ? 'text-white border-b-2 border-[#A3E635]'
-                        : 'text-slate-400 hover:text-white'
-                    }`}
-                  >
-                    <Server className="w-3.5 h-3.5 text-slate-300" />
-                    <span>SERVERS {selectedServers.length}/6</span>
-                  </button>
+                  <div className="hidden sm:flex items-center gap-2 text-slate-400 text-[11px] pb-3">
+                    <ShieldCheck className="w-3.5 h-3.5 text-emerald-400" />
+                    <span>5-Stack Squads • Automated Map Vetoes</span>
+                  </div>
                 </div>
 
-                {/* SUBTAB 1: 3 MATCHMAKING TIERS (FREE • PREMIUM • VIP) */}
+                {/* SUBTAB 1: 3 5-STACK MATCH TIERS (OPEN SCRIM • RANKED SERIES • PRIZE CLASH) */}
                 {playSubTab === 'match_type' && (
                   <div className="mt-4 grid grid-cols-1 lg:grid-cols-3 gap-4 animate-in fade-in duration-200">
                     
-                    {/* CARD 1: FREE STANDARD MATCH */}
+                    {/* CARD 1: 5v5 OPEN SCRIM */}
                     <div
                       onClick={() => {
                         sound.playSelect();
@@ -3874,15 +3939,15 @@ export const VortexDashboard: React.FC<VortexDashboardProps> = ({
                       <div className="space-y-3">
                         <div className="flex items-center justify-between">
                           <div className="flex items-center gap-2.5">
-                            <div className="w-8 h-8 rounded-lg bg-white/[0.05] border border-white/10 flex items-center justify-center text-slate-300">
+                            <div className="w-8 h-8 rounded-lg bg-[#A3E635]/15 border border-[#A3E635]/30 flex items-center justify-center text-[#A3E635]">
                               <Swords className="w-4 h-4" />
                             </div>
                             <div>
-                              <h4 className="text-base font-black font-display text-white">Standard Match • 5v5</h4>
-                              <div className="text-[10px] font-mono text-slate-400">Open competitive queue</div>
+                              <h4 className="text-base font-black font-display text-white">5v5 Open Scrim</h4>
+                              <div className="text-[10px] font-mono text-slate-400">Free • All 5-Stacks</div>
                             </div>
                           </div>
-                          <span className="px-2.5 py-0.5 rounded-full text-[10px] font-mono font-bold bg-white/10 text-slate-300 border border-white/10">
+                          <span className="px-2.5 py-0.5 rounded-full text-[10px] font-mono font-bold bg-[#A3E635]/15 text-[#A3E635] border border-[#A3E635]/30">
                             FREE
                           </span>
                         </div>
@@ -3890,8 +3955,8 @@ export const VortexDashboard: React.FC<VortexDashboardProps> = ({
                         {/* Perk Pills Grid */}
                         <div className="grid grid-cols-2 gap-1.5 pt-1">
                           <div className="px-2 py-1.5 rounded-xl bg-black/50 border border-white/10 flex items-center gap-1 text-slate-300 min-w-0 overflow-hidden">
-                            <Users className="w-3 h-3 text-slate-400 shrink-0" />
-                            <span className="text-[10px] font-sans font-semibold tracking-tight whitespace-nowrap">All Parties</span>
+                            <Users className="w-3 h-3 text-[#A3E635] shrink-0" />
+                            <span className="text-[10px] font-sans font-semibold tracking-tight whitespace-nowrap">All 5-Stacks</span>
                           </div>
                           <div className="px-2 py-1.5 rounded-xl bg-black/50 border border-white/10 flex items-center gap-1 text-slate-300 min-w-0 overflow-hidden">
                             <Star className="w-3 h-3 text-[#A3E635] fill-[#A3E635] shrink-0" />
@@ -3899,32 +3964,32 @@ export const VortexDashboard: React.FC<VortexDashboardProps> = ({
                           </div>
                           <div className="px-2 py-1.5 rounded-xl bg-black/50 border border-white/10 flex items-center gap-1 text-slate-300 min-w-0 overflow-hidden">
                             <TrendingUp className="w-3 h-3 text-slate-400 shrink-0" />
-                            <span className="text-[10px] font-sans font-semibold tracking-tight whitespace-nowrap">Open ELO</span>
+                            <span className="text-[10px] font-sans font-semibold tracking-tight whitespace-nowrap">Open MMR</span>
                           </div>
                           <div className="px-2 py-1.5 rounded-xl bg-black/50 border border-white/10 flex items-center gap-1 text-slate-300 min-w-0 overflow-hidden">
                             <Star className="w-3 h-3 text-[#A3E635] fill-[#A3E635] shrink-0" />
-                            <span className="text-[10px] font-sans font-semibold tracking-tight whitespace-nowrap">Veteran</span>
+                            <span className="text-[10px] font-sans font-semibold tracking-tight whitespace-nowrap">Veteran Squads</span>
                           </div>
                           <div className="px-2 py-1.5 rounded-xl bg-black/50 border border-white/10 flex items-center gap-1 text-slate-300 min-w-0 overflow-hidden">
-                            <Wifi className="w-3 h-3 text-slate-400 shrink-0" />
-                            <span className="text-[10px] font-sans font-semibold tracking-tight whitespace-nowrap">Sub-Tick</span>
+                            <Target className="w-3 h-3 text-slate-400 shrink-0" />
+                            <span className="text-[10px] font-sans font-semibold tracking-tight whitespace-nowrap">CS2 Precision</span>
                           </div>
                           <div className="px-2 py-1.5 rounded-xl bg-black/50 border border-white/10 flex items-center gap-1 text-slate-300 min-w-0 overflow-hidden">
-                            <ShieldAlert className="w-3 h-3 text-emerald-400 shrink-0" />
+                            <ShieldCheck className="w-3 h-3 text-emerald-400 shrink-0" />
                             <span className="text-[10px] font-sans font-semibold tracking-tight whitespace-nowrap">Anti-Cheat</span>
                           </div>
                         </div>
                       </div>
 
                       <div className="pt-2 flex items-center justify-between text-[11px] font-mono border-t border-white/[0.04]">
-                        <span className="text-slate-500">Wait time: ~35s</span>
+                        <span className="text-slate-500">Wait time: ~30s</span>
                         <span className={`font-bold ${selectedMatchTier === 'free' ? 'text-[#A3E635]' : 'text-slate-400'}`}>
                           {selectedMatchTier === 'free' ? '✓ SELECTED' : 'Click to Select'}
                         </span>
                       </div>
                     </div>
 
-                    {/* CARD 2: PREMIUM SUPER MATCH */}
+                    {/* CARD 2: 5v5 RANKED SERIES */}
                     <div
                       onClick={() => {
                         sound.playSelect();
@@ -3943,19 +4008,19 @@ export const VortexDashboard: React.FC<VortexDashboardProps> = ({
                               <Zap className="w-4 h-4 fill-amber-400" />
                             </div>
                             <div>
-                              <h4 className="text-base font-black font-display text-white">Super Match • 5v5</h4>
-                              <div className="text-[10px] font-mono text-amber-400 font-bold">Strict ELO & Captain Vetoes</div>
+                              <h4 className="text-base font-black font-display text-white">5v5 Ranked Series</h4>
+                              <div className="text-[10px] font-mono text-amber-400 font-bold">Pro Pass • Verified 5-Stacks</div>
                             </div>
                           </div>
                           {userMembershipTier === 'free' ? (
                             <span className="px-2.5 py-0.5 rounded-full text-[10px] font-mono font-bold bg-amber-500/20 text-amber-400 border border-amber-500/40 flex items-center gap-1 shadow-sm">
                               <Lock className="w-3 h-3 text-amber-400" />
-                              PREMIUM ONLY
+                              PRO PASS
                             </span>
                           ) : (
                             <span className="px-2.5 py-0.5 rounded-full text-[10px] font-mono font-bold bg-amber-500/20 text-amber-400 border border-amber-500/40 flex items-center gap-1 shadow-sm">
                               <Zap className="w-3 h-3 fill-amber-400" />
-                              PREMIUM
+                              PRO PASS ACTIVE
                             </span>
                           )}
                         </div>
@@ -3964,37 +4029,37 @@ export const VortexDashboard: React.FC<VortexDashboardProps> = ({
                         <div className="grid grid-cols-2 gap-1.5 pt-1">
                           <div className="px-2 py-1.5 rounded-xl bg-black/50 border border-white/10 flex items-center gap-1 text-slate-300 min-w-0 overflow-hidden">
                             <Users className="w-3 h-3 text-amber-400 shrink-0" />
-                            <span className="text-[10px] font-sans font-semibold tracking-tight whitespace-nowrap">Solo/Duo</span>
+                            <span className="text-[10px] font-sans font-semibold tracking-tight whitespace-nowrap">Verified 5-Stacks</span>
                           </div>
                           <div className="px-2 py-1.5 rounded-xl bg-black/50 border border-white/10 flex items-center gap-1 text-slate-300 min-w-0 overflow-hidden">
                             <Star className="w-3 h-3 text-amber-400 fill-amber-400 shrink-0" />
-                            <span className="text-[10px] font-sans font-semibold tracking-tight whitespace-nowrap">Verified</span>
+                            <span className="text-[10px] font-sans font-semibold tracking-tight whitespace-nowrap">ID Verified</span>
                           </div>
                           <div className="px-2 py-1.5 rounded-xl bg-black/50 border border-white/10 flex items-center gap-1 text-slate-300 min-w-0 overflow-hidden">
                             <TrendingUp className="w-3 h-3 text-amber-400 shrink-0" />
-                            <span className="text-[10px] font-sans font-semibold tracking-tight whitespace-nowrap">±250 ELO</span>
-                          </div>
-                          <div className="px-2 py-1.5 rounded-xl bg-black/50 border border-white/10 flex items-center gap-1 text-slate-300 min-w-0 overflow-hidden">
-                            <Star className="w-3 h-3 text-amber-400 fill-amber-400 shrink-0" />
-                            <span className="text-[10px] font-sans font-semibold tracking-tight whitespace-nowrap">Veteran</span>
+                            <span className="text-[10px] font-sans font-semibold tracking-tight whitespace-nowrap">±150 MMR Bracket</span>
                           </div>
                           <div className="px-2 py-1.5 rounded-xl bg-black/50 border border-white/10 flex items-center gap-1 text-slate-300 min-w-0 overflow-hidden">
                             <Crown className="w-3 h-3 text-amber-400 shrink-0" />
-                            <span className="text-[10px] font-sans font-semibold tracking-tight whitespace-nowrap">Captains</span>
+                            <span className="text-[10px] font-sans font-semibold tracking-tight whitespace-nowrap">Captain Vetoes</span>
                           </div>
                           <div className="px-2 py-1.5 rounded-xl bg-black/50 border border-white/10 flex items-center gap-1 text-slate-300 min-w-0 overflow-hidden">
                             <Zap className="w-3 h-3 text-amber-400 shrink-0" />
-                            <span className="text-[10px] font-sans font-semibold tracking-tight whitespace-nowrap">Anti-Smurf</span>
+                            <span className="text-[10px] font-sans font-semibold tracking-tight whitespace-nowrap">Anti-Smurf Shield</span>
+                          </div>
+                          <div className="px-2 py-1.5 rounded-xl bg-black/50 border border-white/10 flex items-center gap-1 text-slate-300 min-w-0 overflow-hidden">
+                            <Trophy className="w-3 h-3 text-amber-400 shrink-0" />
+                            <span className="text-[10px] font-sans font-semibold tracking-tight whitespace-nowrap">Division Points</span>
                           </div>
                         </div>
                       </div>
 
                       <div className="pt-2 flex items-center justify-between text-[11px] font-mono border-t border-white/[0.04]">
-                        <span className="text-slate-500">Wait time: ~18s</span>
+                        <span className="text-slate-500">Wait time: ~20s</span>
                         {userMembershipTier === 'free' ? (
                           <span className="font-bold text-amber-400 flex items-center gap-1">
                             <Lock className="w-3 h-3 inline" />
-                            {selectedMatchTier === 'premium' ? 'PREMIUM REQUIRED' : 'Click to Preview'}
+                            {selectedMatchTier === 'premium' ? 'PRO PASS REQUIRED' : 'Click to Preview'}
                           </span>
                         ) : (
                           <span className={`font-bold ${selectedMatchTier === 'premium' ? 'text-amber-400' : 'text-slate-400'}`}>
@@ -4004,7 +4069,7 @@ export const VortexDashboard: React.FC<VortexDashboardProps> = ({
                       </div>
                     </div>
 
-                    {/* CARD 3: VIP ELITE MATCH */}
+                    {/* CARD 3: 5v5 PRIZE CLASH */}
                     <div
                       onClick={() => {
                         sound.playSelect();
@@ -4020,22 +4085,22 @@ export const VortexDashboard: React.FC<VortexDashboardProps> = ({
                         <div className="flex items-center justify-between">
                           <div className="flex items-center gap-2.5">
                             <div className="w-8 h-8 rounded-lg bg-purple-500/15 border border-purple-500/30 flex items-center justify-center text-purple-400 shadow-sm">
-                              <Crown className="w-4 h-4 fill-purple-400" />
+                              <Trophy className="w-4 h-4 fill-purple-400" />
                             </div>
                             <div>
-                              <h4 className="text-base font-black font-display text-white">VIP Elite Match • 5v5</h4>
-                              <div className="text-[10px] font-mono text-purple-400 font-bold">High Stakes & Pro GOTV</div>
+                              <h4 className="text-base font-black font-display text-white">5v5 Prize Clash</h4>
+                              <div className="text-[10px] font-mono text-purple-400 font-bold">Tournament Entry • Prize Pool</div>
                             </div>
                           </div>
                           {userMembershipTier !== 'vip' ? (
                             <span className="px-2.5 py-0.5 rounded-full text-[10px] font-mono font-bold bg-purple-500/20 text-purple-300 border border-purple-400/40 flex items-center gap-1 shadow-sm">
                               <Lock className="w-3 h-3 text-purple-400" />
-                              VIP ONLY
+                              PRIZE POOL ENTRY
                             </span>
                           ) : (
                             <span className="px-2.5 py-0.5 rounded-full text-[10px] font-mono font-bold bg-gradient-to-r from-amber-500/20 to-purple-500/20 text-amber-300 border border-amber-400/40 flex items-center gap-1 shadow-[0_0_10px_rgba(251,191,36,0.2)]">
                               <Crown className="w-3 h-3 fill-amber-300" />
-                              VIP ELITE
+                              PRIZE ENTRY ACTIVE
                             </span>
                           )}
                         </div>
@@ -4043,38 +4108,38 @@ export const VortexDashboard: React.FC<VortexDashboardProps> = ({
                         {/* Perk Pills Grid */}
                         <div className="grid grid-cols-2 gap-1.5 pt-1">
                           <div className="px-2 py-1.5 rounded-xl bg-black/50 border border-white/10 flex items-center gap-1 text-slate-300 min-w-0 overflow-hidden">
-                            <Crosshair className="w-3 h-3 text-purple-400 shrink-0" />
-                            <span className="text-[10px] font-sans font-semibold tracking-tight whitespace-nowrap">Solo/Duo</span>
+                            <Users className="w-3 h-3 text-purple-400 shrink-0" />
+                            <span className="text-[10px] font-sans font-semibold tracking-tight whitespace-nowrap">Elite 5-Stacks</span>
                           </div>
                           <div className="px-2 py-1.5 rounded-xl bg-black/50 border border-white/10 flex items-center gap-1 text-slate-300 min-w-0 overflow-hidden">
                             <ShieldCheck className="w-3 h-3 text-purple-400 shrink-0" />
-                            <span className="text-[10px] font-sans font-semibold tracking-tight whitespace-nowrap">Verified</span>
+                            <span className="text-[10px] font-sans font-semibold tracking-tight whitespace-nowrap">Cash Prize Pool</span>
                           </div>
                           <div className="px-2 py-1.5 rounded-xl bg-black/50 border border-white/10 flex items-center gap-1 text-slate-300 min-w-0 overflow-hidden">
                             <TrendingUp className="w-3 h-3 text-purple-400 shrink-0" />
-                            <span className="text-[10px] font-sans font-semibold tracking-tight whitespace-nowrap">±150 ELO</span>
+                            <span className="text-[10px] font-sans font-semibold tracking-tight whitespace-nowrap">High Stakes MMR</span>
                           </div>
                           <div className="px-2 py-1.5 rounded-xl bg-black/50 border border-white/10 flex items-center gap-1 text-slate-300 min-w-0 overflow-hidden">
                             <Film className="w-3 h-3 text-purple-400 shrink-0" />
-                            <span className="text-[10px] font-sans font-semibold tracking-tight whitespace-nowrap">GOTV VOD</span>
+                            <span className="text-[10px] font-sans font-semibold tracking-tight whitespace-nowrap">Full GOTV VOD</span>
                           </div>
                           <div className="px-2 py-1.5 rounded-xl bg-black/50 border border-white/10 flex items-center gap-1 text-slate-300 min-w-0 overflow-hidden">
                             <Sparkles className="w-3 h-3 text-amber-300 shrink-0" />
-                            <span className="text-[10px] font-sans font-semibold tracking-tight whitespace-nowrap">2x Points</span>
+                            <span className="text-[10px] font-sans font-semibold tracking-tight whitespace-nowrap">2x Season Points</span>
                           </div>
                           <div className="px-2 py-1.5 rounded-xl bg-black/50 border border-white/10 flex items-center gap-1 text-slate-300 min-w-0 overflow-hidden">
-                            <Flame className="w-3 h-3 text-amber-400 shrink-0" />
-                            <span className="text-[10px] font-sans font-semibold tracking-tight whitespace-nowrap">High Stakes</span>
+                            <Trophy className="w-3 h-3 text-amber-400 shrink-0" />
+                            <span className="text-[10px] font-sans font-semibold tracking-tight whitespace-nowrap">Prize Qualifiers</span>
                           </div>
                         </div>
                       </div>
 
                       <div className="pt-2 flex items-center justify-between text-[11px] font-mono border-t border-white/[0.04]">
-                        <span className="text-slate-500">Wait time: ~12s</span>
+                        <span className="text-slate-500">Wait time: ~15s</span>
                         {userMembershipTier !== 'vip' ? (
                           <span className="font-bold text-purple-400 flex items-center gap-1">
                             <Crown className="w-3 h-3 inline" />
-                            {selectedMatchTier === 'vip' ? 'VIP REQUIRED' : 'Click to Preview'}
+                            {selectedMatchTier === 'vip' ? 'ENTRY PASS REQUIRED' : 'Click to Preview'}
                           </span>
                         ) : (
                           <span className={`font-bold ${selectedMatchTier === 'vip' ? 'text-purple-400' : 'text-slate-400'}`}>
@@ -4144,100 +4209,23 @@ export const VortexDashboard: React.FC<VortexDashboardProps> = ({
                   </div>
                 )}
 
-                {/* SUBTAB 3: SERVER COUNTRY PICKER (MATCHING REFERENCE EXACTLY) */}
-                {playSubTab === 'servers' && (
-                  <div className="mt-4 p-6 rounded-2xl bg-[#0B0D13] border border-[#232838] space-y-5 animate-in fade-in duration-200">
-                    {/* Top Recommendation Banner */}
-                    <div className="text-center text-xs sm:text-sm font-sans text-slate-300">
-                      <span>For a better server experience, we recommend switching to </span>
-                      <button
-                        onClick={() => {
-                          sound.playClick();
-                          setSelectedServers(['netherlands', 'germany', 'sweden', 'finland']);
-                          setServerWarning('Optimized server location profile applied (lowest average ping).');
-                          setTimeout(() => setServerWarning(null), 3000);
-                        }}
-                        className="text-[#FF5500] hover:text-[#FFAA00] font-bold cursor-pointer transition underline decoration-[#FF5500]/50"
-                      >
-                        Optimized server location.
-                      </button>
-                    </div>
-
-                    {/* 6 Country Flag Cards Row */}
-                    <div className="flex items-center justify-center gap-3 sm:gap-4 overflow-x-auto py-2">
-                      {SERVER_COUNTRY_LOCATIONS.map((srv) => {
-                        const isSelected = selectedServers.includes(srv.id);
-                        return (
-                          <button
-                            key={srv.id}
-                            onClick={() => handleToggleServer(srv.id)}
-                            className={`relative w-24 sm:w-28 p-2.5 rounded-xl transition-all duration-200 cursor-pointer flex flex-col items-center justify-between gap-2.5 shrink-0 ${
-                              isSelected
-                                ? 'bg-[#141722] border-2 border-white shadow-[0_0_15px_rgba(255,255,255,0.12)]'
-                                : 'bg-[#0E1017] border border-white/10 hover:border-white/30 opacity-50 hover:opacity-85'
-                            }`}
-                          >
-                            <div className="w-full h-11 sm:h-12 rounded-md overflow-hidden flex items-center justify-center bg-black/40 shadow-inner">
-                              {srv.flagSvg}
-                            </div>
-                            <div className="w-full text-center">
-                              <div className="text-xs font-bold text-white tracking-tight truncate">
-                                {srv.name}
-                              </div>
-                            </div>
-                          </button>
-                        );
-                      })}
-                    </div>
-
-                    {/* Bottom Helper Text */}
-                    <div className="text-center text-xs font-sans text-slate-400">
-                      <span>Select a minimum of 4 servers that you would like to play on. </span>
-                      <a
-                        href="https://support.faceit.com"
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="underline text-slate-300 hover:text-white transition"
-                      >
-                        Learn more
-                      </a>
-                    </div>
-
-                    {serverWarning && (
-                      <div className="text-center text-xs font-mono text-amber-400 animate-in fade-in">
-                        ⚠️ {serverWarning}
-                      </div>
-                    )}
-                  </div>
-                )}
-
-                {/* LIVE QUEUE FOOTER METRICS (AS SHOWN IN PHOTO) */}
-                <div className="mt-6 pt-3 flex flex-wrap items-center justify-between text-[11px] font-mono text-slate-500 gap-3">
+                {/* 5v5 QUEUE FOOTER METRICS */}
+                <div className="mt-6 pt-3 flex flex-wrap items-center justify-between text-[11px] font-mono text-slate-500 gap-3 border-t border-white/[0.06]">
                   <div className="flex items-center gap-4">
                     <span>Live matches: <strong className="text-slate-300">10,697</strong></span>
                     <span>•</span>
                     <span>Players queueing: <strong className="text-[#A3E635]">3,164</strong></span>
                   </div>
-                  <div className="flex items-center gap-2 text-slate-400">
-                    <button
-                      onClick={handleToggleAntiCheat}
-                      className="inline-flex items-center gap-1.5 transition cursor-pointer hover:underline"
-                      title={isAntiCheatActive ? "Anti-Cheat is ACTIVE" : "Anti-Cheat is STOPPED (Click to launch)"}
-                    >
-                      {isAntiCheatActive ? (
-                        <>
-                          <ShieldCheck className="w-3.5 h-3.5 text-emerald-400 inline" />
-                          <span className="text-emerald-400 font-bold">Ring-0 Kernel Anti-Cheat Active</span>
-                        </>
-                      ) : (
-                        <>
-                          <ShieldAlert className="w-3.5 h-3.5 text-[#FF5500] inline" />
-                          <span className="text-[#FF5500] font-bold">Anti-Cheat Not Running (Click to launch)</span>
-                        </>
-                      )}
-                    </button>
+                  <div className="flex flex-wrap items-center gap-3 text-slate-400">
+                    <span className="inline-flex items-center gap-1.5 text-emerald-400 font-semibold">
+                      <CheckCircle2 className="w-3.5 h-3.5 text-emerald-400" />
+                      <span>Steam Account: Verified Competitive Status</span>
+                    </span>
                     <span>•</span>
-                    <span>Region: Global</span>
+                    <span className="inline-flex items-center gap-1.5 text-slate-300 font-semibold">
+                      <Users className="w-3.5 h-3.5 text-[#A3E635]" />
+                      <span>Format: 5v5 Full Stack</span>
+                    </span>
                   </div>
                 </div>
 
