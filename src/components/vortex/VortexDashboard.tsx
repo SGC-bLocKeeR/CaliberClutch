@@ -3383,20 +3383,21 @@ export const VortexDashboard: React.FC<VortexDashboardProps> = ({
                       <div className="space-y-2">
                         <div className="grid grid-cols-4 sm:grid-cols-6 lg:grid-cols-11 gap-1.5 items-stretch">
                           {[
-                            { tier: '1', label: 'BEGINNER', min: 0, color: '#94A3B8', border: 'border-slate-600/40', bg: 'from-slate-900 to-slate-950', isPro: false },
-                            { tier: '2', label: 'NOVICE', min: 300, color: '#38BDF8', border: 'border-sky-500/40', bg: 'from-sky-950/40 to-slate-950', isPro: false },
-                            { tier: '3', label: 'NORMAL', min: 500, color: '#34D399', border: 'border-emerald-500/40', bg: 'from-emerald-950/40 to-slate-950', isPro: false },
-                            { tier: '4', label: 'MEDIUM', min: 700, color: '#4ADE80', border: 'border-green-500/40', bg: 'from-green-950/40 to-slate-950', isPro: false },
-                            { tier: '5', label: 'SKILLED', min: 900, color: '#A3E635', border: 'border-[#A3E635]/50', bg: 'from-[#1A2510] to-slate-950', isPro: false },
-                            { tier: '6', label: 'ADVANCED', min: 1100, color: '#FACC15', border: 'border-yellow-500/50', bg: 'from-yellow-950/40 to-slate-950', isPro: false },
-                            { tier: '7', label: 'HARD', min: 1350, color: '#FB923C', border: 'border-amber-500/50', bg: 'from-amber-950/40 to-slate-950', isPro: false },
-                            { tier: '8', label: 'EXPERT', min: 1600, color: '#F97316', border: 'border-orange-500/60', bg: 'from-orange-950/40 to-slate-950', isPro: false },
-                            { tier: '9', label: 'MASTER', min: 1850, color: '#8B5CF6', border: 'border-purple-500/60', bg: 'from-purple-950/40 to-slate-950', isPro: false },
-                            { tier: '10', label: 'ELITE', min: 2100, color: '#A855F7', border: 'border-fuchsia-500/70', bg: 'from-fuchsia-950/40 to-slate-950', isPro: false },
-                            { tier: '11', label: 'PRO', min: 2350, color: '#EF4444', border: 'border-red-500/80', bg: 'from-red-950/50 to-slate-950', isPro: true },
+                            { tier: '1', label: 'BEGINNER', min: 0, icon: Target, color: '#94A3B8', border: 'border-slate-600/40', bg: 'from-slate-900 to-slate-950', iconColor: 'text-slate-400', isPro: false },
+                            { tier: '2', label: 'NOVICE', min: 300, icon: Crosshair, color: '#38BDF8', border: 'border-sky-500/40', bg: 'from-sky-950/40 to-slate-950', iconColor: 'text-sky-400', isPro: false },
+                            { tier: '3', label: 'NORMAL', min: 500, icon: Shield, color: '#34D399', border: 'border-emerald-500/40', bg: 'from-emerald-950/40 to-slate-950', iconColor: 'text-emerald-400', isPro: false },
+                            { tier: '4', label: 'MEDIUM', min: 700, icon: ShieldCheck, color: '#4ADE80', border: 'border-green-500/40', bg: 'from-green-950/40 to-slate-950', iconColor: 'text-green-400', isPro: false },
+                            { tier: '5', label: 'SKILLED', min: 900, icon: Swords, color: '#A3E635', border: 'border-[#A3E635]/50', bg: 'from-[#1A2510] to-slate-950', iconColor: 'text-[#A3E635]', isPro: false },
+                            { tier: '6', label: 'ADVANCED', min: 1100, icon: Zap, color: '#FACC15', border: 'border-yellow-500/50', bg: 'from-yellow-950/40 to-slate-950', iconColor: 'text-yellow-400', isPro: false },
+                            { tier: '7', label: 'HARD', min: 1350, icon: Flame, color: '#FB923C', border: 'border-amber-500/50', bg: 'from-amber-950/40 to-slate-950', iconColor: 'text-amber-400', isPro: false },
+                            { tier: '8', label: 'EXPERT', min: 1600, icon: Award, color: '#F97316', border: 'border-orange-500/60', bg: 'from-orange-950/40 to-slate-950', iconColor: 'text-orange-400', isPro: false },
+                            { tier: '9', label: 'MASTER', min: 1850, icon: Trophy, color: '#8B5CF6', border: 'border-purple-500/60', bg: 'from-purple-950/40 to-slate-950', iconColor: 'text-purple-400', isPro: false },
+                            { tier: '10', label: 'ELITE', min: 2100, icon: Star, color: '#A855F7', border: 'border-fuchsia-500/70', bg: 'from-fuchsia-950/40 to-slate-950', iconColor: 'text-fuchsia-400', isPro: false },
+                            { tier: '11', label: 'PRO', min: 2350, icon: Crown, color: '#EF4444', border: 'border-red-500/80', bg: 'from-red-950/50 to-slate-950', iconColor: 'text-amber-400', isPro: true },
                           ].map((div) => {
                             const isCurrent = caliberTier.roman === div.tier;
                             const isReached = effectiveElo >= div.min;
+                            const IconComponent = div.icon;
                             return (
                               <div
                                 key={div.tier}
@@ -3408,13 +3409,17 @@ export const VortexDashboard: React.FC<VortexDashboardProps> = ({
                                     : 'bg-[#0B0D14]/90 border border-white/5 opacity-40 hover:opacity-70'
                                 }`}
                               >
-                                {/* Top Insignia Pip or Crown for Pro */}
-                                <div className="flex items-center justify-center mb-0.5">
-                                  {div.isPro ? (
-                                    <Crown className={`w-3.5 h-3.5 ${isCurrent || isReached ? 'text-amber-400 fill-amber-400 animate-pulse' : 'text-slate-500'}`} />
-                                  ) : (
-                                    <Shield className={`w-2.5 h-2.5 ${isCurrent ? 'text-[#A3E635]' : isReached ? 'text-slate-300' : 'text-slate-600'}`} />
-                                  )}
+                                {/* Top Unique Insignia Icon */}
+                                <div className="flex items-center justify-center mb-1">
+                                  <div className={`p-1 rounded-md transition-all ${
+                                    isCurrent
+                                      ? 'bg-[#A3E635]/20 text-[#A3E635] shadow-[0_0_8px_rgba(163,230,53,0.5)]'
+                                      : isReached
+                                      ? `${div.iconColor} bg-white/5`
+                                      : 'text-slate-600'
+                                  }`}>
+                                    <IconComponent className={`w-3.5 h-3.5 ${div.isPro && (isCurrent || isReached) ? 'fill-amber-400 text-amber-400 animate-pulse' : ''}`} />
+                                  </div>
                                 </div>
 
                                 {/* Number Badge with Metallic Finish */}
@@ -3430,16 +3435,16 @@ export const VortexDashboard: React.FC<VortexDashboardProps> = ({
                                   {div.tier}
                                 </div>
 
-                                {/* Division Name Label & Threshold */}
-                                <div className="mt-1.5 w-full">
+                                {/* Division Name Label & Threshold (Full text without truncation) */}
+                                <div className="mt-1 w-full text-center">
                                   <div
-                                    className={`text-[9px] font-mono font-black tracking-wider truncate px-0.5 ${
-                                      isCurrent ? 'text-[#A3E635]' : isReached ? 'text-slate-200' : 'text-slate-500'
+                                    className={`text-[8px] sm:text-[8.5px] font-mono font-black tracking-tight leading-tight whitespace-nowrap overflow-visible ${
+                                      isCurrent ? 'text-[#A3E635]' : isReached ? 'text-slate-200' : 'text-slate-400'
                                     }`}
                                   >
                                     {div.label}
                                   </div>
-                                  <div className="text-[7.5px] font-mono text-slate-400 opacity-75 truncate">
+                                  <div className="text-[7.5px] font-mono text-slate-500 leading-tight mt-0.5 whitespace-nowrap">
                                     {div.min} MMR
                                   </div>
                                 </div>
