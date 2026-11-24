@@ -5,7 +5,7 @@ import { VortexDashboard } from './components/vortex/VortexDashboard';
 import { sound } from './utils/soundEffects';
 import { redirectToSteamLogin, parseSteamLoginParams, getSteamOpenIdUrl, fetchSteamProfile, cleanGamerTag } from './utils/steamAuth';
 
-// Auto-migrate legacy storage keys to caliber_* seamlessly
+// Auto-migrate legacy storage keys to caliber_* seamlessly & sanitize Level 1 / 0 ELO baseline
 if (typeof window !== 'undefined') {
   try {
     for (let i = 0; i < localStorage.length; i++) {
@@ -17,6 +17,21 @@ if (typeof window !== 'undefined') {
           if (val !== null) localStorage.setItem(newK, val);
         }
       }
+    }
+
+    // Purge legacy 800 ELO & Level 3 for uncalibrated users
+    const matches = localStorage.getItem('caliber_user_matches') || localStorage.getItem('vortex_user_matches');
+    const mCount = matches !== null ? parseInt(matches, 10) : 0;
+    if (mCount === 0) {
+      const currentElo = localStorage.getItem('caliber_user_elo');
+      if (currentElo === '800' || currentElo === null) {
+        localStorage.setItem('caliber_user_elo', '0');
+      }
+      const currentLvl = localStorage.getItem('caliber_user_level');
+      if (currentLvl === '3' || currentLvl === null) {
+        localStorage.setItem('caliber_user_level', '1');
+      }
+      localStorage.setItem('caliber_user_matches', '0');
     }
   } catch (_) {}
 }

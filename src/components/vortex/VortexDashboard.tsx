@@ -706,7 +706,7 @@ export interface FaceitTierInfo {
   ringPercent: number;
 }
 
-export const FACEIT_TIERS: Record<number, FaceitTierInfo> = {
+const FACEIT_TIERS: Record<number, FaceitTierInfo> = {
   1: { level: 1, minElo: 0, maxElo: 500, label: 'Level 1', badgeColor: 'text-slate-300', ringBorder: 'border-slate-500', ringGlow: 'shadow-slate-500/20', ringSvgColor: '#94A3B8', ringPercent: 10 },
   2: { level: 2, minElo: 501, maxElo: 750, label: 'Level 2', badgeColor: 'text-emerald-400', ringBorder: 'border-emerald-500', ringGlow: 'shadow-emerald-500/20', ringSvgColor: '#10B981', ringPercent: 20 },
   3: { level: 3, minElo: 751, maxElo: 900, label: 'Level 3', badgeColor: 'text-[#A3E635]', ringBorder: 'border-[#A3E635]', ringGlow: 'shadow-lime-500/25', ringSvgColor: '#A3E635', ringPercent: 30 },
@@ -734,7 +734,7 @@ export const getFaceitLevelFromElo = (elo: number): number => {
   return 1;
 };
 
-export const getFaceitTierInfo = (levelOrElo: number): FaceitTierInfo => {
+const getFaceitTierInfo = (levelOrElo: number): FaceitTierInfo => {
   const level = levelOrElo > 11 ? getFaceitLevelFromElo(levelOrElo) : Math.max(1, Math.min(11, Math.round(levelOrElo)));
   return FACEIT_TIERS[level] || FACEIT_TIERS[1];
 };
@@ -911,18 +911,18 @@ export const VortexDashboard: React.FC<VortexDashboardProps> = ({
   const caliberTier = getCaliberTier(effectiveElo);
 
   useEffect(() => {
+    if (currentUserMatches === 0) {
+      if (currentUserElo !== 0) setCurrentUserElo(0);
+      if (currentUserLevel !== 1) setCurrentUserLevel(1);
+      setLocalState('caliber_user_level', '1');
+      setLocalState('caliber_user_elo', '0');
+      setLocalState('caliber_user_matches', '0');
+    }
+
     if (userGamerTag) {
       setCurrentGamerTag(userGamerTag);
       const isFounder = isUserAdminOrFounder(userGamerTag) || isUserAdminOrFounder(currentGamerTag);
       const hasFaceit = getLocalState('caliber_faceit_connected') === 'true';
-
-      if (currentUserMatches === 0) {
-        setCurrentUserLevel(1);
-        setCurrentUserElo(0);
-        setLocalState('caliber_user_level', '1');
-        setLocalState('caliber_user_elo', '0');
-        setLocalState('caliber_user_matches', '0');
-      }
 
       if (isFounder) {
         setCurrentVerification('vip');
