@@ -188,6 +188,7 @@ export const generateBalancedMatch = (params: MatchmakingParams): BalancedMatch 
       kd: (0.95 + Math.random() * 0.2).toFixed(2),
       kr: (0.68 + Math.random() * 0.14).toFixed(2),
       adr: (76 + Math.random() * 12).toFixed(1),
+      hsRate: `${Math.floor(48 + Math.random() * 16)}%`,
       badgeIndex: 1,
       partyShape: partySize > 1 ? 'circle' : undefined,
     });
@@ -223,6 +224,7 @@ export const generateBalancedMatch = (params: MatchmakingParams): BalancedMatch 
       kd: (0.92 + Math.random() * 0.2).toFixed(2),
       kr: (0.66 + Math.random() * 0.12).toFixed(2),
       adr: (74 + Math.random() * 10).toFixed(1),
+      hsRate: `${Math.floor(45 + Math.random() * 16)}%`,
       badgeIndex: 1,
       partyShape: undefined, // Solo filler
     });
@@ -264,6 +266,7 @@ export const generateBalancedMatch = (params: MatchmakingParams): BalancedMatch 
       kd: (0.98 + Math.random() * 0.18).toFixed(2),
       kr: (0.71 + Math.random() * 0.12).toFixed(2),
       adr: (78 + Math.random() * 10).toFixed(1),
+      hsRate: `${Math.floor(47 + Math.random() * 16)}%`,
       badgeIndex: 1,
       partyShape: isFiveStack ? 'square' : (i < 2 ? 'diamond' : undefined),
     });
@@ -349,13 +352,8 @@ export const generateBalancedMatch = (params: MatchmakingParams): BalancedMatch 
   const team2StatsRows = team2Players.map((p, idx) => generateStatsRow(p, 'team2', idx === 0));
 
   // Stack Type descriptions
-  let stack1Desc = 'Solo Queue';
-  if (isFiveStack) stack1Desc = `5-Stack Clan Team [${userClanTag || 'CC'}]`;
-  else if (partySize === 4) stack1Desc = '4-Stack + 1 Solo';
-  else if (partySize === 3) stack1Desc = '3-Stack + 2 Solos';
-  else if (partySize === 2) stack1Desc = 'Duo Stack + 3 Solos';
-
-  const stack2Desc = isFiveStack ? '5-Stack Clan Opponents' : (partySize > 1 ? `${partySize}-Stack Matching Opponents` : 'Solo / Duo Queue');
+  let stack1Desc = isFiveStack ? `5-Stack Clan Team [${userClanTag || 'CC'}]` : (partySize > 1 ? `${partySize}-Stack Squad` : '5-Stack Squad');
+  const stack2Desc = isFiveStack ? '5-Stack Clan Opponents' : (partySize > 1 ? `${partySize}-Stack Matching Opponents` : '5v5 Competitive');
 
   const team1Name = userClanTag ? `team_${userClanTag}` : `team_${userGamerTag.split(' ')[0]}`;
   const team2Name = `team_${team2Players[0].name.split('_')[0]}`;
