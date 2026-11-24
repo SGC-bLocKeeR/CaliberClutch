@@ -694,6 +694,33 @@ export const getCaliberTier = (mmr: number): CaliberTierInfo => {
   return { tier: 'TIER 1', roman: '1', name: 'BEGINNER', color: '#94A3B8', minMmr: 0, maxMmr: 299, nextTierName: 'TIER 2 • NOVICE' };
 };
 
+export interface CaliberDivisionDef {
+  tier: number;
+  label: string;
+  min: number;
+  max: number;
+  icon: React.ElementType;
+  color: string;
+  glow: string;
+  textClass: string;
+  borderClass: string;
+  isPro?: boolean;
+}
+
+const CALIBER_DIVISIONS: CaliberDivisionDef[] = [
+  { tier: 1, label: 'BEGINNER', min: 0, max: 299, icon: Target, color: '#94A3B8', glow: 'rgba(148,163,184,0.4)', textClass: 'text-slate-300', borderClass: 'border-slate-500/50' },
+  { tier: 2, label: 'NOVICE', min: 300, max: 499, icon: Crosshair, color: '#38BDF8', glow: 'rgba(56,189,248,0.4)', textClass: 'text-sky-400', borderClass: 'border-sky-500/50' },
+  { tier: 3, label: 'NORMAL', min: 500, max: 699, icon: Shield, color: '#34D399', glow: 'rgba(52,211,153,0.4)', textClass: 'text-emerald-400', borderClass: 'border-emerald-500/50' },
+  { tier: 4, label: 'MEDIUM', min: 700, max: 899, icon: ShieldCheck, color: '#4ADE80', glow: 'rgba(74,222,128,0.4)', textClass: 'text-green-400', borderClass: 'border-green-500/50' },
+  { tier: 5, label: 'SKILLED', min: 900, max: 1099, icon: Swords, color: '#A3E635', glow: 'rgba(163,230,53,0.4)', textClass: 'text-[#A3E635]', borderClass: 'border-[#A3E635]/60' },
+  { tier: 6, label: 'ADVANCED', min: 1100, max: 1349, icon: Zap, color: '#FACC15', glow: 'rgba(250,204,21,0.4)', textClass: 'text-yellow-400', borderClass: 'border-yellow-500/60' },
+  { tier: 7, label: 'HARD', min: 1350, max: 1599, icon: Flame, color: '#FB923C', glow: 'rgba(251,146,60,0.4)', textClass: 'text-amber-400', borderClass: 'border-amber-500/60' },
+  { tier: 8, label: 'EXPERT', min: 1600, max: 1849, icon: Award, color: '#F97316', glow: 'rgba(249,115,22,0.4)', textClass: 'text-orange-400', borderClass: 'border-orange-500/60' },
+  { tier: 9, label: 'MASTER', min: 1850, max: 2099, icon: Trophy, color: '#8B5CF6', glow: 'rgba(139,92,246,0.4)', textClass: 'text-purple-400', borderClass: 'border-purple-500/60' },
+  { tier: 10, label: 'ELITE', min: 2100, max: 2349, icon: Star, color: '#A855F7', glow: 'rgba(168,85,247,0.4)', textClass: 'text-fuchsia-400', borderClass: 'border-fuchsia-500/70' },
+  { tier: 11, label: 'PRO', min: 2350, max: 9999, icon: Crown, color: '#EF4444', glow: 'rgba(239,68,68,0.5)', textClass: 'text-rose-400', borderClass: 'border-red-500/80', isPro: true },
+];
+
 export interface FaceitTierInfo {
   level: number;
   minElo: number;
@@ -1177,6 +1204,7 @@ export const VortexDashboard: React.FC<VortexDashboardProps> = ({
   const [xsollaCheckoutItem, setXsollaCheckoutItem] = useState<XsollaOrderItem | null>(null);
   const [showVerificationModal, setShowVerificationModal] = useState<boolean>(false);
   const [verificationModalType, setVerificationModalType] = useState<'vip' | 'verified'>('vip');
+  const [showDivisionsModal, setShowDivisionsModal] = useState<boolean>(false);
 
   const [showPartnersModal, setShowPartnersModal] = useState<boolean>(false);
   const [vortexCoinsBalance, setVortexCoinsBalance] = useState<number>(() => getVortexWalletBalance());
@@ -3329,153 +3357,256 @@ export const VortexDashboard: React.FC<VortexDashboardProps> = ({
                 {/* Top Row: Caliber Clutch Custom Rank Badge & Division Progression */}
                 <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-6 pb-6 border-b border-white/[0.06]">
                   
-                  {/* Caliber Clutch Custom Tactical Insignia Badge & Division Progression */}
-                  <div className="flex flex-col sm:flex-row sm:items-center gap-5 w-full">
-                    {/* Caliber Clutch Insignia Rank Crest (Original Military / Esports Insignia) */}
-                    <div className="relative w-20 h-20 sm:w-24 sm:h-24 rounded-2xl bg-gradient-to-br from-[#1C2612] via-[#0E1318] to-[#0A0D14] border-2 border-[#A3E635] shadow-[0_0_25px_rgba(163,230,53,0.35)] flex flex-col items-center justify-center p-2 shrink-0 select-none group">
-                      <div className="absolute -top-2.5 px-2 py-0.5 rounded-full bg-[#A3E635] text-slate-950 text-[9px] font-mono font-black uppercase tracking-wider shadow-sm">
-                        DIVISION
-                      </div>
-                      <div className="text-2xl sm:text-3xl font-black font-display text-white tracking-wider flex items-center gap-1">
-                        <span className="text-[#A3E635]">TIER</span> {caliberTier.roman}
-                      </div>
-                      <div className="text-[10px] font-mono font-black text-[#A3E635] uppercase tracking-widest mt-0.5">
-                        {caliberTier.name}
-                      </div>
-                    </div>
+                  {/* Caliber Clutch Custom Tactical Insignia Badge & CS2 Premier / FACEIT Unified Skill Track */}
+                  <div className="flex flex-col lg:flex-row lg:items-center gap-5 w-full">
+                    {/* Caliber Clutch Dynamic Insignia Rank Stema (CS2 Premier / FACEIT Style) */}
+                    {(() => {
+                      const currentDiv = CALIBER_DIVISIONS.find(d => String(d.tier) === caliberTier.roman) || CALIBER_DIVISIONS[0];
+                      const StemaIcon = currentDiv.icon;
+                      return (
+                        <div 
+                          className="relative w-24 h-24 sm:w-28 sm:h-28 rounded-2xl bg-gradient-to-b from-[#141924] via-[#0D1017] to-[#07090E] border-2 flex flex-col items-center justify-center p-2 shrink-0 select-none transition-all duration-300 group hover:scale-[1.02] shadow-2xl"
+                          style={{
+                            borderColor: currentDiv.color,
+                            boxShadow: `0 0 25px ${currentDiv.glow}, inset 0 0 15px ${currentDiv.glow}`
+                          }}
+                        >
+                          {/* Top Insignia Tag */}
+                          <div 
+                            className="absolute -top-2.5 px-2.5 py-0.5 rounded-full text-slate-950 text-[8.5px] font-mono font-black uppercase tracking-wider shadow-sm flex items-center gap-1"
+                            style={{ backgroundColor: currentDiv.color }}
+                          >
+                            {currentDiv.isPro && <Crown className="w-2.5 h-2.5 fill-slate-950" />}
+                            <span>DIV {currentDiv.tier}</span>
+                          </div>
 
-                    {/* Division Details & Tactical Milestone Progression Rail */}
-                    <div className="flex-1 space-y-2.5">
-                      <div className="flex flex-wrap items-center gap-3">
-                        <span className="text-xl sm:text-2xl font-black font-display text-white tracking-tight flex items-center gap-2">
-                          <span>{caliberTier.tier} • {caliberTier.name} • {effectiveElo} MMR</span>
-                          <TrendingUp className="w-4 h-4 text-[#A3E635] inline" />
-                        </span>
+                          {/* Tactical Stema Icon */}
+                          <div className="relative mb-0.5 mt-1">
+                            <StemaIcon 
+                              className={`w-6 h-6 sm:w-7 sm:h-7 transition-transform group-hover:scale-110 ${currentDiv.isPro ? 'fill-amber-400 text-amber-400 animate-pulse' : ''}`}
+                              style={{ color: currentDiv.isPro ? '#F59E0B' : currentDiv.color }}
+                            />
+                          </div>
 
-                        <span className="text-[10px] font-mono font-bold text-amber-400 bg-amber-500/10 border border-amber-500/30 px-2.5 py-0.5 rounded-full tracking-wider">
-                          {isCalibrated ? 'CALIBRATED' : 'UNCALIBRATED • 0 MATCHES'}
-                        </span>
+                          {/* Level Number & Tier Name */}
+                          <div className="text-xl sm:text-2xl font-black font-display text-white tracking-wider flex items-center gap-1 leading-none mt-0.5">
+                            <span style={{ color: currentDiv.color }}>TIER</span> {currentDiv.tier}
+                          </div>
+                          <div 
+                            className="text-[9px] sm:text-[9.5px] font-mono font-black uppercase tracking-widest mt-1"
+                            style={{ color: currentDiv.color }}
+                          >
+                            {currentDiv.label}
+                          </div>
+                        </div>
+                      );
+                    })()}
 
-                        {currentVerification === 'none' && (
-                          <span className="text-[10px] font-mono font-bold text-amber-400 bg-amber-500/10 border border-amber-500/30 px-2 py-0.5 rounded">
-                            UNVERIFIED
+                    {/* Division Details & CS2 Premier / FACEIT Unified Skill Progression Rail */}
+                    <div className="flex-1 space-y-3">
+                      {/* Top Header Row: Rank Title, Badges & 11 Divisions Button */}
+                      <div className="flex flex-wrap items-center justify-between gap-3">
+                        <div className="flex flex-wrap items-center gap-2.5">
+                          <span className="text-xl sm:text-2xl font-black font-display text-white tracking-tight flex items-center gap-2">
+                            <span>{caliberTier.tier} • {caliberTier.name} • {effectiveElo} MMR</span>
+                            <TrendingUp className="w-4 h-4 text-[#A3E635] inline" />
                           </span>
-                        )}
-                        {currentVerification === 'verified' && (
-                          <span className="text-[10px] font-mono font-bold text-white bg-white/10 border border-white/30 px-2 py-0.5 rounded flex items-center gap-1">
-                            <Check className="w-3 h-3" /> VERIFIED
-                          </span>
-                        )}
-                        {currentVerification === 'vip' && (
-                          <span className="text-[10px] font-mono font-bold text-amber-300 bg-amber-500/20 border border-amber-500/40 px-2 py-0.5 rounded">
-                            VIP PRO
-                          </span>
-                        )}
 
-                        <div className="ml-auto flex items-center gap-1.5 px-2.5 py-1 rounded-xl bg-white/[0.04] border border-white/10 text-xs font-mono font-bold text-slate-300">
-                          <span>{isCalibrated ? userPlatformRank : 'Unranked'}</span>
-                          <CountryFlag code={currentCountry.code} name={currentCountry.name} size="xs" />
-                          <ChevronRight className="w-3.5 h-3.5 text-emerald-400" />
+                          <span className="text-[10px] font-mono font-bold text-amber-400 bg-amber-500/10 border border-amber-500/30 px-2.5 py-0.5 rounded-full tracking-wider">
+                            {isCalibrated ? 'CALIBRATED' : 'UNCALIBRATED • 0 MATCHES'}
+                          </span>
+
+                          {currentVerification === 'none' && (
+                            <span className="text-[10px] font-mono font-bold text-amber-400 bg-amber-500/10 border border-amber-500/30 px-2 py-0.5 rounded">
+                              UNVERIFIED
+                            </span>
+                          )}
+                          {currentVerification === 'verified' && (
+                            <span className="text-[10px] font-mono font-bold text-white bg-white/10 border border-white/30 px-2 py-0.5 rounded flex items-center gap-1">
+                              <Check className="w-3 h-3" /> VERIFIED
+                            </span>
+                          )}
+                          {currentVerification === 'vip' && (
+                            <span className="text-[10px] font-mono font-bold text-amber-300 bg-amber-500/20 border border-amber-500/40 px-2 py-0.5 rounded">
+                              VIP PRO
+                            </span>
+                          )}
+                        </div>
+
+                        {/* Right: 11 Divisions Ladder Modal Button & Platform Rank */}
+                        <div className="flex items-center gap-2 ml-auto">
+                          <button
+                            type="button"
+                            onClick={() => {
+                              sound.playClick();
+                              setShowDivisionsModal(true);
+                            }}
+                            className="px-3 py-1 rounded-xl bg-white/[0.05] hover:bg-white/[0.10] border border-white/15 text-xs font-mono font-bold text-slate-200 hover:text-white flex items-center gap-1.5 transition cursor-pointer shadow-sm"
+                          >
+                            <SlidersHorizontal className="w-3.5 h-3.5 text-[#A3E635]" />
+                            <span>11 Divisions</span>
+                            <ChevronRight className="w-3.5 h-3.5 text-slate-400" />
+                          </button>
+
+                          <div className="flex items-center gap-1.5 px-2.5 py-1 rounded-xl bg-white/[0.04] border border-white/10 text-xs font-mono font-bold text-slate-300">
+                            <span>{isCalibrated ? userPlatformRank : 'Unranked'}</span>
+                            <CountryFlag code={currentCountry.code} name={currentCountry.name} size="xs" />
+                          </div>
                         </div>
                       </div>
 
-                      {/* Caliber Clutch Tactical Division Track (Option 1: 11 Tactical Insignia Shields - CS2 Style) */}
-                      <div className="space-y-2">
-                        <div className="grid grid-cols-4 sm:grid-cols-6 lg:grid-cols-11 gap-1.5 items-stretch">
-                          {[
-                            { tier: '1', label: 'BEGINNER', min: 0, icon: Target, color: '#94A3B8', border: 'border-slate-600/40', bg: 'from-slate-900 to-slate-950', iconColor: 'text-slate-400', isPro: false },
-                            { tier: '2', label: 'NOVICE', min: 300, icon: Crosshair, color: '#38BDF8', border: 'border-sky-500/40', bg: 'from-sky-950/40 to-slate-950', iconColor: 'text-sky-400', isPro: false },
-                            { tier: '3', label: 'NORMAL', min: 500, icon: Shield, color: '#34D399', border: 'border-emerald-500/40', bg: 'from-emerald-950/40 to-slate-950', iconColor: 'text-emerald-400', isPro: false },
-                            { tier: '4', label: 'MEDIUM', min: 700, icon: ShieldCheck, color: '#4ADE80', border: 'border-green-500/40', bg: 'from-green-950/40 to-slate-950', iconColor: 'text-green-400', isPro: false },
-                            { tier: '5', label: 'SKILLED', min: 900, icon: Swords, color: '#A3E635', border: 'border-[#A3E635]/50', bg: 'from-[#1A2510] to-slate-950', iconColor: 'text-[#A3E635]', isPro: false },
-                            { tier: '6', label: 'ADVANCED', min: 1100, icon: Zap, color: '#FACC15', border: 'border-yellow-500/50', bg: 'from-yellow-950/40 to-slate-950', iconColor: 'text-yellow-400', isPro: false },
-                            { tier: '7', label: 'HARD', min: 1350, icon: Flame, color: '#FB923C', border: 'border-amber-500/50', bg: 'from-amber-950/40 to-slate-950', iconColor: 'text-amber-400', isPro: false },
-                            { tier: '8', label: 'EXPERT', min: 1600, icon: Award, color: '#F97316', border: 'border-orange-500/60', bg: 'from-orange-950/40 to-slate-950', iconColor: 'text-orange-400', isPro: false },
-                            { tier: '9', label: 'MASTER', min: 1850, icon: Trophy, color: '#8B5CF6', border: 'border-purple-500/60', bg: 'from-purple-950/40 to-slate-950', iconColor: 'text-purple-400', isPro: false },
-                            { tier: '10', label: 'ELITE', min: 2100, icon: Star, color: '#A855F7', border: 'border-fuchsia-500/70', bg: 'from-fuchsia-950/40 to-slate-950', iconColor: 'text-fuchsia-400', isPro: false },
-                            { tier: '11', label: 'PRO', min: 2350, icon: Crown, color: '#EF4444', border: 'border-red-500/80', bg: 'from-red-950/50 to-slate-950', iconColor: 'text-amber-400', isPro: true },
-                          ].map((div) => {
-                            const isCurrent = caliberTier.roman === div.tier;
-                            const isReached = effectiveElo >= div.min;
-                            const IconComponent = div.icon;
-                            return (
-                              <div
-                                key={div.tier}
-                                className={`group relative rounded-2xl py-2 px-1 flex flex-col items-center justify-between text-center transition-all duration-300 ${
-                                  isCurrent
-                                    ? 'bg-gradient-to-b from-[#1F2C14] via-[#12161E] to-[#0A0D14] border-2 border-[#A3E635] shadow-[0_0_20px_rgba(163,230,53,0.35)] ring-2 ring-[#A3E635]/40 scale-[1.03] z-10'
-                                    : isReached
-                                    ? `bg-gradient-to-b ${div.bg} border ${div.border} shadow-md`
-                                    : 'bg-[#0B0D14]/90 border border-white/5 opacity-40 hover:opacity-70'
-                                }`}
-                              >
-                                {/* Top Unique Insignia Icon */}
-                                <div className="flex items-center justify-center mb-1">
-                                  <div className={`p-1 rounded-md transition-all ${
-                                    isCurrent
-                                      ? 'bg-[#A3E635]/20 text-[#A3E635] shadow-[0_0_8px_rgba(163,230,53,0.5)]'
-                                      : isReached
-                                      ? `${div.iconColor} bg-white/5`
-                                      : 'text-slate-600'
-                                  }`}>
-                                    <IconComponent className={`w-3.5 h-3.5 ${div.isPro && (isCurrent || isReached) ? 'fill-amber-400 text-amber-400 animate-pulse' : ''}`} />
-                                  </div>
-                                </div>
+                      {/* CS2 Premier / FACEIT UNIFIED SKILL PROGRESSION RAIL (No Clunky Boxes) */}
+                      <div className="space-y-2.5 p-3 sm:p-4 rounded-2xl bg-[#080A10]/95 border border-white/[0.08] shadow-inner">
+                        {/* Milestone Summary Row */}
+                        <div className="flex flex-wrap items-center justify-between gap-2 text-xs font-mono">
+                          <div className="flex items-center gap-2">
+                            <span className="text-slate-400">Current Rank:</span>
+                            <span className="font-bold text-white">
+                              {caliberTier.tier} ({caliberTier.name})
+                            </span>
+                            <span className="text-slate-600">•</span>
+                            <span className="text-[#A3E635] font-black">{effectiveElo} MMR</span>
+                          </div>
 
-                                {/* Number Badge with Metallic Finish */}
+                          <div className="flex items-center gap-1.5">
+                            {caliberTier.nextTierName ? (
+                              <>
+                                <span className="text-slate-500">Next Milestone:</span>
+                                <span className="text-slate-200 font-bold">{caliberTier.nextTierName}</span>
+                                <span className="text-[#A3E635] font-black ml-1">
+                                  ({Math.max(1, (caliberTier.maxMmr + 1) - effectiveElo)} MMR needed)
+                                </span>
+                              </>
+                            ) : (
+                              <span className="text-amber-400 font-bold flex items-center gap-1">
+                                <Crown className="w-3.5 h-3.5 fill-amber-400 animate-pulse" />
+                                Tier 11 PRO Pinnacle Reached
+                              </span>
+                            )}
+                          </div>
+                        </div>
+
+                        {/* Continuous 11-Segment Unified Color Bar */}
+                        <div className="relative pt-1 pb-1">
+                          {/* The Bar Shell */}
+                          <div className="h-3.5 sm:h-4 w-full rounded-full bg-black/90 border border-white/10 p-[2px] flex items-stretch gap-[3px] shadow-inner overflow-hidden">
+                            {CALIBER_DIVISIONS.map((div) => {
+                              const currentTierNum = parseInt(caliberTier.roman, 10) || 1;
+                              const isPast = div.tier < currentTierNum;
+                              const isCurrent = div.tier === currentTierNum;
+                              const isFuture = div.tier > currentTierNum;
+
+                              // Calculate progress inside current segment
+                              const segmentRange = Math.max(1, div.max - div.min + 1);
+                              const progressPct = isPast
+                                ? 100
+                                : isCurrent
+                                ? Math.min(100, Math.max(8, Math.round(((effectiveElo - div.min) / segmentRange) * 100)))
+                                : 0;
+
+                              return (
                                 <div
-                                  className={`w-7 h-7 sm:w-8 sm:h-8 rounded-xl flex items-center justify-center font-display font-black text-xs sm:text-sm transition-all ${
-                                    isCurrent
-                                      ? 'bg-[#A3E635] text-slate-950 shadow-[0_0_12px_rgba(163,230,53,0.6)] font-black'
-                                      : isReached
-                                      ? 'bg-white/10 text-white border border-white/20'
-                                      : 'bg-black/50 text-slate-500 border border-white/5'
-                                  }`}
+                                  key={div.tier}
+                                  className="relative flex-1 h-full rounded-full overflow-hidden transition-all duration-300"
+                                  style={{
+                                    backgroundColor: isFuture ? 'rgba(255, 255, 255, 0.04)' : undefined
+                                  }}
+                                  title={`Tier ${div.tier} • ${div.label} (${div.min} - ${div.max > 5000 ? '2350+' : div.max} MMR)`}
                                 >
-                                  {div.tier}
-                                </div>
+                                  {/* Background Track Color tint for current */}
+                                  {isCurrent && (
+                                    <div
+                                      className="absolute inset-0 opacity-20"
+                                      style={{ backgroundColor: div.color }}
+                                    />
+                                  )}
 
-                                {/* Division Name Label & Threshold (Full text without truncation) */}
-                                <div className="mt-1 w-full text-center">
+                                  {/* Past completed fill */}
+                                  {isPast && (
+                                    <div
+                                      className="h-full w-full rounded-full shadow-[0_0_8px_rgba(255,255,255,0.2)]"
+                                      style={{
+                                        background: `linear-gradient(90deg, ${div.color}, ${div.color}dd)`
+                                      }}
+                                    />
+                                  )}
+
+                                  {/* Current active tier progressive fill */}
+                                  {isCurrent && (
+                                    <div
+                                      className="h-full rounded-full transition-all duration-700 relative"
+                                      style={{
+                                        width: `${progressPct}%`,
+                                        background: `linear-gradient(90deg, ${div.color}, #A3E635)`,
+                                        boxShadow: `0 0 12px ${div.glow}`
+                                      }}
+                                    >
+                                      {/* Glowing cursor head at the tip */}
+                                      <span className="absolute right-0 top-0 bottom-0 w-1.5 bg-white rounded-full shadow-[0_0_8px_#fff]" />
+                                    </div>
+                                  )}
+                                </div>
+                              );
+                            })}
+                          </div>
+
+                          {/* Sub-Markers Under the Unified Bar (1 to 11 with Icons/Crown) */}
+                          <div className="flex items-center justify-between px-0.5 mt-2">
+                            {CALIBER_DIVISIONS.map((div) => {
+                              const currentTierNum = parseInt(caliberTier.roman, 10) || 1;
+                              const isCurrent = div.tier === currentTierNum;
+                              const isReached = div.tier <= currentTierNum;
+
+                              return (
+                                <button
+                                  key={div.tier}
+                                  type="button"
+                                  onClick={() => {
+                                    sound.playClick();
+                                    setShowDivisionsModal(true);
+                                  }}
+                                  className={`group flex flex-col items-center cursor-pointer transition-all ${
+                                    isCurrent ? 'scale-110 z-10' : 'hover:scale-105'
+                                  }`}
+                                  title={`Tier ${div.tier}: ${div.label} (${div.min} MMR)`}
+                                >
                                   <div
-                                    className={`text-[8px] sm:text-[8.5px] font-mono font-black tracking-tight leading-tight whitespace-nowrap overflow-visible ${
-                                      isCurrent ? 'text-[#A3E635]' : isReached ? 'text-slate-200' : 'text-slate-400'
+                                    className={`w-5 h-5 sm:w-6 sm:h-6 rounded-lg flex items-center justify-center transition-all ${
+                                      isCurrent
+                                        ? 'bg-[#A3E635] text-slate-950 font-black shadow-[0_0_12px_rgba(163,230,53,0.7)]'
+                                        : isReached
+                                        ? 'bg-white/10 text-white border border-white/15'
+                                        : 'bg-black/40 text-slate-600 border border-white/5 group-hover:text-slate-400'
+                                    }`}
+                                  >
+                                    {div.isPro ? (
+                                      <Crown className={`w-3 h-3 ${isCurrent ? 'fill-slate-950 text-slate-950' : isReached ? 'text-amber-400 fill-amber-400' : 'text-slate-600'}`} />
+                                    ) : (
+                                      <span className="text-[10px] sm:text-[11px] font-mono font-black">{div.tier}</span>
+                                    )}
+                                  </div>
+
+                                  <span
+                                    className={`text-[7.5px] sm:text-[8px] font-mono mt-1 hidden sm:block whitespace-nowrap uppercase tracking-tighter ${
+                                      isCurrent
+                                        ? 'font-black text-[#A3E635]'
+                                        : isReached
+                                        ? 'text-slate-300 font-medium'
+                                        : 'text-slate-600 group-hover:text-slate-400'
                                     }`}
                                   >
                                     {div.label}
-                                  </div>
-                                  <div className="text-[7.5px] font-mono text-slate-500 leading-tight mt-0.5 whitespace-nowrap">
-                                    {div.min} MMR
-                                  </div>
-                                </div>
-
-                                {/* Active Pulsing Indicator on Current Tier */}
-                                {isCurrent && (
-                                  <span className="absolute -top-1 w-2 h-2 rounded-full bg-[#A3E635] shadow-[0_0_8px_#A3E635] animate-pulse" />
-                                )}
-                              </div>
-                            );
-                          })}
+                                  </span>
+                                </button>
+                              );
+                            })}
+                          </div>
                         </div>
 
-                        {/* Progress Bar & Subtitle */}
-                        <div className="space-y-1 pt-0.5">
-                          <div className="h-2 w-full rounded-full bg-black/60 border border-white/10 overflow-hidden p-[1px]">
-                            <div
-                              className="h-full rounded-full bg-gradient-to-r from-emerald-500 via-[#A3E635] to-emerald-400 transition-all duration-500 shadow-[0_0_10px_rgba(163,230,53,0.5)]"
-                              style={{
-                                width: `${Math.min(100, Math.max(5, caliberTier.nextTierName ? Math.round(((effectiveElo - caliberTier.minMmr) / Math.max(1, caliberTier.maxMmr - caliberTier.minMmr + 1)) * 100) : 100))}%`
-                              }}
-                            />
-                          </div>
-                          <div className="flex items-center justify-between text-[11px] font-mono text-slate-400">
-                            <span className="text-[#A3E635] font-bold">
-                              {caliberTier.nextTierName ? `${Math.max(1, (caliberTier.maxMmr + 1) - effectiveElo)} MMR needed to ${caliberTier.nextTierName}` : 'Tier 11 PRO Pinnacle Rank Achieved'}
-                            </span>
-                            <span className="text-slate-500">
-                              {isCalibrated ? `${effectiveElo} MMR Rating` : 'Uncalibrated (0 MMR Baseline)'}
-                            </span>
-                          </div>
+                        {/* Baseline Notice */}
+                        <div className="flex items-center justify-between text-[10.5px] font-mono text-slate-500 pt-1 border-t border-white/[0.04]">
+                          <span>Calibration Ladder: 11 Tactical Tiers</span>
+                          <span>{isCalibrated ? `${effectiveElo} MMR Rating` : 'Uncalibrated (0 MMR Baseline)'}</span>
                         </div>
                       </div>
 
@@ -9389,8 +9520,140 @@ export const VortexDashboard: React.FC<VortexDashboardProps> = ({
       )}
 
       {/* ======================================================== */}
-      {/* EDIT PROFILE & AVATAR MODAL                              */}
+      {/* CALIBER CLUTCH 11 DIVISIONS LADDER OVERVIEW MODAL        */}
       {/* ======================================================== */}
+      {showDivisionsModal && (
+        <div
+          onClick={() => {
+            sound.playClick();
+            setShowDivisionsModal(false);
+          }}
+          className="fixed inset-0 z-[120] bg-black/85 backdrop-blur-md flex items-center justify-center p-4 animate-in fade-in duration-200 cursor-pointer overflow-y-auto"
+        >
+          <div
+            onClick={(e) => e.stopPropagation()}
+            className="relative w-full max-w-2xl bg-[#0D1017] border border-[#252C3E] rounded-3xl p-6 sm:p-7 shadow-[0_25px_70px_rgba(0,0,0,0.95)] space-y-5 text-left cursor-default my-auto max-h-[90vh] flex flex-col"
+          >
+            {/* Header */}
+            <div className="flex items-center justify-between pb-3 border-b border-white/[0.08]">
+              <div className="flex items-center gap-3">
+                <div className="w-11 h-11 rounded-2xl bg-[#A3E635]/15 border border-[#A3E635]/30 flex items-center justify-center text-[#A3E635]">
+                  <ShieldCheck className="w-6 h-6" />
+                </div>
+                <div>
+                  <h3 className="text-lg sm:text-xl font-black font-display text-white tracking-tight flex items-center gap-2">
+                    <span>CALIBER CLUTCH DIVISIONS</span>
+                    <span className="text-[10px] font-mono font-bold text-[#A3E635] bg-[#A3E635]/10 border border-[#A3E635]/30 px-2 py-0.5 rounded-full">
+                      11 TIERS
+                    </span>
+                  </h3>
+                  <p className="text-xs font-mono text-slate-400 mt-0.5">
+                    CS2 Premier & FACEIT 5v5 competitive ladder from Tier 1 (Beginner) to Tier 11 (PRO)
+                  </p>
+                </div>
+              </div>
+
+              <button
+                onClick={() => {
+                  sound.playClick();
+                  setShowDivisionsModal(false);
+                }}
+                className="p-2 rounded-xl text-slate-400 hover:text-white hover:bg-white/10 transition cursor-pointer"
+              >
+                <X className="w-5 h-5" />
+              </button>
+            </div>
+
+            {/* Scrollable Divisions List */}
+            <div className="space-y-2 overflow-y-auto pr-1 flex-1 [scrollbar-width:thin]">
+              {CALIBER_DIVISIONS.map((div) => {
+                const currentTierNum = parseInt(caliberTier.roman, 10) || 1;
+                const isCurrent = div.tier === currentTierNum;
+                const isReached = div.tier <= currentTierNum;
+                const DivIcon = div.icon;
+
+                return (
+                  <div
+                    key={div.tier}
+                    className={`flex items-center justify-between p-3 rounded-2xl border transition-all ${
+                      isCurrent
+                        ? 'bg-[#182312] border-[#A3E635] shadow-[0_0_15px_rgba(163,230,53,0.3)] ring-1 ring-[#A3E635]/50 scale-[1.01]'
+                        : isReached
+                        ? 'bg-white/[0.03] border-white/10'
+                        : 'bg-black/30 border-white/5 opacity-60'
+                    }`}
+                  >
+                    <div className="flex items-center gap-3.5">
+                      <div
+                        className="w-10 h-10 rounded-xl flex items-center justify-center font-display font-black text-sm shrink-0"
+                        style={{
+                          backgroundColor: isCurrent ? '#A3E635' : isReached ? `${div.color}25` : 'rgba(255,255,255,0.03)',
+                          color: isCurrent ? '#0B0D14' : isReached ? div.color : '#64748B',
+                          border: `1px solid ${isCurrent ? '#A3E635' : isReached ? div.color : 'rgba(255,255,255,0.06)'}`
+                        }}
+                      >
+                        <DivIcon className={`w-5 h-5 ${div.isPro && (isCurrent || isReached) ? 'fill-amber-400 text-amber-400' : ''}`} />
+                      </div>
+
+                      <div>
+                        <div className="flex items-center gap-2">
+                          <span className="font-display font-black text-white text-sm sm:text-base">
+                            TIER {div.tier} • {div.label}
+                          </span>
+                          {div.isPro && (
+                            <span className="px-2 py-0.2 rounded bg-red-500/20 border border-red-500/40 text-[9px] font-mono font-bold text-red-400 flex items-center gap-1">
+                              <Crown className="w-2.5 h-2.5 fill-red-400" /> PRO PINNACLE
+                            </span>
+                          )}
+                          {isCurrent && (
+                            <span className="px-2 py-0.2 rounded-full bg-[#A3E635] text-slate-950 text-[9px] font-mono font-black">
+                              YOUR CURRENT RANK
+                            </span>
+                          )}
+                        </div>
+                        <div className="text-xs font-mono text-slate-400 mt-0.5">
+                          {div.max > 5000 ? `${div.min}+ MMR` : `${div.min} - ${div.max} MMR`}
+                        </div>
+                      </div>
+                    </div>
+
+                    <div className="text-right shrink-0">
+                      {isCurrent ? (
+                        <span className="text-xs font-mono font-bold text-[#A3E635] flex items-center gap-1 justify-end">
+                          <span className="w-2 h-2 rounded-full bg-[#A3E635] animate-pulse" />
+                          {effectiveElo} MMR (Active)
+                        </span>
+                      ) : isReached ? (
+                        <span className="text-xs font-mono text-emerald-400 flex items-center gap-1 justify-end font-bold">
+                          <Check className="w-3.5 h-3.5" /> Achieved
+                        </span>
+                      ) : (
+                        <span className="text-xs font-mono text-slate-500">
+                          {div.min - effectiveElo} MMR needed
+                        </span>
+                      )}
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+
+            {/* Footer */}
+            <div className="pt-3 border-t border-white/[0.08] flex items-center justify-between text-xs font-mono text-slate-400">
+              <span>Account Status: {isCalibrated ? 'Active Calibration' : 'Uncalibrated (0 MMR Baseline)'}</span>
+              <button
+                onClick={() => {
+                  sound.playClick();
+                  setShowDivisionsModal(false);
+                }}
+                className="px-4 py-1.5 rounded-xl bg-white/10 hover:bg-white/15 text-white font-mono text-xs transition cursor-pointer"
+              >
+                Close
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
       {editProfileOpen && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-md animate-in fade-in duration-200">
           <div className="relative w-full max-w-2xl bg-[#0F121A] border border-[#252C3E] rounded-3xl shadow-[0_25px_60px_rgba(0,0,0,0.95)] overflow-hidden max-h-[92vh] flex flex-col">
