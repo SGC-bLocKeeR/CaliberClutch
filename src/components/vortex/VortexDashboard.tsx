@@ -662,10 +662,10 @@ export interface CaliberTierInfo {
 
 export const getCaliberTier = (mmr: number): CaliberTierInfo => {
   if (mmr >= 2350) {
-    return { tier: 'TIER 11', roman: '11', name: 'LEGEND', color: '#EF4444', minMmr: 2350, maxMmr: 3500, nextTierName: null };
+    return { tier: 'TIER 11', roman: '11', name: 'PRO', color: '#EF4444', minMmr: 2350, maxMmr: 3500, nextTierName: null };
   }
   if (mmr >= 2100) {
-    return { tier: 'TIER 10', roman: '10', name: 'ELITE', color: '#A855F7', minMmr: 2100, maxMmr: 2349, nextTierName: 'TIER 11 • LEGEND' };
+    return { tier: 'TIER 10', roman: '10', name: 'ELITE', color: '#A855F7', minMmr: 2100, maxMmr: 2349, nextTierName: 'TIER 11 • PRO' };
   }
   if (mmr >= 1850) {
     return { tier: 'TIER 9', roman: '9', name: 'MASTER', color: '#8B5CF6', minMmr: 1850, maxMmr: 2099, nextTierName: 'TIER 10 • ELITE' };
@@ -927,11 +927,13 @@ export const VortexDashboard: React.FC<VortexDashboardProps> = ({
       if (isFounder) {
         setCurrentVerification('vip');
         setLocalState('caliber_user_verification', 'vip');
-      } else if (!hasFaceit) {
+      } else {
         const savedVerif = getLocalState('caliber_user_verification');
-        if (!savedVerif || savedVerif === 'vip') {
-          setCurrentVerification('none');
-          setLocalState('caliber_user_verification', 'none');
+        if (savedVerif) {
+          setCurrentVerification(savedVerif as VerificationType);
+        } else {
+          setCurrentVerification('vip');
+          setLocalState('caliber_user_verification', 'vip');
         }
       }
     }
@@ -3391,7 +3393,7 @@ export const VortexDashboard: React.FC<VortexDashboardProps> = ({
                             { tier: '8', label: 'EXPERT', min: 1600 },
                             { tier: '9', label: 'MASTER', min: 1850 },
                             { tier: '10', label: 'ELITE', min: 2100 },
-                            { tier: '11', label: 'LEGEND', min: 2350 },
+                            { tier: '11', label: 'PRO', min: 2350 },
                           ].map((div) => {
                             const isCurrent = caliberTier.roman === div.tier;
                             const isReached = effectiveElo >= div.min;

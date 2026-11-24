@@ -29,7 +29,7 @@ export const FACEIT_TIERS: Record<number, FaceitTierInfo> = {
   8: { level: 8, minElo: 1531, maxElo: 1750, label: 'Level 8', badgeColor: 'text-cyan-400', ringBorder: 'border-cyan-500', ringGlow: 'shadow-cyan-500/25', ringSvgColor: '#06B6D4', ringPercent: 82 },
   9: { level: 9, minElo: 1751, maxElo: 2000, label: 'Level 9', badgeColor: 'text-cyan-300', ringBorder: 'border-cyan-400', ringGlow: 'shadow-cyan-400/25', ringSvgColor: '#22D3EE', ringPercent: 90 },
   10: { level: 10, minElo: 2001, maxElo: 2350, label: 'Level 10', badgeColor: 'text-red-500', ringBorder: 'border-red-600', ringGlow: 'shadow-red-600/30', ringSvgColor: '#EF4444', ringPercent: 95 },
-  11: { level: 11, minElo: 2351, maxElo: 9999, label: 'Level 11', badgeColor: 'text-rose-400', ringBorder: 'border-rose-500', ringGlow: 'shadow-rose-500/35', ringSvgColor: '#F43F5E', ringPercent: 100 }
+  11: { level: 11, minElo: 2351, maxElo: 9999, label: 'Level 11 Pro', badgeColor: 'text-rose-400', ringBorder: 'border-rose-500', ringGlow: 'shadow-rose-500/35', ringSvgColor: '#F43F5E', ringPercent: 100 }
 };
 
 export const getFaceitLevelFromElo = (elo: number): number => {
