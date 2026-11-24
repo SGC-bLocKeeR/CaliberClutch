@@ -393,8 +393,8 @@ export const VortexMatchRoom: React.FC<VortexMatchRoomProps> = ({
   const [teamInput, setTeamInput] = useState('');
   const [isTeamChatCollapsed, setIsTeamChatCollapsed] = useState(false);
 
-  // Matchroom Layout Variant: 'classic' (Layout A) vs 'tactical' (Layout B - Caliber Original)
-  const [layoutVariant, setLayoutVariant] = useState<'classic' | 'tactical'>('tactical');
+  // Matchroom Layout Variant: 'layout_b' (Option B - 3-Column) vs 'tactical' (Caliber Tactical View)
+  const [layoutVariant, setLayoutVariant] = useState<'layout_b' | 'tactical'>('layout_b');
   const [unifiedChatTab, setUnifiedChatTab] = useState<'all' | 'team'>('all');
 
   // Room chat messages (Room chat - all 10 players)
@@ -1362,6 +1362,110 @@ export const VortexMatchRoom: React.FC<VortexMatchRoomProps> = ({
   };
 
   // ========================================================
+  // CALIBER CLUTCH ORIGINAL TACTICAL PLAYER CARD (LAYOUT B)
+  // Clean 4 key metrics: K/D, ADR, HS%, Win Rate + "Tier X • XXX MMR" tactical pill badge
+  // ========================================================
+  const renderTacticalPlayerCard = (player: FaceitMatchPlayer, team: 'team1' | 'team2') => {
+    const isCurrentUser = player.name === currentGamerTag;
+    const isSelected = selectedFlyoutPlayer?.name === player.name;
+    const tierInfo = getCaliberTierByLevel(player.level);
+    const hsDisplay = player.hsRate || `${Math.floor(46 + ((player.level * 3) % 22))}%`;
+
+    return (
+      <div 
+        key={player.id}
+        onClick={(e) => handleOpenPlayerFlyout(e, player.name)}
+        className={`rounded-xl border transition p-3 shadow-md relative group cursor-pointer ${
+          isSelected 
+            ? 'border-[#A3E635] bg-[#162114] ring-1 ring-[#A3E635]/40 shadow-[0_0_15px_rgba(163,230,53,0.15)]' 
+            : isCurrentUser
+            ? 'border-[#A3E635]/60 bg-[#13171F] hover:border-[#A3E635]'
+            : 'border-[#222432] bg-[#14151D] hover:border-white/20 hover:bg-[#161822]'
+        }`}
+      >
+        {/* TOP ROW: AVATAR + IDENTITY + TACTICAL TIER & MMR PILL */}
+        <div className="flex items-center justify-between gap-2">
+          {/* Avatar & Player Info */}
+          <div className="flex items-center gap-3 min-w-0">
+            <div className="relative w-11 h-11 shrink-0">
+              {player.isCaptain && <CaliberCaptainBadge />}
+              <img 
+                src={player.avatar} 
+                alt={player.name} 
+                className={`w-full h-full rounded-full object-cover border border-[#2B2D3C] shadow-sm block ${player.name === 'M18' ? 'bg-black object-contain' : ''}`} 
+              />
+              {player.hasPriority && (
+                <div className="absolute -top-1 -right-1 w-3.5 h-3.5 rounded-full bg-[#182312] border border-[#A3E635] flex items-center justify-center text-[8px] text-[#A3E635] font-black shadow-sm" title="Priority">
+                  ★
+                </div>
+              )}
+              <CaliberAnticheatBadge 
+                size={16} 
+                className="absolute -bottom-1 -right-1 z-10" 
+              />
+            </div>
+
+            <div className="min-w-0">
+              <div className="flex items-center gap-1.5 truncate">
+                <CountryFlag code={player.code} name={player.countryName} size="xs" />
+                <span className={`font-display font-bold text-xs truncate ${
+                  isCurrentUser ? 'text-[#A3E635]' : 'text-white group-hover:text-[#A3E635] transition'
+                }`}>
+                  {player.name}
+                </span>
+                {player.verified && (
+                  <CheckCircle2 className="w-3.5 h-3.5 text-[#A3E635] shrink-0" />
+                )}
+              </div>
+              <div className="text-[10px] font-mono text-slate-400 mt-0.5 flex items-center gap-1.5">
+                <span>{player.matches.toLocaleString()} matches</span>
+                <span>•</span>
+                <span className="text-slate-300 font-bold">{player.rating} Rating</span>
+              </div>
+            </div>
+          </div>
+
+          {/* Distinktivi: "Tier X • XXX MMR" */}
+          <div className="shrink-0 text-right">
+            <div 
+              className="inline-flex items-center gap-1.5 px-2 py-1 rounded-lg border font-mono font-black text-[11px] shadow-sm select-none"
+              style={{
+                backgroundColor: `${tierInfo.color}15`,
+                borderColor: `${tierInfo.color}50`,
+                color: tierInfo.color
+              }}
+              title={`${tierInfo.tier} • ${tierInfo.name}`}
+            >
+              <span>{tierInfo.tier}</span>
+              <span className="opacity-40">•</span>
+              <span className="text-white font-bold">{player.elo.toLocaleString()} MMR</span>
+            </div>
+          </div>
+        </div>
+
+        {/* BOTTOM ROW: 4 CLEAN KEY METRICS (K/D, ADR, HS%, WIN RATE) */}
+        <div className="grid grid-cols-4 gap-1.5 pt-2.5 mt-2.5 border-t border-white/[0.06] text-center font-mono">
+          <div className="bg-white/[0.03] p-1.5 rounded-lg border border-white/5">
+            <div className="text-[9px] uppercase text-slate-400 font-bold tracking-wider">K/D</div>
+            <div className="text-xs font-black text-white mt-0.5">{player.kd}</div>
+          </div>
+          <div className="bg-white/[0.03] p-1.5 rounded-lg border border-white/5">
+            <div className="text-[9px] uppercase text-slate-400 font-bold tracking-wider">ADR</div>
+            <div className="text-xs font-black text-white mt-0.5">{player.adr}</div>
+          </div>
+          <div className="bg-white/[0.03] p-1.5 rounded-lg border border-white/5">
+            <div className="text-[9px] uppercase text-slate-400 font-bold tracking-wider">HS%</div>
+            <div className="text-xs font-black text-[#A3E635] mt-0.5">{hsDisplay}</div>
+          </div>
+          <div className="bg-white/[0.03] p-1.5 rounded-lg border border-white/5">
+            <div className="text-[9px] uppercase text-slate-400 font-bold tracking-wider">WIN RATE</div>
+            <div className="text-xs font-black text-emerald-400 mt-0.5">{player.winRate}</div>
+          </div>
+        </div>
+      </div>
+    );
+  };
+
   // ========================================================
   // CALIBER CLUTCH ORIGINAL TACTICAL VIEW HELPERS & COMPONENTS
   // Dynamic Squad / Party Containers (No left vertical line)
@@ -1752,83 +1856,125 @@ export const VortexMatchRoom: React.FC<VortexMatchRoomProps> = ({
         ? 'border-r border-[#1F2129] slide-in-from-left max-md:left-0' 
         : 'border-l border-[#1F2129] slide-in-from-right max-md:right-0'
     }`}>
-      {layoutVariant === 'tactical' ? (
-        /* ==================================================== */
-        /* LAYOUT B: UNIFIED TACTICAL CHAT (MATCH CHAT & TEAM CHAT) */
-        /* ==================================================== */
-        <div className="flex flex-col h-full overflow-hidden">
-          {/* Tactical Chat Header with Match Chat / Team Chat Tabs */}
-          <div className="h-12 px-3 bg-[#0B0C12] border-b border-[#1E202B] flex items-center justify-between shrink-0">
-            <div className="flex items-center gap-1.5 p-1 bg-[#12141D] border border-white/5 rounded-lg">
-              <button
-                onClick={() => {
-                  sound.playClick();
-                  setUnifiedChatTab('all');
-                }}
-                className={`px-3 py-1 rounded-md text-xs font-mono font-bold transition flex items-center gap-1.5 cursor-pointer ${
-                  unifiedChatTab === 'all'
-                    ? 'bg-[#A3E635] text-slate-950 shadow-sm'
-                    : 'text-slate-400 hover:text-white'
-                }`}
-              >
-                <MessageSquare className="w-3.5 h-3.5" />
-                <span>Match Chat</span>
-                <span className="text-[10px] opacity-75 font-mono">({roomMessages.length})</span>
-              </button>
-
-              <button
-                onClick={() => {
-                  sound.playClick();
-                  setUnifiedChatTab('team');
-                }}
-                className={`px-3 py-1 rounded-md text-xs font-mono font-bold transition flex items-center gap-1.5 cursor-pointer ${
-                  unifiedChatTab === 'team'
-                    ? 'bg-emerald-500 text-slate-950 shadow-sm'
-                    : 'text-slate-400 hover:text-white'
-                }`}
-              >
-                <Shield className="w-3.5 h-3.5" />
-                <span>Team Chat</span>
-                <span className="text-[10px] opacity-75 font-mono">({teamMessages.length})</span>
-              </button>
-            </div>
+      {/* ==================================================== */}
+      {/* UNIFIED TACTICAL CHAT (MATCH CHAT & TEAM CHAT TABS) */}
+      {/* ==================================================== */}
+      <div className="flex flex-col h-full overflow-hidden">
+        {/* Tactical Chat Header with Match Chat / Team Chat Tabs */}
+        <div className="h-12 px-3 bg-[#0B0C12] border-b border-[#1E202B] flex items-center justify-between shrink-0">
+          <div className="flex items-center gap-1.5 p-1 bg-[#12141D] border border-white/5 rounded-lg">
+            <button
+              onClick={() => {
+                sound.playClick();
+                setUnifiedChatTab('all');
+              }}
+              className={`px-3 py-1 rounded-md text-xs font-mono font-bold transition flex items-center gap-1.5 cursor-pointer ${
+                unifiedChatTab === 'all'
+                  ? 'bg-[#A3E635] text-slate-950 shadow-sm'
+                  : 'text-slate-400 hover:text-white'
+              }`}
+            >
+              <MessageSquare className="w-3.5 h-3.5" />
+              <span>Match Chat</span>
+              <span className="text-[10px] opacity-75 font-mono">({roomMessages.length})</span>
+            </button>
 
             <button
               onClick={() => {
                 sound.playClick();
-                setIsChatDrawerOpen(false);
+                setUnifiedChatTab('team');
               }}
-              className="p-1.5 rounded-lg text-slate-400 hover:text-white hover:bg-white/5 transition cursor-pointer"
-              title="Collapse chat"
+              className={`px-3 py-1 rounded-md text-xs font-mono font-bold transition flex items-center gap-1.5 cursor-pointer ${
+                unifiedChatTab === 'team'
+                  ? 'bg-emerald-500 text-slate-950 shadow-sm'
+                  : 'text-slate-400 hover:text-white'
+              }`}
             >
-              {side === 'left' ? <ChevronLeft className="w-5 h-5" /> : <ChevronRight className="w-5 h-5" />}
+              <Shield className="w-3.5 h-3.5" />
+              <span>Team Chat</span>
+              <span className="text-[10px] opacity-75 font-mono">({teamMessages.length})</span>
             </button>
           </div>
 
-          {/* Unified Full-Height Chat Stream */}
-          <div className="flex-1 overflow-y-auto p-4 flex flex-col justify-start space-y-3">
-            <div className="text-center my-2">
-              <span className="text-[9px] font-mono text-slate-500 uppercase tracking-widest font-bold px-2 py-0.5 rounded bg-white/[0.03] border border-white/5">
-                {unifiedChatTab === 'all' ? 'All 10 Matchroom Players Feed' : 'Internal Squad Comms (Team 1 Only)'}
-              </span>
-            </div>
+          <button
+            onClick={() => {
+              sound.playClick();
+              setIsChatDrawerOpen(false);
+            }}
+            className="p-1.5 rounded-lg text-slate-400 hover:text-white hover:bg-white/5 transition cursor-pointer"
+            title="Collapse chat"
+          >
+            {side === 'left' ? <ChevronLeft className="w-5 h-5" /> : <ChevronRight className="w-5 h-5" />}
+          </button>
+        </div>
 
-            {unifiedChatTab === 'all' ? (
-              // Match Chat Feed (Room)
-              roomMessages.map(msg => (
-                <div key={msg.id} className="flex items-start gap-2.5">
-                  <img 
-                    src={msg.avatar} 
-                    alt={msg.sender} 
-                    className="w-6 h-6 rounded-full object-cover shrink-0 mt-0.5 border border-white/10" 
-                  />
-                  <div className="flex-1 min-w-0">
-                    <div className="flex items-baseline gap-2">
-                      <span className="text-xs font-bold text-white truncate">{msg.sender}</span>
-                      <span className="text-[10px] text-slate-500 font-mono">{msg.timestamp}</span>
+        {/* Unified Full-Height Chat Stream */}
+        <div className="flex-1 overflow-y-auto p-4 flex flex-col justify-start space-y-3">
+          <div className="text-center my-2">
+            <span className="text-[9px] font-mono text-slate-500 uppercase tracking-widest font-bold px-2 py-0.5 rounded bg-white/[0.03] border border-white/5">
+              {unifiedChatTab === 'all' ? 'All 10 Matchroom Players Feed' : 'Internal Squad Comms (Team 1 Only)'}
+            </span>
+          </div>
+
+          {unifiedChatTab === 'all' ? (
+            // Match Chat Feed (Room)
+            roomMessages.map(msg => (
+              <div key={msg.id} className="flex items-start gap-2.5">
+                <img 
+                  src={msg.avatar} 
+                  alt={msg.sender} 
+                  className="w-6 h-6 rounded-full object-cover shrink-0 mt-0.5 border border-white/10" 
+                />
+                <div className="flex-1 min-w-0">
+                  <div className="flex items-baseline gap-2">
+                    <span className="text-xs font-bold text-white truncate">{msg.sender}</span>
+                    <span className="text-[10px] text-slate-500 font-mono">{msg.timestamp}</span>
+                  </div>
+                  {msg.text && (
+                    <p className="text-xs text-slate-300 font-sans mt-0.5 break-words">{msg.text}</p>
+                  )}
+                  {msg.imageUrl && (
+                    <div className="mt-1.5 max-w-[220px] rounded-lg overflow-hidden border border-white/10 shadow-md">
+                      <img 
+                        src={msg.imageUrl} 
+                        alt="Attachment" 
+                        className="w-full h-auto max-h-[180px] object-cover cursor-pointer hover:opacity-90 transition"
+                        onClick={() => window.open(msg.imageUrl, '_blank')}
+                      />
                     </div>
+                  )}
+                </div>
+              </div>
+            ))
+          ) : (
+            // Team Chat Feed (Squad)
+            teamMessages.map((msg, index) => {
+              const prevMsg = teamMessages[index - 1];
+              const isConsecutive = prevMsg && prevMsg.sender === msg.sender;
+
+              return (
+                <div key={msg.id} className={`flex items-start gap-2.5 ${isConsecutive ? 'mt-0.5' : 'mt-2.5'}`}>
+                  {!isConsecutive ? (
+                    <img 
+                      src={msg.avatar} 
+                      alt={msg.sender} 
+                      className="w-6 h-6 rounded-full object-cover shrink-0 mt-0.5 border border-white/10" 
+                    />
+                  ) : (
+                    <div className="w-6 shrink-0" />
+                  )}
+
+                  <div className="flex-1 min-w-0">
+                    {!isConsecutive && (
+                      <div className="flex items-baseline gap-2">
+                        <span className="text-xs font-bold text-white truncate">{msg.sender}</span>
+                        <span className="text-[10px] text-slate-500 font-mono">{msg.timestamp}</span>
+                      </div>
+                    )}
                     {msg.text && (
-                      <p className="text-xs text-slate-300 font-sans mt-0.5 break-words">{msg.text}</p>
+                      <p className="text-xs text-slate-200 font-sans break-words leading-relaxed">
+                        {msg.text}
+                      </p>
                     )}
                     {msg.imageUrl && (
                       <div className="mt-1.5 max-w-[220px] rounded-lg overflow-hidden border border-white/10 shadow-md">
@@ -1842,349 +1988,82 @@ export const VortexMatchRoom: React.FC<VortexMatchRoomProps> = ({
                     )}
                   </div>
                 </div>
-              ))
-            ) : (
-              // Team Chat Feed (Squad)
-              teamMessages.map((msg, index) => {
-                const prevMsg = teamMessages[index - 1];
-                const isConsecutive = prevMsg && prevMsg.sender === msg.sender;
-
-                return (
-                  <div key={msg.id} className={`flex items-start gap-2.5 ${isConsecutive ? 'mt-0.5' : 'mt-2.5'}`}>
-                    {!isConsecutive ? (
-                      <img 
-                        src={msg.avatar} 
-                        alt={msg.sender} 
-                        className="w-6 h-6 rounded-full object-cover shrink-0 mt-0.5 border border-white/10" 
-                      />
-                    ) : (
-                      <div className="w-6 shrink-0" />
-                    )}
-
-                    <div className="flex-1 min-w-0">
-                      {!isConsecutive && (
-                        <div className="flex items-baseline gap-2">
-                          <span className="text-xs font-bold text-white truncate">{msg.sender}</span>
-                          <span className="text-[10px] text-slate-500 font-mono">{msg.timestamp}</span>
-                        </div>
-                      )}
-                      {msg.text && (
-                        <p className="text-xs text-slate-200 font-sans break-words leading-relaxed">
-                          {msg.text}
-                        </p>
-                      )}
-                      {msg.imageUrl && (
-                        <div className="mt-1.5 max-w-[220px] rounded-lg overflow-hidden border border-white/10 shadow-md">
-                          <img 
-                            src={msg.imageUrl} 
-                            alt="Attachment" 
-                            className="w-full h-auto max-h-[180px] object-cover cursor-pointer hover:opacity-90 transition"
-                            onClick={() => window.open(msg.imageUrl, '_blank')}
-                          />
-                        </div>
-                      )}
-                    </div>
-                  </div>
-                );
-              })
-            )}
-            <div ref={unifiedChatTab === 'all' ? roomEndRef : teamEndRef} />
-          </div>
-
-          {/* Quick Tactical Phrases when in Team tab */}
-          {unifiedChatTab === 'team' && (
-            <div className="px-3 py-1.5 bg-[#0B0C12] border-t border-white/5 flex items-center gap-1.5 overflow-x-auto no-scrollbar">
-              {QUICK_TACTICAL_PHRASES.map((p, i) => (
-                <button
-                  key={i}
-                  onClick={() => handleSendPhrase(p)}
-                  className="px-2 py-0.5 rounded bg-white/[0.04] hover:bg-emerald-500/20 hover:text-emerald-300 text-[10px] font-mono text-slate-400 whitespace-nowrap cursor-pointer transition border border-white/5"
-                >
-                  {p}
-                </button>
-              ))}
-            </div>
+              );
+            })
           )}
-
-          {/* Unified Input Bar */}
-          <div className="p-3 bg-[#0B0C12] border-t border-[#1C1E27] shrink-0">
-            <form 
-              onSubmit={unifiedChatTab === 'all' ? handleSendRoomMessage : handleSendTeamMessage} 
-              className="relative flex items-center"
-            >
-              <input
-                type="text"
-                value={unifiedChatTab === 'all' ? roomInput : teamInput}
-                onChange={e => unifiedChatTab === 'all' ? setRoomInput(e.target.value) : setTeamInput(e.target.value)}
-                placeholder={unifiedChatTab === 'all' ? "Message all 10 players..." : "Message squad only..."}
-                className="w-full h-9 pl-3 pr-20 rounded-md bg-[#13141C] border border-[#222432] text-xs text-white placeholder-slate-500 focus:outline-none focus:border-[#A3E635] transition"
-              />
-              <div className="absolute right-2 flex items-center gap-1.5 text-slate-400">
-                <input 
-                  ref={unifiedChatTab === 'all' ? roomFileInputRef : teamFileInputRef}
-                  type="file" 
-                  accept="image/*" 
-                  className="hidden" 
-                  onChange={unifiedChatTab === 'all' ? handleRoomImageUpload : handleTeamImageUpload} 
-                />
-                <button
-                  type="button"
-                  onClick={() => {
-                    sound.playClick();
-                    if (unifiedChatTab === 'all') roomFileInputRef.current?.click();
-                    else teamFileInputRef.current?.click();
-                  }}
-                  className="hover:text-white transition p-0.5 cursor-pointer"
-                  title="Send image"
-                >
-                  <ImageIcon className="w-4 h-4" />
-                </button>
-                <button
-                  type="button"
-                  onClick={() => {
-                    if (unifiedChatTab === 'all') setRoomInput(prev => prev + ' 🎯');
-                    else setTeamInput(prev => prev + ' 🛡️');
-                  }}
-                  className="hover:text-white transition p-0.5 cursor-pointer"
-                  title="Emoji"
-                >
-                  <Smile className="w-4 h-4" />
-                </button>
-                <button
-                  type="submit"
-                  className="p-1 rounded bg-[#A3E635] text-slate-950 hover:bg-[#bef264] transition cursor-pointer"
-                  title="Send"
-                >
-                  <Send className="w-3.5 h-3.5" />
-                </button>
-              </div>
-            </form>
-          </div>
+          <div ref={unifiedChatTab === 'all' ? roomEndRef : teamEndRef} />
         </div>
-      ) : (
-        /* ==================================================== */
-        /* LAYOUT A: CLASSIC SPLIT CHAT (TOP ROOM / BOTTOM TEAM) */
-        /* ==================================================== */
-        <>
-          {/* TOP HALF: Room chat (All 10 Matchroom Players) */}
-          <div className="flex flex-col flex-1 min-h-[220px] border-b border-[#1A1C24] overflow-hidden">
-            <div className="h-11 px-4 bg-[#07080B] border-b border-[#1A1C24] flex items-center justify-between shrink-0">
-              <span className="font-display font-bold text-white text-sm">
-                Room chat
-              </span>
+
+        {/* Quick Tactical Phrases when in Team tab */}
+        {unifiedChatTab === 'team' && (
+          <div className="px-3 py-1.5 bg-[#0B0C12] border-t border-white/5 flex items-center gap-1.5 overflow-x-auto no-scrollbar">
+            {QUICK_TACTICAL_PHRASES.map((p, i) => (
               <button
+                key={i}
+                onClick={() => handleSendPhrase(p)}
+                className="px-2 py-0.5 rounded bg-white/[0.04] hover:bg-emerald-500/20 hover:text-emerald-300 text-[10px] font-mono text-slate-400 whitespace-nowrap cursor-pointer transition border border-white/5"
+              >
+                {p}
+              </button>
+            ))}
+          </div>
+        )}
+
+        {/* Unified Input Bar */}
+        <div className="p-3 bg-[#0B0C12] border-t border-[#1C1E27] shrink-0">
+          <form 
+            onSubmit={unifiedChatTab === 'all' ? handleSendRoomMessage : handleSendTeamMessage} 
+            className="relative flex items-center"
+          >
+            <input
+              type="text"
+              value={unifiedChatTab === 'all' ? roomInput : teamInput}
+              onChange={e => unifiedChatTab === 'all' ? setRoomInput(e.target.value) : setTeamInput(e.target.value)}
+              placeholder={unifiedChatTab === 'all' ? "Message all 10 players..." : "Message squad only..."}
+              className="w-full h-9 pl-3 pr-20 rounded-md bg-[#13141C] border border-[#222432] text-xs text-white placeholder-slate-500 focus:outline-none focus:border-[#A3E635] transition"
+            />
+            <div className="absolute right-2 flex items-center gap-1.5 text-slate-400">
+              <input 
+                ref={unifiedChatTab === 'all' ? roomFileInputRef : teamFileInputRef}
+                type="file" 
+                accept="image/*" 
+                className="hidden" 
+                onChange={unifiedChatTab === 'all' ? handleRoomImageUpload : handleTeamImageUpload} 
+              />
+              <button
+                type="button"
                 onClick={() => {
                   sound.playClick();
-                  setIsChatDrawerOpen(false);
+                  if (unifiedChatTab === 'all') roomFileInputRef.current?.click();
+                  else teamFileInputRef.current?.click();
                 }}
-                className="p-1 rounded text-slate-400 hover:text-white transition cursor-pointer"
-                title="Collapse chat"
+                className="hover:text-white transition p-0.5 cursor-pointer"
+                title="Send image"
               >
-                <ChevronRight className="w-4 h-4" />
+                <ImageIcon className="w-4 h-4" />
+              </button>
+              <button
+                type="button"
+                onClick={() => {
+                  if (unifiedChatTab === 'all') setRoomInput(prev => prev + ' 🎯');
+                  else setTeamInput(prev => prev + ' 🛡️');
+                }}
+                className="hover:text-white transition p-0.5 cursor-pointer"
+                title="Emoji"
+              >
+                <Smile className="w-4 h-4" />
+              </button>
+              <button
+                type="submit"
+                className="p-1 rounded bg-[#A3E635] text-slate-950 hover:bg-[#bef264] transition cursor-pointer"
+                title="Send"
+              >
+                <Send className="w-3.5 h-3.5" />
               </button>
             </div>
-
-            <div className="flex-1 overflow-y-auto p-4 flex flex-col justify-start">
-              <div className="text-center my-3">
-                <span className="text-[10px] font-mono text-slate-500 uppercase tracking-widest font-semibold">
-                  BEGINNING OF CONVERSATION
-                </span>
-              </div>
-
-              <div className="space-y-3">
-                {roomMessages.map(msg => (
-                  <div key={msg.id} className="flex items-start gap-2.5">
-                    <img 
-                      src={msg.avatar} 
-                      alt={msg.sender} 
-                      className="w-6 h-6 rounded-full object-cover shrink-0 mt-0.5 border border-white/10" 
-                    />
-                    <div className="flex-1 min-w-0">
-                      <div className="flex items-baseline gap-2">
-                        <span className="text-xs font-bold text-white truncate">{msg.sender}</span>
-                        <span className="text-[10px] text-slate-500 font-mono">{msg.timestamp}</span>
-                      </div>
-                      {msg.text && (
-                        <p className="text-xs text-slate-300 font-sans mt-0.5 break-words">{msg.text}</p>
-                      )}
-                      {msg.imageUrl && (
-                        <div className="mt-1.5 max-w-[220px] rounded-lg overflow-hidden border border-white/10 shadow-md">
-                          <img 
-                            src={msg.imageUrl} 
-                            alt="Attachment" 
-                            className="w-full h-auto max-h-[180px] object-cover cursor-pointer hover:opacity-90 transition"
-                            onClick={() => window.open(msg.imageUrl, '_blank')}
-                          />
-                        </div>
-                      )}
-                    </div>
-                  </div>
-                ))}
-                <div ref={roomEndRef} />
-              </div>
-            </div>
-
-            <div className="p-3 bg-[#07080B] border-t border-[#14151C] shrink-0">
-              <form onSubmit={handleSendRoomMessage} className="relative flex items-center">
-                <input
-                  type="text"
-                  value={roomInput}
-                  onChange={e => setRoomInput(e.target.value)}
-                  placeholder="Message room"
-                  className="w-full h-9 pl-3 pr-16 rounded-md bg-[#111218] border border-[#20222B] text-xs text-white placeholder-slate-500 focus:outline-none focus:border-slate-500 transition"
-                />
-                <div className="absolute right-2 flex items-center gap-1.5 text-slate-400">
-                  <input 
-                    ref={roomFileInputRef}
-                    type="file" 
-                    accept="image/*" 
-                    className="hidden" 
-                    onChange={handleRoomImageUpload} 
-                  />
-                  <button
-                    type="button"
-                    onClick={() => {
-                      sound.playClick();
-                      roomFileInputRef.current?.click();
-                    }}
-                    className="hover:text-white transition p-0.5 cursor-pointer"
-                    title="Send image"
-                  >
-                    <ImageIcon className="w-4 h-4" />
-                  </button>
-                  <button
-                    type="button"
-                    onClick={() => setRoomInput(prev => prev + ' 🎯')}
-                    className="hover:text-white transition p-0.5 cursor-pointer"
-                    title="Emoji"
-                  >
-                    <Smile className="w-4 h-4" />
-                  </button>
-                </div>
-              </form>
-            </div>
-          </div>
-
-          {/* BOTTOM HALF: Team chat (Team Only Chat) */}
-          <div className="flex flex-col flex-1 min-h-[260px] overflow-hidden">
-            <div 
-              onClick={() => setIsTeamChatCollapsed(!isTeamChatCollapsed)}
-              className="h-11 px-4 bg-[#07080B] border-b border-[#1A1C24] flex items-center justify-between shrink-0 cursor-pointer hover:bg-white/[0.02] transition"
-            >
-              <span className="font-display font-bold text-white text-sm">
-                Team chat
-              </span>
-              <button className="p-1 text-slate-400 hover:text-white transition">
-                <ChevronDown className={`w-4 h-4 transform transition-transform ${isTeamChatCollapsed ? '-rotate-90' : 'rotate-0'}`} />
-              </button>
-            </div>
-
-            {!isTeamChatCollapsed && (
-              <>
-                <div className="flex-1 overflow-y-auto p-4 space-y-2.5">
-                  {teamMessages.map((msg, index) => {
-                    const prevMsg = teamMessages[index - 1];
-                    const isConsecutive = prevMsg && prevMsg.sender === msg.sender;
-
-                    return (
-                      <div key={msg.id} className={`flex items-start gap-2.5 ${isConsecutive ? 'mt-0.5' : 'mt-2.5'}`}>
-                        {!isConsecutive ? (
-                          <img 
-                            src={msg.avatar} 
-                            alt={msg.sender} 
-                            className="w-6 h-6 rounded-full object-cover shrink-0 mt-0.5 border border-white/10" 
-                          />
-                        ) : (
-                          <div className="w-6 shrink-0" />
-                        )}
-
-                        <div className="flex-1 min-w-0">
-                          {!isConsecutive && (
-                            <div className="flex items-baseline gap-2">
-                              <span className="text-xs font-bold text-white truncate">{msg.sender}</span>
-                              <span className="text-[10px] text-slate-500 font-mono">{msg.timestamp}</span>
-                            </div>
-                          )}
-                          {msg.text && (
-                            <p className="text-xs text-slate-200 font-sans break-words leading-relaxed">
-                              {msg.text}
-                            </p>
-                          )}
-                          {msg.imageUrl && (
-                            <div className="mt-1.5 max-w-[220px] rounded-lg overflow-hidden border border-white/10 shadow-md">
-                              <img 
-                                src={msg.imageUrl} 
-                                alt="Attachment" 
-                                className="w-full h-auto max-h-[180px] object-cover cursor-pointer hover:opacity-90 transition"
-                                onClick={() => window.open(msg.imageUrl, '_blank')}
-                              />
-                            </div>
-                          )}
-                        </div>
-                      </div>
-                    );
-                  })}
-                  <div ref={teamEndRef} />
-                </div>
-
-                {/* Quick Tactical Phrases */}
-                <div className="px-3 py-1 bg-[#07080B] border-t border-[#121319] flex items-center gap-1 overflow-x-auto no-scrollbar">
-                  {QUICK_TACTICAL_PHRASES.slice(0, 3).map((p, i) => (
-                    <button
-                      key={i}
-                      onClick={() => handleSendPhrase(p)}
-                      className="px-2 py-0.5 rounded bg-white/[0.04] hover:bg-white/[0.08] text-[9px] font-mono text-slate-400 hover:text-slate-200 whitespace-nowrap cursor-pointer transition"
-                    >
-                      {p}
-                    </button>
-                  ))}
-                </div>
-
-                {/* Team Chat Input Form */}
-                <div className="p-3 bg-[#07080B] border-t border-[#14151C] shrink-0">
-                  <form onSubmit={handleSendTeamMessage} className="relative flex items-center">
-                    <input
-                      type="text"
-                      value={teamInput}
-                      onChange={e => setTeamInput(e.target.value)}
-                      placeholder="Message room"
-                      className="w-full h-9 pl-3 pr-16 rounded-md bg-[#111218] border border-[#20222B] text-xs text-white placeholder-slate-500 focus:outline-none focus:border-slate-500 transition"
-                    />
-                    <div className="absolute right-2 flex items-center gap-1.5 text-slate-400">
-                      <input 
-                        ref={teamFileInputRef}
-                        type="file" 
-                        accept="image/*" 
-                        className="hidden" 
-                        onChange={handleTeamImageUpload} 
-                      />
-                      <button
-                        type="button"
-                        onClick={() => {
-                          sound.playClick();
-                          teamFileInputRef.current?.click();
-                        }}
-                        className="hover:text-white transition p-0.5 cursor-pointer"
-                        title="Send image"
-                      >
-                        <ImageIcon className="w-4 h-4" />
-                      </button>
-                      <button
-                        type="button"
-                        onClick={() => setTeamInput(prev => prev + ' 🎯')}
-                        className="hover:text-white transition p-0.5 cursor-pointer"
-                        title="Emoji"
-                      >
-                        <Smile className="w-4 h-4" />
-                      </button>
-                    </div>
-                  </form>
-                </div>
-              </>
-            )}
-          </div>
-        </>
-      )}
+          </form>
+        </div>
+      </div>
     </div>
   );
 
@@ -2213,7 +2092,7 @@ export const VortexMatchRoom: React.FC<VortexMatchRoomProps> = ({
               Matchroom
             </span>
             <span className="text-[9px] font-mono text-[#A3E635] bg-[#A3E635]/10 border border-[#A3E635]/30 px-2 py-0.5 rounded-full uppercase font-bold hidden sm:inline">
-              {layoutVariant === 'tactical' ? 'Caliber Tactical View' : 'Classic View'}
+              {layoutVariant === 'tactical' ? 'Caliber Tactical View' : 'Opsioni B (3-Kolona)'}
             </span>
           </div>
 
@@ -2244,21 +2123,21 @@ export const VortexMatchRoom: React.FC<VortexMatchRoomProps> = ({
             </button>
           </div>
 
-          {/* Interactive Layout Switcher (Classic View vs Caliber Tactical View) */}
+          {/* Interactive Layout Switcher (Opsioni B vs Caliber Tactical View) */}
           <div className="flex items-center bg-[#14151D] border border-white/10 p-0.5 rounded-lg text-[10px] font-mono font-bold shadow-inner">
             <button
               onClick={() => {
                 sound.playSelect();
-                setLayoutVariant('classic');
+                setLayoutVariant('layout_b');
               }}
-              className={`px-3 py-1 rounded-md transition cursor-pointer ${
-                layoutVariant === 'classic'
-                  ? 'bg-white/15 text-white shadow-sm font-black'
+              className={`px-3 py-1 rounded-md transition cursor-pointer flex items-center gap-1.5 ${
+                layoutVariant === 'layout_b'
+                  ? 'bg-[#A3E635] text-slate-950 shadow-sm font-black'
                   : 'text-slate-400 hover:text-slate-200'
               }`}
-              title="Classic FACEIT matchroom layout (3 columns with ping selector)"
+              title="Opsioni B: 3 Kolona taktike me Direct Connect në mes dhe Chat në të djathtë"
             >
-              Classic View
+              <span>Opsioni B (3-Kolona)</span>
             </button>
             <button
               onClick={() => {
@@ -2270,7 +2149,7 @@ export const VortexMatchRoom: React.FC<VortexMatchRoomProps> = ({
                   ? 'bg-[#A3E635] text-slate-950 shadow-sm font-black'
                   : 'text-slate-400 hover:text-slate-200'
               }`}
-              title="Caliber Tactical View with Squad Party Containers & Left Chat"
+              title="Caliber Tactical View: Skuadrat krah për krah, Chat majtas dhe Shiriti i gjerë poshtë"
             >
               <span>⚡ Caliber Tactical View</span>
             </button>
@@ -2548,8 +2427,8 @@ export const VortexMatchRoom: React.FC<VortexMatchRoomProps> = ({
           </div>
         ) : (
           /* ======================================================== */
-          /* CLASSIC VIEW (ORIGINAL 3 COLUMNS PRESERVED 100%)         */
-          /* TEAM 1 • CENTER SERVER & PING SLIDER • TEAM 2           */
+          /* OPSIONI B (TACTICAL 3-COLUMN PREVIEW)                    */
+          /* TEAM 1 (4 STATS) • CENTER DIRECT CONNECT • TEAM 2        */
           /* ======================================================== */
           <div className="max-w-[1400px] w-full mx-auto px-4 sm:px-6 py-4 flex-1 relative">
 
@@ -2563,7 +2442,7 @@ export const VortexMatchRoom: React.FC<VortexMatchRoomProps> = ({
               </div>
 
               <div className="space-y-2">
-                {team1Players.map(player => renderOverviewPlayerCard(player, 'team1'))}
+                {team1Players.map(player => renderTacticalPlayerCard(player, 'team1'))}
               </div>
             </div>
 
@@ -2678,7 +2557,7 @@ export const VortexMatchRoom: React.FC<VortexMatchRoomProps> = ({
                   </div>
 
                   {/* Region Selector */}
-                  <div className="flex items-center gap-1 overflow-x-auto pb-1 text-[10px] font-mono">
+                  <div className="flex items-center gap-1 overflow-x-auto pb-1 text-[10px] font-mono [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden">
                     {SERVER_REGIONS.map((reg) => (
                       <button
                         key={reg.id}
@@ -2882,7 +2761,7 @@ export const VortexMatchRoom: React.FC<VortexMatchRoomProps> = ({
               </div>
 
               <div className="space-y-2">
-                {team2Players.map(player => renderOverviewPlayerCard(player, 'team2'))}
+                {team2Players.map(player => renderTacticalPlayerCard(player, 'team2'))}
               </div>
             </div>
 
@@ -3369,9 +3248,9 @@ export const VortexMatchRoom: React.FC<VortexMatchRoomProps> = ({
       </div> {/* END OF LEFT COLUMN: MAIN MATCHROOM */}
 
       {/* ======================================================== */}
-      {/* RIGHT COLUMN: CLASSIC MATCH CHAT (ONLY IN CLASSIC VIEW)   */}
+      {/* RIGHT COLUMN: MATCH CHAT (OPSIONI B - 3-COLUMN VIEW)     */}
       {/* ======================================================== */}
-      {layoutVariant === 'classic' && isChatDrawerOpen && renderChatSidebar('right')}
+      {layoutVariant === 'layout_b' && isChatDrawerOpen && renderChatSidebar('right')}
 
       {/* ======================================================== */}
       {/* 5. AUTHENTIC 1:1 FACEIT PLAYER PROFILE FLYOUT             */}
