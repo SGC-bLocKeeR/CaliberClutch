@@ -126,7 +126,7 @@ export const generateBalancedMatch = (params: MatchmakingParams): BalancedMatch 
   const {
     partyMembers,
     userGamerTag,
-    userAvatar = 'https://distribution.faceit-cdn.net/images/ac453a50-dbca-4d42-a740-dac12bdc74c0.jpeg',
+    userAvatar = 'https://images.unsplash.com/photo-1566492031773-4f4e44671857?auto=format&fit=crop&w=150&q=80',
     userElo,
     userLevel,
     userClanTag = 'M14',
@@ -147,7 +147,7 @@ export const generateBalancedMatch = (params: MatchmakingParams): BalancedMatch 
         code: userCountry.code,
         countryName: userCountry.name,
         isLeader: true,
-        matches: 34
+        matches: userElo === 0 ? 0 : 34
       }];
 
   const partySize = Math.min(5, activeParty.length);
@@ -163,9 +163,9 @@ export const generateBalancedMatch = (params: MatchmakingParams): BalancedMatch 
 
   // Add party members first
   activeParty.slice(0, 5).forEach((pm, idx) => {
-    const pElo = pm.elo || userElo;
-    const pLevel = pm.level || getFaceitLevelFromElo(pElo);
     const isUser = pm.name === userGamerTag;
+    const pElo = pm.elo !== undefined ? pm.elo : userElo;
+    const pLevel = pm.level !== undefined ? pm.level : (pElo === 0 ? 1 : getFaceitLevelFromElo(pElo));
 
     team1Players.push({
       id: `t1-p${idx + 1}`,
@@ -178,7 +178,7 @@ export const generateBalancedMatch = (params: MatchmakingParams): BalancedMatch 
       isCaptain: idx === 0 || pm.isLeader,
       hasPriority: isUser || idx === 0,
       verified: true,
-      matches: pm.matches || (isUser ? 38 : Math.floor(Math.random() * 200) + 120),
+      matches: pm.matches !== undefined ? pm.matches : (isUser ? 0 : Math.floor(Math.random() * 200) + 120),
       winRate: `${Math.floor(Math.random() * 6) + 48}%`,
       recentResults: ['W', 'W', 'L', 'W', Math.random() > 0.4 ? 'W' : 'L'],
       rating: (1.05 + Math.random() * 0.15).toFixed(2),

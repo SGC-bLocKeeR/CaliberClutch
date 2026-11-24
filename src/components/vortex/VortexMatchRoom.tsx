@@ -36,7 +36,8 @@ import {
   Ban,
   Swords,
   Crown,
-  Zap
+  Zap,
+  TrendingUp
 } from 'lucide-react';
 import { sound } from '../../utils/soundEffects';
 import confetti from 'canvas-confetti';
@@ -179,59 +180,85 @@ const QUICK_TACTICAL_PHRASES = [
   "Good comms team 🎙️"
 ];
 
-// Authentic FACEIT circular level ring badge (Yellow for 6-7, Orange for 8-9, Red for 10)
-const FaceitLevelRing: React.FC<{ level: number; size?: number }> = ({ level, size = 26 }) => {
-  const getArcColor = (lvl: number) => {
-    if (lvl === 10) return '#EF4444'; // Red
-    if (lvl >= 8) return '#F97316';  // Orange
-    if (lvl >= 6) return '#EAB308';  // Yellow
-    if (lvl >= 4) return '#22C55E';  // Green
-    return '#94A3B8';               // Slate
-  };
+// Caliber Clutch 11 Divisions Tier Mapper (100% Original, Copyright-Free)
+export const getCaliberTierByLevel = (level: number) => {
+  switch (level) {
+    case 11: return { tier: 'TIER 11', name: 'PRO', color: '#EF4444' };
+    case 10: return { tier: 'TIER 10', name: 'ELITE', color: '#A855F7' };
+    case 9: return { tier: 'TIER 9', name: 'MASTER', color: '#8B5CF6' };
+    case 8: return { tier: 'TIER 8', name: 'EXPERT', color: '#F97316' };
+    case 7: return { tier: 'TIER 7', name: 'HARD', color: '#FB923C' };
+    case 6: return { tier: 'TIER 6', name: 'ADVANCED', color: '#EAB308' };
+    case 5: return { tier: 'TIER 5', name: 'SKILLED', color: '#A3E635' };
+    case 4: return { tier: 'TIER 4', name: 'MEDIUM', color: '#4ADE80' };
+    case 3: return { tier: 'TIER 3', name: 'NORMAL', color: '#34D399' };
+    case 2: return { tier: 'TIER 2', name: 'NOVICE', color: '#38BDF8' };
+    case 1:
+    default:
+      return { tier: 'TIER 1', name: 'BEGINNER', color: '#94A3B8' };
+  }
+};
 
-  const color = getArcColor(level);
-  const strokeWidth = 3;
-  const radius = (size - strokeWidth) / 2;
-  const circumference = 2 * Math.PI * radius;
-  const progress = Math.min(1, Math.max(0.2, level / 10));
-  const strokeDashoffset = circumference * (1 - progress);
+// Caliber Clutch Tactical Division Tier Badge (Tactical Rectangular/Squircle Pill - No Circular Gauge)
+export const CaliberTierBadge: React.FC<{ 
+  level: number; 
+  size?: 'sm' | 'md' | 'lg' | number;
+  showLabel?: boolean;
+  className?: string;
+}> = ({ level, size = 'md', showLabel = false, className = '' }) => {
+  const tierInfo = getCaliberTierByLevel(level);
+  const isSm = size === 'sm' || (typeof size === 'number' && size <= 24);
+  const isLg = size === 'lg' || (typeof size === 'number' && size >= 32);
 
   return (
     <div 
-      className="relative flex items-center justify-center shrink-0" 
-      style={{ width: size, height: size }}
-      title={`Level ${level}`}
+      className={`inline-flex items-center gap-1.5 select-none font-mono ${className}`}
+      title={`${tierInfo.tier} • ${tierInfo.name}`}
     >
-      <svg className="w-full h-full -rotate-90" viewBox={`0 0 ${size} ${size}`}>
-        <circle
-          cx={size / 2}
-          cy={size / 2}
-          r={radius}
-          fill="#111219"
-          stroke="#262835"
-          strokeWidth={strokeWidth}
-        />
-        <circle
-          cx={size / 2}
-          cy={size / 2}
-          r={radius}
-          fill="none"
-          stroke={color}
-          strokeWidth={strokeWidth}
-          strokeDasharray={circumference}
-          strokeDashoffset={strokeDashoffset}
-          strokeLinecap="round"
-        />
-      </svg>
-      <span className="absolute font-mono font-black text-white text-[10px]">
-        {level}
-      </span>
+      <div 
+        className={`relative flex items-center justify-center font-display font-black rounded-md transition shadow-md border ${
+          isSm 
+            ? 'h-5 min-w-[24px] px-1.5 text-[10px]' 
+            : isLg 
+            ? 'h-7 min-w-[32px] px-2 text-xs' 
+            : 'h-6 min-w-[28px] px-1.5 text-[11px]'
+        }`}
+        style={{
+          backgroundColor: `${tierInfo.color}18`,
+          borderColor: `${tierInfo.color}70`,
+          color: tierInfo.color,
+          boxShadow: `0 0 10px ${tierInfo.color}25`
+        }}
+      >
+        {level === 11 ? (
+          <div className="flex items-center gap-1 text-red-400">
+            <Crown className="w-2.5 h-2.5 fill-red-400" />
+            <span className="text-[9px] tracking-tight">PRO</span>
+          </div>
+        ) : (
+          <div className="flex items-center gap-0.5">
+            <span className="text-[8px] font-mono opacity-60">T</span>
+            <span>{level}</span>
+          </div>
+        )}
+      </div>
+      {showLabel && (
+        <span 
+          className="text-[10px] font-mono font-bold tracking-wider uppercase"
+          style={{ color: tierInfo.color }}
+        >
+          {tierInfo.name}
+        </span>
+      )}
     </div>
   );
 };
 
-// Authentic FACEIT Anti-Cheat Shield Badge (Exact 1:1 FACEIT from Reference)
-const FaceitAntiCheatShield: React.FC<{ size?: number; className?: string; style?: React.CSSProperties }> = ({ 
+// Drop-in alias to protect all callers and ensure 0 circular trademarked SVG rings remain
+const FaceitLevelRing = CaliberTierBadge;
+
+// Caliber Clutch Kernel Anti-Cheat Shield Badge (Tactical ShieldCheck in Neon Lime)
+const CaliberAnticheatBadge: React.FC<{ size?: number; className?: string; style?: React.CSSProperties }> = ({ 
   size = 18, 
   className = '',
   style
@@ -240,98 +267,53 @@ const FaceitAntiCheatShield: React.FC<{ size?: number; className?: string; style
     <div 
       className={`group/shield inline-flex items-center justify-center shrink-0 cursor-pointer select-none ${className}`}
       style={style}
-      title="Anti-cheat Required"
+      title="Caliber Kernel Anticheat Active"
     >
-      <svg 
-        width={size} 
-        height={size} 
-        viewBox="0 0 18 18" 
-        fill="none" 
-        xmlns="http://www.w3.org/2000/svg"
-        className="filter drop-shadow-[0_1px_3px_rgba(0,0,0,0.9)]"
-      >
-        {/* Layer 1: Solid Dark Cutout Background (cuts cleanly into the avatar photo) */}
-        <path 
-          d="M9 0.5L16.5 2.5V9C16.5 13 13 16 9 17.2C5 16 1.5 13 1.5 9V2.5L9 0.5Z" 
-          fill="#14151D" 
-          stroke="#14151D" 
-          strokeWidth="3.2" 
-          strokeLinejoin="round" 
-          strokeLinecap="round"
-        />
-        {/* Layer 2: Outer Neon-Lime Shield Outline */}
-        <path 
-          d="M9 1L16 3V9C16 12.6 12.8 15.3 9 16.5C5.2 15.3 2 12.6 2 9V3L9 1Z" 
-          fill="#0E0F14" 
-          stroke="#B4FF00" 
-          strokeWidth="1.6" 
-          strokeLinejoin="round"
-        />
-        {/* Layer 3: Inner Solid Neon-Lime Mini-Shield */}
-        <path 
-          d="M9 5.2L12.2 6.3V9.2C12.2 11.2 10.7 12.6 9 13.4C7.3 12.6 5.8 11.2 5.8 9.2V6.3L9 5.2Z" 
-          fill="#B4FF00" 
-        />
-      </svg>
-
-      {/* 1:1 FACEIT Tooltip on Hover */}
-      <div className="absolute left-1/2 -translate-x-1/2 top-full mt-1.5 hidden group-hover/shield:flex items-center px-2 py-0.5 rounded bg-[#16171E] border border-white/60 text-[11px] font-sans text-white whitespace-nowrap shadow-2xl z-50 pointer-events-none">
-        Anti-cheat Required
+      <div className="relative flex items-center justify-center p-0.5 rounded-full bg-[#0E1015] border border-[#A3E635]/60 shadow-[0_0_8px_rgba(163,230,53,0.3)]">
+        <ShieldCheck className="w-3.5 h-3.5 text-[#A3E635]" />
+      </div>
+      {/* Tooltip on Hover */}
+      <div className="absolute left-1/2 -translate-x-1/2 top-full mt-1.5 hidden group-hover/shield:flex items-center px-2 py-0.5 rounded bg-[#10121A] border border-[#A3E635]/40 text-[10px] font-mono text-white whitespace-nowrap shadow-2xl z-50 pointer-events-none">
+        Caliber Anticheat Active
       </div>
     </div>
   );
 };
 
-// Authentic FACEIT Team Captain White Crown (Exact 1:1 FACEIT from Reference)
-const FaceitCaptainCrown: React.FC<{ className?: string }> = ({ className = '' }) => (
+const FaceitAntiCheatShield = CaliberAnticheatBadge;
+
+// Caliber Clutch Team Captain Badge
+const CaliberCaptainBadge: React.FC<{ className?: string }> = ({ className = '' }) => (
   <div 
-    className={`absolute -top-3 left-1/2 -translate-x-1/2 pointer-events-none z-10 flex flex-col items-center ${className}`}
+    className={`absolute -top-3 left-1/2 -translate-x-1/2 pointer-events-none z-10 flex items-center justify-center ${className}`}
     title="Team Captain"
   >
-    <svg 
-      width="20" 
-      height="13" 
-      viewBox="0 0 20 13" 
-      fill="none" 
-      xmlns="http://www.w3.org/2000/svg" 
-      className="drop-shadow-[0_1px_3px_rgba(0,0,0,0.9)]"
-    >
-      <path 
-        d="M2 9.5L1.5 2L6.5 5.5L10 0.5L13.5 5.5L18.5 2L18 9.5H2Z" 
-        fill="white" 
-      />
-      <rect x="2" y="10.5" width="16" height="2" rx="0.5" fill="white" />
-    </svg>
-  </div>
-);
-
-// Authentic FACEIT Target / Priority Orange Star Badge (Exact 1:1 FACEIT from Reference)
-const FaceitPriorityStar: React.FC<{ size?: number; className?: string }> = ({ size = 15, className = '' }) => (
-  <div 
-    className={`group/priority relative inline-flex items-center justify-center shrink-0 cursor-pointer ${className}`}
-    title="Target / Priority"
-  >
-    <svg 
-      width={size} 
-      height={size} 
-      viewBox="0 0 16 16" 
-      fill="none" 
-      xmlns="http://www.w3.org/2000/svg"
-      className="drop-shadow-[0_0_2px_rgba(0,0,0,1)] drop-shadow-[0_1px_3px_rgba(0,0,0,0.9)]"
-    >
-      <circle cx="8" cy="8" r="7" fill="#140E0A" stroke="#FF5500" strokeWidth="1.6" />
-      <path 
-        d="M8 2.5C8 5.2 6.5 6.8 4 8C6.5 9.2 8 10.8 8 13.5C8 10.8 9.5 9.2 12 8C9.5 6.8 8 5.2 8 2.5Z" 
-        fill="#FF5500" 
-      />
-    </svg>
-
-    {/* 1:1 FACEIT Tooltip on Hover */}
-    <div className="absolute left-full ml-1.5 top-1/2 -translate-y-1/2 hidden group-hover/priority:flex items-center px-2 py-1 rounded bg-[#18191E] border border-[#383A42] text-[11px] font-mono text-slate-200 whitespace-nowrap shadow-xl z-50 pointer-events-none">
-      Target / Priority
+    <div className="flex items-center gap-0.5 px-1.5 py-0.5 rounded bg-amber-500/20 border border-amber-400/60 shadow-[0_0_8px_rgba(245,158,11,0.4)] text-[9px] font-mono font-black text-amber-300">
+      <Crown className="w-2.5 h-2.5 fill-amber-300" />
+      <span>CAP</span>
     </div>
   </div>
 );
+
+const FaceitCaptainCrown = CaliberCaptainBadge;
+
+// Caliber Clutch Target / Priority Badge
+const CaliberPriorityBadge: React.FC<{ size?: number; className?: string }> = ({ size = 15, className = '' }) => (
+  <div 
+    className={`group/priority relative inline-flex items-center justify-center shrink-0 cursor-pointer ${className}`}
+    title="Priority Queue Match"
+  >
+    <div className="w-4 h-4 rounded-full bg-[#182312] border border-[#A3E635] flex items-center justify-center text-[#A3E635] shadow-[0_0_8px_rgba(163,230,53,0.4)]">
+      <Star className="w-2.5 h-2.5 fill-[#A3E635]" />
+    </div>
+    {/* Tooltip on Hover */}
+    <div className="absolute left-full ml-1.5 top-1/2 -translate-y-1/2 hidden group-hover/priority:flex items-center px-2 py-1 rounded bg-[#10121A] border border-[#A3E635]/40 text-[10px] font-mono text-slate-200 whitespace-nowrap shadow-xl z-50 pointer-events-none">
+      Priority Queue
+    </div>
+  </div>
+);
+
+const FaceitPriorityStar = CaliberPriorityBadge;
 
 export const CS2_ACTIVE_DUTY_MAPS = [
   { id: 'mirage', name: 'Mirage', image: '/images/maps/cs2_mirage.png', desc: 'Tactical Middle' },
@@ -428,7 +410,7 @@ export const VortexMatchRoom: React.FC<VortexMatchRoomProps> = ({
     {
       id: 'tm-1',
       sender: 'M18',
-      avatar: '/images/faceit_m18_badge.png',
+      avatar: '/images/avatar_ghost_exact.png',
       team: 'team2',
       code: 'XK',
       text: 'go dust',
@@ -446,7 +428,7 @@ export const VortexMatchRoom: React.FC<VortexMatchRoomProps> = ({
     {
       id: 'tm-3',
       sender: 'M18',
-      avatar: '/images/faceit_m18_badge.png',
+      avatar: '/images/avatar_ghost_exact.png',
       team: 'team2',
       code: 'XK',
       text: 'whateveer',
@@ -455,7 +437,7 @@ export const VortexMatchRoom: React.FC<VortexMatchRoomProps> = ({
     {
       id: 'tm-4',
       sender: 'M18',
-      avatar: '/images/faceit_m18_badge.png',
+      avatar: '/images/avatar_ghost_exact.png',
       team: 'team2',
       code: 'XK',
       text: 'np',
@@ -464,7 +446,7 @@ export const VortexMatchRoom: React.FC<VortexMatchRoomProps> = ({
     {
       id: 'tm-5',
       sender: currentGamerTag || 'M14',
-      avatar: currentAvatarUrl || 'https://distribution.faceit-cdn.net/images/ac453a50-dbca-4d42-a740-dac12bdc74c0.jpeg',
+      avatar: currentAvatarUrl || 'https://images.unsplash.com/photo-1566492031773-4f4e44671857?auto=format&fit=crop&w=150&q=80',
       team: 'team2',
       code: 'GY',
       text: 'no',
@@ -487,7 +469,7 @@ export const VortexMatchRoom: React.FC<VortexMatchRoomProps> = ({
       const newMsg: MatchChatMessage = {
         id: `usr-room-img-${Date.now()}`,
         sender: currentGamerTag || 'M14',
-        avatar: currentAvatarUrl || 'https://distribution.faceit-cdn.net/images/ac453a50-dbca-4d42-a740-dac12bdc74c0.jpeg',
+        avatar: currentAvatarUrl || 'https://images.unsplash.com/photo-1566492031773-4f4e44671857?auto=format&fit=crop&w=150&q=80',
         team: 'team2',
         code: 'GY',
         text: roomInput.trim(),
@@ -512,7 +494,7 @@ export const VortexMatchRoom: React.FC<VortexMatchRoomProps> = ({
       const newMsg: MatchChatMessage = {
         id: `usr-team-img-${Date.now()}`,
         sender: currentGamerTag || 'M14',
-        avatar: currentAvatarUrl || 'https://distribution.faceit-cdn.net/images/ac453a50-dbca-4d42-a740-dac12bdc74c0.jpeg',
+        avatar: currentAvatarUrl || 'https://images.unsplash.com/photo-1566492031773-4f4e44671857?auto=format&fit=crop&w=150&q=80',
         team: 'team2',
         code: 'GY',
         text: teamInput.trim(),
@@ -894,8 +876,8 @@ export const VortexMatchRoom: React.FC<VortexMatchRoomProps> = ({
                     <th className="py-2.5 px-3 font-bold">
                       {isUnified ? (
                         <div className="inline-flex items-center gap-1.5 cursor-pointer text-white">
-                          <div className="w-3.5 h-3.5 rounded-full border border-[#FF5500] flex items-center justify-center shrink-0">
-                            <div className="w-1.5 h-1.5 rounded-full bg-[#FF5500]" />
+                          <div className="w-3.5 h-3.5 rounded-full border border-[#A3E635] flex items-center justify-center shrink-0">
+                            <div className="w-1.5 h-1.5 rounded-full bg-[#A3E635]" />
                           </div>
                           <span className="font-bold text-white">Rating</span>
                           <ChevronDown className="w-3 h-3 text-slate-400" />
@@ -1018,13 +1000,13 @@ export const VortexMatchRoom: React.FC<VortexMatchRoomProps> = ({
                             className={`w-7 h-7 rounded-full object-cover border border-white/10 group-hover:border-white/40 ${row.name === 'M18' ? 'bg-black object-contain' : ''}`} 
                           />
                           {row.hasPriority && (
-                            <div className="absolute -top-1 -right-0.5 w-3 h-3 rounded-full bg-[#FF5500] flex items-center justify-center text-[7px] text-black font-black shadow-sm" title="Priority">
+                            <div className="absolute -top-1 -right-0.5 w-3.5 h-3.5 rounded-full bg-[#182312] border border-[#A3E635] flex items-center justify-center text-[7px] text-[#A3E635] font-black shadow-sm" title="Priority">
                               ★
                             </div>
                           )}
                         </div>
 
-                        <span className="font-display font-bold text-xs text-white group-hover:text-[#FF5500] group-hover:underline transition truncate max-w-[120px]">
+                        <span className="font-display font-bold text-xs text-white group-hover:text-[#A3E635] group-hover:underline transition truncate max-w-[120px]">
                           {row.name}
                         </span>
                       </div>
@@ -1033,9 +1015,9 @@ export const VortexMatchRoom: React.FC<VortexMatchRoomProps> = ({
                     {/* Rank Column */}
                     <td className="py-3 px-3">
                       <div className="flex items-center gap-2">
-                        <FaceitLevelRing level={row.rankLevel} size={22} />
+                        <CaliberTierBadge level={row.rankLevel} size="sm" />
                         <span className="text-white font-mono text-xs font-semibold">
-                          {row.rankElo.toLocaleString()}
+                          {row.rankElo.toLocaleString()} MMR
                         </span>
                       </div>
                     </td>
@@ -1176,7 +1158,7 @@ export const VortexMatchRoom: React.FC<VortexMatchRoomProps> = ({
     const newMsg: MatchChatMessage = {
       id: `usr-team-${Date.now()}`,
       sender: currentGamerTag || 'M14',
-      avatar: currentAvatarUrl || 'https://distribution.faceit-cdn.net/images/ac453a50-dbca-4d42-a740-dac12bdc74c0.jpeg',
+      avatar: currentAvatarUrl || 'https://images.unsplash.com/photo-1566492031773-4f4e44671857?auto=format&fit=crop&w=150&q=80',
       team: 'team2',
       code: 'GY',
       text: teamInput.trim(),
@@ -1188,7 +1170,7 @@ export const VortexMatchRoom: React.FC<VortexMatchRoomProps> = ({
 
     setTimeout(() => {
       const botReplies = [
-        { sender: 'M18', text: 'nice round M14!', avatar: '/images/faceit_m18_badge.png' },
+        { sender: 'M18', text: 'nice round M14!', avatar: '/images/avatar_ghost_exact.png' },
         { sender: 'zimny', text: 'drop me awp next round', avatar: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=150&q=80' },
         { sender: 'Nascar777', text: 'queue next match guys?', avatar: 'https://images.unsplash.com/photo-1522075469751-3a6694fb2f61?auto=format&fit=crop&w=150&q=80' }
       ];
@@ -1216,7 +1198,7 @@ export const VortexMatchRoom: React.FC<VortexMatchRoomProps> = ({
     const newMsg: MatchChatMessage = {
       id: `usr-room-${Date.now()}`,
       sender: currentGamerTag || 'M14',
-      avatar: currentAvatarUrl || 'https://distribution.faceit-cdn.net/images/ac453a50-dbca-4d42-a740-dac12bdc74c0.jpeg',
+      avatar: currentAvatarUrl || 'https://images.unsplash.com/photo-1566492031773-4f4e44671857?auto=format&fit=crop&w=150&q=80',
       team: 'team2',
       code: 'GY',
       text: roomInput.trim(),
@@ -1245,17 +1227,17 @@ export const VortexMatchRoom: React.FC<VortexMatchRoomProps> = ({
         onClick={(e) => handleOpenPlayerFlyout(e, player.name)}
         className={`rounded-xl border transition p-3 shadow-md relative group cursor-pointer ${
           isSelected 
-            ? 'border-[#FF5500]/70 bg-[#161722]' 
+            ? 'border-[#A3E635]/70 bg-[#161F14]' 
             : 'border-[#222432] bg-[#14151D] hover:border-white/20'
         }`}
       >
         {/* TOP ROW: AVATAR MODULE (LEFT) + PLAYER IDENTITY (RIGHT) */}
         <div className="flex items-start gap-3">
           
-          {/* Left: Dedicated Avatar Container with Exact 1:1 FACEIT Anti-Cheat Placement */}
+          {/* Left: Dedicated Avatar Container with Caliber Anti-Cheat Placement */}
           <div className="relative w-12 h-12 shrink-0">
             {/* Captain Crown if player.isCaptain */}
-            {player.isCaptain && <FaceitCaptainCrown />}
+            {player.isCaptain && <CaliberCaptainBadge />}
 
             {/* Circular Avatar Photo */}
             <img 
@@ -1266,25 +1248,25 @@ export const VortexMatchRoom: React.FC<VortexMatchRoomProps> = ({
 
             {/* Target priority badge at top-right */}
             {player.hasPriority && (
-              <div className="absolute -top-1 -right-1 w-3.5 h-3.5 rounded-full bg-[#FF5500] flex items-center justify-center text-[8px] text-black font-black shadow-sm" title="Priority">
+              <div className="absolute -top-1 -right-1 w-3.5 h-3.5 rounded-full bg-[#182312] border border-[#A3E635] flex items-center justify-center text-[8px] text-[#A3E635] font-black shadow-sm" title="Priority">
                 ★
               </div>
             )}
 
-            {/* Authentic FACEIT Anti-Cheat Shield Badge (Overlapping photo at bottom-right) */}
-            <FaceitAntiCheatShield 
+            {/* Caliber Kernel Anti-Cheat Shield Badge */}
+            <CaliberAnticheatBadge 
               size={18} 
               className="absolute -bottom-1 -right-1 z-10" 
             />
           </div>
 
-          {/* Right: Country, Name, Verified, Elo, Level Ring */}
+          {/* Right: Country, Name, Verified, MMR, Tactical Badge */}
           <div className="flex-1 min-w-0">
             <div className="flex items-center justify-between gap-1.5">
               <div className="flex items-center gap-1.5 truncate">
                 <CountryFlag code={player.code} name={player.countryName} size="xs" />
                 <span className={`font-display font-bold text-xs truncate ${
-                  isCurrentUser ? 'text-[#FF5500]' : 'text-white'
+                  isCurrentUser ? 'text-[#A3E635]' : 'text-white'
                 }`}>
                   {player.name}
                 </span>
@@ -1295,10 +1277,10 @@ export const VortexMatchRoom: React.FC<VortexMatchRoomProps> = ({
 
               <div className="flex items-center gap-2 shrink-0">
                 <div className="flex items-center gap-1 text-slate-400 font-mono text-[11px] font-bold">
-                  <Activity className="w-3 h-3 text-slate-500" />
-                  <span className="text-slate-200">{player.elo.toLocaleString()}</span>
+                  <TrendingUp className="w-3 h-3 text-[#A3E635]" />
+                  <span className="text-slate-200">{player.elo.toLocaleString()} MMR</span>
                 </div>
-                <FaceitLevelRing level={player.level} size={24} />
+                <CaliberTierBadge level={player.level} size="sm" />
               </div>
             </div>
 
@@ -1414,14 +1396,14 @@ export const VortexMatchRoom: React.FC<VortexMatchRoomProps> = ({
               }`}
             >
               <span>STATS</span>
-              <span className="px-1.5 py-0.2 rounded bg-[#FF5500] text-black text-[9px] font-black uppercase">
+              <span className="px-1.5 py-0.2 rounded bg-[#A3E635] text-black text-[9px] font-black uppercase">
                 NEW
               </span>
             </button>
           </div>
         </div>
 
-        {/* Right Action Icons: 💬 Chat, 🔗 Share, ⋮ 3-Dots Menu, ✕ Close (Clean & Separated - 1:1 FACEIT) */}
+        {/* Right Action Icons: 💬 Chat, 🔗 Share, ⋮ 3-Dots Menu, ✕ Close (Clean & Tactical) */}
         <div className="flex items-center gap-6 text-[#9498A9]">
           
           {/* Chat Toggle Icon */}
@@ -1434,7 +1416,7 @@ export const VortexMatchRoom: React.FC<VortexMatchRoomProps> = ({
             title="Toggle Match Chat"
           >
             <MessageSquare className="w-4 h-4" />
-            <span className="absolute -top-0.5 -right-0.5 w-2 h-2 rounded-full bg-[#FF5500] animate-pulse" />
+            <span className="absolute -top-0.5 -right-0.5 w-2 h-2 rounded-full bg-[#A3E635] animate-pulse" />
           </button>
 
           {/* Share Link Icon */}
@@ -1471,7 +1453,7 @@ export const VortexMatchRoom: React.FC<VortexMatchRoomProps> = ({
                     }}
                     className="w-full flex items-center gap-2.5 px-3 py-2 rounded-lg hover:bg-white/[0.06] text-slate-200 hover:text-white text-xs font-mono transition text-left cursor-pointer"
                   >
-                    <Headphones className="w-3.5 h-3.5 text-[#FF5500]" />
+                    <Headphones className="w-3.5 h-3.5 text-[#A3E635]" />
                     <span>Support</span>
                   </button>
                 </div>
@@ -1517,8 +1499,8 @@ export const VortexMatchRoom: React.FC<VortexMatchRoomProps> = ({
             <div className="flex items-center justify-between text-xs font-mono text-slate-400 pb-2.5 border-b border-white/[0.06]">
               <div className="flex items-center gap-2">
                 <span className="text-slate-300 font-bold">Matchmaking / EU / Standard Match</span>
-                <span className="flex items-center gap-1 px-2 py-0.5 rounded bg-[#FF5500]/15 text-[#FF5500] text-[10px] font-bold border border-[#FF5500]/30">
-                  <ShieldCheck className="w-3 h-3" />
+                <span className="flex items-center gap-1 px-2 py-0.5 rounded bg-[#A3E635]/15 text-[#A3E635] text-[10px] font-bold border border-[#A3E635]/30">
+                  <ShieldCheck className="w-3 h-3 text-[#A3E635]" />
                   Verified
                 </span>
               </div>
@@ -1547,9 +1529,9 @@ export const VortexMatchRoom: React.FC<VortexMatchRoomProps> = ({
                   </h2>
                   {activeTab === 'overview' && (
                     <div className="text-[11px] font-mono text-slate-400 flex items-center md:justify-end gap-2 mt-0.5">
-                      <span className="text-emerald-400 font-bold">{activeMatch.team1.avgElo.toLocaleString()} AVG ELO</span>
+                      <span className="text-emerald-400 font-bold">{activeMatch.team1.avgElo.toLocaleString()} AVG MMR</span>
                       <span>•</span>
-                      <span>Level {activeMatch.team1.avgLevel}</span>
+                      <span>Tier {activeMatch.team1.avgLevel}</span>
                     </div>
                   )}
                 </div>
@@ -1575,11 +1557,11 @@ export const VortexMatchRoom: React.FC<VortexMatchRoomProps> = ({
                   </span>
                 </div>
 
-                {/* FACEIT SUPER MATCH 50% vs 50% FAIR WIN PROBABILITY */}
+                {/* CALIBER SUPER MATCH 50% vs 50% FAIR WIN PROBABILITY */}
                 <div className="p-2.5 rounded-xl bg-black/70 border border-white/10 space-y-1.5 shadow-lg">
                   <div className="flex items-center justify-between text-[10px] font-mono font-bold">
                     <span className="text-[#A3E635]">{activeMatch.winProbabilityTeam1}% WIN</span>
-                    <span className="text-slate-400 text-[9px]">±{activeMatch.eloGainWin} ELO</span>
+                    <span className="text-slate-400 text-[9px]">±{activeMatch.eloGainWin} MMR</span>
                     <span className="text-blue-400">{activeMatch.winProbabilityTeam2}% WIN</span>
                   </div>
                   <div className="w-full h-2 rounded-full bg-slate-800 overflow-hidden flex">
@@ -1587,7 +1569,7 @@ export const VortexMatchRoom: React.FC<VortexMatchRoomProps> = ({
                     <div style={{ width: `${activeMatch.winProbabilityTeam2}%` }} className="bg-gradient-to-r from-blue-500 to-indigo-500" />
                   </div>
                   <div className="text-[9px] font-mono text-emerald-400 font-bold tracking-tight">
-                    ✓ Fair ELO Balanced (Δ {activeMatch.eloDiff} ELO)
+                    ✓ Fair MMR Balanced (Δ {activeMatch.eloDiff} MMR)
                   </div>
                 </div>
               </div>
@@ -1612,9 +1594,9 @@ export const VortexMatchRoom: React.FC<VortexMatchRoomProps> = ({
                   </h2>
                   {activeTab === 'overview' && (
                     <div className="text-[11px] font-mono text-slate-400 flex items-center gap-2 mt-0.5">
-                      <span className="text-blue-400 font-bold">{activeMatch.team2.avgElo.toLocaleString()} AVG ELO</span>
+                      <span className="text-blue-400 font-bold">{activeMatch.team2.avgElo.toLocaleString()} AVG MMR</span>
                       <span>•</span>
-                      <span>Level {activeMatch.team2.avgLevel}</span>
+                      <span>Tier {activeMatch.team2.avgLevel}</span>
                     </div>
                   )}
                 </div>
@@ -1908,7 +1890,7 @@ export const VortexMatchRoom: React.FC<VortexMatchRoomProps> = ({
                       className="w-full py-2.5 rounded-xl bg-gradient-to-r from-[#84CC16] to-[#A3E635] hover:brightness-110 text-slate-950 font-display font-black text-xs uppercase tracking-wider transition shadow-lg flex items-center justify-center gap-1.5 cursor-pointer active:scale-95"
                     >
                       <Trophy className="w-3.5 h-3.5" />
-                      <span>Record Official Match Result (+{activeMatch.eloGainWin} ELO)</span>
+                      <span>Record Match Result (+{activeMatch.eloGainWin} MMR)</span>
                     </button>
                   </div>
                 ) : (
@@ -1917,7 +1899,7 @@ export const VortexMatchRoom: React.FC<VortexMatchRoomProps> = ({
                       🎉 VICTORY! {activeMatch.team1.name} {matchSimulatedResult.score1} - {matchSimulatedResult.score2} {activeMatch.team2.name}
                     </div>
                     <div className="text-[10px] font-mono text-emerald-400 font-bold mt-0.5">
-                      ✓ +{activeMatch.eloGainWin} ELO Added • Match Record Finalized
+                      ✓ +{activeMatch.eloGainWin} MMR Added • Match Record Finalized
                     </div>
                   </div>
                 )}
@@ -1925,7 +1907,7 @@ export const VortexMatchRoom: React.FC<VortexMatchRoomProps> = ({
                 <button
                   onClick={() => {
                     sound.playClick();
-                    const demoUrl = `https://demos-europe-west.faceit.com/cs2/${matchId}.dem.gz`;
+                    const demoUrl = `https://demos.caliberclutch.gg/cs2/${matchId}.dem.gz`;
                     const link = document.createElement('a');
                     link.href = demoUrl;
                     link.setAttribute('download', `caliber-match-${matchId}.dem.gz`);
@@ -1933,7 +1915,7 @@ export const VortexMatchRoom: React.FC<VortexMatchRoomProps> = ({
                     link.click();
                     document.body.removeChild(link);
                   }}
-                  className="w-full py-2.5 rounded-lg bg-[#18110E] hover:bg-[#201511] border border-[#FF5500]/20 text-[#FF5500] font-display font-bold text-xs uppercase tracking-wider transition flex items-center justify-center cursor-pointer shadow-sm active:scale-95"
+                  className="w-full py-2.5 rounded-lg bg-[#12190E] hover:bg-[#182312] border border-[#A3E635]/30 text-[#A3E635] font-display font-bold text-xs uppercase tracking-wider transition flex items-center justify-center cursor-pointer shadow-sm active:scale-95"
                 >
                   <span>WATCH GOTV REPLAY (.dem)</span>
                 </button>
@@ -2015,7 +1997,7 @@ export const VortexMatchRoom: React.FC<VortexMatchRoomProps> = ({
               }`}
             >
               <span>MATCH INSIGHTS</span>
-              <span className="px-1.5 py-0.2 rounded bg-[#FF5500] text-black text-[9px] font-black uppercase">
+              <span className="px-1.5 py-0.2 rounded bg-[#A3E635] text-slate-950 text-[9px] font-black uppercase">
                 NEW
               </span>
             </button>
@@ -2059,7 +2041,7 @@ export const VortexMatchRoom: React.FC<VortexMatchRoomProps> = ({
               <div className="grid grid-cols-2 sm:grid-cols-5 gap-3 pt-4 border-t border-white/5 items-center">
                 <div className="p-3 rounded-xl bg-emerald-500/10 border border-emerald-500/30 text-center col-span-2 sm:col-span-1">
                   <div className="text-2xl font-display font-black text-emerald-400">1.68</div>
-                  <div className="text-[9px] font-mono text-slate-400 uppercase mt-0.5">FACEIT Rating</div>
+                  <div className="text-[9px] font-mono text-slate-400 uppercase mt-0.5">Caliber Rating</div>
                 </div>
                 
                 <div className="text-center sm:text-left">
@@ -2126,7 +2108,7 @@ export const VortexMatchRoom: React.FC<VortexMatchRoomProps> = ({
 
               <div className="p-3.5 rounded-xl bg-[#14151D] border border-[#232532] flex items-center justify-between">
                 <div className="flex items-center gap-2.5">
-                  <img src="/images/faceit_m18_badge.png" alt="M18" className="w-8 h-8 rounded-full object-contain bg-black" />
+                  <img src="/images/avatar_ghost_exact.png" alt="M18" className="w-8 h-8 rounded-full object-contain bg-black" />
                   <span className="font-display font-bold text-white text-xs">M18</span>
                 </div>
                 <div className="text-right">
@@ -2173,7 +2155,7 @@ export const VortexMatchRoom: React.FC<VortexMatchRoomProps> = ({
                   onClick={() => { sound.playClick(); setSortFilter('players'); }}
                   className={`px-3 py-1 rounded-full transition cursor-pointer text-xs font-sans ${
                     sortFilter === 'players' 
-                      ? 'bg-[#1C1E2A] text-[#FF5500] font-bold shadow-sm' 
+                      ? 'bg-[#1C1E2A] text-[#A3E635] font-bold shadow-sm' 
                       : 'text-slate-400 hover:text-white'
                   }`}
                 >
@@ -2189,7 +2171,7 @@ export const VortexMatchRoom: React.FC<VortexMatchRoomProps> = ({
                     onClick={() => { sound.playClick(); setSideFilter(side); }}
                     className={`px-2.5 py-0.5 rounded-full uppercase font-black transition cursor-pointer ${
                       sideFilter === side 
-                        ? 'bg-[#FF5500] text-black shadow-sm' 
+                        ? 'bg-[#A3E635] text-slate-950 shadow-sm' 
                         : 'text-slate-400 hover:text-white'
                     }`}
                   >
@@ -2209,7 +2191,7 @@ export const VortexMatchRoom: React.FC<VortexMatchRoomProps> = ({
                 score: sideFilter === 't' ? 6 : sideFilter === 'ct' ? 7 : 13,
                 name: 'team_Rosen33',
                 avatar: '/images/avatar_duck_exact.png',
-                avgRank: '(9) 1,801',
+                avgRank: 'Tier 9 • 1,801 MMR',
                 firstHalf: sideFilter === 't' ? 0 : 7,
                 secondHalf: sideFilter === 'ct' ? 0 : 6,
                 isWinner: sideFilter !== 't'
@@ -2218,7 +2200,7 @@ export const VortexMatchRoom: React.FC<VortexMatchRoomProps> = ({
                 score: sideFilter === 't' ? 5 : sideFilter === 'ct' ? 2 : 7,
                 name: 'team_Zalevvo',
                 avatar: '/images/avatar_ghost_exact.png',
-                avgRank: '(8) 1,728',
+                avgRank: 'Tier 8 • 1,728 MMR',
                 firstHalf: sideFilter === 'ct' ? 0 : 5,
                 secondHalf: sideFilter === 't' ? 0 : 2,
                 isWinner: false
@@ -2227,7 +2209,7 @@ export const VortexMatchRoom: React.FC<VortexMatchRoomProps> = ({
           )}
 
           {/* ======================================================== */}
-          {/* 5. MATCH HIGHLIGHTS VIDEO SECTION (Exact 1:1 FACEIT)     */}
+          {/* 5. MATCH HIGHLIGHTS VIDEO SECTION                        */}
           {/* ======================================================== */}
           <div className="space-y-4 pt-4">
             <h2 className="text-xl font-display font-black text-white tracking-wide">
@@ -2268,7 +2250,7 @@ export const VortexMatchRoom: React.FC<VortexMatchRoomProps> = ({
               {/* Highlight Attribution & Share Details (30%) */}
               <div className="lg:col-span-4 p-6 flex flex-col justify-between space-y-4 bg-[#12131A] border-t lg:border-t-0 lg:border-l border-white/5">
                 <div>
-                  <div className="text-[10px] font-mono font-black text-[#FF5500] uppercase tracking-widest">
+                  <div className="text-[10px] font-mono font-black text-[#A3E635] uppercase tracking-widest">
                     PLAY OF THE MATCH
                   </div>
                   <h3 className="text-xl font-display font-black text-white mt-1 leading-snug">
@@ -2329,7 +2311,7 @@ export const VortexMatchRoom: React.FC<VortexMatchRoomProps> = ({
                 </div>
                 <div className="flex items-center justify-between pt-4 border-t border-white/5">
                   <div className="flex items-center gap-1.5">
-                    <img src={currentAvatarUrl || 'https://distribution.faceit-cdn.net/images/ac453a50-dbca-4d42-a740-dac12bdc74c0.jpeg'} alt="M14" className="w-5 h-5 rounded-full object-cover" />
+                    <img src={currentAvatarUrl || 'https://images.unsplash.com/photo-1566492031773-4f4e44671857?auto=format&fit=crop&w=150&q=80'} alt="M14" className="w-5 h-5 rounded-full object-cover" />
                     <span className="text-[10px] font-mono font-bold text-white truncate max-w-[70px]">M14</span>
                   </div>
                   <Lock className="w-3.5 h-3.5 text-emerald-400" />
@@ -2756,16 +2738,11 @@ export const VortexMatchRoom: React.FC<VortexMatchRoomProps> = ({
               <CountryFlag code={selectedFlyoutPlayer.code} name={selectedFlyoutPlayer.countryName} size="sm" />
             </div>
 
-            {/* CS Soldier Silhouette + Level Ring + Elo */}
+            {/* Tactical Caliber Tier Badge + MMR */}
             <div className="flex items-center justify-center gap-2 mt-2">
-              <svg className="w-4 h-4 text-slate-300 fill-current shrink-0" viewBox="0 0 24 24">
-                <circle cx="15.5" cy="4.5" r="2" />
-                <path d="M7 8.5l3.5 1.5 3-2 1.5.5-2 3.5 2 2-1.5 1.5-3-3-1.5 1v5.5H7.5v-6l2-2.5-2.5-1.5z" />
-                <path d="M12 11l6-2 3 .5v1l-3 .5-5 1.5z" />
-              </svg>
-              <FaceitLevelRing level={selectedFlyoutPlayer.level} size={22} />
-              <span className="font-mono font-bold text-white text-sm">
-                {selectedFlyoutPlayer.elo.toLocaleString()}
+              <CaliberTierBadge level={selectedFlyoutPlayer.level} size="sm" showLabel />
+              <span className="font-mono font-bold text-slate-200 text-sm">
+                {selectedFlyoutPlayer.elo.toLocaleString()} MMR
               </span>
             </div>
 
@@ -2858,7 +2835,7 @@ export const VortexMatchRoom: React.FC<VortexMatchRoomProps> = ({
             
             <div className="flex items-center justify-between border-b border-white/[0.08] pb-3">
               <div className="flex items-center gap-2.5">
-                <Headphones className="w-5 h-5 text-[#FF5500]" />
+                <Headphones className="w-5 h-5 text-[#A3E635]" />
                 <h3 className="font-display font-black text-white text-base uppercase">
                   Live Match Support
                 </h3>
@@ -2874,7 +2851,7 @@ export const VortexMatchRoom: React.FC<VortexMatchRoomProps> = ({
             {!supportCallSubmitted ? (
               <div className="space-y-4">
                 <div className="text-xs font-mono text-slate-300">
-                  Select issue to dispatch a live FACEIT match admin:
+                  Select issue to dispatch a live Caliber match admin:
                 </div>
                 <div className="space-y-2">
                   {[
@@ -2891,7 +2868,7 @@ export const VortexMatchRoom: React.FC<VortexMatchRoomProps> = ({
                       }}
                       className={`p-2.5 rounded-xl border text-xs font-mono transition cursor-pointer ${
                         selectedSupportIssue === issue 
-                          ? 'bg-[#FF5500]/15 border-[#FF5500] text-white' 
+                          ? 'bg-[#A3E635]/15 border-[#A3E635] text-white' 
                           : 'bg-black/30 border-white/5 text-slate-400 hover:text-slate-200'
                       }`}
                     >
@@ -2905,7 +2882,7 @@ export const VortexMatchRoom: React.FC<VortexMatchRoomProps> = ({
                     sound.playTournamentVictory();
                     setSupportCallSubmitted(true);
                   }}
-                  className="w-full py-3 rounded-xl bg-[#FF5500] hover:bg-[#FF6611] text-black font-display font-black text-xs uppercase tracking-wider transition cursor-pointer"
+                  className="w-full py-3 rounded-xl bg-[#A3E635] hover:bg-[#bef264] text-slate-950 font-display font-black text-xs uppercase tracking-wider transition cursor-pointer"
                 >
                   Call Live Admin
                 </button>

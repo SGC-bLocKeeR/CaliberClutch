@@ -287,7 +287,7 @@ export const sendFriendRequest = (
   const req: FriendRequest = {
     id: `req-${Date.now()}-${Math.random().toString(36).substring(2, 7)}`,
     fromGamerTag: fromUser.gamerTag,
-    fromAvatar: fromUser.avatar || 'https://distribution.faceit-cdn.net/images/ac453a50-dbca-4d42-a740-dac12bdc74c0.jpeg',
+    fromAvatar: fromUser.avatar || 'https://images.unsplash.com/photo-1566492031773-4f4e44671857?auto=format&fit=crop&w=150&q=80',
     fromLevel: fromUser.level || 1,
     fromElo: fromUser.elo ?? 0,
     fromVerification: fromUser.verification || 'none',
@@ -389,7 +389,7 @@ export const acceptFriendRequest = (
   const newFriendForSender: SocialFriend = {
     id: `f-${currentGamerTag.toLowerCase()}`,
     name: currentGamerTag,
-    avatar: currentUserInfo?.avatar || 'https://distribution.faceit-cdn.net/images/ac453a50-dbca-4d42-a740-dac12bdc74c0.jpeg',
+    avatar: currentUserInfo?.avatar || 'https://images.unsplash.com/photo-1566492031773-4f4e44671857?auto=format&fit=crop&w=150&q=80',
     status: 'online',
     gameStatus: 'Online • In Lobby',
     verification: currentUserInfo?.verification || 'verified',

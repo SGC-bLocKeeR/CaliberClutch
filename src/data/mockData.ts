@@ -595,7 +595,7 @@ export const CURRENT_USER_PASSPORT: GamerPassport = {
   id: 'passport-user-01',
   gamerTag: 'M14 | caliberclutch.vercel.app',
   realName: 'M14',
-  avatar: 'https://distribution.faceit-cdn.net/images/ac453a50-dbca-4d42-a740-dac12bdc74c0.jpeg',
+  avatar: 'https://images.unsplash.com/photo-1566492031773-4f4e44671857?auto=format&fit=crop&w=150&q=80',
   country: 'Kosovo',
   countryFlag: '🇽🇰',
   bio: 'Competitive CS2 Rifler & Faceit Level 7 Player from Ferizaj, Kosovo. In-game: M14. Member since Dec 2019 with 840+ CS2 matches.',
