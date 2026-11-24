@@ -2592,8 +2592,8 @@ export const VortexDashboard: React.FC<VortexDashboardProps> = ({
 
     // Remaining players from the balanced match who haven't accepted yet
     const allMatchPlayers = [
-      ...currentBalancedMatch.team1.players.map(p => ({ name: p.name, avatar: p.avatar, isUser: p.name === currentGamerTag })),
-      ...currentBalancedMatch.team2.players.map(p => ({ name: p.name, avatar: p.avatar, isUser: false }))
+      ...currentBalancedMatch.team1.players.map(p => ({ ...p, isUser: p.name === currentGamerTag })),
+      ...currentBalancedMatch.team2.players.map(p => ({ ...p, isUser: false }))
     ];
 
     let botIdx = 0;
@@ -3629,6 +3629,18 @@ export const VortexDashboard: React.FC<VortexDashboardProps> = ({
                         >
                           <Shield className="w-3.5 h-3.5 text-[#A3E635]" />
                           <span>Team Roster [{currentClanTag || 'M14'}]</span>
+                        </button>
+                        <button
+                          type="button"
+                          onClick={() => {
+                            sound.playClick();
+                            triggerMatchFound();
+                          }}
+                          className="px-3.5 py-1 rounded-full bg-gradient-to-r from-[#A3E635]/20 to-emerald-500/20 hover:from-[#A3E635]/30 hover:to-emerald-500/30 border border-[#A3E635]/60 text-[#A3E635] hover:text-white font-mono text-xs font-bold flex items-center gap-1.5 transition cursor-pointer shadow-[0_0_15px_rgba(163,230,53,0.3)] animate-pulse"
+                          title="Preview the new Caliber Clutch Tactical Match Ready Modal"
+                        >
+                          <Zap className="w-3.5 h-3.5 fill-[#A3E635]" />
+                          <span>DEMO: Match Ready</span>
                         </button>
                       </div>
                     </div>
@@ -7492,128 +7504,292 @@ export const VortexDashboard: React.FC<VortexDashboardProps> = ({
       </div>
 
       {/* ======================================================== */}
-      {/* MATCH READY FOUND POPUP MODAL (1:1 AUTHENTIC FACEIT)    */}
+      {/* CALIBER CLUTCH TACTICAL MATCH READY DEPLOYMENT PROTOCOL  */}
       {/* ======================================================== */}
       {matchFoundModal && (
-        <div className="fixed inset-0 z-50 bg-black/85 backdrop-blur-md flex items-center justify-center p-4 animate-in fade-in duration-150">
-          <div className="relative w-full max-w-lg bg-[#0F121A] border-2 border-[#A3E635] rounded-3xl p-6 sm:p-8 shadow-2xl space-y-6 animate-in zoom-in-95">
-            <div className="text-center space-y-2">
-              <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-[#18210C] border border-[#A3E635]/50 text-[#A3E635] text-xs font-mono font-bold uppercase">
-                <span className="w-2 h-2 rounded-full bg-[#A3E635] animate-ping" />
-                MATCH READY
+        <div className="fixed inset-0 z-50 bg-black/90 backdrop-blur-md flex items-center justify-center p-3 sm:p-4 animate-in fade-in duration-200 overflow-y-auto">
+          <div className="relative w-full max-w-4xl bg-gradient-to-b from-[#0F141E] via-[#090D14] to-[#06080D] border-2 border-[#A3E635]/60 rounded-3xl p-5 sm:p-7 shadow-[0_0_60px_rgba(163,230,53,0.3)] space-y-5 animate-in zoom-in-95 my-auto overflow-hidden">
+            
+            {/* Top Atmospheric Grid & Accent Lights */}
+            <div className="absolute top-0 right-0 w-80 h-80 bg-[#A3E635]/5 rounded-full blur-3xl pointer-events-none" />
+            <div className="absolute bottom-0 left-0 w-80 h-80 bg-emerald-500/5 rounded-full blur-3xl pointer-events-none" />
+
+            {/* Corner Crosshair Reticles (CS2 Tactical Operative Aesthetic) */}
+            <span className="absolute top-3 left-3 text-[#A3E635]/40 text-xs font-mono select-none pointer-events-none hidden sm:block">⌜ CC-OP-5V5 ⌝</span>
+            <span className="absolute top-3 right-12 text-[#A3E635]/40 text-xs font-mono select-none pointer-events-none hidden sm:block">⌞ TICK-128 ⌟</span>
+
+            {/* Close / Dismiss Demo Button */}
+            <button
+              onClick={() => {
+                sound.playClick();
+                setMatchFoundModal(false);
+              }}
+              className="absolute top-4 right-4 p-2 rounded-xl bg-white/5 hover:bg-white/10 text-slate-400 hover:text-white transition cursor-pointer z-10"
+              title="Close Demo"
+            >
+              <X className="w-5 h-5" />
+            </button>
+
+            {/* Header: Tactical Alert & Countdown Clock */}
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-4 border-b border-white/[0.08] relative z-10">
+              <div className="space-y-1.5 text-left">
+                <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-[#18210C] border border-[#A3E635]/50 text-[#A3E635] text-xs font-mono font-bold uppercase tracking-wider shadow-sm">
+                  <span className="w-2 h-2 rounded-full bg-[#A3E635] animate-ping" />
+                  CALIBER CLUTCH // TACTICAL DEPLOYMENT
+                </div>
+                <h3 className="text-xl sm:text-2xl font-black font-display text-white tracking-wide flex items-center gap-2">
+                  <span>5v5 COMPETITIVE MATCH READY</span>
+                  <Crosshair className="w-5 h-5 text-[#A3E635] hidden sm:inline" />
+                </h3>
+                <p className="text-xs font-mono text-slate-400 flex flex-wrap items-center gap-2">
+                  <span className="text-emerald-400 font-bold">FRA-01 (Frankfurt 128-Tick)</span>
+                  <span>•</span>
+                  <span>Anubis / Mirage Pool</span>
+                  <span>•</span>
+                  <span className="text-slate-500">Ring-0 Protected</span>
+                </p>
               </div>
-              <h3 className="text-2xl font-black font-display text-white tracking-wide">
-                5v5 COMPETITIVE MATCH
-              </h3>
-              
-              {/* Countdown and Fair 50/50 Balance info */}
-              <div className="flex items-center justify-center gap-2 pt-1">
-                <Clock className="w-4 h-4 text-[#A3E635]" />
-                <span className="text-sm font-mono text-slate-300">
-                  Time remaining:{' '}
-                  <strong className={matchReadyCountdown <= 15 ? 'text-red-400 font-bold' : 'text-[#A3E635] font-bold'}>
-                    00:{matchReadyCountdown.toString().padStart(2, '0')}
-                  </strong>
-                </span>
-              </div>
-              <div className="flex flex-wrap items-center justify-center gap-2 pt-1 text-xs font-mono">
-                <span className="px-2 py-0.5 rounded bg-emerald-500/20 text-emerald-400 font-bold border border-emerald-500/30">
-                  50% vs 50% Win Rate Balance
-                </span>
-                <span className="text-slate-400 text-[11px]">
-                  {currentBalancedMatch ? `${currentBalancedMatch.team1.stackType} vs ${currentBalancedMatch.team2.stackType}` : 'Strict ELO Match'}
-                </span>
+
+              {/* Digital HUD Countdown Timer */}
+              <div className="flex items-center gap-3 shrink-0 self-end sm:self-center">
+                <div className="px-4 py-2.5 rounded-2xl bg-black/60 border border-white/10 flex items-center gap-2.5 shadow-inner">
+                  <Clock className={`w-5 h-5 ${matchReadyCountdown <= 10 ? 'text-red-400 animate-pulse' : 'text-[#A3E635]'}`} />
+                  <div className="text-right font-mono">
+                    <div className="text-[9px] uppercase tracking-wider text-slate-400 font-bold">Time Left</div>
+                    <div className={`text-xl font-black ${matchReadyCountdown <= 10 ? 'text-red-400 animate-pulse' : 'text-[#A3E635]'}`}>
+                      00:{matchReadyCountdown.toString().padStart(2, '0')}
+                    </div>
+                  </div>
+                </div>
               </div>
             </div>
 
-            {/* 10 Player Profile Avatar Boxes (FACEIT Authentic) */}
-            <div className="p-4 sm:p-5 rounded-2xl bg-[#141722] border border-[#232938] text-center space-y-3">
-              <div className="flex items-center justify-between text-xs font-mono">
-                <span className="text-slate-400">Players Accepted:</span>
-                <span className="text-[#A3E635] font-black text-sm">
-                  {acceptedPlayerList.length} / 10
-                </span>
-              </div>
+            {/* Countdown Shrinking Progress Line */}
+            <div className="h-1.5 w-full bg-black/60 rounded-full overflow-hidden p-[0.5px]">
+              <div 
+                className={`h-full rounded-full transition-all duration-1000 ${matchReadyCountdown <= 10 ? 'bg-gradient-to-r from-red-500 to-amber-500 shadow-[0_0_10px_#ef4444]' : 'bg-gradient-to-r from-emerald-500 to-[#A3E635] shadow-[0_0_10px_#A3E635]'}`}
+                style={{ width: `${Math.max(0, Math.min(100, (matchReadyCountdown / 30) * 100))}%` }}
+              />
+            </div>
 
-              {/* Grid of 10 avatar boxes */}
-              <div className="grid grid-cols-5 sm:grid-cols-10 gap-2 justify-items-center">
-                {Array.from({ length: 10 }).map((_, idx) => {
-                  const player = acceptedPlayerList[idx];
-                  if (player) {
+            {/* 5v5 TEAM ROSTERS FACE-OFF (ALPHA SQUAD vs OMEGA SQUAD) */}
+            <div className="grid grid-cols-1 lg:grid-cols-11 gap-3 sm:gap-4 items-stretch relative z-10">
+              
+              {/* LEFT: TEAM ALPHA (5 Players) */}
+              <div className="lg:col-span-5 p-3.5 sm:p-4 rounded-2xl bg-[#0B0E16] border border-white/[0.08] flex flex-col justify-between space-y-2.5 shadow-lg">
+                <div className="flex items-center justify-between pb-2 border-b border-white/[0.06]">
+                  <div className="flex items-center gap-2">
+                    <span className="w-2.5 h-2.5 rounded-full bg-[#A3E635] shadow-[0_0_8px_#A3E635]" />
+                    <span className="font-display font-black text-white text-sm tracking-wider uppercase">ALPHA SQUAD</span>
+                    <span className="text-[10px] font-mono text-[#A3E635] bg-[#A3E635]/10 px-1.5 py-0.2 rounded border border-[#A3E635]/30">TEAM 1</span>
+                  </div>
+                  <span className="text-xs font-mono text-slate-400 font-bold">
+                    Avg: {currentBalancedMatch?.team1?.avgElo || effectiveElo} MMR
+                  </span>
+                </div>
+
+                <div className="space-y-1.5">
+                  {(currentBalancedMatch?.team1?.players || Array.from({ length: 5 }).map((_, i) => ({
+                    name: i === 0 ? currentGamerTag : `Alpha_Operative_${i + 1}`,
+                    avatar: currentAvatarUrl,
+                    level: 1,
+                    elo: effectiveElo,
+                    code: currentCountry.code,
+                    countryName: currentCountry.name,
+                    tag: currentClanTag,
+                    isUser: i === 0
+                  }))).map((player, idx) => {
+                    const isUserPlayer = player.name === currentGamerTag;
+                    const isAccepted = isUserPlayer ? userHasAccepted : acceptedPlayerList.some(a => a.name === player.name);
+                    const playerTier = getCaliberTier(player.elo || 0);
+
                     return (
                       <div
                         key={idx}
-                        className={`relative w-11 h-11 sm:w-10 sm:h-10 rounded-xl overflow-hidden border-2 transition-all duration-300 transform scale-100 animate-in zoom-in-75 ${
-                          player.isUser 
-                            ? 'border-[#A3E635] shadow-[0_0_15px_rgba(163,230,53,0.7)] ring-2 ring-[#A3E635]/50' 
-                            : 'border-emerald-400 shadow-[0_0_10px_rgba(52,211,153,0.4)]'
+                        className={`flex items-center justify-between p-2 rounded-xl transition-all duration-300 ${
+                          isUserPlayer
+                            ? 'bg-[#182312] border border-[#A3E635]/60 shadow-[0_0_12px_rgba(163,230,53,0.25)] ring-1 ring-[#A3E635]/40'
+                            : isAccepted
+                            ? 'bg-emerald-950/20 border border-emerald-500/20'
+                            : 'bg-white/[0.02] border border-white/5 opacity-70'
                         }`}
-                        title={player.name}
                       >
-                        <img
-                          src={player.avatar}
-                          alt={player.name}
-                          className="w-full h-full object-cover"
-                        />
-                        <div className="absolute -bottom-0.5 -right-0.5 w-3.5 h-3.5 rounded-full bg-emerald-500 border border-slate-950 flex items-center justify-center text-slate-950 shadow">
-                          <Check className="w-2 h-2 stroke-[3]" />
-                        </div>
-                        {player.isUser && (
-                          <div className="absolute top-0 inset-x-0 bg-[#A3E635] text-slate-950 text-[7px] font-black uppercase text-center font-mono leading-none py-0.5">
-                            YOU
+                        <div className="flex items-center gap-2.5 min-w-0">
+                          <div className={`relative w-8 h-8 rounded-lg overflow-hidden border shrink-0 ${isUserPlayer ? 'border-[#A3E635]' : isAccepted ? 'border-emerald-400' : 'border-white/10'}`}>
+                            <img src={player.avatar || currentAvatarUrl} alt={player.name} className="w-full h-full object-cover" />
                           </div>
-                        )}
+                          <div className="min-w-0 text-left">
+                            <div className="flex items-center gap-1.5">
+                              <span className="font-mono font-bold text-xs text-white truncate max-w-[110px] sm:max-w-[130px]">
+                                {player.name}
+                              </span>
+                              {isUserPlayer && (
+                                <span className="px-1.5 py-0.2 rounded bg-[#A3E635] text-slate-950 text-[8px] font-mono font-black">
+                                  YOU
+                                </span>
+                              )}
+                            </div>
+                            <div className="text-[10px] font-mono text-slate-400 truncate">
+                              {playerTier.tier} • {player.elo || 0} MMR
+                            </div>
+                          </div>
+                        </div>
+
+                        {/* Ready Pill */}
+                        <div className="shrink-0">
+                          {isAccepted ? (
+                            <span className="px-2 py-0.5 rounded-full bg-emerald-500/20 border border-emerald-500/40 text-emerald-400 text-[10px] font-mono font-bold flex items-center gap-1 shadow-sm">
+                              <Check className="w-3 h-3 stroke-[3]" /> READY
+                            </span>
+                          ) : (
+                            <span className="px-2 py-0.5 rounded-full bg-white/5 border border-white/10 text-slate-500 text-[10px] font-mono font-medium flex items-center gap-1 animate-pulse">
+                              <span className="w-1.5 h-1.5 rounded-full bg-amber-400/80" /> AWAITING
+                            </span>
+                          )}
+                        </div>
                       </div>
                     );
-                  }
-
-                  // Empty Waiting Slot
-                  return (
-                    <div
-                      key={idx}
-                      className="w-11 h-11 sm:w-10 sm:h-10 rounded-xl bg-black/50 border border-dashed border-white/15 flex items-center justify-center text-slate-600 transition"
-                      title={`Player #${idx + 1} waiting to accept...`}
-                    >
-                      <span className="text-[10px] font-mono font-bold text-slate-600">
-                        {idx + 1}
-                      </span>
-                    </div>
-                  );
-                })}
+                  })}
+                </div>
               </div>
+
+              {/* CENTER: VS & CONFIRMATION GAUGE */}
+              <div className="lg:col-span-1 flex lg:flex-col items-center justify-center gap-3 py-2 lg:py-0">
+                <div className="w-11 h-11 rounded-2xl bg-gradient-to-br from-[#1C2612] to-[#0A0D14] border-2 border-[#A3E635]/60 flex items-center justify-center font-display font-black text-[#A3E635] text-base shadow-[0_0_15px_rgba(163,230,53,0.3)]">
+                  VS
+                </div>
+
+                <div className="text-center">
+                  <div className="text-xl sm:text-2xl font-black font-display text-white">
+                    {acceptedPlayerList.length} <span className="text-slate-500 text-sm">/ 10</span>
+                  </div>
+                  <div className="text-[9px] font-mono font-black text-[#A3E635] uppercase tracking-wider">
+                    READY
+                  </div>
+                </div>
+
+                <div className="px-2 py-1 rounded-lg bg-white/5 border border-white/10 text-[9px] font-mono text-slate-400 text-center hidden lg:block">
+                  50/50 Fair Balance
+                </div>
+              </div>
+
+              {/* RIGHT: TEAM OMEGA (5 Players) */}
+              <div className="lg:col-span-5 p-3.5 sm:p-4 rounded-2xl bg-[#0B0E16] border border-white/[0.08] flex flex-col justify-between space-y-2.5 shadow-lg">
+                <div className="flex items-center justify-between pb-2 border-b border-white/[0.06]">
+                  <div className="flex items-center gap-2">
+                    <span className="w-2.5 h-2.5 rounded-full bg-rose-500 shadow-[0_0_8px_#f43f5e]" />
+                    <span className="font-display font-black text-white text-sm tracking-wider uppercase">OMEGA SQUAD</span>
+                    <span className="text-[10px] font-mono text-rose-400 bg-rose-500/10 px-1.5 py-0.2 rounded border border-rose-500/30">TEAM 2</span>
+                  </div>
+                  <span className="text-xs font-mono text-slate-400 font-bold">
+                    Avg: {currentBalancedMatch?.team2?.avgElo || 500} MMR
+                  </span>
+                </div>
+
+                <div className="space-y-1.5">
+                  {(currentBalancedMatch?.team2?.players || Array.from({ length: 5 }).map((_, i) => ({
+                    name: `Omega_Operative_${i + 1}`,
+                    avatar: 'https://distribution.faceit-cdn.net/images/ac453a50-dbca-4d42-a740-dac12bdc74c0.jpeg',
+                    level: 2,
+                    elo: 500,
+                    code: 'de',
+                    countryName: 'Germany',
+                    tag: 'CS2',
+                    isUser: false
+                  }))).map((player, idx) => {
+                    const isAccepted = acceptedPlayerList.some(a => a.name === player.name);
+                    const playerTier = getCaliberTier(player.elo || 0);
+
+                    return (
+                      <div
+                        key={idx}
+                        className={`flex items-center justify-between p-2 rounded-xl transition-all duration-300 ${
+                          isAccepted
+                            ? 'bg-emerald-950/20 border border-emerald-500/20'
+                            : 'bg-white/[0.02] border border-white/5 opacity-70'
+                        }`}
+                      >
+                        <div className="flex items-center gap-2.5 min-w-0">
+                          <div className={`relative w-8 h-8 rounded-lg overflow-hidden border shrink-0 ${isAccepted ? 'border-emerald-400' : 'border-white/10'}`}>
+                            <img src={player.avatar} alt={player.name} className="w-full h-full object-cover" />
+                          </div>
+                          <div className="min-w-0 text-left">
+                            <span className="font-mono font-bold text-xs text-white truncate max-w-[110px] sm:max-w-[130px] block">
+                              {player.name}
+                            </span>
+                            <div className="text-[10px] font-mono text-slate-400 truncate">
+                              {playerTier.tier} • {player.elo || 0} MMR
+                            </div>
+                          </div>
+                        </div>
+
+                        {/* Ready Pill */}
+                        <div className="shrink-0">
+                          {isAccepted ? (
+                            <span className="px-2 py-0.5 rounded-full bg-emerald-500/20 border border-emerald-500/40 text-emerald-400 text-[10px] font-mono font-bold flex items-center gap-1 shadow-sm">
+                              <Check className="w-3 h-3 stroke-[3]" /> READY
+                            </span>
+                          ) : (
+                            <span className="px-2 py-0.5 rounded-full bg-white/5 border border-white/10 text-slate-500 text-[10px] font-mono font-medium flex items-center gap-1 animate-pulse">
+                              <span className="w-1.5 h-1.5 rounded-full bg-amber-400/80" /> AWAITING
+                            </span>
+                          )}
+                        </div>
+                      </div>
+                    );
+                  })}
+                </div>
+              </div>
+
             </div>
 
-            {/* Actions: Big Green Accept or Confirmation (No Close Window) */}
-            <div className="space-y-3">
+            {/* COMBAT ACTIONS HUD */}
+            <div className="pt-2 border-t border-white/[0.08] space-y-3 relative z-10">
               {!userHasAccepted ? (
-                <button
-                  onClick={handleUserAcceptMatch}
-                  className="w-full py-4 rounded-2xl bg-gradient-to-r from-[#84CC16] via-[#A3E635] to-[#84CC16] hover:brightness-110 text-slate-950 font-display font-black text-sm uppercase tracking-wider transition shadow-[0_0_30px_rgba(163,230,53,0.5)] cursor-pointer active:scale-95"
-                >
-                  ACCEPT MATCH
-                </button>
+                <div className="flex flex-col sm:flex-row items-center gap-3">
+                  <button
+                    onClick={() => {
+                      sound.playClick();
+                      setMatchFoundModal(false);
+                    }}
+                    className="w-full sm:w-auto px-6 py-4 rounded-2xl bg-white/5 hover:bg-white/10 border border-white/10 text-slate-400 hover:text-white font-mono text-xs uppercase tracking-wider transition cursor-pointer"
+                  >
+                    Decline Match
+                  </button>
+
+                  <button
+                    onClick={handleUserAcceptMatch}
+                    className="w-full flex-1 py-4 rounded-2xl bg-gradient-to-r from-emerald-500 via-[#A3E635] to-emerald-400 hover:brightness-110 text-slate-950 font-display font-black text-sm uppercase tracking-wider transition shadow-[0_0_35px_rgba(163,230,53,0.55)] cursor-pointer active:scale-98 flex items-center justify-center gap-2"
+                  >
+                    <Zap className="w-5 h-5 fill-slate-950" />
+                    <span>CONFIRM DEPLOYMENT (ACCEPT)</span>
+                  </button>
+                </div>
               ) : (
-                <div className="space-y-2">
-                  <div className="p-4 rounded-2xl bg-[#A3E635]/15 border border-[#A3E635]/40 text-[#A3E635] text-center font-display font-black text-sm uppercase tracking-wider flex items-center justify-center gap-2">
-                    <Check className="w-5 h-5" />
+                <div className="space-y-2.5">
+                  <div className="p-4 rounded-2xl bg-gradient-to-r from-[#182312] to-[#0D150B] border-2 border-[#A3E635]/60 text-[#A3E635] text-center font-display font-black text-sm uppercase tracking-wider flex items-center justify-center gap-2.5 shadow-[0_0_20px_rgba(163,230,53,0.25)]">
+                    <Check className="w-5 h-5 stroke-[3]" />
                     <span>
                       {acceptedPlayerList.length >= 10 
-                        ? 'ALL PLAYERS ACCEPTED • ENTERING MATCH ROOM...' 
-                        : `ACCEPTED • WAITING FOR OTHERS (${acceptedPlayerList.length}/10)...`}
+                        ? 'ALL 10 OPERATIVES READY • ENTERING TACTICAL MATCH ROOM...' 
+                        : `DEPLOYMENT CONFIRMED • WAITING FOR OTHERS (${acceptedPlayerList.length}/10)...`}
                     </span>
                   </div>
-                  {isProjectAdmin && (
+
+                  {/* Immediate Entry Shortcut */}
+                  <div className="flex items-center justify-center gap-3">
                     <button
                       onClick={() => {
                         sound.playTournamentVictory();
                         setMatchFoundModal(false);
                         setIsMatchRoomOpen(true);
                       }}
-                      className="w-full py-2.5 rounded-xl bg-white/10 hover:bg-white/20 text-white font-mono font-bold text-xs uppercase tracking-wider transition cursor-pointer"
+                      className="px-5 py-2 rounded-xl bg-white/10 hover:bg-white/20 text-white font-mono font-bold text-xs uppercase tracking-wider transition cursor-pointer flex items-center gap-1.5"
                     >
-                      Instant Enter Match Room (Admin Shortcut) →
+                      <span>Enter Match Room Now (Demo)</span>
+                      <ArrowRight className="w-3.5 h-3.5" />
                     </button>
-                  )}
+                  </div>
                 </div>
               )}
             </div>
