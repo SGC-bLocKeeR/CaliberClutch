@@ -150,12 +150,14 @@ export const generateBalancedMatch = (params: MatchmakingParams): BalancedMatch 
         matches: userElo === 0 ? 0 : 34
       }];
 
-  const partySize = Math.min(5, activeParty.length);
+  // If partyMembers is empty (direct Matchroom demo mode), simulate a 5-stack squad for Team 1
+  const isDefaultDemo = partyMembers.length === 0;
+  const partySize = isDefaultDemo ? 5 : Math.min(5, activeParty.length);
   const isFiveStack = partySize === 5;
 
   // 2. Calculate party average ELO & Level baseline
   const partyEloSum = activeParty.reduce((sum, p) => sum + (p.elo || userElo), 0);
-  const partyAvgElo = Math.round(partyEloSum / partySize);
+  const partyAvgElo = Math.round(partyEloSum / (isDefaultDemo ? 1 : partySize));
 
   // 3. Complete Team 1 (if party < 5, fill with balanced teammates around partyAvgElo)
   const team1Players: FaceitMatchPlayer[] = [];
@@ -190,7 +192,7 @@ export const generateBalancedMatch = (params: MatchmakingParams): BalancedMatch 
       adr: (76 + Math.random() * 12).toFixed(1),
       hsRate: `${Math.floor(48 + Math.random() * 16)}%`,
       badgeIndex: 1,
-      partyShape: partySize > 1 ? 'circle' : undefined,
+      partyShape: (partySize > 1 || isDefaultDemo) ? 'circle' : undefined,
     });
   });
 
@@ -226,7 +228,7 @@ export const generateBalancedMatch = (params: MatchmakingParams): BalancedMatch 
       adr: (74 + Math.random() * 10).toFixed(1),
       hsRate: `${Math.floor(45 + Math.random() * 16)}%`,
       badgeIndex: 1,
-      partyShape: undefined, // Solo filler
+      partyShape: isDefaultDemo ? 'circle' : undefined, // In demo, all 5 form a 5-stack squad
     });
   }
 
@@ -268,7 +270,7 @@ export const generateBalancedMatch = (params: MatchmakingParams): BalancedMatch 
       adr: (78 + Math.random() * 10).toFixed(1),
       hsRate: `${Math.floor(47 + Math.random() * 16)}%`,
       badgeIndex: 1,
-      partyShape: isFiveStack ? 'square' : (i < 2 ? 'diamond' : undefined),
+      partyShape: (isFiveStack && !isDefaultDemo) ? 'square' : (i < 2 ? 'diamond' : undefined),
     });
   }
 
@@ -352,8 +354,12 @@ export const generateBalancedMatch = (params: MatchmakingParams): BalancedMatch 
   const team2StatsRows = team2Players.map((p, idx) => generateStatsRow(p, 'team2', idx === 0));
 
   // Stack Type descriptions
-  let stack1Desc = isFiveStack ? `5-Stack Clan Team [${userClanTag || 'CC'}]` : (partySize > 1 ? `${partySize}-Stack Squad` : '5-Stack Squad');
-  const stack2Desc = isFiveStack ? '5-Stack Clan Opponents' : (partySize > 1 ? `${partySize}-Stack Matching Opponents` : '5v5 Competitive');
+  let stack1Desc = (isFiveStack || isDefaultDemo) 
+    ? (userClanTag ? `5-Stack Clan Team [${userClanTag}]` : '5-Stack Squad') 
+    : (partySize > 1 ? `${partySize}-Stack Squad` : 'Solo Queue');
+  const stack2Desc = (isFiveStack && !isDefaultDemo) 
+    ? '5-Stack Clan Opponents' 
+    : (partySize > 1 && !isDefaultDemo ? `${partySize}-Stack Matching Opponents` : '5v5 Competitive');
 
   const team1Name = userClanTag ? `team_${userClanTag}` : `team_${userGamerTag.split(' ')[0]}`;
   const team2Name = `team_${team2Players[0].name.split('_')[0]}`;

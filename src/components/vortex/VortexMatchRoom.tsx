@@ -1362,30 +1362,107 @@ export const VortexMatchRoom: React.FC<VortexMatchRoomProps> = ({
   };
 
   // ========================================================
-  // CALIBER CLUTCH ORIGINAL TACTICAL PLAYER CARD (LAYOUT B)
-  // Clean 4 key metrics: K/D, ADR, HS%, Win Rate + "Tier X • XXX MMR" tactical pill badge
   // ========================================================
-  const renderTacticalPlayerCard = (player: FaceitMatchPlayer, team: 'team1' | 'team2') => {
+  // CALIBER CLUTCH ORIGINAL TACTICAL VIEW HELPERS & COMPONENTS
+  // Dynamic Squad / Party Containers (No left vertical line)
+  // Preserving all 8 stats: Matches, Wins, Rating, K/D/A, K/D, ADR, Tier, MMR
+  // ========================================================
+  interface PartyGroup {
+    type: 'party' | 'solo';
+    label: string;
+    badgeIcon: string;
+    badgeColor: string;
+    players: FaceitMatchPlayer[];
+  }
+
+  const groupPlayersByParty = (players: FaceitMatchPlayer[]): PartyGroup[] => {
+    const groups: PartyGroup[] = [];
+    const partyMap = new Map<string, FaceitMatchPlayer[]>();
+    const soloPlayers: FaceitMatchPlayer[] = [];
+
+    players.forEach((p) => {
+      if (p.partyShape) {
+        if (!partyMap.has(p.partyShape)) {
+          partyMap.set(p.partyShape, []);
+        }
+        partyMap.get(p.partyShape)!.push(p);
+      } else {
+        soloPlayers.push(p);
+      }
+    });
+
+    partyMap.forEach((partyList) => {
+      if (partyList.length === 1) {
+        soloPlayers.push(partyList[0]);
+      } else {
+        let label = `${partyList.length}-STACK SQUAD`;
+        let badgeIcon = '⚡';
+        let badgeColor = '#A3E635';
+
+        if (partyList.length === 5) {
+          label = '5-STACK SQUAD';
+          badgeIcon = '⚡';
+          badgeColor = '#A3E635';
+        } else if (partyList.length === 4) {
+          label = '4-STACK SQUAD';
+          badgeIcon = '⚡';
+          badgeColor = '#A3E635';
+        } else if (partyList.length === 3) {
+          label = '3-STACK PARTY';
+          badgeIcon = '🛡️';
+          badgeColor = '#38BDF8';
+        } else if (partyList.length === 2) {
+          label = 'DUO PARTY';
+          badgeIcon = '👥';
+          badgeColor = '#818CF8';
+        }
+
+        groups.push({
+          type: 'party',
+          label,
+          badgeIcon,
+          badgeColor,
+          players: partyList,
+        });
+      }
+    });
+
+    soloPlayers.forEach((solo) => {
+      groups.push({
+        type: 'solo',
+        label: 'SOLO QUEUE',
+        badgeIcon: '👤',
+        badgeColor: '#94A3B8',
+        players: [solo],
+      });
+    });
+
+    return groups;
+  };
+
+  const renderSquadPlayerItem = (
+    player: FaceitMatchPlayer,
+    team: 'team1' | 'team2',
+    isStandaloneSolo: boolean = false
+  ) => {
     const isCurrentUser = player.name === currentGamerTag;
     const isSelected = selectedFlyoutPlayer?.name === player.name;
     const tierInfo = getCaliberTierByLevel(player.level);
-    const hsDisplay = player.hsRate || `${Math.floor(46 + ((player.level * 3) % 22))}%`;
 
     return (
       <div 
         key={player.id}
         onClick={(e) => handleOpenPlayerFlyout(e, player.name)}
-        className={`rounded-xl border transition p-3 shadow-md relative group cursor-pointer ${
+        className={`p-3 sm:p-3.5 transition group cursor-pointer relative ${
           isSelected 
-            ? 'border-[#A3E635] bg-[#162114] ring-1 ring-[#A3E635]/40 shadow-[0_0_15px_rgba(163,230,53,0.15)]' 
+            ? 'bg-[#182615] ring-1 ring-[#A3E635]/50' 
             : isCurrentUser
-            ? 'border-[#A3E635]/60 bg-[#13171F] hover:border-[#A3E635]'
-            : 'border-[#222432] bg-[#14151D] hover:border-white/20 hover:bg-[#161822]'
-        }`}
+            ? 'bg-[#151B24] hover:bg-[#192230]'
+            : 'bg-[#10121A] hover:bg-[#141724]'
+        } ${isStandaloneSolo ? 'rounded-b-2xl' : ''}`}
       >
-        {/* TOP ROW: AVATAR + IDENTITY + TACTICAL TIER & MMR PILL */}
-        <div className="flex items-center justify-between gap-2">
-          {/* Avatar & Player Info */}
+        {/* Top row: Avatar, Info, and Tier • MMR Pill */}
+        <div className="flex items-center justify-between gap-3">
           <div className="flex items-center gap-3 min-w-0">
             <div className="relative w-11 h-11 shrink-0">
               {player.isCaptain && <CaliberCaptainBadge />}
@@ -1406,9 +1483,9 @@ export const VortexMatchRoom: React.FC<VortexMatchRoomProps> = ({
             </div>
 
             <div className="min-w-0">
-              <div className="flex items-center gap-1.5 truncate">
+              <div className="flex items-center gap-2 truncate">
                 <CountryFlag code={player.code} name={player.countryName} size="xs" />
-                <span className={`font-display font-bold text-xs truncate ${
+                <span className={`font-display font-black text-sm truncate ${
                   isCurrentUser ? 'text-[#A3E635]' : 'text-white group-hover:text-[#A3E635] transition'
                 }`}>
                   {player.name}
@@ -1417,20 +1494,21 @@ export const VortexMatchRoom: React.FC<VortexMatchRoomProps> = ({
                   <CheckCircle2 className="w-3.5 h-3.5 text-[#A3E635] shrink-0" />
                 )}
               </div>
-              <div className="text-[10px] font-mono text-slate-400 mt-0.5 flex items-center gap-1.5">
-                <span>{player.matches.toLocaleString()} matches</span>
-                <span>•</span>
-                <span className="text-slate-300 font-bold">{player.rating} Rating</span>
+              <div className="text-[10px] font-mono text-slate-400 mt-0.5 flex items-center gap-2">
+                <span className="text-slate-300">Competitive Ranked</span>
+                {isCurrentUser && (
+                  <span className="text-[#A3E635] font-bold">(YOU)</span>
+                )}
               </div>
             </div>
           </div>
 
-          {/* Distinktivi: "Tier X • XXX MMR" */}
+          {/* Tier & MMR Pill */}
           <div className="shrink-0 text-right">
             <div 
-              className="inline-flex items-center gap-1.5 px-2 py-1 rounded-lg border font-mono font-black text-[11px] shadow-sm select-none"
+              className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg border font-mono font-black text-xs shadow-sm select-none"
               style={{
-                backgroundColor: `${tierInfo.color}15`,
+                backgroundColor: `${tierInfo.color}18`,
                 borderColor: `${tierInfo.color}50`,
                 color: tierInfo.color
               }}
@@ -1443,34 +1521,683 @@ export const VortexMatchRoom: React.FC<VortexMatchRoomProps> = ({
           </div>
         </div>
 
-        {/* BOTTOM ROW: 4 CLEAN KEY METRICS (K/D, ADR, HS%, WIN RATE) */}
-        <div className="grid grid-cols-4 gap-1.5 pt-2.5 mt-2.5 border-t border-white/[0.06] text-center font-mono">
-          <div className="bg-white/[0.03] p-1.5 rounded-lg border border-white/5">
+        {/* 6-Column Clean Stats Bar: Matches, Wins, Rating, K/D/A, K/D, ADR */}
+        <div className="grid grid-cols-3 sm:grid-cols-6 gap-1.5 pt-2.5 mt-2.5 border-t border-white/[0.06] text-center font-mono">
+          <div className="bg-black/40 p-1.5 rounded-lg border border-white/5">
+            <div className="text-[9px] uppercase text-slate-400 font-bold tracking-wider">MATCHES</div>
+            <div className="text-xs font-bold text-white mt-0.5">{player.matches.toLocaleString()}</div>
+          </div>
+          <div className="bg-black/40 p-1.5 rounded-lg border border-white/5">
+            <div className="text-[9px] uppercase text-slate-400 font-bold tracking-wider">WINS</div>
+            <div className="text-xs font-bold text-emerald-400 mt-0.5">{player.winRate}</div>
+          </div>
+          <div className="bg-black/40 p-1.5 rounded-lg border border-white/5">
+            <div className="text-[9px] uppercase text-slate-400 font-bold tracking-wider">RATING</div>
+            <div className="text-xs font-bold text-white mt-0.5 flex items-center justify-center gap-1">
+              <span>{player.rating}</span>
+              <span className={`text-[9px] ${player.isPositiveSwing ? 'text-emerald-400' : 'text-red-400'}`}>
+                {player.swing}
+              </span>
+            </div>
+          </div>
+          <div className="bg-black/40 p-1.5 rounded-lg border border-white/5">
+            <div className="text-[9px] uppercase text-slate-400 font-bold tracking-wider">K/D/A</div>
+            <div className="text-xs font-bold text-slate-200 mt-0.5">{player.kda}</div>
+          </div>
+          <div className="bg-black/40 p-1.5 rounded-lg border border-white/5">
             <div className="text-[9px] uppercase text-slate-400 font-bold tracking-wider">K/D</div>
-            <div className="text-xs font-black text-white mt-0.5">{player.kd}</div>
+            <div className="text-xs font-bold text-white mt-0.5">{player.kd}</div>
           </div>
-          <div className="bg-white/[0.03] p-1.5 rounded-lg border border-white/5">
+          <div className="bg-black/40 p-1.5 rounded-lg border border-white/5">
             <div className="text-[9px] uppercase text-slate-400 font-bold tracking-wider">ADR</div>
-            <div className="text-xs font-black text-white mt-0.5">{player.adr}</div>
-          </div>
-          <div className="bg-white/[0.03] p-1.5 rounded-lg border border-white/5">
-            <div className="text-[9px] uppercase text-slate-400 font-bold tracking-wider">HS%</div>
-            <div className="text-xs font-black text-[#A3E635] mt-0.5">{hsDisplay}</div>
-          </div>
-          <div className="bg-white/[0.03] p-1.5 rounded-lg border border-white/5">
-            <div className="text-[9px] uppercase text-slate-400 font-bold tracking-wider">WIN RATE</div>
-            <div className="text-xs font-black text-emerald-400 mt-0.5">{player.winRate}</div>
+            <div className="text-xs font-bold text-[#A3E635] mt-0.5">{player.adr}</div>
           </div>
         </div>
       </div>
     );
   };
 
+  const renderSquadContainer = (group: PartyGroup, team: 'team1' | 'team2') => {
+    if (group.type === 'party') {
+      return (
+        <div 
+          key={`party-${group.label}-${team}`}
+          className="rounded-2xl border border-[#2B2F40] bg-[#10121A] overflow-hidden shadow-xl transition-all hover:border-[#3E445E]"
+        >
+          {/* Top Header of the Squad/Party Container */}
+          <div className="px-4 py-2.5 bg-[#141622] border-b border-[#242738] flex items-center justify-between">
+            <div className="flex items-center gap-2">
+              <span className="text-sm">{group.badgeIcon}</span>
+              <span 
+                className="text-xs font-mono font-black tracking-wider uppercase"
+                style={{ color: group.badgeColor }}
+              >
+                {group.label}
+              </span>
+              <span className="text-[10px] font-mono text-slate-400 bg-black/50 px-2 py-0.5 rounded-md border border-white/5 font-bold">
+                {group.players.length} PLAYERS
+              </span>
+            </div>
+            <div className="flex items-center gap-1.5 text-[10px] font-mono text-emerald-400 font-bold">
+              <span className="w-1.5 h-1.5 rounded-full bg-[#A3E635] animate-pulse" />
+              <span>SQUAD SYNCED</span>
+            </div>
+          </div>
+
+          {/* Players inside this shared container */}
+          <div className="divide-y divide-[#1D202E]">
+            {group.players.map(player => renderSquadPlayerItem(player, team, false))}
+          </div>
+        </div>
+      );
+    }
+
+    // Standalone Solo Card
+    const soloPlayer = group.players[0];
+    return (
+      <div 
+        key={`solo-${soloPlayer.id}`}
+        className="rounded-2xl border border-[#222432] bg-[#10121A] overflow-hidden shadow-md transition-all hover:border-[#32364A]"
+      >
+        <div className="px-3.5 py-1.5 bg-[#13141E] border-b border-[#1E202B] flex items-center justify-between">
+          <div className="flex items-center gap-1.5 text-[10px] font-mono font-bold text-slate-400">
+            <span>👤</span>
+            <span>SOLO QUEUE</span>
+          </div>
+          <span className="text-[9px] font-mono text-slate-500 font-semibold">INDIVIDUAL PLAYER</span>
+        </div>
+        {renderSquadPlayerItem(soloPlayer, team, true)}
+      </div>
+    );
+  };
+
+  const renderTacticalBottomRail = () => (
+    <div className="mt-6 rounded-2xl border border-[#232535] bg-[#10121A] p-5 shadow-2xl space-y-4">
+      {/* Top Row: Direct Match Connect String & Connect Actions */}
+      <div className="flex flex-col md:flex-row items-center justify-between gap-4 p-3.5 rounded-xl bg-black/60 border border-white/10">
+        <div className="flex items-center gap-3 overflow-hidden w-full md:w-auto flex-1">
+          <div className="flex items-center gap-1.5 text-xs font-mono font-bold text-[#A3E635] shrink-0">
+            <Radio className="w-3.5 h-3.5 text-[#A3E635] animate-pulse" />
+            <span>Direct Connect:</span>
+          </div>
+          <div className={`text-xs font-mono text-[#A3E635] truncate transition-all duration-200 ${
+            isMatchIpRevealed ? 'filter-none select-all' : 'blur-sm select-none opacity-60'
+          }`}>
+            {isMatchIpRevealed
+              ? `connect ${selectedServerRegion.ip}; password cc123`
+              : `connect srv-•••••.caliberclutch.com:•••••; password •••••`}
+          </div>
+          <button
+            type="button"
+            onClick={() => {
+              sound.playClick();
+              setIsMatchIpRevealed(!isMatchIpRevealed);
+            }}
+            className="p-1 rounded-lg bg-white/5 hover:bg-white/10 text-slate-300 hover:text-white transition cursor-pointer shrink-0"
+            title={isMatchIpRevealed ? 'Hide connection code' : 'Reveal connection code'}
+          >
+            {isMatchIpRevealed ? <EyeOff className="w-3.5 h-3.5" /> : <Eye className="w-3.5 h-3.5" />}
+          </button>
+        </div>
+
+        {/* Buttons: Copy IP, Launch CS2, Status */}
+        <div className="flex items-center gap-2.5 w-full md:w-auto shrink-0">
+          <button
+            onClick={() => {
+              sound.playClick();
+              navigator.clipboard.writeText(`connect ${selectedServerRegion.ip}; password cc123`);
+              setCopiedServerIp(true);
+              setTimeout(() => setCopiedServerIp(false), 2000);
+            }}
+            className="px-4 py-2 rounded-lg bg-white/10 hover:bg-white/20 text-white font-mono font-bold text-xs flex items-center justify-center gap-1.5 transition cursor-pointer"
+          >
+            {copiedServerIp ? <Check className="w-3.5 h-3.5 text-emerald-400" /> : <Copy className="w-3.5 h-3.5" />}
+            <span>{copiedServerIp ? 'Copied ✓' : 'Copy IP'}</span>
+          </button>
+
+          <a
+            href={`steam://connect/${selectedServerRegion.ip}/cc123`}
+            onClick={() => sound.playClick()}
+            className="px-4 py-2 rounded-lg bg-[#A3E635] hover:bg-[#bef264] text-slate-950 font-display font-black text-xs uppercase tracking-wider flex items-center justify-center gap-1.5 transition cursor-pointer shadow-md"
+          >
+            <Play className="w-3.5 h-3.5 fill-current" />
+            <span>Launch CS2</span>
+          </a>
+
+          <div className="hidden sm:flex items-center gap-1.5 px-3 py-2 rounded-lg bg-emerald-500/10 border border-emerald-500/30 text-emerald-400 font-mono font-bold text-xs">
+            <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse" />
+            <span>ONLINE (128-TICK MATCHZY)</span>
+          </div>
+        </div>
+      </div>
+
+      {/* Bottom Row / Grid: Record Match Result, Map Veto Log, GOTV Replay, Back to Matchmaking */}
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
+        {/* Map Veto Log */}
+        <button
+          onClick={() => {
+            sound.playSelect();
+            setIsInteractiveVetoOpen(true);
+          }}
+          className="py-2.5 px-4 rounded-xl bg-[#141824] hover:bg-[#1A2030] border border-[#2A344A] text-white font-mono font-bold text-xs flex items-center justify-center gap-2 transition cursor-pointer shadow-sm"
+        >
+          <Ban className="w-4 h-4 text-amber-400" />
+          <span>Map Veto Log ({currentSelectedMap})</span>
+        </button>
+
+        {/* Record Result (+25 MMR) */}
+        {!matchSimulatedResult ? (
+          <button
+            onClick={() => {
+              sound.playTournamentVictory();
+              confetti({ particleCount: 90, spread: 80, origin: { y: 0.6 } });
+              const s1 = 13;
+              const s2 = 10;
+              setMatchSimulatedResult({ score1: s1, score2: s2, won: true });
+              if (onMatchFinished) {
+                onMatchFinished(true, activeMatch.eloGainWin);
+              }
+            }}
+            className="py-2.5 px-4 rounded-xl bg-gradient-to-r from-[#84CC16] to-[#A3E635] hover:brightness-110 text-slate-950 font-display font-black text-xs uppercase tracking-wider transition shadow-lg flex items-center justify-center gap-1.5 cursor-pointer active:scale-95"
+          >
+            <Trophy className="w-4 h-4" />
+            <span>Record Result (+{activeMatch.eloGainWin} MMR)</span>
+          </button>
+        ) : (
+          <div className="py-2 px-3 rounded-xl bg-emerald-500/15 border border-emerald-500/30 text-center flex items-center justify-center gap-2">
+            <span className="text-xs font-black font-display text-white">
+              🎉 VICTORY! {matchSimulatedResult.score1} - {matchSimulatedResult.score2}
+            </span>
+            <span className="text-[10px] font-mono text-emerald-400 font-bold">
+              (+{activeMatch.eloGainWin} MMR)
+            </span>
+          </div>
+        )}
+
+        {/* Watch GOTV Replay (.dem) */}
+        <button
+          onClick={() => {
+            sound.playClick();
+            const demoUrl = `https://demos.caliberclutch.gg/cs2/${matchId}.dem.gz`;
+            const link = document.createElement('a');
+            link.href = demoUrl;
+            link.setAttribute('download', `caliber-match-${matchId}.dem.gz`);
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+          }}
+          className="py-2.5 px-4 rounded-xl bg-[#12190E] hover:bg-[#182312] border border-[#A3E635]/30 text-[#A3E635] font-display font-bold text-xs uppercase tracking-wider transition flex items-center justify-center gap-1.5 cursor-pointer shadow-sm active:scale-95"
+        >
+          <Eye className="w-4 h-4 text-[#A3E635]" />
+          <span>GOTV Replay (.dem)</span>
+        </button>
+
+        {/* Back to Matchmaking */}
+        <button
+          onClick={() => {
+            sound.playClick();
+            onClose();
+          }}
+          className="py-2.5 px-4 rounded-xl bg-white/10 hover:bg-white/20 text-white font-display font-black text-xs uppercase tracking-wider transition flex items-center justify-center cursor-pointer active:scale-95"
+        >
+          <span>Back to Matchmaking</span>
+        </button>
+      </div>
+    </div>
+  );
+
+  const renderChatSidebar = (side: 'left' | 'right') => (
+    <div className={`w-[320px] xl:w-[360px] shrink-0 h-full bg-[#07080B] flex flex-col z-30 select-text animate-in duration-150 max-md:fixed max-md:inset-y-0 max-md:w-full max-md:z-50 ${
+      side === 'left' 
+        ? 'border-r border-[#1F2129] slide-in-from-left max-md:left-0' 
+        : 'border-l border-[#1F2129] slide-in-from-right max-md:right-0'
+    }`}>
+      {layoutVariant === 'tactical' ? (
+        /* ==================================================== */
+        /* LAYOUT B: UNIFIED TACTICAL CHAT (MATCH CHAT & TEAM CHAT) */
+        /* ==================================================== */
+        <div className="flex flex-col h-full overflow-hidden">
+          {/* Tactical Chat Header with Match Chat / Team Chat Tabs */}
+          <div className="h-12 px-3 bg-[#0B0C12] border-b border-[#1E202B] flex items-center justify-between shrink-0">
+            <div className="flex items-center gap-1.5 p-1 bg-[#12141D] border border-white/5 rounded-lg">
+              <button
+                onClick={() => {
+                  sound.playClick();
+                  setUnifiedChatTab('all');
+                }}
+                className={`px-3 py-1 rounded-md text-xs font-mono font-bold transition flex items-center gap-1.5 cursor-pointer ${
+                  unifiedChatTab === 'all'
+                    ? 'bg-[#A3E635] text-slate-950 shadow-sm'
+                    : 'text-slate-400 hover:text-white'
+                }`}
+              >
+                <MessageSquare className="w-3.5 h-3.5" />
+                <span>Match Chat</span>
+                <span className="text-[10px] opacity-75 font-mono">({roomMessages.length})</span>
+              </button>
+
+              <button
+                onClick={() => {
+                  sound.playClick();
+                  setUnifiedChatTab('team');
+                }}
+                className={`px-3 py-1 rounded-md text-xs font-mono font-bold transition flex items-center gap-1.5 cursor-pointer ${
+                  unifiedChatTab === 'team'
+                    ? 'bg-emerald-500 text-slate-950 shadow-sm'
+                    : 'text-slate-400 hover:text-white'
+                }`}
+              >
+                <Shield className="w-3.5 h-3.5" />
+                <span>Team Chat</span>
+                <span className="text-[10px] opacity-75 font-mono">({teamMessages.length})</span>
+              </button>
+            </div>
+
+            <button
+              onClick={() => {
+                sound.playClick();
+                setIsChatDrawerOpen(false);
+              }}
+              className="p-1.5 rounded-lg text-slate-400 hover:text-white hover:bg-white/5 transition cursor-pointer"
+              title="Collapse chat"
+            >
+              {side === 'left' ? <ChevronLeft className="w-5 h-5" /> : <ChevronRight className="w-5 h-5" />}
+            </button>
+          </div>
+
+          {/* Unified Full-Height Chat Stream */}
+          <div className="flex-1 overflow-y-auto p-4 flex flex-col justify-start space-y-3">
+            <div className="text-center my-2">
+              <span className="text-[9px] font-mono text-slate-500 uppercase tracking-widest font-bold px-2 py-0.5 rounded bg-white/[0.03] border border-white/5">
+                {unifiedChatTab === 'all' ? 'All 10 Matchroom Players Feed' : 'Internal Squad Comms (Team 1 Only)'}
+              </span>
+            </div>
+
+            {unifiedChatTab === 'all' ? (
+              // Match Chat Feed (Room)
+              roomMessages.map(msg => (
+                <div key={msg.id} className="flex items-start gap-2.5">
+                  <img 
+                    src={msg.avatar} 
+                    alt={msg.sender} 
+                    className="w-6 h-6 rounded-full object-cover shrink-0 mt-0.5 border border-white/10" 
+                  />
+                  <div className="flex-1 min-w-0">
+                    <div className="flex items-baseline gap-2">
+                      <span className="text-xs font-bold text-white truncate">{msg.sender}</span>
+                      <span className="text-[10px] text-slate-500 font-mono">{msg.timestamp}</span>
+                    </div>
+                    {msg.text && (
+                      <p className="text-xs text-slate-300 font-sans mt-0.5 break-words">{msg.text}</p>
+                    )}
+                    {msg.imageUrl && (
+                      <div className="mt-1.5 max-w-[220px] rounded-lg overflow-hidden border border-white/10 shadow-md">
+                        <img 
+                          src={msg.imageUrl} 
+                          alt="Attachment" 
+                          className="w-full h-auto max-h-[180px] object-cover cursor-pointer hover:opacity-90 transition"
+                          onClick={() => window.open(msg.imageUrl, '_blank')}
+                        />
+                      </div>
+                    )}
+                  </div>
+                </div>
+              ))
+            ) : (
+              // Team Chat Feed (Squad)
+              teamMessages.map((msg, index) => {
+                const prevMsg = teamMessages[index - 1];
+                const isConsecutive = prevMsg && prevMsg.sender === msg.sender;
+
+                return (
+                  <div key={msg.id} className={`flex items-start gap-2.5 ${isConsecutive ? 'mt-0.5' : 'mt-2.5'}`}>
+                    {!isConsecutive ? (
+                      <img 
+                        src={msg.avatar} 
+                        alt={msg.sender} 
+                        className="w-6 h-6 rounded-full object-cover shrink-0 mt-0.5 border border-white/10" 
+                      />
+                    ) : (
+                      <div className="w-6 shrink-0" />
+                    )}
+
+                    <div className="flex-1 min-w-0">
+                      {!isConsecutive && (
+                        <div className="flex items-baseline gap-2">
+                          <span className="text-xs font-bold text-white truncate">{msg.sender}</span>
+                          <span className="text-[10px] text-slate-500 font-mono">{msg.timestamp}</span>
+                        </div>
+                      )}
+                      {msg.text && (
+                        <p className="text-xs text-slate-200 font-sans break-words leading-relaxed">
+                          {msg.text}
+                        </p>
+                      )}
+                      {msg.imageUrl && (
+                        <div className="mt-1.5 max-w-[220px] rounded-lg overflow-hidden border border-white/10 shadow-md">
+                          <img 
+                            src={msg.imageUrl} 
+                            alt="Attachment" 
+                            className="w-full h-auto max-h-[180px] object-cover cursor-pointer hover:opacity-90 transition"
+                            onClick={() => window.open(msg.imageUrl, '_blank')}
+                          />
+                        </div>
+                      )}
+                    </div>
+                  </div>
+                );
+              })
+            )}
+            <div ref={unifiedChatTab === 'all' ? roomEndRef : teamEndRef} />
+          </div>
+
+          {/* Quick Tactical Phrases when in Team tab */}
+          {unifiedChatTab === 'team' && (
+            <div className="px-3 py-1.5 bg-[#0B0C12] border-t border-white/5 flex items-center gap-1.5 overflow-x-auto no-scrollbar">
+              {QUICK_TACTICAL_PHRASES.map((p, i) => (
+                <button
+                  key={i}
+                  onClick={() => handleSendPhrase(p)}
+                  className="px-2 py-0.5 rounded bg-white/[0.04] hover:bg-emerald-500/20 hover:text-emerald-300 text-[10px] font-mono text-slate-400 whitespace-nowrap cursor-pointer transition border border-white/5"
+                >
+                  {p}
+                </button>
+              ))}
+            </div>
+          )}
+
+          {/* Unified Input Bar */}
+          <div className="p-3 bg-[#0B0C12] border-t border-[#1C1E27] shrink-0">
+            <form 
+              onSubmit={unifiedChatTab === 'all' ? handleSendRoomMessage : handleSendTeamMessage} 
+              className="relative flex items-center"
+            >
+              <input
+                type="text"
+                value={unifiedChatTab === 'all' ? roomInput : teamInput}
+                onChange={e => unifiedChatTab === 'all' ? setRoomInput(e.target.value) : setTeamInput(e.target.value)}
+                placeholder={unifiedChatTab === 'all' ? "Message all 10 players..." : "Message squad only..."}
+                className="w-full h-9 pl-3 pr-20 rounded-md bg-[#13141C] border border-[#222432] text-xs text-white placeholder-slate-500 focus:outline-none focus:border-[#A3E635] transition"
+              />
+              <div className="absolute right-2 flex items-center gap-1.5 text-slate-400">
+                <input 
+                  ref={unifiedChatTab === 'all' ? roomFileInputRef : teamFileInputRef}
+                  type="file" 
+                  accept="image/*" 
+                  className="hidden" 
+                  onChange={unifiedChatTab === 'all' ? handleRoomImageUpload : handleTeamImageUpload} 
+                />
+                <button
+                  type="button"
+                  onClick={() => {
+                    sound.playClick();
+                    if (unifiedChatTab === 'all') roomFileInputRef.current?.click();
+                    else teamFileInputRef.current?.click();
+                  }}
+                  className="hover:text-white transition p-0.5 cursor-pointer"
+                  title="Send image"
+                >
+                  <ImageIcon className="w-4 h-4" />
+                </button>
+                <button
+                  type="button"
+                  onClick={() => {
+                    if (unifiedChatTab === 'all') setRoomInput(prev => prev + ' 🎯');
+                    else setTeamInput(prev => prev + ' 🛡️');
+                  }}
+                  className="hover:text-white transition p-0.5 cursor-pointer"
+                  title="Emoji"
+                >
+                  <Smile className="w-4 h-4" />
+                </button>
+                <button
+                  type="submit"
+                  className="p-1 rounded bg-[#A3E635] text-slate-950 hover:bg-[#bef264] transition cursor-pointer"
+                  title="Send"
+                >
+                  <Send className="w-3.5 h-3.5" />
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      ) : (
+        /* ==================================================== */
+        /* LAYOUT A: CLASSIC SPLIT CHAT (TOP ROOM / BOTTOM TEAM) */
+        /* ==================================================== */
+        <>
+          {/* TOP HALF: Room chat (All 10 Matchroom Players) */}
+          <div className="flex flex-col flex-1 min-h-[220px] border-b border-[#1A1C24] overflow-hidden">
+            <div className="h-11 px-4 bg-[#07080B] border-b border-[#1A1C24] flex items-center justify-between shrink-0">
+              <span className="font-display font-bold text-white text-sm">
+                Room chat
+              </span>
+              <button
+                onClick={() => {
+                  sound.playClick();
+                  setIsChatDrawerOpen(false);
+                }}
+                className="p-1 rounded text-slate-400 hover:text-white transition cursor-pointer"
+                title="Collapse chat"
+              >
+                <ChevronRight className="w-4 h-4" />
+              </button>
+            </div>
+
+            <div className="flex-1 overflow-y-auto p-4 flex flex-col justify-start">
+              <div className="text-center my-3">
+                <span className="text-[10px] font-mono text-slate-500 uppercase tracking-widest font-semibold">
+                  BEGINNING OF CONVERSATION
+                </span>
+              </div>
+
+              <div className="space-y-3">
+                {roomMessages.map(msg => (
+                  <div key={msg.id} className="flex items-start gap-2.5">
+                    <img 
+                      src={msg.avatar} 
+                      alt={msg.sender} 
+                      className="w-6 h-6 rounded-full object-cover shrink-0 mt-0.5 border border-white/10" 
+                    />
+                    <div className="flex-1 min-w-0">
+                      <div className="flex items-baseline gap-2">
+                        <span className="text-xs font-bold text-white truncate">{msg.sender}</span>
+                        <span className="text-[10px] text-slate-500 font-mono">{msg.timestamp}</span>
+                      </div>
+                      {msg.text && (
+                        <p className="text-xs text-slate-300 font-sans mt-0.5 break-words">{msg.text}</p>
+                      )}
+                      {msg.imageUrl && (
+                        <div className="mt-1.5 max-w-[220px] rounded-lg overflow-hidden border border-white/10 shadow-md">
+                          <img 
+                            src={msg.imageUrl} 
+                            alt="Attachment" 
+                            className="w-full h-auto max-h-[180px] object-cover cursor-pointer hover:opacity-90 transition"
+                            onClick={() => window.open(msg.imageUrl, '_blank')}
+                          />
+                        </div>
+                      )}
+                    </div>
+                  </div>
+                ))}
+                <div ref={roomEndRef} />
+              </div>
+            </div>
+
+            <div className="p-3 bg-[#07080B] border-t border-[#14151C] shrink-0">
+              <form onSubmit={handleSendRoomMessage} className="relative flex items-center">
+                <input
+                  type="text"
+                  value={roomInput}
+                  onChange={e => setRoomInput(e.target.value)}
+                  placeholder="Message room"
+                  className="w-full h-9 pl-3 pr-16 rounded-md bg-[#111218] border border-[#20222B] text-xs text-white placeholder-slate-500 focus:outline-none focus:border-slate-500 transition"
+                />
+                <div className="absolute right-2 flex items-center gap-1.5 text-slate-400">
+                  <input 
+                    ref={roomFileInputRef}
+                    type="file" 
+                    accept="image/*" 
+                    className="hidden" 
+                    onChange={handleRoomImageUpload} 
+                  />
+                  <button
+                    type="button"
+                    onClick={() => {
+                      sound.playClick();
+                      roomFileInputRef.current?.click();
+                    }}
+                    className="hover:text-white transition p-0.5 cursor-pointer"
+                    title="Send image"
+                  >
+                    <ImageIcon className="w-4 h-4" />
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => setRoomInput(prev => prev + ' 🎯')}
+                    className="hover:text-white transition p-0.5 cursor-pointer"
+                    title="Emoji"
+                  >
+                    <Smile className="w-4 h-4" />
+                  </button>
+                </div>
+              </form>
+            </div>
+          </div>
+
+          {/* BOTTOM HALF: Team chat (Team Only Chat) */}
+          <div className="flex flex-col flex-1 min-h-[260px] overflow-hidden">
+            <div 
+              onClick={() => setIsTeamChatCollapsed(!isTeamChatCollapsed)}
+              className="h-11 px-4 bg-[#07080B] border-b border-[#1A1C24] flex items-center justify-between shrink-0 cursor-pointer hover:bg-white/[0.02] transition"
+            >
+              <span className="font-display font-bold text-white text-sm">
+                Team chat
+              </span>
+              <button className="p-1 text-slate-400 hover:text-white transition">
+                <ChevronDown className={`w-4 h-4 transform transition-transform ${isTeamChatCollapsed ? '-rotate-90' : 'rotate-0'}`} />
+              </button>
+            </div>
+
+            {!isTeamChatCollapsed && (
+              <>
+                <div className="flex-1 overflow-y-auto p-4 space-y-2.5">
+                  {teamMessages.map((msg, index) => {
+                    const prevMsg = teamMessages[index - 1];
+                    const isConsecutive = prevMsg && prevMsg.sender === msg.sender;
+
+                    return (
+                      <div key={msg.id} className={`flex items-start gap-2.5 ${isConsecutive ? 'mt-0.5' : 'mt-2.5'}`}>
+                        {!isConsecutive ? (
+                          <img 
+                            src={msg.avatar} 
+                            alt={msg.sender} 
+                            className="w-6 h-6 rounded-full object-cover shrink-0 mt-0.5 border border-white/10" 
+                          />
+                        ) : (
+                          <div className="w-6 shrink-0" />
+                        )}
+
+                        <div className="flex-1 min-w-0">
+                          {!isConsecutive && (
+                            <div className="flex items-baseline gap-2">
+                              <span className="text-xs font-bold text-white truncate">{msg.sender}</span>
+                              <span className="text-[10px] text-slate-500 font-mono">{msg.timestamp}</span>
+                            </div>
+                          )}
+                          {msg.text && (
+                            <p className="text-xs text-slate-200 font-sans break-words leading-relaxed">
+                              {msg.text}
+                            </p>
+                          )}
+                          {msg.imageUrl && (
+                            <div className="mt-1.5 max-w-[220px] rounded-lg overflow-hidden border border-white/10 shadow-md">
+                              <img 
+                                src={msg.imageUrl} 
+                                alt="Attachment" 
+                                className="w-full h-auto max-h-[180px] object-cover cursor-pointer hover:opacity-90 transition"
+                                onClick={() => window.open(msg.imageUrl, '_blank')}
+                              />
+                            </div>
+                          )}
+                        </div>
+                      </div>
+                    );
+                  })}
+                  <div ref={teamEndRef} />
+                </div>
+
+                {/* Quick Tactical Phrases */}
+                <div className="px-3 py-1 bg-[#07080B] border-t border-[#121319] flex items-center gap-1 overflow-x-auto no-scrollbar">
+                  {QUICK_TACTICAL_PHRASES.slice(0, 3).map((p, i) => (
+                    <button
+                      key={i}
+                      onClick={() => handleSendPhrase(p)}
+                      className="px-2 py-0.5 rounded bg-white/[0.04] hover:bg-white/[0.08] text-[9px] font-mono text-slate-400 hover:text-slate-200 whitespace-nowrap cursor-pointer transition"
+                    >
+                      {p}
+                    </button>
+                  ))}
+                </div>
+
+                {/* Team Chat Input Form */}
+                <div className="p-3 bg-[#07080B] border-t border-[#14151C] shrink-0">
+                  <form onSubmit={handleSendTeamMessage} className="relative flex items-center">
+                    <input
+                      type="text"
+                      value={teamInput}
+                      onChange={e => setTeamInput(e.target.value)}
+                      placeholder="Message room"
+                      className="w-full h-9 pl-3 pr-16 rounded-md bg-[#111218] border border-[#20222B] text-xs text-white placeholder-slate-500 focus:outline-none focus:border-slate-500 transition"
+                    />
+                    <div className="absolute right-2 flex items-center gap-1.5 text-slate-400">
+                      <input 
+                        ref={teamFileInputRef}
+                        type="file" 
+                        accept="image/*" 
+                        className="hidden" 
+                        onChange={handleTeamImageUpload} 
+                      />
+                      <button
+                        type="button"
+                        onClick={() => {
+                          sound.playClick();
+                          teamFileInputRef.current?.click();
+                        }}
+                        className="hover:text-white transition p-0.5 cursor-pointer"
+                        title="Send image"
+                      >
+                        <ImageIcon className="w-4 h-4" />
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => setTeamInput(prev => prev + ' 🎯')}
+                        className="hover:text-white transition p-0.5 cursor-pointer"
+                        title="Emoji"
+                      >
+                        <Smile className="w-4 h-4" />
+                      </button>
+                    </div>
+                  </form>
+                </div>
+              </>
+            )}
+          </div>
+        </>
+      )}
+    </div>
+  );
+
   return (
     <div className="fixed inset-0 z-[120] bg-[#0E0F12] text-[#E2E8F0] flex overflow-hidden font-sans select-none animate-in fade-in duration-150">
       
       {/* ======================================================== */}
-      {/* LEFT COLUMN: MAIN MATCHROOM (OVERVIEW & STATS)           */}
+      {/* LEFT COLUMN: TACTICAL MATCH CHAT (CALIBER TACTICAL VIEW)  */}
+      {/* ======================================================== */}
+      {layoutVariant === 'tactical' && isChatDrawerOpen && renderChatSidebar('left')}
+
+      {/* ======================================================== */}
+      {/* MAIN MATCHROOM (OVERVIEW & STATS)                         */}
       {/* ======================================================== */}
       <div className="flex-1 min-w-0 flex flex-col h-full overflow-y-auto">
       
@@ -1486,7 +2213,7 @@ export const VortexMatchRoom: React.FC<VortexMatchRoomProps> = ({
               Matchroom
             </span>
             <span className="text-[9px] font-mono text-[#A3E635] bg-[#A3E635]/10 border border-[#A3E635]/30 px-2 py-0.5 rounded-full uppercase font-bold hidden sm:inline">
-              {layoutVariant === 'tactical' ? 'Layout B (Caliber)' : 'Layout A (Classic)'}
+              {layoutVariant === 'tactical' ? 'Caliber Tactical View' : 'Classic View'}
             </span>
           </div>
 
@@ -1517,35 +2244,35 @@ export const VortexMatchRoom: React.FC<VortexMatchRoomProps> = ({
             </button>
           </div>
 
-          {/* Interactive Layout Switcher (Layout A vs Layout B) */}
+          {/* Interactive Layout Switcher (Classic View vs Caliber Tactical View) */}
           <div className="flex items-center bg-[#14151D] border border-white/10 p-0.5 rounded-lg text-[10px] font-mono font-bold shadow-inner">
             <button
               onClick={() => {
                 sound.playSelect();
                 setLayoutVariant('classic');
               }}
-              className={`px-2.5 py-1 rounded-md transition cursor-pointer ${
+              className={`px-3 py-1 rounded-md transition cursor-pointer ${
                 layoutVariant === 'classic'
-                  ? 'bg-white/15 text-white shadow-sm'
+                  ? 'bg-white/15 text-white shadow-sm font-black'
                   : 'text-slate-400 hover:text-slate-200'
               }`}
-              title="Classic layout with detailed 8-column stats row"
+              title="Classic FACEIT matchroom layout (3 columns with ping selector)"
             >
-              Layout A
+              Classic View
             </button>
             <button
               onClick={() => {
                 sound.playSelect();
                 setLayoutVariant('tactical');
               }}
-              className={`px-2.5 py-1 rounded-md transition cursor-pointer flex items-center gap-1 ${
+              className={`px-3 py-1 rounded-md transition cursor-pointer flex items-center gap-1.5 ${
                 layoutVariant === 'tactical'
                   ? 'bg-[#A3E635] text-slate-950 shadow-sm font-black'
                   : 'text-slate-400 hover:text-slate-200'
               }`}
-              title="Caliber Tactical Layout with 4 key metrics, Tier X MMR pill, unified chat tabs"
+              title="Caliber Tactical View with Squad Party Containers & Left Chat"
             >
-              <span>⚡ Layout B</span>
+              <span>⚡ Caliber Tactical View</span>
             </button>
           </div>
         </div>
@@ -1652,10 +2379,21 @@ export const VortexMatchRoom: React.FC<VortexMatchRoomProps> = ({
                 </span>
               </div>
               <div className="flex items-center gap-2.5">
-                <span className="text-emerald-400 font-black">{currentSelectedMap}</span>
-                <span>•</span>
-                <span>10 Nov</span>
-                <CountryFlag code="DE" name="Germany" size="xs" />
+                {layoutVariant === 'tactical' ? (
+                  <span className="text-emerald-400 font-bold flex items-center gap-2">
+                    <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />
+                    <span>Server: Germany (18ms) • 128-Tick MatchZy Dedicated</span>
+                    <span className="text-slate-500">•</span>
+                    <span className="text-white font-black">{currentSelectedMap}</span>
+                  </span>
+                ) : (
+                  <>
+                    <span className="text-emerald-400 font-black">{currentSelectedMap}</span>
+                    <span>•</span>
+                    <span>10 Nov</span>
+                    <CountryFlag code="DE" name="Germany" size="xs" />
+                  </>
+                )}
               </div>
             </div>
 
@@ -1755,10 +2493,65 @@ export const VortexMatchRoom: React.FC<VortexMatchRoomProps> = ({
       </div>
 
       {/* ======================================================== */}
-      {/* 3. VIEW 1: OVERVIEW TAB (3 COLUMNS: PLAYERS • MAP • PLAYERS) */}
+      {/* 3. VIEW 1: OVERVIEW TAB                                  */}
       {/* ======================================================== */}
       {activeTab === 'overview' && (
-        <div className="max-w-[1400px] w-full mx-auto px-4 sm:px-6 py-4 flex-1 relative">
+        layoutVariant === 'tactical' ? (
+          /* ======================================================== */
+          /* CALIBER TACTICAL VIEW (ORIGINAL LAYOUT)                 */
+          /* 2 SQUADS SIDE-BY-SIDE + WIDE HORIZONTAL BOTTOM RAIL     */
+          /* ======================================================== */
+          <div className="max-w-[1400px] w-full mx-auto px-4 sm:px-6 py-4 flex-1 space-y-6">
+            {/* Two Teams Side-by-Side Grid */}
+            <div className="grid grid-cols-1 xl:grid-cols-2 gap-6 items-start">
+              {/* Team 1 Column */}
+              <div className="space-y-3">
+                <div className="flex items-center justify-between px-1">
+                  <div className="text-xs font-mono font-black text-emerald-400 uppercase tracking-wider flex items-center gap-2">
+                    <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse" />
+                    <span>Team 1 • {activeMatch.team1.name}</span>
+                  </div>
+                  <div className="text-[11px] font-mono text-slate-400 flex items-center gap-2">
+                    <span className="text-emerald-400 font-bold">{activeMatch.team1.avgElo.toLocaleString()} AVG MMR</span>
+                    <span>•</span>
+                    <span>Tier {activeMatch.team1.avgLevel}</span>
+                  </div>
+                </div>
+
+                <div className="space-y-4">
+                  {groupPlayersByParty(team1Players).map(group => renderSquadContainer(group, 'team1'))}
+                </div>
+              </div>
+
+              {/* Team 2 Column */}
+              <div className="space-y-3">
+                <div className="flex items-center justify-between px-1">
+                  <div className="text-xs font-mono font-black text-slate-300 uppercase tracking-wider flex items-center gap-2">
+                    <span className="w-2 h-2 rounded-full bg-slate-500" />
+                    <span>Team 2 • {activeMatch.team2.name}</span>
+                  </div>
+                  <div className="text-[11px] font-mono text-slate-400 flex items-center gap-2">
+                    <span className="text-blue-400 font-bold">{activeMatch.team2.avgElo.toLocaleString()} AVG MMR</span>
+                    <span>•</span>
+                    <span>Tier {activeMatch.team2.avgLevel}</span>
+                  </div>
+                </div>
+
+                <div className="space-y-4">
+                  {groupPlayersByParty(team2Players).map(group => renderSquadContainer(group, 'team2'))}
+                </div>
+              </div>
+            </div>
+
+            {/* Wide Horizontal Action Rail (Replaces narrow middle column) */}
+            {renderTacticalBottomRail()}
+          </div>
+        ) : (
+          /* ======================================================== */
+          /* CLASSIC VIEW (ORIGINAL 3 COLUMNS PRESERVED 100%)         */
+          /* TEAM 1 • CENTER SERVER & PING SLIDER • TEAM 2           */
+          /* ======================================================== */
+          <div className="max-w-[1400px] w-full mx-auto px-4 sm:px-6 py-4 flex-1 relative">
 
 
           <div className="grid grid-cols-1 lg:grid-cols-12 gap-5 items-start">
@@ -1770,11 +2563,7 @@ export const VortexMatchRoom: React.FC<VortexMatchRoomProps> = ({
               </div>
 
               <div className="space-y-2">
-                {team1Players.map(player => 
-                  layoutVariant === 'tactical' 
-                    ? renderTacticalPlayerCard(player, 'team1') 
-                    : renderOverviewPlayerCard(player, 'team1')
-                )}
+                {team1Players.map(player => renderOverviewPlayerCard(player, 'team1'))}
               </div>
             </div>
 
@@ -2093,16 +2882,13 @@ export const VortexMatchRoom: React.FC<VortexMatchRoomProps> = ({
               </div>
 
               <div className="space-y-2">
-                {team2Players.map(player => 
-                  layoutVariant === 'tactical' 
-                    ? renderTacticalPlayerCard(player, 'team2') 
-                    : renderOverviewPlayerCard(player, 'team2')
-                )}
+                {team2Players.map(player => renderOverviewPlayerCard(player, 'team2'))}
               </div>
             </div>
 
           </div>
         </div>
+        )
       )}
 
       {/* ======================================================== */}
@@ -2583,465 +3369,9 @@ export const VortexMatchRoom: React.FC<VortexMatchRoomProps> = ({
       </div> {/* END OF LEFT COLUMN: MAIN MATCHROOM */}
 
       {/* ======================================================== */}
-      {/* RIGHT COLUMN: 1:1 FACEIT MATCH CHAT DRAWER (SIDEBAR)     */}
+      {/* RIGHT COLUMN: CLASSIC MATCH CHAT (ONLY IN CLASSIC VIEW)   */}
       {/* ======================================================== */}
-      {isChatDrawerOpen && (
-        <div className="w-[340px] xl:w-[380px] shrink-0 h-full bg-[#07080B] border-l border-[#1F2129] flex flex-col z-30 select-text animate-in slide-in-from-right duration-150 max-md:fixed max-md:inset-y-0 max-md:right-0 max-md:w-full max-md:z-50">
-          
-          {layoutVariant === 'tactical' ? (
-            /* ==================================================== */
-            /* LAYOUT B: UNIFIED TACTICAL CHAT (ALL CHAT & TEAM TABS) */
-            /* ==================================================== */
-            <div className="flex flex-col h-full overflow-hidden">
-              
-              {/* Tactical Chat Header with All / Team Tabs */}
-              <div className="h-12 px-3 bg-[#0B0C12] border-b border-[#1E202B] flex items-center justify-between shrink-0">
-                <div className="flex items-center gap-1.5 p-1 bg-[#12141D] border border-white/5 rounded-lg">
-                  <button
-                    onClick={() => {
-                      sound.playClick();
-                      setUnifiedChatTab('all');
-                    }}
-                    className={`px-3 py-1 rounded-md text-xs font-mono font-bold transition flex items-center gap-1.5 cursor-pointer ${
-                      unifiedChatTab === 'all'
-                        ? 'bg-[#A3E635] text-slate-950 shadow-sm'
-                        : 'text-slate-400 hover:text-white'
-                    }`}
-                  >
-                    <MessageSquare className="w-3.5 h-3.5" />
-                    <span>All Chat</span>
-                    <span className="text-[10px] opacity-75 font-mono">({roomMessages.length})</span>
-                  </button>
-
-                  <button
-                    onClick={() => {
-                      sound.playClick();
-                      setUnifiedChatTab('team');
-                    }}
-                    className={`px-3 py-1 rounded-md text-xs font-mono font-bold transition flex items-center gap-1.5 cursor-pointer ${
-                      unifiedChatTab === 'team'
-                        ? 'bg-emerald-500 text-slate-950 shadow-sm'
-                        : 'text-slate-400 hover:text-white'
-                    }`}
-                  >
-                    <Shield className="w-3.5 h-3.5" />
-                    <span>Team Chat</span>
-                    <span className="text-[10px] opacity-75 font-mono">({teamMessages.length})</span>
-                  </button>
-                </div>
-
-                <button
-                  onClick={() => {
-                    sound.playClick();
-                    setIsChatDrawerOpen(false);
-                  }}
-                  className="p-1.5 rounded-lg text-slate-400 hover:text-white hover:bg-white/5 transition cursor-pointer"
-                  title="Collapse chat"
-                >
-                  <ChevronRight className="w-5 h-5" />
-                </button>
-              </div>
-
-              {/* Unified Full-Height Chat Stream */}
-              <div className="flex-1 overflow-y-auto p-4 flex flex-col justify-start space-y-3">
-                <div className="text-center my-2">
-                  <span className="text-[9px] font-mono text-slate-500 uppercase tracking-widest font-bold px-2 py-0.5 rounded bg-white/[0.03] border border-white/5">
-                    {unifiedChatTab === 'all' ? 'All 10 Matchroom Players Feed' : 'Internal Squad Comms (Team 1 Only)'}
-                  </span>
-                </div>
-
-                {unifiedChatTab === 'all' ? (
-                  // All Chat Feed (Room)
-                  roomMessages.map(msg => (
-                    <div key={msg.id} className="flex items-start gap-2.5">
-                      <img 
-                        src={msg.avatar} 
-                        alt={msg.sender} 
-                        className="w-6 h-6 rounded-full object-cover shrink-0 mt-0.5 border border-white/10" 
-                      />
-                      <div className="flex-1 min-w-0">
-                        <div className="flex items-baseline gap-2">
-                          <span className="text-xs font-bold text-white truncate">{msg.sender}</span>
-                          <span className="text-[10px] text-slate-500 font-mono">{msg.timestamp}</span>
-                        </div>
-                        {msg.text && (
-                          <p className="text-xs text-slate-300 font-sans mt-0.5 break-words">{msg.text}</p>
-                        )}
-                        {msg.imageUrl && (
-                          <div className="mt-1.5 max-w-[220px] rounded-lg overflow-hidden border border-white/10 shadow-md">
-                            <img 
-                              src={msg.imageUrl} 
-                              alt="Attachment" 
-                              className="w-full h-auto max-h-[180px] object-cover cursor-pointer hover:opacity-90 transition"
-                              onClick={() => window.open(msg.imageUrl, '_blank')}
-                            />
-                          </div>
-                        )}
-                      </div>
-                    </div>
-                  ))
-                ) : (
-                  // Team Chat Feed (Squad)
-                  teamMessages.map((msg, index) => {
-                    const prevMsg = teamMessages[index - 1];
-                    const isConsecutive = prevMsg && prevMsg.sender === msg.sender;
-
-                    return (
-                      <div key={msg.id} className={`flex items-start gap-2.5 ${isConsecutive ? 'mt-0.5' : 'mt-2.5'}`}>
-                        {!isConsecutive ? (
-                          <img 
-                            src={msg.avatar} 
-                            alt={msg.sender} 
-                            className="w-6 h-6 rounded-full object-cover shrink-0 mt-0.5 border border-white/10" 
-                          />
-                        ) : (
-                          <div className="w-6 shrink-0" />
-                        )}
-
-                        <div className="flex-1 min-w-0">
-                          {!isConsecutive && (
-                            <div className="flex items-baseline gap-2">
-                              <span className="text-xs font-bold text-white truncate">{msg.sender}</span>
-                              <span className="text-[10px] text-slate-500 font-mono">{msg.timestamp}</span>
-                            </div>
-                          )}
-                          {msg.text && (
-                            <p className="text-xs text-slate-200 font-sans break-words leading-relaxed">
-                              {msg.text}
-                            </p>
-                          )}
-                          {msg.imageUrl && (
-                            <div className="mt-1.5 max-w-[220px] rounded-lg overflow-hidden border border-white/10 shadow-md">
-                              <img 
-                                src={msg.imageUrl} 
-                                alt="Attachment" 
-                                className="w-full h-auto max-h-[180px] object-cover cursor-pointer hover:opacity-90 transition"
-                                onClick={() => window.open(msg.imageUrl, '_blank')}
-                              />
-                            </div>
-                          )}
-                        </div>
-                      </div>
-                    );
-                  })
-                )}
-                <div ref={unifiedChatTab === 'all' ? roomEndRef : teamEndRef} />
-              </div>
-
-              {/* Quick Tactical Phrases when in Team tab */}
-              {unifiedChatTab === 'team' && (
-                <div className="px-3 py-1.5 bg-[#0B0C12] border-t border-white/5 flex items-center gap-1.5 overflow-x-auto no-scrollbar">
-                  {QUICK_TACTICAL_PHRASES.map((p, i) => (
-                    <button
-                      key={i}
-                      onClick={() => handleSendPhrase(p)}
-                      className="px-2 py-0.5 rounded bg-white/[0.04] hover:bg-emerald-500/20 hover:text-emerald-300 text-[10px] font-mono text-slate-400 whitespace-nowrap cursor-pointer transition border border-white/5"
-                    >
-                      {p}
-                    </button>
-                  ))}
-                </div>
-              )}
-
-              {/* Unified Input Bar */}
-              <div className="p-3 bg-[#0B0C12] border-t border-[#1C1E27] shrink-0">
-                <form 
-                  onSubmit={unifiedChatTab === 'all' ? handleSendRoomMessage : handleSendTeamMessage} 
-                  className="relative flex items-center"
-                >
-                  <input
-                    type="text"
-                    value={unifiedChatTab === 'all' ? roomInput : teamInput}
-                    onChange={e => unifiedChatTab === 'all' ? setRoomInput(e.target.value) : setTeamInput(e.target.value)}
-                    placeholder={unifiedChatTab === 'all' ? "Message all 10 players..." : "Message squad only..."}
-                    className="w-full h-9 pl-3 pr-20 rounded-md bg-[#13141C] border border-[#222432] text-xs text-white placeholder-slate-500 focus:outline-none focus:border-[#A3E635] transition"
-                  />
-                  <div className="absolute right-2 flex items-center gap-1.5 text-slate-400">
-                    <input 
-                      ref={unifiedChatTab === 'all' ? roomFileInputRef : teamFileInputRef}
-                      type="file" 
-                      accept="image/*" 
-                      className="hidden" 
-                      onChange={unifiedChatTab === 'all' ? handleRoomImageUpload : handleTeamImageUpload} 
-                    />
-                    <button
-                      type="button"
-                      onClick={() => {
-                        sound.playClick();
-                        if (unifiedChatTab === 'all') roomFileInputRef.current?.click();
-                        else teamFileInputRef.current?.click();
-                      }}
-                      className="hover:text-white transition p-0.5 cursor-pointer"
-                      title="Send image"
-                    >
-                      <ImageIcon className="w-4 h-4" />
-                    </button>
-                    <button
-                      type="button"
-                      onClick={() => {
-                        if (unifiedChatTab === 'all') setRoomInput(prev => prev + ' 🎯');
-                        else setTeamInput(prev => prev + ' 🛡️');
-                      }}
-                      className="hover:text-white transition p-0.5 cursor-pointer"
-                      title="Emoji"
-                    >
-                      <Smile className="w-4 h-4" />
-                    </button>
-                    <button
-                      type="submit"
-                      className="p-1 rounded bg-[#A3E635] text-slate-950 hover:bg-[#bef264] transition cursor-pointer"
-                      title="Send"
-                    >
-                      <Send className="w-3.5 h-3.5" />
-                    </button>
-                  </div>
-                </form>
-              </div>
-            </div>
-          ) : (
-            /* ==================================================== */
-            /* LAYOUT A: CLASSIC SPLIT CHAT (TOP ROOM / BOTTOM TEAM) */
-            /* ==================================================== */
-            <>
-              {/* TOP HALF: Room chat (All 10 Matchroom Players) */}
-              <div className="flex flex-col flex-1 min-h-[220px] border-b border-[#1A1C24] overflow-hidden">
-                <div className="h-11 px-4 bg-[#07080B] border-b border-[#1A1C24] flex items-center justify-between shrink-0">
-                  <span className="font-display font-bold text-white text-sm">
-                    Room chat
-                  </span>
-                  <button
-                    onClick={() => {
-                      sound.playClick();
-                      setIsChatDrawerOpen(false);
-                    }}
-                    className="p-1 rounded text-slate-400 hover:text-white transition cursor-pointer"
-                    title="Collapse chat"
-                  >
-                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
-                      <path d="M4 4v16" />
-                      <path d="M9 12h11" />
-                      <path d="m15 7 5 5-5 5" />
-                    </svg>
-                  </button>
-                </div>
-
-                <div className="flex-1 overflow-y-auto p-4 flex flex-col justify-start">
-                  <div className="text-center my-3">
-                    <span className="text-[10px] font-mono text-slate-500 uppercase tracking-widest font-semibold">
-                      BEGINNING OF CONVERSATION
-                    </span>
-                  </div>
-
-                  <div className="space-y-3">
-                    {roomMessages.map(msg => (
-                      <div key={msg.id} className="flex items-start gap-2.5">
-                        <img 
-                          src={msg.avatar} 
-                          alt={msg.sender} 
-                          className="w-6 h-6 rounded-full object-cover shrink-0 mt-0.5 border border-white/10" 
-                        />
-                        <div className="flex-1 min-w-0">
-                          <div className="flex items-baseline gap-2">
-                            <span className="text-xs font-bold text-white truncate">{msg.sender}</span>
-                            <span className="text-[10px] text-slate-500 font-mono">{msg.timestamp}</span>
-                          </div>
-                          {msg.text && (
-                            <p className="text-xs text-slate-300 font-sans mt-0.5 break-words">{msg.text}</p>
-                          )}
-                          {msg.imageUrl && (
-                            <div className="mt-1.5 max-w-[220px] rounded-lg overflow-hidden border border-white/10 shadow-md">
-                              <img 
-                                src={msg.imageUrl} 
-                                alt="Attachment" 
-                                className="w-full h-auto max-h-[180px] object-cover cursor-pointer hover:opacity-90 transition"
-                                onClick={() => window.open(msg.imageUrl, '_blank')}
-                              />
-                            </div>
-                          )}
-                        </div>
-                      </div>
-                    ))}
-                    <div ref={roomEndRef} />
-                  </div>
-                </div>
-
-                <div className="p-3 bg-[#07080B] border-t border-[#14151C] shrink-0">
-                  <form onSubmit={handleSendRoomMessage} className="relative flex items-center">
-                    <input
-                      type="text"
-                      value={roomInput}
-                      onChange={e => setRoomInput(e.target.value)}
-                      placeholder="Message room"
-                      className="w-full h-9 pl-3 pr-16 rounded-md bg-[#111218] border border-[#20222B] text-xs text-white placeholder-slate-500 focus:outline-none focus:border-slate-500 transition"
-                    />
-                    <div className="absolute right-2 flex items-center gap-1.5 text-slate-400">
-                      <input 
-                        ref={roomFileInputRef}
-                        type="file" 
-                        accept="image/*" 
-                        className="hidden" 
-                        onChange={handleRoomImageUpload} 
-                      />
-                      <button
-                        type="button"
-                        onClick={() => {
-                          sound.playClick();
-                          roomFileInputRef.current?.click();
-                        }}
-                        className="hover:text-white transition p-0.5 cursor-pointer"
-                        title="Send image"
-                      >
-                        <ImageIcon className="w-4 h-4" />
-                      </button>
-                      <button
-                        type="button"
-                        onClick={() => setRoomInput(prev => prev + ' 🎯')}
-                        className="hover:text-white transition p-0.5 cursor-pointer"
-                        title="Emoji"
-                      >
-                        <Smile className="w-4 h-4" />
-                      </button>
-                    </div>
-                  </form>
-                </div>
-              </div>
-
-              {/* BOTTOM HALF: Team chat (Team Only Chat) */}
-              <div className="flex flex-col flex-1 min-h-[260px] overflow-hidden">
-                <div 
-                  onClick={() => setIsTeamChatCollapsed(!isTeamChatCollapsed)}
-                  className="h-11 px-4 bg-[#07080B] border-b border-[#1A1C24] flex items-center justify-between shrink-0 cursor-pointer hover:bg-white/[0.02] transition"
-                >
-                  <span className="font-display font-bold text-white text-sm">
-                    Team chat
-                  </span>
-                  <button className="p-1 text-slate-400 hover:text-white transition">
-                    <svg 
-                      width="15" 
-                      height="15" 
-                      viewBox="0 0 24 24" 
-                      fill="none" 
-                      stroke="currentColor" 
-                      strokeWidth="2.2" 
-                      strokeLinecap="round" 
-                      strokeLinejoin="round"
-                      className={`transform transition-transform ${isTeamChatCollapsed ? '-rotate-90' : 'rotate-0'}`}
-                    >
-                      <path d="M12 5v14" />
-                      <path d="m19 12-7 7-7-7" />
-                    </svg>
-                  </button>
-                </div>
-
-                {!isTeamChatCollapsed && (
-                  <>
-                    <div className="flex-1 overflow-y-auto p-4 space-y-2.5">
-                      {teamMessages.map((msg, index) => {
-                        const prevMsg = teamMessages[index - 1];
-                        const isConsecutive = prevMsg && prevMsg.sender === msg.sender;
-
-                        return (
-                          <div key={msg.id} className={`flex items-start gap-2.5 ${isConsecutive ? 'mt-0.5' : 'mt-2.5'}`}>
-                            {!isConsecutive ? (
-                              <img 
-                                src={msg.avatar} 
-                                alt={msg.sender} 
-                                className="w-6 h-6 rounded-full object-cover shrink-0 mt-0.5 border border-white/10" 
-                              />
-                            ) : (
-                              <div className="w-6 shrink-0" />
-                            )}
-
-                            <div className="flex-1 min-w-0">
-                              {!isConsecutive && (
-                                <div className="flex items-baseline gap-2">
-                                  <span className="text-xs font-bold text-white truncate">{msg.sender}</span>
-                                  <span className="text-[10px] text-slate-500 font-mono">{msg.timestamp}</span>
-                                </div>
-                              )}
-                              {msg.text && (
-                                <p className="text-xs text-slate-200 font-sans break-words leading-relaxed">
-                                  {msg.text}
-                                </p>
-                              )}
-                              {msg.imageUrl && (
-                            <div className="mt-1.5 max-w-[220px] rounded-lg overflow-hidden border border-white/10 shadow-md">
-                              <img 
-                                src={msg.imageUrl} 
-                                alt="Attachment" 
-                                className="w-full h-auto max-h-[180px] object-cover cursor-pointer hover:opacity-90 transition"
-                                onClick={() => window.open(msg.imageUrl, '_blank')}
-                              />
-                            </div>
-                          )}
-                        </div>
-                      </div>
-                    );
-                  })}
-                  <div ref={teamEndRef} />
-                </div>
-
-                {/* Quick Tactical Phrases */}
-                <div className="px-3 py-1 bg-[#07080B] border-t border-[#121319] flex items-center gap-1 overflow-x-auto no-scrollbar">
-                  {QUICK_TACTICAL_PHRASES.slice(0, 3).map((p, i) => (
-                    <button
-                      key={i}
-                      onClick={() => handleSendPhrase(p)}
-                      className="px-2 py-0.5 rounded bg-white/[0.04] hover:bg-white/[0.08] text-[9px] font-mono text-slate-400 hover:text-slate-200 whitespace-nowrap cursor-pointer transition"
-                    >
-                      {p}
-                    </button>
-                  ))}
-                </div>
-
-                {/* Team Chat Input Form */}
-                <div className="p-3 bg-[#07080B] border-t border-[#14151C] shrink-0">
-                  <form onSubmit={handleSendTeamMessage} className="relative flex items-center">
-                    <input
-                      type="text"
-                      value={teamInput}
-                      onChange={e => setTeamInput(e.target.value)}
-                      placeholder="Message room"
-                      className="w-full h-9 pl-3 pr-16 rounded-md bg-[#111218] border border-[#20222B] text-xs text-white placeholder-slate-500 focus:outline-none focus:border-slate-500 transition"
-                    />
-                    <div className="absolute right-2 flex items-center gap-1.5 text-slate-400">
-                      <input 
-                        ref={teamFileInputRef}
-                        type="file" 
-                        accept="image/*" 
-                        className="hidden" 
-                        onChange={handleTeamImageUpload} 
-                      />
-                      <button
-                        type="button"
-                        onClick={() => {
-                          sound.playClick();
-                          teamFileInputRef.current?.click();
-                        }}
-                        className="hover:text-white transition p-0.5 cursor-pointer"
-                        title="Send image"
-                      >
-                        <ImageIcon className="w-4 h-4" />
-                      </button>
-                      <button
-                        type="button"
-                        onClick={() => setTeamInput(prev => prev + ' 🎯')}
-                        className="hover:text-white transition p-0.5 cursor-pointer"
-                        title="Emoji"
-                      >
-                        <Smile className="w-4 h-4" />
-                      </button>
-                    </div>
-                  </form>
-                </div>
-              </>
-            )}
-          </div>
-        </>
-      )}
-
-    </div>
-  )}
+      {layoutVariant === 'classic' && isChatDrawerOpen && renderChatSidebar('right')}
 
       {/* ======================================================== */}
       {/* 5. AUTHENTIC 1:1 FACEIT PLAYER PROFILE FLYOUT             */}
