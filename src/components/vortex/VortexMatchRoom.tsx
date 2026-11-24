@@ -541,15 +541,15 @@ export const VortexMatchRoom: React.FC<VortexMatchRoomProps> = ({
         id: p.id,
         name: p.name,
         avatar: p.avatar || '',
-        level: p.level || 3,
-        elo: p.elo || 800,
+        level: p.level || 1,
+        elo: p.elo ?? 0,
         code: p.code || 'XK',
         countryName: p.countryName || 'Kosovo'
       })),
       userGamerTag: currentGamerTag,
       userAvatar: currentAvatarUrl,
-      userElo: partyMembers?.find(p => p.name === currentGamerTag)?.elo || 800,
-      userLevel: partyMembers?.find(p => p.name === currentGamerTag)?.level || 3,
+      userElo: partyMembers?.find(p => p.name === currentGamerTag)?.elo ?? 0,
+      userLevel: partyMembers?.find(p => p.name === currentGamerTag)?.level ?? 1,
       mapName: 'Anubis'
     });
   }, [matchData, partyMembers, currentGamerTag, currentAvatarUrl]);

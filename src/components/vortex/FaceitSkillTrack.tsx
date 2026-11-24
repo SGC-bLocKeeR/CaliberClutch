@@ -19,7 +19,7 @@ export interface FaceitTierInfo {
 }
 
 export const FACEIT_TIERS: Record<number, FaceitTierInfo> = {
-  1: { level: 1, minElo: 100, maxElo: 500, label: 'Level 1', badgeColor: 'text-sky-400', ringBorder: 'border-sky-500', ringGlow: 'shadow-sky-500/20', ringSvgColor: '#38BDF8', ringPercent: 12 },
+  1: { level: 1, minElo: 0, maxElo: 500, label: 'Level 1', badgeColor: 'text-sky-400', ringBorder: 'border-sky-500', ringGlow: 'shadow-sky-500/20', ringSvgColor: '#38BDF8', ringPercent: 12 },
   2: { level: 2, minElo: 501, maxElo: 750, label: 'Level 2', badgeColor: 'text-sky-300', ringBorder: 'border-sky-400', ringGlow: 'shadow-sky-400/20', ringSvgColor: '#38BDF8', ringPercent: 25 },
   3: { level: 3, minElo: 751, maxElo: 900, label: 'Level 3', badgeColor: 'text-teal-400', ringBorder: 'border-teal-500', ringGlow: 'shadow-teal-500/25', ringSvgColor: '#14B8A6', ringPercent: 35 },
   4: { level: 4, minElo: 901, maxElo: 1050, label: 'Level 4', badgeColor: 'text-emerald-400', ringBorder: 'border-emerald-500', ringGlow: 'shadow-emerald-500/20', ringSvgColor: '#10B981', ringPercent: 45 },
@@ -28,10 +28,12 @@ export const FACEIT_TIERS: Record<number, FaceitTierInfo> = {
   7: { level: 7, minElo: 1351, maxElo: 1530, label: 'Level 7', badgeColor: 'text-[#bef264]', ringBorder: 'border-[#bef264]', ringGlow: 'shadow-lime-400/25', ringSvgColor: '#A3E635', ringPercent: 75 },
   8: { level: 8, minElo: 1531, maxElo: 1750, label: 'Level 8', badgeColor: 'text-cyan-400', ringBorder: 'border-cyan-500', ringGlow: 'shadow-cyan-500/25', ringSvgColor: '#06B6D4', ringPercent: 82 },
   9: { level: 9, minElo: 1751, maxElo: 2000, label: 'Level 9', badgeColor: 'text-cyan-300', ringBorder: 'border-cyan-400', ringGlow: 'shadow-cyan-400/25', ringSvgColor: '#22D3EE', ringPercent: 90 },
-  10: { level: 10, minElo: 2001, maxElo: 9999, label: 'Level 10', badgeColor: 'text-red-500', ringBorder: 'border-red-600', ringGlow: 'shadow-red-600/30', ringSvgColor: '#EF4444', ringPercent: 100 }
+  10: { level: 10, minElo: 2001, maxElo: 2350, label: 'Level 10', badgeColor: 'text-red-500', ringBorder: 'border-red-600', ringGlow: 'shadow-red-600/30', ringSvgColor: '#EF4444', ringPercent: 95 },
+  11: { level: 11, minElo: 2351, maxElo: 9999, label: 'Level 11', badgeColor: 'text-rose-400', ringBorder: 'border-rose-500', ringGlow: 'shadow-rose-500/35', ringSvgColor: '#F43F5E', ringPercent: 100 }
 };
 
 export const getFaceitLevelFromElo = (elo: number): number => {
+  if (elo >= 2351) return 11;
   if (elo >= 2001) return 10;
   if (elo >= 1751) return 9;
   if (elo >= 1531) return 8;
@@ -55,7 +57,8 @@ const SEGMENT_COLORS = [
   'bg-gradient-to-r from-[#F59E0B] to-[#EA580C]',   // 7 -> 8 (Amber to Orange)
   'bg-[#EA580C]',                                    // 8 -> 9 (Orange)
   'bg-gradient-to-r from-[#EA580C] to-[#DC2626]',   // 9 -> 10 (Orange to Red)
-  'bg-[#DC2626]',                                    // 10 -> Challenger (Red)
+  'bg-gradient-to-r from-[#DC2626] to-[#F43F5E]',   // 10 -> 11 (Red to Rose)
+  'bg-[#F43F5E]',                                    // 11 -> Challenger
 ];
 
 // ============================================================================
@@ -77,13 +80,13 @@ export const FaceitSkillTrack: React.FC<FaceitSkillTrackProps> = ({
   className = '',
   compact = false
 }) => {
-  const currentLevel = isCalibrated ? level : 3;
-  const currentElo = isCalibrated ? elo : 800;
+  const currentLevel = isCalibrated ? level : 1;
+  const currentElo = isCalibrated ? elo : 0;
 
   // Calculate ELO needed to next skill rank
-  const nextTier = FACEIT_TIERS[Math.min(10, currentLevel + 1)];
+  const nextTier = FACEIT_TIERS[Math.min(11, currentLevel + 1)];
   const currentTier = FACEIT_TIERS[currentLevel];
-  const eloNeeded = currentLevel < 10 ? Math.max(1, nextTier.minElo - currentElo) : 0;
+  const eloNeeded = currentLevel < 11 ? Math.max(1, nextTier.minElo - currentElo) : 0;
 
   // Partial progress in current segment between currentLevel and currentLevel + 1
   const range = Math.max(1, nextTier.minElo - currentTier.minElo);
@@ -94,7 +97,7 @@ export const FaceitSkillTrack: React.FC<FaceitSkillTrackProps> = ({
       {/* 100% Responsive track without any horizontal scrollbar or drag-handle */}
       <div className="w-full overflow-hidden [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden">
         <div className="w-full flex items-center justify-between">
-          {[1, 2, 3, 4, 5, 6, 7, 8, 9, 10].map((lvl, idx) => {
+          {[1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11].map((lvl, idx) => {
             const isReached = lvl <= currentLevel;
             const isCurrent = lvl === currentLevel;
             const tier = FACEIT_TIERS[lvl];
@@ -187,19 +190,19 @@ export const FaceitSkillTrack: React.FC<FaceitSkillTrackProps> = ({
 
       {/* Underneath: Elo needed to next skill rank (1:1 with authentic FACEIT UI) */}
       <div className="text-center pt-1 text-xs font-mono flex items-center justify-center gap-1.5">
-        {currentLevel < 10 ? (
+        {currentLevel < 11 ? (
           <>
             <span className="text-[#38BDF8] font-black text-sm">{eloNeeded}</span>{' '}
             <span className="text-slate-300 font-sans">Elo needed to next skill rank</span>
             {!isCalibrated && (
               <span className="text-amber-400 font-mono text-[10px] ml-1 bg-amber-500/10 border border-amber-500/20 px-2 py-0.5 rounded">
-                Uncalibrated (800 Elo Baseline)
+                Uncalibrated (0 Elo Baseline)
               </span>
             )}
           </>
         ) : (
-          <span className="text-red-400 font-bold">
-            Max Level 10 Reached • Top 1,000 Regional Ranking for Challenger
+          <span className="text-rose-400 font-bold">
+            Max Level 11 Reached • Pinnacle Rank on Caliber Clutch
           </span>
         )}
       </div>
@@ -285,10 +288,10 @@ export const FaceitSeasonStatsCard: React.FC<FaceitSeasonStatsCardProps> = ({
           <div className="flex flex-wrap items-center justify-center gap-2 pt-1 text-[11px] font-mono">
             <div className="flex items-center gap-1.5 px-3 py-1 rounded-full bg-amber-500/10 border border-amber-500/25 text-amber-300">
               <span className="w-2 h-2 rounded-full bg-amber-400 animate-pulse" />
-              <span>Starting Baseline: Level 3 • 800 ELO</span>
+              <span>Starting Baseline: Level 1 • 0 ELO</span>
             </div>
             <div className="flex items-center gap-1.5 px-3 py-1 rounded-full bg-white/[0.04] border border-white/10 text-slate-400">
-              <span>101 ELO to Level 4</span>
+              <span>501 ELO to Level 2</span>
             </div>
           </div>
         </div>

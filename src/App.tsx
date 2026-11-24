@@ -76,14 +76,14 @@ export function App() {
             localStorage.removeItem('vortex_is_admin');
           }
 
-          // FACEIT standard baseline: 0 matches = Level 3 & 800 ELO (Uncalibrated)
+          // Caliber Clutch baseline: 0 matches = Level 1 & 0 ELO (Uncalibrated)
           const hasLinkedFaceit = localStorage.getItem('caliber_faceit_connected') === 'true' || localStorage.getItem('vortex_faceit_connected') === 'true';
           const savedMatches = localStorage.getItem('caliber_user_matches') || localStorage.getItem('vortex_user_matches');
           const matchCount = savedMatches !== null ? parseInt(savedMatches, 10) : 0;
           if (!hasLinkedFaceit || matchCount === 0) {
             if (matchCount === 0) {
-              localStorage.setItem('caliber_user_level', '3'); // FACEIT baseline: Level 3
-              localStorage.setItem('caliber_user_elo', '800'); // 800 ELO baseline for 0 matches
+              localStorage.setItem('caliber_user_level', '1'); // Baseline: Level 1
+              localStorage.setItem('caliber_user_elo', '0'); // 0 ELO baseline for 0 matches
               localStorage.setItem('caliber_user_matches', '0');
             }
             if (!isOwnerAdmin) {

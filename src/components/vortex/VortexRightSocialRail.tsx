@@ -243,8 +243,8 @@ export const VortexRightSocialRail: React.FC<VortexRightSocialRailProps> = ({
       const savedMatches = typeof window !== 'undefined' ? (localStorage.getItem('caliber_user_matches') || localStorage.getItem('vortex_user_matches')) : null;
       const matchCount = savedMatches !== null ? parseInt(savedMatches, 10) : 0;
       const savedElo = typeof window !== 'undefined' ? (localStorage.getItem('caliber_user_elo') || localStorage.getItem('vortex_user_elo')) : null;
-      const elo = matchCount > 0 && savedElo ? parseInt(savedElo, 10) : 800;
-      const lvl = matchCount > 0 ? (elo >= 2001 ? 10 : elo >= 1751 ? 9 : elo >= 1531 ? 8 : elo >= 1351 ? 7 : elo >= 1201 ? 6 : elo >= 1051 ? 5 : elo >= 901 ? 4 : elo >= 751 ? 3 : elo >= 501 ? 2 : 1) : 3;
+      const elo = matchCount > 0 && savedElo ? parseInt(savedElo, 10) : 0;
+      const lvl = matchCount > 0 ? (elo >= 2351 ? 11 : elo >= 2001 ? 10 : elo >= 1751 ? 9 : elo >= 1531 ? 8 : elo >= 1351 ? 7 : elo >= 1201 ? 6 : elo >= 1051 ? 5 : elo >= 901 ? 4 : elo >= 751 ? 3 : elo >= 501 ? 2 : 1) : 1;
 
       registerPlatformPlayer({
         id: `u-${currentGamerTag.toLowerCase()}`,
@@ -695,18 +695,15 @@ export const VortexRightSocialRail: React.FC<VortexRightSocialRailProps> = ({
                   ? 'bg-white/[0.1] text-white border border-white/10' 
                   : 'bg-white/[0.03] hover:bg-white/[0.07] text-slate-300 hover:text-white'
               }`}
-              title="Social"
+              title="Friends/Chat"
             >
               <div className="flex items-center gap-2.5">
                 <Users className="w-4 h-4 text-emerald-400" />
-                <span className="text-xs font-bold font-sans">Social</span>
+                <span className="text-xs font-bold font-sans">Friends/Chat</span>
               </div>
               <span className="px-2 py-0.5 rounded-full bg-emerald-400/20 text-emerald-400 border border-emerald-400/30 font-mono font-black text-[10px] flex items-center gap-1">
                 <span className="w-1.5 h-1.5 rounded-full bg-emerald-400" />
-                {onlineFriends.length + playingFriends.length > 0 
-                  ? `${onlineFriends.length + playingFriends.length} Online`
-                  : `${friendsList.length} Friends`
-                }
+                {onlineFriends.length + playingFriends.length} Online
               </span>
             </button>
           </div>
@@ -1040,10 +1037,10 @@ export const VortexRightSocialRail: React.FC<VortexRightSocialRailProps> = ({
               /* NORMAL SOCIAL DRAWER VIEW (Friends, DMs, Requests)  */
               /* ==================================================== */
               <>
-                {/* Header: Social + Search User Button + Close ✕ */}
+                {/* Header: Friends/Chat + Search User Button + Close ✕ */}
                 <div className="p-4 border-b border-[#181B26] flex items-center justify-between">
                   <h2 className="font-display font-black text-white text-xl">
-                    Social
+                    Friends/Chat
                   </h2>
 
                   <div className="flex items-center gap-1.5">
@@ -1067,9 +1064,9 @@ export const VortexRightSocialRail: React.FC<VortexRightSocialRailProps> = ({
                   </div>
                 </div>
 
-                {/* Sub-Tabs: Friends • Messages • Friend Requests */}
+                {/* Sub-Tabs: Friends • Messages (Clean 2-Tab Layout) */}
                 <div className="p-3 border-b border-[#181B26]">
-                  <div className="grid grid-cols-3 gap-1 p-1 rounded-xl bg-[#12141C] border border-[#202330]">
+                  <div className="grid grid-cols-2 gap-1 p-1 rounded-xl bg-[#12141C] border border-[#202330]">
                     <button
                       onClick={() => { sound.playClick(); setSocialSubTab('friends'); }}
                       className={`py-2 rounded-lg flex items-center justify-center transition cursor-pointer relative ${
@@ -1078,8 +1075,11 @@ export const VortexRightSocialRail: React.FC<VortexRightSocialRailProps> = ({
                       title="Friends"
                     >
                       <Users className="w-4 h-4" />
+                      {friendRequests.incoming.length > 0 && (
+                        <span className="w-1.5 h-1.5 rounded-full bg-[#A3E635] absolute top-2 right-6 animate-pulse" />
+                      )}
                       {socialSubTab === 'friends' && (
-                        <span className="absolute bottom-0 w-6 h-0.5 rounded-full bg-[#A3E635]" />
+                        <span className="absolute bottom-0 w-8 h-0.5 rounded-full bg-[#A3E635]" />
                       )}
                     </button>
 
@@ -1092,20 +1092,7 @@ export const VortexRightSocialRail: React.FC<VortexRightSocialRailProps> = ({
                     >
                       <MessageSquare className="w-4 h-4" />
                       {socialSubTab === 'dms' && (
-                        <span className="absolute bottom-0 w-6 h-0.5 rounded-full bg-[#A3E635]" />
-                      )}
-                    </button>
-
-                    <button
-                      onClick={() => { sound.playClick(); setSocialSubTab('requests'); }}
-                      className={`py-2 rounded-lg flex items-center justify-center transition cursor-pointer relative ${
-                        socialSubTab === 'requests' ? 'text-white' : 'text-slate-400 hover:text-white'
-                      }`}
-                      title="Friend Requests"
-                    >
-                      <UserPlus className="w-4 h-4" />
-                      {socialSubTab === 'requests' && (
-                        <span className="absolute bottom-0 w-6 h-0.5 rounded-full bg-[#A3E635]" />
+                        <span className="absolute bottom-0 w-8 h-0.5 rounded-full bg-[#A3E635]" />
                       )}
                     </button>
                   </div>
@@ -1132,6 +1119,53 @@ export const VortexRightSocialRail: React.FC<VortexRightSocialRailProps> = ({
                       <div className="p-2.5 rounded-xl bg-[#A3E635]/15 border border-[#A3E635]/30 text-[#A3E635] text-xs font-mono font-bold flex items-center gap-2 animate-in fade-in">
                         <CheckCircle2 className="w-4 h-4 shrink-0" />
                         <span>{socialToast}</span>
+                      </div>
+                    )}
+
+                    {/* Pending Incoming Friend Requests */}
+                    {friendRequests.incoming.length > 0 && (
+                      <div className="p-3 rounded-2xl bg-[#121A0F] border border-[#A3E635]/40 space-y-2">
+                        <div className="text-[11px] font-mono font-bold text-[#A3E635] flex items-center justify-between">
+                          <span className="flex items-center gap-1.5">
+                            <UserPlus className="w-3.5 h-3.5" />
+                            Incoming Requests ({friendRequests.incoming.length})
+                          </span>
+                        </div>
+                        <div className="space-y-1.5">
+                          {friendRequests.incoming.map(req => (
+                            <div 
+                              key={req.id} 
+                              className="p-2 rounded-xl bg-[#0E131C] border border-white/10 flex items-center justify-between gap-2"
+                            >
+                              <div className="flex items-center gap-2 min-w-0">
+                                <img src={req.fromAvatar} alt={req.fromGamerTag} className="w-7 h-7 rounded-full object-cover border border-white/10 shrink-0" />
+                                <div className="min-w-0">
+                                  <div className="flex items-center gap-1">
+                                    <span className="text-xs font-bold text-white truncate">{req.fromGamerTag}</span>
+                                    <CountryFlag code={req.fromCountryCode} name={req.fromCountryName} size="xs" />
+                                  </div>
+                                  <div className="text-[9px] font-mono text-slate-400">Level {req.fromLevel} • {req.fromElo} ELO</div>
+                                </div>
+                              </div>
+                              <div className="flex items-center gap-1 shrink-0">
+                                <button
+                                  onClick={() => handleAcceptRequest(req)}
+                                  className="px-2 py-1 rounded-lg bg-[#A3E635] hover:bg-[#86efac] text-slate-950 font-mono font-black text-[10px] transition cursor-pointer active:scale-95"
+                                  title="Accept"
+                                >
+                                  Accept
+                                </button>
+                                <button
+                                  onClick={() => handleDeclineRequest(req.id)}
+                                  className="p-1 rounded-lg bg-white/5 hover:bg-white/10 text-slate-400 hover:text-white transition cursor-pointer"
+                                  title="Decline"
+                                >
+                                  <X className="w-3.5 h-3.5" />
+                                </button>
+                              </div>
+                            </div>
+                          ))}
+                        </div>
                       </div>
                     )}
 
@@ -1387,6 +1421,53 @@ export const VortexRightSocialRail: React.FC<VortexRightSocialRailProps> = ({
                       <div className="p-2.5 rounded-xl bg-[#A3E635]/15 border border-[#A3E635]/30 text-[#A3E635] text-xs font-mono font-bold flex items-center gap-2 animate-in fade-in">
                         <CheckCircle2 className="w-4 h-4 shrink-0" />
                         <span>{socialToast}</span>
+                      </div>
+                    )}
+
+                    {/* Pending Incoming Friend Requests */}
+                    {friendRequests.incoming.length > 0 && (
+                      <div className="p-3 rounded-2xl bg-[#121A0F] border border-[#A3E635]/40 space-y-2">
+                        <div className="text-[11px] font-mono font-bold text-[#A3E635] flex items-center justify-between">
+                          <span className="flex items-center gap-1.5">
+                            <UserPlus className="w-3.5 h-3.5" />
+                            Incoming Requests ({friendRequests.incoming.length})
+                          </span>
+                        </div>
+                        <div className="space-y-1.5">
+                          {friendRequests.incoming.map(req => (
+                            <div 
+                              key={req.id} 
+                              className="p-2 rounded-xl bg-[#0E131C] border border-white/10 flex items-center justify-between gap-2"
+                            >
+                              <div className="flex items-center gap-2 min-w-0">
+                                <img src={req.fromAvatar} alt={req.fromGamerTag} className="w-7 h-7 rounded-full object-cover border border-white/10 shrink-0" />
+                                <div className="min-w-0">
+                                  <div className="flex items-center gap-1">
+                                    <span className="text-xs font-bold text-white truncate">{req.fromGamerTag}</span>
+                                    <CountryFlag code={req.fromCountryCode} name={req.fromCountryName} size="xs" />
+                                  </div>
+                                  <div className="text-[9px] font-mono text-slate-400">Level {req.fromLevel} • {req.fromElo} ELO</div>
+                                </div>
+                              </div>
+                              <div className="flex items-center gap-1 shrink-0">
+                                <button
+                                  onClick={() => handleAcceptRequest(req)}
+                                  className="px-2 py-1 rounded-lg bg-[#A3E635] hover:bg-[#86efac] text-slate-950 font-mono font-black text-[10px] transition cursor-pointer active:scale-95"
+                                  title="Accept"
+                                >
+                                  Accept
+                                </button>
+                                <button
+                                  onClick={() => handleDeclineRequest(req.id)}
+                                  className="p-1 rounded-lg bg-white/5 hover:bg-white/10 text-slate-400 hover:text-white transition cursor-pointer"
+                                  title="Decline"
+                                >
+                                  <X className="w-3.5 h-3.5" />
+                                </button>
+                              </div>
+                            </div>
+                          ))}
+                        </div>
                       </div>
                     )}
 

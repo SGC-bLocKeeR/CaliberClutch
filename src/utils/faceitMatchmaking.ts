@@ -28,6 +28,7 @@ export interface BalancedMatch {
 }
 
 export const getFaceitLevelFromElo = (elo: number): number => {
+  if (elo >= 2351) return 11;
   if (elo >= 2001) return 10;
   if (elo >= 1751) return 9;
   if (elo >= 1531) return 8;

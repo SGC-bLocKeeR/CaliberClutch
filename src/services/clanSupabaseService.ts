@@ -73,7 +73,7 @@ export async function fetchClanFromCloud(clanTag: string = 'CC'): Promise<ClanDa
           wins: 0,
           losses: 0,
           winrate: '0%',
-          avgElo: 800,
+          avgElo: 0,
           tournamentsWon: 0,
           streak: 0,
         },

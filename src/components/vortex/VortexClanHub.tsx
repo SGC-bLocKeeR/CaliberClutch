@@ -4350,7 +4350,7 @@ export const VortexClanHub: React.FC<VortexClanHubProps> = ({
                       <Info className="w-3.5 h-3.5 text-[#A3E635]" />
                       <span>How to invite teammates:</span>
                     </div>
-                    <div>1. Open the Social / Friends panel on the right side.</div>
+                    <div>1. Open the Friends/Chat panel on the right side.</div>
                     <div>2. Add your teammates as friends using their GamerTag.</div>
                     <div>3. Once accepted, select them here to add them to your 5v5 roster.</div>
                   </div>

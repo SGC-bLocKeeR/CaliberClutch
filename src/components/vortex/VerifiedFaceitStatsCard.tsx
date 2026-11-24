@@ -406,7 +406,7 @@ export const VerifiedFaceitStatsCard: React.FC<VerifiedFaceitStatsCardProps> = (
                 </div>
                 <div className="flex items-baseline gap-1 mt-1">
                   <span className="text-2xl font-black font-display text-[#A3E635]">
-                    {stats.faceitElo?.toLocaleString() || 800}
+                    {stats.faceitElo !== undefined && stats.faceitElo !== null ? stats.faceitElo.toLocaleString() : 0}
                   </span>
                 </div>
               </div>

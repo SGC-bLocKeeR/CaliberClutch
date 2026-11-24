@@ -289,7 +289,7 @@ export const sendFriendRequest = (
     fromGamerTag: fromUser.gamerTag,
     fromAvatar: fromUser.avatar || 'https://distribution.faceit-cdn.net/images/ac453a50-dbca-4d42-a740-dac12bdc74c0.jpeg',
     fromLevel: fromUser.level || 1,
-    fromElo: fromUser.elo || 800,
+    fromElo: fromUser.elo ?? 0,
     fromVerification: fromUser.verification || 'none',
     fromCountryCode: fromUser.countryCode || 'XK',
     fromCountryName: fromUser.countryName || 'Kosovo',

@@ -661,70 +661,37 @@ export interface CaliberTierInfo {
 }
 
 export const getCaliberTier = (mmr: number): CaliberTierInfo => {
-  if (mmr >= 1750) {
-    return {
-      tier: 'TIER VI',
-      roman: 'VI',
-      name: 'APEX ELITE',
-      color: '#A855F7',
-      minMmr: 1750,
-      maxMmr: 3000,
-      nextTierName: null,
-    };
+  if (mmr >= 2350) {
+    return { tier: 'TIER 11', roman: '11', name: 'LEGEND', color: '#EF4444', minMmr: 2350, maxMmr: 3500, nextTierName: null };
+  }
+  if (mmr >= 2100) {
+    return { tier: 'TIER 10', roman: '10', name: 'ELITE', color: '#A855F7', minMmr: 2100, maxMmr: 2349, nextTierName: 'TIER 11 • LEGEND' };
+  }
+  if (mmr >= 1850) {
+    return { tier: 'TIER 9', roman: '9', name: 'MASTER', color: '#8B5CF6', minMmr: 1850, maxMmr: 2099, nextTierName: 'TIER 10 • ELITE' };
+  }
+  if (mmr >= 1600) {
+    return { tier: 'TIER 8', roman: '8', name: 'EXPERT', color: '#F97316', minMmr: 1600, maxMmr: 1849, nextTierName: 'TIER 9 • MASTER' };
   }
   if (mmr >= 1350) {
-    return {
-      tier: 'TIER V',
-      roman: 'V',
-      name: 'CLUTCH MASTER',
-      color: '#FB923C',
-      minMmr: 1350,
-      maxMmr: 1749,
-      nextTierName: 'TIER VI • APEX ELITE',
-    };
+    return { tier: 'TIER 7', roman: '7', name: 'HARD', color: '#FB923C', minMmr: 1350, maxMmr: 1599, nextTierName: 'TIER 8 • EXPERT' };
   }
-  if (mmr >= 1000) {
-    return {
-      tier: 'TIER IV',
-      roman: 'IV',
-      name: 'VANGUARD',
-      color: '#FACC15',
-      minMmr: 1000,
-      maxMmr: 1349,
-      nextTierName: 'TIER V • CLUTCH MASTER',
-    };
+  if (mmr >= 1100) {
+    return { tier: 'TIER 6', roman: '6', name: 'ADVANCED', color: '#EAB308', minMmr: 1100, maxMmr: 1349, nextTierName: 'TIER 7 • HARD' };
+  }
+  if (mmr >= 900) {
+    return { tier: 'TIER 5', roman: '5', name: 'SKILLED', color: '#FACC15', minMmr: 900, maxMmr: 1099, nextTierName: 'TIER 6 • ADVANCED' };
   }
   if (mmr >= 700) {
-    return {
-      tier: 'TIER III',
-      roman: 'III',
-      name: 'CONTENDER',
-      color: '#A3E635',
-      minMmr: 700,
-      maxMmr: 999,
-      nextTierName: 'TIER IV • VANGUARD',
-    };
+    return { tier: 'TIER 4', roman: '4', name: 'MEDIUM', color: '#A3E635', minMmr: 700, maxMmr: 899, nextTierName: 'TIER 5 • SKILLED' };
   }
-  if (mmr >= 400) {
-    return {
-      tier: 'TIER II',
-      roman: 'II',
-      name: 'INITIATE',
-      color: '#38BDF8',
-      minMmr: 400,
-      maxMmr: 699,
-      nextTierName: 'TIER III • CONTENDER',
-    };
+  if (mmr >= 500) {
+    return { tier: 'TIER 3', roman: '3', name: 'NORMAL', color: '#4ADE80', minMmr: 500, maxMmr: 699, nextTierName: 'TIER 4 • MEDIUM' };
   }
-  return {
-    tier: 'TIER I',
-    roman: 'I',
-    name: 'RECRUIT',
-    color: '#94A3B8',
-    minMmr: 0,
-    maxMmr: 399,
-    nextTierName: 'TIER II • INITIATE',
-  };
+  if (mmr >= 300) {
+    return { tier: 'TIER 2', roman: '2', name: 'NOVICE', color: '#38BDF8', minMmr: 300, maxMmr: 499, nextTierName: 'TIER 3 • NORMAL' };
+  }
+  return { tier: 'TIER 1', roman: '1', name: 'BEGINNER', color: '#94A3B8', minMmr: 0, maxMmr: 299, nextTierName: 'TIER 2 • NOVICE' };
 };
 
 export interface FaceitTierInfo {
@@ -740,7 +707,7 @@ export interface FaceitTierInfo {
 }
 
 export const FACEIT_TIERS: Record<number, FaceitTierInfo> = {
-  1: { level: 1, minElo: 100, maxElo: 500, label: 'Level 1', badgeColor: 'text-slate-300', ringBorder: 'border-slate-500', ringGlow: 'shadow-slate-500/20', ringSvgColor: '#94A3B8', ringPercent: 10 },
+  1: { level: 1, minElo: 0, maxElo: 500, label: 'Level 1', badgeColor: 'text-slate-300', ringBorder: 'border-slate-500', ringGlow: 'shadow-slate-500/20', ringSvgColor: '#94A3B8', ringPercent: 10 },
   2: { level: 2, minElo: 501, maxElo: 750, label: 'Level 2', badgeColor: 'text-emerald-400', ringBorder: 'border-emerald-500', ringGlow: 'shadow-emerald-500/20', ringSvgColor: '#10B981', ringPercent: 20 },
   3: { level: 3, minElo: 751, maxElo: 900, label: 'Level 3', badgeColor: 'text-[#A3E635]', ringBorder: 'border-[#A3E635]', ringGlow: 'shadow-lime-500/25', ringSvgColor: '#A3E635', ringPercent: 30 },
   4: { level: 4, minElo: 901, maxElo: 1050, label: 'Level 4', badgeColor: 'text-yellow-400', ringBorder: 'border-yellow-400', ringGlow: 'shadow-yellow-500/20', ringSvgColor: '#FACC15', ringPercent: 40 },
@@ -749,10 +716,12 @@ export const FACEIT_TIERS: Record<number, FaceitTierInfo> = {
   7: { level: 7, minElo: 1351, maxElo: 1530, label: 'Level 7', badgeColor: 'text-amber-500', ringBorder: 'border-amber-500', ringGlow: 'shadow-amber-500/25', ringSvgColor: '#D97706', ringPercent: 70 },
   8: { level: 8, minElo: 1531, maxElo: 1750, label: 'Level 8', badgeColor: 'text-orange-500', ringBorder: 'border-orange-500', ringGlow: 'shadow-orange-500/25', ringSvgColor: '#EA580C', ringPercent: 80 },
   9: { level: 9, minElo: 1751, maxElo: 2000, label: 'Level 9', badgeColor: 'text-orange-500', ringBorder: 'border-orange-600', ringGlow: 'shadow-orange-600/25', ringSvgColor: '#C2410C', ringPercent: 90 },
-  10: { level: 10, minElo: 2001, maxElo: 9999, label: 'Level 10', badgeColor: 'text-red-500', ringBorder: 'border-red-600', ringGlow: 'shadow-red-600/30', ringSvgColor: '#DC2626', ringPercent: 100 }
+  10: { level: 10, minElo: 2001, maxElo: 2350, label: 'Level 10', badgeColor: 'text-red-500', ringBorder: 'border-red-600', ringGlow: 'shadow-red-600/30', ringSvgColor: '#DC2626', ringPercent: 95 },
+  11: { level: 11, minElo: 2351, maxElo: 9999, label: 'Level 11', badgeColor: 'text-rose-500', ringBorder: 'border-rose-600', ringGlow: 'shadow-rose-600/35', ringSvgColor: '#F43F5E', ringPercent: 100 }
 };
 
 export const getFaceitLevelFromElo = (elo: number): number => {
+  if (elo >= 2351) return 11;
   if (elo >= 2001) return 10;
   if (elo >= 1751) return 9;
   if (elo >= 1531) return 8;
@@ -766,8 +735,8 @@ export const getFaceitLevelFromElo = (elo: number): number => {
 };
 
 export const getFaceitTierInfo = (levelOrElo: number): FaceitTierInfo => {
-  const level = levelOrElo > 10 ? getFaceitLevelFromElo(levelOrElo) : Math.max(1, Math.min(10, Math.round(levelOrElo)));
-  return FACEIT_TIERS[level] || FACEIT_TIERS[3];
+  const level = levelOrElo > 11 ? getFaceitLevelFromElo(levelOrElo) : Math.max(1, Math.min(11, Math.round(levelOrElo)));
+  return FACEIT_TIERS[level] || FACEIT_TIERS[1];
 };
 
 
@@ -883,7 +852,7 @@ export const VortexDashboard: React.FC<VortexDashboardProps> = ({
     return getLocalState('caliber_user_crosshair') || 'CSGO-4w29A-6yvKP-6k7kF-3xK2v-d9HkQ';
   });
 
-  // User Matches & ELO State (FACEIT-Standard Calibration: 0 matches = Level 3 & 800 ELO baseline)
+  // User Matches & ELO State (Caliber Clutch Standard: 0 matches = Level 1 & 0 ELO/MMR baseline)
   const [currentUserMatches, setCurrentUserMatches] = useState<number>(() => {
     const saved = getLocalState('caliber_user_matches');
     if (saved !== null) {
@@ -897,36 +866,48 @@ export const VortexDashboard: React.FC<VortexDashboardProps> = ({
     const savedMatches = getLocalState('caliber_user_matches');
     const matchesCount = savedMatches !== null ? parseInt(savedMatches, 10) : 0;
     if (matchesCount === 0) {
-      setLocalState('caliber_user_elo', '800');
-      return 800;
+      setLocalState('caliber_user_elo', '0');
+      return 0;
     }
     const saved = getLocalState('caliber_user_elo');
-    if (saved) {
+    if (saved !== null && saved !== undefined) {
       const parsed = parseInt(saved, 10);
-      if (!isNaN(parsed) && parsed > 0) return parsed;
+      if (!isNaN(parsed) && parsed >= 0) {
+        if (matchesCount === 0 && parsed === 800) {
+          setLocalState('caliber_user_elo', '0');
+          return 0;
+        }
+        return parsed;
+      }
     }
-    return 800;
+    return 0;
   });
 
   const [currentUserLevel, setCurrentUserLevel] = useState<number>(() => {
     const savedMatches = getLocalState('caliber_user_matches');
     const matchesCount = savedMatches !== null ? parseInt(savedMatches, 10) : 0;
     if (matchesCount === 0) {
-      setLocalState('caliber_user_level', '3');
-      return 3;
+      setLocalState('caliber_user_level', '1');
+      return 1;
     }
     const saved = getLocalState('caliber_user_level');
     if (saved) {
       const parsed = parseInt(saved, 10);
-      if (!isNaN(parsed) && parsed >= 1 && parsed <= 10) return parsed;
+      if (!isNaN(parsed) && parsed >= 1 && parsed <= 11) {
+        if (matchesCount === 0 && parsed === 3) {
+          setLocalState('caliber_user_level', '1');
+          return 1;
+        }
+        return parsed;
+      }
     }
-    return 3;
+    return 1;
   });
 
-  // Effective ELO & Level (Strict FACEIT standard: 0 matches = Level 3 & 800 ELO)
+  // Effective ELO & Level (Caliber standard: 0 matches = Level 1 & 0 ELO)
   const isCalibrated = currentUserMatches > 0;
-  const effectiveElo = isCalibrated ? currentUserElo : 800;
-  const effectiveLevel = isCalibrated ? getFaceitLevelFromElo(currentUserElo) : 3;
+  const effectiveElo = isCalibrated ? currentUserElo : 0;
+  const effectiveLevel = isCalibrated ? getFaceitLevelFromElo(currentUserElo) : 1;
   const caliberTier = getCaliberTier(effectiveElo);
 
   useEffect(() => {
@@ -936,10 +917,10 @@ export const VortexDashboard: React.FC<VortexDashboardProps> = ({
       const hasFaceit = getLocalState('caliber_faceit_connected') === 'true';
 
       if (currentUserMatches === 0) {
-        setCurrentUserLevel(3);
-        setCurrentUserElo(800);
-        setLocalState('caliber_user_level', '3');
-        setLocalState('caliber_user_elo', '800');
+        setCurrentUserLevel(1);
+        setCurrentUserElo(0);
+        setLocalState('caliber_user_level', '1');
+        setLocalState('caliber_user_elo', '0');
         setLocalState('caliber_user_matches', '0');
       }
 
@@ -3390,29 +3371,34 @@ export const VortexDashboard: React.FC<VortexDashboardProps> = ({
                         )}
 
                         <div className="ml-auto flex items-center gap-1.5 px-2.5 py-1 rounded-xl bg-white/[0.04] border border-white/10 text-xs font-mono font-bold text-slate-300">
-                          <span>{isCalibrated ? userPlatformRank : 'Unranked Contender'}</span>
+                          <span>{isCalibrated ? userPlatformRank : 'Unranked'}</span>
                           <CountryFlag code={currentCountry.code} name={currentCountry.name} size="xs" />
                           <ChevronRight className="w-3.5 h-3.5 text-emerald-400" />
                         </div>
                       </div>
 
-                      {/* Caliber Clutch Tactical Division Track (6 Divisions: Recruit -> Apex) */}
+                      {/* Caliber Clutch Tactical Division Track (11 Divisions: Beginner -> Legend) */}
                       <div className="space-y-1.5">
-                        <div className="grid grid-cols-6 gap-1.5">
+                        <div className="grid grid-cols-4 sm:grid-cols-6 lg:grid-cols-11 gap-1.5">
                           {[
-                            { tier: 'I', label: 'RECRUIT', min: 0 },
-                            { tier: 'II', label: 'INITIATE', min: 400 },
-                            { tier: 'III', label: 'CONTENDER', min: 700 },
-                            { tier: 'IV', label: 'VANGUARD', min: 1000 },
-                            { tier: 'V', label: 'MASTER', min: 1350 },
-                            { tier: 'VI', label: 'APEX', min: 1750 },
+                            { tier: '1', label: 'BEGINNER', min: 0 },
+                            { tier: '2', label: 'NOVICE', min: 300 },
+                            { tier: '3', label: 'NORMAL', min: 500 },
+                            { tier: '4', label: 'MEDIUM', min: 700 },
+                            { tier: '5', label: 'SKILLED', min: 900 },
+                            { tier: '6', label: 'ADVANCED', min: 1100 },
+                            { tier: '7', label: 'HARD', min: 1350 },
+                            { tier: '8', label: 'EXPERT', min: 1600 },
+                            { tier: '9', label: 'MASTER', min: 1850 },
+                            { tier: '10', label: 'ELITE', min: 2100 },
+                            { tier: '11', label: 'LEGEND', min: 2350 },
                           ].map((div) => {
                             const isCurrent = caliberTier.roman === div.tier;
                             const isReached = effectiveElo >= div.min;
                             return (
                               <div
                                 key={div.tier}
-                                className={`py-1.5 px-2 rounded-xl border text-center transition-all ${
+                                className={`py-1.5 px-1 rounded-xl border text-center transition-all ${
                                   isCurrent
                                     ? 'bg-gradient-to-b from-[#1E2812] to-[#10141D] border-[#A3E635] shadow-[0_0_15px_rgba(163,230,53,0.3)] ring-1 ring-[#A3E635]/50'
                                     : isReached
@@ -3420,10 +3406,10 @@ export const VortexDashboard: React.FC<VortexDashboardProps> = ({
                                     : 'bg-black/40 border-white/5 opacity-40 text-slate-500'
                                 }`}
                               >
-                                <div className={`text-[11px] font-display font-black ${isCurrent ? 'text-[#A3E635]' : 'text-slate-300'}`}>
+                                <div className={`text-[12px] font-display font-black ${isCurrent ? 'text-[#A3E635]' : 'text-slate-300'}`}>
                                   {div.tier}
                                 </div>
-                                <div className="text-[9px] font-mono tracking-wider truncate">
+                                <div className="text-[8px] font-mono tracking-wider truncate">
                                   {div.label}
                                 </div>
                               </div>
@@ -3436,15 +3422,17 @@ export const VortexDashboard: React.FC<VortexDashboardProps> = ({
                           <div className="h-2 w-full rounded-full bg-black/60 border border-white/10 overflow-hidden p-[1px]">
                             <div
                               className="h-full rounded-full bg-gradient-to-r from-emerald-500 via-[#A3E635] to-emerald-400 transition-all duration-500 shadow-[0_0_10px_rgba(163,230,53,0.5)]"
-                              style={{ width: `${Math.min(100, Math.max(15, ((effectiveElo - 700) / 300) * 100))}%` }}
+                              style={{
+                                width: `${Math.min(100, Math.max(5, caliberTier.nextTierName ? Math.round(((effectiveElo - caliberTier.minMmr) / Math.max(1, caliberTier.maxMmr - caliberTier.minMmr + 1)) * 100) : 100))}%`
+                              }}
                             />
                           </div>
                           <div className="flex items-center justify-between text-[11px] font-mono text-slate-400">
                             <span className="text-[#A3E635] font-bold">
-                              {effectiveElo >= 1000 ? 'Tier IV Achieved' : `${Math.max(1, 1000 - effectiveElo)} MMR needed to Tier IV (Vanguard)`}
+                              {caliberTier.nextTierName ? `${Math.max(1, (caliberTier.maxMmr + 1) - effectiveElo)} MMR needed to ${caliberTier.nextTierName}` : 'Tier VI Apex Elite Max Rank'}
                             </span>
                             <span className="text-slate-500">
-                              {isCalibrated ? `${effectiveElo} MMR Rating` : 'Uncalibrated (800 MMR Baseline)'}
+                              {isCalibrated ? `${effectiveElo} MMR Rating` : 'Uncalibrated (0 MMR Baseline)'}
                             </span>
                           </div>
                         </div>
@@ -5955,7 +5943,7 @@ export const VortexDashboard: React.FC<VortexDashboardProps> = ({
                       </span>
                     </div>
                     <p className="text-xs text-[#94A3B8] mt-1">
-                      Official competitive leaderboard of registered players on our platform • Your Standing: <strong className="text-white">{currentUserMatches > 0 ? `${userPlatformRank} (${currentUserElo.toLocaleString()} ELO)` : 'Unranked (800 ELO • 0 Matches)'}</strong> (Click any player to view full profile)
+                      Official competitive leaderboard of registered players on our platform • Your Standing: <strong className="text-white">{currentUserMatches > 0 ? `${userPlatformRank} (${currentUserElo.toLocaleString()} ELO)` : 'Unranked (0 ELO • 0 Matches)'}</strong> (Click any player to view full profile)
                     </p>
                   </div>
                 </div>
@@ -5987,7 +5975,7 @@ export const VortexDashboard: React.FC<VortexDashboardProps> = ({
                     </div>
                     <div className="p-3 rounded-xl bg-black/50 border border-white/10 text-center min-w-[100px]">
                       <span className="text-[10px] font-mono text-slate-400 block uppercase">Seasonal ELO</span>
-                      <span className="font-display font-black text-sm text-white">{currentUserMatches > 0 ? currentUserElo : 800}</span>
+                      <span className="font-display font-black text-sm text-white">{currentUserMatches > 0 ? currentUserElo : 0}</span>
                     </div>
                   </div>
                 </div>
@@ -6193,7 +6181,7 @@ export const VortexDashboard: React.FC<VortexDashboardProps> = ({
                             <FaceitVerificationBadge type={currentVerification} size="xs" />
                           </div>
                           <div className="text-[10px] font-mono text-slate-400">
-                            {currentVerification === 'none' ? '⚠️ Unverified • Level ' + currentUserLevel : 'Level ' + currentUserLevel} • {currentUserMatches > 0 ? `${currentUserElo.toLocaleString()} ELO` : '800 ELO (Uncalibrated)'}
+                            {currentVerification === 'none' ? '⚠️ Unverified • Level ' + currentUserLevel : 'Level ' + currentUserLevel} • {currentUserMatches > 0 ? `${currentUserElo.toLocaleString()} ELO` : '0 ELO (Uncalibrated)'}
                           </div>
                         </div>
                       </div>
@@ -6680,7 +6668,7 @@ export const VortexDashboard: React.FC<VortexDashboardProps> = ({
                             <span>{displayCountryName}</span>
                           </span>
                           <span>•</span>
-                          <span className="text-white font-bold">{displayMatches > 0 ? `${displayElo.toLocaleString()} ELO` : '800 ELO'}</span>
+                          <span className="text-white font-bold">{displayMatches > 0 ? `${displayElo.toLocaleString()} ELO` : '0 ELO'}</span>
                           <span>•</span>
                           <span className={displayMatches > 0 ? "text-[#A3E635] font-bold" : "text-amber-400 font-bold"}>{displayRank}</span>
                           <span>•</span>
@@ -6757,8 +6745,8 @@ export const VortexDashboard: React.FC<VortexDashboardProps> = ({
                   gamerTag={displayTag}
                   countryCode={displayCountryCode}
                   countryName={displayCountryName}
-                  elo={displayMatches > 0 ? displayElo : 800}
-                  level={displayMatches > 0 ? displayLevelNum : 3}
+                  elo={displayMatches > 0 ? displayElo : 0}
+                  level={displayMatches > 0 ? displayLevelNum : 1}
                   matches={displayMatches}
                   isCalibrated={displayMatches > 0}
                   userRank={displayMatches > 0 ? userPlatformRank : 97}
