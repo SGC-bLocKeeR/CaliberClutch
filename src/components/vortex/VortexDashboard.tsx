@@ -3379,41 +3379,75 @@ export const VortexDashboard: React.FC<VortexDashboardProps> = ({
                         </div>
                       </div>
 
-                      {/* Caliber Clutch Tactical Division Track (11 Divisions: Beginner -> Legend) */}
-                      <div className="space-y-1.5">
-                        <div className="grid grid-cols-4 sm:grid-cols-6 lg:grid-cols-11 gap-1.5">
+                      {/* Caliber Clutch Tactical Division Track (Option 1: 11 Tactical Insignia Shields - CS2 Style) */}
+                      <div className="space-y-2">
+                        <div className="grid grid-cols-4 sm:grid-cols-6 lg:grid-cols-11 gap-1.5 items-stretch">
                           {[
-                            { tier: '1', label: 'BEGINNER', min: 0 },
-                            { tier: '2', label: 'NOVICE', min: 300 },
-                            { tier: '3', label: 'NORMAL', min: 500 },
-                            { tier: '4', label: 'MEDIUM', min: 700 },
-                            { tier: '5', label: 'SKILLED', min: 900 },
-                            { tier: '6', label: 'ADVANCED', min: 1100 },
-                            { tier: '7', label: 'HARD', min: 1350 },
-                            { tier: '8', label: 'EXPERT', min: 1600 },
-                            { tier: '9', label: 'MASTER', min: 1850 },
-                            { tier: '10', label: 'ELITE', min: 2100 },
-                            { tier: '11', label: 'PRO', min: 2350 },
+                            { tier: '1', label: 'BEGINNER', min: 0, color: '#94A3B8', border: 'border-slate-600/40', bg: 'from-slate-900 to-slate-950', isPro: false },
+                            { tier: '2', label: 'NOVICE', min: 300, color: '#38BDF8', border: 'border-sky-500/40', bg: 'from-sky-950/40 to-slate-950', isPro: false },
+                            { tier: '3', label: 'NORMAL', min: 500, color: '#34D399', border: 'border-emerald-500/40', bg: 'from-emerald-950/40 to-slate-950', isPro: false },
+                            { tier: '4', label: 'MEDIUM', min: 700, color: '#4ADE80', border: 'border-green-500/40', bg: 'from-green-950/40 to-slate-950', isPro: false },
+                            { tier: '5', label: 'SKILLED', min: 900, color: '#A3E635', border: 'border-[#A3E635]/50', bg: 'from-[#1A2510] to-slate-950', isPro: false },
+                            { tier: '6', label: 'ADVANCED', min: 1100, color: '#FACC15', border: 'border-yellow-500/50', bg: 'from-yellow-950/40 to-slate-950', isPro: false },
+                            { tier: '7', label: 'HARD', min: 1350, color: '#FB923C', border: 'border-amber-500/50', bg: 'from-amber-950/40 to-slate-950', isPro: false },
+                            { tier: '8', label: 'EXPERT', min: 1600, color: '#F97316', border: 'border-orange-500/60', bg: 'from-orange-950/40 to-slate-950', isPro: false },
+                            { tier: '9', label: 'MASTER', min: 1850, color: '#8B5CF6', border: 'border-purple-500/60', bg: 'from-purple-950/40 to-slate-950', isPro: false },
+                            { tier: '10', label: 'ELITE', min: 2100, color: '#A855F7', border: 'border-fuchsia-500/70', bg: 'from-fuchsia-950/40 to-slate-950', isPro: false },
+                            { tier: '11', label: 'PRO', min: 2350, color: '#EF4444', border: 'border-red-500/80', bg: 'from-red-950/50 to-slate-950', isPro: true },
                           ].map((div) => {
                             const isCurrent = caliberTier.roman === div.tier;
                             const isReached = effectiveElo >= div.min;
                             return (
                               <div
                                 key={div.tier}
-                                className={`py-1.5 px-1 rounded-xl border text-center transition-all ${
+                                className={`group relative rounded-2xl py-2 px-1 flex flex-col items-center justify-between text-center transition-all duration-300 ${
                                   isCurrent
-                                    ? 'bg-gradient-to-b from-[#1E2812] to-[#10141D] border-[#A3E635] shadow-[0_0_15px_rgba(163,230,53,0.3)] ring-1 ring-[#A3E635]/50'
+                                    ? 'bg-gradient-to-b from-[#1F2C14] via-[#12161E] to-[#0A0D14] border-2 border-[#A3E635] shadow-[0_0_20px_rgba(163,230,53,0.35)] ring-2 ring-[#A3E635]/40 scale-[1.03] z-10'
                                     : isReached
-                                    ? 'bg-[#12151F] border-white/15 text-slate-300'
-                                    : 'bg-black/40 border-white/5 opacity-40 text-slate-500'
+                                    ? `bg-gradient-to-b ${div.bg} border ${div.border} shadow-md`
+                                    : 'bg-[#0B0D14]/90 border border-white/5 opacity-40 hover:opacity-70'
                                 }`}
                               >
-                                <div className={`text-[12px] font-display font-black ${isCurrent ? 'text-[#A3E635]' : 'text-slate-300'}`}>
+                                {/* Top Insignia Pip or Crown for Pro */}
+                                <div className="flex items-center justify-center mb-0.5">
+                                  {div.isPro ? (
+                                    <Crown className={`w-3.5 h-3.5 ${isCurrent || isReached ? 'text-amber-400 fill-amber-400 animate-pulse' : 'text-slate-500'}`} />
+                                  ) : (
+                                    <Shield className={`w-2.5 h-2.5 ${isCurrent ? 'text-[#A3E635]' : isReached ? 'text-slate-300' : 'text-slate-600'}`} />
+                                  )}
+                                </div>
+
+                                {/* Number Badge with Metallic Finish */}
+                                <div
+                                  className={`w-7 h-7 sm:w-8 sm:h-8 rounded-xl flex items-center justify-center font-display font-black text-xs sm:text-sm transition-all ${
+                                    isCurrent
+                                      ? 'bg-[#A3E635] text-slate-950 shadow-[0_0_12px_rgba(163,230,53,0.6)] font-black'
+                                      : isReached
+                                      ? 'bg-white/10 text-white border border-white/20'
+                                      : 'bg-black/50 text-slate-500 border border-white/5'
+                                  }`}
+                                >
                                   {div.tier}
                                 </div>
-                                <div className="text-[8px] font-mono tracking-wider truncate">
-                                  {div.label}
+
+                                {/* Division Name Label & Threshold */}
+                                <div className="mt-1.5 w-full">
+                                  <div
+                                    className={`text-[9px] font-mono font-black tracking-wider truncate px-0.5 ${
+                                      isCurrent ? 'text-[#A3E635]' : isReached ? 'text-slate-200' : 'text-slate-500'
+                                    }`}
+                                  >
+                                    {div.label}
+                                  </div>
+                                  <div className="text-[7.5px] font-mono text-slate-400 opacity-75 truncate">
+                                    {div.min} MMR
+                                  </div>
                                 </div>
+
+                                {/* Active Pulsing Indicator on Current Tier */}
+                                {isCurrent && (
+                                  <span className="absolute -top-1 w-2 h-2 rounded-full bg-[#A3E635] shadow-[0_0_8px_#A3E635] animate-pulse" />
+                                )}
                               </div>
                             );
                           })}
@@ -3431,7 +3465,7 @@ export const VortexDashboard: React.FC<VortexDashboardProps> = ({
                           </div>
                           <div className="flex items-center justify-between text-[11px] font-mono text-slate-400">
                             <span className="text-[#A3E635] font-bold">
-                              {caliberTier.nextTierName ? `${Math.max(1, (caliberTier.maxMmr + 1) - effectiveElo)} MMR needed to ${caliberTier.nextTierName}` : 'Tier VI Apex Elite Max Rank'}
+                              {caliberTier.nextTierName ? `${Math.max(1, (caliberTier.maxMmr + 1) - effectiveElo)} MMR needed to ${caliberTier.nextTierName}` : 'Tier 11 PRO Pinnacle Rank Achieved'}
                             </span>
                             <span className="text-slate-500">
                               {isCalibrated ? `${effectiveElo} MMR Rating` : 'Uncalibrated (0 MMR Baseline)'}
