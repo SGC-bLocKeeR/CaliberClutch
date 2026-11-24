@@ -3550,13 +3550,12 @@ export const VortexDashboard: React.FC<VortexDashboardProps> = ({
                             })}
                           </div>
 
-                          {/* Sub-Markers Under the Unified Bar (All 11 Tiers with their Tactical Insignia Icons) */}
-                          <div className="flex items-center justify-between px-0.5 mt-2.5">
+                          {/* Sub-Markers Under the Unified Bar (Clean Uniform Numbers 1 to 11 - No Icons) */}
+                          <div className="flex items-center justify-between px-0.5 mt-2">
                             {CALIBER_DIVISIONS.map((div) => {
                               const currentTierNum = parseInt(caliberTier.roman, 10) || 1;
                               const isCurrent = div.tier === currentTierNum;
                               const isReached = div.tier <= currentTierNum;
-                              const DivIcon = div.icon;
 
                               return (
                                 <button
@@ -3571,47 +3570,30 @@ export const VortexDashboard: React.FC<VortexDashboardProps> = ({
                                   }`}
                                   title={`Tier ${div.tier}: ${div.label} (${div.min} MMR)`}
                                 >
-                                  {/* Tactical Icon Badge for every Tier */}
+                                  {/* Clean Number Badge for every Tier (1 to 11) */}
                                   <div
-                                    className={`w-6 h-6 sm:w-7 sm:h-7 rounded-lg flex items-center justify-center transition-all ${
+                                    className={`w-6 h-6 sm:w-7 sm:h-7 rounded-lg flex items-center justify-center font-display font-black text-xs sm:text-sm transition-all ${
                                       isCurrent
-                                        ? 'bg-[#A3E635] text-slate-950 font-black shadow-[0_0_14px_rgba(163,230,53,0.7)]'
+                                        ? 'bg-[#A3E635] text-slate-950 shadow-[0_0_14px_rgba(163,230,53,0.7)]'
                                         : isReached
-                                        ? 'bg-white/10 border border-white/20'
-                                        : 'bg-black/50 text-slate-600 border border-white/5 group-hover:text-slate-400'
+                                        ? 'bg-white/10 text-white border border-white/20'
+                                        : 'bg-black/50 text-slate-500 border border-white/5 group-hover:text-slate-300'
                                     }`}
-                                    style={{
-                                      color: isCurrent ? '#090D12' : isReached ? div.color : undefined
-                                    }}
                                   >
-                                    <DivIcon className={`w-3.5 h-3.5 sm:w-4 sm:h-4 ${div.isPro && (isCurrent || isReached) ? 'fill-amber-400 text-amber-400 animate-pulse' : ''}`} />
+                                    {div.tier}
                                   </div>
 
-                                  {/* Level Number & Label */}
-                                  <div className="flex flex-col items-center mt-1">
-                                    <span
-                                      className={`text-[9px] font-mono font-black leading-none ${
-                                        isCurrent
-                                          ? 'text-[#A3E635]'
-                                          : isReached
-                                          ? 'text-slate-200'
-                                          : 'text-slate-600 group-hover:text-slate-400'
-                                      }`}
-                                    >
-                                      {div.tier}
-                                    </span>
-                                    <span
-                                      className={`text-[7px] sm:text-[7.5px] font-mono mt-0.5 hidden sm:block whitespace-nowrap uppercase tracking-tighter ${
-                                        isCurrent
-                                          ? 'font-black text-[#A3E635]'
-                                          : isReached
-                                          ? 'text-slate-300 font-medium'
-                                          : 'text-slate-600 group-hover:text-slate-400'
-                                      }`}
-                                    >
-                                      {div.label}
-                                    </span>
-                                  </div>
+                                  <span
+                                    className={`text-[7.5px] sm:text-[8px] font-mono mt-1 hidden sm:block whitespace-nowrap uppercase tracking-tighter ${
+                                      isCurrent
+                                        ? 'font-black text-[#A3E635]'
+                                        : isReached
+                                        ? 'text-slate-300 font-medium'
+                                        : 'text-slate-600 group-hover:text-slate-400'
+                                    }`}
+                                  >
+                                    {div.label}
+                                  </span>
                                 </button>
                               );
                             })}
