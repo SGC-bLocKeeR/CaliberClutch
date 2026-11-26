@@ -12,7 +12,6 @@ import {
   Trophy, 
   Radio, 
   RotateCcw,
-  MoreVertical,
   Headphones,
   Send,
   MessageSquare,
@@ -382,8 +381,7 @@ export const VortexMatchRoom: React.FC<VortexMatchRoomProps> = ({
     isPlaying: false
   });
 
-  // 3-Dots Menu & Live Support Modal
-  const [isMenuOpen, setIsMenuOpen] = useState(false);
+  // Live Support Modal
   const [isSupportModalOpen, setIsSupportModalOpen] = useState(false);
   const [selectedSupportIssue, setSelectedSupportIssue] = useState<string>('server_issue');
   const [supportCallSubmitted, setSupportCallSubmitted] = useState<boolean>(false);
@@ -1437,7 +1435,7 @@ export const VortexMatchRoom: React.FC<VortexMatchRoomProps> = ({
       <div 
         key={player.id}
         onClick={(e) => handleOpenPlayerFlyout(e, player.name)}
-        className={`px-2.5 py-2 transition group cursor-pointer relative ${
+        className={`px-2.5 py-1.5 transition group cursor-pointer relative ${
           isSelected 
             ? 'bg-[#182615] ring-1 ring-[#A3E635]/50' 
             : isCurrentUser
@@ -1449,7 +1447,6 @@ export const VortexMatchRoom: React.FC<VortexMatchRoomProps> = ({
         <div className="flex items-center justify-between gap-2">
           <div className="flex items-center gap-2.5 min-w-0">
             <div className="relative w-8 h-8 shrink-0">
-              {player.isCaptain && <CaliberCaptainBadge />}
               <img 
                 src={player.avatar} 
                 alt={player.name} 
@@ -1476,6 +1473,15 @@ export const VortexMatchRoom: React.FC<VortexMatchRoomProps> = ({
                 </span>
                 {player.verified && (
                   <CheckCircle2 className="w-3 h-3 text-[#A3E635] shrink-0" />
+                )}
+                {player.isCaptain && (
+                  <span
+                    className="inline-flex items-center gap-0.5 px-1.5 py-0.2 rounded bg-amber-500/15 border border-amber-400/50 text-[8px] font-mono font-black text-amber-300 shrink-0"
+                    title="Team Captain"
+                  >
+                    <Crown className="w-2.5 h-2.5 fill-amber-300" />
+                    <span>CAP</span>
+                  </span>
                 )}
                 {isStandaloneSolo && (
                   <span className="text-[8px] font-mono font-bold uppercase px-1.5 py-0.2 rounded bg-white/5 border border-white/10 text-slate-400 shrink-0">
@@ -1511,7 +1517,7 @@ export const VortexMatchRoom: React.FC<VortexMatchRoomProps> = ({
         </div>
 
         {/* 6-Column Compact Stats Bar: Matches, Wins, Rating, K/D/A, K/D, ADR */}
-        <div className="grid grid-cols-6 gap-1 pt-1.5 mt-1.5 border-t border-white/[0.06] text-center font-mono">
+        <div className="grid grid-cols-6 gap-1 pt-1 mt-1 border-t border-white/[0.06] text-center font-mono">
           <div className="bg-black/40 px-1 py-1 rounded-md border border-white/5">
             <div className="text-[8px] uppercase text-slate-400 font-bold tracking-wider leading-none">MATCHES</div>
             <div className="text-[11px] font-bold text-white mt-0.5 leading-tight">{player.matches.toLocaleString()}</div>
@@ -1594,7 +1600,7 @@ export const VortexMatchRoom: React.FC<VortexMatchRoomProps> = ({
   };
 
   const renderTacticalBottomRail = () => (
-    <div className="mt-3 rounded-xl border border-[#232535] bg-[#10121A] p-3 shadow-xl space-y-2.5">
+    <div className="rounded-xl border border-[#232535] bg-[#10121A] p-2.5 shadow-xl space-y-2">
       {/* Top Row: Direct Match Connect String & Connect Actions */}
       <div className="flex flex-col md:flex-row items-center justify-between gap-2.5 px-3 py-2 rounded-lg bg-black/60 border border-white/10">
         <div className="flex items-center gap-2 overflow-hidden w-full md:w-auto flex-1">
@@ -1954,255 +1960,227 @@ export const VortexMatchRoom: React.FC<VortexMatchRoomProps> = ({
       <div className="flex-1 min-w-0 flex flex-col h-full overflow-y-auto">
       
       {/* ======================================================== */}
-      {/* 1. TOP HEADER: Matchroom • OVERVIEW / STATS • 💬 🔗 ...   */}
+      {/* 1. CALIBER CLUTCH ARENA TOP BAR                          */}
       {/* ======================================================== */}
-      <div className="w-full bg-[#111217] border-b border-[#1E2029] px-4 py-2 flex items-center justify-between sticky top-0 z-40">
+      <div className="w-full bg-[#0B0D12] border-b border-[#1E222E] px-4 py-2 flex items-center justify-between sticky top-0 z-40">
         
-        {/* Left: Brand / Title */}
+        {/* Left: Caliber Lobby Identity + Pill Switcher */}
         <div className="flex items-center gap-3 sm:gap-4 min-w-0">
           <div className="flex items-center gap-2 shrink-0">
-            <span className="font-display font-black text-white text-sm sm:text-base tracking-wide">
-              Matchroom
+            <div className="w-6 h-6 rounded-lg bg-[#A3E635]/15 border border-[#A3E635]/40 flex items-center justify-center">
+              <Crosshair className="w-3.5 h-3.5 text-[#A3E635]" />
+            </div>
+            <span className="font-display font-black text-white text-sm tracking-wider uppercase">
+              Caliber Lobby
+            </span>
+            <span className="hidden sm:inline-block text-[10px] font-mono text-slate-500 border border-white/10 bg-white/[0.03] px-1.5 py-0.5 rounded">
+              #{matchId}
             </span>
           </div>
 
-          {/* Center Tabs: OVERVIEW & STATS */}
-          <div className="flex items-center gap-4 text-[11px] font-mono font-bold uppercase tracking-wider shrink-0">
+          {/* Segmented Pill Switcher: Squads & Scoreboard */}
+          <div className="flex items-center p-0.5 rounded-lg bg-[#131620] border border-white/10 text-[11px] font-mono font-bold shrink-0">
             <button
               onClick={() => { sound.playClick(); setActiveTab('overview'); }}
-              className={`pb-0.5 transition cursor-pointer ${
+              className={`px-3 py-1 rounded-md transition cursor-pointer ${
                 activeTab === 'overview'
-                  ? 'text-white font-black'
+                  ? 'bg-[#A3E635] text-slate-950 font-black shadow-sm'
                   : 'text-slate-400 hover:text-white'
               }`}
             >
-              OVERVIEW
+              Squads
             </button>
             <button
               onClick={() => { sound.playClick(); setActiveTab('stats'); }}
-              className={`pb-0.5 transition flex items-center gap-1 cursor-pointer ${
+              className={`px-3 py-1 rounded-md transition cursor-pointer ${
                 activeTab === 'stats'
-                  ? 'text-white font-black'
+                  ? 'bg-[#A3E635] text-slate-950 font-black shadow-sm'
                   : 'text-slate-400 hover:text-white'
               }`}
             >
-              <span>STATS</span>
-              <span className="px-1.5 py-0.2 rounded bg-[#A3E635] text-black text-[8px] font-black uppercase">
-                NEW
-              </span>
+              Scoreboard
             </button>
           </div>
         </div>
 
-        {/* Right Action Icons: 🔊 Sound, 💬 Chat, 🔗 Share, ⋮ 3-Dots Menu, ✕ Close (Clean & Tactical) */}
-        <div className="flex items-center gap-4 text-[#9498A9] shrink-0">
-          
-          {/* Platform Sound Mute Toggle */}
+        {/* Right Action Controls: Sound, Chat, Copy Link, Support, Exit */}
+        <div className="flex items-center gap-2.5 text-[#9498A9] shrink-0">
           <button
             type="button"
             onClick={() => toggleSound()}
-            className={`transition cursor-pointer flex items-center ${
-              soundEnabled ? 'hover:text-white text-[#A3E635]' : 'text-rose-400 hover:text-rose-300'
+            className={`p-1.5 rounded-lg border transition cursor-pointer flex items-center ${
+              soundEnabled
+                ? 'bg-white/[0.04] border-white/10 hover:text-white text-[#A3E635]'
+                : 'bg-rose-500/10 border-rose-500/30 text-rose-400 hover:text-rose-300'
             }`}
             title={soundEnabled ? 'Mute Platform Sound' : 'Unmute Platform Sound'}
             aria-label={soundEnabled ? 'Mute Platform Sound' : 'Unmute Platform Sound'}
           >
-            {soundEnabled ? <Volume2 className="w-4 h-4" /> : <VolumeX className="w-4 h-4" />}
+            {soundEnabled ? <Volume2 className="w-3.5 h-3.5" /> : <VolumeX className="w-3.5 h-3.5" />}
           </button>
 
-          {/* Chat Toggle Icon */}
           <button
             onClick={() => {
               sound.playClick();
               setIsChatDrawerOpen(!isChatDrawerOpen);
             }}
-            className="hover:text-white transition cursor-pointer relative"
-            title="Toggle Match Chat"
+            className="p-1.5 rounded-lg bg-white/[0.04] border border-white/10 hover:text-white transition cursor-pointer relative"
+            title="Toggle Lobby Chat"
           >
-            <MessageSquare className="w-4 h-4" />
+            <MessageSquare className="w-3.5 h-3.5" />
             <span className="absolute -top-0.5 -right-0.5 w-2 h-2 rounded-full bg-[#A3E635] animate-pulse" />
           </button>
 
-          {/* Share Link Icon */}
           <button
             onClick={handleCopyLink}
-            className="hover:text-white transition cursor-pointer relative"
-            title="Share Match Link"
+            className="p-1.5 rounded-lg bg-white/[0.04] border border-white/10 hover:text-white transition cursor-pointer"
+            title="Copy Lobby Link"
           >
-            {copiedLink ? <Check className="w-4 h-4 text-[#A3E635]" /> : <Share2 className="w-4 h-4" />}
+            {copiedLink ? <Check className="w-3.5 h-3.5 text-[#A3E635]" /> : <Share2 className="w-3.5 h-3.5" />}
           </button>
 
-          {/* 3-DOTS MENU (Support Only) */}
-          <div className="relative flex items-center">
-            <button
-              onClick={() => setIsMenuOpen(!isMenuOpen)}
-              className="hover:text-white transition cursor-pointer flex items-center"
-              title="Options"
-            >
-              <MoreVertical className="w-4 h-4" />
-            </button>
+          <button
+            onClick={() => {
+              sound.playSelect();
+              setIsSupportModalOpen(true);
+            }}
+            className="px-2.5 py-1.5 rounded-lg bg-white/[0.04] border border-white/10 hover:border-[#A3E635]/40 hover:text-white transition cursor-pointer flex items-center gap-1.5 text-[11px] font-mono font-bold"
+            title="Match Support"
+          >
+            <Headphones className="w-3.5 h-3.5 text-[#A3E635]" />
+            <span className="hidden sm:inline">Support</span>
+          </button>
 
-            {isMenuOpen && (
-              <>
-                <div 
-                  className="fixed inset-0 z-40" 
-                  onClick={() => setIsMenuOpen(false)} 
-                />
-                <div className="absolute right-0 top-full mt-2 w-44 rounded-xl bg-[#16171F] border border-[#262835] shadow-2xl p-1 z-50 animate-in fade-in zoom-in-95 duration-100">
-                  <button
-                    onClick={() => {
-                      sound.playSelect();
-                      setIsMenuOpen(false);
-                      setIsSupportModalOpen(true);
-                    }}
-                    className="w-full flex items-center gap-2.5 px-3 py-2 rounded-lg hover:bg-white/[0.06] text-slate-200 hover:text-white text-xs font-mono transition text-left cursor-pointer"
-                  >
-                    <Headphones className="w-3.5 h-3.5 text-[#A3E635]" />
-                    <span>Support</span>
-                  </button>
-                </div>
-              </>
-            )}
-          </div>
-
-          {/* Direct Close X Button */}
           <button
             onClick={() => {
               sound.playClick();
               onClose();
             }}
-            className="hover:text-white transition cursor-pointer"
-            title="Close"
+            className="p-1.5 rounded-lg bg-white/[0.04] border border-white/10 hover:bg-rose-500/15 hover:border-rose-500/30 hover:text-rose-300 transition cursor-pointer"
+            title="Leave Lobby"
           >
-            <X className="w-4 h-4" />
+            <X className="w-3.5 h-3.5" />
           </button>
         </div>
       </div>
 
       {/* ======================================================== */}
-      {/* 2. MATCH SCORE & TEAMS BANNER (Authentic FACEIT Header)   */}
+      {/* 2. CALIBER CLUTCH TACTICAL MATCH HEADER (MAP BACKDROP)   */}
       {/* ======================================================== */}
-      <div className="max-w-[1320px] w-full mx-auto px-3 sm:px-5 pt-2.5 pb-1">
-        <div className="relative rounded-xl overflow-hidden border border-[#232530] shadow-xl bg-[#13141B]">
+      <div className="max-w-[1320px] w-full mx-auto px-3 sm:px-5 pt-2 pb-1">
+        <div className="relative rounded-xl overflow-hidden border border-[#232736] shadow-xl bg-[#0F1219]">
           
-          {/* Authentic CS2 Panoramic Map Background */}
+          {/* CS2 Panoramic Map Background */}
           <div className="absolute inset-0 z-0">
             <img 
               src={getMapImage(currentSelectedMap)} 
               alt={currentSelectedMap} 
-              className="w-full h-full object-cover opacity-60 filter blur-[0.5px] transition-all duration-700" 
+              className="w-full h-full object-cover opacity-50 filter blur-[0.5px] transition-all duration-700" 
             />
-            <div className="absolute inset-0 bg-gradient-to-r from-[#111218]/90 via-[#111218]/65 to-[#111218]/90" />
-            <div className="absolute inset-0 bg-gradient-to-b from-[#111218]/40 via-transparent to-[#111218]/85" />
+            <div className="absolute inset-0 bg-gradient-to-r from-[#0B0D14]/95 via-[#0B0D14]/70 to-[#0B0D14]/95" />
+            <div className="absolute inset-0 bg-gradient-to-b from-[#0B0D14]/45 via-transparent to-[#0B0D14]/90" />
           </div>
 
           <div className={`relative z-10 px-3.5 sm:px-4 ${
-            activeTab === 'stats' ? 'py-2' : 'py-2.5'
+            activeTab === 'stats' ? 'py-2' : 'py-2'
           }`}>
-            {/* Top Sub-Header: Mode & Match Details */}
-            <div className="flex items-center justify-between text-[11px] font-mono text-slate-400 pb-1.5 border-b border-white/[0.06]">
+            {/* Top Meta Strip (CaliberClutch Native - Zero FACEIT Breadcrumbs) */}
+            <div className="flex items-center justify-between text-[10px] font-mono text-slate-300 pb-1.5 border-b border-white/[0.07]">
               <div className="flex items-center gap-2">
-                <span className="text-slate-300 font-bold">Matchmaking / EU / Standard Match</span>
-                <span className="flex items-center gap-1 px-1.5 py-0.2 rounded bg-[#A3E635]/15 text-[#A3E635] text-[9px] font-bold border border-[#A3E635]/30">
-                  <ShieldCheck className="w-2.5 h-2.5 text-[#A3E635]" />
-                  Verified
+                <span className="px-2 py-0.5 rounded bg-white/[0.06] border border-white/10 text-white font-bold uppercase tracking-wider">
+                  5v5 Competitive
+                </span>
+                <span className="flex items-center gap-1 px-2 py-0.5 rounded bg-[#A3E635]/15 text-[#A3E635] font-bold border border-[#A3E635]/30 uppercase tracking-wider">
+                  <ShieldCheck className="w-3 h-3 text-[#A3E635]" />
+                  Caliber AC
                 </span>
               </div>
               <div className="flex items-center gap-2">
-                <span className="text-emerald-400 font-bold flex items-center gap-1.5">
-                  <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />
-                  <span>Server: Germany (18ms) • Dedicated CS2</span>
-                  <span className="text-slate-500">•</span>
-                  <span className="text-white font-black">{currentSelectedMap}</span>
+                <span className="px-2.5 py-0.5 rounded bg-black/60 border border-white/15 text-white font-black uppercase tracking-widest flex items-center gap-1.5">
+                  <span className="w-1.5 h-1.5 rounded-full bg-[#A3E635] animate-pulse" />
+                  <span>{currentSelectedMap}</span>
                 </span>
               </div>
             </div>
 
-            {/* Scoreboard & Fair 50% vs 50% Win Rate Balance */}
-            <div className="grid grid-cols-1 md:grid-cols-12 items-center gap-2.5 py-1.5">
+            {/* 3-Block Tactical Versus Layout (Squircle Team Cards + Center Balance Core) */}
+            <div className="grid grid-cols-1 md:grid-cols-12 items-center gap-2.5 pt-2">
               
-              {/* Left Team (Team 1) */}
-              <div className="md:col-span-5 flex items-center justify-start md:justify-end gap-2.5 text-left md:text-right">
-                <div className="order-2 md:order-1">
-                  <div className="text-[9px] font-mono font-black text-emerald-400 uppercase tracking-widest flex items-center md:justify-end gap-1">
-                    <span>5-STACK SQUAD</span>
-                    <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />
+              {/* Left Wing: Team 1 */}
+              <div className="md:col-span-4 flex items-center justify-between gap-2.5 px-3 py-2 rounded-xl bg-black/55 border border-emerald-500/25 backdrop-blur-sm">
+                <div className="flex items-center gap-2.5 min-w-0">
+                  <div className="w-9 h-9 rounded-lg p-0.5 bg-gradient-to-br from-[#A3E635] to-emerald-500 shadow-[0_0_12px_rgba(163,230,53,0.25)] shrink-0">
+                    <img 
+                      src={team1Players[0]?.avatar || '/images/avatar_duck_exact.png'} 
+                      alt={activeMatch.team1.name} 
+                      className="w-full h-full rounded-[6px] object-cover" 
+                    />
                   </div>
-                  <h2 className="text-base sm:text-lg font-display font-black text-white tracking-wide leading-tight">
-                    {activeMatch.team1.name}
-                  </h2>
-                  {activeTab === 'overview' && (
-                    <div className="text-[10px] font-mono text-slate-400 flex items-center md:justify-end gap-1.5">
-                      <span className="text-emerald-400 font-bold">{activeMatch.team1.avgElo.toLocaleString()} AVG MMR</span>
-                      <span>•</span>
-                      <span>Tier {activeMatch.team1.avgLevel}</span>
+                  <div className="min-w-0">
+                    <div className="text-[9px] font-mono font-black text-emerald-400 uppercase tracking-wider">
+                      5-Stack Squad
                     </div>
-                  )}
+                    <h2 className="text-sm sm:text-base font-display font-black text-white tracking-wide leading-tight truncate">
+                      {activeMatch.team1.name}
+                    </h2>
+                    {activeTab === 'overview' && (
+                      <div className="text-[10px] font-mono text-slate-400">
+                        <span className="text-emerald-400 font-bold">{activeMatch.team1.avgElo.toLocaleString()} AVG MMR</span>
+                        <span className="mx-1">•</span>
+                        <span>Tier {activeMatch.team1.avgLevel}</span>
+                      </div>
+                    )}
+                  </div>
                 </div>
-
-                <div className="order-1 md:order-2 relative w-10 h-10 rounded-full p-0.5 bg-gradient-to-r from-emerald-500 to-[#A3E635] shadow-[0_0_12px_rgba(52,211,153,0.35)] shrink-0">
-                  <img 
-                    src={team1Players[0]?.avatar || '/images/avatar_duck_exact.png'} 
-                    alt={activeMatch.team1.name} 
-                    className="w-full h-full rounded-full object-cover" 
-                  />
+                <div className="px-3 py-1.5 rounded-lg bg-emerald-500/15 border border-emerald-400/40 text-xl sm:text-2xl font-display font-black text-emerald-400 leading-none shrink-0">
+                  {matchSimulatedResult ? matchSimulatedResult.score1 : '13'}
                 </div>
               </div>
 
-              {/* Center Match Balance & Score */}
-              <div className="md:col-span-2 text-center space-y-1">
-                <div className="inline-flex items-center justify-center gap-2.5 px-3.5 py-1 rounded-xl bg-black/70 border border-white/10 shadow-inner">
-                  <span className="text-xl sm:text-2xl font-display font-black text-emerald-400 leading-none">
-                    {matchSimulatedResult ? matchSimulatedResult.score1 : '13'}
-                  </span>
-                  <span className="text-[10px] font-mono uppercase text-slate-500 font-bold">vs</span>
-                  <span className="text-xl sm:text-2xl font-display font-black text-slate-400 leading-none">
-                    {matchSimulatedResult ? matchSimulatedResult.score2 : '11'}
-                  </span>
+              {/* Center Tactical Balance Core */}
+              <div className="md:col-span-4 text-center px-2.5 py-2 rounded-xl bg-black/65 border border-white/10 backdrop-blur-sm space-y-1">
+                <div className="flex items-center justify-between text-[9px] font-mono font-bold leading-none">
+                  <span className="text-[#A3E635]">{activeMatch.winProbabilityTeam1}% WIN</span>
+                  <span className="text-slate-300 uppercase tracking-widest text-[8px]">±{activeMatch.eloGainWin} MMR</span>
+                  <span className="text-blue-400">{activeMatch.winProbabilityTeam2}% WIN</span>
                 </div>
-
-                {/* CALIBER SUPER MATCH 50% vs 50% FAIR WIN PROBABILITY */}
-                <div className="p-1.5 rounded-lg bg-black/70 border border-white/10 space-y-1 shadow-md">
-                  <div className="flex items-center justify-between text-[9px] font-mono font-bold leading-none">
-                    <span className="text-[#A3E635]">{activeMatch.winProbabilityTeam1}% WIN</span>
-                    <span className="text-slate-400 text-[8px]">±{activeMatch.eloGainWin} MMR</span>
-                    <span className="text-blue-400">{activeMatch.winProbabilityTeam2}% WIN</span>
-                  </div>
-                  <div className="w-full h-1.5 rounded-full bg-slate-800 overflow-hidden flex">
-                    <div style={{ width: `${activeMatch.winProbabilityTeam1}%` }} className="bg-gradient-to-r from-emerald-500 to-[#A3E635]" />
-                    <div style={{ width: `${activeMatch.winProbabilityTeam2}%` }} className="bg-gradient-to-r from-blue-500 to-indigo-500" />
-                  </div>
-                  <div className="text-[8px] font-mono text-emerald-400 font-bold tracking-tight leading-none">
-                    ✓ Fair MMR Balanced (Δ {activeMatch.eloDiff} MMR)
-                  </div>
+                <div className="w-full h-1.5 rounded-full bg-slate-800 overflow-hidden flex">
+                  <div style={{ width: `${activeMatch.winProbabilityTeam1}%` }} className="bg-gradient-to-r from-emerald-500 to-[#A3E635]" />
+                  <div style={{ width: `${activeMatch.winProbabilityTeam2}%` }} className="bg-gradient-to-r from-blue-500 to-indigo-500" />
+                </div>
+                <div className="text-[9px] font-mono text-emerald-400 font-bold tracking-tight leading-none">
+                  ✓ Fair MMR Balanced (Δ {activeMatch.eloDiff} MMR)
                 </div>
               </div>
 
-              {/* Right Team (Team 2) */}
-              <div className="md:col-span-5 flex items-center justify-start gap-2.5 text-left">
-                <div className="relative w-10 h-10 rounded-full p-0.5 bg-gradient-to-r from-slate-600 to-slate-400 shrink-0">
-                  <img 
-                    src={team2Players[0]?.avatar || '/images/avatar_ghost_exact.png'} 
-                    alt={activeMatch.team2.name} 
-                    className="w-full h-full rounded-full object-cover" 
-                  />
+              {/* Right Wing: Team 2 */}
+              <div className="md:col-span-4 flex items-center justify-between gap-2.5 px-3 py-2 rounded-xl bg-black/55 border border-blue-500/20 backdrop-blur-sm">
+                <div className="px-3 py-1.5 rounded-lg bg-white/[0.06] border border-white/15 text-xl sm:text-2xl font-display font-black text-slate-300 leading-none shrink-0">
+                  {matchSimulatedResult ? matchSimulatedResult.score2 : '11'}
                 </div>
-
-                <div>
-                  <div className="text-[9px] font-mono font-black text-slate-400 uppercase tracking-widest flex items-center gap-1">
-                    <span>5V5 COMPETITIVE</span>
-                    <span className="w-1.5 h-1.5 rounded-full bg-slate-500" />
-                  </div>
-                  <h2 className="text-base sm:text-lg font-display font-black text-white tracking-wide leading-tight">
-                    {activeMatch.team2.name}
-                  </h2>
-                  {activeTab === 'overview' && (
-                    <div className="text-[10px] font-mono text-slate-400 flex items-center gap-1.5">
-                      <span className="text-blue-400 font-bold">{activeMatch.team2.avgElo.toLocaleString()} AVG MMR</span>
-                      <span>•</span>
-                      <span>Tier {activeMatch.team2.avgLevel}</span>
+                <div className="flex items-center gap-2.5 min-w-0 text-right">
+                  <div className="min-w-0">
+                    <div className="text-[9px] font-mono font-black text-slate-400 uppercase tracking-wider">
+                      5v5 Challengers
                     </div>
-                  )}
+                    <h2 className="text-sm sm:text-base font-display font-black text-white tracking-wide leading-tight truncate">
+                      {activeMatch.team2.name}
+                    </h2>
+                    {activeTab === 'overview' && (
+                      <div className="text-[10px] font-mono text-slate-400">
+                        <span className="text-blue-400 font-bold">{activeMatch.team2.avgElo.toLocaleString()} AVG MMR</span>
+                        <span className="mx-1">•</span>
+                        <span>Tier {activeMatch.team2.avgLevel}</span>
+                      </div>
+                    )}
+                  </div>
+                  <div className="w-9 h-9 rounded-lg p-0.5 bg-gradient-to-br from-slate-500 to-slate-700 shrink-0">
+                    <img 
+                      src={team2Players[0]?.avatar || '/images/avatar_ghost_exact.png'} 
+                      alt={activeMatch.team2.name} 
+                      className="w-full h-full rounded-[6px] object-cover" 
+                    />
+                  </div>
                 </div>
               </div>
 
@@ -2219,11 +2197,11 @@ export const VortexMatchRoom: React.FC<VortexMatchRoomProps> = ({
           /* CALIBER TACTICAL VIEW (COMPACT 100% ZOOM FIT)            */
           /* 2 SQUADS SIDE-BY-SIDE + COMPACT BOTTOM ACTION RAIL       */
           /* ======================================================== */
-          <div className="max-w-[1320px] w-full mx-auto px-3 sm:px-5 py-2 flex-1 space-y-3">
+          <div className="max-w-[1320px] w-full mx-auto px-3 sm:px-5 py-1.5 flex-1 space-y-2">
             {/* Two Teams Side-by-Side Grid */}
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 items-start">
               {/* Team 1 Column */}
-              <div className="space-y-2">
+              <div className="space-y-1.5">
                 <div className="flex items-center justify-between px-1">
                   <div className="text-[11px] font-mono font-black text-emerald-400 uppercase tracking-wider flex items-center gap-1.5">
                     <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse" />
@@ -2236,13 +2214,13 @@ export const VortexMatchRoom: React.FC<VortexMatchRoomProps> = ({
                   </div>
                 </div>
 
-                <div className="space-y-2">
+                <div className="space-y-1.5">
                   {groupPlayersByParty(team1Players).map(group => renderSquadContainer(group, 'team1'))}
                 </div>
               </div>
 
               {/* Team 2 Column */}
-              <div className="space-y-2">
+              <div className="space-y-1.5">
                 <div className="flex items-center justify-between px-1">
                   <div className="text-[11px] font-mono font-black text-slate-300 uppercase tracking-wider flex items-center gap-1.5">
                     <span className="w-2 h-2 rounded-full bg-slate-500" />
@@ -2255,7 +2233,7 @@ export const VortexMatchRoom: React.FC<VortexMatchRoomProps> = ({
                   </div>
                 </div>
 
-                <div className="space-y-2">
+                <div className="space-y-1.5">
                   {groupPlayersByParty(team2Players).map(group => renderSquadContainer(group, 'team2'))}
                 </div>
               </div>
