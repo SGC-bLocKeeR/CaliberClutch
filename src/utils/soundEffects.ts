@@ -1,6 +1,9 @@
+import { useEffect, useState } from 'react';
+
 class SoundSynthesizer {
   private ctx: AudioContext | null = null;
   private soundEnabled: boolean = true;
+  private listeners = new Set<(enabled: boolean) => void>();
 
   constructor() {
     // Check localStorage preference
@@ -14,12 +17,26 @@ class SoundSynthesizer {
     return this.soundEnabled;
   }
 
+  public subscribe(listener: (enabled: boolean) => void): () => void {
+    this.listeners.add(listener);
+    return () => {
+      this.listeners.delete(listener);
+    };
+  }
+
   public toggleSound(): boolean {
     this.soundEnabled = !this.soundEnabled;
     localStorage.setItem('caliber_sound_enabled', String(this.soundEnabled));
     localStorage.removeItem('nexus_sound_enabled');
+    if (!this.soundEnabled && this.ctx && this.ctx.state === 'running') {
+      this.ctx.suspend().catch?.(() => {});
+    }
     if (this.soundEnabled) {
       this.playSelect();
+    }
+    this.listeners.forEach((listener) => listener(this.soundEnabled));
+    if (typeof window !== 'undefined') {
+      window.dispatchEvent(new CustomEvent('caliber_sound_toggled', { detail: this.soundEnabled }));
     }
     return this.soundEnabled;
   }
@@ -443,3 +460,14 @@ class SoundSynthesizer {
 }
 
 export const sound = new SoundSynthesizer();
+
+export function useSoundEnabled(): [boolean, () => boolean] {
+  const [enabled, setEnabled] = useState<boolean>(() => sound.isEnabled());
+
+  useEffect(() => {
+    setEnabled(sound.isEnabled());
+    return sound.subscribe(setEnabled);
+  }, []);
+
+  return [enabled, () => sound.toggleSound()];
+}

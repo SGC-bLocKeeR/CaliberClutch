@@ -23,9 +23,8 @@ import {
   ShieldCheck,
   ShieldAlert,
   Volume2,
+  VolumeX,
   ArrowLeft,
-  ShoppingBag,
-  Trophy,
   Target,
   Gift,
   Coins,
@@ -38,7 +37,7 @@ import {
   ArrowUpRight
 } from 'lucide-react';
 import confetti from 'canvas-confetti';
-import { sound } from '../../utils/soundEffects';
+import { sound, useSoundEnabled } from '../../utils/soundEffects';
 import { CountryFlag } from './CountryFlag';
 import { FaceitVerificationBadge } from './VortexDashboard';
 import { XsollaCheckoutModal } from './XsollaCheckoutModal';
@@ -99,7 +98,7 @@ export const VortexRightSocialRail: React.FC<VortexRightSocialRailProps> = ({
   currentCountry = { code: 'XK', name: 'Kosovo' },
   userMembershipTier = 'vip',
   partyMembers = [],
-  unreadNotificationsCount = 1,
+  unreadNotificationsCount = 0,
   onToggleAntiCheat,
   onOpenNotifications,
   onOpenInviteModal,
@@ -112,6 +111,7 @@ export const VortexRightSocialRail: React.FC<VortexRightSocialRailProps> = ({
 }) => {
   // Drawer active state: 'none' | 'social' | 'party' | 'profile' | 'notifications'
   const [activeDrawer, setActiveDrawer] = useState<'none' | 'social' | 'party' | 'profile' | 'notifications'>('none');
+  const [soundEnabled, toggleSound] = useSoundEnabled();
   const [copiedSteamId, setCopiedSteamId] = useState(false);
   const [socialSubTab, setSocialSubTab] = useState<'friends' | 'dms' | 'requests'>('friends');
   const [socialSearch, setSocialSearch] = useState('');
@@ -525,6 +525,20 @@ export const VortexRightSocialRail: React.FC<VortexRightSocialRailProps> = ({
 
         <div className="w-[1px] h-6 bg-white/10 mx-1" />
 
+        <button
+          type="button"
+          onClick={() => toggleSound()}
+          aria-label={soundEnabled ? 'Mute platform sound' : 'Unmute platform sound'}
+          title={soundEnabled ? 'Sound ON — Click to Mute' : 'Sound MUTED — Click to Enable'}
+          className={`p-1.5 rounded-xl border transition cursor-pointer ${
+            soundEnabled
+              ? 'bg-white/5 hover:bg-white/10 border-white/10 text-slate-300 hover:text-white'
+              : 'bg-rose-500/10 hover:bg-rose-500/20 border-rose-500/30 text-rose-400'
+          }`}
+        >
+          {soundEnabled ? <Volume2 className="w-3.5 h-3.5 text-[#A3E635]" /> : <VolumeX className="w-3.5 h-3.5" />}
+        </button>
+
         {onLogout && (
           <button
             onClick={() => {
@@ -857,19 +871,35 @@ export const VortexRightSocialRail: React.FC<VortexRightSocialRailProps> = ({
 
         </div>
 
-        {/* BOTTOM SECTION: Profile Settings & Caliber Clutch Badge */}
+        {/* BOTTOM SECTION: Profile Settings, Sound Mute & Caliber Clutch Badge */}
         <div className={`w-full pt-3 border-t border-[#1A1D27] items-center justify-between ${mobileCollapsed ? 'hidden' : 'flex'} lg:flex`}>
-          <button
-            onClick={() => {
-              sound.playSelect();
-              onOpenProfileTab?.();
-            }}
-            className="flex items-center gap-2 p-1.5 rounded-xl hover:bg-white/[0.05] text-slate-400 hover:text-white transition cursor-pointer text-xs font-mono"
-            title="User Settings"
-          >
-            <User className="w-4 h-4 text-slate-400" />
-            <span className="font-sans font-semibold">Settings</span>
-          </button>
+          <div className="flex items-center gap-1">
+            <button
+              onClick={() => {
+                sound.playSelect();
+                onOpenProfileTab?.();
+              }}
+              className="flex items-center gap-2 p-1.5 rounded-xl hover:bg-white/[0.05] text-slate-400 hover:text-white transition cursor-pointer text-xs font-mono"
+              title="User Settings"
+            >
+              <User className="w-4 h-4 text-slate-400" />
+              <span className="font-sans font-semibold">Settings</span>
+            </button>
+
+            <button
+              type="button"
+              onClick={() => toggleSound()}
+              aria-label={soundEnabled ? 'Mute platform sound' : 'Unmute platform sound'}
+              title={soundEnabled ? 'Sound ON — Click to Mute' : 'Sound MUTED — Click to Enable'}
+              className={`p-1.5 rounded-xl border transition cursor-pointer ${
+                soundEnabled
+                  ? 'border-transparent hover:bg-white/[0.05] text-[#A3E635]'
+                  : 'border-rose-500/30 bg-rose-500/10 text-rose-400 hover:bg-rose-500/20'
+              }`}
+            >
+              {soundEnabled ? <Volume2 className="w-4 h-4" /> : <VolumeX className="w-4 h-4" />}
+            </button>
+          </div>
 
           {/* Caliber Clutch Wolf Shield Emblem */}
           <div className="flex items-center gap-1.5 text-slate-400 opacity-60 hover:opacity-100 transition cursor-default" title="CALIBER CLUTCH">
@@ -1662,187 +1692,14 @@ export const VortexRightSocialRail: React.FC<VortexRightSocialRailProps> = ({
             </div>
 
             {/* Notifications Feed */}
-            <div className="flex-1 overflow-y-auto p-3 space-y-4">
-              {/* Date Group 1: 12 Nov 2026 */}
-              <div>
-                <div className="text-[11px] font-sans font-medium text-slate-400 mb-2 px-1">
-                  12 Nov 2026
-                </div>
-                <div className="space-y-3">
-                  {/* Case 50 Points */}
-                  <div className="flex items-start gap-3 p-2 rounded-xl hover:bg-white/[0.03] transition cursor-pointer">
-                    <div className="w-9 h-9 rounded-full bg-[#151722] border border-[#222533] flex items-center justify-center shrink-0">
-                      <span className="text-orange-500 font-black text-xs">◀</span>
-                    </div>
-                    <div className="min-w-0 flex-1 text-xs">
-                      <p className="text-slate-200">
-                        <strong className="text-white font-bold">You</strong> received 50 FACEIT Points from Daily Ladder Mission.
-                      </p>
-                      <a 
-                        href="https://www.faceit.com/en/shop"
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="text-orange-500 hover:text-orange-400 font-bold mt-0.5 inline-flex items-center gap-1 cursor-pointer"
-                      >
-                        <span>Redeem in FACEIT Shop</span>
-                        <ExternalLink className="w-2.5 h-2.5" />
-                      </a>
-                      <div className="flex items-center gap-1 text-[10px] text-slate-500 mt-1 font-mono">
-                        <ShoppingBag className="w-3 h-3" />
-                        <span>13:20 GMT+1</span>
-                      </div>
-                    </div>
-                  </div>
-
-                  {/* Access Token */}
-                  <div className="flex items-start gap-3 p-2 rounded-xl hover:bg-white/[0.03] transition cursor-pointer">
-                    <div className="w-9 h-9 rounded-full bg-[#151722] border border-[#222533] flex items-center justify-center shrink-0">
-                      <span className="text-orange-500 font-black text-xs">◀</span>
-                    </div>
-                    <div className="min-w-0 flex-1 text-xs">
-                      <p className="text-slate-200">
-                        <strong className="text-white font-bold">You</strong> received 1 Access Token from Tournament Mission.
-                      </p>
-                      <div className="flex items-center gap-1 text-[10px] text-slate-500 mt-1 font-mono">
-                        <ShoppingBag className="w-3 h-3" />
-                        <span>13:20 GMT+1</span>
-                      </div>
-                    </div>
-                  </div>
-
-                  {/* 100 Points */}
-                  <div className="flex items-start gap-3 p-2 rounded-xl hover:bg-white/[0.03] transition cursor-pointer">
-                    <div className="w-9 h-9 rounded-full bg-[#151722] border border-[#222533] flex items-center justify-center shrink-0">
-                      <span className="text-orange-500 font-black text-xs">◀</span>
-                    </div>
-                    <div className="min-w-0 flex-1 text-xs">
-                      <p className="text-slate-200">
-                        <strong className="text-white font-bold">You</strong> received 100 FACEIT Points from Weekly Scrim Series.
-                      </p>
-                      <a 
-                        href="https://www.faceit.com/en/shop"
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="text-orange-500 hover:text-orange-400 font-bold mt-0.5 inline-flex items-center gap-1 cursor-pointer"
-                      >
-                        <span>Redeem in FACEIT Shop</span>
-                        <ExternalLink className="w-2.5 h-2.5" />
-                      </a>
-                      <div className="flex items-center gap-1 text-[10px] text-slate-500 mt-1 font-mono">
-                        <ShoppingBag className="w-3 h-3" />
-                        <span>13:19 GMT+1</span>
-                      </div>
-                    </div>
-                  </div>
-
-                  {/* 80 Points */}
-                  <div className="flex items-start gap-3 p-2 rounded-xl hover:bg-white/[0.03] transition cursor-pointer">
-                    <div className="w-9 h-9 rounded-full bg-[#151722] border border-[#222533] flex items-center justify-center shrink-0">
-                      <span className="text-orange-500 font-black text-xs">◀</span>
-                    </div>
-                    <div className="min-w-0 flex-1 text-xs">
-                      <p className="text-slate-200">
-                        <strong className="text-white font-bold">You</strong> received 80 FACEIT Points from Match MVP Award.
-                      </p>
-                      <a 
-                        href="https://www.faceit.com/en/shop"
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="text-orange-500 hover:text-orange-400 font-bold mt-0.5 inline-flex items-center gap-1 cursor-pointer"
-                      >
-                        <span>Redeem in FACEIT Shop</span>
-                        <ExternalLink className="w-2.5 h-2.5" />
-                      </a>
-                      <div className="flex items-center gap-1 text-[10px] text-slate-500 mt-1 font-mono">
-                        <ShoppingBag className="w-3 h-3" />
-                        <span>13:19 GMT+1</span>
-                      </div>
-                    </div>
-                  </div>
-
-                  {/* 500 Points */}
-                  <div className="flex items-start gap-3 p-2 rounded-xl hover:bg-white/[0.03] transition cursor-pointer">
-                    <div className="w-9 h-9 rounded-full bg-[#151722] border border-[#222533] flex items-center justify-center shrink-0">
-                      <span className="text-orange-500 font-black text-xs">◀</span>
-                    </div>
-                    <div className="min-w-0 flex-1 text-xs">
-                      <p className="text-slate-200">
-                        <strong className="text-white font-bold">You</strong> received 500 FACEIT Points from Division Championship Placement.
-                      </p>
-                      <a 
-                        href="https://www.faceit.com/en/shop"
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="text-orange-500 hover:text-orange-400 font-bold mt-0.5 inline-flex items-center gap-1 cursor-pointer"
-                      >
-                        <span>Redeem in FACEIT Shop</span>
-                        <ExternalLink className="w-2.5 h-2.5" />
-                      </a>
-                      <div className="flex items-center gap-1 text-[10px] text-slate-500 mt-1 font-mono">
-                        <ShoppingBag className="w-3 h-3" />
-                        <span>13:14 GMT+1</span>
-                      </div>
-                    </div>
-                  </div>
-                </div>
+            <div className="flex-1 overflow-y-auto p-3 flex flex-col items-center justify-center text-center">
+              <div className="w-11 h-11 rounded-2xl bg-[#151722] border border-[#222533] flex items-center justify-center mb-3">
+                <Bell className="w-5 h-5 text-slate-500" />
               </div>
-
-              {/* Date Group 2: 09 Nov 2026 */}
-              <div className="pt-2 border-t border-[#181B26]">
-                <div className="text-[11px] font-sans font-medium text-slate-400 mb-2 px-1">
-                  09 Nov 2026
-                </div>
-                <div className="space-y-3">
-                  {/* Challenge Completed */}
-                  <div className="flex items-start gap-3 p-2 rounded-xl hover:bg-white/[0.03] transition cursor-pointer">
-                    <div className="w-9 h-9 rounded-xl bg-[#151722] border border-[#222533] flex items-center justify-center shrink-0">
-                      <Trophy className="w-4 h-4 text-orange-500" />
-                    </div>
-                    <div className="min-w-0 flex-1 text-xs">
-                      <span className="text-[10px] font-mono font-bold text-slate-500 uppercase tracking-widest block mb-0.5">
-                        CHALLENGE COMPLETED
-                      </span>
-                      <p className="text-slate-200 font-medium">
-                        Challenge completed! Check your progress and see what's unlocked next.
-                      </p>
-                      <div className="flex items-center gap-1 text-[10px] text-slate-500 mt-1 font-mono">
-                        <span>22:21 GMT+1</span>
-                      </div>
-                    </div>
-                  </div>
-
-                  {/* edd1- Accepted friend request */}
-                  <div 
-                    onClick={() => {
-                      openChatWithUser({
-                        id: 'f-edd1',
-                        name: 'edd1-',
-                        avatar: '/avatars/edd1.png',
-                        verification: 'verified',
-                        code: 'XK',
-                        countryName: 'Kosovo'
-                      });
-                    }}
-                    className="flex items-start gap-3 p-2 rounded-xl hover:bg-white/[0.05] transition cursor-pointer group"
-                  >
-                    <img 
-                      src="/avatars/edd1.png" 
-                      alt="edd1-" 
-                      className="w-9 h-9 rounded-full object-cover shrink-0 border border-white/10" 
-                    />
-                    <div className="min-w-0 flex-1 text-xs">
-                      <p className="text-slate-200">
-                        <strong className="text-white font-bold group-hover:text-[#A3E635] transition">edd1-</strong> accepted your friend request
-                      </p>
-                      <div className="flex items-center gap-1 text-[10px] text-slate-500 mt-1 font-mono">
-                        <Users className="w-3 h-3" />
-                        <span>21:26 GMT+1</span>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-              </div>
-
+              <p className="text-xs font-display font-bold text-white">No notifications yet</p>
+              <p className="text-[11px] text-slate-500 mt-1 max-w-[220px] leading-relaxed">
+                Match alerts, party invites, and friend updates will appear here.
+              </p>
             </div>
           </div>
         </>
@@ -2261,6 +2118,28 @@ export const VortexRightSocialRail: React.FC<VortexRightSocialRailProps> = ({
                     <span>View Full Profile</span>
                   </div>
                   <ChevronRight className="w-3.5 h-3.5 text-slate-500" />
+                </button>
+
+                <button
+                  type="button"
+                  onClick={() => toggleSound()}
+                  className="w-full flex items-center justify-between px-3.5 py-2.5 text-xs font-mono text-slate-300 hover:text-white hover:bg-white/[0.05] rounded-xl transition cursor-pointer"
+                >
+                  <div className="flex items-center gap-2">
+                    {soundEnabled ? (
+                      <Volume2 className="w-4 h-4 text-[#A3E635]" />
+                    ) : (
+                      <VolumeX className="w-4 h-4 text-rose-400" />
+                    )}
+                    <span>Platform Sound (SFX)</span>
+                  </div>
+                  <span className={`text-[10px] font-mono font-bold px-2 py-0.5 rounded-md border ${
+                    soundEnabled
+                      ? 'bg-[#A3E635]/15 text-[#A3E635] border-[#A3E635]/30'
+                      : 'bg-rose-500/15 text-rose-400 border-rose-500/30'
+                  }`}>
+                    {soundEnabled ? 'ON' : 'MUTED'}
+                  </span>
                 </button>
 
                 <button

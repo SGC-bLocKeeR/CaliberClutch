@@ -68,10 +68,12 @@ import {
   Key,
   Wallet,
   CreditCard,
-  Image as ImageIcon
+  Image as ImageIcon,
+  Volume2,
+  VolumeX
 } from 'lucide-react';
 import confetti from 'canvas-confetti';
-import { sound } from '../../utils/soundEffects';
+import { sound, useSoundEnabled } from '../../utils/soundEffects';
 import { cleanGamerTag, convertSteam2ToSteam64 } from '../../utils/steamAuth';
 import { VortexBrandLogo } from './VortexLandingPage';
 import { CountryFlag } from './CountryFlag';
@@ -1198,6 +1200,7 @@ export const VortexDashboard: React.FC<VortexDashboardProps> = ({
   const [selectedServers, setSelectedServers] = useState<string[]>(['netherlands', 'germany', 'sweden', 'finland']);
   // Default tab is Home (Overview & Season 1 Hub triggered by Caliber Clutch logo)
   const [activeTab, setActiveTab] = useState<VortexTab>('home');
+  const [soundEnabled, toggleSound] = useSoundEnabled();
   const [profileDropdownOpen, setProfileDropdownOpen] = useState(false);
   const [notificationsOpen, setNotificationsOpen] = useState(false);
   const [showPremiumModal, setShowPremiumModal] = useState(initialOpenPremium);
@@ -3108,6 +3111,32 @@ export const VortexDashboard: React.FC<VortexDashboardProps> = ({
                   <span>IN QUEUE (00:0{queueSeconds})</span>
                 </button>
               )}
+            </div>
+
+            <div className="flex items-center gap-2">
+              <button
+                type="button"
+                onClick={() => toggleSound()}
+                aria-label={soundEnabled ? 'Mute platform sound' : 'Unmute platform sound'}
+                title={soundEnabled ? 'Sound ON — Click to Mute' : 'Sound MUTED — Click to Enable'}
+                className={`px-3 py-2 rounded-xl border font-mono text-xs font-bold flex items-center gap-2 transition cursor-pointer shadow-md ${
+                  soundEnabled
+                    ? 'bg-[#12141C] hover:bg-[#1A1F2E] border-white/10 hover:border-[#A3E635]/50 text-slate-200 hover:text-white'
+                    : 'bg-rose-500/10 hover:bg-rose-500/20 border-rose-500/35 text-rose-300'
+                }`}
+              >
+                {soundEnabled ? (
+                  <>
+                    <Volume2 className="w-4 h-4 text-[#A3E635]" />
+                    <span className="hidden sm:inline">Sound On</span>
+                  </>
+                ) : (
+                  <>
+                    <VolumeX className="w-4 h-4 text-rose-400" />
+                    <span className="hidden sm:inline">Muted</span>
+                  </>
+                )}
+              </button>
             </div>
 
           </header>
@@ -10889,7 +10918,7 @@ export const VortexDashboard: React.FC<VortexDashboardProps> = ({
         currentCountry={currentCountry}
         userMembershipTier={userMembershipTier}
         partyMembers={partySlots}
-        unreadNotificationsCount={unreadCount}
+        unreadNotificationsCount={0}
         isAntiCheatActive={isAntiCheatActive}
         onToggleAntiCheat={handleToggleAntiCheat}
         onOpenNotifications={() => {
