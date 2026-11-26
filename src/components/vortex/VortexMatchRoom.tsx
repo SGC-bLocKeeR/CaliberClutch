@@ -2075,39 +2075,39 @@ export const VortexMatchRoom: React.FC<VortexMatchRoomProps> = ({
             <img 
               src={getMapImage(currentSelectedMap)} 
               alt={currentSelectedMap} 
-              className="w-full h-full object-cover opacity-50 filter blur-[0.5px] transition-all duration-700" 
+              className="w-full h-full object-cover opacity-80 transition-all duration-700" 
             />
-            <div className="absolute inset-0 bg-gradient-to-r from-[#0B0D14]/95 via-[#0B0D14]/70 to-[#0B0D14]/95" />
-            <div className="absolute inset-0 bg-gradient-to-b from-[#0B0D14]/45 via-transparent to-[#0B0D14]/90" />
+            <div className="absolute inset-0 bg-gradient-to-r from-[#0B0D14]/70 via-[#0B0D14]/15 to-[#0B0D14]/70" />
+            <div className="absolute inset-0 bg-gradient-to-b from-[#0B0D14]/25 via-transparent to-[#0B0D14]/55" />
           </div>
 
           <div className={`relative z-10 px-3.5 sm:px-4 ${
-            activeTab === 'stats' ? 'py-2' : 'py-2'
+            activeTab === 'stats' ? 'py-2' : 'py-2.5'
           }`}>
             {/* Top Meta Strip (CaliberClutch Native - Zero FACEIT Breadcrumbs) */}
-            <div className="flex items-center justify-between text-[10px] font-mono text-slate-300 pb-1.5 border-b border-white/[0.07]">
+            <div className="flex items-center justify-between text-[10px] font-mono text-slate-200 pb-1.5 border-b border-white/10">
               <div className="flex items-center gap-2">
-                <span className="px-2 py-0.5 rounded bg-white/[0.06] border border-white/10 text-white font-bold uppercase tracking-wider">
+                <span className="px-2 py-0.5 rounded bg-[#0B0D14]/55 backdrop-blur-[2px] border border-white/15 text-white font-bold uppercase tracking-wider">
                   5v5 Competitive
                 </span>
-                <span className="flex items-center gap-1 px-2 py-0.5 rounded bg-[#A3E635]/15 text-[#A3E635] font-bold border border-[#A3E635]/30 uppercase tracking-wider">
+                <span className="flex items-center gap-1 px-2 py-0.5 rounded bg-[#0B0D14]/55 backdrop-blur-[2px] text-[#A3E635] font-bold border border-[#A3E635]/35 uppercase tracking-wider">
                   <ShieldCheck className="w-3 h-3 text-[#A3E635]" />
                   Caliber AC
                 </span>
               </div>
               <div className="flex items-center gap-2">
-                <span className="px-2.5 py-0.5 rounded bg-black/60 border border-white/15 text-white font-black uppercase tracking-widest flex items-center gap-1.5">
+                <span className="px-2.5 py-0.5 rounded bg-[#0B0D14]/60 backdrop-blur-[2px] border border-white/20 text-white font-black uppercase tracking-widest flex items-center gap-1.5 shadow-sm">
                   <span className="w-1.5 h-1.5 rounded-full bg-[#A3E635] animate-pulse" />
                   <span>{currentSelectedMap}</span>
                 </span>
               </div>
             </div>
 
-            {/* 3-Block Tactical Versus Layout (Squircle Team Cards + Center Balance Core) */}
-            <div className="grid grid-cols-1 md:grid-cols-12 items-center gap-2.5 pt-2">
+            {/* 3-Block Tactical Versus Layout (Compact Floating Cards leaving Map Backdrop Visible) */}
+            <div className="flex flex-col md:flex-row items-stretch md:items-center justify-between gap-2.5 pt-2">
               
               {/* Left Wing: Team 1 */}
-              <div className="md:col-span-4 flex items-center justify-between gap-2.5 px-3 py-2 rounded-xl bg-black/55 border border-emerald-500/25 backdrop-blur-sm">
+              <div className="flex items-center justify-between gap-3 px-3 py-1.5 rounded-xl bg-[#0B0D14]/45 border border-emerald-500/30 backdrop-blur-[2px] md:min-w-[270px]">
                 <div className="flex items-center gap-2.5 min-w-0">
                   <div className="w-9 h-9 rounded-lg p-0.5 bg-gradient-to-br from-[#A3E635] to-emerald-500 shadow-[0_0_12px_rgba(163,230,53,0.25)] shrink-0">
                     <img 
@@ -2124,7 +2124,7 @@ export const VortexMatchRoom: React.FC<VortexMatchRoomProps> = ({
                       {activeMatch.team1.name}
                     </h2>
                     {activeTab === 'overview' && (
-                      <div className="text-[10px] font-mono text-slate-400">
+                      <div className="text-[10px] font-mono text-slate-300">
                         <span className="text-emerald-400 font-bold">{activeMatch.team1.avgElo.toLocaleString()} AVG MMR</span>
                         <span className="mx-1">•</span>
                         <span>Tier {activeMatch.team1.avgLevel}</span>
@@ -2132,19 +2132,19 @@ export const VortexMatchRoom: React.FC<VortexMatchRoomProps> = ({
                     )}
                   </div>
                 </div>
-                <div className="px-3 py-1.5 rounded-lg bg-emerald-500/15 border border-emerald-400/40 text-xl sm:text-2xl font-display font-black text-emerald-400 leading-none shrink-0">
+                <div className="px-3 py-1.5 rounded-lg bg-emerald-500/20 border border-emerald-400/45 text-xl sm:text-2xl font-display font-black text-emerald-400 leading-none shrink-0">
                   {matchSimulatedResult ? matchSimulatedResult.score1 : '13'}
                 </div>
               </div>
 
               {/* Center Tactical Balance Core */}
-              <div className="md:col-span-4 text-center px-2.5 py-2 rounded-xl bg-black/65 border border-white/10 backdrop-blur-sm space-y-1">
+              <div className="text-center px-3 py-1.5 rounded-xl bg-[#0B0D14]/50 border border-white/15 backdrop-blur-[2px] space-y-1 md:w-[270px] shrink-0">
                 <div className="flex items-center justify-between text-[9px] font-mono font-bold leading-none">
                   <span className="text-[#A3E635]">{activeMatch.winProbabilityTeam1}% WIN</span>
-                  <span className="text-slate-300 uppercase tracking-widest text-[8px]">±{activeMatch.eloGainWin} MMR</span>
+                  <span className="text-slate-200 uppercase tracking-widest text-[8px]">±{activeMatch.eloGainWin} MMR</span>
                   <span className="text-blue-400">{activeMatch.winProbabilityTeam2}% WIN</span>
                 </div>
-                <div className="w-full h-1.5 rounded-full bg-slate-800 overflow-hidden flex">
+                <div className="w-full h-1.5 rounded-full bg-slate-800/90 overflow-hidden flex">
                   <div style={{ width: `${activeMatch.winProbabilityTeam1}%` }} className="bg-gradient-to-r from-emerald-500 to-[#A3E635]" />
                   <div style={{ width: `${activeMatch.winProbabilityTeam2}%` }} className="bg-gradient-to-r from-blue-500 to-indigo-500" />
                 </div>
@@ -2154,20 +2154,20 @@ export const VortexMatchRoom: React.FC<VortexMatchRoomProps> = ({
               </div>
 
               {/* Right Wing: Team 2 */}
-              <div className="md:col-span-4 flex items-center justify-between gap-2.5 px-3 py-2 rounded-xl bg-black/55 border border-blue-500/20 backdrop-blur-sm">
-                <div className="px-3 py-1.5 rounded-lg bg-white/[0.06] border border-white/15 text-xl sm:text-2xl font-display font-black text-slate-300 leading-none shrink-0">
+              <div className="flex items-center justify-between gap-3 px-3 py-1.5 rounded-xl bg-[#0B0D14]/45 border border-blue-500/25 backdrop-blur-[2px] md:min-w-[270px]">
+                <div className="px-3 py-1.5 rounded-lg bg-white/[0.08] border border-white/20 text-xl sm:text-2xl font-display font-black text-slate-200 leading-none shrink-0">
                   {matchSimulatedResult ? matchSimulatedResult.score2 : '11'}
                 </div>
                 <div className="flex items-center gap-2.5 min-w-0 text-right">
                   <div className="min-w-0">
-                    <div className="text-[9px] font-mono font-black text-slate-400 uppercase tracking-wider">
+                    <div className="text-[9px] font-mono font-black text-slate-300 uppercase tracking-wider">
                       5v5 Challengers
                     </div>
                     <h2 className="text-sm sm:text-base font-display font-black text-white tracking-wide leading-tight truncate">
                       {activeMatch.team2.name}
                     </h2>
                     {activeTab === 'overview' && (
-                      <div className="text-[10px] font-mono text-slate-400">
+                      <div className="text-[10px] font-mono text-slate-300">
                         <span className="text-blue-400 font-bold">{activeMatch.team2.avgElo.toLocaleString()} AVG MMR</span>
                         <span className="mx-1">•</span>
                         <span>Tier {activeMatch.team2.avgLevel}</span>
