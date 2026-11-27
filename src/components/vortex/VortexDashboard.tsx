@@ -10693,6 +10693,7 @@ export const VortexDashboard: React.FC<VortexDashboardProps> = ({
           currentAvatarUrl={currentAvatarUrl}
           partyMembers={partySlots.filter((m): m is PartySlotMember => m !== null)}
           matchData={currentBalancedMatch || undefined}
+          isAdmin={isProjectAdmin}
           onMatchFinished={(won, eloDelta) => {
             const nextMatches = currentUserMatches + 1;
             const nextElo = Math.max(100, currentUserElo + (won ? eloDelta : -eloDelta));

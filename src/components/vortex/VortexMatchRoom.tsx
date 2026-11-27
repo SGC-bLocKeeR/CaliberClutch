@@ -20,7 +20,6 @@ import {
   Share2,
   Info,
   Download,
-  Lock,
   Eye,
   EyeOff,
   Star,
@@ -158,6 +157,7 @@ interface VortexMatchRoomProps {
   onMatchFinished?: (won: boolean, deltaElo: number) => void;
   onClose: () => void;
   initialVetoOpen?: boolean;
+  isAdmin?: boolean;
 }
 
 export interface MatchChatMessage {
@@ -346,13 +346,15 @@ export const VortexMatchRoom: React.FC<VortexMatchRoomProps> = ({
   matchData,
   onMatchFinished,
   onClose,
-  initialVetoOpen = true
+  initialVetoOpen = true,
+  isAdmin = false
 }) => {
   // Navigation Tabs: OVERVIEW vs STATS
   const [activeTab, setActiveTab] = useState<'overview' | 'stats'>('overview');
 
-  // Stats Sub-Tabs: SUMMARY / DUELS / UTILITY / MATCH INSIGHTS
+  // Stats Sub-Tabs & Layout Preview Switcher
   const [statsSubTab, setStatsSubTab] = useState<'summary' | 'duels' | 'utility' | 'insights'>('summary');
+  const [statsLayoutPreview, setStatsLayoutPreview] = useState<'A' | 'B' | 'C'>('A');
   const [tableFilter, setTableFilter] = useState<'general' | 'advanced' | 'entry' | 'trade' | 'clutch'>('general');
   const [sortFilter, setSortFilter] = useState<'team' | 'players'>('team');
   const [sideFilter, setSideFilter] = useState<'all' | 't' | 'ct'>('all');
@@ -832,21 +834,48 @@ export const VortexMatchRoom: React.FC<VortexMatchRoomProps> = ({
     }
   ) => {
     return (
-      <div className="rounded-2xl bg-[#14151D] border border-[#232532] overflow-hidden shadow-xl">
-        {/* Table Team Header (only shown when not unified) */}
+      <div className="rounded-xl bg-[#0D1017] border border-[#1E2433] overflow-hidden shadow-xl">
+        {/* CaliberClutch Squad Scoreboard Header */}
         {!isUnified && teamHeader && (
-          <div className="px-5 py-3 bg-[#171822] border-b border-white/[0.06] flex items-center justify-between">
+          <div className={`px-4 py-2.5 bg-[#121621] border-b border-white/[0.07] border-l-4 flex flex-wrap items-center justify-between gap-3 ${
+            teamHeader.isWinner ? 'border-l-[#A3E635]' : 'border-l-blue-400'
+          }`}>
             <div className="flex items-center gap-3">
-              <span className={`text-lg font-display font-black ${teamHeader.isWinner ? 'text-emerald-400' : 'text-slate-400'}`}>
+              <div className={`px-2.5 py-1 rounded-lg font-display font-black text-base leading-none border ${
+                teamHeader.isWinner
+                  ? 'bg-[#A3E635]/15 border-[#A3E635]/40 text-[#A3E635]'
+                  : 'bg-white/[0.05] border-white/15 text-slate-300'
+              }`}>
                 {teamHeader.score}
-              </span>
-              <img src={teamHeader.avatar} alt={teamHeader.name} className="w-6 h-6 rounded-full object-cover" />
-              <span className="font-display font-black text-white text-sm">{teamHeader.name}</span>
+              </div>
+              <img
+                src={teamHeader.avatar}
+                alt={teamHeader.name}
+                className="w-7 h-7 rounded-lg object-cover border border-white/15"
+              />
+              <div className="flex items-center gap-2">
+                <span className="font-display font-black text-white text-sm tracking-wide">
+                  {teamHeader.name}
+                </span>
+                <span className={`text-[9px] font-mono font-black uppercase px-1.5 py-0.5 rounded border ${
+                  teamHeader.isWinner
+                    ? 'bg-emerald-500/15 border-emerald-500/35 text-emerald-400'
+                    : 'bg-blue-500/10 border-blue-500/30 text-blue-300'
+                }`}>
+                  {teamHeader.isWinner ? 'Winners' : 'Challengers'}
+                </span>
+              </div>
             </div>
-            <div className="text-xs font-mono text-slate-400 flex items-center gap-4">
-              <span>Team avg <strong className="text-white font-bold ml-1.5">{teamHeader.avgRank}</strong></span>
-              <span>First half <strong className="text-white font-bold ml-1.5">{teamHeader.firstHalf}</strong></span>
-              <span>Second half <strong className="text-white font-bold ml-1.5">{teamHeader.secondHalf}</strong></span>
+
+            <div className="text-[11px] font-mono text-slate-400 flex flex-wrap items-center gap-3">
+              <span className="px-2 py-0.5 rounded bg-black/40 border border-white/10">
+                Squad Avg: <strong className="text-white font-bold ml-1">{teamHeader.avgRank}</strong>
+              </span>
+              <span className="px-2 py-0.5 rounded bg-black/40 border border-white/10">
+                CT: <strong className="text-sky-300 font-bold">{teamHeader.firstHalf}</strong>
+                <span className="mx-1.5 text-slate-600">•</span>
+                T: <strong className="text-amber-300 font-bold">{teamHeader.secondHalf}</strong>
+              </span>
             </div>
           </div>
         )}
@@ -855,39 +884,30 @@ export const VortexMatchRoom: React.FC<VortexMatchRoomProps> = ({
         <div className="overflow-x-auto">
           <table className="w-full text-left text-xs font-mono">
             <thead>
-              <tr className="border-b border-white/[0.04] text-[10px] uppercase text-slate-500 bg-[#12131A]">
-                <th className="py-2.5 px-4 font-bold">Player</th>
-                <th className="py-2.5 px-3 font-bold">Rank</th>
+              <tr className="border-b border-white/[0.06] text-[10px] uppercase text-slate-400 bg-[#0A0C12]">
+                <th className="py-2.5 px-4 font-bold tracking-wider">Operative</th>
+                <th className="py-2.5 px-3 font-bold tracking-wider">Division</th>
 
                 {tableFilter === 'general' && (
                   <>
-                    <th className="py-2.5 px-3 font-bold">
+                    <th className="py-2.5 px-3 font-bold tracking-wider">
                       {isUnified ? (
-                        <div className="inline-flex items-center gap-1.5 cursor-pointer text-white">
-                          <div className="w-3.5 h-3.5 rounded-full border border-[#A3E635] flex items-center justify-center shrink-0">
-                            <div className="w-1.5 h-1.5 rounded-full bg-[#A3E635]" />
-                          </div>
-                          <span className="font-bold text-white">Rating</span>
-                          <ChevronDown className="w-3 h-3 text-slate-400" />
+                        <div className="inline-flex items-center gap-1 text-[#A3E635]">
+                          <span>Caliber Rating</span>
+                          <ChevronDown className="w-3 h-3" />
                         </div>
                       ) : (
-                        <span>Rating</span>
+                        <span>Caliber Rating</span>
                       )}
                     </th>
-                    <th className="py-2.5 px-3 font-bold">Swing</th>
-                    <th className="py-2.5 px-2 font-bold text-center">K</th>
-                    <th className="py-2.5 px-2 font-bold text-center">D</th>
-                    <th className="py-2.5 px-2 font-bold text-center">A</th>
-                    <th className="py-2.5 px-3 font-bold text-center">ADR</th>
-                    <th className="py-2.5 px-3 font-bold text-center">K/D</th>
-                    <th className="py-2.5 px-3 font-bold text-center">K/R</th>
-                    <th className="py-2.5 px-2 font-bold text-center">HS</th>
-                    <th className="py-2.5 px-3 font-bold text-center">HS %</th>
-                    <th className="py-2.5 px-2 font-bold text-center">5k</th>
-                    <th className="py-2.5 px-2 font-bold text-center">4k</th>
-                    <th className="py-2.5 px-2 font-bold text-center">3k</th>
-                    <th className="py-2.5 px-2 font-bold text-center">2k</th>
-                    <th className="py-2.5 px-3 font-bold text-center">MVPs</th>
+                    <th className="py-2.5 px-3 font-bold tracking-wider">Impact</th>
+                    <th className="py-2.5 px-3 font-bold text-center tracking-wider">K / D / A</th>
+                    <th className="py-2.5 px-3 font-bold text-center tracking-wider">K/D</th>
+                    <th className="py-2.5 px-3 font-bold text-center tracking-wider">K/R</th>
+                    <th className="py-2.5 px-3 font-bold text-center tracking-wider">ADR</th>
+                    <th className="py-2.5 px-3 font-bold text-center tracking-wider">HS (HS%)</th>
+                    <th className="py-2.5 px-3 font-bold text-center tracking-wider">Multi-Kills</th>
+                    <th className="py-2.5 px-3 font-bold text-center tracking-wider">MVPs</th>
                   </>
                 )}
 
@@ -916,9 +936,9 @@ export const VortexMatchRoom: React.FC<VortexMatchRoomProps> = ({
                     <th className="py-2.5 px-3 font-bold">Entry Attempts</th>
                     <th className="py-2.5 px-3 font-bold">Entry Kills</th>
                     <th className="py-2.5 px-3 font-bold">Entry Deaths</th>
-                    <th className="py-2.5 px-3 font-bold">Entry Difference</th>
-                    <th className="py-2.5 px-3 font-bold">Entry Attempts %</th>
-                    <th className="py-2.5 px-3 font-bold">Entry Success %</th>
+                    <th className="py-2.5 px-3 font-bold">Entry Diff</th>
+                    <th className="py-2.5 px-3 font-bold">Attempts %</th>
+                    <th className="py-2.5 px-3 font-bold">Success %</th>
                   </>
                 )}
 
@@ -934,13 +954,13 @@ export const VortexMatchRoom: React.FC<VortexMatchRoomProps> = ({
                 {tableFilter === 'clutch' && (
                   <>
                     <th className="py-2.5 px-3 font-bold">Clutch Wins</th>
-                    <th className="py-2.5 px-3 font-bold">Clutch Rounds Lost</th>
-                    <th className="py-2.5 px-3 font-bold">Clutch Success</th>
-                    <th className="py-2.5 px-2 font-bold text-center">1v5 Wins</th>
-                    <th className="py-2.5 px-2 font-bold text-center">1v4 Wins</th>
-                    <th className="py-2.5 px-2 font-bold text-center">1v3 Wins</th>
-                    <th className="py-2.5 px-2 font-bold text-center">1v2 Wins</th>
-                    <th className="py-2.5 px-2 font-bold text-center">1v1 Wins</th>
+                    <th className="py-2.5 px-3 font-bold">Clutch Lost</th>
+                    <th className="py-2.5 px-3 font-bold">Success %</th>
+                    <th className="py-2.5 px-2 font-bold text-center">1v5</th>
+                    <th className="py-2.5 px-2 font-bold text-center">1v4</th>
+                    <th className="py-2.5 px-2 font-bold text-center">1v3</th>
+                    <th className="py-2.5 px-2 font-bold text-center">1v2</th>
+                    <th className="py-2.5 px-2 font-bold text-center">1v1</th>
                   </>
                 )}
               </tr>
@@ -949,62 +969,50 @@ export const VortexMatchRoom: React.FC<VortexMatchRoomProps> = ({
               {rows.map(row => {
                 const rowBg = isUnified
                   ? row.team === 'team1'
-                    ? 'bg-[#121426]/75 hover:bg-[#181a33]'
-                    : 'bg-[#0c1714]/75 hover:bg-[#12241f]'
-                  : 'hover:bg-white/[0.02]';
+                    ? 'border-l-2 border-l-[#A3E635] bg-[#0F1512]/80 hover:bg-[#15201A]'
+                    : 'border-l-2 border-l-blue-400 bg-[#0D121D]/80 hover:bg-[#131B2B]'
+                  : 'hover:bg-white/[0.025]';
 
                 return (
                   <tr key={row.id} className={`${rowBg} transition`}>
-                    {/* Player Column - Clickable Profile Flyout (1:1 FACEIT) */}
-                    <td className="py-3 px-4">
+                    {/* Operative Column - Clickable Profile Flyout */}
+                    <td className="py-2.5 px-4">
                       <div 
                         onClick={(e) => handleOpenPlayerFlyout(e, row.name)}
                         className="flex items-center gap-2.5 cursor-pointer group w-fit select-none"
                       >
-                        {/* Party shape indicator */}
-                        <div className="w-3 flex items-center justify-center shrink-0">
-                          {row.partyShape === 'circle' && (
-                            <span className={row.team === 'team1' ? 'text-indigo-400 text-xs' : 'text-emerald-400 text-xs'}>●</span>
-                          )}
-                          {row.partyShape === 'diamond' && (
-                            <span className="text-indigo-400 text-xs">◆</span>
-                          )}
-                          {row.partyShape === 'triangle' && (
-                            <span className="text-emerald-400 text-xs">▲</span>
-                          )}
-                          {row.partyShape === 'square' && (
-                            <span className="text-emerald-400 text-xs">■</span>
-                          )}
-                          {!row.partyShape && (
-                            <span className={row.team === 'team1' ? 'w-1.5 h-1.5 rounded-full bg-blue-400' : 'w-1.5 h-1.5 rounded-full bg-emerald-400'} />
-                          )}
-                        </div>
+                        <span
+                          className={`w-1.5 h-4 rounded-full shrink-0 ${
+                            row.team === 'team1' ? 'bg-[#A3E635]' : 'bg-blue-400'
+                          }`}
+                          title={row.team === 'team1' ? activeMatch.team1.name : activeMatch.team2.name}
+                        />
 
-                        {/* Avatar */}
+                        {/* Squircle Avatar */}
                         <div className="relative w-7 h-7 shrink-0 transition-transform group-hover:scale-105">
                           <img 
                             src={row.avatar} 
                             alt={row.name} 
-                            className={`w-7 h-7 rounded-full object-cover border border-white/10 group-hover:border-white/40 ${row.name === 'M18' ? 'bg-black object-contain' : ''}`} 
+                            className={`w-7 h-7 rounded-lg object-cover border border-white/15 group-hover:border-[#A3E635]/60 ${row.name === 'M18' ? 'bg-black object-contain' : ''}`} 
                           />
                           {row.hasPriority && (
-                            <div className="absolute -top-1 -right-0.5 w-3.5 h-3.5 rounded-full bg-[#182312] border border-[#A3E635] flex items-center justify-center text-[7px] text-[#A3E635] font-black shadow-sm" title="Priority">
+                            <div className="absolute -top-1 -right-1 w-3 h-3 rounded-full bg-[#182312] border border-[#A3E635] flex items-center justify-center text-[7px] text-[#A3E635] font-black shadow-sm" title="Priority">
                               ★
                             </div>
                           )}
                         </div>
 
-                        <span className="font-display font-bold text-xs text-white group-hover:text-[#A3E635] group-hover:underline transition truncate max-w-[120px]">
+                        <span className="font-display font-bold text-xs text-white group-hover:text-[#A3E635] transition truncate max-w-[140px]">
                           {row.name}
                         </span>
                       </div>
                     </td>
 
-                    {/* Rank Column */}
-                    <td className="py-3 px-3">
+                    {/* Division Column */}
+                    <td className="py-2.5 px-3">
                       <div className="flex items-center gap-2">
                         <CaliberTierBadge level={row.rankLevel} size="sm" />
-                        <span className="text-white font-mono text-xs font-semibold">
+                        <span className="text-slate-200 font-mono text-[11px] font-semibold">
                           {row.rankElo.toLocaleString()} MMR
                         </span>
                       </div>
@@ -1013,40 +1021,55 @@ export const VortexMatchRoom: React.FC<VortexMatchRoomProps> = ({
                     {/* GENERAL */}
                     {tableFilter === 'general' && (
                       <>
-                        <td className="py-3 px-3">
-                          {row.ratingScore >= 1.30 ? (
-                            <div className="inline-flex items-center gap-1 px-2 py-0.5 rounded bg-emerald-500/20 border border-emerald-500/40 text-emerald-400 font-bold font-mono text-xs">
-                              <span>{row.rating}</span>
-                              {row.isMvp && (
-                                <Star className="w-3 h-3 text-[#EAB308] fill-current ml-0.5" />
-                              )}
-                            </div>
-                          ) : row.ratingScore >= 0.90 ? (
-                            <div className="inline-flex items-center px-2 py-0.5 rounded bg-white/10 border border-white/20 text-white font-bold font-mono text-xs border-b-2 border-b-white/40">
-                              <span>{row.rating}</span>
-                            </div>
-                          ) : (
-                            <div className="inline-flex items-center px-2 py-0.5 rounded bg-rose-500/20 border border-rose-500/30 text-rose-400 font-bold font-mono text-xs">
-                              <span>{row.rating}</span>
-                            </div>
-                          )}
+                        <td className="py-2.5 px-3">
+                          <div className={`inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full border font-mono text-xs font-black ${
+                            row.ratingScore >= 1.25
+                              ? 'bg-[#A3E635]/15 border-[#A3E635]/40 text-[#A3E635]'
+                              : row.ratingScore >= 0.95
+                              ? 'bg-white/[0.06] border-white/15 text-white'
+                              : 'bg-rose-500/15 border-rose-500/35 text-rose-400'
+                          }`}>
+                            <span>{row.rating}</span>
+                            {row.isMvp && (
+                              <Crown className="w-3 h-3 text-amber-300 fill-amber-300" />
+                            )}
+                          </div>
                         </td>
-                        <td className={`py-3 px-3 font-bold font-mono text-xs ${row.isPositiveSwing ? 'text-emerald-400' : 'text-rose-400'}`}>
+                        <td className={`py-2.5 px-3 font-bold font-mono text-xs ${row.isPositiveSwing ? 'text-emerald-400' : 'text-rose-400'}`}>
                           {row.swing}
                         </td>
-                        <td className="py-3 px-2 text-center text-white font-bold">{row.k}</td>
-                        <td className="py-3 px-2 text-center text-slate-400">{row.d}</td>
-                        <td className="py-3 px-2 text-center text-slate-400">{row.a}</td>
-                        <td className="py-3 px-3 text-center text-white">{row.adr}</td>
-                        <td className="py-3 px-3 text-center text-white">{row.kd}</td>
-                        <td className="py-3 px-3 text-center text-slate-300">{row.kr}</td>
-                        <td className="py-3 px-2 text-center text-slate-300">{row.hs}</td>
-                        <td className="py-3 px-3 text-center text-slate-300">{row.hsRate}</td>
-                        <td className="py-3 px-2 text-center text-slate-500">{row.k5}</td>
-                        <td className="py-3 px-2 text-center text-slate-500">{row.k4}</td>
-                        <td className="py-3 px-2 text-center text-slate-300">{row.k3}</td>
-                        <td className="py-3 px-2 text-center text-slate-300">{row.k2}</td>
-                        <td className="py-3 px-3 text-center text-[#EAB308] font-bold">{row.mvps}</td>
+                        <td className="py-2.5 px-3 text-center whitespace-nowrap">
+                          <span className="text-white font-bold">{row.k}</span>
+                          <span className="text-slate-600 mx-1">/</span>
+                          <span className="text-slate-400">{row.d}</span>
+                          <span className="text-slate-600 mx-1">/</span>
+                          <span className="text-slate-300">{row.a}</span>
+                        </td>
+                        <td className="py-2.5 px-3 text-center text-white font-bold">{row.kd}</td>
+                        <td className="py-2.5 px-3 text-center text-slate-300">{row.kr}</td>
+                        <td className="py-2.5 px-3 text-center text-[#A3E635] font-bold">{row.adr}</td>
+                        <td className="py-2.5 px-3 text-center whitespace-nowrap">
+                          <span className="text-white font-semibold">{row.hs}</span>
+                          <span className="text-slate-500 text-[10px] ml-1">({row.hsRate})</span>
+                        </td>
+                        <td className="py-2.5 px-3 text-center">
+                          <div className="inline-flex items-center gap-1">
+                            {row.k5 > 0 && <span className="px-1.5 py-0.5 rounded bg-amber-500/20 border border-amber-400/40 text-amber-300 text-[10px] font-black">{row.k5}×5K</span>}
+                            {row.k4 > 0 && <span className="px-1.5 py-0.5 rounded bg-purple-500/20 border border-purple-400/40 text-purple-300 text-[10px] font-black">{row.k4}×4K</span>}
+                            {row.k3 > 0 && <span className="px-1.5 py-0.5 rounded bg-sky-500/15 border border-sky-400/30 text-sky-300 text-[10px] font-bold">{row.k3}×3K</span>}
+                            {row.k2 > 0 && <span className="px-1.5 py-0.5 rounded bg-white/[0.05] border border-white/10 text-slate-300 text-[10px]">{row.k2}×2K</span>}
+                            {row.k5 === 0 && row.k4 === 0 && row.k3 === 0 && row.k2 === 0 && (
+                              <span className="text-slate-600">—</span>
+                            )}
+                          </div>
+                        </td>
+                        <td className="py-2.5 px-3 text-center">
+                          <span className={`inline-flex items-center justify-center min-w-[22px] px-1.5 py-0.5 rounded font-bold text-[11px] ${
+                            row.mvps > 0 ? 'bg-amber-500/15 text-amber-300 border border-amber-400/30' : 'text-slate-600'
+                          }`}>
+                            {row.mvps}
+                          </span>
+                        </td>
                       </>
                     )}
 
@@ -2245,479 +2268,426 @@ export const VortexMatchRoom: React.FC<VortexMatchRoomProps> = ({
       )}
 
       {/* ======================================================== */}
-      {/* 4. VIEW 2: STATS TAB (EXACT 1:1 FACEIT MATCH STATS)      */}
+      {/* 4. VIEW 2: CALIBER CLUTCH TACTICAL SCOREBOARD            */}
       {/* ======================================================== */}
-      {activeTab === 'stats' && (
-        <div className="max-w-[1400px] w-full mx-auto px-4 sm:px-6 py-4 flex-1 space-y-6">
-          
-          {/* Sub-Tabs: SUMMARY / DUELS / UTILITY / MATCH INSIGHTS (Clean - No Orange Underline) */}
-          <div className="flex items-center gap-6 border-b border-[#20222D] pb-3 text-xs font-mono font-bold uppercase tracking-wider">
-            <button
-              onClick={() => { sound.playClick(); setStatsSubTab('summary'); }}
-              className={`pb-1 transition cursor-pointer ${
-                statsSubTab === 'summary' 
-                  ? 'text-white font-black' 
-                  : 'text-slate-400 hover:text-white'
-              }`}
-            >
-              SUMMARY
-            </button>
-            <button
-              onClick={() => { sound.playClick(); setStatsSubTab('duels'); }}
-              className={`pb-1 transition cursor-pointer ${
-                statsSubTab === 'duels' 
-                  ? 'text-white font-black' 
-                  : 'text-slate-400 hover:text-white'
-              }`}
-            >
-              DUELS
-            </button>
-            <button
-              onClick={() => { sound.playClick(); setStatsSubTab('utility'); }}
-              className={`pb-1 transition cursor-pointer ${
-                statsSubTab === 'utility' 
-                  ? 'text-white font-black' 
-                  : 'text-slate-400 hover:text-white'
-              }`}
-            >
-              UTILITY
-            </button>
-            <button
-              onClick={() => { sound.playClick(); setStatsSubTab('insights'); }}
-              className={`pb-1 transition flex items-center gap-1.5 cursor-pointer ${
-                statsSubTab === 'insights' 
-                  ? 'text-white font-black' 
-                  : 'text-slate-400 hover:text-white'
-              }`}
-            >
-              <span>MATCH INSIGHTS</span>
-              <span className="px-1.5 py-0.2 rounded bg-[#A3E635] text-slate-950 text-[9px] font-black uppercase">
-                NEW
+      {activeTab === 'stats' && (() => {
+        const mvp = activePlayersSorted[0];
+        const topKills = [...activeAllStats].sort((a, b) => b.k - a.k)[0];
+        const topAdr = [...activeAllStats].sort((a, b) => parseFloat(b.adr) - parseFloat(a.adr))[0];
+        const topKast = [...activeAllStats].sort((a, b) => parseFloat(b.kast) - parseFloat(a.kast))[0];
+        const topEntry = [...activeAllStats].sort((a, b) => b.entryKills - a.entryKills)[0];
+
+        const t1Kills = activeTeam1Rows.reduce((s, r) => s + r.k, 0);
+        const t2Kills = activeTeam2Rows.reduce((s, r) => s + r.k, 0);
+        const t1Adr = activeTeam1Rows.length ? (activeTeam1Rows.reduce((s, r) => s + parseFloat(r.adr), 0) / activeTeam1Rows.length).toFixed(1) : '0.0';
+        const t2Adr = activeTeam2Rows.length ? (activeTeam2Rows.reduce((s, r) => s + parseFloat(r.adr), 0) / activeTeam2Rows.length).toFixed(1) : '0.0';
+        const t1Entry = activeTeam1Rows.reduce((s, r) => s + r.entryKills, 0);
+        const t2Entry = activeTeam2Rows.reduce((s, r) => s + r.entryKills, 0);
+        const t1Clutch = activeTeam1Rows.reduce((s, r) => s + r.clutchWins, 0);
+        const t2Clutch = activeTeam2Rows.reduce((s, r) => s + r.clutchWins, 0);
+
+        const renderTeamH2H = () => (
+          <div className="rounded-xl bg-[#0D1017] border border-[#1E2433] p-4 shadow-xl flex flex-col justify-between space-y-3">
+            <div className="flex items-center justify-between border-b border-white/[0.06] pb-2">
+              <span className="text-xs font-display font-black text-white uppercase tracking-wider">
+                Squad Head-to-Head
               </span>
-            </button>
-          </div>
-
-          {/* MVP CARD & MATCH LEADERS GRID */}
-          <div className="grid grid-cols-1 lg:grid-cols-12 gap-5">
-            
-            {/* Left 7 Cols: MVP Card */}
-            <div className="lg:col-span-7 rounded-2xl bg-[#14151D] border border-[#232532] p-5 shadow-xl relative">
-              <div className="flex items-center justify-between pb-3">
-                <div className="flex items-center gap-3">
-                  <div className="w-16 h-16 rounded-full overflow-hidden border-2 border-emerald-400 shadow-[0_0_15px_rgba(52,211,153,0.3)] shrink-0">
-                    <img 
-                      src="/images/avatar_duck_exact.png" 
-                      alt="Rosen33" 
-                      className="w-full h-full object-cover" 
-                    />
+              <span className="text-[10px] font-mono text-[#A3E635] font-bold">
+                {activeMatch.team1.name} vs {activeMatch.team2.name}
+              </span>
+            </div>
+            {[
+              { label: 'Total Kills', v1: t1Kills, v2: t2Kills },
+              { label: 'Avg Squad ADR', v1: parseFloat(t1Adr), v2: parseFloat(t2Adr) },
+              { label: 'Opening Kills', v1: t1Entry, v2: t2Entry },
+              { label: 'Clutches Won', v1: t1Clutch, v2: t2Clutch }
+            ].map(metric => {
+              const total = metric.v1 + metric.v2 || 1;
+              const pct1 = Math.round((metric.v1 / total) * 100);
+              return (
+                <div key={metric.label} className="space-y-1">
+                  <div className="flex items-center justify-between text-[11px] font-mono">
+                    <span className="text-[#A3E635] font-black">{metric.v1}</span>
+                    <span className="text-slate-400 text-[10px] uppercase tracking-wider">{metric.label}</span>
+                    <span className="text-blue-400 font-black">{metric.v2}</span>
                   </div>
-                  <div>
-                    <div className="flex items-center gap-2">
-                      <h3 className="font-display font-black text-white text-lg">
-                        Rosen33
-                      </h3>
-                      <span className="text-emerald-400 text-xs">✓</span>
-                    </div>
-                    <div className="flex items-center gap-1.5 text-xs font-mono text-slate-400 mt-0.5">
-                      <span className="w-4 h-4 rounded bg-[#252836] text-white text-[9px] font-bold flex items-center justify-center">9</span>
-                      <span>1,993</span>
-                    </div>
+                  <div className="w-full h-1.5 rounded-full bg-slate-800 overflow-hidden flex">
+                    <div style={{ width: `${pct1}%` }} className="bg-gradient-to-r from-emerald-500 to-[#A3E635]" />
+                    <div style={{ width: `${100 - pct1}%` }} className="bg-gradient-to-r from-blue-500 to-indigo-500" />
                   </div>
                 </div>
-
-                <div className="flex items-center gap-1 text-[#EAB308] font-display font-black text-sm uppercase tracking-wider">
-                  <Star className="w-4 h-4 fill-current" />
-                  <span>MVP</span>
-                </div>
-              </div>
-
-              {/* Rating & 4 Key Metrics */}
-              <div className="grid grid-cols-2 sm:grid-cols-5 gap-3 pt-4 border-t border-white/5 items-center">
-                <div className="p-3 rounded-xl bg-emerald-500/10 border border-emerald-500/30 text-center col-span-2 sm:col-span-1">
-                  <div className="text-2xl font-display font-black text-emerald-400">1.68</div>
-                  <div className="text-[9px] font-mono text-slate-400 uppercase mt-0.5">Caliber Rating</div>
-                </div>
-                
-                <div className="text-center sm:text-left">
-                  <div className="text-base font-mono font-bold text-emerald-400">+9.32%</div>
-                  <div className="text-[10px] font-mono text-slate-500 uppercase">Swing</div>
-                </div>
-
-                <div className="text-center sm:text-left">
-                  <div className="text-base font-mono font-bold text-white">109.6</div>
-                  <div className="text-[10px] font-mono text-slate-500 uppercase">ADR</div>
-                </div>
-
-                <div className="text-center sm:text-left">
-                  <div className="text-base font-mono font-bold text-white">20/11/3</div>
-                  <div className="text-[10px] font-mono text-slate-500 uppercase">K/D/A</div>
-                </div>
-
-                <div className="text-center sm:text-left">
-                  <div className="text-base font-mono font-bold text-white">55.0%</div>
-                  <div className="text-[10px] font-mono text-slate-500 uppercase">Headshot %</div>
-                </div>
-              </div>
-
-              <div className="flex items-center justify-end gap-1 text-[10px] font-mono text-slate-500 mt-3">
-                <Lock className="w-3 h-3 text-slate-600" />
-                <span>Highlight locked</span>
-              </div>
-            </div>
-
-            {/* Right 5 Cols: 4 Match Leaders */}
-            <div className="lg:col-span-5 grid grid-cols-2 gap-3">
-              <div className="p-3.5 rounded-xl bg-[#14151D] border border-[#232532] flex items-center justify-between">
-                <div className="flex items-center gap-2.5">
-                  <img src="/images/avatar_duck_exact.png" alt="Rosen33" className="w-8 h-8 rounded-full object-cover" />
-                  <span className="font-display font-bold text-white text-xs">Rosen33</span>
-                </div>
-                <div className="text-right">
-                  <div className="font-mono font-black text-white text-base">20</div>
-                  <div className="text-[9px] font-mono text-slate-500">Most kills</div>
-                </div>
-              </div>
-
-              <div className="p-3.5 rounded-xl bg-[#14151D] border border-[#232532] flex items-center justify-between">
-                <div className="flex items-center gap-2.5">
-                  <img src="/images/avatar_ghost_exact.png" alt="Zalevvo" className="w-8 h-8 rounded-full object-cover" />
-                  <span className="font-display font-bold text-white text-xs">Zalevvo</span>
-                </div>
-                <div className="text-right">
-                  <div className="font-mono font-black text-white text-base">2328</div>
-                  <div className="text-[9px] font-mono text-slate-500">Most damage</div>
-                </div>
-              </div>
-
-              <div className="p-3.5 rounded-xl bg-[#14151D] border border-[#232532] flex items-center justify-between">
-                <div className="flex items-center gap-2.5">
-                  <img src="https://images.unsplash.com/photo-1539571696357-5a69c17a67c6?auto=format&fit=crop&w=150&q=80" alt="mxrty666" className="w-8 h-8 rounded-full object-cover" />
-                  <span className="font-display font-bold text-white text-xs">mxrty666</span>
-                </div>
-                <div className="text-right">
-                  <div className="font-mono font-black text-white text-base">85.0%</div>
-                  <div className="text-[9px] font-mono text-slate-500">KAST</div>
-                </div>
-              </div>
-
-              <div className="p-3.5 rounded-xl bg-[#14151D] border border-[#232532] flex items-center justify-between">
-                <div className="flex items-center gap-2.5">
-                  <img src="/images/avatar_ghost_exact.png" alt="M18" className="w-8 h-8 rounded-full object-contain bg-black" />
-                  <span className="font-display font-bold text-white text-xs">M18</span>
-                </div>
-                <div className="text-right">
-                  <div className="font-mono font-black text-white text-base">5</div>
-                  <div className="text-[9px] font-mono text-slate-500">First kills</div>
-                </div>
-              </div>
-            </div>
-
+              );
+            })}
           </div>
+        );
 
-          {/* TABLE FILTERS BAR */}
-          <div className="flex flex-col sm:flex-row items-center justify-between gap-3 text-xs font-mono pt-2">
-            <div className="flex items-center gap-2">
-              {(['general', 'advanced', 'entry', 'trade', 'clutch'] as const).map(tab => (
-                <button
-                  key={tab}
-                  onClick={() => { sound.playClick(); setTableFilter(tab); }}
-                  className={`px-3 py-1.5 rounded-md capitalize transition cursor-pointer text-xs font-sans ${
-                    tableFilter === tab 
-                      ? 'border border-white/30 bg-transparent text-white font-bold shadow-sm' 
-                      : 'text-slate-400 hover:text-white hover:bg-white/[0.03]'
-                  }`}
-                >
-                  {tab.charAt(0).toUpperCase() + tab.slice(1)}
-                </button>
-              ))}
-            </div>
-
-            <div className="flex items-center gap-3">
-              {/* Sort by team / Sort by players Pill Group */}
-              <div className="flex items-center bg-[#13141B] border border-[#232532] rounded-full p-1 text-xs font-mono">
-                <button
-                  onClick={() => { sound.playClick(); setSortFilter('team'); }}
-                  className={`px-3 py-1 rounded-full transition cursor-pointer text-xs font-sans ${
-                    sortFilter === 'team' 
-                      ? 'bg-[#1C1E2A] text-white font-bold shadow-sm' 
-                      : 'text-slate-400 hover:text-white'
-                  }`}
-                >
-                  Sort by team
-                </button>
-                <button
-                  onClick={() => { sound.playClick(); setSortFilter('players'); }}
-                  className={`px-3 py-1 rounded-full transition cursor-pointer text-xs font-sans ${
-                    sortFilter === 'players' 
-                      ? 'bg-[#1C1E2A] text-[#A3E635] font-bold shadow-sm' 
-                      : 'text-slate-400 hover:text-white'
-                  }`}
-                >
-                  Sort by players
-                </button>
+        const renderMvpCard = () => (
+          <div className="rounded-xl bg-gradient-to-br from-[#12171A] via-[#0E1218] to-[#0B0E14] border border-[#A3E635]/30 p-4 shadow-xl flex flex-col justify-between">
+            <div className="flex items-center justify-between pb-3">
+              <div className="flex items-center gap-3">
+                <div className="w-12 h-12 rounded-xl overflow-hidden border-2 border-[#A3E635] shadow-[0_0_15px_rgba(163,230,53,0.25)] shrink-0">
+                  <img 
+                    src={mvp?.avatar || '/images/avatar_duck_exact.png'} 
+                    alt={mvp?.name || 'MVP'} 
+                    className="w-full h-full object-cover" 
+                  />
+                </div>
+                <div>
+                  <div className="flex items-center gap-2">
+                    <h3 className="font-display font-black text-white text-base sm:text-lg">
+                      {mvp?.name || currentGamerTag}
+                    </h3>
+                    <CheckCircle2 className="w-3.5 h-3.5 text-[#A3E635]" />
+                  </div>
+                  <div className="flex items-center gap-2 text-xs font-mono text-slate-400 mt-0.5">
+                    <CaliberTierBadge level={mvp?.rankLevel || 1} size="sm" />
+                    <span className="text-slate-300 font-bold">{(mvp?.rankElo || 0).toLocaleString()} MMR</span>
+                  </div>
+                </div>
               </div>
 
-              {/* All / T / CT Pill Group */}
-              <div className="flex items-center bg-[#13141B] border border-[#232532] rounded-full p-1 text-[10px] font-mono">
-                {(['all', 't', 'ct'] as const).map(side => (
+              <div className="flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-amber-500/15 border border-amber-400/40 text-amber-300 font-mono font-black text-xs uppercase tracking-wider">
+                <Crown className="w-3.5 h-3.5 fill-amber-300" />
+                <span>Match MVP</span>
+              </div>
+            </div>
+
+            <div className="grid grid-cols-2 sm:grid-cols-5 gap-2.5 pt-3 border-t border-white/[0.06] items-center">
+              <div className="p-2.5 rounded-lg bg-[#A3E635]/10 border border-[#A3E635]/35 text-center col-span-2 sm:col-span-1">
+                <div className="text-xl font-display font-black text-[#A3E635]">{mvp?.rating || '1.45'}</div>
+                <div className="text-[9px] font-mono text-slate-300 uppercase">Caliber Rating</div>
+              </div>
+              
+              <div className="p-2 rounded-lg bg-black/35 border border-white/5 text-center">
+                <div className={`text-sm font-mono font-bold ${mvp?.isPositiveSwing ? 'text-emerald-400' : 'text-rose-400'}`}>
+                  {mvp?.swing || '+4.2%'}
+                </div>
+                <div className="text-[9px] font-mono text-slate-500 uppercase">Impact</div>
+              </div>
+
+              <div className="p-2 rounded-lg bg-black/35 border border-white/5 text-center">
+                <div className="text-sm font-mono font-bold text-white">{mvp?.adr || '95.0'}</div>
+                <div className="text-[9px] font-mono text-slate-500 uppercase">ADR</div>
+              </div>
+
+              <div className="p-2 rounded-lg bg-black/35 border border-white/5 text-center">
+                <div className="text-sm font-mono font-bold text-white">
+                  {mvp ? `${mvp.k}/${mvp.d}/${mvp.a}` : '20/11/4'}
+                </div>
+                <div className="text-[9px] font-mono text-slate-500 uppercase">K / D / A</div>
+              </div>
+
+              <div className="p-2 rounded-lg bg-black/35 border border-white/5 text-center">
+                <div className="text-sm font-mono font-bold text-white">{mvp?.hsRate || '52.0%'}</div>
+                <div className="text-[9px] font-mono text-slate-500 uppercase">HS %</div>
+              </div>
+            </div>
+          </div>
+        );
+
+        const renderLeadersStrip = (columnsClass: string) => (
+          <div className={columnsClass}>
+            {[
+              { player: topKills, val: topKills?.k, label: 'Top Fragger', color: 'text-[#A3E635]' },
+              { player: topAdr, val: topAdr?.adr, label: 'Damage Leader', color: 'text-white' },
+              { player: topKast, val: topKast?.kast, label: 'KAST %', color: 'text-emerald-400' },
+              { player: topEntry, val: topEntry?.entryKills, label: 'Opening Kills', color: 'text-sky-400' }
+            ].map(item => (
+              <div key={item.label} className="p-3 rounded-xl bg-[#0D1017] border border-[#1E2433] flex items-center justify-between gap-2">
+                <div className="flex items-center gap-2 min-w-0">
+                  <img src={item.player?.avatar || '/images/avatar_duck_exact.png'} alt={item.player?.name} className="w-8 h-8 rounded-lg object-cover shrink-0 border border-white/10" />
+                  <span className="font-display font-bold text-white text-xs truncate">{item.player?.name}</span>
+                </div>
+                <div className="text-right shrink-0">
+                  <div className={`font-mono font-black text-base leading-none ${item.color}`}>{item.val}</div>
+                  <div className="text-[9px] font-mono text-slate-500 mt-0.5">{item.label}</div>
+                </div>
+              </div>
+            ))}
+          </div>
+        );
+
+        const renderFiltersAndTables = () => (
+          <div className="space-y-3">
+            {/* TABLE FILTERS BAR */}
+            <div className="flex flex-col sm:flex-row items-center justify-between gap-3 text-xs font-mono">
+              <div className="flex flex-wrap items-center gap-1.5 p-1 rounded-xl bg-[#0D1017] border border-[#1E2433]">
+                {([
+                  { id: 'general', label: 'Overview' },
+                  { id: 'advanced', label: 'Precision' },
+                  { id: 'entry', label: 'Opening' },
+                  { id: 'trade', label: 'Trades' },
+                  { id: 'clutch', label: 'Clutches' }
+                ] as const).map(tab => (
                   <button
-                    key={side}
-                    onClick={() => { sound.playClick(); setSideFilter(side); }}
-                    className={`px-2.5 py-0.5 rounded-full uppercase font-black transition cursor-pointer ${
-                      sideFilter === side 
-                        ? 'bg-[#A3E635] text-slate-950 shadow-sm' 
+                    key={tab.id}
+                    onClick={() => { sound.playClick(); setTableFilter(tab.id); }}
+                    className={`px-3 py-1 rounded-lg transition cursor-pointer text-[11px] font-mono font-bold ${
+                      tableFilter === tab.id 
+                        ? 'bg-[#A3E635] text-slate-950 font-black shadow-sm' 
+                        : 'text-slate-400 hover:text-white hover:bg-white/[0.04]'
+                    }`}
+                  >
+                    {tab.label}
+                  </button>
+                ))}
+              </div>
+
+              <div className="flex items-center gap-2.5">
+                <div className="flex items-center bg-[#0D1017] border border-[#1E2433] rounded-xl p-1 text-[11px] font-mono">
+                  <button
+                    onClick={() => { sound.playClick(); setSortFilter('team'); }}
+                    className={`px-3 py-1 rounded-lg transition cursor-pointer font-bold ${
+                      sortFilter === 'team' 
+                        ? 'bg-white/10 text-white shadow-sm' 
                         : 'text-slate-400 hover:text-white'
                     }`}
                   >
-                    {side}
+                    By Squad
+                  </button>
+                  <button
+                    onClick={() => { sound.playClick(); setSortFilter('players'); }}
+                    className={`px-3 py-1 rounded-lg transition cursor-pointer font-bold ${
+                      sortFilter === 'players' 
+                        ? 'bg-white/10 text-[#A3E635] shadow-sm' 
+                        : 'text-slate-400 hover:text-white'
+                    }`}
+                  >
+                    Combined Top 10
+                  </button>
+                </div>
+
+                <div className="flex items-center bg-[#0D1017] border border-[#1E2433] rounded-xl p-1 text-[10px] font-mono">
+                  {(['all', 't', 'ct'] as const).map(side => (
+                    <button
+                      key={side}
+                      onClick={() => { sound.playClick(); setSideFilter(side); }}
+                      className={`px-2.5 py-1 rounded-lg uppercase font-black transition cursor-pointer ${
+                        sideFilter === side 
+                          ? 'bg-[#A3E635] text-slate-950 shadow-sm' 
+                          : 'text-slate-400 hover:text-white'
+                      }`}
+                    >
+                      {side === 'all' ? 'ALL' : `${side.toUpperCase()} SIDE`}
+                    </button>
+                  ))}
+                </div>
+              </div>
+            </div>
+
+            {sortFilter === 'players' ? (
+              renderStatsTable(activePlayersSorted, true)
+            ) : (
+              <div className="space-y-4">
+                {renderStatsTable(activeTeam1Rows, false, {
+                  score: sideFilter === 't' ? 6 : sideFilter === 'ct' ? 7 : (matchSimulatedResult?.score1 || 13),
+                  name: activeMatch.team1.name,
+                  avatar: team1Players[0]?.avatar || '/images/avatar_duck_exact.png',
+                  avgRank: `Tier ${activeMatch.team1.avgLevel} • ${activeMatch.team1.avgElo.toLocaleString()} MMR`,
+                  firstHalf: sideFilter === 't' ? 0 : 7,
+                  secondHalf: sideFilter === 'ct' ? 0 : 6,
+                  isWinner: sideFilter !== 't'
+                })}
+                {renderStatsTable(activeTeam2Rows, false, {
+                  score: sideFilter === 't' ? 5 : sideFilter === 'ct' ? 6 : (matchSimulatedResult?.score2 || 11),
+                  name: activeMatch.team2.name,
+                  avatar: team2Players[0]?.avatar || '/images/avatar_ghost_exact.png',
+                  avgRank: `Tier ${activeMatch.team2.avgLevel} • ${activeMatch.team2.avgElo.toLocaleString()} MMR`,
+                  firstHalf: sideFilter === 'ct' ? 0 : 6,
+                  secondHalf: sideFilter === 't' ? 0 : 5,
+                  isWinner: false
+                })}
+              </div>
+            )}
+          </div>
+        );
+
+        const renderCaliberHighlights = () => {
+          const demoUrl = `https://demos.caliberclutch.gg/cs2/${matchId}.dem.gz`;
+          const clipCandidates = [
+            { title: `${currentSelectedMap} AWP Wallbang 3K`, round: 'R14', player: mvp },
+            { title: `${currentSelectedMap} Site Anchor 4K`, round: 'R19', player: topKills },
+            { title: `${currentSelectedMap} 1v2 Post-Plant Clutch`, round: 'R22', player: topEntry },
+            { title: `${currentSelectedMap} Eco Deagle 3K`, round: 'R07', player: topAdr }
+          ];
+
+          return (
+            <div className="space-y-3 pt-2">
+              <div className="flex flex-wrap items-center justify-between gap-2">
+                <div className="flex items-center gap-2">
+                  <Sparkles className="w-4 h-4 text-[#A3E635]" />
+                  <h2 className="text-base sm:text-lg font-display font-black text-white tracking-wide uppercase">
+                    Caliber Top Plays & Demo Clips
+                  </h2>
+                </div>
+                <a
+                  href={demoUrl}
+                  download={`caliber-match-${matchId}.dem.gz`}
+                  onClick={() => sound.playClick()}
+                  className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-[#A3E635]/15 hover:bg-[#A3E635]/25 border border-[#A3E635]/40 text-[#A3E635] text-[11px] font-mono font-bold transition"
+                >
+                  <Download className="w-3.5 h-3.5" />
+                  <span>Download GOTV Demo (.dem)</span>
+                </a>
+              </div>
+
+              <div className="rounded-xl bg-[#0D1017] border border-[#1E2433] overflow-hidden grid grid-cols-1 lg:grid-cols-12 shadow-xl">
+                <div className="lg:col-span-7 relative aspect-video bg-black flex items-center justify-center overflow-hidden">
+                  <img 
+                    src={getMapImage(currentSelectedMap)} 
+                    alt={activeHighlightVideo.title} 
+                    className="w-full h-full object-cover opacity-70" 
+                  />
+                  <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-black/40" />
+                  <button
+                    onClick={() => {
+                      sound.playSelect();
+                      setActiveHighlightVideo(prev => ({ ...prev, isPlaying: !prev.isPlaying }));
+                    }}
+                    className="relative z-10 w-14 h-14 rounded-xl bg-[#A3E635] hover:bg-[#bef264] text-slate-950 flex items-center justify-center shadow-2xl hover:scale-105 active:scale-95 transition cursor-pointer"
+                  >
+                    <Play className="w-6 h-6 fill-slate-950 ml-0.5" />
+                  </button>
+                  <div className="absolute bottom-3 left-3 z-10 px-2.5 py-1 rounded-md bg-black/75 border border-white/15 text-[11px] font-mono text-white font-bold">
+                    {activeHighlightVideo.title} • {activeHighlightVideo.player}
+                  </div>
+                </div>
+
+                <div className="lg:col-span-5 p-4 flex flex-col justify-between gap-2 bg-[#0B0E14] border-t lg:border-t-0 lg:border-l border-white/[0.06]">
+                  <div className="text-[10px] font-mono font-black text-[#A3E635] uppercase tracking-widest">
+                    Round Timeline Clips
+                  </div>
+                  <div className="space-y-2 flex-1">
+                    {clipCandidates.map(clip => (
+                      <button
+                        key={clip.round}
+                        onClick={() => {
+                          sound.playClick();
+                          setActiveHighlightVideo({
+                            title: clip.title,
+                            player: clip.player?.name || currentGamerTag,
+                            avatar: clip.player?.avatar || '/images/avatar_duck_exact.png',
+                            views: 1,
+                            isPlaying: true
+                          });
+                        }}
+                        className="w-full p-2.5 rounded-lg bg-[#121621] hover:bg-[#171D2B] border border-white/10 hover:border-[#A3E635]/40 flex items-center justify-between gap-2 transition cursor-pointer text-left"
+                      >
+                        <div className="flex items-center gap-2.5 min-w-0">
+                          <span className="px-1.5 py-0.5 rounded bg-[#A3E635]/15 border border-[#A3E635]/35 text-[#A3E635] font-mono text-[10px] font-black shrink-0">
+                            {clip.round}
+                          </span>
+                          <img src={clip.player?.avatar || '/images/avatar_duck_exact.png'} alt={clip.player?.name} className="w-6 h-6 rounded-md object-cover shrink-0" />
+                          <div className="min-w-0">
+                            <div className="text-xs font-display font-bold text-white truncate">{clip.title}</div>
+                            <div className="text-[10px] font-mono text-slate-400 truncate">{clip.player?.name}</div>
+                          </div>
+                        </div>
+                        <Play className="w-3.5 h-3.5 text-[#A3E635] shrink-0" />
+                      </button>
+                    ))}
+                  </div>
+                </div>
+              </div>
+            </div>
+          );
+        };
+
+        return (
+        <div className="max-w-[1320px] w-full mx-auto px-3 sm:px-5 py-3 flex-1 space-y-4">
+          
+          {/* Preview Bar: Admin-Only 3 Layout Suggestions to Compare Live */}
+          {isAdmin && (
+            <div className="flex flex-wrap items-center justify-between gap-2 p-2 rounded-xl bg-[#0D1017] border border-[#A3E635]/30">
+              <span className="text-[11px] font-mono font-bold text-[#A3E635] px-2">
+                Zgjidh Renditjen e Scoreboard (Admin Preview):
+              </span>
+              <div className="flex flex-wrap items-center gap-1.5 text-[11px] font-mono font-bold">
+                {([
+                  { id: 'A', label: 'Sugjerimi A: Scoreboard-First' },
+                  { id: 'B', label: 'Sugjerimi B: Leaders Strip + Team H2H' },
+                  { id: 'C', label: 'Sugjerimi C: Top Plays & Demo Clips' }
+                ] as const).map(opt => (
+                  <button
+                    key={opt.id}
+                    onClick={() => { sound.playClick(); setStatsLayoutPreview(opt.id); }}
+                    className={`px-3 py-1 rounded-lg border transition cursor-pointer ${
+                      statsLayoutPreview === opt.id
+                        ? 'bg-[#A3E635] border-[#A3E635] text-slate-950 font-black'
+                        : 'bg-white/[0.04] border-white/10 text-slate-300 hover:text-white'
+                    }`}
+                  >
+                    {opt.label}
                   </button>
                 ))}
               </div>
             </div>
-          </div>
-
-          {/* DETAILED STATS TABLES: SORTED BY PLAYERS (UNIFIED 10-PLAYER TABLE) OR SORTED BY TEAM */}
-          {sortFilter === 'players' ? (
-            renderStatsTable(activePlayersSorted, true)
-          ) : (
-            <div className="space-y-6">
-              {renderStatsTable(activeTeam1Rows, false, {
-                score: sideFilter === 't' ? 6 : sideFilter === 'ct' ? 7 : 13,
-                name: 'team_Rosen33',
-                avatar: '/images/avatar_duck_exact.png',
-                avgRank: 'Tier 9 • 1,801 MMR',
-                firstHalf: sideFilter === 't' ? 0 : 7,
-                secondHalf: sideFilter === 'ct' ? 0 : 6,
-                isWinner: sideFilter !== 't'
-              })}
-              {renderStatsTable(activeTeam2Rows, false, {
-                score: sideFilter === 't' ? 5 : sideFilter === 'ct' ? 2 : 7,
-                name: 'team_Zalevvo',
-                avatar: '/images/avatar_ghost_exact.png',
-                avgRank: 'Tier 8 • 1,728 MMR',
-                firstHalf: sideFilter === 'ct' ? 0 : 5,
-                secondHalf: sideFilter === 't' ? 0 : 2,
-                isWinner: false
-              })}
-            </div>
           )}
 
-          {/* ======================================================== */}
-          {/* 5. MATCH HIGHLIGHTS VIDEO SECTION                        */}
-          {/* ======================================================== */}
-          <div className="space-y-4 pt-4">
-            <h2 className="text-xl font-display font-black text-white tracking-wide">
-              Match highlights
-            </h2>
-
-            {/* Featured Highlight Video Player */}
-            <div className="rounded-2xl bg-[#14151D] border border-[#232532] overflow-hidden grid grid-cols-1 lg:grid-cols-12 shadow-2xl">
-              
-              {/* Video Player Display (70%) */}
-              <div className="lg:col-span-8 relative aspect-video bg-black flex items-center justify-center overflow-hidden group">
-                <img 
-                  src="https://images.unsplash.com/photo-1542751371-adc38448a05e?auto=format&fit=crop&w=1200&q=80" 
-                  alt="Anubis Wallbang AWP 3K" 
-                  className="w-full h-full object-cover opacity-60" 
-                />
-                
-                {/* CS2 Scope Reticle Overlay */}
-                <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
-                  <div className="w-56 h-56 rounded-full border border-red-500/40 relative">
-                    <div className="absolute top-1/2 left-0 right-0 h-px bg-red-500/40" />
-                    <div className="absolute left-1/2 top-0 bottom-0 w-px bg-red-500/40" />
-                  </div>
-                </div>
-
-                {/* Big Center Play Button */}
-                <button
-                  onClick={() => {
-                    sound.playSelect();
-                    setActiveHighlightVideo(prev => ({ ...prev, isPlaying: !prev.isPlaying }));
-                  }}
-                  className="relative z-10 w-16 h-16 rounded-full bg-white/90 hover:bg-white text-black flex items-center justify-center shadow-2xl hover:scale-110 active:scale-95 transition cursor-pointer"
-                >
-                  <Play className="w-7 h-7 fill-black ml-1" />
-                </button>
-              </div>
-
-              {/* Highlight Attribution & Share Details (30%) */}
-              <div className="lg:col-span-4 p-6 flex flex-col justify-between space-y-4 bg-[#12131A] border-t lg:border-t-0 lg:border-l border-white/5">
-                <div>
-                  <div className="text-[10px] font-mono font-black text-[#A3E635] uppercase tracking-widest">
-                    PLAY OF THE MATCH
-                  </div>
-                  <h3 className="text-xl font-display font-black text-white mt-1 leading-snug">
-                    {activeHighlightVideo.title}
-                  </h3>
-                  
-                  {/* Player */}
-                  <div className="flex items-center gap-2.5 mt-4">
-                    <img 
-                      src={activeHighlightVideo.avatar} 
-                      alt={activeHighlightVideo.player} 
-                      className="w-8 h-8 rounded-full object-cover border border-white/10" 
-                    />
-                    <span className="font-display font-bold text-white text-sm">
-                      {activeHighlightVideo.player}
-                    </span>
-                  </div>
-                </div>
-
-                <div className="flex items-center justify-between text-xs font-mono text-slate-400 pt-4 border-t border-white/5">
-                  <span className="flex items-center gap-1.5">
-                    <Eye className="w-3.5 h-3.5" />
-                    <span>0 views</span>
-                  </span>
-
-                  <button
-                    onClick={handleCopyLink}
-                    className="flex items-center gap-1 text-slate-300 hover:text-white transition cursor-pointer"
-                  >
-                    <Share2 className="w-3.5 h-3.5" />
-                    <span>Share</span>
-                  </button>
-                </div>
-              </div>
-
-            </div>
-
-            {/* Horizontal Clips Carousel */}
-            <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3 pt-2">
-              
-              {/* Card 1: Relive the hype with Highlights (Upgrade Card) */}
-              <div className="relative rounded-xl overflow-hidden border border-[#232532] p-3 flex flex-col justify-between min-h-[160px] bg-gradient-to-t from-black via-[#14151D] to-[#1E202B]">
-                <div className="text-xs font-display font-black text-white leading-tight">
-                  Relive the hype with Highlights
-                </div>
-                <button
-                  onClick={() => sound.playClick()}
-                  className="w-full py-1.5 rounded-lg bg-[#A3E635] hover:bg-[#bef264] text-slate-950 font-display font-black text-[10px] uppercase tracking-wider transition cursor-pointer shadow-sm mt-3"
-                >
-                  UPGRADE
-                </button>
-              </div>
-
-              {/* Card 2: M14 (Highlight locked) */}
-              <div className="relative rounded-xl overflow-hidden border border-emerald-500/30 p-3 flex flex-col justify-between min-h-[160px] bg-[#0E1711]/60">
-                <div className="text-[10px] font-mono text-emerald-400 font-bold uppercase">
-                  Highlight locked
-                </div>
-                <div className="flex items-center justify-between pt-4 border-t border-white/5">
-                  <div className="flex items-center gap-1.5">
-                    <img src={currentAvatarUrl || 'https://images.unsplash.com/photo-1566492031773-4f4e44671857?auto=format&fit=crop&w=150&q=80'} alt="M14" className="w-5 h-5 rounded-full object-cover" />
-                    <span className="text-[10px] font-mono font-bold text-white truncate max-w-[70px]">M14</span>
-                  </div>
-                  <Lock className="w-3.5 h-3.5 text-emerald-400" />
-                </div>
-              </div>
-
-              {/* Card 3: zeryx666 (Anubis MP9 3K) */}
-              <div 
-                onClick={() => {
-                  sound.playClick();
-                  setActiveHighlightVideo({
-                    title: 'Anubis MP9 3K',
-                    player: 'zeryx666',
-                    avatar: 'https://images.unsplash.com/photo-1501196354995-cbb51c65aaea?auto=format&fit=crop&w=150&q=80',
-                    views: 1,
-                    isPlaying: true
-                  });
-                }}
-                className="relative rounded-xl overflow-hidden border border-[#232532] hover:border-white/20 p-3 flex flex-col justify-between min-h-[160px] bg-[#14151D] cursor-pointer group transition"
+          {/* Sub-Tabs: CaliberClutch Tactical Pills */}
+          <div className="flex flex-wrap items-center gap-2 border-b border-[#1E2433] pb-2.5 text-[11px] font-mono font-bold uppercase tracking-wider">
+            {([
+              { id: 'summary', label: 'Match Breakdown' },
+              { id: 'duels', label: 'Combat Duels' },
+              { id: 'utility', label: 'Utility Usage' },
+              { id: 'insights', label: 'Tactical Insights' }
+            ] as const).map(sub => (
+              <button
+                key={sub.id}
+                onClick={() => { sound.playClick(); setStatsSubTab(sub.id); }}
+                className={`px-3 py-1.5 rounded-lg border transition cursor-pointer ${
+                  statsSubTab === sub.id
+                    ? 'bg-[#A3E635]/15 border-[#A3E635]/40 text-[#A3E635] font-black'
+                    : 'bg-white/[0.02] border-transparent text-slate-400 hover:text-white hover:bg-white/[0.05]'
+                }`}
               >
-                <div>
-                  <div className="text-[11px] font-display font-bold text-white leading-tight">
-                    Anubis MP9 3K
-                  </div>
-                  <div className="text-[9px] font-mono text-slate-500 mt-0.5">1 view</div>
-                </div>
-                <div className="flex items-center justify-between pt-4 border-t border-white/5">
-                  <div className="flex items-center gap-1.5">
-                    <img src="https://images.unsplash.com/photo-1501196354995-cbb51c65aaea?auto=format&fit=crop&w=150&q=80" alt="zeryx666" className="w-5 h-5 rounded-full object-cover" />
-                    <span className="text-[10px] font-mono text-slate-300 truncate max-w-[65px]">zeryx666</span>
-                  </div>
-                  <Play className="w-3.5 h-3.5 text-white fill-current group-hover:scale-110 transition" />
-                </div>
-              </div>
-
-              {/* Card 4: mxrty666 (Anubis AK-47 3K) */}
-              <div 
-                onClick={() => {
-                  sound.playClick();
-                  setActiveHighlightVideo({
-                    title: 'Anubis AK-47 3K',
-                    player: 'mxrty666',
-                    avatar: 'https://images.unsplash.com/photo-1539571696357-5a69c17a67c6?auto=format&fit=crop&w=150&q=80',
-                    views: 1,
-                    isPlaying: true
-                  });
-                }}
-                className="relative rounded-xl overflow-hidden border border-[#232532] hover:border-white/20 p-3 flex flex-col justify-between min-h-[160px] bg-[#14151D] cursor-pointer group transition"
-              >
-                <div>
-                  <div className="text-[11px] font-display font-bold text-white leading-tight">
-                    Anubis AK-47 3K
-                  </div>
-                  <div className="text-[9px] font-mono text-slate-500 mt-0.5">1 view</div>
-                </div>
-                <div className="flex items-center justify-between pt-4 border-t border-white/5">
-                  <div className="flex items-center gap-1.5">
-                    <img src="https://images.unsplash.com/photo-1539571696357-5a69c17a67c6?auto=format&fit=crop&w=150&q=80" alt="mxrty666" className="w-5 h-5 rounded-full object-cover" />
-                    <span className="text-[10px] font-mono text-slate-300 truncate max-w-[65px]">mxrty666</span>
-                  </div>
-                  <Play className="w-3.5 h-3.5 text-white fill-current group-hover:scale-110 transition" />
-                </div>
-              </div>
-
-              {/* Card 5: stonken (Anubis AK-47 2K) */}
-              <div 
-                onClick={() => {
-                  sound.playClick();
-                  setActiveHighlightVideo({
-                    title: 'Anubis AK-47 2K',
-                    player: 'stonken',
-                    avatar: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?auto=format&fit=crop&w=150&q=80',
-                    views: 1,
-                    isPlaying: true
-                  });
-                }}
-                className="relative rounded-xl overflow-hidden border border-[#232532] hover:border-white/20 p-3 flex flex-col justify-between min-h-[160px] bg-[#14151D] cursor-pointer group transition"
-              >
-                <div>
-                  <div className="text-[11px] font-display font-bold text-white leading-tight">
-                    Anubis AK-47 2K
-                  </div>
-                  <div className="text-[9px] font-mono text-slate-500 mt-0.5">1 view</div>
-                </div>
-                <div className="flex items-center justify-between pt-4 border-t border-white/5">
-                  <div className="flex items-center gap-1.5">
-                    <img src="https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?auto=format&fit=crop&w=150&q=80" alt="stonken" className="w-5 h-5 rounded-full object-cover" />
-                    <span className="text-[10px] font-mono text-slate-300 truncate max-w-[65px]">stonken</span>
-                  </div>
-                  <Play className="w-3.5 h-3.5 text-white fill-current group-hover:scale-110 transition" />
-                </div>
-              </div>
-
-              {/* Card 6: Rosen33 (Highlight locked) */}
-              <div className="relative rounded-xl overflow-hidden border border-[#232532] p-3 flex flex-col justify-between min-h-[160px] bg-[#12131A]">
-                <div className="text-[10px] font-mono text-slate-500 font-bold uppercase">
-                  Highlight locked
-                </div>
-                <div className="flex items-center justify-between pt-4 border-t border-white/5">
-                  <div className="flex items-center gap-1.5">
-                    <img src="https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=150&q=80" alt="Rosen33" className="w-5 h-5 rounded-full object-cover" />
-                    <span className="text-[10px] font-mono text-slate-400 truncate max-w-[65px]">Rosen33</span>
-                  </div>
-                  <Lock className="w-3.5 h-3.5 text-slate-500" />
-                </div>
-              </div>
-
-            </div>
+                {sub.label}
+              </button>
+            ))}
           </div>
 
+          {/* SUGJERIMI A: Scoreboard-First (Tables first, then Awards + Team H2H, then Highlights) */}
+          {statsLayoutPreview === 'A' && (
+            <>
+              {renderFiltersAndTables()}
+              <div className="grid grid-cols-1 lg:grid-cols-12 gap-4 pt-2">
+                <div className="lg:col-span-7">{renderMvpCard()}</div>
+                <div className="lg:col-span-5">{renderTeamH2H()}</div>
+              </div>
+              {renderLeadersStrip('grid grid-cols-2 lg:grid-cols-4 gap-2.5')}
+              {renderCaliberHighlights()}
+            </>
+          )}
+
+          {/* SUGJERIMI B: 4 Leaders Strip on top -> MVP + Team H2H -> Tables -> Highlights */}
+          {statsLayoutPreview === 'B' && (
+            <>
+              {renderLeadersStrip('grid grid-cols-2 lg:grid-cols-4 gap-2.5')}
+              <div className="grid grid-cols-1 lg:grid-cols-12 gap-4">
+                <div className="lg:col-span-7">{renderMvpCard()}</div>
+                <div className="lg:col-span-5">{renderTeamH2H()}</div>
+              </div>
+              {renderFiltersAndTables()}
+              {renderCaliberHighlights()}
+            </>
+          )}
+
+          {/* SUGJERIMI C: Top Plays & Demo Clips first -> MVP + H2H -> Tables */}
+          {statsLayoutPreview === 'C' && (
+            <>
+              {renderCaliberHighlights()}
+              <div className="grid grid-cols-1 lg:grid-cols-12 gap-4">
+                <div className="lg:col-span-7">{renderMvpCard()}</div>
+                <div className="lg:col-span-5">{renderTeamH2H()}</div>
+              </div>
+              {renderLeadersStrip('grid grid-cols-2 lg:grid-cols-4 gap-2.5')}
+              {renderFiltersAndTables()}
+            </>
+          )}
+
         </div>
-      )}
+        );
+      })()}
 
       </div> {/* END OF LEFT COLUMN: MAIN MATCHROOM */}
 
