@@ -525,20 +525,6 @@ export const VortexRightSocialRail: React.FC<VortexRightSocialRailProps> = ({
 
         <div className="w-[1px] h-6 bg-white/10 mx-1" />
 
-        <button
-          type="button"
-          onClick={() => toggleSound()}
-          aria-label={soundEnabled ? 'Mute platform sound' : 'Unmute platform sound'}
-          title={soundEnabled ? 'Sound ON — Click to Mute' : 'Sound MUTED — Click to Enable'}
-          className={`p-1.5 rounded-xl border transition cursor-pointer ${
-            soundEnabled
-              ? 'bg-white/5 hover:bg-white/10 border-white/10 text-slate-300 hover:text-white'
-              : 'bg-rose-500/10 hover:bg-rose-500/20 border-rose-500/30 text-rose-400'
-          }`}
-        >
-          {soundEnabled ? <Volume2 className="w-3.5 h-3.5 text-[#A3E635]" /> : <VolumeX className="w-3.5 h-3.5" />}
-        </button>
-
         {onLogout && (
           <button
             onClick={() => {

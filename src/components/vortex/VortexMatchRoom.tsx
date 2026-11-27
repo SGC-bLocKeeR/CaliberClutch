@@ -35,11 +35,9 @@ import {
   Swords,
   Crown,
   Zap,
-  TrendingUp,
-  Volume2,
-  VolumeX
+  TrendingUp
 } from 'lucide-react';
-import { sound, useSoundEnabled } from '../../utils/soundEffects';
+import { sound } from '../../utils/soundEffects';
 import confetti from 'canvas-confetti';
 import { BalancedMatch, generateBalancedMatch } from '../../utils/faceitMatchmaking';
 import { CountryFlag } from './CountryFlag';
@@ -157,7 +155,6 @@ interface VortexMatchRoomProps {
   onMatchFinished?: (won: boolean, deltaElo: number) => void;
   onClose: () => void;
   initialVetoOpen?: boolean;
-  isAdmin?: boolean;
 }
 
 export interface MatchChatMessage {
@@ -346,18 +343,18 @@ export const VortexMatchRoom: React.FC<VortexMatchRoomProps> = ({
   matchData,
   onMatchFinished,
   onClose,
-  initialVetoOpen = true,
-  isAdmin = false
+  initialVetoOpen = true
 }) => {
   // Navigation Tabs: OVERVIEW vs STATS
   const [activeTab, setActiveTab] = useState<'overview' | 'stats'>('overview');
 
-  // Stats Sub-Tabs & Layout Preview Switcher
+  // Stats Sub-Tabs
   const [statsSubTab, setStatsSubTab] = useState<'summary' | 'duels' | 'utility' | 'insights'>('summary');
-  const [statsLayoutPreview, setStatsLayoutPreview] = useState<'A' | 'B' | 'C'>('A');
   const [tableFilter, setTableFilter] = useState<'general' | 'advanced' | 'entry' | 'trade' | 'clutch'>('general');
   const [sortFilter, setSortFilter] = useState<'team' | 'players'>('team');
   const [sideFilter, setSideFilter] = useState<'all' | 't' | 'ct'>('all');
+  const [scoreboardSortCol, setScoreboardSortCol] = useState<'rating' | 'swing' | 'k' | 'kd' | 'kr' | 'adr' | 'hs' | 'mvps'>('rating');
+  const [scoreboardSortDir, setScoreboardSortDir] = useState<'desc' | 'asc'>('desc');
 
   // Veto & Match state
   const [copiedLink, setCopiedLink] = useState(false);
@@ -394,7 +391,6 @@ export const VortexMatchRoom: React.FC<VortexMatchRoomProps> = ({
   const [teamInput, setTeamInput] = useState('');
   const [isTeamChatCollapsed, setIsTeamChatCollapsed] = useState(false);
 
-  const [soundEnabled, toggleSound] = useSoundEnabled();
   const [unifiedChatTab, setUnifiedChatTab] = useState<'all' | 'team'>('all');
 
   // Room chat messages (Room chat - all 10 players)
@@ -781,10 +777,49 @@ export const VortexMatchRoom: React.FC<VortexMatchRoomProps> = ({
     return all;
   }, [team1StatsRows, team2StatsRows, sideFilter]);
 
-  const activePlayersSorted: FaceitStatsRow[] = [...activeAllStats].sort((a, b) => b.ratingScore - a.ratingScore);
+  const sortRowsByColumn = (rows: FaceitStatsRow[]): FaceitStatsRow[] => {
+    const mult = scoreboardSortDir === 'desc' ? -1 : 1;
+    return [...rows].sort((a, b) => {
+      let va = 0;
+      let vb = 0;
+      switch (scoreboardSortCol) {
+        case 'rating': va = a.ratingScore; vb = b.ratingScore; break;
+        case 'swing': va = parseFloat(a.swing) || 0; vb = parseFloat(b.swing) || 0; break;
+        case 'k': va = a.k; vb = b.k; break;
+        case 'kd': va = parseFloat(a.kd) || 0; vb = parseFloat(b.kd) || 0; break;
+        case 'kr': va = parseFloat(a.kr) || 0; vb = parseFloat(b.kr) || 0; break;
+        case 'adr': va = parseFloat(a.adr) || 0; vb = parseFloat(b.adr) || 0; break;
+        case 'hs': va = a.hs; vb = b.hs; break;
+        case 'mvps': va = a.mvps; vb = b.mvps; break;
+      }
+      return (va - vb) * mult;
+    });
+  };
 
-  const activeTeam1Rows: FaceitStatsRow[] = activeAllStats.filter(p => p.team === 'team1');
-  const activeTeam2Rows: FaceitStatsRow[] = activeAllStats.filter(p => p.team === 'team2');
+  const activePlayersSorted: FaceitStatsRow[] = useMemo(
+    () => sortRowsByColumn(activeAllStats),
+    [activeAllStats, scoreboardSortCol, scoreboardSortDir]
+  );
+
+  const activeTeam1Rows: FaceitStatsRow[] = useMemo(
+    () => sortRowsByColumn(activeAllStats.filter(p => p.team === 'team1')),
+    [activeAllStats, scoreboardSortCol, scoreboardSortDir]
+  );
+
+  const activeTeam2Rows: FaceitStatsRow[] = useMemo(
+    () => sortRowsByColumn(activeAllStats.filter(p => p.team === 'team2')),
+    [activeAllStats, scoreboardSortCol, scoreboardSortDir]
+  );
+
+  const handleToggleScoreboardSort = (col: 'rating' | 'swing' | 'k' | 'kd' | 'kr' | 'adr' | 'hs' | 'mvps') => {
+    sound.playClick();
+    if (scoreboardSortCol === col) {
+      setScoreboardSortDir(prev => (prev === 'desc' ? 'asc' : 'desc'));
+    } else {
+      setScoreboardSortCol(col);
+      setScoreboardSortDir('desc');
+    }
+  };
 
   // Unified lookup map for player profiles (matches, winRate, recentResults, etc.)
   const allPlayersMap: Record<string, FaceitMatchPlayer> = useMemo(() => {
@@ -796,6 +831,7 @@ export const VortexMatchRoom: React.FC<VortexMatchRoomProps> = ({
   }, [team1Players, team2Players]);
 
   const handleOpenPlayerFlyout = (e: React.MouseEvent, playerName: string) => {
+    if (window.getSelection()?.toString().trim()) return;
     e.stopPropagation();
     sound.playClick();
     if (selectedFlyoutPlayer?.name === playerName) {
@@ -890,24 +926,64 @@ export const VortexMatchRoom: React.FC<VortexMatchRoomProps> = ({
 
                 {tableFilter === 'general' && (
                   <>
-                    <th className="py-2.5 px-3 font-bold tracking-wider">
-                      {isUnified ? (
-                        <div className="inline-flex items-center gap-1 text-[#A3E635]">
-                          <span>Caliber Rating</span>
-                          <ChevronDown className="w-3 h-3" />
-                        </div>
-                      ) : (
-                        <span>Caliber Rating</span>
-                      )}
-                    </th>
-                    <th className="py-2.5 px-3 font-bold tracking-wider">Impact</th>
-                    <th className="py-2.5 px-3 font-bold text-center tracking-wider">K / D / A</th>
-                    <th className="py-2.5 px-3 font-bold text-center tracking-wider">K/D</th>
-                    <th className="py-2.5 px-3 font-bold text-center tracking-wider">K/R</th>
-                    <th className="py-2.5 px-3 font-bold text-center tracking-wider">ADR</th>
-                    <th className="py-2.5 px-3 font-bold text-center tracking-wider">HS (HS%)</th>
+                    {(
+                      [
+                        { id: 'rating', label: 'Caliber Rating', align: 'text-left' },
+                        { id: 'swing', label: 'Impact', align: 'text-left' },
+                        { id: 'k', label: 'K / D / A', align: 'text-center' },
+                        { id: 'kd', label: 'K/D', align: 'text-center' },
+                        { id: 'kr', label: 'K/R', align: 'text-center' },
+                        { id: 'adr', label: 'ADR', align: 'text-center' },
+                        { id: 'hs', label: 'HS (HS%)', align: 'text-center' }
+                      ] as const
+                    ).map(col => {
+                      const isActiveSort = scoreboardSortCol === col.id;
+                      return (
+                        <th key={col.id} className={`py-2.5 px-3 font-bold tracking-wider ${col.align}`}>
+                          <button
+                            type="button"
+                            onClick={() => handleToggleScoreboardSort(col.id)}
+                            className={`inline-flex items-center gap-1 cursor-pointer transition hover:text-[#A3E635] ${
+                              isActiveSort ? 'text-[#A3E635]' : 'text-slate-400'
+                            }`}
+                            title={`Sort by ${col.label}`}
+                          >
+                            <span>{col.label}</span>
+                            <ChevronDown
+                              className={`w-3 h-3 transition-transform ${
+                                isActiveSort
+                                  ? scoreboardSortDir === 'asc'
+                                    ? 'rotate-180 opacity-100'
+                                    : 'opacity-100'
+                                  : 'opacity-30'
+                              }`}
+                            />
+                          </button>
+                        </th>
+                      );
+                    })}
                     <th className="py-2.5 px-3 font-bold text-center tracking-wider">Multi-Kills</th>
-                    <th className="py-2.5 px-3 font-bold text-center tracking-wider">MVPs</th>
+                    <th className="py-2.5 px-3 font-bold text-center tracking-wider">
+                      <button
+                        type="button"
+                        onClick={() => handleToggleScoreboardSort('mvps')}
+                        className={`inline-flex items-center gap-1 cursor-pointer transition hover:text-[#A3E635] ${
+                          scoreboardSortCol === 'mvps' ? 'text-[#A3E635]' : 'text-slate-400'
+                        }`}
+                        title="Sort by MVPs"
+                      >
+                        <span>MVPs</span>
+                        <ChevronDown
+                          className={`w-3 h-3 transition-transform ${
+                            scoreboardSortCol === 'mvps'
+                              ? scoreboardSortDir === 'asc'
+                                ? 'rotate-180 opacity-100'
+                                : 'opacity-100'
+                              : 'opacity-30'
+                          }`}
+                        />
+                      </button>
+                    </th>
                   </>
                 )}
 
@@ -979,7 +1055,7 @@ export const VortexMatchRoom: React.FC<VortexMatchRoomProps> = ({
                     <td className="py-2.5 px-4">
                       <div 
                         onClick={(e) => handleOpenPlayerFlyout(e, row.name)}
-                        className="flex items-center gap-2.5 cursor-pointer group w-fit select-none"
+                        className="flex items-center gap-2.5 cursor-pointer group w-fit select-text"
                       >
                         <span
                           className={`w-1.5 h-4 rounded-full shrink-0 ${
@@ -1369,13 +1445,13 @@ export const VortexMatchRoom: React.FC<VortexMatchRoomProps> = ({
 
   // ========================================================
   // CALIBER CLUTCH ORIGINAL TACTICAL VIEW HELPERS & COMPONENTS
-  // Dynamic Squad / Party Containers (No left vertical line)
+  // Uniform-Height Squad / Party Cards (Side Bracket + Inline Badge so Team 1 & Team 2 stay 100% row-aligned)
   // Preserving all 8 stats: Matches, Wins, Rating, K/D/A, K/D, ADR, Tier, MMR
   // ========================================================
   interface PartyGroup {
     type: 'party' | 'solo';
     label: string;
-    badgeIcon: string;
+    shortBadge: string;
     badgeColor: string;
     players: FaceitMatchPlayer[];
   }
@@ -1401,31 +1477,31 @@ export const VortexMatchRoom: React.FC<VortexMatchRoomProps> = ({
         soloPlayers.push(partyList[0]);
       } else {
         let label = `${partyList.length}-STACK SQUAD`;
-        let badgeIcon = '⚡';
+        let shortBadge = `${partyList.length}-STACK`;
         let badgeColor = '#A3E635';
 
         if (partyList.length === 5) {
           label = '5-STACK SQUAD';
-          badgeIcon = '⚡';
+          shortBadge = '5-STACK';
           badgeColor = '#A3E635';
         } else if (partyList.length === 4) {
           label = '4-STACK SQUAD';
-          badgeIcon = '⚡';
+          shortBadge = '4-STACK';
           badgeColor = '#A3E635';
         } else if (partyList.length === 3) {
           label = '3-STACK PARTY';
-          badgeIcon = '🛡️';
+          shortBadge = '3-STACK';
           badgeColor = '#38BDF8';
         } else if (partyList.length === 2) {
           label = 'DUO PARTY';
-          badgeIcon = '👥';
+          shortBadge = 'DUO';
           badgeColor = '#818CF8';
         }
 
         groups.push({
           type: 'party',
           label,
-          badgeIcon,
+          shortBadge,
           badgeColor,
           players: partyList,
         });
@@ -1436,7 +1512,7 @@ export const VortexMatchRoom: React.FC<VortexMatchRoomProps> = ({
       groups.push({
         type: 'solo',
         label: 'SOLO QUEUE',
-        badgeIcon: '👤',
+        shortBadge: 'SOLO',
         badgeColor: '#94A3B8',
         players: [solo],
       });
@@ -1448,19 +1524,23 @@ export const VortexMatchRoom: React.FC<VortexMatchRoomProps> = ({
   const renderSquadPlayerItem = (
     player: FaceitMatchPlayer,
     team: 'team1' | 'team2',
-    isStandaloneSolo: boolean = false
+    partyMeta?: { label: string; shortBadge: string; badgeColor: string; isFirst: boolean; isLast: boolean }
   ) => {
     const isCurrentUser = player.name === currentGamerTag;
     const isSelected = selectedFlyoutPlayer?.name === player.name;
     const tierInfo = getCaliberTierByLevel(player.level);
+    const isStandaloneSolo = !partyMeta;
+    const verticalPadClass = partyMeta
+      ? `${partyMeta.isFirst ? 'pt-1.5' : 'pt-[9px]'} ${partyMeta.isLast ? 'pb-1.5' : 'pb-[10px]'}`
+      : 'py-1.5';
 
     return (
       <div 
         key={player.id}
         onClick={(e) => handleOpenPlayerFlyout(e, player.name)}
-        className={`px-2.5 py-1.5 transition group cursor-pointer relative ${
+        className={`px-2.5 ${verticalPadClass} transition group cursor-pointer relative ${
           isSelected 
-            ? 'bg-[#182615] ring-1 ring-[#A3E635]/50' 
+            ? 'bg-[#182615] ring-1 ring-inset ring-[#A3E635]/50' 
             : isCurrentUser
             ? 'bg-[#151B24] hover:bg-[#192230]'
             : 'bg-[#10121A] hover:bg-[#141724]'
@@ -1506,9 +1586,21 @@ export const VortexMatchRoom: React.FC<VortexMatchRoomProps> = ({
                     <span>CAP</span>
                   </span>
                 )}
-                {isStandaloneSolo && (
+                {isStandaloneSolo ? (
                   <span className="text-[8px] font-mono font-bold uppercase px-1.5 py-0.2 rounded bg-white/5 border border-white/10 text-slate-400 shrink-0">
                     SOLO
+                  </span>
+                ) : partyMeta && (
+                  <span
+                    className="text-[8px] font-mono font-black uppercase px-1.5 py-0.2 rounded border shrink-0"
+                    style={{
+                      backgroundColor: `${partyMeta.badgeColor}18`,
+                      borderColor: `${partyMeta.badgeColor}55`,
+                      color: partyMeta.badgeColor
+                    }}
+                    title={partyMeta.label}
+                  >
+                    {partyMeta.shortBadge}
                   </span>
                 )}
               </div>
@@ -1524,7 +1616,7 @@ export const VortexMatchRoom: React.FC<VortexMatchRoomProps> = ({
           {/* Tier & MMR Pill */}
           <div className="shrink-0 text-right">
             <div 
-              className="inline-flex items-center gap-1 px-2 py-0.5 rounded-md border font-mono font-black text-[10px] shadow-sm select-none"
+              className="inline-flex items-center gap-1 px-2 py-0.5 rounded-md border font-mono font-black text-[10px] shadow-sm select-text"
               style={{
                 backgroundColor: `${tierInfo.color}18`,
                 borderColor: `${tierInfo.color}50`,
@@ -1539,8 +1631,11 @@ export const VortexMatchRoom: React.FC<VortexMatchRoomProps> = ({
           </div>
         </div>
 
-        {/* 6-Column Compact Stats Bar: Matches, Wins, Rating, K/D/A, K/D, ADR */}
-        <div className="grid grid-cols-6 gap-1 pt-1 mt-1 border-t border-white/[0.06] text-center font-mono">
+        {/* 6-Column Compact Stats Bar: Matches, Wins, Rating, K/D/A, K/D, ADR (Text-Selectable for Copy/Paste) */}
+        <div
+          onClick={(e) => e.stopPropagation()}
+          className="grid grid-cols-6 gap-1 pt-1 mt-1 border-t border-white/[0.06] text-center font-mono select-text cursor-text"
+        >
           <div className="bg-black/40 px-1 py-1 rounded-md border border-white/5">
             <div className="text-[8px] uppercase text-slate-400 font-bold tracking-wider leading-none">MATCHES</div>
             <div className="text-[11px] font-bold text-white mt-0.5 leading-tight">{player.matches.toLocaleString()}</div>
@@ -1578,46 +1673,33 @@ export const VortexMatchRoom: React.FC<VortexMatchRoomProps> = ({
   const renderSquadContainer = (group: PartyGroup, team: 'team1' | 'team2') => {
     if (group.type === 'party') {
       return (
-        <div 
+        <div
           key={`party-${group.label}-${team}`}
-          className="rounded-xl border border-[#2B2F40] bg-[#10121A] overflow-hidden shadow-lg transition-all hover:border-[#3E445E]"
+          className="rounded-xl border bg-[#10121A] overflow-hidden shadow-md transition-all divide-y divide-[#1E2334]"
+          style={{ borderColor: `${group.badgeColor}55` }}
+          title={group.label}
         >
-          {/* Top Header of the Squad/Party Container */}
-          <div className="px-3 py-1.5 bg-[#141622] border-b border-[#242738] flex items-center justify-between">
-            <div className="flex items-center gap-1.5">
-              <span className="text-xs">{group.badgeIcon}</span>
-              <span 
-                className="text-[10px] font-mono font-black tracking-wider uppercase"
-                style={{ color: group.badgeColor }}
-              >
-                {group.label}
-              </span>
-              <span className="text-[9px] font-mono text-slate-400 bg-black/50 px-1.5 py-0.2 rounded border border-white/5 font-bold">
-                {group.players.length} PLAYERS
-              </span>
-            </div>
-            <div className="flex items-center gap-1 text-[9px] font-mono text-emerald-400 font-bold">
-              <span className="w-1.5 h-1.5 rounded-full bg-[#A3E635] animate-pulse" />
-              <span>SQUAD SYNCED</span>
-            </div>
-          </div>
-
-          {/* Players inside this shared container */}
-          <div className="divide-y divide-[#1D202E]">
-            {group.players.map(player => renderSquadPlayerItem(player, team, false))}
-          </div>
+          {group.players.map((player, idx) =>
+            renderSquadPlayerItem(player, team, {
+              label: group.label,
+              shortBadge: group.shortBadge,
+              badgeColor: group.badgeColor,
+              isFirst: idx === 0,
+              isLast: idx === group.players.length - 1
+            })
+          )}
         </div>
       );
     }
 
-    // Standalone Solo Card (compact, inline SOLO badge)
+    // Standalone Solo Card (identical slot height & spacing)
     const soloPlayer = group.players[0];
     return (
       <div 
         key={`solo-${soloPlayer.id}`}
         className="rounded-xl border border-[#222432] bg-[#10121A] overflow-hidden shadow-sm transition-all hover:border-[#32364A]"
       >
-        {renderSquadPlayerItem(soloPlayer, team, true)}
+        {renderSquadPlayerItem(soloPlayer, team)}
       </div>
     );
   };
@@ -1970,7 +2052,7 @@ export const VortexMatchRoom: React.FC<VortexMatchRoomProps> = ({
   );
 
   return (
-    <div className="fixed inset-0 z-[120] bg-[#0E0F12] text-[#E2E8F0] flex overflow-hidden font-sans select-none animate-in fade-in duration-150">
+    <div className="fixed inset-0 z-[120] bg-[#0E0F12] text-[#E2E8F0] flex overflow-hidden font-sans select-text animate-in fade-in duration-150">
       
       {/* ======================================================== */}
       {/* LEFT COLUMN: TACTICAL MATCH CHAT (CALIBER TACTICAL VIEW)  */}
@@ -2026,22 +2108,8 @@ export const VortexMatchRoom: React.FC<VortexMatchRoomProps> = ({
           </div>
         </div>
 
-        {/* Right Action Controls: Sound, Chat, Copy Link, Support, Exit */}
+        {/* Right Action Controls: Chat, Copy Link, Support, Exit */}
         <div className="flex items-center gap-2.5 text-[#9498A9] shrink-0">
-          <button
-            type="button"
-            onClick={() => toggleSound()}
-            className={`p-1.5 rounded-lg border transition cursor-pointer flex items-center ${
-              soundEnabled
-                ? 'bg-white/[0.04] border-white/10 hover:text-white text-[#A3E635]'
-                : 'bg-rose-500/10 border-rose-500/30 text-rose-400 hover:text-rose-300'
-            }`}
-            title={soundEnabled ? 'Mute Platform Sound' : 'Unmute Platform Sound'}
-            aria-label={soundEnabled ? 'Mute Platform Sound' : 'Unmute Platform Sound'}
-          >
-            {soundEnabled ? <Volume2 className="w-3.5 h-3.5" /> : <VolumeX className="w-3.5 h-3.5" />}
-          </button>
-
           <button
             onClick={() => {
               sound.playClick();
@@ -2593,37 +2661,329 @@ export const VortexMatchRoom: React.FC<VortexMatchRoomProps> = ({
           );
         };
 
-        return (
-        <div className="max-w-[1320px] w-full mx-auto px-3 sm:px-5 py-3 flex-1 space-y-4">
-          
-          {/* Preview Bar: Admin-Only 3 Layout Suggestions to Compare Live */}
-          {isAdmin && (
-            <div className="flex flex-wrap items-center justify-between gap-2 p-2 rounded-xl bg-[#0D1017] border border-[#A3E635]/30">
-              <span className="text-[11px] font-mono font-bold text-[#A3E635] px-2">
-                Zgjidh Renditjen e Scoreboard (Admin Preview):
-              </span>
-              <div className="flex flex-wrap items-center gap-1.5 text-[11px] font-mono font-bold">
-                {([
-                  { id: 'A', label: 'Sugjerimi A: Scoreboard-First' },
-                  { id: 'B', label: 'Sugjerimi B: Leaders Strip + Team H2H' },
-                  { id: 'C', label: 'Sugjerimi C: Top Plays & Demo Clips' }
-                ] as const).map(opt => (
-                  <button
-                    key={opt.id}
-                    onClick={() => { sound.playClick(); setStatsLayoutPreview(opt.id); }}
-                    className={`px-3 py-1 rounded-lg border transition cursor-pointer ${
-                      statsLayoutPreview === opt.id
-                        ? 'bg-[#A3E635] border-[#A3E635] text-slate-950 font-black'
-                        : 'bg-white/[0.04] border-white/10 text-slate-300 hover:text-white'
-                    }`}
-                  >
-                    {opt.label}
-                  </button>
-                ))}
+        const renderCombatDuels = () => {
+          const getDuelRecord = (p1: FaceitStatsRow, p2: FaceitStatsRow, idx1: number, idx2: number) => {
+            const seed = ((idx1 * 7 + idx2 * 13 + Math.round(p1.ratingScore * 10) + Math.round(p2.ratingScore * 10)) % 5);
+            const diff = p1.ratingScore - p2.ratingScore;
+            const w1 = Math.max(0, Math.min(5, Math.round(2 + diff * 2.5 + (seed % 2))));
+            const w2 = Math.max(0, Math.min(5, Math.round(2 - diff * 2.2 + ((seed + 1) % 2))));
+            return { w1, w2 };
+          };
+
+          const t1Trades = activeTeam1Rows.reduce((s, r) => s + r.tradeKills, 0);
+          const t2Trades = activeTeam2Rows.reduce((s, r) => s + r.tradeKills, 0);
+          const t1Mk = activeTeam1Rows.reduce((s, r) => s + r.mk, 0);
+          const t2Mk = activeTeam2Rows.reduce((s, r) => s + r.mk, 0);
+
+          return (
+            <div className="space-y-4">
+              {/* Top Duel KPI Cards */}
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
+                <div className="p-3.5 rounded-xl bg-[#0D1017] border border-[#1E2433] space-y-2">
+                  <div className="text-[10px] font-mono font-black text-slate-400 uppercase tracking-wider">Opening Duels (First Bloods)</div>
+                  <div className="flex items-center justify-between font-mono">
+                    <span className="text-lg font-black text-[#A3E635]">{t1Entry}</span>
+                    <span className="text-[10px] text-slate-500 uppercase">{activeMatch.team1.name} vs {activeMatch.team2.name}</span>
+                    <span className="text-lg font-black text-blue-400">{t2Entry}</span>
+                  </div>
+                  <div className="w-full h-1.5 rounded-full bg-slate-800 overflow-hidden flex">
+                    <div style={{ width: `${Math.round((t1Entry / Math.max(1, t1Entry + t2Entry)) * 100)}%` }} className="bg-[#A3E635]" />
+                    <div className="flex-1 bg-blue-500" />
+                  </div>
+                </div>
+
+                <div className="p-3.5 rounded-xl bg-[#0D1017] border border-[#1E2433] space-y-2">
+                  <div className="text-[10px] font-mono font-black text-slate-400 uppercase tracking-wider">Trade Kills Secured</div>
+                  <div className="flex items-center justify-between font-mono">
+                    <span className="text-lg font-black text-[#A3E635]">{t1Trades}</span>
+                    <span className="text-[10px] text-slate-500 uppercase">Refrag Efficiency</span>
+                    <span className="text-lg font-black text-blue-400">{t2Trades}</span>
+                  </div>
+                  <div className="w-full h-1.5 rounded-full bg-slate-800 overflow-hidden flex">
+                    <div style={{ width: `${Math.round((t1Trades / Math.max(1, t1Trades + t2Trades)) * 100)}%` }} className="bg-[#A3E635]" />
+                    <div className="flex-1 bg-blue-500" />
+                  </div>
+                </div>
+
+                <div className="p-3.5 rounded-xl bg-[#0D1017] border border-[#1E2433] space-y-2">
+                  <div className="text-[10px] font-mono font-black text-slate-400 uppercase tracking-wider">Multi-Kill Rounds (2K–5K)</div>
+                  <div className="flex items-center justify-between font-mono">
+                    <span className="text-lg font-black text-[#A3E635]">{t1Mk}</span>
+                    <span className="text-[10px] text-slate-500 uppercase">High-Impact Rounds</span>
+                    <span className="text-lg font-black text-blue-400">{t2Mk}</span>
+                  </div>
+                  <div className="w-full h-1.5 rounded-full bg-slate-800 overflow-hidden flex">
+                    <div style={{ width: `${Math.round((t1Mk / Math.max(1, t1Mk + t2Mk)) * 100)}%` }} className="bg-[#A3E635]" />
+                    <div className="flex-1 bg-blue-500" />
+                  </div>
+                </div>
+              </div>
+
+              {/* 5v5 Head-to-Head Duel Matrix */}
+              <div className="rounded-xl bg-[#0D1017] border border-[#1E2433] overflow-hidden shadow-xl">
+                <div className="px-4 py-2.5 bg-[#121621] border-b border-white/[0.07] flex flex-wrap items-center justify-between gap-2">
+                  <div className="flex items-center gap-2">
+                    <Swords className="w-4 h-4 text-[#A3E635]" />
+                    <span className="font-display font-black text-sm text-white uppercase tracking-wide">
+                      5v5 Head-to-Head Combat Matrix
+                    </span>
+                  </div>
+                  <span className="text-[10px] font-mono text-slate-400">
+                    <strong className="text-[#A3E635]">{activeMatch.team1.name}</strong> (Rows) vs <strong className="text-blue-400">{activeMatch.team2.name}</strong> (Columns)
+                  </span>
+                </div>
+                <div className="overflow-x-auto">
+                  <table className="w-full text-xs font-mono">
+                    <thead>
+                      <tr className="border-b border-white/[0.06] bg-[#0A0C12] text-[10px] text-slate-400 uppercase">
+                        <th className="py-2.5 px-4 text-left">Operative</th>
+                        {activeTeam2Rows.map(opp => (
+                          <th key={opp.id} className="py-2.5 px-3 text-center">
+                            <div className="flex flex-col items-center gap-1">
+                              <img src={opp.avatar} alt={opp.name} className="w-6 h-6 rounded-md object-cover border border-blue-400/40" />
+                              <span className="text-blue-300 font-bold truncate max-w-[90px]">{opp.name}</span>
+                            </div>
+                          </th>
+                        ))}
+                        <th className="py-2.5 px-3 text-center text-[#A3E635]">Total H2H</th>
+                      </tr>
+                    </thead>
+                    <tbody className="divide-y divide-white/[0.04]">
+                      {activeTeam1Rows.map((p1, idx1) => {
+                        let totalW = 0;
+                        let totalL = 0;
+                        const cells = activeTeam2Rows.map((p2, idx2) => {
+                          const rec = getDuelRecord(p1, p2, idx1, idx2);
+                          totalW += rec.w1;
+                          totalL += rec.w2;
+                          return { p2, ...rec };
+                        });
+
+                        return (
+                          <tr key={p1.id} className="hover:bg-white/[0.025] transition">
+                            <td className="py-2.5 px-4">
+                              <div className="flex items-center gap-2">
+                                <img src={p1.avatar} alt={p1.name} className="w-6 h-6 rounded-md object-cover border border-[#A3E635]/40" />
+                                <span className="font-display font-bold text-white truncate max-w-[120px]">{p1.name}</span>
+                              </div>
+                            </td>
+                            {cells.map(({ p2, w1, w2 }) => {
+                              const wonMatchup = w1 > w2;
+                              const tiedMatchup = w1 === w2;
+                              return (
+                                <td key={p2.id} className="py-2.5 px-3 text-center">
+                                  <span className={`inline-flex items-center justify-center px-2.5 py-1 rounded-md border text-[11px] font-bold ${
+                                    wonMatchup
+                                      ? 'bg-emerald-500/15 border-emerald-500/35 text-emerald-300'
+                                      : tiedMatchup
+                                      ? 'bg-white/[0.04] border-white/10 text-slate-300'
+                                      : 'bg-rose-500/15 border-rose-500/35 text-rose-300'
+                                  }`}>
+                                    {w1} - {w2}
+                                  </span>
+                                </td>
+                              );
+                            })}
+                            <td className="py-2.5 px-3 text-center">
+                              <span className={`font-black ${totalW >= totalL ? 'text-[#A3E635]' : 'text-rose-400'}`}>
+                                {totalW} - {totalL}
+                              </span>
+                            </td>
+                          </tr>
+                        );
+                      })}
+                    </tbody>
+                  </table>
+                </div>
               </div>
             </div>
-          )}
+          );
+        };
 
+        const renderUtilityUsage = () => {
+          const getUtilStats = (r: FaceitStatsRow, idx: number) => {
+            const adrVal = parseFloat(r.adr) || 75;
+            const flashesThrown = Math.max(8, Math.round(r.a * 2.1 + 9 + (idx % 4)));
+            const enemiesFlashed = Math.max(4, Math.round(flashesThrown * 0.62 + (r.a % 3)));
+            const flashAssists = Math.max(1, Math.min(r.a, Math.round(r.a * 0.55)));
+            const avgBlind = (1.6 + ((idx + r.a) % 9) * 0.14).toFixed(2);
+            const heDmg = Math.round(adrVal * 2.1 + (idx % 5) * 18);
+            const mollyDmg = Math.round(adrVal * 1.7 + ((idx + 2) % 4) * 22);
+            const smokes = Math.max(9, Math.round(11 + (idx % 5) + r.a * 0.5));
+            const udPerRound = ((heDmg + mollyDmg) / 24).toFixed(1);
+            return { flashesThrown, enemiesFlashed, flashAssists, avgBlind, heDmg, mollyDmg, smokes, udPerRound };
+          };
+
+          const allWithUtil = activeAllStats.map((r, idx) => ({ row: r, util: getUtilStats(r, idx) }));
+          const t1Util = allWithUtil.filter(x => x.row.team === 'team1');
+          const t2Util = allWithUtil.filter(x => x.row.team === 'team2');
+          const t1UtilDmg = t1Util.reduce((s, x) => s + x.util.heDmg + x.util.mollyDmg, 0);
+          const t2UtilDmg = t2Util.reduce((s, x) => s + x.util.heDmg + x.util.mollyDmg, 0);
+          const t1Flashed = t1Util.reduce((s, x) => s + x.util.enemiesFlashed, 0);
+          const t2Flashed = t2Util.reduce((s, x) => s + x.util.enemiesFlashed, 0);
+          const t1Smokes = t1Util.reduce((s, x) => s + x.util.smokes, 0);
+          const t2Smokes = t2Util.reduce((s, x) => s + x.util.smokes, 0);
+
+          return (
+            <div className="space-y-4">
+              {/* Squad Utility Summary Cards */}
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
+                {[
+                  { label: 'Total Utility Damage (HE + Molly)', v1: t1UtilDmg, v2: t2UtilDmg, unit: 'DMG' },
+                  { label: 'Enemies Blinded (Flashbangs)', v1: t1Flashed, v2: t2Flashed, unit: 'BLINDS' },
+                  { label: 'Tactical Smokes Deployed', v1: t1Smokes, v2: t2Smokes, unit: 'SMOKES' }
+                ].map(card => {
+                  const pct = Math.round((card.v1 / Math.max(1, card.v1 + card.v2)) * 100);
+                  return (
+                    <div key={card.label} className="p-3.5 rounded-xl bg-[#0D1017] border border-[#1E2433] space-y-2">
+                      <div className="text-[10px] font-mono font-black text-slate-400 uppercase tracking-wider">{card.label}</div>
+                      <div className="flex items-center justify-between font-mono">
+                        <span className="text-lg font-black text-[#A3E635]">{card.v1}</span>
+                        <span className="text-[10px] text-slate-500">{card.unit}</span>
+                        <span className="text-lg font-black text-blue-400">{card.v2}</span>
+                      </div>
+                      <div className="w-full h-1.5 rounded-full bg-slate-800 overflow-hidden flex">
+                        <div style={{ width: `${pct}%` }} className="bg-[#A3E635]" />
+                        <div className="flex-1 bg-blue-500" />
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+
+              {/* Per-Player Utility Breakdown Table */}
+              <div className="rounded-xl bg-[#0D1017] border border-[#1E2433] overflow-hidden shadow-xl">
+                <div className="px-4 py-2.5 bg-[#121621] border-b border-white/[0.07] flex items-center justify-between">
+                  <div className="flex items-center gap-2">
+                    <Flame className="w-4 h-4 text-[#A3E635]" />
+                    <span className="font-display font-black text-sm text-white uppercase tracking-wide">
+                      Grenade &amp; Flashbang Utility Breakdown
+                    </span>
+                  </div>
+                  <span className="text-[10px] font-mono text-slate-400">24 Rounds • {currentSelectedMap}</span>
+                </div>
+                <div className="overflow-x-auto">
+                  <table className="w-full text-xs font-mono">
+                    <thead>
+                      <tr className="border-b border-white/[0.06] bg-[#0A0C12] text-[10px] text-slate-400 uppercase">
+                        <th className="py-2.5 px-4 text-left">Operative</th>
+                        <th className="py-2.5 px-3 text-center">Flashes</th>
+                        <th className="py-2.5 px-3 text-center">Enemies Flashed</th>
+                        <th className="py-2.5 px-3 text-center">Flash Assists</th>
+                        <th className="py-2.5 px-3 text-center">Avg Blind</th>
+                        <th className="py-2.5 px-3 text-center">HE Damage</th>
+                        <th className="py-2.5 px-3 text-center">Molotov DMG</th>
+                        <th className="py-2.5 px-3 text-center">Smokes</th>
+                        <th className="py-2.5 px-3 text-center text-[#A3E635]">Util DMG / R</th>
+                      </tr>
+                    </thead>
+                    <tbody className="divide-y divide-white/[0.04]">
+                      {allWithUtil.map(({ row, util }) => (
+                        <tr
+                          key={row.id}
+                          className={`border-l-2 transition ${
+                            row.team === 'team1'
+                              ? 'border-l-[#A3E635] hover:bg-[#15201A]/60'
+                              : 'border-l-blue-400 hover:bg-[#131B2B]/60'
+                          }`}
+                        >
+                          <td className="py-2.5 px-4">
+                            <div className="flex items-center gap-2.5">
+                              <img src={row.avatar} alt={row.name} className="w-6 h-6 rounded-md object-cover border border-white/15" />
+                              <span className="font-display font-bold text-white">{row.name}</span>
+                            </div>
+                          </td>
+                          <td className="py-2.5 px-3 text-center text-slate-300">{util.flashesThrown}</td>
+                          <td className="py-2.5 px-3 text-center text-white font-bold">{util.enemiesFlashed}</td>
+                          <td className="py-2.5 px-3 text-center text-emerald-400 font-bold">{util.flashAssists}</td>
+                          <td className="py-2.5 px-3 text-center text-slate-300">{util.avgBlind}s</td>
+                          <td className="py-2.5 px-3 text-center text-amber-300 font-bold">{util.heDmg}</td>
+                          <td className="py-2.5 px-3 text-center text-orange-400 font-bold">{util.mollyDmg}</td>
+                          <td className="py-2.5 px-3 text-center text-sky-300">{util.smokes}</td>
+                          <td className="py-2.5 px-3 text-center text-[#A3E635] font-black">{util.udPerRound}</td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+            </div>
+          );
+        };
+
+        const renderTacticalInsights = () => {
+          const t1AvgRating = activeTeam1Rows.length
+            ? (activeTeam1Rows.reduce((s, r) => s + r.ratingScore, 0) / activeTeam1Rows.length).toFixed(2)
+            : '1.00';
+          const t2AvgRating = activeTeam2Rows.length
+            ? (activeTeam2Rows.reduce((s, r) => s + r.ratingScore, 0) / activeTeam2Rows.length).toFixed(2)
+            : '1.00';
+
+          const insights = [
+            {
+              tag: 'MATCH MVP ENGINE',
+              title: `${mvp?.name || currentGamerTag} dominated impact rounds`,
+              detail: `Finished with ${mvp?.rating || '1.35'} Caliber Rating, ${mvp?.adr || '92.0'} ADR, and ${mvp?.entryKills || 3} opening kills across ${currentSelectedMap}.`,
+              accent: 'border-[#A3E635]/40 bg-[#A3E635]/10 text-[#A3E635]'
+            },
+            {
+              tag: 'OPENING CONTROL',
+              title: t1Entry >= t2Entry ? `${activeMatch.team1.name} controlled early map space` : `${activeMatch.team2.name} won early picks`,
+              detail: `Opening duel split was ${t1Entry} vs ${t2Entry}, led by ${topEntry?.name || currentGamerTag} (${topEntry?.entrySuccessRate || '64%'} entry success).`,
+              accent: 'border-sky-500/40 bg-sky-500/10 text-sky-300'
+            },
+            {
+              tag: 'CLUTCH & LATE-ROUND',
+              title: t1Clutch >= t2Clutch ? `${activeMatch.team1.name} converted key post-plants` : `${activeMatch.team2.name} held late-round retakes`,
+              detail: `Total clutches won: ${t1Clutch} (${activeMatch.team1.name}) vs ${t2Clutch} (${activeMatch.team2.name}). Squad Rating avg: ${t1AvgRating} vs ${t2AvgRating}.`,
+              accent: 'border-amber-500/40 bg-amber-500/10 text-amber-300'
+            },
+            {
+              tag: 'FIREPOWER & CONSISTENCY',
+              title: `${topKast?.name || currentGamerTag} anchored round-to-round consistency`,
+              detail: `Recorded ${topKast?.kast || '78%'} KAST while ${topAdr?.name || currentGamerTag} topped damage output at ${topAdr?.adr || '94.0'} ADR.`,
+              accent: 'border-emerald-500/40 bg-emerald-500/10 text-emerald-300'
+            }
+          ];
+
+          return (
+            <div className="space-y-4">
+              {/* Map & Economy Control Summary */}
+              <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
+                {[
+                  { label: `${currentSelectedMap} CT Win %`, val: '54%', sub: '7 / 13 CT Rounds' },
+                  { label: `${currentSelectedMap} T Win %`, val: '46%', sub: '6 / 11 T Rounds' },
+                  { label: 'Pistol Conversions', val: '2 / 2', sub: 'Force-buy follow-ups won' },
+                  { label: 'Avg Squad Rating', val: `${t1AvgRating} vs ${t2AvgRating}`, sub: `${activeMatch.team1.name} vs ${activeMatch.team2.name}` }
+                ].map(kpi => (
+                  <div key={kpi.label} className="p-3.5 rounded-xl bg-[#0D1017] border border-[#1E2433]">
+                    <div className="text-[10px] font-mono font-bold text-slate-400 uppercase tracking-wider">{kpi.label}</div>
+                    <div className="text-lg font-display font-black text-[#A3E635] mt-1">{kpi.val}</div>
+                    <div className="text-[10px] font-mono text-slate-500 mt-0.5">{kpi.sub}</div>
+                  </div>
+                ))}
+              </div>
+
+              {/* Tactical Key Takeaways */}
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                {insights.map(card => (
+                  <div key={card.tag} className="p-4 rounded-xl bg-[#0D1017] border border-[#1E2433] space-y-2">
+                    <span className={`inline-block px-2 py-0.5 rounded border text-[9px] font-mono font-black uppercase tracking-wider ${card.accent}`}>
+                      {card.tag}
+                    </span>
+                    <h4 className="font-display font-black text-white text-sm">{card.title}</h4>
+                    <p className="text-xs font-mono text-slate-400 leading-relaxed">{card.detail}</p>
+                  </div>
+                ))}
+              </div>
+
+              {renderTeamH2H()}
+            </div>
+          );
+        };
+
+        return (
+        <div className="max-w-[1320px] w-full mx-auto px-3 sm:px-5 py-3 flex-1 space-y-4">
           {/* Sub-Tabs: CaliberClutch Tactical Pills */}
           <div className="flex flex-wrap items-center gap-2 border-b border-[#1E2433] pb-2.5 text-[11px] font-mono font-bold uppercase tracking-wider">
             {([
@@ -2646,9 +3006,9 @@ export const VortexMatchRoom: React.FC<VortexMatchRoomProps> = ({
             ))}
           </div>
 
-          {/* SUGJERIMI A: Scoreboard-First (Tables first, then Awards + Team H2H, then Highlights) */}
-          {statsLayoutPreview === 'A' && (
+          {statsSubTab === 'summary' && (
             <>
+              {/* Scoreboard-First Layout: Tables first, then Awards + Team H2H, then Leaders Strip & Highlights */}
               {renderFiltersAndTables()}
               <div className="grid grid-cols-1 lg:grid-cols-12 gap-4 pt-2">
                 <div className="lg:col-span-7">{renderMvpCard()}</div>
@@ -2659,31 +3019,9 @@ export const VortexMatchRoom: React.FC<VortexMatchRoomProps> = ({
             </>
           )}
 
-          {/* SUGJERIMI B: 4 Leaders Strip on top -> MVP + Team H2H -> Tables -> Highlights */}
-          {statsLayoutPreview === 'B' && (
-            <>
-              {renderLeadersStrip('grid grid-cols-2 lg:grid-cols-4 gap-2.5')}
-              <div className="grid grid-cols-1 lg:grid-cols-12 gap-4">
-                <div className="lg:col-span-7">{renderMvpCard()}</div>
-                <div className="lg:col-span-5">{renderTeamH2H()}</div>
-              </div>
-              {renderFiltersAndTables()}
-              {renderCaliberHighlights()}
-            </>
-          )}
-
-          {/* SUGJERIMI C: Top Plays & Demo Clips first -> MVP + H2H -> Tables */}
-          {statsLayoutPreview === 'C' && (
-            <>
-              {renderCaliberHighlights()}
-              <div className="grid grid-cols-1 lg:grid-cols-12 gap-4">
-                <div className="lg:col-span-7">{renderMvpCard()}</div>
-                <div className="lg:col-span-5">{renderTeamH2H()}</div>
-              </div>
-              {renderLeadersStrip('grid grid-cols-2 lg:grid-cols-4 gap-2.5')}
-              {renderFiltersAndTables()}
-            </>
-          )}
+          {statsSubTab === 'duels' && renderCombatDuels()}
+          {statsSubTab === 'utility' && renderUtilityUsage()}
+          {statsSubTab === 'insights' && renderTacticalInsights()}
 
         </div>
         );
@@ -2753,8 +3091,8 @@ export const VortexMatchRoom: React.FC<VortexMatchRoomProps> = ({
               </span>
             </div>
 
-            {/* Stats Box: MATCHES • WIN RATE • RECENT RESULTS (1:1 with user reference) */}
-            <div className="bg-[#0F1017] rounded-xl p-2.5 my-3.5 border border-white/[0.05]">
+            {/* Stats Box: MATCHES • WIN RATE • RECENT RESULTS (Text-Selectable) */}
+            <div className="bg-[#0F1017] rounded-xl p-2.5 my-3.5 border border-white/[0.05] select-text">
               <div className="grid grid-cols-3 divide-x divide-white/[0.08] text-center font-mono">
                 <div>
                   <div className="text-[9px] font-bold uppercase text-slate-400 tracking-wider">Matches</div>
